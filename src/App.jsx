@@ -57,7 +57,8 @@ import TOKENS from "./theme/appTokens";
 
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
-import { isDemoAccount, isDemoMode, isDemoPersistenceSession, isDemoPlayerSessionShotLog, setDemoMode } from "./lib/demoMode.js";
+import { isDemoAccount, isDemoPersistenceSession, isDemoPlayerSessionShotLog, setDemoMode } from "./lib/demoMode.js";
+import { buildAccountCapabilities, requireAccountCapability } from "./lib/accountCapabilities.js";
 import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard } from "./lib/joinConsumeGuard.js";
 
 import { supabase } from "./lib/supabase.js";
@@ -762,6 +763,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[programScores,setProgramScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[seasonArchives,setSeasonArchives]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
+const accountCapabilities=useMemo(()=>buildAccountCapabilities(user),[user]);
 const[accountNotice,setAccountNotice]=useState("");
 const[startupError,setStartupError]=useState("");
 const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:""});
@@ -858,7 +860,7 @@ return true;
 };
 leaderboardRequestRef.current={teamId,requestId};
 setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
-if(isDemoAccount(user)||isDemoMode()){
+if(accountCapabilities.isSandbox){
 const rows=localLeaderboardRows();
 applyLeaderboardRows(rows,{httpStatus:200,errorCode:"demo_local",isEmpty:rows.length===0});
 return;
@@ -1328,7 +1330,7 @@ await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.ro
 return{ok:true};
 };
 const cleanupDemoPlayerSessionData=useCallback(async(activeUser=user)=>{
-if(!isDemoMode()&&!isDemoAccount(activeUser))return;
+if(!buildAccountCapabilities(activeUser).isSandbox)return;
 const demoTeamId=activeUser?.teamId||"";
 const storedShotLogs=await DB.get("sl:shotlogs");
 const sourceShotLogs=Array.isArray(storedShotLogs)?storedShotLogs:shotLogs;
@@ -1336,13 +1338,14 @@ const nextShotLogs=sourceShotLogs.filter(log=>!isDemoPlayerSessionShotLog(log,{t
 await P("sl:shotlogs",nextShotLogs,setShotLogs);
 setHomeShotsLeaderboard(prev=>({...prev,rows:(Array.isArray(prev?.rows)?prev.rows:[]).filter(row=>!isDemoPlayerSessionShotLog(row,{teamId:demoTeamId}))}));
 },[P,shotLogs,user]);
-const logout=async()=>{const exitingUser=user;trackEvent("auth_logout");if(isDemoMode()||isDemoAccount(exitingUser))await cleanupDemoPlayerSessionData(exitingUser);setDemoMode(false);if(SUPABASE_AUTH_ENABLED)await supabase.auth.signOut();legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");DB.set("sl:session",null)};
+const logout=async()=>{const exitingUser=user;trackEvent("auth_logout");if(buildAccountCapabilities(exitingUser).isSandbox)await cleanupDemoPlayerSessionData(exitingUser);setDemoMode(false);if(SUPABASE_AUTH_ENABLED)await supabase.auth.signOut();legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");DB.set("sl:session",null)};
 const deleteAccount=async()=>{
 if(!user)return{ok:false,error:"No active account."};
+const deletePermission=requireAccountCapability(accountCapabilities,"canDeleteAccount");
+if(!deletePermission.ok)return deletePermission;
 const e=String(user.email||"").trim().toLowerCase();
 const isSelf=(row={})=>String(row?.playerId||row?.player_id||row?.email||row?.userId||row?.user_id||"").trim().toLowerCase()===e;
 try{
-if(isDemoMode()||isDemoAccount(user))await cleanupDemoPlayerSessionData(user);
 setDemoMode(false);
 await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
 await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
@@ -1604,7 +1607,7 @@ const replaceShotLog=(shotId,savedLog)=>{
 setShotLogs(prev=>{const next=prev.flatMap(log=>{if(log.id===shotId)return[savedLog];if(isUnconfirmedHomeShot(log)&&isSameHomeShotEntry(log,savedLog))return[];return[log];});persistLocalShotLogs(next);return next;});
 };
 const buildHomeShotQuietContext=()=>({
-isExplicitDemoOrLocal:isDemoMode()||isDemoAccount(user),
+isExplicitDemoOrLocal:accountCapabilities.isSandbox,
 isOffline:typeof navigator!=="undefined"&&navigator.onLine===false,
 isMembershipPending:Boolean(pendingJoinContext),
 });
@@ -1628,7 +1631,7 @@ const appendOptimisticShot=(log)=>{
 setShotLogs(prev=>{const next=[...prev.filter(existing=>!(isUnconfirmedHomeShot(existing)&&isSameHomeShotEntry(existing,log))),log];persistLocalShotLogs(next);return next;});
 };
 appendOptimisticShot(localLog);
-if(isDemoMode()||isDemoAccount(user)){
+if(accountCapabilities.isSandbox){
 const demoSavedLog={...localLog,demo:true,syncState:"local_pending",syncSource:"local",syncError:"",syncDiagnostic:null};
 replaceShotLog(localLog.id,demoSavedLog);
 setStatSyncError("");
@@ -1665,7 +1668,7 @@ return{ok:false,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.err
 }
 };
 const retryHomeShotLog=async(log)=>{
-if(isDemoMode()||isDemoAccount(user)||isDemoAccount(log)){
+if(accountCapabilities.isSandbox||isDemoAccount(log)){
 if(log?.id)markShotSyncState(log.id,"local_pending","");
 setStatSyncError("");
 return{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true};
@@ -1691,8 +1694,8 @@ trackEvent("shot_log_retry_failed",{made:log.made,date:log.date,mode:retryFailur
 return retryFailure;
 }
 };
-const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const draft={...ch,id:genId("challenge"),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()};if(isDemoMode()||isDemoAccount(user)){await P("sl:challenges",mergePlayerChallenges(challenges,[draft]),setChallenges);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:draft,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.createChallenge(draft,{teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_create_failed",{teamId:user.teamId,to:ch.to||"",message:String(error?.message||"unknown")});return{ok:false,error:"Challenge could not be delivered. Please try again."}}};
-const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const localChallenge=challenges.find(c=>String(c.id)===String(id)&&c.teamId===user.teamId&&c.to===user.email);if(!localChallenge)return{ok:false,error:"Challenge is no longer available."};if(isDemoMode()||isDemoAccount(user)){const updated={...localChallenge,respScore:score,respTs:Date.now(),status:score>localChallenge.score?"won":score===localChallenge.score?"tied":"lost"};const next=mergePlayerChallenges(challenges,[updated]);await P("sl:challenges",next,setChallenges);return{ok:true,challenge:updated,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.respondChallenge({id:String(id),score,teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_responded",{challengeId:String(id),status:result.challenge.status});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_response_failed",{teamId:user.teamId,challengeId:String(id),message:String(error?.message||"unknown")});return{ok:false,error:"Response could not be saved. Please try again."}}};
+const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const draft={...ch,id:genId("challenge"),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()};if(accountCapabilities.isSandbox){await P("sl:challenges",mergePlayerChallenges(challenges,[draft]),setChallenges);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:draft,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.createChallenge(draft,{teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_create_failed",{teamId:user.teamId,to:ch.to||"",message:String(error?.message||"unknown")});return{ok:false,error:"Challenge could not be delivered. Please try again."}}};
+const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const localChallenge=challenges.find(c=>String(c.id)===String(id)&&c.teamId===user.teamId&&c.to===user.email);if(!localChallenge)return{ok:false,error:"Challenge is no longer available."};if(accountCapabilities.isSandbox){const updated={...localChallenge,respScore:score,respTs:Date.now(),status:score>localChallenge.score?"won":score===localChallenge.score?"tied":"lost"};const next=mergePlayerChallenges(challenges,[updated]);await P("sl:challenges",next,setChallenges);return{ok:true,challenge:updated,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.respondChallenge({id:String(id),score,teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_responded",{challengeId:String(id),status:result.challenge.status});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_response_failed",{teamId:user.teamId,challengeId:String(id),message:String(error?.message||"unknown")});return{ok:false,error:"Response could not be saved. Please try again."}}};
 const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};try{await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions,{strictRemote:true});trackEvent("sc_session_created",{sport:s.sport||""});return{ok:true}}catch(error){console.error("sc_session_save_failed",{error,teamId:user.teamId,sport:String(s?.sport||"")});return{ok:false,error:"Session could not be saved. Please try again."}}};
 const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamScSession({scSessions,scRsvps,scLogs,sessionId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;try{await P("sl:sc-sessions",deletion.scSessions,setScSessions,{strictRemote:true});await P("sl:sc-rsvps",deletion.scRsvps,setScRsvps,{strictRemote:true});await P("sl:sc-logs",deletion.scLogs,setScLogs,{strictLocal:true,strictRemote:true});return deletion}catch(error){console.error("sc_session_delete_failed",{error,teamId:user.teamId,sessionId:id});return{ok:false,error:"Session could not be deleted. Please try again."}}};
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false};const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);const nextRsvps=ex?scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)):[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}];try{await P("sl:sc-rsvps",nextRsvps,setScRsvps,{strictRemote:true});trackEvent(ex?"sc_rsvp_removed":"sc_rsvp_added",{sessionId:sid});return{ok:true}}catch(error){console.error("sc_rsvp_save_failed",{error,teamId:user.teamId,sessionId:sid});return{ok:false,error:"RSVP could not be saved. Please try again."}}};
@@ -1846,8 +1849,7 @@ const tabFromPath=useCallback((path)=>{
 const initialTab = tabFromPath(window.location.pathname);
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotSaving,setShotSaving]=useState(false),[shotInputError,setShotInputError]=useState(""),[shotSaveNotice,setShotSaveNotice]=useState("");
-const isDemoHomeShotSession=isDemoMode()||isDemoAccount(u);
-const syncIssueShots=useMemo(()=>isDemoHomeShotSession?[]:shotLogs.filter(s=>s.email===u.email&&!isDemoAccount(s)&&(s.syncState==="failed_sync")),[isDemoHomeShotSession,shotLogs,u.email]);
+const syncIssueShots=useMemo(()=>shotLogs.filter(s=>s.email===u.email&&s.syncState==="failed_sync"),[shotLogs,u.email]);
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false),[challengeSending,setChallengeSending]=useState(false),[challengeSaveError,setChallengeSaveError]=useState("");
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
@@ -2314,7 +2316,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
         </div>
       </div>
 
-    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice} isDemoSession={isDemoHomeShotSession}/>
+    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice}/>
     {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
       <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){pushCompletionCue({title:"Shots logged",detail:`${validation.made} makes added to today’s total`,momentum:"Daily progress updated",next:"Return to the command center",nextAction:{target:"home"}});if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
         {shotSaving?"SAVING…":shotSaved?"✓ SAVED":"LOG SHOTS"}
@@ -3021,11 +3023,11 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 }
 
 
-function HomeShotSyncRetryPanel({syncIssueShots=[],retryHomeShotLog,setShotSaveNotice,isDemoSession=false}){
+function HomeShotSyncRetryPanel({syncIssueShots=[],retryHomeShotLog,setShotSaveNotice}){
 const[retryingShotId,setRetryingShotId]=useState("");
 const debugMode=typeof window!=="undefined"&&window.location.search.includes("homeShotDebug=1");
-const visibleSyncIssueShots=syncIssueShots.filter(log=>!isDemoAccount(log));
-if(isDemoSession||!visibleSyncIssueShots.length)return null;
+const visibleSyncIssueShots=syncIssueShots;
+if(!visibleSyncIssueShots.length)return null;
 const diagnosticLines=(diag={})=>["status","error","stage","message","authorized_by","uuid_membership_query_result","email_membership_query_result","player_record_query_result","team_binding_repair_attempted","team_binding_repair_account_probe","team_binding_repair_players_result","team_binding_repair_memberships_result","team_binding_repair_result"].map(key=>diag?.[key]?`${key}: ${diag[key]}`:"").filter(Boolean);
 return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(255,181,71,0.07)",borderRadius:12,padding:"10px 12px",margin:"0 0 12px"}}>
   <div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:800,letterSpacing:"0.08em",marginBottom:6}}>TEAM SYNC NEEDS ATTENTION</div>
@@ -3041,8 +3043,7 @@ return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(25
 // ═══════════════════════════════════════
 function ShotTracker({u,shotLogs,addShotLog,retryHomeShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved,shotSaving,setShotSaving,shotSaveNotice,setShotSaveNotice}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
-const isDemoHomeShotSession=isDemoMode()||isDemoAccount(u);
-const syncIssueShots=useMemo(()=>isDemoHomeShotSession?[]:my.filter(s=>!isDemoAccount(s)&&s.syncState==="failed_sync"),[isDemoHomeShotSession,my]);
+const syncIssueShots=useMemo(()=>my.filter(s=>s.syncState==="failed_sync"),[my]);
 const today=todayStr();
 const[shotInputError,setShotInputError]=useState("");
 
@@ -3120,7 +3121,7 @@ return <div className="fade-up">
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
-    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice} isDemoSession={isDemoHomeShotSession}/>
+    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice}/>
     {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
     {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
     <button className="btn-v cta-primary" disabled={shotSaving} onClick={handleLog} style={{opacity:shotSaving?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>

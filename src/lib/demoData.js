@@ -243,25 +243,38 @@ export async function applyDemoData(bundle) {
   await writeStored("sl:demo-data-meta", payload.demoMeta || {});
 }
 
-export async function clearDemoData() {
-  const keys = Object.values(STORAGE_KEYS);
-  for (const key of keys) {
-    if (typeof window !== "undefined") {
-      if (key === "sl:shotlogs") {
-        const stored = window.localStorage?.getItem(key);
-        const rows = stored ? JSON.parse(stored) : [];
-        const preserved = Array.isArray(rows) ? rows.filter((row) => !isDemoPlayerSessionShotLog(row)) : [];
-        const json = JSON.stringify(preserved);
-        if (window.localStorage) window.localStorage.setItem(key, json);
-        if (window.storage && typeof window.storage.set === "function") {
-          await window.storage.set(key, json, true);
-        }
-        continue;
-      }
-      if (window.localStorage) window.localStorage.removeItem(key);
-      if (window.storage && typeof window.storage.set === "function") {
-        await window.storage.set(key, JSON.stringify([]), true);
-      }
-    }
+export async function clearDemoData(bundle) {
+  const payload = bundle || buildDemoDataBundle({ coachEmail: "coach.demo@shotlab.app" });
+  const storedMeta = await readStored(STORAGE_KEYS.demoMeta, {});
+  const teamId = String(storedMeta?.teamId || payload.demoMeta?.teamId || payload.teams?.[0]?.id || DEMO_TEAM_ID);
+  const managedIdentities = demoIdentitySet(payload);
+  const storedCoachEmail = normalizeIdentity(storedMeta?.coachEmail);
+  if (storedCoachEmail) managedIdentities.add(storedCoachEmail);
+  managedIdentities.add("coach.demo@shotlab.app");
+  managedIdentities.add("demo@shotlab.app");
+
+  const collections = [
+    [STORAGE_KEYS.teams, { teamsOnly: true }],
+    [STORAGE_KEYS.players],
+    [STORAGE_KEYS.playerProfiles],
+    [STORAGE_KEYS.events],
+    [STORAGE_KEYS.rsvps],
+    [STORAGE_KEYS.scores],
+    [STORAGE_KEYS.shotLogs],
+    [STORAGE_KEYS.progressSnapshots],
+  ];
+
+  for (const [key, options = {}] of collections) {
+    const existing = await readStored(key, []);
+    const preserved = (Array.isArray(existing) ? existing : []).filter((row) => {
+      if (options.teamsOnly) return String(row?.id || "") !== teamId;
+      if (rowTeamId(row) === teamId) return false;
+      if (rowUsesManagedDemoIdentity(row, managedIdentities)) return false;
+      if (key === STORAGE_KEYS.shotLogs && isDemoPlayerSessionShotLog(row, { teamId })) return false;
+      return true;
+    });
+    await writeStored(key, preserved);
   }
+
+  await writeStored(STORAGE_KEYS.demoMeta, {});
 }
