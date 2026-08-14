@@ -112,9 +112,10 @@ test("Phase 4A Rankings gets restrained competitive branding without becoming a 
   await sheet.locator('[data-nav-key="leaderboards"]').click();
   const hub = page.getByTestId("premium-leaderboards-hub");
   await expect(hub).toBeVisible({ timeout: 20_000 });
-  const header = hub.locator(":scope > header");
-  const title = header.getByText("LEADERBOARDS", { exact: true });
+  const workspace = page.getByTestId("player-leaderboards-workspace");
+  const title = workspace.getByRole("heading", { level: 1, name: "Leaderboards", exact: true });
   await expect(title).toBeVisible();
+  await expect(hub.locator(":scope > header").getByText("LEADERBOARDS", { exact: true })).toBeHidden();
   const treatment = await title.evaluate((node) => ({
     fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
     color: getComputedStyle(node).color,
