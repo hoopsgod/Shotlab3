@@ -44,7 +44,7 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
 
   return (
     <SecondaryPageShell testId="coach-players-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
+      <SecondaryPageIntro eyebrow="Roster pulse" title="Players" summary="See who's moving, who's slipping, and who needs you next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <InteractiveMetricStrip surface="light" items={metricItems} activeKey={filter} onSelect={onFilterChange} testId="coach-players-metric-strip" />
         <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
@@ -75,7 +75,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />
+      <SecondaryPageIntro eyebrow="Schedule control" title="Events" summary="Run the week. Close RSVP gaps. Keep the team aligned." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />
       <SecondaryPageToolbar testId="coach-events-toolbar">
         <InteractiveMetricStrip surface="light" items={metricItems} activeKey={status} onSelect={onStatusChange} testId="coach-events-metric-strip" />
         <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search title, location, or type" filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]} activeFilter={type} onFilterChange={onTypeChange} testId="coach-events-filter-rail" />
