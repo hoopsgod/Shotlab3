@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { test, expect } from "@playwright/test";
 
 test.use({ viewport: { width: 390, height: 844 } });
@@ -107,8 +108,35 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
+async function settleVisuals(page) {
+  await page.evaluate(async () => {
+    if (document.fonts?.ready) await document.fonts.ready;
+  });
+  await page.waitForTimeout(250);
+}
+
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
+});
+
+test("captures Coach mobile title-stage acceptance evidence", async ({ page }) => {
+  fs.mkdirSync("artifacts/coach-title-stage", { recursive: true });
+  await enterSeededDemoCoach(page);
+  await settleVisuals(page);
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: "artifacts/coach-title-stage/home.png", fullPage: false });
+
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+  await expect(page.getByTestId("coach-players-command-bar")).toBeVisible({ timeout: 20_000 });
+  await settleVisuals(page);
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: "artifacts/coach-title-stage/players.png", fullPage: false });
+
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
+  await expect(page.getByTestId("coach-events-command-bar")).toBeVisible({ timeout: 20_000 });
+  await settleVisuals(page);
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: "artifacts/coach-title-stage/events.png", fullPage: false });
 });
 
 test("Coach Players behaves as an interactive operational dashboard", async ({ page }) => {
