@@ -10,7 +10,6 @@ const main = read("../src/main.jsx");
 const header = read("../src/components/AppHeader.jsx");
 const auth = read("../src/components/AuthWorkspace.jsx");
 const mobileNavigation = read("../src/components/MobileNavigation.module.css");
-const mobileNavigationAuthority = read("../src/components/MobileNavigationArchitecture.css");
 
 const channel = (value) => {
   const normalized = value / 255;
@@ -115,9 +114,8 @@ test("authentication segmented controls expose native interaction semantics", ()
 
 test("mobile navigation keeps glass restrained to the floating shell", () => {
   assert.match(mobileNavigation, /background: rgba\(7, 24, 32, \.91\)/);
-  assert.match(mobileNavigationAuthority, /box-shadow: 0 24px 54px rgba\(7, 24, 32, \.30\)/);
   assert.match(mobileNavigation, /--mobile-tab-bar-height: 64px/);
   assert.match(mobileNavigation, /border-radius: 25px 25px 25px 10px/);
-  assert.match(mobileNavigationAuthority, /backdrop-filter: blur\(30px\) saturate\(145%\)/);
+  assert.match(mobileNavigation, /backdrop-filter: blur\(30px\) saturate\(145%\)/);
   assert.doesNotMatch(mobileNavigation, /background: rgba\(7, 10, 12, \.84\)/);
 });

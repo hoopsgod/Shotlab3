@@ -76,7 +76,7 @@ test("light support tokens cannot inherit legacy dark shell variables", () => {
 test("mobile hierarchy clears legacy clipping and preserves accessible control sizing", () => {
   assert.match(commandCenter, /@media\(max-width:700px\)/);
   assert.match(css, /min-height:\s*44px !important/);
-  assert.match(commandCenter, /\.mcHeader\{grid-template-columns:40px minmax\(0,1fr\) auto!important/);
+  assert.match(commandCenter, /\.mcHeader\{[^}]*grid-template-columns:40px minmax\(0,1fr\) auto!important/s);
   assert.match(css, /\.mcTeamSelect\s*\{[\s\S]*display:\s*inline-flex !important/s);
   assert.match(commandCenter, /\.mcHeroContent\{grid-template-columns:minmax\(0,1fr\) 68px!important/);
   assert.match(css, /\.mcHero\s*\{[^}]*max-height:\s*none !important/s);

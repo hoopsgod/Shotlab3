@@ -6,7 +6,6 @@ const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "u
 const legacyStylesSource = fs.readFileSync(new URL("../src/styles/appLegacyStyles.js", import.meta.url), "utf8");
 const navigationSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navigationCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
-const architectureCss = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
 const coachMissionControlCss = fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css", import.meta.url), "utf8");
 
 test("mobile dock limits persistent navigation to three destinations plus More", () => {
@@ -62,8 +61,7 @@ test("shared navigation remains authoritative inside coach Mission Control", () 
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
-  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(7, 24, 32, \.91\)\s*!important/s);
-  assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
+  assert.match(navigationCss, /:global\(body\.mission-control-active\) \.dock\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });
 
 test("secondary navigation is accessible, dismissible, and does not leave body scrolling behind", () => {
@@ -88,9 +86,7 @@ test("secondary tools are grouped without removing destinations", () => {
 });
 
 test("floating navigation uses Phase 2 performance glass and large touch targets", () => {
-  assert.match(navigationSource, /MobileNavigationArchitecture\.css/);
-  assert.match(architectureCss, /background:\s*rgba\(7, 24, 32, \.91\)/);
-  assert.match(architectureCss, /background:\s*#f8f7f3/);
+  assert.doesNotMatch(navigationSource, /MobileNavigationArchitecture\.css/);
   assert.match(navigationCss, /left:\s*50%/);
   assert.match(navigationCss, /bottom:\s*max\(10px, env\(safe-area-inset-bottom/);
   assert.match(navigationCss, /border-radius:\s*25px 25px 25px 10px/);
@@ -98,7 +94,7 @@ test("floating navigation uses Phase 2 performance glass and large touch targets
   assert.match(navigationCss, /backdrop-filter:\s*blur\(30px\) saturate\(145%\)/);
   assert.match(navigationCss, /min-height:\s*54px/);
   assert.match(navigationCss, /min-height:\s*66px/);
-  assert.match(architectureCss, /prefers-reduced-transparency/);
+  assert.match(navigationCss, /prefers-reduced-transparency/);
 });
 
 test("App keeps every player and coach destination available to navigation", () => {

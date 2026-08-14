@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const secondaryCss = readFileSync('src/components/SecondaryPageSystem.css', 'utf8');
 const coachCss = readFileSync('src/styles/CoachInteractiveDashboard.css', 'utf8');
-const navigationCss = readFileSync('src/components/MobileNavigationArchitecture.css', 'utf8');
+const navigationCss = readFileSync('src/components/MobileNavigation.module.css', 'utf8');
 const navigationSource = readFileSync('src/components/MobileNavigation.jsx', 'utf8');
 const expertPolishSource = readFileSync('src/lib/expertVisualPolish.js', 'utf8');
 
@@ -33,7 +33,7 @@ test('More sheet handoff visibly subordinates the dock while preserving accessib
   assert.match(navigationSource, /document\.body\.dataset\.navigationSheetOpen = "true"/);
   assert.match(navigationCss, /body\[data-navigation-sheet-open="true"\]/);
   assert.match(navigationCss, /translateX\(-50%\) translateY\(5px\) scale\(\.985\)/);
-  assert.match(navigationCss, /mobile-navigation-groups.*button:active/s);
+  assert.match(navigationCss, /\.sheetItem:active/);
   assert.match(navigationCss, /prefers-reduced-motion: reduce/);
 });
 

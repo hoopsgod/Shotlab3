@@ -52,23 +52,24 @@ const blurInput=(event)=>{event.currentTarget.style.borderColor="rgba(17,26,33,.
 const inp={width:"100%",height:52,padding:"0 15px",background:"#F8F7F2",border:"1px solid rgba(17,26,33,.14)",borderRadius:14,color:"#111A21",fontSize:15,fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontWeight:550,outline:"none",boxShadow:"inset 0 1px 2px rgba(17,26,33,.025)",transition:"border-color .15s ease, box-shadow .15s ease"};
 const labelStyle={display:"block",marginBottom:7,color:"#58646D",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12,fontWeight:700,letterSpacing:"-.005em"};
 const segmentButton=(active)=>({flex:1,minHeight:42,borderRadius:11,border:"none",cursor:"pointer",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,fontWeight:700,letterSpacing:"-.01em",transition:"all .15s ease",background:active?"#FFFFFF":"transparent",color:active?"#111A21":"#65717A",boxShadow:active?"0 1px 2px rgba(17,26,33,.06),0 6px 16px rgba(17,26,33,.05)":"none"});
-return <div data-testid="auth-workspace" data-mobile-visual-system="phase-2" style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"flex-start",justifyContent:"center",position:"relative",overflowX:"hidden",overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"max(22px, env(safe-area-inset-top, 0px)) 0 max(30px, env(safe-area-inset-bottom, 0px))"}}>
-<div aria-hidden="true" style={{position:"fixed",inset:0,pointerEvents:"none",background:"radial-gradient(circle at 82% 2%, rgba(200,255,26,.20), transparent 19rem), radial-gradient(circle at 12% 24%, rgba(93,132,146,.22), transparent 22rem), linear-gradient(180deg,#071820 0,#0B2633 304px,#F3F1EA 304px,#F7F6F1 100%)"}}/>
+return <div data-testid="auth-workspace" data-mobile-visual-system="phase-2" data-phase2-composition="cinematic-auth-stage" style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"flex-start",justifyContent:"center",position:"relative",overflowX:"hidden",overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"max(22px, env(safe-area-inset-top, 0px)) 0 max(30px, env(safe-area-inset-bottom, 0px))"}}>
+<div aria-hidden="true" style={{position:"fixed",inset:0,pointerEvents:"none",background:"radial-gradient(circle at 82% 2%, rgba(200,255,26,.23), transparent 19rem), radial-gradient(circle at 12% 24%, rgba(93,132,146,.26), transparent 22rem), linear-gradient(180deg,#06161E 0,#0B2A38 338px,#F3F1EA 338px,#F7F6F1 100%)"}}/>
 <div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:460,padding:"0 18px"}}>
-<header style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:18,margin:"0 4px 22px"}}>
-  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-    <div style={{width:48,height:48,borderRadius:16,display:"grid",placeItems:"center",background:"rgba(255,255,255,.09)",border:"1px solid rgba(255,255,255,.14)",boxShadow:"inset 0 1px rgba(255,255,255,.10),0 14px 32px rgba(0,0,0,.20)"}}><SLLogo size={30}/></div>
+<header style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:18,margin:"0 4px 20px"}}>
+  <div style={{display:"flex",alignItems:"center",gap:14,minWidth:0}}>
+    <div style={{width:64,height:64,borderRadius:"20px 20px 20px 8px",display:"grid",placeItems:"center",background:"linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.055))",border:"1px solid rgba(255,255,255,.17)",boxShadow:"inset 0 1px rgba(255,255,255,.12),0 18px 40px rgba(0,0,0,.24)"}}><SLLogo size={42}/></div>
     <div style={{minWidth:0}}>
-      <div style={{color:"#F5F8F9",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:20,fontWeight:800,letterSpacing:"-.035em"}}>ShotLab</div>
+      <div style={{color:"#F5F8F9",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:23,fontWeight:830,letterSpacing:"-.045em"}}>ShotLab</div>
       <div style={{color:"#A9B9C0",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:11,fontWeight:650,marginTop:2}}>Performance development</div>
     </div>
   </div>
   <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 10px",border:"1px solid rgba(255,255,255,.13)",borderRadius:999,background:"rgba(255,255,255,.08)",color:"#D3F36A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:10,fontWeight:750,letterSpacing:".05em",textTransform:"uppercase",boxShadow:"inset 0 1px rgba(255,255,255,.08)"}}><span style={{width:6,height:6,borderRadius:999,background:"#C8FF1A",boxShadow:"0 0 0 4px rgba(200,255,26,.10)"}}/>Team ready</div>
 </header>
 
-<section style={{margin:"0 4px 22px"}}>
+<section style={{position:"relative",margin:"0 4px 24px"}}>
+  <div aria-hidden="true" style={{position:"absolute",right:-26,top:14,width:104,height:104,border:"1px solid rgba(200,255,26,.18)",borderRadius:"50%",boxShadow:"0 0 0 18px rgba(200,255,26,.025),0 0 0 36px rgba(255,255,255,.018)"}}/>
   <div style={{color:"#C8FF1A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:11,fontWeight:750,letterSpacing:".09em",textTransform:"uppercase"}}>Built for the work between games</div>
-  <h1 style={{maxWidth:390,margin:"9px 0 0",color:"#F7FAFB",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:"clamp(38px,10vw,52px)",fontWeight:820,lineHeight:.96,letterSpacing:"-.058em",textShadow:"0 18px 40px rgba(0,0,0,.18)"}}>Train with intent.<br/>Lead with clarity.</h1>
+  <h1 style={{position:"relative",maxWidth:390,margin:"9px 0 0",color:"#F7FAFB",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:"clamp(44px,11.7vw,58px)",fontWeight:840,lineHeight:.9,letterSpacing:"-.066em",textShadow:"0 18px 40px rgba(0,0,0,.18)"}}>Train with intent.<br/>Lead with clarity.</h1>
   <p style={{maxWidth:400,margin:"14px 0 0",color:"#B7C5CB",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:15,lineHeight:1.5,letterSpacing:"-.012em"}}>One focused workspace for player development, team accountability, and measurable progress.</p>
 </section>
 

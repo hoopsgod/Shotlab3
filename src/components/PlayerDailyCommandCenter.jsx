@@ -15,6 +15,27 @@ const actionKey = (action = {}) => String(action.id || action.kind || action.tar
 const coachSignalStatus = (signal = {}) => signal.stale ? "Stale" : signal.freshness === "current" ? signal.ageDays === 0 ? "Published today" : `${signal.ageDays}d old` : "Unverified";
 const coachSignalIcon = (signal = {}) => signal.stale ? "clock" : signal.freshness === "current" ? "verified" : "neutral";
 const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
+const PHASE2_COMPOSITION_CSS = `
+@media(max-width:700px){
+  [data-phase2-composition="progress-led-training"]{padding:0 0 8px!important}
+  [data-phase2-composition="progress-led-training"]>[data-layout-role="editorial-header"]{display:none!important}
+  [data-phase2-composition="progress-led-training"]>[data-command-role="primary"]{display:grid!important;grid-template-columns:minmax(0,1fr) 104px!important;gap:10px 14px!important;min-height:318px!important;margin:0!important;padding:22px 18px 18px!important;border:1px solid rgba(255,255,255,.82)!important;border-radius:30px 30px 30px 10px!important;background:radial-gradient(circle at 96% 4%,rgba(200,255,26,.15),transparent 28%),linear-gradient(145deg,rgba(255,255,255,.98),rgba(242,241,234,.96))!important;box-shadow:0 28px 64px rgba(17,26,33,.16),inset 0 1px rgba(255,255,255,.9)!important;color:#111a21!important}
+  [data-phase2-composition="progress-led-training"]>[data-command-role="primary"]:before{opacity:.32!important;background:radial-gradient(ellipse 42% 58% at 101% 50%,transparent 64%,rgba(17,26,33,.13) 65%,transparent 66%),linear-gradient(90deg,transparent 72%,rgba(17,26,33,.09) 72.2%,transparent 72.5%)!important}
+  [data-phase2-composition="progress-led-training"]>[data-command-role="primary"]:after{right:-50px!important;bottom:-82px!important;width:190px!important;height:190px!important;background:rgba(200,255,26,.16)!important;filter:blur(30px)!important}
+  [data-phase2-composition="progress-led-training"] [data-command-role="primary"]>div:first-child{grid-column:1/-1!important}
+  [data-phase2-composition="progress-led-training"] [data-command-role="primary"] h1{grid-column:1;grid-row:2;align-self:end;max-width:7ch!important;margin:4px 0 0!important;color:#111a21!important;font-size:clamp(36px,10vw,42px)!important;font-weight:850!important;line-height:.9!important;letter-spacing:-.064em!important}
+  [data-phase2-composition="progress-led-training"] [data-command-role="primary"]>p{grid-column:1;grid-row:3;margin:0!important;color:#58646d!important;font-size:14px!important;line-height:1.42!important}
+  [data-phase2-composition="progress-led-training"] [data-testid="player-daily-primary-action"]{grid-column:1/-1!important;min-height:56px!important;margin-top:6px!important;border-radius:18px 18px 18px 7px!important}
+  .playerPhase2Gauge{--phase2-progress:0%;position:relative;grid-column:2;grid-row:2/4;align-self:center;width:104px;height:104px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(#9ed200 var(--phase2-progress),rgba(17,26,33,.10) 0);box-shadow:0 16px 34px rgba(17,26,33,.12)}
+  .playerPhase2Gauge:before{content:"";position:absolute;inset:9px;border-radius:50%;background:#0b2633;box-shadow:inset 0 1px rgba(255,255,255,.08)}
+  .playerPhase2Gauge>span,.playerPhase2Gauge>small{position:absolute;z-index:1;color:#f7fafb;font-family:var(--font-display)}
+  .playerPhase2Gauge>span{top:31px;font-size:26px;font-weight:850;letter-spacing:-.055em}.playerPhase2Gauge>span b{color:#c8ff1a;font-size:12px;margin-left:1px}.playerPhase2Gauge>small{top:61px;color:#91a2aa;font-size:9px;font-weight:760;letter-spacing:.12em}
+  [data-phase2-composition="progress-led-training"]>[data-testid="player-command-evidence"]{margin-top:14px!important;border:0!important;border-radius:22px 22px 22px 8px!important;background:rgba(255,255,255,.78)!important;box-shadow:0 16px 38px rgba(17,26,33,.07),inset 0 1px rgba(255,255,255,.86)!important}
+  [data-phase2-composition="progress-led-training"]>[data-testid="player-coach-priority-signal"]{border-radius:24px 24px 24px 8px!important;background:rgba(255,255,255,.74)!important}
+}
+@media(max-width:365px){.playerPhase2Gauge{width:92px;height:92px}.playerPhase2Gauge:before{inset:8px}.playerPhase2Gauge>span{top:27px}.playerPhase2Gauge>small{top:55px}[data-phase2-composition="progress-led-training"]>[data-command-role="primary"]{grid-template-columns:minmax(0,1fr) 92px!important}}
+@media(max-width:700px) and (prefers-reduced-transparency:reduce){[data-phase2-composition="progress-led-training"]>[data-command-role="primary"],[data-phase2-composition="progress-led-training"]>[data-testid="player-command-evidence"],[data-phase2-composition="progress-led-training"]>[data-testid="player-coach-priority-signal"]{background:#fff!important}}
+`;
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
@@ -30,6 +51,8 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   if (!model?.primaryAction) return null;
 
   const primary = model.primaryAction;
+  const dailyPercent = Math.max(0, Math.round(Number(model.daily?.pct) || 0));
+  const dailyGaugePercent = `${Math.min(100, dailyPercent)}%`;
   const queue = Array.isArray(model.queue) ? model.queue.slice(1, 3) : [];
   const coachSignal = model.coachSignal || {};
   const firstSession = model.firstSession || {};
@@ -56,8 +79,9 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
     { label: "Streak", value: `${model.streak || 0}d`, aria: `Current streak: ${model.streak || 0} days` },
   ];
 
-  return (
-    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" data-mobile-product-reset="phase-1" data-mobile-visual-system="phase-2" aria-label="Daily training command center">
+  return (<>
+    <style>{PHASE2_COMPOSITION_CSS}</style>
+    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" data-mobile-product-reset="phase-1" data-mobile-visual-system="phase-2" data-phase2-composition="progress-led-training" aria-label="Daily training command center">
       <div className={styles.header} data-layout-role="editorial-header">
         <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today’s focus"}</div>
         <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
@@ -75,6 +99,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
         <h1 className={styles.title}>{dailyComplete ? "Daily work banked." : primary.title}</h1>
         <p className={styles.description}>{dailyComplete ? "Today’s standard is complete. Build on the week, review progress, or handle the next team commitment." : primary.detail}</p>
+        <div className="playerPhase2Gauge" data-testid="player-hero-progress" role="img" aria-label={`${dailyPercent}% of today’s target`} style={{ "--phase2-progress": dailyGaugePercent }}><span>{dailyPercent}<b>%</b></span><small>Today</small></div>
         <button type="button" className={styles.primaryButton} style={iconButtonStyle} data-testid="player-daily-primary-action" data-state={primaryWorking ? "working" : "idle"} onClick={() => runAction(primary)}>
           <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
           <ShotLabIcon name={primaryWorking ? "clock" : dailyComplete ? "check" : "arrow"} size={18} />
@@ -152,5 +177,5 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>)}</div>
       </details>}
     </section>
-  );
+  </>);
 }
