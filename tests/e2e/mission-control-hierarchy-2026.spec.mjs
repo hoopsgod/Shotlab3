@@ -51,8 +51,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(metrics).toBeVisible();
 
   await expect(page.locator(".mcHeader")).toBeVisible();
-  await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
-  await expect(page.locator(".mcTeamSelect")).toBeVisible();
+  await expect(page.locator(".mcHeaderTeamMark")).toBeVisible();
+  await expect(page.locator(".mcHeroTeamMark")).toBeHidden();
+  await expect(page.locator(".mcTeamSelect")).toBeHidden();
   await expect(page.locator(".mcBell")).toBeVisible();
   await expect(page.locator(".mcMobileMenu")).toBeVisible();
   await expect(page.locator(".mcPrimary")).toBeVisible();
@@ -62,7 +63,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const workspace = document.querySelector(".performance-workspace--coach");
     const hero = document.querySelector(".mcHero");
     const heroContent = document.querySelector(".mcHeroContent");
-    const mark = document.querySelector(".mcHeroTeamMark");
+    const headerMark = document.querySelector(".mcHeaderTeamMark");
+    const heroMark = document.querySelector(".mcHeroTeamMark");
     const primary = document.querySelector(".mcPrimary");
     const section = document.querySelector(".mcSection");
     const reality = document.querySelector(".mcRealityStrip");
@@ -72,7 +74,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const workspaceStyle = workspace ? getComputedStyle(workspace) : null;
     const heroStyle = getComputedStyle(hero);
     const heroContentStyle = getComputedStyle(heroContent);
-    const markStyle = getComputedStyle(mark);
+    const headerMarkStyle = getComputedStyle(headerMark);
+    const heroMarkStyle = getComputedStyle(heroMark);
     const primaryStyle = getComputedStyle(primary);
     const sectionStyle = section ? getComputedStyle(section) : null;
     const realityStyle = getComputedStyle(reality);
@@ -86,14 +89,14 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       heroMaxHeight: heroStyle.maxHeight,
       heroRadius: parseFloat(heroStyle.borderRadius),
       heroContentBackground: heroContentStyle.backgroundColor,
-      markBackground: markStyle.backgroundColor,
-      markWidth: parseFloat(markStyle.width),
+      headerMarkWidth: parseFloat(headerMarkStyle.width),
+      headerMarkHeight: parseFloat(headerMarkStyle.height),
+      heroMarkDisplay: heroMarkStyle.display,
       primaryBackground: primaryStyle.backgroundColor,
       primaryHeight: parseFloat(primaryStyle.minHeight),
       supportingBackground: sectionStyle?.backgroundColor || "",
       metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
       teamSelectDisplay: teamSelectStyle.display,
-      teamSelectWidth: parseFloat(teamSelectStyle.width),
       attentionBackground: attentionStyle?.backgroundColor || "",
       attentionTitleColor: attentionTitleStyle?.color || "",
     };
@@ -106,14 +109,14 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
   expect(presentation.heroRadius).toBeGreaterThanOrEqual(20);
   expect(presentation.heroContentBackground).toBe("rgba(0, 0, 0, 0)");
-  expect(presentation.markBackground).toBe("rgba(0, 0, 0, 0)");
-  expect(presentation.markWidth).toBeGreaterThanOrEqual(60);
+  expect(presentation.headerMarkWidth).toBeGreaterThanOrEqual(40);
+  expect(presentation.headerMarkHeight).toBeGreaterThanOrEqual(40);
+  expect(presentation.heroMarkDisplay).toBe("none");
   expect(presentation.primaryBackground).toBe("rgb(200, 255, 26)");
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
   expect(presentation.supportingBackground).toBe("rgb(255, 255, 255)");
   expect(presentation.metricColumns).toBe(3);
-  expect(presentation.teamSelectDisplay).toContain("flex");
-  expect(presentation.teamSelectWidth).toBeGreaterThanOrEqual(58);
+  expect(presentation.teamSelectDisplay).toBe("none");
   expect(presentation.attentionBackground).toBe("rgb(245, 244, 239)");
   expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
 
