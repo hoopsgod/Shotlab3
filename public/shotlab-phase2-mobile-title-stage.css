@@ -1,0 +1,412 @@
+/* Phase 2 mobile title-stage authority.
+   Presentation only: tighten first impressions without changing route, data, or action semantics. */
+
+:root{
+  --p2-title-ink:#07151c;
+  --p2-title-deep:#06141b;
+  --p2-title-navy:#0b2a38;
+  --p2-title-lime:#c8ff1a;
+  --p2-title-cream:#f5f3ec;
+  --p2-title-muted:#aebdc3;
+  --p2-title-line:rgba(255,255,255,.12);
+  --p2-title-shadow:0 24px 58px rgba(7,24,32,.22);
+}
+
+@media(max-width:700px){
+  /* Shared Coach secondary-page opening. The title stage should feel like the product,
+     not a desktop document header dropped onto a phone. */
+  [data-testid="coach-players-interactive-dashboard"],
+  [data-testid="coach-events-interactive-dashboard"]{
+    gap:16px!important;
+    padding-top:8px!important;
+    padding-inline:14px!important;
+  }
+
+  [data-testid="coach-players-command-bar"],
+  [data-testid="coach-events-command-bar"]{
+    position:relative!important;
+    isolation:isolate!important;
+    overflow:hidden!important;
+    display:grid!important;
+    grid-template-columns:46px minmax(0,1fr)!important;
+    align-items:start!important;
+    gap:12px!important;
+    margin:0!important;
+    padding:20px 18px 18px!important;
+    border:1px solid rgba(200,255,26,.16)!important;
+    border-radius:30px 30px 30px 11px!important;
+    background:
+      radial-gradient(circle at 91% 3%,rgba(200,255,26,.20),transparent 29%),
+      radial-gradient(circle at 0 100%,rgba(67,112,131,.26),transparent 43%),
+      linear-gradient(145deg,var(--p2-title-navy) 0%,var(--p2-title-deep) 76%)!important;
+    color:#f7fafb!important;
+    box-shadow:var(--p2-title-shadow),inset 0 1px rgba(255,255,255,.08)!important;
+  }
+
+  [data-testid="coach-players-command-bar"]::before,
+  [data-testid="coach-events-command-bar"]::before{
+    content:"";
+    position:absolute;
+    right:-25px;
+    top:24px;
+    width:114px;
+    height:114px;
+    z-index:-1;
+    border:1px solid rgba(200,255,26,.14);
+    border-radius:50%;
+    box-shadow:0 0 0 18px rgba(200,255,26,.025),0 0 0 38px rgba(255,255,255,.018);
+    pointer-events:none;
+  }
+
+  [data-testid="coach-players-command-bar"]::after,
+  [data-testid="coach-events-command-bar"]::after{
+    content:"";
+    position:absolute;
+    left:18px;
+    right:18px;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg,var(--p2-title-lime),rgba(200,255,26,0));
+    opacity:.42;
+    pointer-events:none;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__icon,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__icon{
+    width:46px!important;
+    height:46px!important;
+    display:grid!important;
+    place-items:center!important;
+    border:1px solid rgba(200,255,26,.25)!important;
+    border-radius:15px 15px 15px 6px!important;
+    background:rgba(255,255,255,.07)!important;
+    color:var(--p2-title-lime)!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.08)!important;
+    -webkit-backdrop-filter:blur(14px)!important;
+    backdrop-filter:blur(14px)!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__copy,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__copy{
+    position:relative!important;
+    z-index:1!important;
+    max-width:none!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__eyebrow,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__eyebrow{
+    margin:1px 0 7px!important;
+    color:var(--p2-title-lime)!important;
+    -webkit-text-fill-color:var(--p2-title-lime)!important;
+    font-size:10px!important;
+    font-weight:780!important;
+    line-height:1.2!important;
+    letter-spacing:.115em!important;
+    text-transform:uppercase!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__title,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__title{
+    max-width:8ch!important;
+    margin:0!important;
+    color:#f7fafb!important;
+    -webkit-text-fill-color:#f7fafb!important;
+    font-size:clamp(42px,11.2vw,48px)!important;
+    font-weight:840!important;
+    line-height:.91!important;
+    letter-spacing:-.065em!important;
+    text-wrap:balance!important;
+    overflow-wrap:normal!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__summary,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__summary{
+    max-width:30ch!important;
+    margin:11px 0 0!important;
+    color:#b7c5cb!important;
+    -webkit-text-fill-color:#b7c5cb!important;
+    font-size:14px!important;
+    font-weight:520!important;
+    line-height:1.45!important;
+    letter-spacing:-.012em!important;
+    text-wrap:pretty!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__actions,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__actions{
+    position:relative!important;
+    z-index:1!important;
+    grid-column:1/-1!important;
+    width:100%!important;
+    min-width:0!important;
+    margin-top:2px!important;
+    display:grid!important;
+    gap:11px!important;
+    justify-items:stretch!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__status,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__status{
+    max-width:none!important;
+    color:#d7e0e4!important;
+    -webkit-text-fill-color:#d7e0e4!important;
+    font-size:12px!important;
+    font-weight:690!important;
+    line-height:1.25!important;
+    text-align:left!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__status::before,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__status::before{
+    width:7px!important;
+    height:7px!important;
+    margin-right:8px!important;
+    background:var(--p2-title-lime)!important;
+    box-shadow:0 0 0 4px rgba(200,255,26,.09)!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__buttonRow,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__buttonRow{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageAction,
+  [data-testid="coach-events-command-bar"] .secondaryPageAction{
+    min-width:0!important;
+    min-height:50px!important;
+    padding:0 15px!important;
+    border-radius:16px 16px 16px 6px!important;
+    font-size:13px!important;
+    font-weight:780!important;
+    letter-spacing:-.012em!important;
+    box-shadow:none!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageAction--primary,
+  [data-testid="coach-events-command-bar"] .secondaryPageAction--primary{
+    border-color:transparent!important;
+    background:linear-gradient(135deg,#c8ff1a 0%,#aee800 100%)!important;
+    color:#071007!important;
+    -webkit-text-fill-color:#071007!important;
+    box-shadow:0 12px 26px rgba(174,232,0,.15),inset 0 1px rgba(255,255,255,.35)!important;
+  }
+
+  [data-testid="coach-players-command-bar"] .secondaryPageAction--secondary,
+  [data-testid="coach-events-command-bar"] .secondaryPageAction--secondary{
+    border-color:rgba(255,255,255,.14)!important;
+    background:rgba(255,255,255,.07)!important;
+    color:#eef4f6!important;
+    -webkit-text-fill-color:#eef4f6!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.06)!important;
+  }
+
+  /* Keep the decision card strong, but make it read as the second layer rather than
+     another competing hero. */
+  [data-testid="coach-players-decision-brief"],
+  [data-testid="coach-events-decision-brief"]{
+    min-height:0!important;
+    margin:0!important;
+    padding:20px 18px!important;
+    border-radius:24px 24px 24px 9px!important;
+    box-shadow:0 16px 38px rgba(20,24,21,.13)!important;
+  }
+
+  [data-testid="coach-players-decision-brief"] h2,
+  [data-testid="coach-events-decision-brief"] h2{
+    max-width:15ch!important;
+    font-size:29px!important;
+    line-height:1!important;
+    letter-spacing:-.045em!important;
+  }
+
+  /* Coach Home: compress the first viewport, remove duplicated chrome pressure,
+     and preserve the team mark as a deliberate brand signature instead of clutter. */
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .missionControl{
+    padding:8px 12px 108px!important;
+    gap:14px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeader{
+    grid-template-columns:40px minmax(0,1fr) 40px!important;
+    gap:9px!important;
+    margin:0 7px -64px!important;
+    padding:max(7px,env(safe-area-inset-top)) 3px 7px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandLockup{
+    gap:9px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeaderTeamMark{
+    width:40px!important;
+    height:40px!important;
+    flex-basis:40px!important;
+    border-radius:12px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeaderTeamMark img{
+    width:42px!important;
+    height:42px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandCopy small{
+    color:#9aabb2!important;
+    font-size:9px!important;
+    letter-spacing:.09em!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandCopy strong{
+    max-width:none!important;
+    color:#f7fafb!important;
+    -webkit-text-fill-color:#f7fafb!important;
+    font-size:18px!important;
+    font-weight:810!important;
+    line-height:1!important;
+    letter-spacing:-.045em!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeaderActions{
+    display:block!important;
+    width:40px!important;
+    min-width:40px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcTeamSelect{
+    display:none!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBell{
+    width:40px!important;
+    height:40px!important;
+    border-radius:13px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero{
+    min-height:356px!important;
+    max-height:none!important;
+    border-radius:30px 30px 30px 11px!important;
+    background:
+      radial-gradient(circle at 88% 7%,rgba(200,255,26,.16),transparent 29%),
+      radial-gradient(circle at 5% 100%,rgba(64,116,137,.22),transparent 44%),
+      linear-gradient(145deg,#0b2a38 0%,#06151c 79%)!important;
+    box-shadow:0 28px 62px rgba(7,24,32,.25),inset 0 1px rgba(255,255,255,.08)!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroContent{
+    grid-template-columns:minmax(0,1fr) 62px!important;
+    padding:86px 18px 17px!important;
+    gap:8px 11px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroTeamMark{
+    top:80px!important;
+    right:17px!important;
+    width:62px!important;
+    height:62px!important;
+    opacity:.96!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroTeamMark img{
+    width:60px!important;
+    height:60px!important;
+    filter:drop-shadow(0 14px 22px rgba(0,0,0,.28))!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcDecisionIndex{
+    display:none!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcEyebrow{
+    color:var(--p2-title-lime)!important;
+    -webkit-text-fill-color:var(--p2-title-lime)!important;
+    font-size:10px!important;
+    font-weight:780!important;
+    letter-spacing:.115em!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero h1{
+    max-width:10.4ch!important;
+    margin-top:8px!important;
+    color:#f7fafb!important;
+    -webkit-text-fill-color:#f7fafb!important;
+    font-size:clamp(37px,9.8vw,42px)!important;
+    font-weight:850!important;
+    line-height:.91!important;
+    letter-spacing:-.064em!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroContent>p{
+    max-width:29ch!important;
+    margin-top:8px!important;
+    color:#b7c5cb!important;
+    -webkit-text-fill-color:#b7c5cb!important;
+    font-size:13.5px!important;
+    line-height:1.42!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip{
+    margin-top:11px!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    border-radius:18px 18px 18px 7px!important;
+    background:rgba(255,255,255,.055)!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip>button{
+    min-height:48px!important;
+    padding:5px 4px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip strong{
+    color:#f7fafb!important;
+    -webkit-text-fill-color:#f7fafb!important;
+    font-size:20px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip small{
+    color:#9fb0b7!important;
+    -webkit-text-fill-color:#9fb0b7!important;
+    font-size:9.5px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcPrimary{
+    min-height:52px!important;
+    margin-top:11px!important;
+    border-radius:16px 16px 16px 6px!important;
+    background:linear-gradient(135deg,#c8ff1a,#aee800)!important;
+    color:#071007!important;
+    -webkit-text-fill-color:#071007!important;
+    font-size:13.5px!important;
+    font-weight:800!important;
+  }
+}
+
+@media(max-width:390px){
+  [data-testid="coach-players-command-bar"] .secondaryPageIntro__title,
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__title{
+    font-size:41px!important;
+  }
+
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero h1{
+    font-size:37px!important;
+  }
+}
+
+@media(max-width:700px) and (prefers-reduced-transparency:reduce){
+  [data-testid="coach-players-command-bar"],
+  [data-testid="coach-events-command-bar"]{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  [data-testid="coach-players-command-bar"] *,
+  [data-testid="coach-events-command-bar"] *,
+  html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 *{
+    transition:none!important;
+    animation:none!important;
+  }
+}
