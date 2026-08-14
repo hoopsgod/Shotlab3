@@ -442,6 +442,7 @@ export const normalizeScSessionRowForDb = (row = {}) => {
     sport,
     date: cleanText(row.date),
     time: cleanText(row.time),
+    location: cleanText(row.location),
     session_type: cleanText(row.session_type || row.sessionType),
     owner_coach_id: cleanText(row.owner_coach_id || row.ownerCoachId).toLowerCase(),
   };
@@ -456,6 +457,7 @@ export const normalizeScSessionRowForApp = (row = {}) => {
     sport: db.sport,
     date: db.date,
     time: db.time,
+    location: db.location,
     sessionType: db.session_type,
     ownerCoachId: db.owner_coach_id,
   };

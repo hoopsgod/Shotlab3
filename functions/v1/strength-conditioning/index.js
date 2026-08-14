@@ -23,6 +23,7 @@ export function sanitizeScSession(value = {}, fallbackTeamId = "") {
     sport: cleanText(value?.sport, 320),
     date: cleanText(value?.date, 40),
     time: cleanText(value?.time, 40),
+    location: cleanText(value?.location, 320),
     sessionType: cleanText(value?.session_type || value?.sessionType, 160),
     ownerCoachId: normalizeIdentity(value?.owner_coach_id || value?.ownerCoachId).slice(0, 320),
   };
@@ -62,6 +63,7 @@ function sessionToDatabase(row) {
     sport: row.sport,
     date: row.date || null,
     time: row.time || null,
+    location: row.location || null,
     session_type: row.sessionType || null,
     owner_coach_id: row.ownerCoachId || null,
     updated_at: new Date().toISOString(),
@@ -105,6 +107,7 @@ function sessionToResponse(row = {}) {
     sport: normalized.sport,
     date: normalized.date,
     time: normalized.time,
+    location: normalized.location,
     session_type: normalized.sessionType,
     owner_coach_id: normalized.ownerCoachId,
   };
@@ -154,7 +157,7 @@ async function readTeamState(env, teamId) {
     selectRows(
       env,
       "sc_sessions",
-      `select=team_id,id,sport,date,time,session_type,owner_coach_id&team_id=eq.${encodeURIComponent(teamId)}&order=date.asc&limit=${RESOURCE_LIMITS.sessions}`,
+      `select=team_id,id,sport,date,time,location,session_type,owner_coach_id&team_id=eq.${encodeURIComponent(teamId)}&order=date.asc&limit=${RESOURCE_LIMITS.sessions}`,
     ),
     selectRows(
       env,
