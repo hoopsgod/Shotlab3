@@ -7,6 +7,7 @@ export const REGISTERED_ACCOUNT_CAPABILITIES = freeze({
   dataSource: "tenant",
   canPersistRemoteWrites: true,
   canPersistSandboxMutations: false,
+  canResetSandbox: false,
   canSendInvites: true,
   canSendNotifications: true,
   canModifyBilling: true,
@@ -19,6 +20,7 @@ export const SANDBOX_ACCOUNT_CAPABILITIES = freeze({
   dataSource: "sandbox",
   canPersistRemoteWrites: false,
   canPersistSandboxMutations: true,
+  canResetSandbox: true,
   canSendInvites: false,
   canSendNotifications: false,
   canModifyBilling: false,
@@ -42,6 +44,7 @@ export function buildAccountCapabilities(userOrEmail, options = {}) {
 
 export function capabilityError(capability) {
   const messages = {
+    canResetSandbox: "Demo data controls are available only inside the demo sandbox.",
     canSendInvites: "Player invitations are disabled in the demo sandbox.",
     canSendNotifications: "Real notifications are disabled in the demo sandbox.",
     canModifyBilling: "Billing changes are disabled in the demo sandbox.",
