@@ -225,7 +225,7 @@ async function applyRegisteredState(state) {
       team_id: TEAM_ID,
       made: state === "sparse" ? 45 : 125,
       date: localDateKey(0),
-      ts: now + 2,
+      ts: new Date(now + 2).toISOString(),
     }],
   });
 
