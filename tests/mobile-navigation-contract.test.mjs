@@ -62,7 +62,7 @@ test("shared navigation remains authoritative inside coach Mission Control", () 
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
-  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(252, 252, 250, \.9\)\s*!important/s);
+  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(7, 24, 32, \.91\)\s*!important/s);
   assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });
 
@@ -87,14 +87,15 @@ test("secondary tools are grouped without removing destinations", () => {
   assert.doesNotMatch(navigationSource, /secondaryItems[^\n]*slice\(/);
 });
 
-test("floating navigation uses restrained glass and large touch targets", () => {
+test("floating navigation uses Phase 2 performance glass and large touch targets", () => {
   assert.match(navigationSource, /MobileNavigationArchitecture\.css/);
-  assert.match(architectureCss, /background:\s*rgba\(252, 252, 250/);
+  assert.match(architectureCss, /background:\s*rgba\(7, 24, 32, \.91\)/);
   assert.match(architectureCss, /background:\s*#f8f7f3/);
   assert.match(navigationCss, /left:\s*50%/);
   assert.match(navigationCss, /bottom:\s*max\(10px, env\(safe-area-inset-bottom/);
-  assert.match(navigationCss, /border-radius:\s*24px/);
-  assert.match(navigationCss, /backdrop-filter:\s*blur\(28px\) saturate\(150%\)/);
+  assert.match(navigationCss, /border-radius:\s*25px 25px 25px 10px/);
+  assert.match(navigationCss, /background:\s*rgba\(7, 24, 32, \.91\)/);
+  assert.match(navigationCss, /backdrop-filter:\s*blur\(30px\) saturate\(145%\)/);
   assert.match(navigationCss, /min-height:\s*54px/);
   assert.match(navigationCss, /min-height:\s*66px/);
   assert.match(architectureCss, /prefers-reduced-transparency/);

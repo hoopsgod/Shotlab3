@@ -67,14 +67,15 @@ async function finalizeProductionCss(files) {
 
 async function main() {
   await stat(DIST_DIR);
-  const files = await listCssFiles(DIST_DIR);
 
   if (FINAL_COACH_MODE) {
+    const files = await listCssFiles(DIST_DIR);
     await finalizeProductionCss(files);
     return;
   }
 
   const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
+  const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;

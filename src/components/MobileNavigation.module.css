@@ -13,12 +13,9 @@
   min-height: var(--mobile-tab-bar-height);
   padding: 0;
   overflow: hidden;
-  border: 1px solid rgba(17, 26, 33, .12);
-  border-radius: 24px;
-  background: rgba(250, 249, 245, .78);
-  box-shadow: 0 18px 46px rgba(17, 26, 33, .16), 0 2px 8px rgba(17, 26, 33, .08), inset 0 1px rgba(255, 255, 255, .82);
-  -webkit-backdrop-filter: blur(28px) saturate(150%);
-  backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 25px 25px 25px 10px;
+  background: rgba(7, 24, 32, .91);
   transform: translateX(-50%);
   pointer-events: auto;
 }
@@ -29,8 +26,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, .64), transparent 56%),
-    radial-gradient(circle at 50% -80%, rgba(200, 255, 26, .11), transparent 58%);
+    linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 58%),
+    radial-gradient(circle at 50% -65%, rgba(200, 255, 26, .18), transparent 58%);
 }
 
 .dockInner {
@@ -57,7 +54,7 @@
   border: 1px solid transparent;
   border-radius: 17px;
   background: transparent;
-  color: var(--nav-inactive, #65717a);
+  color: var(--nav-inactive, #a9b8bf);
   cursor: pointer;
   touch-action: manipulation;
   transition: color 140ms ease, transform 100ms ease, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
@@ -75,10 +72,9 @@
 }
 
 .dockItem.active {
-  border-color: rgba(17, 26, 33, .07);
-  background: rgba(255, 255, 255, .66);
-  color: var(--nav-active-text, #5f7600);
-  box-shadow: 0 4px 14px rgba(17, 26, 33, .075), inset 0 1px rgba(255, 255, 255, .82);
+  border-color: rgba(200, 255, 26, .14);
+  background: rgba(200, 255, 26, .10);
+  color: #c8ff1a;
 }
 
 .dockIcon {
@@ -94,7 +90,7 @@
 }
 
 .dockItem.active .dockIcon {
-  background: rgba(126, 158, 30, .08);
+  background: rgba(200, 255, 26, .08);
   transform: translateY(-1px);
 }
 
@@ -113,7 +109,6 @@
   border-radius: 999px;
   background: currentColor;
   transform: translateX(-50%);
-  box-shadow: none;
 }
 
 .dockLabel,
@@ -138,7 +133,7 @@
   height: 7px;
   border-radius: 999px;
   background: var(--semantic-warning, #a85f0c);
-  box-shadow: 0 0 0 2px rgba(250, 249, 245, .96);
+  box-shadow: 0 0 0 2px rgba(7, 24, 32, .96);
 }
 
 .overlay {
@@ -405,7 +400,7 @@
     backdrop-filter: none;
   }
 
-  .dock,
+  .dock { background: #071820; }
   .sheet { background: #faf9f5; }
 }
 

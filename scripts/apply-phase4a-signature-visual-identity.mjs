@@ -67,10 +67,11 @@ function patchAuth() {
     'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "Auth signature import",
   );
-  source = replaceOne(
+  source = insertAfterOne(
     source,
-    '<div aria-hidden="true" style={{position:"fixed",inset:0,pointerEvents:"none",background:"radial-gradient(circle at 84% 4%, rgba(126,158,30,.09), transparent 27rem), linear-gradient(180deg,#FAF9F5 0%,#F3F1EA 70%)"}}/>\n<div className="fade-up"',
-    '<div aria-hidden="true" style={{position:"fixed",inset:0,pointerEvents:"none",background:"radial-gradient(circle at 84% 4%, rgba(126,158,30,.09), transparent 27rem), linear-gradient(180deg,#FAF9F5 0%,#F3F1EA 70%)"}}/>\n<ShotLabSignatureField variant="identity" testId="auth-signature-field" style={{position:"fixed",inset:0,zIndex:0,opacity:.72}}/>\n<div className="fade-up"',
+    /^<div aria-hidden="true"(?=[^>\n]*position:"fixed")[^>\n]*\/>\r?\n(?=<div className="fade-up")/m,
+    '<ShotLabSignatureField variant="identity" testId="auth-signature-field" style={{position:"fixed",inset:0,zIndex:0,opacity:.72}}/>\n',
+    'testId="auth-signature-field"',
     "Auth signature field",
   );
   writeFileSync(path, source);

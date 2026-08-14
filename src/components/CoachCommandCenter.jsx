@@ -19,33 +19,44 @@ const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
 const normalizedName = (value = "") => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 const MOBILE_PRODUCT_RESET_CSS = `
-body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup{min-width:0!important;display:flex!important;align-items:center!important;gap:10px!important}
-body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{color:var(--mc-dim)!important;font-family:var(--font-body)!important;font-size:var(--type-micro,11px)!important;font-weight:700!important;line-height:1.2!important;letter-spacing:.04em!important;text-transform:uppercase!important}
-body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{color:var(--mc-ink)!important;font-family:var(--font-display)!important;font-size:clamp(20px,4vw,25px)!important;font-weight:790!important;line-height:1!important;letter-spacing:-.04em!important;text-transform:none!important}
+body.mission-control-active [data-mobile-visual-system="phase-2"] .mcBrandLockup{min-width:0!important;display:flex!important;align-items:center!important;gap:9px!important}
+body.mission-control-active [data-mobile-visual-system="phase-2"] .mcBrandCopy small{color:#748089!important;font-family:var(--font-body)!important;font-size:10px!important;font-weight:760!important;line-height:1.15!important;letter-spacing:.075em!important;text-transform:uppercase!important}
+body.mission-control-active [data-mobile-visual-system="phase-2"] .mcBrandCopy strong{color:#111a21!important;font-family:var(--font-display)!important;font-size:19px!important;font-weight:820!important;line-height:1!important;letter-spacing:-.045em!important;text-transform:none!important}
 @media(max-width:700px){
-  body.mission-control-active [data-mobile-product-reset="phase-1"].missionControl{padding:8px 12px 108px!important;gap:16px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:40px minmax(0,1fr) auto!important;gap:8px!important;padding:max(6px,env(safe-area-inset-top)) 0 4px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup{gap:8px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark{width:46px!important;height:46px!important;flex-basis:46px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark img{width:44px!important;height:44px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{font-size:10px!important;letter-spacing:.055em!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{max-width:30vw!important;overflow:hidden!important;font-size:18px!important;line-height:1.05!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderActions{display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{display:inline-flex!important;min-width:0!important;max-width:min(104px,27vw)!important;padding-inline:8px!important;font-size:var(--type-micro,11px)!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:20px 18px!important;gap:8px 12px!important;background:transparent!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark{top:18px!important;right:18px!important;width:64px!important;height:64px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero h1{max-width:12ch!important;font-size:clamp(31px,9vw,39px)!important;line-height:.98!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent>p{max-width:30ch!important;font-size:14px!important;line-height:1.45!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork{opacity:.4!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:8px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip>button{min-height:52px!important;padding:5px 4px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip strong{font-size:21px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcPrimary{min-height:48px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3{background:linear-gradient(180deg,#f8f7f1 0,#f1efe7 58%,#f7f6f1 100%)!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .missionControl{padding:10px 12px 108px!important;gap:14px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeader{grid-template-columns:40px minmax(0,1fr) auto!important;gap:8px!important;padding:max(8px,env(safe-area-inset-top)) 9px 8px!important;border:1px solid rgba(17,26,33,.08)!important;border-radius:22px!important;background:rgba(255,255,255,.66)!important;box-shadow:0 12px 32px rgba(17,26,33,.07),inset 0 1px rgba(255,255,255,.84)!important;-webkit-backdrop-filter:blur(22px) saturate(135%)!important;backdrop-filter:blur(22px) saturate(135%)!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcMobileMenu{width:40px!important;height:40px!important;margin:0!important;border:1px solid rgba(17,26,33,.08)!important;border-radius:14px!important;background:rgba(255,255,255,.7)!important;color:#26323a!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeaderTeamMark{width:42px!important;height:42px!important;flex-basis:42px!important;border-radius:13px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeaderTeamMark img{width:44px!important;height:44px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcBrandCopy strong{display:block!important;max-width:30vw!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeaderActions{display:flex!important;align-items:center!important;min-width:0!important;gap:5px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcTeamSelect{display:inline-flex!important;min-width:0!important;max-width:min(82px,22vw)!important;min-height:40px!important;padding-inline:9px!important;border-color:rgba(17,26,33,.08)!important;border-radius:13px!important;background:rgba(255,255,255,.72)!important;color:#34414a!important;font-size:10px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcBell{width:40px!important;height:40px!important;border:1px solid rgba(17,26,33,.08)!important;border-radius:13px!important;background:rgba(255,255,255,.72)!important;color:#26323a!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHero{min-height:356px!important;max-height:none!important;overflow:hidden!important;border:1px solid rgba(200,255,26,.17)!important;border-radius:30px 30px 30px 12px!important;background:radial-gradient(circle at 88% 8%,rgba(200,255,26,.15),transparent 29%),radial-gradient(circle at 5% 100%,rgba(64,116,137,.20),transparent 42%),linear-gradient(145deg,#0b2a38 0,#071820 74%)!important;box-shadow:0 28px 60px rgba(7,24,32,.24),inset 0 1px rgba(255,255,255,.07)!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:24px 20px 20px!important;gap:9px 12px!important;background:transparent!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeroTeamMark{top:20px!important;right:19px!important;width:68px!important;height:68px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:22px!important;background:rgba(255,255,255,.07)!important;box-shadow:inset 0 1px rgba(255,255,255,.08),0 18px 36px rgba(0,0,0,.16)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeroTeamMark img{width:58px!important;height:58px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcEyebrow{color:#c8ff1a!important;font-size:10px!important;letter-spacing:.11em!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHero h1{max-width:10ch!important;margin-top:10px!important;color:#f7fafb!important;font-size:clamp(34px,9.5vw,41px)!important;font-weight:830!important;line-height:.94!important;letter-spacing:-.055em!important;text-wrap:balance!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeroContent>p{max-width:28ch!important;margin-top:10px!important;color:#b7c5cb!important;font-size:14px!important;line-height:1.46!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcCourtArtwork{opacity:.5!important;filter:saturate(.8)!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcRealityStrip{margin-top:13px!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:18px!important;background:rgba(255,255,255,.055)!important;-webkit-backdrop-filter:blur(16px)!important;backdrop-filter:blur(16px)!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcRealityStrip>button{min-height:52px!important;padding:6px 4px!important;border-color:rgba(255,255,255,.09)!important;background:transparent!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcRealityStrip strong{color:#f7fafb!important;font-size:21px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcRealityStrip small{color:#9fb0b7!important;font-size:10px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcPrimary{min-height:54px!important;margin-top:12px!important;border:0!important;border-radius:17px!important;background:linear-gradient(135deg,#c8ff1a,#aee800)!important;color:#071007!important;box-shadow:0 14px 30px rgba(174,232,0,.18),inset 0 1px rgba(255,255,255,.36)!important;font-size:14px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcFocusGrid{gap:14px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcSection{border:1px solid rgba(17,26,33,.08)!important;border-radius:26px 26px 26px 10px!important;background:rgba(255,255,255,.76)!important;box-shadow:0 18px 44px rgba(17,26,33,.08),inset 0 1px rgba(255,255,255,.86)!important}
 }
 @media(max-width:390px){
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{width:62px!important;max-width:62px!important;font-size:0!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect:before{content:"Team";font-size:var(--type-micro,11px)!important;font-weight:720!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect>span{font-size:11px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcTeamSelect{width:58px!important;max-width:58px!important;font-size:0!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcTeamSelect:before{content:"Team";font-size:10px!important;font-weight:740!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcTeamSelect>span{font-size:10px!important}
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcBrandCopy strong{max-width:28vw!important;font-size:18px!important}
+}
+@media(max-width:700px) and (prefers-reduced-transparency:reduce){
+  body.mission-control-active [data-mobile-visual-system="phase-2"] .mcHeader{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 }`;
 
 function Icon({ name, size = 22 }) {
@@ -428,7 +439,7 @@ export default function CoachCommandCenter({
 
   return <>
     <style>{MOBILE_PRODUCT_RESET_CSS}</style>
-    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
+    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" data-mobile-visual-system="phase-2" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
         <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>

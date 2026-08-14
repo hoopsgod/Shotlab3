@@ -40,7 +40,8 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationCss, /left:\s*50%/);
   assert.match(navigationCss, /transform:\s*translateX\(-50%\)/);
   assert.match(navigationCss, /border:\s*1px solid/);
-  assert.match(navigationCss, /border-radius:\s*24px/);
+  assert.match(navigationCss, /border-radius:\s*25px 25px 25px 10px/);
+  assert.match(navigationCss, /background:\s*rgba\(7, 24, 32, \.91\)/);
   assert.match(navigationCss, /-apple-system, BlinkMacSystemFont/);
 });
 
