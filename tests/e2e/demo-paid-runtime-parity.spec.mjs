@@ -338,26 +338,29 @@ async function expectPlayerHeroContrast(page) {
       }
       return [values[0], values[1], values[2], values[3] ?? 1];
     };
-    const [red, green, blue] = channels(getComputedStyle(node).color);
-    let backgroundNode = node;
-    let background = [255, 255, 255, 1];
-    while (backgroundNode) {
-      const parsed = channels(getComputedStyle(backgroundNode).backgroundColor);
-      if (parsed.length >= 3 && parsed[3] > 0) {
-        background = parsed;
-        break;
-      }
-      backgroundNode = backgroundNode.parentElement;
-    }
-    const alpha = background[3];
-    const compositedBackground = background.slice(0, 3).map((channel) => channel * alpha + 255 * (1 - alpha));
+    const foreground = channels(getComputedStyle(node).color).slice(0, 3);
     const luminance = (rgb) => rgb
       .map((channel) => channel / 255)
       .map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
       .reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0);
-    const light = luminance([red, green, blue]);
-    const dark = luminance(compositedBackground);
-    return (Math.max(light, dark) + 0.05) / (Math.min(light, dark) + 0.05);
+    const backgroundCandidates = [];
+    let backgroundNode = node;
+    while (backgroundNode && backgroundCandidates.length === 0) {
+      const computed = getComputedStyle(backgroundNode);
+      const solid = channels(computed.backgroundColor);
+      if (solid.length >= 3 && solid[3] > 0) backgroundCandidates.push(solid.slice(0, 3));
+      if (computed.backgroundImage !== "none") {
+        const paints = computed.backgroundImage.match(/rgba?\([^)]*\)|color\(srgb[^)]*\)/g) || [];
+        backgroundCandidates.push(...paints.map(channels).filter((paint) => paint.length >= 3 && paint[3] >= .95).map((paint) => paint.slice(0, 3)));
+      }
+      backgroundNode = backgroundNode.parentElement;
+    }
+    if (backgroundCandidates.length === 0) backgroundCandidates.push([255, 255, 255]);
+    const foregroundLuminance = luminance(foreground);
+    return Math.min(...backgroundCandidates.map((background) => {
+      const backgroundLuminance = luminance(background);
+      return (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+    }));
   });
   expect(ratio, 'Player command hero body copy must meet WCAG AA contrast').toBeGreaterThanOrEqual(4.5);
 }
@@ -439,7 +442,20 @@ async function captureFingerprint(page, role, kind, key) {
   const roleDir = path.join(OUTPUT_DIR, role, kind);
   fs.mkdirSync(roleDir, { recursive: true });
   fs.writeFileSync(path.join(roleDir, `${key}.json`), JSON.stringify(fingerprint, null, 2));
-  await page.screenshot({ path: path.join(roleDir, `${key}.png`), fullPage: true });
+  // Prime every viewport-sized paint tile before a full-page capture. Chromium
+  // can otherwise omit parts of offscreen clipped cards even when the DOM and
+  // computed layout are identical across isolated contexts.
+  await page.evaluate(async () => {
+    const height = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    const step = Math.max(1, window.innerHeight - 80);
+    for (let y = 0; y < height; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    window.scrollTo(0, 0);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  await page.screenshot({ path: path.join(roleDir, `${key}.png`), fullPage: true, animations: "disabled" });
   return { digest: digest(normalizeFingerprintForDigest(fingerprint)), count: fingerprint.length };
 }
 
