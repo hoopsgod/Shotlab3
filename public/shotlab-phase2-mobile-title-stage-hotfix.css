@@ -1,9 +1,0 @@
-/* Phase 2 mobile title-stage action layout correction. */
-@media(max-width:700px){
-  [data-testid="coach-players-command-bar"] .secondaryPageIntro__buttonRow{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  }
-  [data-testid="coach-events-command-bar"] .secondaryPageIntro__buttonRow{
-    grid-template-columns:minmax(0,1fr)!important;
-  }
-}
