@@ -1,0 +1,111 @@
+name: Demo Registered Live Parity
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "functions/**"
+      - "migrations/**"
+      - "tests/e2e/demo-registered-live-parity.spec.mjs"
+      - ".github/workflows/demo-registered-live-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: demo-registered-live-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify shared UI source and capability contracts
+        run: node --test tests/demo-visual-parity-contract.test.mjs tests/account-capabilities.test.mjs tests/demo-capability-boundary.test.mjs
+
+      - name: Install pinned browser and Cloudflare tooling
+        run: npm install --no-save @playwright/test@1.55.1 wrangler@4.30.0
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build exact production bundle
+        run: npm run build
+
+      - name: Configure local Cloudflare Functions environment
+        shell: bash
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          {
+            printf 'SUPABASE_URL="%s"\n' "$SUPABASE_URL"
+            printf 'SUPABASE_SERVICE_ROLE_KEY="%s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            printf 'APP_BASE_URL="http://127.0.0.1:4173"\n'
+          } > .dev.vars
+          chmod 600 .dev.vars
+
+      - name: Start exact PR build with real Cloudflare Functions
+        shell: bash
+        run: |
+          npx wrangler pages dev dist --port 4173 > /tmp/demo-registered-live-parity.log 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/demo-registered-live-parity.log
+          exit 1
+
+      - name: Certify real Demo versus registered presentation
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/demo-registered-live-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --timeout=120000 --retries=0
+
+      - name: Remove local secret file
+        if: always()
+        run: rm -f .dev.vars
+
+      - name: Upload live parity screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-registered-live-parity-evidence
+          path: artifacts/demo-registered-live-parity/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-registered-live-parity-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/demo-registered-live-parity.log
+          if-no-files-found: ignore
+          retention-days: 7
