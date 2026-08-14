@@ -393,6 +393,34 @@ async function navigateToKey(page, key) {
   await settle(page);
 }
 
+async function assertRegisteredStateHydrated(page, role, state, navKeys) {
+  if (state === "empty") return;
+
+  const expectVisibleOn = async (key, pattern, label) => {
+    expect(navKeys, `${role}/${state} must expose ${key}`).toContain(key);
+    await navigateToKey(page, key);
+    await expect(
+      page.getByText(pattern).first(),
+      `${role}/${state} must visibly hydrate ${label} from the real registered persistence path`,
+    ).toBeVisible({ timeout: 25_000 });
+  };
+
+  if (role === "coach") {
+    await expectVisibleOn("events", /Team Practice/i, "the seeded team event");
+    if (state === "populated") {
+      await expectVisibleOn("players", /Micah Santos/i, "the populated roster");
+      await expectVisibleOn("sc", /Weight Room|Turf/i, "the persisted S&C venue");
+    }
+    return;
+  }
+
+  await expectVisibleOn("program", /Team Practice/i, "the seeded team commitment");
+  if (state === "populated") {
+    await expectVisibleOn("sc", /Weight Room|Turf/i, "the persisted S&C venue");
+    await expectVisibleOn("leaderboards", /Ava Brooks/i, "the populated competitive data");
+  }
+}
+
 async function presentationContract(page, role) {
   return page.evaluate((activeRole) => {
     const read = (node) => {
@@ -437,6 +465,10 @@ async function captureRole(browser, role, kind) {
   else await enterRegistered(page, role);
 
   const navKeys = await getNavigationKeys(page);
+  if (kind.startsWith("registered-")) {
+    await assertRegisteredStateHydrated(page, role, kind.slice("registered-".length), navKeys);
+  }
+
   const contracts = {};
   for (const key of navKeys) {
     await navigateToKey(page, key);
