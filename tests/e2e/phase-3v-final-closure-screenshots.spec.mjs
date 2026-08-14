@@ -75,8 +75,8 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   }
 
   const contrast = await page.evaluate(() => {
-    const evidenceCard = document.querySelector('[data-testid="player-command-evidence"] > div');
-    const evidenceValue = evidenceCard?.children?.[1];
+    const evidenceCard = document.querySelector('[data-testid="player-canvas-evidence"] > div');
+    const evidenceValue = evidenceCard?.querySelector("strong");
     const schedule = document.querySelector('[data-testid="player-upcoming-schedule"]');
     const scheduleTitle = schedule?.querySelector('summary > span:first-child > span:first-child');
     const scheduleMeta = schedule?.querySelector('summary > span:first-child > span:nth-child(2)');
@@ -92,7 +92,7 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   });
   expect(contrast.evidenceBackground).toBe("rgba(0, 0, 0, 0)");
   expect(contrast.evidenceRadius).toBe(0);
-  expect(contrast.evidenceValueColor).toBe("rgb(23, 26, 24)");
+  expect(contrast.evidenceValueColor).toBe("rgb(247, 250, 251)");
   expect(contrast.supportBackground).toBe("rgba(0, 0, 0, 0)");
   expect(contrast.supportTitleColor).toBe("rgb(23, 28, 24)");
   expect(contrast.supportMetaColor).toBe("rgb(104, 113, 106)");

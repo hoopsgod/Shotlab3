@@ -47,15 +47,20 @@ test("player mobile home prioritizes one daily command center, three evidence me
   await enterDemo(page, "player");
 
   const commandCenter = page.getByTestId("player-daily-command-center");
+  const canvas = page.getByTestId("player-performance-canvas");
   const primaryAction = page.getByTestId("player-daily-primary-action");
-  const metrics = page.getByTestId("player-command-evidence");
+  const trajectory = page.getByTestId("player-momentum-trajectory");
+  const metrics = page.getByTestId("player-canvas-evidence");
   const schedule = page.getByTestId("player-upcoming-schedule");
   const standings = page.getByTestId("player-team-standings");
   const guidance = page.getByTestId("player-coach-guidance");
   const secondary = page.getByTestId("player-secondary-intelligence");
 
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
+  await expect(commandCenter).toHaveAttribute("data-phase2-composition", "edge-to-edge-performance-story");
+  await expect(canvas).toBeVisible();
   await expect(primaryAction).toBeVisible();
+  await expect(trajectory).toBeVisible();
   await expectThreeMetrics(metrics);
   for (const disclosure of [schedule, standings, guidance, secondary]) {
     await expect(disclosure).toBeVisible();
@@ -63,16 +68,19 @@ test("player mobile home prioritizes one daily command center, three evidence me
   }
 
   const commandCenterBox = await commandCenter.boundingBox();
+  const canvasBox = await canvas.boundingBox();
   const primaryActionBox = await primaryAction.boundingBox();
   const metricBox = await metrics.boundingBox();
   const scheduleBox = await schedule.boundingBox();
   expect(commandCenterBox).not.toBeNull();
+  expect(canvasBox).not.toBeNull();
   expect(primaryActionBox).not.toBeNull();
   expect(metricBox).not.toBeNull();
   expect(scheduleBox).not.toBeNull();
   expect(primaryActionBox.y).toBeGreaterThan(commandCenterBox.y);
-  expect(metricBox.y).toBeGreaterThan(primaryActionBox.y);
-  expect(commandCenterBox.y).toBeLessThan(scheduleBox.y);
+  expect(metricBox.y).toBeLessThan(primaryActionBox.y);
+  expect(canvasBox.height).toBeGreaterThanOrEqual(500);
+  expect(canvasBox.y + canvasBox.height).toBeLessThanOrEqual(scheduleBox.y);
   expect(primaryActionBox.y).toBeLessThan(844);
 
   await schedule.locator("summary").click();

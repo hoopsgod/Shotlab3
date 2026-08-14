@@ -17,24 +17,30 @@ const coachSignalIcon = (signal = {}) => signal.stale ? "clock" : signal.freshne
 const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
 const PHASE2_COMPOSITION_CSS = `
 @media(max-width:700px){
-  [data-phase2-composition="progress-led-training"]{padding:0 0 8px!important}
-  [data-phase2-composition="progress-led-training"]>[data-layout-role="editorial-header"]{display:none!important}
-  [data-phase2-composition="progress-led-training"]>[data-command-role="primary"]{display:grid!important;grid-template-columns:minmax(0,1fr) 104px!important;gap:10px 14px!important;min-height:318px!important;margin:0!important;padding:22px 18px 18px!important;border:1px solid rgba(255,255,255,.82)!important;border-radius:30px 30px 30px 10px!important;background:radial-gradient(circle at 96% 4%,rgba(200,255,26,.15),transparent 28%),linear-gradient(145deg,rgba(255,255,255,.98),rgba(242,241,234,.96))!important;box-shadow:0 28px 64px rgba(17,26,33,.16),inset 0 1px rgba(255,255,255,.9)!important;color:#111a21!important}
-  [data-phase2-composition="progress-led-training"]>[data-command-role="primary"]:before{opacity:.32!important;background:radial-gradient(ellipse 42% 58% at 101% 50%,transparent 64%,rgba(17,26,33,.13) 65%,transparent 66%),linear-gradient(90deg,transparent 72%,rgba(17,26,33,.09) 72.2%,transparent 72.5%)!important}
-  [data-phase2-composition="progress-led-training"]>[data-command-role="primary"]:after{right:-50px!important;bottom:-82px!important;width:190px!important;height:190px!important;background:rgba(200,255,26,.16)!important;filter:blur(30px)!important}
-  [data-phase2-composition="progress-led-training"] [data-command-role="primary"]>div:first-child{grid-column:1/-1!important}
-  [data-phase2-composition="progress-led-training"] [data-command-role="primary"] h1{grid-column:1;grid-row:2;align-self:end;max-width:7ch!important;margin:4px 0 0!important;color:#111a21!important;font-size:clamp(36px,10vw,42px)!important;font-weight:850!important;line-height:.9!important;letter-spacing:-.064em!important}
-  [data-phase2-composition="progress-led-training"] [data-command-role="primary"]>p{grid-column:1;grid-row:3;margin:0!important;color:#58646d!important;font-size:14px!important;line-height:1.42!important}
-  [data-phase2-composition="progress-led-training"] [data-testid="player-daily-primary-action"]{grid-column:1/-1!important;min-height:56px!important;margin-top:6px!important;border-radius:18px 18px 18px 7px!important}
-  .playerPhase2Gauge{--phase2-progress:0%;position:relative;grid-column:2;grid-row:2/4;align-self:center;width:104px;height:104px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(#9ed200 var(--phase2-progress),rgba(17,26,33,.10) 0);box-shadow:0 16px 34px rgba(17,26,33,.12)}
-  .playerPhase2Gauge:before{content:"";position:absolute;inset:9px;border-radius:50%;background:#0b2633;box-shadow:inset 0 1px rgba(255,255,255,.08)}
+  [data-phase2-composition="edge-to-edge-performance-story"]{padding:0 0 8px!important;overflow:visible!important}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-layout-role="editorial-header"]{display:none!important}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-command-role="primary"]{position:relative!important;display:flex!important;flex-direction:column!important;min-height:526px!important;margin:0!important;padding:42px 20px 18px!important;overflow:hidden!important;border:0!important;border-radius:0 0 44px 14px!important;background:radial-gradient(circle at 112% 25%,rgba(200,255,26,.22),transparent 34%),radial-gradient(circle at -8% 88%,rgba(69,130,151,.26),transparent 39%),linear-gradient(155deg,#0b2a38 0,#06151c 72%)!important;box-shadow:0 34px 72px rgba(7,24,32,.28)!important;color:#f7fafb!important;isolation:isolate!important}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-command-role="primary"]:before{opacity:.52!important;background:radial-gradient(ellipse 45% 68% at 108% 39%,transparent 64%,rgba(200,255,26,.18) 64.6%,transparent 65.4%),linear-gradient(90deg,transparent 77%,rgba(255,255,255,.07) 77.2%,transparent 77.5%)!important}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-command-role="primary"]:after{right:-54px!important;bottom:-102px!important;width:250px!important;height:250px!important;background:rgba(200,255,26,.12)!important;filter:blur(44px)!important}
+  [data-phase2-composition="edge-to-edge-performance-story"] [data-command-role="primary"]>div:first-child{position:relative!important;z-index:2!important;width:100%!important}
+  [data-phase2-composition="edge-to-edge-performance-story"] [data-command-role="primary"] h1{position:relative!important;z-index:2!important;max-width:6.7ch!important;margin:46px 0 0!important;color:#f7fafb!important;font-size:clamp(46px,12.6vw,54px)!important;font-weight:860!important;line-height:.84!important;letter-spacing:-.075em!important;text-wrap:balance!important}
+  [data-phase2-composition="edge-to-edge-performance-story"] [data-command-role="primary"]>p{position:relative!important;z-index:2!important;max-width:22ch!important;margin:16px 0 0!important;color:#aec0c8!important;font-size:14px!important;line-height:1.46!important}
+  [data-phase2-composition="edge-to-edge-performance-story"] [data-testid="player-daily-primary-action"]{position:relative!important;z-index:3!important;order:6!important;width:100%!important;min-height:58px!important;margin-top:14px!important;border:0!important;border-radius:20px 20px 20px 7px!important;background:linear-gradient(135deg,#c8ff1a,#aee800)!important;color:#071007!important;box-shadow:0 16px 34px rgba(174,232,0,.18),inset 0 1px rgba(255,255,255,.4)!important;font-size:15px!important}
+  .playerPhase2Gauge{--phase2-progress:0%;position:absolute;z-index:1;top:112px;right:-46px;width:178px;height:178px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(#c8ff1a var(--phase2-progress),rgba(255,255,255,.09) 0);box-shadow:0 30px 70px rgba(0,0,0,.24),0 0 0 1px rgba(255,255,255,.08)}
+  .playerPhase2Gauge:before{content:"";position:absolute;inset:14px;border-radius:50%;background:radial-gradient(circle at 35% 25%,#123746,#071820 70%);box-shadow:inset 0 1px rgba(255,255,255,.10)}
   .playerPhase2Gauge>span,.playerPhase2Gauge>small{position:absolute;z-index:1;color:#f7fafb;font-family:var(--font-display)}
-  .playerPhase2Gauge>span{top:31px;font-size:26px;font-weight:850;letter-spacing:-.055em}.playerPhase2Gauge>span b{color:#c8ff1a;font-size:12px;margin-left:1px}.playerPhase2Gauge>small{top:61px;color:#91a2aa;font-size:9px;font-weight:760;letter-spacing:.12em}
-  [data-phase2-composition="progress-led-training"]>[data-testid="player-command-evidence"]{margin-top:14px!important;border:0!important;border-radius:22px 22px 22px 8px!important;background:rgba(255,255,255,.78)!important;box-shadow:0 16px 38px rgba(17,26,33,.07),inset 0 1px rgba(255,255,255,.86)!important}
-  [data-phase2-composition="progress-led-training"]>[data-testid="player-coach-priority-signal"]{border-radius:24px 24px 24px 8px!important;background:rgba(255,255,255,.74)!important}
+  .playerPhase2Gauge>span{top:54px;font-size:41px;font-weight:870;letter-spacing:-.07em}.playerPhase2Gauge>span b{color:#c8ff1a;font-size:15px;margin-left:2px}.playerPhase2Gauge>small{top:103px;color:#91a2aa;font-size:11px;font-weight:760;letter-spacing:.12em;text-transform:uppercase}
+  .playerMomentumTrajectory{position:relative;z-index:2;order:4;margin-top:auto;padding-top:18px}
+  .playerMomentumTrajectory svg{display:block;width:100%;height:58px;overflow:visible}.playerMomentumTrajectoryTrack{fill:none;stroke:rgba(255,255,255,.11);stroke-width:2}.playerMomentumTrajectoryProgress{fill:none;stroke:#c8ff1a;stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 0 7px rgba(200,255,26,.24))}.playerMomentumTrajectoryMarker{fill:#c8ff1a;stroke:#071820;stroke-width:4}
+  .playerMomentumTrajectoryLabels{display:flex;justify-content:space-between;margin-top:-3px;color:#91a2aa;font-size:11px;font-weight:750;letter-spacing:.07em;text-transform:uppercase}.playerMomentumTrajectoryLabels strong{color:#dfe7ea;font-size:11px}
+  .playerCanvasEvidence{position:relative;z-index:2;order:5;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px;border-block:1px solid rgba(255,255,255,.10)}
+  .playerCanvasEvidence>div{min-width:0;padding:11px 8px 12px;border-right:1px solid rgba(255,255,255,.09)}.playerCanvasEvidence>div:first-child{padding-left:0}.playerCanvasEvidence>div:last-child{padding-right:0;border-right:0}.playerCanvasEvidence small{display:block;color:#8fa1a9;font-size:11px;font-weight:740;letter-spacing:.07em;text-transform:uppercase}.playerCanvasEvidence strong{display:block;margin-top:5px;overflow:hidden;color:#f7fafb;font-family:var(--font-display);font-size:20px;font-weight:820;letter-spacing:-.04em;text-overflow:ellipsis;white-space:nowrap}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-testid="player-command-evidence"]{display:none!important}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-testid="player-coach-priority-signal"],[data-phase2-composition="edge-to-edge-performance-story"]>[data-command-role="next-actions"],[data-phase2-composition="edge-to-edge-performance-story"]>details{margin-inline:16px!important}
+  [data-phase2-composition="edge-to-edge-performance-story"]>[data-testid="player-coach-priority-signal"]{margin-top:18px!important;border-radius:24px 24px 24px 8px!important;background:rgba(255,255,255,.78)!important}
 }
-@media(max-width:365px){.playerPhase2Gauge{width:92px;height:92px}.playerPhase2Gauge:before{inset:8px}.playerPhase2Gauge>span{top:27px}.playerPhase2Gauge>small{top:55px}[data-phase2-composition="progress-led-training"]>[data-command-role="primary"]{grid-template-columns:minmax(0,1fr) 92px!important}}
-@media(max-width:700px) and (prefers-reduced-transparency:reduce){[data-phase2-composition="progress-led-training"]>[data-command-role="primary"],[data-phase2-composition="progress-led-training"]>[data-testid="player-command-evidence"],[data-phase2-composition="progress-led-training"]>[data-testid="player-coach-priority-signal"]{background:#fff!important}}
+@media(max-width:365px){.playerPhase2Gauge{right:-58px;width:164px;height:164px}.playerPhase2Gauge:before{inset:13px}.playerPhase2Gauge>span{top:50px}.playerPhase2Gauge>small{top:96px}[data-phase2-composition="edge-to-edge-performance-story"] [data-command-role="primary"] h1{font-size:44px!important}}
+@media(max-width:700px) and (prefers-reduced-motion:reduce){.playerMomentumTrajectoryProgress{filter:none}.playerPhase2Gauge{box-shadow:0 0 0 1px rgba(255,255,255,.08)}}
 `;
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
@@ -53,6 +59,10 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   const primary = model.primaryAction;
   const dailyPercent = Math.max(0, Math.round(Number(model.daily?.pct) || 0));
   const dailyGaugePercent = `${Math.min(100, dailyPercent)}%`;
+  const weeklyPercent = Math.max(0, Math.min(100, Math.round(Number(model.weekly?.pct) || 0)));
+  const weeklyTrajectoryT = weeklyPercent / 100;
+  const weeklyTrajectoryX = 8 + (304 * weeklyTrajectoryT);
+  const weeklyTrajectoryY = ((1 - weeklyTrajectoryT) ** 2 * 48) + (2 * (1 - weeklyTrajectoryT) * weeklyTrajectoryT * -8) + (weeklyTrajectoryT ** 2 * 18);
   const queue = Array.isArray(model.queue) ? model.queue.slice(1, 3) : [];
   const coachSignal = model.coachSignal || {};
   const firstSession = model.firstSession || {};
@@ -81,13 +91,13 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
 
   return (<>
     <style>{PHASE2_COMPOSITION_CSS}</style>
-    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" data-mobile-product-reset="phase-1" data-mobile-visual-system="phase-2" data-phase2-composition="progress-led-training" aria-label="Daily training command center">
+    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" data-mobile-product-reset="phase-1" data-mobile-visual-system="phase-2" data-phase2-composition="edge-to-edge-performance-story" aria-label="Daily training command center">
       <div className={styles.header} data-layout-role="editorial-header">
         <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today’s focus"}</div>
         <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
       </div>
 
-      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary" data-layout-role="primary-decision">
+      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-testid="player-performance-canvas" data-command-role="primary" data-layout-role="primary-decision">
         <div className={styles.heroTop}>
           <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -104,6 +114,17 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
           <ShotLabIcon name={primaryWorking ? "clock" : dailyComplete ? "check" : "arrow"} size={18} />
         </button>
+        <div className="playerMomentumTrajectory" data-testid="player-momentum-trajectory" role="img" aria-label={`${weeklyPercent}% of the weekly training target`}>
+          <svg viewBox="0 -12 320 76" aria-hidden="true">
+            <path className="playerMomentumTrajectoryTrack" d="M8 48 Q160 -8 312 18" pathLength="100" />
+            <path className="playerMomentumTrajectoryProgress" d="M8 48 Q160 -8 312 18" pathLength="100" style={{ strokeDasharray: `${weeklyPercent} 100` }} />
+            <circle className="playerMomentumTrajectoryMarker" cx={weeklyTrajectoryX} cy={weeklyTrajectoryY} r="6" />
+          </svg>
+          <div className="playerMomentumTrajectoryLabels"><span>Week trajectory</span><strong>{weeklyPercent}% banked</strong></div>
+        </div>
+        <div className="playerCanvasEvidence" data-testid="player-canvas-evidence" role="group" aria-label="Performance proof">
+          {evidence.map((item) => <div key={item.label}><small>{item.label}</small><strong>{item.value}</strong></div>)}
+        </div>
       </div>
 
       <div className={styles.progressGrid} role="group" data-testid="player-command-evidence" data-layout-role="supporting-evidence" aria-label="Today’s training evidence">

@@ -92,16 +92,23 @@ test.beforeEach(async ({ page }) => {
 test("Player home presents action, evidence, priority, and disclosure in order", async ({ page }) => {
   await enterDemo(page, "player");
   const root = page.getByTestId("player-daily-command-center");
+  const canvas = page.getByTestId("player-performance-canvas");
   const primary = page.getByTestId("player-daily-primary-action");
-  const evidence = page.getByTestId("player-command-evidence");
+  const trajectory = page.getByTestId("player-momentum-trajectory");
+  const evidence = page.getByTestId("player-canvas-evidence");
+  const retiredEvidence = page.getByTestId("player-command-evidence");
   const priority = page.getByTestId("player-coach-priority-signal");
   const disclosure = page.getByTestId("player-progress-disclosure");
 
   await expect(root).toBeVisible({ timeout: 20_000 });
   await expect(root).toHaveAttribute("data-phase", "phase-2-command-hierarchy");
+  await expect(root).toHaveAttribute("data-phase2-composition", "edge-to-edge-performance-story");
+  await expect(canvas).toBeVisible();
   await expect(primary).toBeVisible();
   await expect(root.getByRole("heading", { level: 1 })).toContainText("Daily work banked.");
+  await expect(trajectory).toBeVisible();
   await expect(evidence).toBeVisible();
+  await expect(retiredEvidence).toBeHidden();
   await expect(priority).toBeVisible();
   await expect(disclosure).toBeVisible();
 
@@ -117,7 +124,7 @@ test("Player home presents action, evidence, priority, and disclosure in order",
     const primaryButtonStyle = style('[data-testid="player-daily-primary-action"]');
     const primaryButtonLabel = document.querySelector('[data-testid="player-daily-primary-action"] span');
     const primaryButtonLabelStyle = primaryButtonLabel ? getComputedStyle(primaryButtonLabel) : null;
-    const evidenceStyle = style('[data-testid="player-command-evidence"] > div');
+    const evidenceStyle = style('[data-testid="player-canvas-evidence"] > div');
     const nextStyle = style('[data-command-role="next-actions"]');
     const disclosureStyle = style('[data-command-role="progress-details"]');
     const activationStyle = style('[data-command-role="activation"]');
@@ -152,7 +159,8 @@ test("Player home presents action, evidence, priority, and disclosure in order",
     return {
       positions: {
         primary: top('[data-command-role="primary"]'),
-        evidence: top('[data-testid="player-command-evidence"]'),
+        trajectory: top('[data-testid="player-momentum-trajectory"]'),
+        evidence: top('[data-testid="player-canvas-evidence"]'),
         priority: top('[data-command-role="coach-priority"]'),
         nextActions: top('[data-command-role="next-actions"]'),
         progress: top('[data-command-role="progress-details"]'),
@@ -173,6 +181,7 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   });
 
   expect(presentation.positions.primary).toBeGreaterThanOrEqual(0);
+  expect(presentation.positions.trajectory).toBeGreaterThan(presentation.positions.primary);
   expect(presentation.positions.evidence).toBeGreaterThan(presentation.positions.primary);
   expect(presentation.positions.priority).toBeGreaterThan(presentation.positions.evidence);
   if (presentation.positions.nextActions >= 0) expect(presentation.positions.progress).toBeGreaterThan(presentation.positions.nextActions);

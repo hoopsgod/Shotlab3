@@ -26,7 +26,7 @@ test("Coach mobile identity uses a free-standing team mark inside the command he
 
 test("Mobile home hierarchy keeps readable type and one compact identity-to-command transition", () => {
   assert.match(playerHeader, /MOBILE_PRODUCT_RESET_CSS/);
-  assert.match(playerHeader, /data-identity-role=\"inner\"\]\{[\s\S]*?min-height:84px!important/);
+  assert.match(playerHeader, /data-identity-role=\"inner\"\]\{[\s\S]*?min-height:126px!important/);
   assert.match(playerCommandCss, /Mobile Product Reset — Phase 1/);
   assert.match(playerCommandCss, /\.description \{[^}]*font-size: 15px;/);
   assert.match(coach, /MOBILE_PRODUCT_RESET_CSS/);

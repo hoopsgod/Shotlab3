@@ -22,10 +22,23 @@ test("corrective Phase 2 changes first-viewport composition instead of only rest
   assert.match(auth, /data-phase2-composition="cinematic-auth-stage"/);
   assert.match(coach, /data-phase2-composition="integrated-command-deck"/);
   assert.match(coach, /className="mcDecisionIndex"/);
-  assert.match(playerHeader, /data-phase2-composition="performance-passport"/);
-  assert.match(playerCommand, /data-phase2-composition="progress-led-training"/);
+  assert.match(playerHeader, /data-phase2-composition="integrated-performance-canvas"/);
+  assert.match(playerCommand, /data-phase2-composition="edge-to-edge-performance-story"/);
   assert.match(playerCommand, /data-testid="player-hero-progress"/);
   assert.match(playerCommand, /className="playerPhase2Gauge"/);
+});
+
+test("Player Home is one edge-to-edge performance story instead of a passport above stacked cards", () => {
+  assert.match(playerHeader, /data-phase2-composition="integrated-performance-canvas"/);
+  assert.match(playerCommand, /data-phase2-composition="edge-to-edge-performance-story"/);
+  assert.match(playerCommand, /data-testid="player-performance-canvas"/);
+  assert.match(playerCommand, /data-testid="player-momentum-trajectory"/);
+  assert.match(playerCommand, /data-testid="player-canvas-evidence"/);
+  assert.match(playerCommand, /min-height:526px!important/);
+  assert.match(playerCommand, /width:178px;height:178px/);
+  assert.doesNotMatch(`${playerHeader}\n${playerCommand}`, /font-size:(?:8|9|10)px/);
+  assert.match(playerCommand, /\[data-testid="player-command-evidence"\]\{display:none!important\}/);
+  assert.doesNotMatch(playerHeader, /PLAYER  \/  01/);
 });
 
 test("Phase 2 gives authentication a cinematic dark-to-light entry composition", () => {
@@ -46,11 +59,11 @@ test("Coach mobile chrome and command hero use the Phase 2 premium field system"
 });
 
 test("Player identity, decision field, evidence, and coach handoff share one visual language", () => {
-  assert.match(playerHeader, /border-radius:0 0 34px 12px!important/);
-  assert.match(playerHeader, /min-height:182px!important/);
-  assert.match(playerCommand, /grid-template-columns:minmax\(0,1fr\) 104px!important/);
-  assert.match(playerCommand, /conic-gradient\(#9ed200 var\(--phase2-progress\)/);
-  assert.match(playerCommand, /background:radial-gradient\(circle at 96% 4%,rgba\(200,255,26,.15\)/);
+  assert.match(playerHeader, /min-height:126px!important/);
+  assert.match(playerHeader, /padding:0 0 var\(--player-scroll-bottom-padding\)!important/);
+  assert.match(playerCommand, /border-radius:0 0 44px 14px!important/);
+  assert.match(playerCommand, /conic-gradient\(#c8ff1a var\(--phase2-progress\)/);
+  assert.match(playerCommand, /data-testid="player-momentum-trajectory"/);
   assert.match(playerCommandCss, /font-size: 15px/);
 });
 

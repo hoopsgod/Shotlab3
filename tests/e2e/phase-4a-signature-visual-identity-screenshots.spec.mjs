@@ -63,21 +63,25 @@ test("Phase 4A Player Home uses signature court geometry and branded stat instru
   await expect(field).toBeVisible();
   await expect(field).toHaveAttribute("data-shotlab-signature", "court");
   expect(await field.evaluate((node) => node.parentElement?.getAttribute("data-testid"))).toBe("player-daily-command-center");
-  const firstMetric = page.getByTestId("player-command-evidence").locator(":scope > div").first();
-  const metricAccent = await firstMetric.evaluate((node) => {
-    const track = node.querySelector('[aria-hidden="true"]');
-    const fill = track?.firstElementChild;
+  const trajectory = page.getByTestId("player-momentum-trajectory");
+  await expect(trajectory).toBeVisible();
+  const metricAccent = await trajectory.evaluate((node) => {
+    const track = node.querySelector(".playerMomentumTrajectoryTrack");
+    const progress = node.querySelector(".playerMomentumTrajectoryProgress");
+    const marker = node.querySelector(".playerMomentumTrajectoryMarker");
     return {
       backgroundColor: getComputedStyle(node).backgroundColor,
       borderRadius: Number.parseFloat(getComputedStyle(node).borderRadius),
-      trackHeight: track ? Number.parseFloat(getComputedStyle(track).height) : 0,
-      fillImage: fill ? getComputedStyle(fill).backgroundImage : "none",
+      trackWidth: track ? Number.parseFloat(getComputedStyle(track).strokeWidth) : 0,
+      progressStroke: progress ? getComputedStyle(progress).stroke : "none",
+      markerFill: marker ? getComputedStyle(marker).fill : "none",
     };
   });
   expect(metricAccent.backgroundColor).toBe("rgba(0, 0, 0, 0)");
   expect(metricAccent.borderRadius).toBe(0);
-  expect(metricAccent.trackHeight).toBeGreaterThanOrEqual(4);
-  expect(metricAccent.fillImage).not.toBe("none");
+  expect(metricAccent.trackWidth).toBeGreaterThanOrEqual(2);
+  expect(metricAccent.progressStroke).not.toBe("none");
+  expect(metricAccent.markerFill).not.toBe("none");
   await expectNoOverflow(page);
   await capture(page, "08b-phase4a-player-home-signature.png");
 });

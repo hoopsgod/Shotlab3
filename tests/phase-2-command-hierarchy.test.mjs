@@ -7,7 +7,8 @@ const main=read("../src/main.jsx"),player=read("../src/components/PlayerDailyCom
 test("Phase 2 hierarchy contracts remain intact",()=>{
  const foundation=main.indexOf("await import('./styles/VisualFoundation2026.css')"),command=main.indexOf("await import('./styles/CommandHierarchy2026.css')");
  assert.ok(foundation>=0&&command>foundation);
- const order=['data-command-role="primary"','data-testid="player-command-evidence"','data-command-role="coach-priority"','data-command-role="next-actions"','data-command-role="progress-details"'].map(v=>player.indexOf(v));
+ const markup=player.slice(player.indexOf("return (<>"));
+ const order=['data-command-role="primary"','data-testid="player-momentum-trajectory"','data-testid="player-canvas-evidence"','data-testid="player-command-evidence"','data-command-role="coach-priority"','data-command-role="next-actions"','data-command-role="progress-details"'].map(v=>markup.indexOf(v));
  assert.ok(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])));
  for(const value of ['data-testid="player-progress-disclosure"','className="playerProgressDisclosure"','Progress snapshot','View details','data-layout-role="primary-decision"','data-layout-role="supporting-evidence"','data-layout-role="quiet-secondary"','aria-label="Today’s training evidence"']) assert.ok(player.includes(value));
  assert.ok(hierarchy.includes('[data-testid="player-command-evidence"]'));
