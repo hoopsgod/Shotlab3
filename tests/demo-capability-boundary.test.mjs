@@ -26,6 +26,13 @@ test("destructive and external account actions are capability-protected", () => 
   assert.match(inviteSource, /if \(!capabilities\.canSendInvites\) return \{ ok: true, invitations: \[\], storageMode: "demo_local" \}/);
 });
 
+test("demo reset controls are sandbox-only at both action and presentation boundaries", () => {
+  const resetGuards = appSource.match(/requireAccountCapability\(accountCapabilities,"canResetSandbox"\)/g) || [];
+  assert.equal(resetGuards.length, 2, "load and clear actions must independently require sandbox reset authority");
+  assert.match(appSource, /accountCapabilities\?\.canResetSandbox&&<article className="coachAdministrationCard">/);
+  assert.match(appSource, /accountCapabilities=\{accountCapabilities\}/);
+});
+
 test("demo cleanup is row-scoped and cannot wipe shared local collections", () => {
   const clearStart = demoDataSource.indexOf("export async function clearDemoData");
   assert.ok(clearStart >= 0, "clearDemoData must exist");
