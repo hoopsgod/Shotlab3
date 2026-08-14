@@ -381,7 +381,28 @@ async function navigateToKey(page, key) {
   await settle(page);
 }
 
+async function canonicalizeAllowedSandboxUtility(page, role, kind, key) {
+  if (role !== "coach" || key !== "settings") return;
+
+  const sandboxCards = page.locator(".coachAdministrationCard").filter({
+    has: page.getByRole("heading", { name: "DEMO SETTINGS", exact: true }),
+  });
+
+  if (kind === "registered") {
+    await expect(sandboxCards, "Registered Coach settings must never expose demo reset controls").toHaveCount(0);
+    return;
+  }
+
+  await expect(sandboxCards, "Demo Coach settings must expose exactly one sandbox reset utility").toHaveCount(1);
+  await sandboxCards.evaluate((node) => {
+    node.setAttribute("data-parity-excluded-sandbox-utility", "true");
+    node.style.setProperty("display", "none", "important");
+  });
+  await settle(page);
+}
+
 async function captureFingerprint(page, role, kind, key) {
+  await canonicalizeAllowedSandboxUtility(page, role, kind, key);
   const demoEmail = DEMO_IDENTITIES[role].email;
   const registeredEmail = REGISTERED_IDENTITIES[role].email;
   const fingerprint = await page.evaluate(({ demoEmail, registeredEmail }) => {
