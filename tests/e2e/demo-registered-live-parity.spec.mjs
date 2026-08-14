@@ -226,7 +226,6 @@ async function applyRegisteredState(state) {
       made: state === "sparse" ? 45 : 125,
       date: localDateKey(0),
       ts: now + 2,
-      hide_from_leaderboards: false,
     }],
   });
 
