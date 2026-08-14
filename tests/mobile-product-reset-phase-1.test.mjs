@@ -19,17 +19,18 @@ test("Mobile Product Reset identifies the shared first-viewport surfaces", () =>
 test("Coach mobile identity uses a free-standing team mark inside the command header", () => {
   assert.match(coach, /className="mcHeaderTeamMark"/);
   assert.match(coach, /aria-label=\{`Customize \$\{teamName\} team identity`\}/);
+  assert.match(coach, /MOBILE_PRODUCT_RESET_CSS/);
   assert.match(coachCss, /\.mcHeaderTeamMark/);
-  assert.match(coachCss, /body\.mission-control-active \.mcShellV3 \.mcHeaderTeamMark img/);
+  assert.match(coach, /\.mcHeaderTeamMark img\{width:44px!important;height:44px!important\}/);
 });
 
 test("Mobile home hierarchy keeps readable type and one compact identity-to-command transition", () => {
-  assert.match(identityCss, /Mobile Product Reset — Phase 1/);
-  assert.match(identityCss, /\.player \.inner\{[\s\S]*?min-height:84px!important/);
+  assert.match(playerHeader, /MOBILE_PRODUCT_RESET_CSS/);
+  assert.match(playerHeader, /data-identity-role=\"inner\"\]\{[\s\S]*?min-height:84px!important/);
   assert.match(playerCommandCss, /Mobile Product Reset — Phase 1/);
   assert.match(playerCommandCss, /\.description \{[^}]*font-size: 15px;/);
-  assert.match(coachCss, /Mobile Product Reset — Phase 1/);
-  assert.match(coachCss, /\.mcHeroContent > p \{[\s\S]*?font-size: 14px !important/);
+  assert.match(coach, /MOBILE_PRODUCT_RESET_CSS/);
+  assert.match(coach, /\.mcHeroContent>p\{[\s\S]*?font-size:14px!important/);
 });
 
 test("The reset remains presentation-only", () => {
