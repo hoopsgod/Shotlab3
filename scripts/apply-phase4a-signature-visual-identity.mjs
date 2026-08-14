@@ -7,6 +7,13 @@ const replaceOne = (source, from, to, label) => {
   if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
   return source.replace(from, to);
 };
+const insertAfterOne = (source, anchor, insertion, marker, label) => {
+  if (source.includes(marker)) return source;
+  const flags = anchor.flags.includes("g") ? anchor.flags : `${anchor.flags}g`;
+  const count = [...source.matchAll(new RegExp(anchor.source, flags))].length;
+  if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
+  return source.replace(anchor, (match) => `${match}${insertion}`);
+};
 const ensureImportAfter = (source, anchor, importStatement, label) => {
   if (source.includes(importStatement)) return source;
   const count = source.split(anchor).length - 1;
@@ -23,10 +30,11 @@ function patchPlayerDaily() {
     'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "PlayerDaily signature import",
   );
-  source = replaceOne(
+  source = insertAfterOne(
     source,
-    '    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">\n      <div className={styles.header} data-layout-role="editorial-header">',
-    '    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">\n      <ShotLabSignatureField variant="court" testId="player-home-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n      <div className={styles.header} data-layout-role="editorial-header">',
+    /^[ \t]*<section\b(?=[^>\n]*data-testid="player-daily-command-center")[^>\n]*>\r?\n(?=[ \t]*<div className=\{styles\.header\} data-layout-role="editorial-header">)/m,
+    '      <ShotLabSignatureField variant="court" testId="player-home-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n',
+    'testId="player-home-signature-field"',
     "PlayerDaily signature field",
   );
   writeFileSync(path, source);

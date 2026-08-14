@@ -18,6 +18,35 @@ const DEFAULT_MARK = "/branding/titans-default-mark.svg";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
 const normalizedName = (value = "") => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+const MOBILE_PRODUCT_RESET_CSS = `
+body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup{min-width:0!important;display:flex!important;align-items:center!important;gap:10px!important}
+body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{color:var(--mc-dim)!important;font-family:var(--font-body)!important;font-size:var(--type-micro,11px)!important;font-weight:700!important;line-height:1.2!important;letter-spacing:.04em!important;text-transform:uppercase!important}
+body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{color:var(--mc-ink)!important;font-family:var(--font-display)!important;font-size:clamp(20px,4vw,25px)!important;font-weight:790!important;line-height:1!important;letter-spacing:-.04em!important;text-transform:none!important}
+@media(max-width:700px){
+  body.mission-control-active [data-mobile-product-reset="phase-1"].missionControl{padding:8px 12px 108px!important;gap:16px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:40px minmax(0,1fr) auto!important;gap:8px!important;padding:max(6px,env(safe-area-inset-top)) 0 4px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup{gap:8px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark{width:46px!important;height:46px!important;flex-basis:46px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark img{width:44px!important;height:44px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{font-size:10px!important;letter-spacing:.055em!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{max-width:30vw!important;overflow:hidden!important;font-size:18px!important;line-height:1.05!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderActions{display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{display:inline-flex!important;min-width:0!important;max-width:min(104px,27vw)!important;padding-inline:8px!important;font-size:var(--type-micro,11px)!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:20px 18px!important;gap:8px 12px!important;background:transparent!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark{top:18px!important;right:18px!important;width:64px!important;height:64px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero h1{max-width:12ch!important;font-size:clamp(31px,9vw,39px)!important;line-height:.98!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent>p{max-width:30ch!important;font-size:14px!important;line-height:1.45!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork{opacity:.4!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:8px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip>button{min-height:52px!important;padding:5px 4px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip strong{font-size:21px!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcPrimary{min-height:48px!important}
+}
+@media(max-width:390px){
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{width:62px!important;max-width:62px!important;font-size:0!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect:before{content:"Team";font-size:var(--type-micro,11px)!important;font-weight:720!important}
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect>span{font-size:11px!important}
+}`;
 
 function Icon({ name, size = 22 }) {
   const paths = {
@@ -397,8 +426,9 @@ export default function CoachCommandCenter({
     return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
   }
 
-  return (
-    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" style={{ "--mc": accent, "--mc-secondary": secondary }}>
+  return <>
+    <style>{MOBILE_PRODUCT_RESET_CSS}</style>
+    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
         <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
@@ -408,7 +438,10 @@ export default function CoachCommandCenter({
       <main className="missionControl">
         <header className="mcHeader" data-testid="mission-control-team-header">
           <button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button>
-          <div className="mcBrandLockup"><span className="mcBrandCopy"><small>{teamName}</small><strong>Mission Control</strong></span></div>
+          <div className="mcBrandLockup">
+            <button type="button" className="mcHeaderTeamMark" style={{width:52,height:52,flex:"0 0 52px",display:"grid",placeItems:"center",padding:0,border:0,borderRadius:14,background:"transparent",color:"inherit",boxShadow:"none",cursor:"pointer"}} onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img style={{width:48,height:48,display:"block",objectFit:"contain",filter:"drop-shadow(0 8px 16px rgba(7,28,40,.13))"}} src={cleanMarkLogoUrl} alt="" /></button>
+            <span className="mcBrandCopy"><small>Coach workspace</small><strong>{teamName}</strong></span>
+          </div>
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
         </header>
 
@@ -462,5 +495,5 @@ export default function CoachCommandCenter({
         <aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}><img src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside>
       </div>
     </div>
-  );
+  </>;
 }

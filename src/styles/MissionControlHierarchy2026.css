@@ -34,24 +34,9 @@ body.mission-control-active .mcShellV3 .mcHeader {
   -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
   backdrop-filter: blur(18px) saturate(120%) !important;
 }
-body.mission-control-active .mcShellV3 .mcBrandLockup { min-width: 0 !important; }
-body.mission-control-active .mcShellV3 .mcBrandCopy small {
-  color: var(--mc-dim) !important;
-  font-family: var(--font-body) !important;
-  font-size: var(--type-micro,11px) !important;
-  font-weight: 700 !important;
-  line-height: 1.2 !important;
-  letter-spacing: .04em !important;
-  text-transform: uppercase !important;
-}
-body.mission-control-active .mcShellV3 .mcBrandCopy strong {
-  color: var(--mc-ink) !important;
-  font-family: var(--font-display) !important;
-  font-size: clamp(20px,4vw,25px) !important;
-  font-weight: 790 !important;
-  line-height: 1 !important;
-  letter-spacing: -.04em !important;
-  text-transform: none !important;
+body.mission-control-active .mcShellV3 .mcHeaderTeamMark:focus-visible {
+  outline: 3px solid rgba(126,158,30,.22) !important;
+  outline-offset: 2px !important;
 }
 body.mission-control-active .mcShellV3 .mcHeaderActions { min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: 7px !important; }
 body.mission-control-active .mcShellV3 .mcTeamSelect,
@@ -217,31 +202,6 @@ body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow strong { c
 body.mission-control-active .mcShellV3 .mcAttentionCopy small,
 body.mission-control-active .mcShellV3 .mcAttentionMeta,
 body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
-
-@media (max-width: 700px) {
-  body.mission-control-active .mcShellV3 .missionControl { padding: 8px 12px 108px !important; gap: 16px !important; }
-  body.mission-control-active .mcShellV3 .mcHeader { grid-template-columns: 40px minmax(0, 1fr) auto !important; gap: 8px !important; padding: 8px 9px !important; border-radius: var(--radius-lg,18px) !important; }
-  body.mission-control-active .mcShellV3 .mcHeaderActions { display: flex !important; align-items: center !important; min-width: 0 !important; gap: 6px !important; }
-  body.mission-control-active .mcShellV3 .mcTeamSelect { display: inline-flex !important; min-width: 0 !important; max-width: min(104px,27vw) !important; padding-inline: 8px !important; font-size: var(--type-micro,11px) !important; }
-  body.mission-control-active .mcShellV3 .mcHero { max-height: none !important; border-radius: var(--radius-xl,24px) !important; }
-  body.mission-control-active .mcShellV3 .mcHeroContent { grid-template-columns: minmax(0, 1fr) 68px !important; padding: 20px 18px !important; gap: 8px 12px !important; background: transparent !important; }
-  body.mission-control-active .mcShellV3 .mcHeroTeamMark { top: 18px !important; right: 18px !important; width: 64px !important; height: 64px !important; }
-  body.mission-control-active .mcShellV3 .mcEyebrow { font-size: var(--type-micro,11px) !important; }
-  body.mission-control-active .mcShellV3 .mcHero h1 { max-width: 12ch !important; font-size: clamp(31px,9vw,39px) !important; line-height: .98 !important; }
-  body.mission-control-active .mcShellV3 .mcHeroContent > p { max-width: 30ch !important; font-size: 13px !important; line-height: 1.4 !important; }
-  body.mission-control-active .mcShellV3 .mcCourtArtwork { opacity: .4 !important; }
-  body.mission-control-active .mcShellV3 .mcRealityStrip { margin-top: 8px !important; }
-  body.mission-control-active .mcShellV3 .mcRealityStrip > button { min-height: 52px !important; padding: 5px 4px !important; }
-  body.mission-control-active .mcShellV3 .mcRealityStrip strong { font-size: 21px !important; }
-  body.mission-control-active .mcShellV3 .mcRealityStrip small { font-size: var(--type-micro,11px) !important; }
-  body.mission-control-active .mcShellV3 .mcPrimary { min-height: 48px !important; border-radius: var(--radius-md,14px) !important; }
-}
-
-@media (max-width: 390px) {
-  body.mission-control-active .mcShellV3 .mcTeamSelect { width: 62px !important; max-width: 62px !important; font-size: 0 !important; }
-  body.mission-control-active .mcShellV3 .mcTeamSelect::before { content: "Team"; font-size: var(--type-micro,11px) !important; font-weight: 720 !important; }
-  body.mission-control-active .mcShellV3 .mcTeamSelect > span { font-size: 11px !important; }
-}
 
 @media (prefers-reduced-transparency: reduce) {
   body.mission-control-active .mcShellV3 .mcHeader { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--mc-surface) !important; }

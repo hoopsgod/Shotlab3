@@ -94,7 +94,7 @@ test("Player Demo keeps the complete Player presentation system from first paint
   });
   expect(headerStyle.borderRadius).toBe(0);
   expect(headerStyle.borderTopWidth).toBe(0);
-  expect(headerStyle.borderBottomWidth).toBeGreaterThanOrEqual(1);
+  expect(headerStyle.borderBottomWidth).toBe(0);
   expect(headerStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
 
   const commandCenter = page.getByTestId("player-daily-command-center");

@@ -26,7 +26,7 @@ test("player identity uses an unboxed editorial shell with authoritative team br
 
 test("Daily Command Center matches the modern player hierarchy without changing its actions", () => {
   assert.match(dailyCss, /\.root\s*\{[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent/);
-  assert.match(dailyCss, /\.hero\s*\{[\s\S]*?border-radius:\s*24px/);
+  assert.match(dailyCss, /\.hero\s*\{[\s\S]*?border-radius:\s*var\(--radius-xl,24px\)/);
   assert.match(dailyCss, /\.progressCard\s*\{[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent/);
   assert.match(dailyCss, /min-height:\s*48px/);
   assert.match(dailyCss, /\.coachSignal/);
