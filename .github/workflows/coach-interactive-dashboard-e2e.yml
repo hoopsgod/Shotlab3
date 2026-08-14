@@ -45,6 +45,15 @@ jobs:
       - name: Run interactive coach dashboard flows
         run: npx playwright test tests/e2e/coach-interactive-dashboards.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
+      - name: Upload mobile title-stage screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-mobile-title-stage-screenshots
+          path: artifacts/coach-title-stage/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload browser failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
