@@ -22,7 +22,7 @@ test('Player career history defaults to one native disclosure while Coach athlet
   assert.match(profile, /const isPlayerView = viewerRole === "player"/);
   assert.match(profile, /const careerContent = \(/);
   assert.match(profile, /if \(!isPlayerView\) return careerContent/);
-  assert.match(profile, /<details className=\{styles\.careerDisclosure\} data-testid="player-profile-career-disclosure">/);
+  assert.match(profile, /<details className=\{styles\.careerDisclosure\} data-testid="player-profile-career-disclosure" data-surface="light" data-visual-role="career-disclosure">/);
   assert.match(profile, /Career history/);
   assert.match(profile, /Verified season record/);
   assert.match(profile, /Coach athlete view/);

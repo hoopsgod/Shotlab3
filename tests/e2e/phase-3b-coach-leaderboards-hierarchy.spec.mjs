@@ -78,6 +78,7 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
       summaryColor: getComputedStyle(summaryNode).color,
       summaryBackground: getComputedStyle(summaryNode).backgroundColor,
       decisionTitleColor: getComputedStyle(decisionTitleNode).color,
+      decisionBackgroundColor: getComputedStyle(decisionNode).backgroundColor,
       decisionBackgroundImage: getComputedStyle(decisionNode).backgroundImage,
       firstMetricValueFill: getComputedStyle(metricValueNode).webkitTextFillColor,
       firstMetricLabelFill: getComputedStyle(metricLabelNode).webkitTextFillColor,
@@ -98,7 +99,9 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const decisionTitleChannels = visualState.decisionTitleColor.match(/\d+/g)?.map(Number) || [];
   expect(decisionTitleChannels).toHaveLength(3);
   expect(decisionTitleChannels.every((value) => value >= 240)).toBeTruthy();
-  expect(visualState.decisionBackgroundImage).toContain("linear-gradient");
+  const decisionBackgroundChannels = visualState.decisionBackgroundColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
+  expect(decisionBackgroundChannels).toHaveLength(3);
+  expect(decisionBackgroundChannels.every((value) => value <= 60)).toBeTruthy();
   expect(visualState.firstMetricValueFill).toBe("rgb(23, 26, 24)");
   expect(visualState.firstMetricLabelFill).toBe("rgb(82, 96, 89)");
   expect(visualState.metricCount).toBe(4);

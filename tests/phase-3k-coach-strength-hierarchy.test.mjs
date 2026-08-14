@@ -48,7 +48,7 @@ test('S&C keeps one header decision layer instead of repeating metric evidence',
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-evidence\"\][\s\S]*display:none!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\]/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] > button[\s\S]*background:var\(--p3-surface,#fff\)!important/);
-  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] \[class\*=\"metricValue\"\][\s\S]*color:var\(--p3-ink,#151a16\)!important/);
+  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] \[data-premium-metric-value\][\s\S]*color:var\(--p3-ink,#151a16\)!important/);
 });
 
 test('S&C operational filters use the light native utility rail', () => {

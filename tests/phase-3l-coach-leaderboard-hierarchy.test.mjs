@@ -78,7 +78,7 @@ test('mobile Leaderboards keeps editorial context readable and metric controls f
   assert.doesNotMatch(css, /secondaryPageIntro__summary/);
   assert.doesNotMatch(css, /secondaryPageIntro__status/);
   assert.doesNotMatch(css, /font-size: 9px !important/);
-  assert.match(secondaryCss, /\.secondaryPageToolbar \[class\*="metricStrip"\][\s\S]*?border-block: 1px solid/);
+  assert.match(secondaryCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\][\s\S]*?border-block: 1px solid/);
   assert.match(secondaryCss, /@media \(max-width: 760px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
 });
 

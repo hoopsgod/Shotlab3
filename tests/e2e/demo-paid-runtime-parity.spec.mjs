@@ -468,6 +468,11 @@ async function captureExperience(browser, role, kind, seedStorage = null) {
   for (const key of navKeys) {
     await navigateToKey(page, key);
     routes[key] = await captureFingerprint(page, role, kind, key);
+    if (key === "team-store") {
+      await page.getByRole("button", { name: "Close team store", exact: true }).click();
+      await expect(page.getByRole("dialog", { name: "Team Store", exact: true })).toHaveCount(0);
+      await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+    }
   }
 
   expect(pageErrors, `${role} ${kind} must not throw uncaught page errors`).toEqual([]);

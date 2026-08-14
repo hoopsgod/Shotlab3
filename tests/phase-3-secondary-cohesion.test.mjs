@@ -37,8 +37,8 @@ test('Phase 3 is scoped to high-value secondary destinations', () => {
 
 test('Player secondary identity chrome is compact without changing the shared component', () => {
   assert.match(css, /player-dashboard-identity-header/);
-  assert.match(css, /\[class\*="tagline"\]/);
-  assert.match(css, /\[class\*="mission"\]/);
+  assert.match(css, /\[data-identity-role="tagline"\]/);
+  assert.match(css, /\[data-identity-role="mission"\]/);
   assert.match(css, /font-size:26px!important/);
   assert.match(css, /width:58px!important/);
   assert.match(css, /height:58px!important/);
