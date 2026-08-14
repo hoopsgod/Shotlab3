@@ -396,10 +396,15 @@ async function captureFingerprint(page, role, kind, key) {
 
     return [...document.body.querySelectorAll("*")]
       .filter((node) => !excludedTags.has(node.tagName))
-      // Demo-data cleanup is intentionally state-dependent: the action is only
-      // available while managed sample data exists. It is not a paid/demo UI
-      // branch and therefore is outside the commercial surface comparison.
-      .filter((node) => !(node.tagName === "BUTTON" && normalizeText(node.textContent) === "CLEAR DEMO DATA"))
+      // Sandbox reset controls are an intentional capability-only difference:
+      // registered tenants must never be able to load or clear demo seed data.
+      // Exclude only that tightly identified utility card from product parity.
+      .filter((node) => {
+        const sandboxCard = node.closest?.(".coachAdministrationCard");
+        if (!sandboxCard) return true;
+        const isSandboxUtility = [...sandboxCard.querySelectorAll("h3")].some((heading) => normalizeText(heading.textContent) === "DEMO SETTINGS");
+        return !isSandboxUtility;
+      })
       .map((node) => {
         const rect = node.getBoundingClientRect();
         const style = getComputedStyle(node);
