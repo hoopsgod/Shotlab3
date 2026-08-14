@@ -1,0 +1,85 @@
+name: One-shot parity canonicalization fix
+
+on:
+  push:
+    branches:
+      - agent/demo-paid-experience-unification
+    paths:
+      - .github/workflows/one-shot-parity-canonicalization-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/demo-paid-experience-unification
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Canonicalize the one allowed sandbox-only settings card
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("tests/e2e/demo-paid-runtime-parity.spec.mjs")
+          text = path.read_text()
+
+          anchor = '''async function captureFingerprint(page, role, kind, key) {\n'''
+          if text.count(anchor) != 1:
+              raise SystemExit(f"expected one captureFingerprint anchor, found {text.count(anchor)}")
+
+          helper = '''async function canonicalizeAllowedSandboxUtility(page, role, kind, key) {\n  if (role !== "coach" || key !== "settings") return;\n\n  const sandboxCards = page.locator(".coachAdministrationCard").filter({\n    has: page.getByRole("heading", { name: "DEMO SETTINGS", exact: true }),\n  });\n\n  if (kind === "registered") {\n    await expect(sandboxCards, "Registered Coach settings must never expose demo reset controls").toHaveCount(0);\n    return;\n  }\n\n  await expect(sandboxCards, "Demo Coach settings must expose exactly one sandbox reset utility").toHaveCount(1);\n  await sandboxCards.evaluate((node) => {\n    node.setAttribute("data-parity-excluded-sandbox-utility", "true");\n    node.style.setProperty("display", "none", "important");\n  });\n  await settle(page);\n}\n\n'''
+          text = text.replace(anchor, helper + anchor, 1)
+
+          call_anchor = '''async function captureFingerprint(page, role, kind, key) {\n  const demoEmail = DEMO_IDENTITIES[role].email;\n'''
+          replacement = '''async function captureFingerprint(page, role, kind, key) {\n  await canonicalizeAllowedSandboxUtility(page, role, kind, key);\n  const demoEmail = DEMO_IDENTITIES[role].email;\n'''
+          if text.count(call_anchor) != 1:
+              raise SystemExit(f"expected one captureFingerprint call anchor, found {text.count(call_anchor)}")
+          text = text.replace(call_anchor, replacement, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Enforce narrow canonicalization source contract
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const source = fs.readFileSync('tests/e2e/demo-paid-runtime-parity.spec.mjs', 'utf8');
+          const required = [
+            'role !== "coach" || key !== "settings"',
+            'name: "DEMO SETTINGS", exact: true',
+            'kind === "registered"',
+            'toHaveCount(0)',
+            'toHaveCount(1)',
+            'data-parity-excluded-sandbox-utility',
+          ];
+          for (const needle of required) {
+            if (!source.includes(needle)) throw new Error(`missing narrow parity canonicalization contract: ${needle}`);
+          }
+          NODE
+
+      - name: Run parity source contract
+        run: node --test tests/demo-visual-parity-contract.test.mjs
+
+      - name: Build production app
+        run: npm run build
+
+      - name: Commit repair and remove one-shot workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/one-shot-parity-canonicalization-fix.yml
+          git add tests/e2e/demo-paid-runtime-parity.spec.mjs
+          git diff --cached --check
+          git commit -m "Canonicalize allowed demo settings parity capture"
+          git push origin HEAD:agent/demo-paid-experience-unification
