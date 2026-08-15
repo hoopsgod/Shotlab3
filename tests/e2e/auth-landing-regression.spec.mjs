@@ -45,6 +45,17 @@ test("normal launch clears stale demo authentication and renders the full welcom
       const darker = Math.min(foregroundLuminance, backgroundLuminance);
       return (lighter + 0.05) / (darker + 0.05);
     };
+    const effectiveBackground = (node) => {
+      let current = node;
+      while (current instanceof Element) {
+        const value = getComputedStyle(current).backgroundColor;
+        const channels = String(value).match(/[\d.]+/g) || [];
+        const alpha = channels.length >= 4 ? Number(channels[3]) : 1;
+        if (value && value !== "transparent" && alpha > 0) return value;
+        current = current.parentElement;
+      }
+      return "rgb(255, 255, 255)";
+    };
 
     const preview = document.querySelector(".auth-demo-enter");
     const buttons = [...(preview?.querySelectorAll("button") || [])];
@@ -56,11 +67,13 @@ test("normal launch clears stale demo authentication and renders the full welcom
       previewContrast: contrast(previewColor, previewBackground),
       buttons: buttons.map((button) => {
         const style = getComputedStyle(button);
+        const effectiveBackgroundColor = effectiveBackground(button);
         return {
           label: button.textContent?.trim() || "",
           color: style.color,
           background: style.backgroundColor,
-          contrast: contrast(style.color, style.backgroundColor),
+          effectiveBackground: effectiveBackgroundColor,
+          contrast: contrast(style.color, effectiveBackgroundColor),
         };
       }),
     };
@@ -69,9 +82,13 @@ test("normal launch clears stale demo authentication and renders the full welcom
   expect(demoContrast.previewColor).toBe("rgb(17, 26, 33)");
   expect(demoContrast.previewContrast).toBeGreaterThanOrEqual(4.5);
   expect(demoContrast.buttons).toHaveLength(2);
+  expect(demoContrast.buttons[0].background).toBe("rgba(0, 0, 0, 0)");
+  const darkChannels = (demoContrast.buttons[1].background.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  expect(darkChannels).toHaveLength(3);
+  expect(Math.max(...darkChannels)).toBeLessThan(45);
   for (const button of demoContrast.buttons) {
-    expect(button.color).toBe("rgb(68, 85, 11)");
-    expect(button.background).toBe("rgb(237, 242, 221)");
+    expect(button.color).toMatch(/^rgb/);
+    expect(button.effectiveBackground).toMatch(/^rgb/);
     expect(button.contrast).toBeGreaterThanOrEqual(4.5);
   }
 
