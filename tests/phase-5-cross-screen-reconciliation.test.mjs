@@ -7,11 +7,15 @@ const metricCss = fs.readFileSync("src/components/PlayerMetricHierarchy.module.c
 const visualAudit = fs.readFileSync("tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs", "utf8");
 const feedback = fs.readFileSync("src/components/AppFeedbackLayer.jsx", "utf8");
 
-test("Phase 5 keeps every mobile Player secondary identity header inside the viewport", () => {
+test("Phase 5 keeps every mobile Player secondary identity header compact and inside the viewport", () => {
   assert.match(identityCss, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)/);
-  assert.match(identityCss, /margin:10px 16px 8px!important/);
+  assert.match(identityCss, /margin:2px 16px 4px!important/);
+  assert.match(identityCss, /border-left:3px solid var\(--p3-accent\)!important/);
+  assert.match(identityCss, /border-radius:0!important/);
+  assert.match(identityCss, /background:transparent!important/);
+  assert.match(identityCss, /box-shadow:none!important/);
+  assert.match(identityCss, /min-height:50px!important/);
   assert.match(identityCss, /transform:none!important/);
-  assert.match(identityCss, /overflow:hidden!important/);
 });
 
 test("Phase 5 gives dark Player metric surfaces explicit readable foreground ownership", () => {
