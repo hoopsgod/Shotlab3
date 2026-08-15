@@ -71,9 +71,11 @@ async function expectPlayerIdentityInsideViewport(page) {
 }
 
 async function expectCompactFunctionalIntro(page) {
-  const intro = page.locator('[data-visual-role="page-intro"]');
-  await expect(intro.first()).toBeVisible();
-  const geometry = await intro.first().evaluate((element) => {
+  const sharedIntro = page.locator('[data-visual-role="page-intro"]').first();
+  const specializedIntro = page.locator('[data-page-hierarchy="editorial"] [data-layout-role="editorial-header"]').first();
+  const intro = await sharedIntro.count() ? sharedIntro : specializedIntro;
+  await expect(intro).toBeVisible();
+  const geometry = await intro.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
     return {
