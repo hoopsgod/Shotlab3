@@ -2,10 +2,10 @@
 
 [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(260px, .9fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   margin: 0 0 12px;
-  padding: 18px;
+  padding: 14px;
   border: 1px solid rgba(23, 26, 24, .10);
   border-radius: 22px;
   background:
@@ -17,7 +17,7 @@
 [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy {
   min-width: 0;
   display: grid;
-  align-content: center;
+  align-content: start;
   gap: 4px;
 }
 
@@ -36,7 +36,7 @@
   font: 760 clamp(22px, 3vw, 29px)/1.06 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.03em;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > small,
@@ -53,10 +53,11 @@
 
 [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics > div {
   min-width: 0;
+  min-height: 84px;
   display: grid;
   align-content: center;
   gap: 4px;
-  padding: 12px 13px;
+  padding: 11px 12px;
   border: 1px solid rgba(23, 26, 24, .08);
   border-radius: 16px;
   background: rgba(247, 248, 244, .88);
@@ -224,46 +225,31 @@ html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetri
   background: #0c1012 !important;
 }
 
+@media (min-width: 761px) {
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
+    grid-template-columns: minmax(0, 1.3fr) minmax(260px, .9fr);
+    padding: 18px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy {
+    align-content: center;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > strong {
+    white-space: nowrap;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics > div {
+    min-height: 0;
+    padding: 12px 13px;
+  }
+}
+
 @media (max-width: 760px) {
   html body #root [data-testid="coach-page-dashboard-leaderboards"] {
     min-height: 0 !important;
     gap: 8px !important;
     padding: 8px 14px 12px !important;
-  }
-
-  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "pulse-copy" "pulse-metrics";
-    gap: 12px;
-    padding: 14px;
-  }
-
-  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy {
-    grid-area: pulse-copy;
-    position: relative;
-    inset: auto;
-    width: auto;
-    min-height: 58px;
-    align-content: start;
-    z-index: auto;
-  }
-
-  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > strong {
-    white-space: normal;
-  }
-
-  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics {
-    grid-area: pulse-metrics;
-    position: relative;
-    inset: auto;
-    width: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    z-index: auto;
-  }
-
-  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics > div {
-    min-height: 84px;
-    padding: 11px 12px;
   }
 
   [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow {
