@@ -68,8 +68,13 @@ test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding de
 
   const heroBox = await hero.boundingBox();
   expect(heroBox).not.toBeNull();
-  expect(heroBox.x).toBeGreaterThanOrEqual(12);
-  expect(heroBox.x + heroBox.width).toBeLessThanOrEqual(418);
+  expect(heroBox.x).toBeGreaterThanOrEqual(-0.5);
+  expect(heroBox.x + heroBox.width).toBeLessThanOrEqual(430.5);
+
+  const heroContentBox = await hero.locator(".mcHeroContent").boundingBox();
+  expect(heroContentBox).not.toBeNull();
+  expect(heroContentBox.x).toBeGreaterThanOrEqual(12);
+  expect(heroContentBox.x + heroContentBox.width).toBeLessThanOrEqual(418);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
