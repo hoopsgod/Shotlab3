@@ -69,7 +69,7 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork{opacity:.4!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork{opacity:.55!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork{opacity:.72!important}',
     'Coach mobile court presence',
   );
   next = replaceOnce(next,
@@ -119,7 +119,7 @@ export function promoteCoachFinalCss(source) {
   );
   next = replaceOnce(next,
     '    font-size: 34px !important;',
-    '    font-size: 40px !important;',
+    '    font-size: 46px !important;',
     'Coach final hero title scale',
   );
   next = replaceOnce(next,
