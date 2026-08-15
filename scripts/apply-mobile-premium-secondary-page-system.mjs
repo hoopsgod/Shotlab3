@@ -36,7 +36,7 @@ const mobileAuthority = `@media (max-width: 760px) {
   .secondaryPageIntro__icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
   .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 10.5px; }
   .secondaryPageIntro__title {
-    font-size: clamp(29px, 8vw, 34px);
+    font-size: clamp(29px, 8vw, 34px) !important;
     line-height: .98;
     letter-spacing: -.047em;
     overflow-wrap: normal;
@@ -124,7 +124,7 @@ const narrowAuthority = `@media (max-width: 390px) {
   .secondaryPageIntro__status { max-width: 100%; }
   .secondaryPageIntro__buttonRow { width: 100%; justify-content: stretch; }
   .secondaryPageAction { flex: 1 1 0; min-width: 0; }
-  .secondaryPageIntro__title { font-size: 30px; }
+  .secondaryPageIntro__title { font-size: 30px !important; }
 }
 
 `
