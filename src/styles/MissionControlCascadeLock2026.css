@@ -19,10 +19,11 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
 }
 
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionRow {
-  border-color: rgba(17, 26, 33, .10) !important;
-  background: #f5f4ef !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: #111a21 !important;
-  -webkit-text-fill-color: currentColor !important;
 }
 
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionCopy strong {
