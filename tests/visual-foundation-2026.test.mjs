@@ -118,7 +118,7 @@ test("mobile navigation is a restrained native floating shell", () => {
   assert.match(mobileNavigation, /--mobile-tab-bar-height: 60px/);
   assert.match(mobileNavigation, /border-radius: 19px/);
   assert.match(mobileNavigation, /backdrop-filter: blur\(18px\) saturate\(125%\)/);
-  assert.match(mobileNavigation, /bottom: max\(6px, env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(mobileNavigation, /bottom: max\(8px, env\(safe-area-inset-bottom, 0px\)\)/);
   assert.match(mobileNavigation, /\.dockItem\.active \{[\s\S]*background: rgba\(126, 158, 30, \.08\)/);
   assert.doesNotMatch(mobileNavigation, /background: rgba\(7, 10, 12, \.84\)/);
 });
