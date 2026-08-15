@@ -7,9 +7,29 @@ let source = fs.readFileSync(appPath, 'utf8')
 
 const signedImport = 'import { requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
 const combinedImport = 'import { hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
-if (source.includes(signedImport)) source = source.replace(signedImport, combinedImport)
-if (!source.includes(combinedImport)) {
-  throw new Error('Could not expose authenticated collection hydration inside App login.')
+
+if (source.includes(combinedImport)) {
+  source = source.split(signedImport).join('')
+} else if (source.includes(signedImport)) {
+  source = source.replace(signedImport, combinedImport)
+}
+
+const combinedOccurrences = source.split(combinedImport).length - 1
+if (combinedOccurrences > 1) {
+  let kept = false
+  source = source
+    .split('\n')
+    .filter((line) => {
+      if (line !== combinedImport) return true
+      if (kept) return false
+      kept = true
+      return true
+    })
+    .join('\n')
+}
+
+if ((source.split(combinedImport).length - 1) !== 1) {
+  throw new Error('Authenticated persistence import must exist exactly once after enhancement.')
 }
 
 const earlyMarker = 'const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});'
