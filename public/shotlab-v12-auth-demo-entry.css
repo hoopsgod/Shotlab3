@@ -14,7 +14,6 @@
 .auth-demo-enter .btn-v{
   min-width:0!important;
   min-height:48px!important;
-  height:auto!important;
   padding:0 14px!important;
   border:1px solid rgba(82,105,0,.42)!important;
   border-radius:13px!important;
