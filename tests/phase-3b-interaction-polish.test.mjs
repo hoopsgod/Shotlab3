@@ -1,21 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import { readFileSync } from 'node:fs';
 
-const coachCss = fs.readFileSync(new URL('../src/components/CoachInteractiveDashboard.css', import.meta.url), 'utf8');
-const navigationSource = fs.readFileSync(new URL('../src/components/MobileNavigation.jsx', import.meta.url), 'utf8');
-const navigationCss = fs.readFileSync(new URL('../src/components/MobileNavigationArchitecture.css', import.meta.url), 'utf8');
-const expertPolishSource = fs.readFileSync(new URL('../src/lib/expertVisualPolish.js', import.meta.url), 'utf8');
+const secondaryCss = readFileSync('src/components/SecondaryPageSystem.css', 'utf8');
+const coachCss = readFileSync('src/styles/CoachInteractiveDashboard.css', 'utf8');
+const navigationCss = readFileSync('src/components/MobileNavigationArchitecture.css', 'utf8');
+const navigationSource = readFileSync('src/components/MobileNavigation.jsx', 'utf8');
+const expertPolishSource = readFileSync('src/lib/expertVisualPolish.js', 'utf8');
 
 test('Phase 3B gives secondary actions tactile pressed, focus, and reduced-motion states', () => {
-  assert.match(coachCss, /:focus-visible/);
-  assert.match(coachCss, /:active/);
-  assert.match(coachCss, /prefers-reduced-motion/);
+  assert.match(secondaryCss, /secondaryPageAction:active:not\(:disabled\)/);
+  assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]\s*> button\[aria-pressed="true"\]/);
+  assert.match(secondaryCss, /secondaryPageDecision button:focus-visible/);
+  assert.match(secondaryCss, /prefers-reduced-motion:\s*reduce/);
 });
 
 test('Phase 3B makes insight actions deliberate rather than a loose button cluster', () => {
-  assert.match(coachCss, /coachDashboardOperationalActions/);
-  assert.match(coachCss, /coachDashboardInsightAction/);
+  assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
+  assert.match(secondaryCss, /\[data-action-role="tertiary"\]/);
+  assert.match(secondaryCss, /min-height: var\(--touch-target, 44px\) !important/);
 });
 
 test('Coach management empty states remain on the light native secondary system', () => {
@@ -43,5 +46,9 @@ test('Expert visual polish never converts the full Players decision into a dupli
 
 test('Add Player activation copy cannot inherit a legacy paragraph box and its roster action remains intentional', () => {
   assert.match(coachCss, /coach-player-invite-dashboard-section/);
-  assert.match(coachCss, /coachDashboardActivation/);
+  assert.match(coachCss, /\[class\*="sectionSummary"\]/);
+  assert.match(coachCss, /border: 0 !important/);
+  assert.match(coachCss, /background: transparent !important/);
+  assert.match(coachCss, /\[class\*="sectionAction"\]/);
+  assert.match(coachCss, /width: 100% !important/);
 });
