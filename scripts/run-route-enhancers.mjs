@@ -35,6 +35,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase2d-premium-empty-state-language.mjs',
   'scripts/apply-mobile-premium-secondary-page-system.mjs',
   'scripts/apply-mobile-coach-signature-stage.mjs',
+  'scripts/apply-mobile-coach-cascade-reconciliation.mjs',
   'scripts/apply-phase4c-coach-event-manage-hit-area.mjs',
   'scripts/apply-phase4d-shared-back-hit-area.mjs',
   'scripts/apply-phase4e1-coach-filter-hit-area.mjs',
