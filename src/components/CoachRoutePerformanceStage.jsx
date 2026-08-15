@@ -67,6 +67,7 @@ export default function CoachRoutePerformanceStage({
   metrics = [],
   activeMetric,
   onMetricSelect,
+  children,
   testId,
 }) {
   const routeKind = kind || resolveCoachRouteKind({ testId, title });
@@ -103,6 +104,8 @@ export default function CoachRoutePerformanceStage({
           </button>
         ) : null}
       </div>
+
+      {children ? <div className={styles.visual} data-visual-role="decision-evidence">{children}</div> : null}
 
       {visibleMetrics.length ? (
         <div className={styles.metricRail} data-visual-role="performance-evidence" aria-label="Current performance signals">
