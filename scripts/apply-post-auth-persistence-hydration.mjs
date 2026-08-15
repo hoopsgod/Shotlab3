@@ -33,15 +33,23 @@ if (!source.includes(sessionReplacement)) {
 fs.writeFileSync(appPath, source)
 
 let authSource = fs.readFileSync(authPath, 'utf8')
-authSource = authSource.replace('import { hydrateAuthenticatedCollectionsToStorage } from "../lib/legacySignedCollectionPersistence.js";\n', '')
-authSource = authSource.replace(
-  'if(!r.ok){setErr(r.err);return}\nawait hydrateAuthenticatedCollectionsToStorage().catch(()=>null);\nif(typeof window!=="undefined"&&typeof window.location?.reload==="function")window.location.reload();',
-  'if(!r.ok){setErr(r.err);return}',
-)
+const authImport = 'import { hydrateAuthenticatedCollectionsToStorage } from "../lib/legacySignedCollectionPersistence.js";'
+if (!authSource.includes(authImport)) {
+  throw new Error('AuthWorkspace must retain the authenticated collection hydration fallback.')
+}
 
-if (authSource.includes('hydrateAuthenticatedCollectionsToStorage') || authSource.includes('window.location.reload()')) {
-  throw new Error('Could not remove the redundant post-login reload from AuthWorkspace.jsx.')
+const authHydrationNeedle = 'await hydrateAuthenticatedCollectionsToStorage().catch(()=>null);'
+const authHydrationReplacement = 'await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:id}).catch(()=>null);'
+if (authSource.includes(authHydrationNeedle)) {
+  authSource = authSource.replace(authHydrationNeedle, authHydrationReplacement)
+}
+
+if (!authSource.includes(authHydrationReplacement)) {
+  throw new Error('Could not bind post-login storage hydration to the newly signed-in identity.')
+}
+if (!authSource.includes('window.location.reload()')) {
+  throw new Error('Registered login must reload once after authenticated storage hydration so startup reads the signed-in collections.')
 }
 
 fs.writeFileSync(authPath, authSource)
-console.log('Applied registered post-auth persistence hydration after a committed session marker without a navigation-resetting reload.')
+console.log('Applied registered post-auth hydration with identity-verified storage fallback and one clean startup reload.')
