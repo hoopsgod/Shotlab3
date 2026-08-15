@@ -1,3 +1,5 @@
+import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
 const DEMO_IDENTITIES = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
@@ -13,6 +15,25 @@ export const LEGACY_SIGNED_COLLECTIONS = Object.freeze({
   sc_rsvps: { path: "/v1/strength-conditioning", field: "rsvps" },
   sc_logs: { path: "/v1/strength-conditioning", field: "logs" },
 });
+
+const AUTHENTICATED_COLLECTION_GROUPS = Object.freeze([
+  { path: "/v1/teams", fields: [{ field: "teams", storageKey: "sl:teams" }] },
+  { path: "/v1/players", fields: [{ field: "players", storageKey: "sl:players" }] },
+  { path: "/v1/player-profiles", fields: [{ field: "profiles", storageKey: "sl:player-profiles" }] },
+  { path: "/v1/scores", fields: [{ field: "scores", storageKey: "sl:scores" }] },
+  { path: "/v1/program-scores", fields: [{ field: "program_scores", storageKey: "sl:program-scores" }] },
+  { path: "/v1/shot-logs", fields: [{ field: "shot_logs", storageKey: "sl:shotlogs" }] },
+  { path: "/v1/events", fields: [{ field: "events", storageKey: "sl:events" }] },
+  { path: "/v1/rsvps", fields: [{ field: "rsvps", storageKey: "sl:rsvps" }] },
+  {
+    path: "/v1/strength-conditioning",
+    fields: [
+      { field: "sessions", storageKey: "sl:sc-sessions" },
+      { field: "rsvps", storageKey: "sl:sc-rsvps" },
+      { field: "logs", storageKey: "sl:sc-logs" },
+    ],
+  },
+]);
 
 function readJson(storage, key) {
   try {
@@ -42,6 +63,47 @@ async function readJsonResponse(response) {
   }
 }
 
+function signedHeaders(storage) {
+  return buildApiIdentityHeaders({
+    storage,
+    headers: { Accept: "application/json" },
+  });
+}
+
+export async function hydrateAuthenticatedCollectionsToStorage({
+  fetchImpl = globalThis?.fetch,
+  storage = globalThis?.localStorage,
+} = {}) {
+  if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") {
+    return { ok: false, hydrated: [], failures: ["storage_unavailable"] };
+  }
+
+  const hydrated = [];
+  const failures = [];
+  for (const group of AUTHENTICATED_COLLECTION_GROUPS) {
+    try {
+      const response = await fetchImpl(group.path, {
+        method: "GET",
+        credentials: "same-origin",
+        headers: signedHeaders(storage),
+      });
+      const payload = await readJsonResponse(response);
+      if (!response?.ok || payload?.ok === false || payload?.error) {
+        failures.push(`${group.path}:${payload?.error || response?.status || "failed"}`);
+        continue;
+      }
+      for (const binding of group.fields) {
+        if (!Array.isArray(payload?.[binding.field])) continue;
+        storage.setItem(binding.storageKey, JSON.stringify(payload[binding.field]));
+        hydrated.push(binding.storageKey);
+      }
+    } catch (error) {
+      failures.push(`${group.path}:${String(error?.message || "failed")}`);
+    }
+  }
+  return { ok: hydrated.length > 0, hydrated, failures };
+}
+
 export async function requestLegacySignedCollection({
   table,
   method = "GET",
@@ -57,7 +119,7 @@ export async function requestLegacySignedCollection({
     const response = await fetchImpl(config.path, {
       method: "GET",
       credentials: "same-origin",
-      headers: { Accept: "application/json" },
+      headers: signedHeaders(storage),
     });
     const payload = await readJsonResponse(response);
     if (!response?.ok || payload?.ok === false || payload?.error) {
