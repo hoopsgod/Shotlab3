@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 const appPath = 'src/components/CoachInteractiveDashboards.jsx';
 const source = readFileSync(appPath, 'utf8');
 
-const marker = 'data-testid="coach-events-supporting-intelligence"';
+const marker = 'testId="coach-events-supporting-intelligence"';
 const semanticOwner = 'SecondaryPageDisclosure';
 
 if (!source.includes(marker) || !source.includes(semanticOwner)) {
