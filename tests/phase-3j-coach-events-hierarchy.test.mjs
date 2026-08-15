@@ -31,31 +31,32 @@ test('supporting RSVP and calendar intelligence becomes one mobile disclosure wi
 });
 
 test('supporting disclosure preserves the established decision-first grid order', () => {
-  assert.match(css, /\.coachEventsSupportingIntelligence[\s\S]*order: 4 !important/);
+  assert.match(css, /\.coachEventsSupportingIntelligence\{[^}]*order:\s*4\s*!important/);
 });
 
 test('desktop preserves expanded supporting intelligence while iPhone defaults it closed', () => {
   assert.match(enhancer, /open=\{typeof window !== \"undefined\" && window\.innerWidth > 760\}/);
-  assert.match(css, /@media \(min-width: 761px\)[\s\S]*coachEventsSupportingSummary[\s\S]*display: none/);
-  assert.match(css, /@media \(max-width: 760px\)/);
+  assert.match(css, /@media\s*\(min-width:\s*761px\)[\s\S]*?\.coachEventsSupportingSummary\{display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)/);
   assert.doesNotMatch(enhancer, /open=\{true\}/);
 });
 
 test('Coach Events removes shared mobile bottom-padding debt so the agenda follows the decision system', () => {
-  assert.match(css, /coach-events-mobile-surface \[data-testid=\"coach-events-interactive-dashboard\"\][\s\S]*padding-bottom: 8px !important/);
+  assert.match(css, /\.coach-events-mobile-surface \[data-testid="coach-events-interactive-dashboard"\]\{[^}]*padding-bottom:\s*8px\s*!important/);
 });
 
-test('mobile Schedule insights uses route-scoped native summary authority with accessible behavior', () => {
+test('mobile Schedule insights uses compact route-scoped native summary authority with accessible behavior', () => {
   assert.match(css, /\.coachEventsSupportingIntelligence/);
   assert.match(css, /\.coachEventsSupportingSummary/);
-  assert.match(css, /min-height: 68px/);
-  assert.match(css, /touch-action: manipulation/);
+  const minHeight = Number(css.match(/\.coachEventsSupportingSummary\{[^}]*min-height:\s*(\d+)px\s*!important/)?.[1]);
+  assert.ok(minHeight >= 44, `Schedule insights summary must remain touch-safe; got ${minHeight}px`);
+  assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /html body #root \.coach-events-mobile-surface \[data-testid=\"coach-events-interactive-dashboard\"\] \.coachEventsSupportingSummary > \.coachEventsSupportingSummaryCopy/);
-  assert.match(css, /all: unset !important/);
-  assert.match(css, /coachEventsSupportingSummaryCopy::before[\s\S]*coachEventsSupportingSummaryCopy::after[\s\S]*content: none !important/);
-  assert.match(css, /coachEventsSupportingSummaryCopy > small[\s\S]*box-shadow: none !important[\s\S]*transform: none !important/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /html body #root \.coach-events-mobile-surface \[data-testid="coach-events-interactive-dashboard"\] \.coachEventsSupportingSummary>\.coachEventsSupportingSummaryCopy/);
+  assert.match(css, /all:\s*unset\s*!important/);
+  assert.match(css, /coachEventsSupportingSummaryCopy::before[\s\S]*coachEventsSupportingSummaryCopy::after\{content:\s*none\s*!important/);
+  assert.match(css, /coachEventsSupportingSummaryCopy>small[\s\S]*box-shadow:\s*none\s*!important[\s\S]*transform:\s*none\s*!important/);
 });
 
 test('Phase 3J preserves existing event action wiring and event insight actions', () => {
