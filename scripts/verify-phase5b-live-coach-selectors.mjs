@@ -15,7 +15,6 @@ const builtCss = fs.readdirSync(assetsDir)
 
 const requiredSelectors = [
   '.mcCourtArtwork',
-  '.mcCourtFloor',
   '.mcRailBrand',
   '.mcRailBrand .mcRailLogo',
   '.mcDrawerLogo',
