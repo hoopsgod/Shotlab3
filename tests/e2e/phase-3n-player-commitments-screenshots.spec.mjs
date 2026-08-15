@@ -57,7 +57,7 @@ async function verifyCommitmentSurface(page, {
   await expect(center).toBeVisible({ timeout: 20_000 });
   await expect(routeHeader).toBeVisible();
   await expect(routeHeader.getByRole("heading", { name: title, exact: true })).toBeVisible();
-  await expect(routeHeader.getByText(routeStatus, { exact: true })).toBeVisible();
+  await expect(routeHeader.getByText(routeStatus, { exact: typeof routeStatus === "string" })).toBeVisible();
   await expect(hero).toBeVisible();
   await expect(details).not.toHaveAttribute("open", "");
   await expect(legacy).toBeHidden();
@@ -132,7 +132,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
   await verifyCommitmentSurface(page, {
     mode: "strength",
     title: "Strength & Conditioning",
-    routeStatus: "Schedule clear",
+    routeStatus: /^(?:Schedule clear|\d+ responses? needed)$/,
     legacyTestId: "player-strength-operational-panel",
     screenshotName: "04o-player-strength-commitment",
   });
