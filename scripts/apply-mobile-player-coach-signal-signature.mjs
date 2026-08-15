@@ -44,13 +44,18 @@ export function promotePlayerCoachSignal(source) {
     'Player hero blur-orb removal',
   );
   next = replaceOnce(next,
+    '@media (max-width: 700px) {\n  /* Mobile Product Reset — Phase 1: one decision, one CTA, then evidence. */',
+    '@media (max-width: 700px) {\n  /* Mobile Product Reset — flagship performance stage. */\n  .root { margin-top:-18px; }',
+    'Player mobile stage attachment',
+  );
+  next = replaceOnce(next,
     '  .header { min-height: 28px; padding-bottom: 7px; }',
-    '  .header { min-height:48px;margin:0 -18px;padding:12px 18px;border-bottom:1px solid rgba(220,235,241,.1);background:#071c28; }',
+    '  .header { min-height:48px;margin:0 -18px!important;padding:12px 18px;border-bottom:1px solid rgba(220,235,241,.1);background:#071c28; }',
     'Player mobile focus rail',
   );
   next = replaceOnce(next,
     '  .hero { margin-top: 12px; padding: 20px 18px 18px; border-radius: 22px; }',
-    '  .hero { margin:0 -18px;padding:24px 18px 22px;border:0;border-radius:0;box-shadow:none; }',
+    '  .hero { margin:0 -18px!important;padding:24px 18px 22px;border:0;border-radius:0;box-shadow:none; }',
     'Player mobile continuous performance stage',
   );
   next = replaceOnce(next,
@@ -70,7 +75,7 @@ export function promotePlayerCoachSignal(source) {
   );
   next = replaceOnce(next,
     '  .progressGrid { margin-top: 13px; }',
-    '  .progressGrid { margin:0 -18px;padding:0 18px;border-top:0;background:#f5f4ef; }',
+    '  .progressGrid { margin:0 -18px!important;padding:0 18px;border-top:0;background:#f5f4ef; }',
     'Player mobile score ledger',
   );
   next = replaceOnce(next,
