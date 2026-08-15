@@ -178,17 +178,24 @@ export async function hydrateAuthenticatedCollectionsToStorage({
     return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
   }
 
-  const hydrated = [];
-  const failures = [];
-  for (const group of AUTHENTICATED_COLLECTION_GROUPS) {
-    const result = await hydrateGroup({
+  // These signed GETs are independent and write distinct storage keys. Running them
+  // concurrently keeps registered mobile login bounded by the slowest collection
+  // instead of the sum of every collection latency, while each group retains its own
+  // retry/fail-closed behavior.
+  const results = await Promise.all(
+    AUTHENTICATED_COLLECTION_GROUPS.map((group) => hydrateGroup({
       group,
       fetchImpl,
       storage,
       requester: session.identity,
       attempts: groupAttempts,
       retryDelayMs,
-    });
+    })),
+  );
+
+  const hydrated = [];
+  const failures = [];
+  for (const result of results) {
     hydrated.push(...result.hydrated);
     if (!result.ok) failures.push(result.failure);
   }
