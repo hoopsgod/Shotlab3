@@ -53,8 +53,8 @@ test("premium completion cue motion stays bounded while navigation motion remain
   assert.match(motion, /player-training-session \.particle/);
   assert.match(motion, /display: none !important/);
   assert.match(motion, /prefers-reduced-motion: reduce/);
-  assert.match(nav, /navOverlayIn 150ms/);
-  assert.match(nav, /navSheetIn 220ms/);
+  assert.match(nav, /navOverlayIn 140ms/);
+  assert.match(nav, /navSheetIn 190ms/);
   assert.match(nav, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(motion, /bounce|spin|pulse.*infinite/i);
 });
