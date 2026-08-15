@@ -104,17 +104,12 @@ async function readTeamBranding(page) {
   }, TEAM_ID);
 }
 
-async function countDemoPlayerShotRows(page, made) {
-  return page.evaluate((madeCount) => {
-    const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    return rows.filter((row) => {
-      const rowEmail = String(row?.email || row?.player_email || row?.playerId || row?.player_id || "").trim().toLowerCase();
-      const syncSource = String(row?.syncSource || row?.sync_source || "").trim().toLowerCase();
-      const syncState = String(row?.syncState || row?.sync_state || "").trim().toLowerCase();
-      const hasDemoSessionMarker = row?.demo === true || syncSource === "demo" || syncSource === "local" || syncState === "local_pending";
-      return Number(row?.made) === Number(madeCount) && rowEmail === "demo@shotlab.app" && hasDemoSessionMarker;
-    }).length;
-  }, made);
+async function readAtHomeTodayMakes(page) {
+  const workspace = page.getByTestId("player-at-home-workspace");
+  await expect(workspace).toBeVisible({ timeout: 20_000 });
+  const todayMetric = workspace.locator('[data-layout-role="supporting-evidence"] [data-metric-role="value"]').first();
+  await expect(todayMetric).toBeVisible();
+  return Number(String(await todayMetric.textContent()).replace(/[^0-9.-]/g, ""));
 }
 
 test.beforeEach(async ({ page }) => {
@@ -203,19 +198,24 @@ test("coach-created strength session remains stored across refresh", async ({ pa
   expect(await readSavedSession()).toEqual(savedSession);
 });
 
-test("Demo Player shot rows are removed on logout", async ({ page }) => {
+test("Demo Player shot mutation is sandboxed and reset on logout", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
   await enterDemoPlayer(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
+  const baselineMakes = await readAtHomeTodayMakes(page);
+  expect(Number.isFinite(baselineMakes)).toBe(true);
+
   await page.getByRole("spinbutton").first().fill("33");
   await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
-
-  await expect.poll(() => countDemoPlayerShotRows(page, 33), { timeout: 15_000 }).toBe(1);
+  await expect.poll(() => readAtHomeTodayMakes(page), { timeout: 15_000 }).toBe(baselineMakes + 33);
 
   await page.getByRole("button", { name: /^logout$/i }).click();
   await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect.poll(() => countDemoPlayerShotRows(page, 33)).toBe(0);
+
+  await enterDemoPlayer(page);
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
+  await expect.poll(() => readAtHomeTodayMakes(page), { timeout: 15_000 }).toBe(baselineMakes);
 });
