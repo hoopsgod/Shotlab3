@@ -3,15 +3,15 @@ import styles from "./DashboardIdentityHeader.module.css";
 
 const MOBILE_PRODUCT_RESET_CSS = `
 @media(max-width:700px){
-  [data-testid="player-dashboard-identity-header"]{margin:0 16px 4px!important;border:0!important}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="inner"]{grid-template-columns:58px minmax(0,1fr)!important;gap:12px!important;align-items:center!important;min-height:84px!important;padding:max(10px,env(safe-area-inset-top)) 0 10px!important}
+  [data-testid="player-dashboard-identity-header"]{margin:0 16px 2px!important;border:0!important;box-shadow:none!important;background:transparent!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="inner"]{grid-template-columns:46px minmax(0,1fr)!important;gap:10px!important;align-items:center!important;min-height:62px!important;padding:max(7px,env(safe-area-inset-top)) 0 7px!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="identity"]{grid-column:2;grid-row:1;align-self:center}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-panel"]{grid-column:1;grid-row:1;width:58px!important;min-height:58px!important;place-items:center!important}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-mark"]{width:56px!important;height:56px!important;filter:drop-shadow(0 9px 17px rgba(17,26,33,.14))!important}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="mode-row"]{gap:7px!important;flex-wrap:nowrap!important}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"]{font-size:10px!important;letter-spacing:.055em!important;white-space:nowrap!important}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{max-width:38vw!important;font-size:10px!important}
-  [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:5px!important;overflow:hidden!important;font-size:24px!important;line-height:1!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-panel"]{grid-column:1;grid-row:1;width:46px!important;min-height:46px!important;place-items:center!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-mark"]{width:44px!important;height:44px!important;filter:drop-shadow(0 6px 12px rgba(17,26,33,.12))!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="mode-row"]{gap:6px!important;flex-wrap:nowrap!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"],[data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{font-size:9px!important;line-height:1.1!important;white-space:nowrap!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{max-width:42vw!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:3px!important;overflow:hidden!important;font-size:20px!important;line-height:1!important;letter-spacing:-.025em!important;text-overflow:ellipsis!important;white-space:nowrap!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="tagline"],[data-testid="player-dashboard-identity-header"] [data-identity-role="mission"]{display:none!important}
 }`;
 
