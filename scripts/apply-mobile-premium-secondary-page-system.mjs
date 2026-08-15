@@ -166,17 +166,21 @@ fs.writeFileSync(metricCssPath, metricCss)
 let commitmentSource = fs.readFileSync(commitmentPath, 'utf8')
 const legacyCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}`
 const premiumCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}\n      data-page-hierarchy="editorial"`
-if (commitmentSource.includes(legacyCommitmentRoot)) {
+if (commitmentSource.includes(premiumCommitmentRoot)) {
+  // Already upgraded. The premium root contains the legacy prefix, so check it first.
+} else if (commitmentSource.includes(legacyCommitmentRoot)) {
   commitmentSource = commitmentSource.replace(legacyCommitmentRoot, premiumCommitmentRoot)
-} else if (!commitmentSource.includes('data-page-hierarchy="editorial"')) {
+} else {
   throw new Error('Could not locate Player commitment center hierarchy root.')
 }
 
 const legacyCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`}>`
 const premiumCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`} data-layout-role="editorial-header" data-visual-role="page-intro">`
-if (commitmentSource.includes(legacyCommitmentHeader)) {
+if (commitmentSource.includes(premiumCommitmentHeader)) {
+  // Already upgraded.
+} else if (commitmentSource.includes(legacyCommitmentHeader)) {
   commitmentSource = commitmentSource.replace(legacyCommitmentHeader, premiumCommitmentHeader)
-} else if (!commitmentSource.includes('data-testid={`player-commitment-route-header-${mode}`} data-layout-role="editorial-header" data-visual-role="page-intro"')) {
+} else {
   throw new Error('Could not locate Player commitment center route header.')
 }
 fs.writeFileSync(commitmentPath, commitmentSource)
