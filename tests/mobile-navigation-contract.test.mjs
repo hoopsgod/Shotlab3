@@ -62,7 +62,7 @@ test("shared navigation remains authoritative inside coach Mission Control", () 
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
-  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(252, 252, 250, \.9\)\s*!important/s);
+  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(250, 249, 245, \.965\)\s*!important/s);
   assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });
 
@@ -87,18 +87,20 @@ test("secondary tools are grouped without removing destinations", () => {
   assert.doesNotMatch(navigationSource, /secondaryItems[^\n]*slice\(/);
 });
 
-test("floating navigation uses restrained glass and large touch targets", () => {
+test("native edge navigation removes the competing floating-card silhouette while preserving touch targets", () => {
   assert.match(navigationSource, /MobileNavigationArchitecture\.css/);
-  assert.match(architectureCss, /background:\s*rgba\(252, 252, 250/);
+  assert.match(architectureCss, /background:\s*rgba\(250, 249, 245, \.965\)/);
   assert.match(architectureCss, /background:\s*#f8f7f3/);
-  assert.match(navigationCss, /left:\s*50%/);
-  assert.match(navigationCss, /bottom:\s*max\(8px, env\(safe-area-inset-bottom/);
-  assert.match(navigationCss, /border-radius:\s*20px/);
-  assert.match(navigationCss, /backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
-  assert.match(navigationCss, /min-height:\s*50px/);
+  assert.match(navigationCss, /left:\s*0/);
+  assert.match(navigationCss, /right:\s*0/);
+  assert.match(navigationCss, /bottom:\s*0/);
+  assert.match(navigationCss, /border-radius:\s*0/);
+  assert.match(navigationCss, /backdrop-filter:\s*blur\(18px\) saturate\(118%\)/);
+  assert.match(navigationCss, /min-height:\s*48px/);
   assert.match(navigationCss, /min-height:\s*66px/);
-  assert.match(navigationCss, /width:\s*min\(430px/);
+  assert.match(navigationCss, /width:\s*100%/);
   assert.match(architectureCss, /prefers-reduced-transparency/);
+  assert.doesNotMatch(architectureCss, /translateX\(-50%\)/);
 });
 
 test("App keeps every player and coach destination available to navigation", () => {
@@ -115,8 +117,8 @@ test("App keeps every player and coach destination available to navigation", () 
   assert.doesNotMatch(appSource, /!isDesktop&&<NavBar/);
 });
 
-test("floating dock reserves enough mobile viewport space", () => {
-  assert.match(navigationCss, /--bottom-nav-content-padding:\s*96px/);
+test("edge tab bar reserves enough mobile viewport space without the old floating-dock tax", () => {
+  assert.match(navigationCss, /--bottom-nav-content-padding:\s*82px/);
   assert.match(legacyStylesSource, /var\(--bottom-nav-content-padding, 88px\)/);
   assert.doesNotMatch(legacyStylesSource, /--bottom-nav-content-padding, 132px/);
   assert.doesNotMatch(legacyStylesSource, /--bottom-nav-content-padding, 156px/);
