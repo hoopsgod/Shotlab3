@@ -8,13 +8,14 @@
   padding: 22px 22px 0;
   border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 28px;
-  background:
-    radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--sl-accent, #c8ff1a) 15%, transparent), transparent 34%),
-    linear-gradient(145deg, #121817 0%, #07100f 74%);
-  color: #f4f6ed;
+  --stage-accent: #c8ff1a;
   --surface-title: #f6f7ef;
   --surface-body: #b7c0b6;
   --surface-muted: #9ea99f;
+  background:
+    radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--stage-accent) 15%, transparent), transparent 34%),
+    linear-gradient(145deg, #121817 0%, #07100f 74%);
+  color: #f4f6ed;
   box-shadow: 0 22px 52px rgba(7, 16, 15, .16);
 }
 
@@ -69,7 +70,7 @@
   top: 9px;
   right: -12px;
   z-index: -1;
-  color: var(--sl-accent, #c8ff1a);
+  color: var(--stage-accent);
   opacity: .07;
   transform: rotate(-6deg);
   pointer-events: none;
@@ -88,14 +89,14 @@
   flex: 0 0 38px;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 24%, rgba(255, 255, 255, .12));
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 24%, rgba(255, 255, 255, .12));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--sl-accent, #c8ff1a) 7%, transparent);
-  color: var(--sl-accent, #c8ff1a);
+  background: color-mix(in srgb, var(--stage-accent) 7%, transparent);
+  color: var(--stage-accent);
 }
 
 .eyebrow {
-  color: var(--sl-accent, #c8ff1a);
+  color: var(--stage-accent);
   font: 760 10px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   letter-spacing: .095em;
   text-transform: uppercase;
@@ -109,7 +110,7 @@
   padding-right: min(16vw, 112px);
 }
 
-.stage .copy h2 {
+.title {
   max-width: 20ch;
   margin: 0;
   color: #f6f7ef;
@@ -119,7 +120,7 @@
   overflow-wrap: anywhere;
 }
 
-.stage .copy p {
+.detail {
   max-width: 58ch;
   margin: 9px 0 0;
   color: #b7c0b6;
@@ -137,9 +138,9 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
-  border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 36%, rgba(255, 255, 255, .1));
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 36%, rgba(255, 255, 255, .1));
   border-radius: 12px;
-  background: var(--sl-accent, #c8ff1a);
+  background: var(--stage-accent);
   color: #11170f;
   -webkit-text-fill-color: #11170f;
   font: 780 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
@@ -153,7 +154,7 @@
 .stage .action:disabled { opacity: .52; cursor: not-allowed; }
 .stage .action:focus-visible,
 .stage .metric:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 38%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--stage-accent) 38%, transparent);
   outline-offset: 3px;
 }
 
@@ -215,7 +216,7 @@
   left: 14px;
   height: 2px;
   border-radius: 2px 2px 0 0;
-  background: var(--sl-accent, #c8ff1a);
+  background: var(--stage-accent);
 }
 
 .stage .metricLabel {
@@ -240,8 +241,8 @@
 
 .stage .metricActive .metricValue,
 .stage button.metric.metricActive .metricValue {
-  color: var(--sl-accent, #c8ff1a);
-  -webkit-text-fill-color: var(--sl-accent, #c8ff1a);
+  color: var(--stage-accent);
+  -webkit-text-fill-color: var(--stage-accent);
 }
 
 .stage .metricDetail {
@@ -275,12 +276,12 @@
     padding-right: 44px;
   }
 
-  .stage .copy h2 {
+  .title {
     max-width: 18ch;
     font-size: clamp(27px, 8.1vw, 34px);
   }
 
-  .stage .copy p {
+  .detail {
     max-width: 48ch;
     font-size: 12.5px;
     line-height: 1.46;
