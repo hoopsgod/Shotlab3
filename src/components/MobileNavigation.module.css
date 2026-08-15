@@ -1,6 +1,6 @@
 :global(:root) {
   --bottom-nav-content-padding: 82px;
-  --mobile-tab-bar-height: 58px;
+  --mobile-tab-bar-height: 56px;
 }
 
 .dock {
