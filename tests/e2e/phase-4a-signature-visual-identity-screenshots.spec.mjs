@@ -127,27 +127,27 @@ test("Phase 4A Rankings gets restrained competitive branding without becoming a 
   await capture(page, "08d-phase4a-player-rankings-signature.png");
 });
 
-test("Phase 4A preserves Coach Mission Control's established mobile team-mark identity", async ({ page }) => {
+test("Phase 4A preserves Coach Mission Control's visible mobile team-mark identity", async ({ page }) => {
   await page.goto("/");
   await enterDemo(page, "Coach");
   const hero = page.getByTestId("coach-primary-objective");
   await expect(hero).toBeVisible({ timeout: 20_000 });
 
-  const teamMark = hero.locator(".mcHeroTeamMark");
-  await expect(teamMark).toBeVisible();
-  await expect(teamMark.locator("img")).toBeVisible();
+  const headerMark = page.locator(".mcHeaderTeamMark");
+  const retiredHeroMark = hero.locator(".mcHeroTeamMark");
+  await expect(headerMark).toBeVisible();
+  await expect(headerMark.locator("img")).toBeVisible();
+  await expect(retiredHeroMark).toBeHidden();
   const coachIdentity = await hero.evaluate((node) => ({
     courtArtworkDisplay: getComputedStyle(node.querySelector(".mcCourtArtwork")).display,
     courtArtworkBackground: getComputedStyle(node.querySelector(".mcCourtArtwork")).backgroundImage,
-    teamMarkDisplay: getComputedStyle(node.querySelector(".mcHeroTeamMark")).display,
-    teamMarkOpacity: Number.parseFloat(getComputedStyle(node.querySelector(".mcHeroTeamMark")).opacity),
+    retiredTeamMarkDisplay: getComputedStyle(node.querySelector(".mcHeroTeamMark")).display,
     backgroundImage: getComputedStyle(node).backgroundImage,
     shadow: getComputedStyle(node).boxShadow,
   }));
   expect(coachIdentity.courtArtworkDisplay).not.toBe("none");
   expect(coachIdentity.courtArtworkBackground).toContain("gradient");
-  expect(coachIdentity.teamMarkDisplay).not.toBe("none");
-  expect(coachIdentity.teamMarkOpacity).toBeGreaterThanOrEqual(.9);
+  expect(coachIdentity.retiredTeamMarkDisplay).toBe("none");
   expect(coachIdentity.backgroundImage).toContain("gradient");
   expect(coachIdentity.shadow).not.toBe("none");
 
