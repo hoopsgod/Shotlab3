@@ -9,6 +9,9 @@ const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardH
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
 const brandingCss = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
+const metricCss = fs.readFileSync(new URL("../src/components/Phase2PremiumMetricLayer.css", import.meta.url), "utf8");
+const scheduleCss = fs.readFileSync(new URL("../public/shotlab-phase3j-coach-events-hierarchy.css", import.meta.url), "utf8");
+const routeFramingCss = fs.readFileSync(new URL("../public/shotlab-phase3-native-route-framing.css", import.meta.url), "utf8");
 
 test("secondary routes use one explicit signature owner instead of a late competing first-viewport stylesheet", () => {
   assert.match(secondaryPageSystem, /import "\.\/SecondaryPageSystem\.css";/);
@@ -43,6 +46,29 @@ test("first-impression mobile controls and labels respect the product readabilit
   assert.match(enhancer, /\.secondaryPageIntro__status \{[\s\S]*font-size: 11px/);
   assert.match(enhancer, /\.secondaryPageDecision__eyebrow \{[^}]*font-size: 11px/);
   assert.doesNotMatch(enhancer, /font-size:\s*(?:8|9|10)(?:\.\d+)?px\b/);
+});
+
+test("Coach secondary metrics fit the viewport as a score ribbon instead of a clipped carousel", () => {
+  assert.match(metricCss, /grid-template-columns:repeat\(auto-fit,minmax\(76px,1fr\)\)!important/);
+  assert.match(metricCss, /overflow:visible!important/);
+  assert.match(metricCss, /scroll-snap-type:none!important/);
+  assert.match(metricCss, /min-width:0!important/);
+  assert.match(metricCss, /font-size:11px!important/);
+  assert.doesNotMatch(metricCss, /flex-basis:82vw!important/);
+});
+
+test("Schedule disclosure cannot overlap its own supporting copy on mobile", () => {
+  assert.match(scheduleCss, /coachEventsSupportingSummaryCopy>small\{display:none!important\}/);
+  assert.match(scheduleCss, /position:static!important/);
+  assert.match(scheduleCss, /min-height:62px!important/);
+  assert.match(scheduleCss, /font:760 11px\/1\.15/);
+});
+
+test("secondary route framing spends first-viewport space on content, not dead runway", () => {
+  assert.match(routeFramingCss, /shared-dashboard-back-action\{margin-bottom:-6px!important\}/);
+  assert.match(routeFramingCss, /player-dashboard-identity-header"\]\{margin-inline:12px!important/);
+  assert.match(routeFramingCss, /coachAdministrationWorkspace \.secondaryPageIntro\{row-gap:4px!important;padding-bottom:8px!important\}/);
+  assert.match(routeFramingCss, /font-size:11px!important/);
 });
 
 test("Coach and Player home identity stages carry visible team branding instead of tiny utility chrome", () => {
