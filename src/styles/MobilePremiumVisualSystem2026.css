@@ -1,0 +1,487 @@
+/* ShotLab Mobile Premium Visual System — first-impression and information-density authority.
+ * This layer is intentionally mobile-only and semantic. It refines existing primitives
+ * instead of creating another page-specific skin. */
+
+:root {
+  --mobile-gutter: clamp(16px, 4.6vw, 20px);
+  --mobile-section-gap: 20px;
+  --mobile-tight-gap: 12px;
+  --mobile-card-pad: 18px;
+  --mobile-command-pad: 20px;
+  --mobile-nav-clearance: calc(86px + env(safe-area-inset-bottom, 0px));
+  --type-eyebrow-mobile: 10.5px;
+  --type-page-mobile: clamp(29px, 8vw, 34px);
+  --type-section-mobile: 21px;
+  --type-card-mobile: 17px;
+  --type-stat-mobile: clamp(24px, 7vw, 32px);
+  --motion-press: 110ms;
+  --motion-ui: 160ms;
+}
+
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Shared mobile page rhythm. */
+  .performance-shell .content-wrap,
+  .performance-shell .player-scroll-container,
+  .performance-shell .coach-scroll-container,
+  .performance-workspace {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .performance-shell .player-scroll-container,
+  .performance-shell .coach-scroll-container {
+    padding-bottom: var(--mobile-nav-clearance) !important;
+  }
+
+  /* LEVEL B — functional pages. The useful content should enter the first viewport. */
+  .secondaryPageShell {
+    width: 100%;
+    gap: var(--mobile-section-gap) !important;
+    padding: 8px var(--mobile-gutter) var(--mobile-nav-clearance) !important;
+    box-sizing: border-box;
+  }
+
+  .secondaryPageIntro.appHeader,
+  .performance-shell .secondaryPageIntro.appHeader {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 10px 11px !important;
+    margin: 0 !important;
+    padding: 3px 0 14px !important;
+    border-bottom: 1px solid var(--stroke-1) !important;
+  }
+
+  .secondaryPageIntro__icon {
+    width: 34px !important;
+    height: 34px !important;
+    margin-top: 1px;
+  }
+
+  .secondaryPageIntro__icon svg {
+    width: 22px !important;
+    height: 22px !important;
+    stroke-width: 1.75;
+  }
+
+  .secondaryPageIntro__copy {
+    max-width: none !important;
+  }
+
+  .secondaryPageIntro__eyebrow {
+    margin: 0 0 4px !important;
+    font-size: var(--type-eyebrow-mobile) !important;
+    line-height: 1.15 !important;
+    letter-spacing: .07em !important;
+  }
+
+  .secondaryPageIntro__title,
+  .performance-shell .secondaryPageIntro__title.appHeaderTitle {
+    margin: 0 !important;
+    font-size: var(--type-page-mobile) !important;
+    font-weight: 790 !important;
+    line-height: .98 !important;
+    letter-spacing: -.047em !important;
+    text-wrap: balance;
+    overflow-wrap: normal !important;
+    word-break: normal;
+  }
+
+  .secondaryPageIntro__summary {
+    max-width: 42ch !important;
+    margin: 7px 0 0 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    letter-spacing: -.008em !important;
+  }
+
+  .secondaryPageIntro__actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between !important;
+    gap: 9px !important;
+  }
+
+  .secondaryPageIntro__status {
+    max-width: 48%;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    text-align: left !important;
+  }
+
+  .secondaryPageIntro__buttonRow {
+    min-width: 0;
+    flex: 0 1 auto;
+    gap: 7px !important;
+  }
+
+  .secondaryPageAction {
+    min-height: 44px !important;
+    padding-inline: 13px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  /* AppHeader is the general Level B/C primitive. Kill the title-stage effect. */
+  .performance-shell .appHeader:not(.secondaryPageIntro),
+  .premium-screen .appHeader:not(.secondaryPageIntro),
+  .appHeader:not(.secondaryPageIntro) {
+    margin-bottom: 18px !important;
+    padding: 2px 0 13px !important;
+  }
+
+  .appHeader:not(.secondaryPageIntro) .appHeaderMain {
+    gap: 10px !important;
+  }
+
+  .appHeader:not(.secondaryPageIntro) .appHeaderIdentity {
+    gap: 10px !important;
+    flex-basis: 190px !important;
+  }
+
+  .appHeader:not(.secondaryPageIntro) .appHeaderEyebrow {
+    margin-bottom: 4px !important;
+    font-size: var(--type-eyebrow-mobile) !important;
+    letter-spacing: .07em !important;
+    text-transform: uppercase;
+  }
+
+  .appHeader:not(.secondaryPageIntro) .appHeaderTitle {
+    font-size: var(--type-page-mobile) !important;
+    line-height: .99 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  .appHeader:not(.secondaryPageIntro) .appHeaderSubtitle {
+    margin-top: 6px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  .appHeader:not(.secondaryPageIntro) .appHeaderTools {
+    margin-left: 0 !important;
+  }
+
+  .appHeaderAction {
+    min-height: 44px !important;
+    border-radius: 12px !important;
+  }
+
+  /* LEVEL C — detail screens. Start with the useful player intelligence. */
+  .coachPlayerDetailWorkspace {
+    gap: 16px !important;
+  }
+
+  .coachPlayerProfileHero {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 18px !important;
+    border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 14px 34px rgba(25, 31, 26, .12) !important;
+  }
+
+  .coachPlayerProfileHero__identity {
+    gap: 12px !important;
+  }
+
+  .coachPlayerProfileHero h2 {
+    font-size: 27px !important;
+  }
+
+  .coachPlayerProfileHero__headline {
+    min-width: 0 !important;
+  }
+
+  /* Player identity is persistent context, not a second hero on every route. */
+  [data-testid="player-dashboard-identity-header"] {
+    margin: 0 var(--mobile-gutter) 2px !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="inner"] {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    min-height: 62px !important;
+    gap: 10px !important;
+    padding: max(7px, env(safe-area-inset-top)) 0 7px !important;
+  }
+
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-panel"] {
+    width: 46px !important;
+    min-height: 46px !important;
+  }
+
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-mark"] {
+    width: 44px !important;
+    height: 44px !important;
+    filter: drop-shadow(0 6px 12px rgba(17, 26, 33, .12)) !important;
+  }
+
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"],
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"] {
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+  }
+
+  [data-testid="player-dashboard-identity-header"] [data-identity-role="name"] {
+    margin-top: 3px !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    letter-spacing: -.025em !important;
+  }
+
+  /* LEVEL A — dashboards keep identity, but not at the expense of action density. */
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] {
+    margin-top: 10px !important;
+    padding: var(--mobile-command-pad) !important;
+    border-radius: 20px !important;
+  }
+
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
+    max-width: 11ch !important;
+    font-size: clamp(32px, 9vw, 39px) !important;
+    line-height: .98 !important;
+  }
+
+  [data-testid="player-command-evidence"] {
+    margin-top: 10px !important;
+    gap: 0 !important;
+    border-block: 1px solid var(--stroke-1);
+  }
+
+  [data-testid="player-command-evidence"] > div {
+    min-height: 76px !important;
+    padding: 11px 9px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  [data-testid="player-command-evidence"] > div + div {
+    border-left: 1px solid var(--stroke-1) !important;
+  }
+
+  [data-testid="player-command-evidence"] [class*="progressValue"] {
+    font-size: 22px !important;
+  }
+
+  /* One dominant decision card, not a second page hero. */
+  .secondaryPageDecision {
+    grid-template-columns: 36px minmax(0, 1fr) !important;
+    gap: 11px !important;
+    min-height: 0 !important;
+    padding: 18px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 16px 38px rgba(25, 31, 26, .13) !important;
+  }
+
+  .secondaryPageDecision::after {
+    display: none !important;
+  }
+
+  .secondaryPageDecision__icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 11px !important;
+  }
+
+  .secondaryPageDecision__copy {
+    min-width: 0;
+  }
+
+  .secondaryPageDecision__eyebrow {
+    margin-bottom: 5px !important;
+    font-size: var(--type-eyebrow-mobile) !important;
+  }
+
+  .secondaryPageDecision h2 {
+    font-size: clamp(24px, 7vw, 29px) !important;
+    line-height: 1 !important;
+    letter-spacing: -.04em !important;
+  }
+
+  .secondaryPageDecision p {
+    margin-top: 7px !important;
+    font-size: 12.5px !important;
+    line-height: 1.43 !important;
+  }
+
+  .secondaryPageDecision button {
+    min-height: 42px !important;
+    margin-top: 12px !important;
+  }
+
+  .secondaryPageDecision__visual {
+    grid-column: 1 / -1;
+    padding: 12px 0 0 !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.09);
+  }
+
+  /* Evidence hierarchy: compact strips and rows beat stacks of equal-weight cards. */
+  .secondaryPageToolbar [data-visual-role="metric-strip"] > button {
+    min-height: 82px !important;
+    padding: 11px 8px !important;
+  }
+
+  .secondaryPageEvidence {
+    grid-template-columns: 1fr !important;
+  }
+
+  .secondaryPageEvidence > * {
+    padding: 15px 2px !important;
+  }
+
+  .secondaryPageEvidence > * + * {
+    border-left: 0 !important;
+    border-top: 1px solid var(--stroke-1) !important;
+  }
+
+  [data-testid="coach-leaderboard-operational-results"],
+  [data-testid="coach-activity-intelligence-results"] {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .coachLeaderboardRow,
+  [data-testid="coach-activity-intelligence-results"] > * {
+    min-width: 0;
+  }
+
+  .coachLeaderboardRowCopy,
+  .coachLeaderboardRowCopy > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Navigation: quieter, tighter, and safe-area correct. */
+  [data-testid="mobile-navigation-dock"] {
+    bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+    width: calc(100% - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) !important;
+    max-width: 430px !important;
+    min-height: 60px !important;
+    border-radius: 19px !important;
+    background: rgba(250, 249, 245, .94) !important;
+    box-shadow: 0 10px 28px rgba(17,26,33,.13), 0 1px 4px rgba(17,26,33,.07) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
+    backdrop-filter: blur(18px) saturate(125%) !important;
+  }
+
+  [data-testid="mobile-navigation-dock"] button {
+    min-height: 50px !important;
+    border-radius: 13px !important;
+  }
+
+  [data-testid="mobile-navigation-dock"] button[data-active="true"] {
+    border-color: transparent !important;
+    background: rgba(126,158,30,.08) !important;
+    box-shadow: none !important;
+  }
+
+  [data-testid="mobile-navigation-dock"] [data-icon-name] svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  [data-testid="mobile-navigation-sheet"] {
+    max-height: min(82dvh, 700px) !important;
+    border-radius: 24px 24px 18px 18px !important;
+    background: #faf9f5 !important;
+    box-shadow: 0 24px 70px rgba(17,26,33,.23) !important;
+  }
+
+  /* Touch and focus polish. */
+  button,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button:active:not(:disabled),
+  [role="button"]:active:not([aria-disabled="true"]) {
+    transition-duration: var(--motion-press) !important;
+  }
+
+  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent-strong, #617900) 28%, transparent);
+    outline-offset: 2px;
+  }
+
+  /* Prevent long real-world data from creating horizontal scrolling. */
+  :where(.secondaryPageShell, .performance-workspace, .player-scroll-container, .coach-scroll-container) :where(h1,h2,h3,p,strong,span,small) {
+    max-width: 100%;
+  }
+
+  :where(.secondaryPageShell, .performance-workspace) :where(table, pre, code) {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  :root {
+    --mobile-gutter: 15px;
+    --mobile-section-gap: 18px;
+  }
+
+  .secondaryPageIntro__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .secondaryPageIntro__status {
+    max-width: 100%;
+  }
+
+  .secondaryPageIntro__buttonRow {
+    width: 100%;
+    justify-content: stretch !important;
+  }
+
+  .secondaryPageAction {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  [data-testid="player-command-evidence"] [class*="progressValue"] {
+    font-size: 20px !important;
+  }
+}
+
+@media (min-width: 391px) and (max-width: 430px) {
+  .secondaryPageIntro__summary {
+    max-width: 46ch !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) and (max-width: 760px) {
+  [data-testid="mobile-navigation-dock"],
+  [data-testid="mobile-navigation-sheet"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #faf9f5 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .secondaryPageAction,
+  .secondaryPageDecision button,
+  [data-testid="mobile-navigation-dock"] button {
+    transition: none !important;
+  }
+}
