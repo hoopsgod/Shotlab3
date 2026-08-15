@@ -1,0 +1,56 @@
+/* Phase 3 mobile centering reconciliation
+ * Keep editorial copy intentionally left aligned; normalize the geometry of the
+ * containers that own that copy so every route shares one centered mobile axis. */
+
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  html body #root [data-visual-role="secondary-page"],
+  html body #root [data-mobile-stage] {
+    max-width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="page-intro"],
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"],
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="supporting-evidence"],
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="page-tools"] {
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-self: stretch;
+    box-sizing: border-box;
+  }
+
+  /* Nested rails are the most common source of a section appearing a few
+   * pixels off-axis after older route-specific margins survive the cascade. */
+  html body #root [data-mobile-stage] > [data-layout-role],
+  html body #root [data-mobile-stage] > [data-visual-role],
+  html body #root [data-visual-role="page-tools"] > [data-visual-role],
+  html body #root [data-visual-role="supporting-evidence"] > * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Search/filter controls should be centered within their owning rail rather
+   * than inheriting a one-sided legacy offset. */
+  html body #root [data-visual-role="page-tools"] :is(form, [role="search"], input[type="search"], input[type="text"]) {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+
+  /* Preserve full-bleed navigation and intentional left-aligned typography. */
+  html body #root :is(nav, [role="navigation"]) {
+    box-sizing: border-box;
+  }
+}
