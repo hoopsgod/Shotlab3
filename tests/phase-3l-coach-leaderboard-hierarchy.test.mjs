@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const enhancer = readFileSync('scripts/apply-phase3l-coach-leaderboard-hierarchy.mjs', 'utf8');
 const css = readFileSync('public/shotlab-phase3l-coach-leaderboard-hierarchy.css', 'utf8');
+const cssWithoutMediaConditions = css.replace(/@media\s*\([^)]*\)/g, '@media');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
@@ -106,7 +107,7 @@ test('rank and weekly pace receive dedicated mobile hierarchy without horizontal
   assert.match(css, /coachLeaderboardRank/);
   assert.match(css, /coachLeaderboardWeek/);
   assert.match(css, /text-overflow:\s*ellipsis/);
-  assert.doesNotMatch(css, /min-width:\s*[4-9][0-9]{2}px/);
+  assert.doesNotMatch(cssWithoutMediaConditions, /min-width:\s*[4-9][0-9]{2}px/);
 });
 
 test('Phase 3L authority loads after Phase 3K', () => {
