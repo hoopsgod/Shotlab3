@@ -17,7 +17,7 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
 
 test("major functional page intros are compact instead of oversized title stages", () => {
   assert.match(enhancer, /grid-template-columns:\s*34px minmax\(0, 1fr\)/);
-  assert.match(enhancer, /\.performance-shell \.secondaryPageIntro \.secondaryPageIntro__title/);
+  assert.match(enhancer, /\.performance-shell \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle/);
   assert.match(enhancer, /font-size:\s*clamp\(29px, 8vw, 34px\) !important/);
   assert.match(enhancer, /padding:\s*3px 0 12px/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
@@ -25,7 +25,7 @@ test("major functional page intros are compact instead of oversized title stages
   assert.match(enhancer, /min-height:\s*0/);
   assert.match(enhancer, /\.secondaryPageDecision::after,[\s\S]*\.secondaryPageDecision__icon,[\s\S]*\.secondaryPageDecision__visual \{ display: none; \}/);
   assert.match(enhancer, /font-size:\s*clamp\(23px, 6\.4vw, 27px\)/);
-  assert.match(enhancer, /@media \(max-width: 390px\)/);
+  assert.match(enhancer, /@media \(max-width: 430px\)/);
   assert.match(enhancer, /font-size: 30px !important/);
   assert.match(enhancer, /\['title="Drills Dashboard"', 'title="Drills"'\]/);
   assert.match(enhancer, /\['title="Strength & Conditioning Dashboard"', 'title="S&C"'\]/);
