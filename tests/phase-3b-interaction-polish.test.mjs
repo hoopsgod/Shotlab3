@@ -33,10 +33,11 @@ test('More sheet handoff visibly subordinates the native edge dock while preserv
   assert.match(navigationSource, /document\.body\.dataset\.navigationSheetOpen = "true"/);
   assert.match(navigationCss, /body\[data-navigation-sheet-open="true"\]/);
   assert.match(navigationCss, /transform: translateY\(4px\) scale\(\.995\) !important/);
-  assert.match(navigationCss, /opacity: \.82/);
+  assert.match(navigationCss, /body\[data-navigation-sheet-open="true"\][\s\S]*opacity: \.(?:7\d|8\d)/);
+  assert.match(navigationCss, /mobile-navigation-overlay[\s\S]*backdrop-filter: blur\(10px\)/);
   assert.doesNotMatch(navigationCss, /translateX\(-50%\)/);
   assert.match(navigationCss, /mobile-navigation-groups.*button:active/s);
-  assert.match(navigationCss, /prefers-reduced-motion: reduce/);
+  assert.match(navigationCss, /prefers-reduced-motion: reduce[\s\S]*body\[data-navigation-sheet-open="true"\][\s\S]*transform: none !important/);
 });
 
 test('Expert visual polish never converts the full Players decision into a duplicate teaser action', () => {
