@@ -80,7 +80,7 @@ test('mobile Leaderboards preserves the decision and performance-evidence hierar
 
 test('mobile Leaderboards readability is owned by the premium route stage rather than legacy route CSS', () => {
   assert.match(routeStage, /aria-label="Current performance signals"/);
-  assert.match(routeStage, /aria-pressed=\{active\}/);
+  assert.match(routeStage, /"aria-pressed": active/);
   assert.match(routeStageCss, /--stage-accent:\s*#c8ff1a/);
   assert.match(routeStageCss, /\.title\s*\{[\s\S]*color:\s*#f6f7ef/);
   assert.match(routeStageCss, /\.metricValue,[\s\S]*color:\s*#f7f8f0/);
