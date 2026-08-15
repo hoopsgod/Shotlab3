@@ -1,0 +1,288 @@
+.stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  min-width: 0;
+  min-height: 236px;
+  padding: 22px 22px 0;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--sl-accent, #c8ff1a) 15%, transparent), transparent 34%),
+    linear-gradient(145deg, #121817 0%, #07100f 74%);
+  color: #f4f6ed;
+  box-shadow: 0 22px 52px rgba(7, 16, 15, .16);
+}
+
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: .18;
+  pointer-events: none;
+}
+
+.stage[data-route-kind="players"]::before {
+  background:
+    radial-gradient(circle at 12% 116%, transparent 0 72px, rgba(200, 255, 26, .22) 73px 75px, transparent 76px),
+    linear-gradient(90deg, transparent 49.7%, rgba(255, 255, 255, .08) 50%, transparent 50.3%);
+}
+
+.stage[data-route-kind="schedule"]::before {
+  background: repeating-linear-gradient(90deg, transparent 0 58px, rgba(255, 255, 255, .1) 59px 60px);
+}
+
+.stage[data-route-kind="training"]::before {
+  background:
+    radial-gradient(circle at 86% 58%, transparent 0 52px, rgba(200, 255, 26, .22) 53px 55px, transparent 56px),
+    linear-gradient(0deg, transparent 49.7%, rgba(255, 255, 255, .08) 50%, transparent 50.3%);
+}
+
+.stage[data-route-kind="strength"]::before {
+  background: repeating-linear-gradient(132deg, transparent 0 26px, rgba(255, 255, 255, .075) 27px 28px);
+}
+
+.stage[data-route-kind="activity"]::before {
+  background:
+    linear-gradient(161deg, transparent 0 54%, rgba(200, 255, 26, .2) 54.5% 55%, transparent 55.5%),
+    linear-gradient(16deg, transparent 0 68%, rgba(255, 255, 255, .08) 68.4% 68.8%, transparent 69.2%);
+}
+
+.stage[data-route-kind="leaderboards"]::before {
+  background:
+    linear-gradient(to top, rgba(200, 255, 26, .13) 0 34%, transparent 34%) 78% 100% / 34px 84px no-repeat,
+    linear-gradient(to top, rgba(255, 255, 255, .09) 0 34%, transparent 34%) 88% 100% / 34px 62px no-repeat,
+    linear-gradient(to top, rgba(255, 255, 255, .07) 0 34%, transparent 34%) 98% 100% / 34px 45px no-repeat;
+}
+
+.stage[data-route-kind="settings"]::before {
+  background: radial-gradient(circle at 88% 34%, transparent 0 44px, rgba(255, 255, 255, .09) 45px 46px, transparent 47px 64px, rgba(255, 255, 255, .06) 65px 66px, transparent 67px);
+}
+
+.watermark {
+  position: absolute;
+  top: 9px;
+  right: -12px;
+  z-index: -1;
+  color: var(--sl-accent, #c8ff1a);
+  opacity: .07;
+  transform: rotate(-6deg);
+  pointer-events: none;
+}
+
+.topline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.routeMark {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 24%, rgba(255, 255, 255, .12));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sl-accent, #c8ff1a) 7%, transparent);
+  color: var(--sl-accent, #c8ff1a);
+}
+
+.eyebrow {
+  color: var(--sl-accent, #c8ff1a);
+  font: 760 10px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .095em;
+  text-transform: uppercase;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  max-width: 650px;
+  margin-top: 13px;
+  padding-right: min(16vw, 112px);
+}
+
+.copy h2 {
+  max-width: 20ch;
+  margin: 0;
+  color: #f6f7ef;
+  font: 790 clamp(28px, 5vw, 38px)/.99 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.048em;
+  overflow-wrap: anywhere;
+}
+
+.copy p {
+  max-width: 58ch;
+  margin: 9px 0 0;
+  color: #b7c0b6;
+  font: 520 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+}
+
+.action {
+  min-width: 0;
+  min-height: var(--touch-target, 44px);
+  margin-top: 15px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 36%, rgba(255, 255, 255, .1));
+  border-radius: 12px;
+  background: var(--sl-accent, #c8ff1a);
+  color: #11170f;
+  font: 780 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: none;
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.action:hover:not(:disabled) { filter: brightness(.96); transform: translateY(-1px); }
+.action:active:not(:disabled) { transform: scale(.985); }
+.action:disabled { opacity: .52; cursor: not-allowed; }
+.action:focus-visible,
+.metric:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 38%, transparent);
+  outline-offset: 3px;
+}
+
+.metricRail {
+  align-self: end;
+  min-width: 0;
+  margin-top: 20px;
+  margin-inline: -22px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(126px, 1fr);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, .018);
+}
+
+.metricRail::-webkit-scrollbar { display: none; }
+
+.metric {
+  position: relative;
+  min-width: 0;
+  min-height: 92px;
+  padding: 14px 16px 13px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  box-shadow: none;
+}
+
+button.metric {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.metric + .metric { border-left: 1px solid rgba(255, 255, 255, .09); }
+
+.metricActive::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: 0;
+  left: 14px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--sl-accent, #c8ff1a);
+}
+
+.metricLabel {
+  color: #9ea99f;
+  font: 700 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metricValue {
+  color: #f7f8f0;
+  font: 800 26px/.98 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.05em;
+  white-space: nowrap;
+}
+
+.metricActive .metricValue { color: var(--sl-accent, #c8ff1a); }
+
+.metricDetail {
+  color: #aeb8ae;
+  font: 510 10px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 760px) {
+  .stage {
+    min-height: 244px;
+    margin-inline: calc(var(--layout-gutter, 16px) * -1);
+    padding: 18px var(--layout-gutter, 16px) 0;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .routeMark {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .copy {
+    margin-top: 11px;
+    padding-right: 44px;
+  }
+
+  .copy h2 {
+    max-width: 18ch;
+    font-size: clamp(27px, 8.1vw, 34px);
+  }
+
+  .copy p {
+    max-width: 48ch;
+    font-size: 12.5px;
+    line-height: 1.46;
+  }
+
+  .action { margin-top: 13px; }
+
+  .metricRail {
+    margin-inline: calc(var(--layout-gutter, 16px) * -1);
+    grid-auto-columns: minmax(118px, 42vw);
+  }
+
+  .metric {
+    min-height: 86px;
+    padding: 12px 14px;
+  }
+
+  .metricValue { font-size: 24px; }
+}
+
+@media (max-width: 390px) {
+  .copy { padding-right: 28px; }
+  .watermark { right: -28px; opacity: .055; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action { transition: none; }
+}
