@@ -1,13 +1,6 @@
 /* Phase 3C — native route framing and secondary-page density.
    Phase 7 owns the shared return control itself; this layer owns route density,
    account access, gutters, and compact first-viewport geometry. */
-:root{
-  --p3c-route-control:44px;
-  --p3c-route-radius:14px;
-  --p3c-route-line:rgba(21,26,22,.14);
-  --p3c-route-shadow:0 7px 18px rgba(24,31,27,.075);
-}
-
 @media(max-width:820px){
   /* Keep the return target touch-safe without paying a second row of dead space. */
   .is-mobile .shared-dashboard-back-action{margin-bottom:-6px!important}
