@@ -22,6 +22,15 @@ replaceRequired(
   'coach settings sandbox utility',
 )
 
+// A new registered team must not swap the Coach Events route into a full-viewport
+// onboarding composition. Keep the truthful empty message and Create Event action,
+// but fit them into the same bounded workspace rhythm used by populated schedules.
+replaceRequired(
+  `data-testid="coach-events-mobile-empty-state" style={{minHeight:"calc(100dvh - 330px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"44px 20px 54px"}}`,
+  `data-testid="coach-events-mobile-empty-state" data-parity-empty-slot="true" style={{minHeight:190,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"24px 20px 28px",marginTop:14,borderTop:"1px solid var(--stroke-1)",borderBottom:"1px solid var(--stroke-1)"}}`,
+  'coach events empty-state geometry',
+)
+
 // Keep the Duels page architecture stable. Data can be empty, but the Incoming and
 // Completed modules remain in the same order instead of swapping to a different page.
 replaceRequired(
