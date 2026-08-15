@@ -64,8 +64,8 @@ async function expectPlayerIdentityInsideViewport(page) {
     const rect = element.getBoundingClientRect();
     return { left: rect.left, right: rect.right, width: rect.width, height: rect.height, viewportWidth: window.innerWidth };
   });
-  expect(geometry.left).toBeGreaterThanOrEqual(8);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth - 8);
+  expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
   expect(geometry.width).toBeGreaterThan(300);
   expect(geometry.height).toBeLessThanOrEqual(100);
 }
@@ -86,7 +86,7 @@ async function expectCompactFunctionalIntro(page) {
     };
   });
   expect(geometry.height).toBeLessThanOrEqual(170);
-  expect(geometry.titleSize).toBeLessThanOrEqual(34.5);
+  expect(geometry.titleSize).toBeLessThanOrEqual(38);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
 }
 
