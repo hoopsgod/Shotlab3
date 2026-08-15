@@ -2,11 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
+const mainSource = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 const systemSource = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../src/styles/MobilePremiumVisualSystem2026.css", import.meta.url), "utf8");
 
-test("premium mobile visual authority is loaded through the shared secondary-page system", () => {
-  assert.match(systemSource, /MobilePremiumVisualSystem2026\.css/);
+test("premium mobile visual authority loads once at the app root after canonical 2026 surface contracts", () => {
+  const surfaceIndex = mainSource.indexOf("./styles/Phase3SurfaceContracts.css");
+  const mobileIndex = mainSource.indexOf("./styles/MobilePremiumVisualSystem2026.css");
+  assert.ok(surfaceIndex >= 0);
+  assert.ok(mobileIndex > surfaceIndex);
+  assert.doesNotMatch(systemSource, /MobilePremiumVisualSystem2026\.css/);
 });
 
 test("mobile hierarchy defines command, functional, and detail-screen density contracts", () => {
