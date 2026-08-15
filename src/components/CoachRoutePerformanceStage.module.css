@@ -12,6 +12,9 @@
     radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--sl-accent, #c8ff1a) 15%, transparent), transparent 34%),
     linear-gradient(145deg, #121817 0%, #07100f 74%);
   color: #f4f6ed;
+  --surface-title: #f6f7ef;
+  --surface-body: #b7c0b6;
+  --surface-muted: #9ea99f;
   box-shadow: 0 22px 52px rgba(7, 16, 15, .16);
 }
 
@@ -106,24 +109,26 @@
   padding-right: min(16vw, 112px);
 }
 
-.copy h2 {
+.stage .copy h2 {
   max-width: 20ch;
   margin: 0;
   color: #f6f7ef;
+  -webkit-text-fill-color: #f6f7ef;
   font: 790 clamp(28px, 5vw, 38px)/.99 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.048em;
   overflow-wrap: anywhere;
 }
 
-.copy p {
+.stage .copy p {
   max-width: 58ch;
   margin: 9px 0 0;
   color: #b7c0b6;
+  -webkit-text-fill-color: #b7c0b6;
   font: 520 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   letter-spacing: -.01em;
 }
 
-.action {
+.stage .action {
   min-width: 0;
   min-height: var(--touch-target, 44px);
   margin-top: 15px;
@@ -136,19 +141,28 @@
   border-radius: 12px;
   background: var(--sl-accent, #c8ff1a);
   color: #11170f;
+  -webkit-text-fill-color: #11170f;
   font: 780 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   cursor: pointer;
   box-shadow: none;
   transition: transform 150ms ease, filter 150ms ease;
 }
 
-.action:hover:not(:disabled) { filter: brightness(.96); transform: translateY(-1px); }
-.action:active:not(:disabled) { transform: scale(.985); }
-.action:disabled { opacity: .52; cursor: not-allowed; }
-.action:focus-visible,
-.metric:focus-visible {
+.stage .action:hover:not(:disabled) { filter: brightness(.96); transform: translateY(-1px); }
+.stage .action:active:not(:disabled) { transform: scale(.985); }
+.stage .action:disabled { opacity: .52; cursor: not-allowed; }
+.stage .action:focus-visible,
+.stage .metric:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 38%, transparent);
   outline-offset: 3px;
+}
+
+.visual {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 360px);
+  margin-top: 12px;
+  color: #aeb8ae;
 }
 
 .metricRail {
@@ -168,7 +182,7 @@
 
 .metricRail::-webkit-scrollbar { display: none; }
 
-.metric {
+.stage .metric {
   position: relative;
   min-width: 0;
   min-height: 92px;
@@ -179,20 +193,21 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: inherit;
+  color: #f4f6ed;
+  -webkit-text-fill-color: currentColor;
   text-align: left;
   box-shadow: none;
 }
 
-button.metric {
+.stage button.metric {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-.metric + .metric { border-left: 1px solid rgba(255, 255, 255, .09); }
+.stage .metric + .metric { border-left: 1px solid rgba(255, 255, 255, .09); }
 
-.metricActive::after {
+.stage .metricActive::after {
   content: "";
   position: absolute;
   right: 14px;
@@ -203,8 +218,9 @@ button.metric {
   background: var(--sl-accent, #c8ff1a);
 }
 
-.metricLabel {
+.stage .metricLabel {
   color: #9ea99f;
+  -webkit-text-fill-color: #9ea99f;
   font: 700 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   letter-spacing: .075em;
   text-transform: uppercase;
@@ -213,17 +229,24 @@ button.metric {
   text-overflow: ellipsis;
 }
 
-.metricValue {
+.stage .metricValue,
+.stage button.metric .metricValue {
   color: #f7f8f0;
+  -webkit-text-fill-color: #f7f8f0;
   font: 800 26px/.98 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.05em;
   white-space: nowrap;
 }
 
-.metricActive .metricValue { color: var(--sl-accent, #c8ff1a); }
+.stage .metricActive .metricValue,
+.stage button.metric.metricActive .metricValue {
+  color: var(--sl-accent, #c8ff1a);
+  -webkit-text-fill-color: var(--sl-accent, #c8ff1a);
+}
 
-.metricDetail {
+.stage .metricDetail {
   color: #aeb8ae;
+  -webkit-text-fill-color: #aeb8ae;
   font: 510 10px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   white-space: nowrap;
   overflow: hidden;
@@ -252,30 +275,36 @@ button.metric {
     padding-right: 44px;
   }
 
-  .copy h2 {
+  .stage .copy h2 {
     max-width: 18ch;
     font-size: clamp(27px, 8.1vw, 34px);
   }
 
-  .copy p {
+  .stage .copy p {
     max-width: 48ch;
     font-size: 12.5px;
     line-height: 1.46;
   }
 
-  .action { margin-top: 13px; }
+  .stage .action { margin-top: 13px; }
+
+  .visual {
+    width: min(100%, 320px);
+    margin-top: 10px;
+  }
 
   .metricRail {
     margin-inline: calc(var(--layout-gutter, 16px) * -1);
     grid-auto-columns: minmax(118px, 42vw);
   }
 
-  .metric {
+  .stage .metric {
     min-height: 86px;
     padding: 12px 14px;
   }
 
-  .metricValue { font-size: 24px; }
+  .stage .metricValue,
+  .stage button.metric .metricValue { font-size: 24px; }
 }
 
 @media (max-width: 390px) {
@@ -284,5 +313,5 @@ button.metric {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .action { transition: none; }
+  .stage .action { transition: none; }
 }
