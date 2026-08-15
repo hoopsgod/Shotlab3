@@ -7,7 +7,9 @@ on:
       - "functions/**"
       - "migrations/**"
       - "scripts/apply-post-auth-persistence-hydration.mjs"
+      - "scripts/apply-mobile-secondary-page-parity.mjs"
       - "tests/post-auth-mobile-parity-hydration.test.mjs"
+      - "tests/mobile-secondary-page-parity-contract.test.mjs"
       - "tests/e2e/demo-registered-live-parity.spec.mjs"
       - "tests/e2e/registered-mobile-post-auth-hydration.spec.mjs"
       - ".github/workflows/demo-registered-live-parity.yml"
@@ -46,8 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify shared UI, capability, and post-auth hydration contracts
-        run: node --test tests/demo-visual-parity-contract.test.mjs tests/account-capabilities.test.mjs tests/demo-capability-boundary.test.mjs tests/post-auth-mobile-parity-hydration.test.mjs
+      - name: Verify shared UI, secondary-page parity, capability, and post-auth hydration contracts
+        run: node --test tests/demo-visual-parity-contract.test.mjs tests/mobile-secondary-page-parity-contract.test.mjs tests/account-capabilities.test.mjs tests/demo-capability-boundary.test.mjs tests/post-auth-mobile-parity-hydration.test.mjs
 
       - name: Install pinned browser and Cloudflare tooling
         run: npm install --no-save @playwright/test@1.55.1 wrangler@4.30.0
