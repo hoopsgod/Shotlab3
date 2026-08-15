@@ -28,6 +28,21 @@ const replaceFirstKnown = (pairs, label) => {
 };
 
 const cssImport = 'import "./Phase2PremiumEmptyStateLanguage.css";';
+
+// This enhancer is a one-way semantic migration. Route preparation intentionally
+// runs more than once in CI (production build, then Playwright webServer), and
+// downstream enhancers are free to normalize the JSX installed here. Once the
+// stable Phase 2D component + stylesheet markers exist, never attempt to replay
+// the original source-text transforms against that downstream-normalized source.
+const semanticPassAlreadyApplied = next.includes(cssImport)
+  && next.includes('data-phase2-empty-state')
+  && next.includes('phase2-empty-state-label')
+  && next.includes('phase2-empty-state-message');
+if (semanticPassAlreadyApplied) {
+  console.log('Phase 2D premium semantic operational-state language already applied; preserving downstream normalization.');
+  process.exit(0);
+}
+
 if (!next.includes(cssImport)) {
   const anchor = 'import styles from "./CoachDashboardPhase2.module.css";';
   const matches = next.split(anchor).length - 1;
@@ -131,16 +146,7 @@ const activityAfter = `      {rows.length ? (
           <EmptyState label="Filtered activity" kind="filter">No team activity matches the selected view.</EmptyState>
         </div>
       )}`;
-
-// Downstream mobile/parity enhancers are allowed to normalize the surrounding
-// activity markup after this semantic state is installed. On a later build/dev
-// pass, recognize the stable semantic outcome rather than requiring the exact
-// pre-normalization JSX block to still be byte-for-byte present.
-const activitySemanticAlreadyApplied = next.includes('label="Filtered activity" kind="filter"')
-  && next.includes('No team activity matches the selected view.');
-if (!activitySemanticAlreadyApplied) {
-  replaceOnce(activityBefore, activityAfter, 'activity no-results state');
-}
+replaceOnce(activityBefore, activityAfter, 'activity no-results state');
 
 for (const required of [
   cssImport,
