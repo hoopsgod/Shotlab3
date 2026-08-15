@@ -276,8 +276,9 @@ body.mission-control-active .mcPrimary,
   }
 
   .secondaryPageIntro__title {
-    font-size: 36px !important;
-    line-height: 1.02 !important;
+    font-size: clamp(29px, 8vw, 34px) !important;
+    line-height: 1 !important;
+    letter-spacing: -.045em !important;
   }
 
   .secondaryPageIntro__summary,
