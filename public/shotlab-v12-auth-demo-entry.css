@@ -28,15 +28,6 @@
   outline:3px solid rgba(97,121,0,.24)!important;
   outline-offset:3px!important;
 }
-.auth-demo-enter::before{
-  content:"Preview the experience";
-  grid-column:1/-1;
-  margin:1px 0 0;
-  color:#44515b!important;
-  font:700 11px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  letter-spacing:.01em;
-  text-align:center;
-}
 
 /* The premium auth lockup uses the shared raster SL mark. Constrain the actual
    image element so the mark remains inside its 56px brand tile. */
@@ -154,9 +145,6 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
     color:#aebcc2!important;
     -webkit-text-fill-color:#aebcc2!important;
   }
-  [data-testid="auth-workspace"] .auth-demo-enter::before{
-    color:#9eabb1!important;
-  }
   [data-testid="auth-workspace"] .auth-demo-enter .btn-v{
     border-color:rgba(200,255,26,.24)!important;
     background:rgba(255,255,255,.035)!important;
@@ -166,8 +154,6 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
 }
 
 @media(max-width:390px){
-  .auth-demo-enter{grid-template-columns:1fr!important}
-  .auth-demo-enter::before{grid-column:1!important}
   html body:has(.auth-card-enter) div:has(> .auth-ball-enter) > div:first-child img{
     width:30px!important;
     height:30px!important;
