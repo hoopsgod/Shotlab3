@@ -59,7 +59,7 @@ const mobileAuthority = `@media (max-width: 760px) {
   }
   .secondaryPageIntro__icon svg { width: 16px; height: 16px; stroke-width: 1.85; }
   .secondaryPageIntro[data-page-kind] .secondaryPageIntro__icon { transform: none; }
-  .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 9.5px; letter-spacing: .1em; }
+  .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 11px; letter-spacing: .09em; }
   .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
   .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {
     max-width: 11ch;
@@ -84,8 +84,8 @@ const mobileAuthority = `@media (max-width: 760px) {
     max-width: 100%;
     overflow: hidden;
     color: #5b665e;
-    font-size: 9.5px;
-    line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.25;
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -104,7 +104,7 @@ const mobileAuthority = `@media (max-width: 760px) {
     min-height: 44px;
     padding-inline: 10px;
     border-radius: 11px;
-    font-size: 11.5px;
+    font-size: 12px;
     white-space: nowrap;
   }
   .secondaryPageAction--primary { background: #18211d; border-color: #18211d; }
@@ -173,7 +173,7 @@ const mobileAuthority = `@media (max-width: 760px) {
   }
   .secondaryPageDecision__icon svg { width: 19px; height: 19px; stroke-width: 1.7; }
   .secondaryPageDecision__visual { display: none; }
-  .secondaryPageDecision__eyebrow { margin-bottom: 6px; color: #c8ff1a; font-size: 10px; letter-spacing: .1em; }
+  .secondaryPageDecision__eyebrow { margin-bottom: 6px; color: #c8ff1a; font-size: 11px; letter-spacing: .09em; }
   .secondaryPageDecision h2 { max-width: 17ch; font-size: clamp(26px, 7.3vw, 31px); line-height: .96; letter-spacing: -.052em; }
   .secondaryPageDecision p { max-width: 38ch; margin-top: 8px; color: #b8c5c2; font-size: 12.5px; line-height: 1.45; }
   .secondaryPageDecision button {
@@ -237,7 +237,7 @@ const narrowAuthority = `@media (max-width: 430px) {
   .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
   .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle { font-size: 32px !important; }
   .secondaryPageIntro__buttonRow { gap: 6px; }
-  .secondaryPageAction { font-size: 11px; }
+  .secondaryPageAction { font-size: 11.5px; }
   .secondaryPageDecision h2 { font-size: 28px; }
 }
 
