@@ -49,6 +49,7 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
     margin-left: calc(50% - 50vw) !important;
     margin-right: calc(50% - 50vw) !important;
     overflow-x: clip;
+    box-shadow: 0 -32px 0 #071c28 !important;
   }
 
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
