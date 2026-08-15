@@ -20,24 +20,70 @@
   background:rgba(14,16,17,.72)!important;
 }
 .metricSupporting [class*="metricValue"]{font-size:27px!important}
+
 @media(max-width:700px){
   .metricsHierarchy{
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:8px!important;
+    gap:0!important;
+    overflow:hidden!important;
+    border-block:1px solid rgba(23,26,24,.11)!important;
+    background:transparent!important;
   }
   .metricPrimary{
+    --text-1:#f6f8f5;
+    --text-3:#aab7b3;
     grid-column:1 / -1!important;
-    min-height:104px!important;
+    min-height:88px!important;
+    padding:15px 16px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:
+      radial-gradient(circle at 100% 0%,rgba(200,255,26,.11),transparent 38%),
+      linear-gradient(124deg,#071a22 0%,#0a222b 62%,#102e35 100%)!important;
+    box-shadow:none!important;
+  }
+  .metricPrimary::after{
+    left:16px!important;
+    right:auto!important;
+    bottom:0!important;
+    width:42px!important;
+    height:3px!important;
+    border-radius:0!important;
+    background:#c8ff1a!important;
+    opacity:1!important;
+  }
+  .metricPrimary [class*="metricValue"]{
+    margin-top:5px!important;
+    font-size:36px!important;
+    letter-spacing:-.055em!important;
   }
   .metricSupporting{
-    min-height:84px!important;
-    padding:12px!important;
+    --text-1:#171a18;
+    --text-3:#68716a;
+    min-height:78px!important;
+    padding:12px 10px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
   }
-  .metricPrimary [class*="metricValue"]{font-size:34px!important}
-  .metricSupporting [class*="metricValue"]{font-size:24px!important}
-  .metricSupporting [class*="metricDetail"]{white-space:normal!important;line-height:1.2!important}
+  .metricPrimary + .metricSupporting{border-left:0!important}
+  .metricSupporting + .metricSupporting{border-left:1px solid rgba(23,26,24,.1)!important}
+  .metricSupporting::after{display:none!important}
+  .metricSupporting [class*="metricValue"]{
+    margin-top:5px!important;
+    font-size:25px!important;
+    letter-spacing:-.045em!important;
+  }
+  .metricSupporting [class*="metricDetail"]{
+    margin-top:5px!important;
+    white-space:normal!important;
+    line-height:1.18!important;
+  }
 }
+
 @media(max-width:390px){
-  .metricSupporting [class*="metricLabel"]{font-size:8px!important;letter-spacing:.04em!important}
-  .metricSupporting [class*="metricValue"]{font-size:22px!important}
+  .metricSupporting{padding-inline:8px!important}
+  .metricSupporting [class*="metricLabel"]{font-size:8px!important;letter-spacing:.045em!important}
+  .metricSupporting [class*="metricValue"]{font-size:23px!important}
 }
