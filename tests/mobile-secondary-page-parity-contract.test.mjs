@@ -61,13 +61,15 @@ test("Coach Activity reserves six operational rows using semantic function bound
   assert.match(coachParityEnhancer, /data-activity-placeholder=\"true\"/);
 });
 
-test("Phase 2D semantic activity language accepts the parity runway on a repeated build-to-dev enhancer pass", () => {
-  assert.match(emptyStateEnhancer, /activityParityAlreadyApplied/);
-  assert.match(emptyStateEnhancer, /data-testid=\"coach-activity-intelligence-results\" data-parity-slot-count=\"6\"/);
-  assert.match(emptyStateEnhancer, /data-activity-placeholder=\"true\"/);
-  assert.match(emptyStateEnhancer, /New team activity will appear here/);
-  assert.match(emptyStateEnhancer, /if \(!activityParityAlreadyApplied\) \{\s*replaceOnce\(activityBefore, activityAfter, 'activity no-results state'\)/);
-  assert.match(emptyStateEnhancer, /if \(!activityParityAlreadyApplied && !next\.includes\('No team activity matches the selected view\.'\)\)/);
+test("Phase 2D semantic language is a one-way migration and preserves the downstream parity runway on replay", () => {
+  assert.match(emptyStateEnhancer, /semanticPassAlreadyApplied/);
+  assert.match(emptyStateEnhancer, /next\.includes\(cssImport\)/);
+  assert.match(emptyStateEnhancer, /next\.includes\('data-phase2-empty-state'\)/);
+  assert.match(emptyStateEnhancer, /next\.includes\('phase2-empty-state-label'\)/);
+  assert.match(emptyStateEnhancer, /next\.includes\('phase2-empty-state-message'\)/);
+  assert.match(emptyStateEnhancer, /preserving downstream normalization/);
+  assert.match(emptyStateEnhancer, /process\.exit\(0\)/);
+  assert.doesNotMatch(emptyStateEnhancer, /activityParityAlreadyApplied/);
 });
 
 test("Coach leaderboards reserve three ranking rows without depending on the exact Phase 3L row body", () => {
