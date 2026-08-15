@@ -108,14 +108,14 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           paddingBottom: 12,
         }}
       >
-        <div className={styles.coachSignalHeader} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 10, alignItems: "start" }}>
-          <div style={{ minWidth: 0 }}>
+        <div className={styles.coachSignalHeader} style={{ display: "block" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
             <div className={styles.coachSignalEyebrow} style={coachSignal.stale ? { color: "#ffca76" } : undefined}>{coachSignal.stale ? "Coach assignment needs refresh" : "Coach assignment"}</div>
-            <h2 className={styles.coachSignalTitle} style={{ fontSize: "clamp(18px,5vw,21px)", lineHeight: 1.03, maxWidth: "23ch", letterSpacing: "-.032em", display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}>{coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}</h2>
+            <span className={styles.coachSignalStatus} style={coachSignal.stale ? { marginTop: 0, borderColor: "rgba(255,181,71,.48)", background: "rgba(255,181,71,.12)", color: "#ffd18a", gap: 5 } : { marginTop: 0, paddingInline: 0, gap: 5 }}>
+              <ShotLabIcon name={coachSignalIcon(coachSignal)} size={13} /><span>{coachSignalStatus(coachSignal)}</span>
+            </span>
           </div>
-          <span className={styles.coachSignalStatus} style={coachSignal.stale ? { marginTop: 0, borderColor: "rgba(255,181,71,.48)", background: "rgba(255,181,71,.12)", color: "#ffd18a", gap: 5 } : { marginTop: 0, paddingInline: 0, gap: 5 }}>
-            <ShotLabIcon name={coachSignalIcon(coachSignal)} size={13} /><span>{coachSignalStatus(coachSignal)}</span>
-          </span>
+          <h2 className={styles.coachSignalTitle} style={{ fontSize: "clamp(17px,4.6vw,20px)", lineHeight: 1.04, maxWidth: "none", letterSpacing: "-.03em", marginTop: 7 }}>{coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}</h2>
         </div>
         <div className={styles.coachSignalGrid} style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", marginTop: 9 }}>
           {coachSignal.stale ? <>
