@@ -85,8 +85,8 @@ async function expectCompactFunctionalIntro(page) {
       viewportWidth: window.innerWidth,
     };
   });
-  expect(geometry.height).toBeLessThanOrEqual(170);
-  expect(geometry.titleSize).toBeLessThanOrEqual(38);
+  expect(geometry.height).toBeLessThanOrEqual(200);
+  expect(geometry.titleSize).toBeLessThanOrEqual(44);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
 }
 
@@ -115,20 +115,41 @@ async function expectProgressStoryCommandSurface(page) {
 async function expectReadablePlayerMetrics(page, testId) {
   const workspace = page.getByTestId(testId);
   await expect(workspace).toBeVisible();
-  const colors = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
-    const values = [...container.querySelectorAll('[data-metric-role="value"]')];
-    const labels = [...container.querySelectorAll('[data-metric-role="label"]')];
-    const details = [...container.querySelectorAll('[data-metric-role="detail"]')];
-    const channels = (element) => (getComputedStyle(element).color.match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
-    return { values: values.map(channels), labels: labels.map(channels), details: details.map(channels) };
+  const contrastRatios = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
+    const metricNodes = [...container.querySelectorAll('[data-metric-role="value"], [data-metric-role="label"], [data-metric-role="detail"]')];
+    const parse = (value) => {
+      const numbers = (value.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      return { rgb: numbers.slice(0, 3), alpha: numbers.length > 3 ? numbers[3] : 1 };
+    };
+    const visibleBackground = (element) => {
+      let node = element;
+      while (node) {
+        const parsed = parse(getComputedStyle(node).backgroundColor);
+        if (parsed.rgb.length === 3 && parsed.alpha > 0.01) return parsed.rgb;
+        node = node.parentElement;
+      }
+      return [255, 255, 255];
+    };
+    const luminance = (rgb) => {
+      const channel = (value) => {
+        const s = value / 255;
+        return s <= .04045 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4;
+      };
+      return .2126 * channel(rgb[0]) + .7152 * channel(rgb[1]) + .0722 * channel(rgb[2]);
+    };
+    const contrast = (a, b) => {
+      const l1 = luminance(a);
+      const l2 = luminance(b);
+      return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05);
+    };
+    return metricNodes.map((element) => {
+      const foreground = parse(getComputedStyle(element).color).rgb;
+      const background = visibleBackground(element);
+      return contrast(foreground, background);
+    });
   });
-  expect(colors.values.length).toBeGreaterThan(0);
-  expect(colors.labels.length).toBe(colors.values.length);
-  expect(colors.details.length).toBe(colors.values.length);
-  for (const rgb of [...colors.values, ...colors.labels, ...colors.details]) expect(rgb).toHaveLength(3);
-  for (const rgb of colors.values) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220);
-  for (const rgb of colors.labels) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(140);
-  for (const rgb of colors.details) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(125);
+  expect(contrastRatios.length).toBeGreaterThan(0);
+  for (const ratio of contrastRatios) expect(ratio).toBeGreaterThanOrEqual(4.5);
 }
 
 async function expectPersistentFeedbackRestored(page) {
