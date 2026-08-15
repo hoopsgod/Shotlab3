@@ -10,9 +10,19 @@
     max-width: 100%;
   }
 
-  html body #root [data-visual-role="secondary-page"],
-  html body #root [data-mobile-stage] {
+  html body #root [data-visual-role="secondary-page"] {
     max-width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  /* Route stages previously retained a narrower desktop/legacy width on a few
+   * Coach screens, leaving a visible blank strip on the right. Mobile stages
+   * own the full width of their parent and are centered on the same axis. */
+  html body #root [data-mobile-stage] {
+    width: 100% !important;
+    max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box;
