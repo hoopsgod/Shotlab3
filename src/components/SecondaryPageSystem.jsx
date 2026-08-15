@@ -3,7 +3,6 @@ import "./SecondaryPageSystem.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
 import "../styles/Phase2PremiumRosterLayer.css";
-import "../styles/MobilePremiumVisualSystem2026.css";
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";
 const actionClassName=(index,action)=>["secondaryPageAction",index?"secondaryPageAction--secondary":"secondaryPageAction--primary",action.className].filter(Boolean).join(" ");
