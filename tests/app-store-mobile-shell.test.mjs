@@ -37,10 +37,10 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(navigationSource, /className=\{styles\.activeIndicator\}/);
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
-  assert.match(navigationCss, /left:\s*50%/);
-  assert.match(navigationCss, /transform:\s*translateX\(-50%\)/);
-  assert.match(navigationCss, /border:\s*1px solid/);
-  assert.match(navigationCss, /border-radius:\s*24px/);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*left:\s*50%/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*border:\s*1px solid/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*border-radius:\s*19px/s);
   assert.match(navigationCss, /-apple-system, BlinkMacSystemFont/);
 });
 
@@ -57,9 +57,9 @@ test("More navigation is a floating modal sheet with keyboard focus containment"
   assert.match(navigationSource, /event\.key !== "Tab"/);
   assert.match(navigationSource, /previousFocusRef/);
   assert.match(navigationSource, /document\.body\.dataset\.navigationSheetOpen/);
-  assert.match(navigationCss, /border-radius:\s*28px/);
+  assert.match(navigationCss, /\.sheet\s*\{[^}]*border-radius:\s*24px/s);
   assert.match(navigationCss, /env\(safe-area-inset-bottom/);
-  assert.match(navigationCss, /backdrop-filter:\s*blur\(30px\) saturate\(145%\)/);
+  assert.match(navigationCss, /\.sheet\s*\{[^}]*backdrop-filter:\s*blur\(18px\) saturate\(125%\)/s);
 });
 
 test("shared V3 mobile foundation supports touch, safe areas, contrast, and reduced motion", () => {
