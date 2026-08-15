@@ -17,11 +17,10 @@ const auth = readFileSync('src/components/AuthWorkspace.jsx', 'utf8');
 test('signature promotions run after canonical owners and auth remains the final presentation mutation', () => {
   assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-route-signature-promotion\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
   assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs/);
-  const finalEnhancers = routePipeline.slice(routePipeline.indexOf('const FINAL_ROUTE_ENHANCERS'));
-  const authIndex = finalEnhancers.indexOf('apply-mobile-auth-signature-stage.mjs');
-  const arrayEnd = finalEnhancers.indexOf('])');
-  assert.ok(authIndex >= 0 && authIndex < arrayEnd, 'auth signature promotion must remain in FINAL_ROUTE_ENHANCERS');
-  assert.equal(finalEnhancers.slice(authIndex, arrayEnd).match(/scripts\//g)?.length || 0, 1, 'auth signature promotion must be the final route enhancer');
+  const finalEnhancers = routePipeline.slice(routePipeline.indexOf('const FINAL_ROUTE_ENHANCERS'), routePipeline.indexOf('const RELEASE_AUTH_RECOVERY_MARKER'));
+  const authEntry = "'scripts/apply-mobile-auth-signature-stage.mjs'";
+  assert.equal(finalEnhancers.split(authEntry).length - 1, 1, 'auth signature promotion must appear exactly once in FINAL_ROUTE_ENHANCERS');
+  assert.match(finalEnhancers, /'scripts\/apply-mobile-auth-signature-stage\.mjs',?\s*\]\)/, 'auth signature promotion must be the final route enhancer');
 });
 
 test('Coach Home promotion creates one strong first-impression hierarchy', () => {
