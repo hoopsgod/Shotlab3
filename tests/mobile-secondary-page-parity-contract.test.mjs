@@ -15,7 +15,7 @@ test("player commitments keep a fixed mobile runway instead of removing the modu
   assert.doesNotMatch(commitmentSource, /state\.upcoming\.length\s*>\s*0\s*&&\s*\(\s*<div className=\{styles\.queue\}/);
 });
 
-test("leaderboards keep ranking geometry when the registered account has fewer or zero rows", () => {
+test("player leaderboards keep ranking geometry when the registered account has fewer or zero rows", () => {
   assert.match(leaderboardSource, /minimumRows = 3/);
   assert.match(leaderboardSource, /data-reserved-rows=\{reservedRows\}/);
   assert.match(leaderboardSource, /displayState === "empty"\s*\? reservedRows/);
@@ -30,19 +30,39 @@ test("demo-only utilities cannot change visible Coach Settings geometry", () => 
   assert.match(parityEnhancer, /pointerEvents:\"none\"/);
 });
 
-test("empty Coach Events stays inside the normal bounded mobile workspace", () => {
-  assert.match(parityEnhancer, /coach-events-mobile-empty-state/);
-  assert.match(parityEnhancer, /data-parity-empty-slot=\"true\"/);
-  assert.match(parityEnhancer, /minHeight:190/);
-  assert.match(parityEnhancer, /borderTop:\"1px solid var\(--stroke-1\)\"/);
-  assert.match(parityEnhancer, /borderBottom:\"1px solid var\(--stroke-1\)\"/);
+test("Coach Events reserves four schedule slots across empty, sparse, and populated data", () => {
+  assert.match(parityEnhancer, /data-parity-slot-count=\"4\"/);
+  assert.match(parityEnhancer, /data-coach-event-placeholder=\"true\"/);
+  assert.match(parityEnhancer, /Math\.max\(0,4-filteredEvents\.length\)/);
+  assert.match(parityEnhancer, /OPEN SCHEDULE SLOT/);
 });
 
-test("empty Coach leaderboards reserve ranking rows instead of collapsing the page", () => {
+test("Coach S&C reserves three session cards across data density", () => {
+  assert.match(parityEnhancer, /data-coach-sc-placeholder=\"true\"/);
+  assert.match(parityEnhancer, /Math\.max\(0,3-filteredCoachStrengthRows\.length\)/);
+  assert.match(parityEnhancer, /OPEN SESSION SLOT/);
+});
+
+test("Coach Players reserves four roster positions without inventing players", () => {
+  assert.match(parityEnhancer, /data-coach-roster-placeholder=\"true\"/);
+  assert.match(parityEnhancer, /Math\.max\(0,4-roster\.length\)/);
+  assert.match(parityEnhancer, /OPEN ROSTER SLOT/);
+});
+
+test("Coach Activity reserves six operational rows", () => {
+  assert.match(parityEnhancer, /data-parity-slot-count=\"6\"/);
+  assert.match(parityEnhancer, /rows\.slice\(0, 6\)/);
+  assert.match(parityEnhancer, /Math\.max\(0, 6 - rows\.length\)/);
+  assert.match(parityEnhancer, /data-activity-placeholder=\"true\"/);
+});
+
+test("Coach leaderboards reserve three ranking rows for zero or partial results", () => {
+  assert.match(parityEnhancer, /coach leaderboard minimum ranking rows/);
   assert.match(parityEnhancer, /coach leaderboard empty ranking geometry/);
+  assert.match(parityEnhancer, /rows\.slice\(0,3\)/);
+  assert.match(parityEnhancer, /Math\.max\(0, 3 - rows\.length\)/);
   assert.match(parityEnhancer, /data-leaderboard-placeholder=\"true\"/);
   assert.match(parityEnhancer, /Open rank/);
-  assert.match(parityEnhancer, /Array\.from\(\{ length: 3 \}/);
 });
 
 test("duels preserve Incoming and Completed modules even when no challenge rows exist", () => {
