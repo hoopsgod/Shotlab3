@@ -86,7 +86,7 @@ if (!source.includes(panelMarker)) {
       />
       {rows.length ? (
         <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results">
-          {rows.slice(0,3).map((row) => (
+          {rows.slice(0, 3).map((row) => (
             <button
               type="button"
               className={styles.operationalRow + " coachLeaderboardRow"}
@@ -144,7 +144,7 @@ if (!followUpSource.includes(placementMarker)) {
     host.dataset.testid = HOST_TEST_ID;
     drawerBody.appendChild(host);`;
   followUpSource = followUpSource.replace(oldPlacement, newPlacement);
-  writeFileSync(followUpPath, followUpSource);
+  writeFileSync(followUpPath, source);
   changed = true;
 } else {
   console.log('Phase 3L Coach follow-up placement already applied.');
