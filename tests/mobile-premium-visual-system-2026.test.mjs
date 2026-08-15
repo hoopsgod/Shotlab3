@@ -95,14 +95,17 @@ test("persistent Player and Coach identity chrome is compact and secondary Playe
   assert.match(secondaryCohesionCss, /player-dashboard-identity-header"\]\>div\{[\s\S]*min-height:50px!important/);
 });
 
-test("mobile navigation is a quiet native edge tab bar, safe-area aware, and touch compliant", () => {
+test("mobile navigation is a ShotLab dark edge rail, safe-area aware, and touch compliant", () => {
   assert.match(mobileNav, /--mobile-tab-bar-height:\s*56px/);
   assert.match(mobileNav, /--bottom-nav-content-padding:\s*82px/);
   assert.match(mobileNav, /left:\s*0;[\s\S]*right:\s*0;[\s\S]*bottom:\s*0;/);
   assert.match(mobileNav, /width:\s*100%/);
   assert.match(mobileNav, /border-radius:\s*0/);
   assert.match(mobileNav, /min-height:\s*48px/);
-  assert.match(mobileNav, /dockItem\.active \.dockIcon \{ background: rgba\(126, 158, 30, \.10\); \}/);
+  assert.match(mobileNav, /background:\s*rgba\(7, 26, 34, \.975\)/);
+  assert.match(mobileNav, /dockItem\.active \.dockIcon \{ background: rgba\(200, 255, 26, \.08\); \}/);
+  assert.match(navArchitecture, /background:\s*rgba\(7, 26, 34, \.975\) !important/);
+  assert.match(navArchitecture, /button\[data-active="true"\] \{[\s\S]*color: #c8ff1a/);
   assert.match(navArchitecture, /transform: translateY\(4px\) scale\(\.995\) !important/);
   assert.match(navArchitecture, /prefers-reduced-transparency/);
   assert.doesNotMatch(navArchitecture, /translateX\(-50%\)/);
