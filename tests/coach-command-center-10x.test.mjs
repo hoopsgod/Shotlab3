@@ -139,11 +139,11 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(navigationCss,/--mobile-tab-bar-height:\s*56px/);
-  assert.match(navigationCss,/bottom:\s*0/);
-  assert.match(navigationCss,/backdrop-filter:\s*blur\(18px\) saturate\(118%\)/);
-  assert.match(navigationCss,/width:\s*100%/);
-  assert.match(navigationCss,/min-height:\s*48px/);
-  assert.doesNotMatch(navigationCss,/translateX\(-50%\)/);
+  assert.match(navigationCss,/\.dock\s*\{[\s\S]*?bottom:\s*0;/);
+  assert.match(navigationCss,/\.dock\s*\{[\s\S]*?backdrop-filter:\s*blur\(18px\) saturate\(118%\)/);
+  assert.match(navigationCss,/\.dock\s*\{[\s\S]*?width:\s*100%/);
+  assert.match(navigationCss,/\.dockItem\s*\{[\s\S]*?min-height:\s*48px/);
+  assert.doesNotMatch(navigationCss,/\.dock\s*\{[^}]*translateX\(-50%\)/s);
   assert.match(finalCss,/\.mcPrimary:active/);
   assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
