@@ -17,9 +17,7 @@
     box-sizing: border-box;
   }
 
-  /* Route stages previously retained a narrower desktop/legacy width on a few
-   * Coach screens, leaving a visible blank strip on the right. Mobile stages
-   * own the full width of their parent and are centered on the same axis. */
+  /* Native mobile stages keep the width of their parent and sit on its center axis. */
   html body #root [data-mobile-stage] {
     width: 100% !important;
     max-width: 100% !important;
@@ -29,9 +27,33 @@
   }
 
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="page-intro"],
-  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"],
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="supporting-evidence"],
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="page-tools"] {
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-self: stretch;
+    box-sizing: border-box;
+  }
+
+  /* CoachRoutePerformanceStage intentionally breaks out of the inner editorial
+   * gutter. Its legacy mobile rule shifted it left with negative margins but did
+   * not add those gutters back to the width, producing a visible blank strip on
+   * the right of S&C, Activity, and Leaderboards. Expand by both gutters so the
+   * stage is truly full-bleed and geometrically centered. */
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"][data-route-kind] {
+    width: calc(100% + var(--layout-gutter, 18px) + var(--layout-gutter, 18px)) !important;
+    max-width: none !important;
+    margin-left: calc(var(--layout-gutter, 18px) * -1) !important;
+    margin-right: calc(var(--layout-gutter, 18px) * -1) !important;
+    justify-self: stretch;
+    box-sizing: border-box;
+  }
+
+  /* Other decision surfaces that do not use the route-performance component
+   * remain centered inside their normal page gutter. */
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"]:not([data-route-kind]) {
     width: 100%;
     max-width: 100%;
     margin-left: auto !important;
