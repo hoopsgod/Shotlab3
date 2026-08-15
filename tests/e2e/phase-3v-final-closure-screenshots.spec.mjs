@@ -192,7 +192,7 @@ test("Phase 3 closure: Progress keeps development first and deep Profile data in
   await capture(page, "07g-phase3-final-player-account-expanded.png");
 });
 
-test("Phase 3 closure: Coach Mission Control remains intact on the shared native shell", async ({ page }) => {
+test("Phase 3 closure: Coach Mission Control remains intact on the shared dark native shell", async ({ page }) => {
   const dock = await enterDemo(page, "Coach");
   await expect(dock.getByRole("button", { name: "Home", exact: true })).toHaveAttribute("data-icon-name", "home");
   await expect(dock.getByRole("button", { name: "Players", exact: true })).toHaveAttribute("data-icon-name", "team");
@@ -201,7 +201,10 @@ test("Phase 3 closure: Coach Mission Control remains intact on the shared native
     outer: getComputedStyle(node).backgroundColor,
     inner: getComputedStyle(node.firstElementChild).backgroundColor,
   }));
-  expect(surface.outer).toBe("rgba(252, 252, 250, 0.9)");
+  const channels = (surface.outer.match(/[\d.]+/g) || []).map(Number);
+  expect(channels).toHaveLength(4);
+  expect(Math.max(...channels.slice(0, 3))).toBeLessThan(50);
+  expect(channels[3]).toBeGreaterThanOrEqual(.9);
   expect(surface.inner).toBe("rgba(0, 0, 0, 0)");
   await expectNoOverflow(page);
   await capture(page, "07h-phase3-final-coach-home.png");
