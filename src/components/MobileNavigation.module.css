@@ -1,56 +1,58 @@
 :global(:root) {
-  --bottom-nav-content-padding: 96px;
-  --mobile-tab-bar-height: 60px;
+  --bottom-nav-content-padding: 82px;
+  --mobile-tab-bar-height: 56px;
 }
 
 .dock {
   position: fixed;
-  left: 50%;
-  right: auto;
-  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 24;
-  width: min(430px, calc(100% - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
-  min-height: var(--mobile-tab-bar-height);
-  padding: 0;
+  width: 100%;
+  min-height: calc(var(--mobile-tab-bar-height) + env(safe-area-inset-bottom, 0px));
+  padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
   overflow: hidden;
-  border: 1px solid rgba(17, 26, 33, .10);
-  border-radius: 20px;
-  background: rgba(250, 249, 245, .94);
-  box-shadow: 0 10px 28px rgba(17, 26, 33, .13), 0 1px 4px rgba(17, 26, 33, .07);
-  -webkit-backdrop-filter: blur(18px) saturate(125%);
-  backdrop-filter: blur(18px) saturate(125%);
-  transform: translateX(-50%);
+  border: 0;
+  border-top: 1px solid rgba(17, 26, 33, .09);
+  border-radius: 0;
+  background: rgba(250, 249, 245, .965);
+  box-shadow: 0 -8px 22px rgba(17, 26, 33, .075);
+  -webkit-backdrop-filter: blur(18px) saturate(118%);
+  backdrop-filter: blur(18px) saturate(118%);
+  transform: none;
   pointer-events: auto;
+  box-sizing: border-box;
 }
 
 .dockInner {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  width: 100%;
+  width: min(100%, 430px);
   min-height: var(--mobile-tab-bar-height);
   margin: 0 auto;
-  padding: 4px 5px;
+  padding: 3px 8px max(4px, env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 
 .dockItem {
   position: relative;
   min-width: 0;
-  min-height: 50px;
+  min-height: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid transparent;
-  border-radius: 13px;
+  gap: 1px;
+  padding: 3px 4px;
+  border: 0;
+  border-radius: 11px;
   background: transparent;
-  color: var(--nav-inactive, #65717a);
+  color: var(--nav-inactive, #687279);
   cursor: pointer;
   touch-action: manipulation;
-  transition: color 140ms ease, transform 100ms ease, background 140ms ease;
+  transition: color 140ms ease, transform 100ms ease, opacity 140ms ease;
 }
 
 .dockItem:active { transform: scale(.97); }
@@ -63,32 +65,35 @@
 }
 
 .dockItem.active {
-  border-color: transparent;
-  background: rgba(126, 158, 30, .08);
+  background: transparent;
   color: var(--nav-active-text, #5f7600);
 }
 
 .dockIcon {
   position: relative;
-  width: 30px;
-  height: 24px;
+  width: 32px;
+  height: 27px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border-radius: 10px;
+  transition: background 140ms ease;
 }
 
+.dockItem.active .dockIcon { background: rgba(126, 158, 30, .10); }
+
 .dockIcon svg {
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
   stroke-width: 1.8;
 }
 
 .activeIndicator {
   position: absolute;
   left: 50%;
-  bottom: -3px;
-  width: 12px;
+  bottom: -2px;
+  width: 10px;
   height: 2px;
   border-radius: 999px;
   background: currentColor;
@@ -103,9 +108,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: var(--type-micro, 11px);
+  font-size: 10px;
   font-weight: 680;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -.01em;
 }
 
@@ -334,9 +339,8 @@
 }
 
 @media (max-width: 370px) {
-  .dock { width: calc(100% - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); border-radius: 20px; }
-  .dockInner { padding-inline: 3px; }
-  .dockLabelText { font-size: var(--type-micro, 11px); }
+  .dockInner { padding-inline: 4px; }
+  .dockLabelText { font-size: 9.5px; }
   .sheet { padding-inline: 10px; }
   .sheetSummary { max-width: 245px; }
 }
@@ -348,12 +352,15 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+
+  .dock { background: #faf9f5; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   .sheet,
   .dockItem,
+  .dockIcon,
   .sheetItem,
   .closeButton {
     animation: none;
