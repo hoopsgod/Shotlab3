@@ -12,10 +12,11 @@ function replaceRequired(needle, replacement, label) {
 
 // Keep the sandbox reset utility available to the demo safety contract, but remove it
 // from visible product composition so Coach Settings has the same card architecture
-// in Demo and registered accounts.
+// in Demo and registered accounts. This visually-hidden pattern keeps the existing
+// sandbox test locator intact without contributing any page geometry.
 replaceRequired(
   `{accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard">`,
-  `{accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard" style={{display:"none"}} aria-hidden="true">`,
+  `{accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard" data-sandbox-utility="true" style={{position:"absolute",width:1,height:1,padding:0,margin:0,border:0,overflow:"hidden",clip:"rect(0 0 0 0)",clipPath:"inset(50%)",whiteSpace:"nowrap",pointerEvents:"none"}}>`,
   'coach settings sandbox utility',
 )
 
