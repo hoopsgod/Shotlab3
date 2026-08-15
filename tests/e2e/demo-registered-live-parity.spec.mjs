@@ -215,19 +215,29 @@ async function applyRegisteredState(state) {
   }
   await rest("scores", { method: "POST", body: scoreRows });
 
-  await rest("shot_logs", {
-    method: "POST",
-    body: [{
-      id: `live-shotlog-primary-${RUN_ID}`,
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      player_id: PLAYER_EMAIL,
+  const shotLogRows = [{
+    id: `live-shotlog-primary-${RUN_ID}`,
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    player_id: PLAYER_EMAIL,
+    team_id: TEAM_ID,
+    made: state === "sparse" ? 45 : 125,
+    date: localDateKey(0),
+    ts: new Date(now + 2).toISOString(),
+  }];
+  if (state === "populated") {
+    shotLogRows.push({
+      id: `live-shotlog-ava-${RUN_ID}`,
+      email: extras[0].email,
+      name: extras[0].name,
+      player_id: extras[0].email,
       team_id: TEAM_ID,
-      made: state === "sparse" ? 45 : 125,
+      made: 110,
       date: localDateKey(0),
-      ts: new Date(now + 2).toISOString(),
-    }],
-  });
+      ts: new Date(now + 3).toISOString(),
+    });
+  }
+  await rest("shot_logs", { method: "POST", body: shotLogRows });
 
   if (state !== "populated") return;
 
