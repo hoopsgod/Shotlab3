@@ -6,10 +6,16 @@ import {
   onRequestGet as getStrengthState,
   onRequestPost as syncStrengthState,
   sanitizeScRsvp,
+  sanitizeScSession,
 } from "../functions/v1/strength-conditioning/index.js";
 import { createStrengthConditioningPersistenceService } from "../src/lib/strengthConditioningPersistenceService.js";
 import { __testUtils as bridgeUtils } from "../src/lib/apiFetchBridge.js";
-import { buildAppRows, normalizeScRsvpRowForApp } from "../src/lib/remotePersistence.js";
+import {
+  buildAppRows,
+  normalizeScRsvpRowForApp,
+  normalizeScSessionRowForApp,
+  normalizeScSessionRowForDb,
+} from "../src/lib/remotePersistence.js";
 
 const ENV = {
   SUPABASE_URL: "https://example.supabase.co",
@@ -117,6 +123,7 @@ const SESSION = {
   sport: "Team Lift",
   date: "2026-08-03",
   time: "8:00 AM",
+  location: "Weight Room",
   session_type: "School",
 };
 const PLAYER_RSVP = {
@@ -163,6 +170,7 @@ test("players receive shared sessions but only their own RSVP and log records", 
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.deepEqual(body.sessions.map((row) => row.id), ["lift-a"]);
+    assert.equal(body.sessions[0].location, "Weight Room");
     assert.deepEqual(body.rsvps.map((row) => row.email), ["player@example.com"]);
     assert.deepEqual(body.logs.map((row) => row.email), ["player@example.com"]);
     assert.equal(body.can_write_sessions, false);
@@ -228,6 +236,7 @@ test("coach replacement is team-scoped and supports empty collection deletion", 
     const body = await response.json();
     assert.equal(body.deleted_count, 1);
     assert.deepEqual(backend.state.sc_sessions.map((row) => row.id), ["lift-a"]);
+    assert.equal(backend.state.sc_sessions[0].location, "Weight Room");
 
     const empty = await syncStrengthState(context({
       method: "POST",
@@ -262,6 +271,25 @@ test("client rejects malformed successful responses and bridge recognizes all S&
   }
 });
 
+test("S&C session location survives API sanitization and remote browser normalization", () => {
+  const sanitized = sanitizeScSession(SESSION);
+  assert.equal(sanitized.location, "Weight Room");
+
+  const dbRow = normalizeScSessionRowForDb({
+    id: "lift-a",
+    teamId: "team-a",
+    sport: "Team Lift",
+    date: "2026-08-03",
+    time: "8:00 AM",
+    location: "Weight Room",
+    sessionType: "School",
+  });
+  assert.equal(dbRow.location, "Weight Room");
+
+  const appRow = normalizeScSessionRowForApp({ ...dbRow });
+  assert.equal(appRow.location, "Weight Room");
+});
+
 test("local S&C fallback preserves legacy IDs and absent timestamps exactly", () => {
   const localSessions = [{ id: 1785462812819, teamId: "team-a", sport: "Strength" }];
   const localRsvps = [{ id: "rsvp-a", teamId: "team-a", sessionId: "lift-a", email: "player@example.com" }];
@@ -277,6 +305,7 @@ test("local S&C fallback preserves legacy IDs and absent timestamps exactly", ()
 
 test("migration and application integration enforce a service-only signed boundary", () => {
   const migration = fs.readFileSync(new URL("../migrations/052_strength_conditioning_signed_api.sql", import.meta.url), "utf8");
+  const locationMigration = fs.readFileSync(new URL("../migrations/054_strength_conditioning_session_location.sql", import.meta.url), "utf8");
   const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
   const dataModels = fs.readFileSync(new URL("../src/lib/appDataModels.js", import.meta.url), "utf8");
   assert.match(migration, /create table if not exists public\.sc_sessions/i);
@@ -286,6 +315,7 @@ test("migration and application integration enforce a service-only signed bounda
   assert.match(migration, /revoke all privileges on table public\.sc_sessions, public\.sc_rsvps, public\.sc_logs\s+from public, anon, authenticated/i);
   assert.match(migration, /grant select, insert, update, delete on table public\.sc_sessions, public\.sc_rsvps, public\.sc_logs\s+to service_role/i);
   assert.doesNotMatch(migration, /create policy/i);
+  assert.match(locationMigration, /alter table if exists public\.sc_sessions[\s\S]*add column if not exists location text/i);
   assert.match(dataModels, /\[STORAGE_KEYS\.scSessions\]: "sc_sessions"/);
   assert.match(app, /const signedReplacementCollection = k === "sl:sc-sessions" \|\| k === "sl:sc-rsvps" \|\| k === "sl:sc-logs"/);
   assert.match(app, /await DB\.set\("sl:sc-sessions",m\.scSM\);\s*await Promise\.all/);

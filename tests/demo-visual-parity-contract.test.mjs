@@ -115,6 +115,16 @@ test('runtime parity mirrors the active demo team instead of assuming stored tea
   assert.doesNotMatch(runtimeParitySource, /const team = teams\[0\]/);
 });
 
+test('runtime parity canonicalizes only the Demo Coach settings sandbox utility', () => {
+  assert.match(runtimeParitySource, /if \(role !== "coach" \|\| key !== "settings"\) return;/);
+  assert.match(runtimeParitySource, /name: "DEMO SETTINGS", exact: true/);
+  assert.match(runtimeParitySource, /kind === "registered"/);
+  assert.match(runtimeParitySource, /Registered Coach settings must never expose demo reset controls/);
+  assert.match(runtimeParitySource, /Demo Coach settings must expose exactly one sandbox reset utility/);
+  assert.match(runtimeParitySource, /data-parity-excluded-sandbox-utility/);
+  assert.doesNotMatch(runtimeParitySource, /role !== "player" \|\| key !== "settings"/);
+});
+
 test('Phase 1 names the commercial comparison truthfully as demo versus registered', () => {
   for (const [label, source] of [
     ['focused parity spec', focusedParitySource],

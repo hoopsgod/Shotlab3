@@ -103,22 +103,27 @@ test('Phase 1 recognizes only explicit, pending, or durable demo persistence ses
   assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '?demo=1' }, now }), true)
 })
 
-test('demo sign-in establishes local-only persistence before seeding collections', () => {
+test('demo sign-in clears subscribed auth before establishing local-only demo persistence', () => {
   const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
   const start = appSource.indexOf('const demoSignIn=')
   const end = appSource.indexOf('const cleanupDemoPlayerSessionData=', start)
   const demoSignInSource = appSource.slice(start, end)
+  const authClear = demoSignInSource.indexOf('await supabase.auth.signOut()')
+  const legacySecretClear = demoSignInSource.indexOf('legacyAuthSecretRef.current={email:"",password:""}')
+  const demoModeMarker = demoSignInSource.indexOf('setDemoMode(true)')
   const sessionMarker = demoSignInSource.indexOf('await DB.set("sl:session",{email:acct.email})')
   const firstSeedWrite = demoSignInSource.indexOf('await savePlayers()')
 
   assert.ok(start >= 0 && end > start)
-  assert.ok(sessionMarker >= 0)
-  assert.ok(firstSeedWrite > sessionMarker)
+  assert.ok(authClear >= 0 && authClear < demoModeMarker)
+  assert.ok(legacySecretClear > authClear && legacySecretClear < demoModeMarker)
+  assert.ok(demoModeMarker >= 0 && demoModeMarker < sessionMarker)
+  assert.ok(sessionMarker >= 0 && firstSeedWrite > sessionMarker)
   assert.equal((demoSignInSource.match(/DB\.set\("sl:session"/g) || []).length, 1)
   assert.match(demoSignInSource, /shotlab:demo-session-started/)
 })
 
-test('Phase 1 keeps demo database writes local and demo leaderboards deterministic', () => {
+test('Phase 1 keeps demo database writes local and demo leaderboards deterministic through the capability boundary', () => {
   const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
   const databaseSetStart = appSource.indexOf('async set(k, v, options = {})')
   const databaseSetEnd = appSource.indexOf('\n};\n\nconst persistenceService', databaseSetStart)
@@ -132,10 +137,11 @@ test('Phase 1 keeps demo database writes local and demo leaderboards determinist
   const leaderboardStart = appSource.indexOf('const fetchHomeShotsLeaderboard=')
   const leaderboardEnd = appSource.indexOf('\n\nconst migrateData=', leaderboardStart)
   const leaderboardSource = appSource.slice(leaderboardStart, leaderboardEnd)
-  const demoFallback = leaderboardSource.indexOf('isDemoAccount(user)||isDemoMode()')
+  const capabilityBoundary = leaderboardSource.indexOf('if(accountCapabilities.isSandbox)')
   const remoteFetch = leaderboardSource.indexOf('await fetch(url')
 
   assert.ok(leaderboardStart >= 0 && leaderboardEnd > leaderboardStart)
-  assert.ok(demoFallback >= 0 && demoFallback < remoteFetch)
+  assert.ok(capabilityBoundary >= 0 && capabilityBoundary < remoteFetch)
+  assert.doesNotMatch(leaderboardSource, /isDemoMode\s*\(/)
   assert.match(leaderboardSource, /errorCode:"demo_local"/)
 })

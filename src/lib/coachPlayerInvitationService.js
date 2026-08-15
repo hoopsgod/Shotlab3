@@ -1,3 +1,5 @@
+import { buildAccountCapabilities, requireAccountCapability } from "./accountCapabilities.js";
+
 const clean = (value) => String(value ?? "").trim();
 const emailKey = (value) => clean(value).toLowerCase();
 
@@ -8,6 +10,7 @@ const errorMessage = (code, status = 0) => {
   if (status === 409 && code === "account_role_conflict") return "That email belongs to a coach account and cannot be added as a player.";
   if (status === 429 || code === "rate_limited") return "Too many invitation attempts. Wait briefly and try again.";
   if (code === "invalid_request") return "Enter a first name and a valid player email.";
+  if (code === "sandbox_action_blocked") return "Player invitations are disabled in the demo sandbox.";
   return "The player invitation could not be created. No password was generated or exposed.";
 };
 
@@ -38,6 +41,8 @@ export function buildCoachPlayerInviteEmailLink({ recipient, playerName, setupUr
 
 export async function provisionCoachPlayer({ coach, teamId, firstName, lastName, email, jerseyNumber, fetchImpl = globalThis.fetch } = {}) {
   const requester = emailKey(coach?.email);
+  const permission = requireAccountCapability(buildAccountCapabilities(coach), "canSendInvites");
+  if (!permission.ok) return permission;
   if (!requester || clean(coach?.role) !== "coach" || !clean(teamId) || typeof fetchImpl !== "function") {
     return { ok: false, error: "Only an authorized coach can invite a player." };
   }
@@ -63,6 +68,8 @@ export async function provisionCoachPlayer({ coach, teamId, firstName, lastName,
 
 export async function loadCoachPlayerInvitations({ coach, teamId, fetchImpl = globalThis.fetch } = {}) {
   const requester = emailKey(coach?.email);
+  const capabilities = buildAccountCapabilities(coach);
+  if (!capabilities.canSendInvites) return { ok: true, invitations: [], storageMode: "demo_local" };
   if (!requester || !clean(teamId) || typeof fetchImpl !== "function") return { ok: false, invitations: [] };
   try {
     const response = await fetchImpl(`/v1/coach/players/provision?team_id=${encodeURIComponent(clean(teamId))}`, { headers: { "x-user-id": requester } });

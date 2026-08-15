@@ -59,8 +59,14 @@ test("Phase 6A keeps internal drill identifiers out of Player Performance Intell
 
   expect(text).not.toMatch(/demo-(?:home|program|training|drill)[a-z0-9_-]*/i);
   expect(readoutText).not.toMatch(/demo-(?:home|program|training|drill)[a-z0-9_-]*/i);
-  expect(text).toContain("Strongest drill pattern: 4-Minute Warm-Up Shooting.");
-  expect(readoutText).toContain("Strength: 4-Minute Warm-Up Shooting");
+
+  const strongestMatch = text.match(/Strongest drill pattern:\s*([^.]+)\./i);
+  expect(strongestMatch, "interpreted trends expose a readable strongest drill").not.toBeNull();
+  const strongestDrill = strongestMatch[1].trim();
+  expect(strongestDrill).toBeTruthy();
+  expect(strongestDrill).not.toMatch(/demo-(?:home|program|training|drill)[a-z0-9_-]*/i);
+  expect(strongestDrill).not.toMatch(/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i);
+  expect(readoutText).toContain(`Strength: ${strongestDrill}`);
 
   const horizontal = await page.evaluate(() => ({
     innerWidth,

@@ -381,7 +381,28 @@ async function navigateToKey(page, key) {
   await settle(page);
 }
 
+async function canonicalizeAllowedSandboxUtility(page, role, kind, key) {
+  if (role !== "coach" || key !== "settings") return;
+
+  const sandboxCards = page.locator(".coachAdministrationCard").filter({
+    has: page.getByRole("heading", { name: "DEMO SETTINGS", exact: true }),
+  });
+
+  if (kind === "registered") {
+    await expect(sandboxCards, "Registered Coach settings must never expose demo reset controls").toHaveCount(0);
+    return;
+  }
+
+  await expect(sandboxCards, "Demo Coach settings must expose exactly one sandbox reset utility").toHaveCount(1);
+  await sandboxCards.evaluate((node) => {
+    node.setAttribute("data-parity-excluded-sandbox-utility", "true");
+    node.style.setProperty("display", "none", "important");
+  });
+  await settle(page);
+}
+
 async function captureFingerprint(page, role, kind, key) {
+  await canonicalizeAllowedSandboxUtility(page, role, kind, key);
   const demoEmail = DEMO_IDENTITIES[role].email;
   const registeredEmail = REGISTERED_IDENTITIES[role].email;
   const fingerprint = await page.evaluate(({ demoEmail, registeredEmail }) => {
@@ -396,10 +417,15 @@ async function captureFingerprint(page, role, kind, key) {
 
     return [...document.body.querySelectorAll("*")]
       .filter((node) => !excludedTags.has(node.tagName))
-      // Demo-data cleanup is intentionally state-dependent: the action is only
-      // available while managed sample data exists. It is not a paid/demo UI
-      // branch and therefore is outside the commercial surface comparison.
-      .filter((node) => !(node.tagName === "BUTTON" && normalizeText(node.textContent) === "CLEAR DEMO DATA"))
+      // Sandbox reset controls are an intentional capability-only difference:
+      // registered tenants must never be able to load or clear demo seed data.
+      // Exclude only that tightly identified utility card from product parity.
+      .filter((node) => {
+        const sandboxCard = node.closest?.(".coachAdministrationCard");
+        if (!sandboxCard) return true;
+        const isSandboxUtility = [...sandboxCard.querySelectorAll("h3")].some((heading) => normalizeText(heading.textContent) === "DEMO SETTINGS");
+        return !isSandboxUtility;
+      })
       .map((node) => {
         const rect = node.getBoundingClientRect();
         const style = getComputedStyle(node);
