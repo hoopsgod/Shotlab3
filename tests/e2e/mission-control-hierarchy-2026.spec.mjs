@@ -1,12 +1,9 @@
-import { mkdirSync } from "node:fs";
 import { test, expect } from "@playwright/test";
+import { mkdirSync } from "node:fs";
 
 const SCREENSHOT_DIR = "artifacts/mission-control-phase-2";
 
-test.use({
-  viewport: { width: 390, height: 844 },
-  reducedMotion: "reduce",
-});
+const rgbChannels = (value = "") => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
 
 async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -25,7 +22,7 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
-const rgbChannels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
 
 test.beforeAll(() => mkdirSync(SCREENSHOT_DIR, { recursive: true }));
 
@@ -98,6 +95,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
       teamSelectDisplay: teamSelectStyle.display,
       attentionBackground: attentionStyle?.backgroundColor || "",
+      attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 99,
+      attentionShadow: attentionStyle?.boxShadow || "",
       attentionTitleColor: attentionTitleStyle?.color || "",
     };
   });
@@ -117,8 +116,11 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.supportingBackground).toBe("rgba(0, 0, 0, 0)");
   expect(presentation.metricColumns).toBe(3);
   expect(presentation.teamSelectDisplay).toBe("none");
-  expect(presentation.attentionBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
+  expect(presentation.attentionShadow).toBe("none");
   expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
+  const attentionChannels = rgbChannels(presentation.attentionBackground);
+  if (attentionChannels.length === 3) expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
 
   await expectNoHorizontalOverflow(page);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });
