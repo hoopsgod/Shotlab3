@@ -1,0 +1,25 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+const appPath = path.resolve(process.cwd(), 'src/App.jsx')
+let source = fs.readFileSync(appPath, 'utf8')
+
+const marker = 'trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:p.role||"player",teamId:p.teamId||null});\nawait hydratePersistedData();\nreturn{ok:true};'
+const needle = 'trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:p.role||"player",teamId:p.teamId||null});\nreturn{ok:true};'
+
+if (source.includes(marker)) {
+  console.log('Registered post-auth persistence hydration already applied.')
+  process.exit(0)
+}
+
+if (!source.includes(needle)) {
+  throw new Error('Could not locate the registered login completion boundary in src/App.jsx.')
+}
+
+source = source.replace(
+  needle,
+  'trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:p.role||"player",teamId:p.teamId||null});\nawait hydratePersistedData();\nreturn{ok:true};',
+)
+
+fs.writeFileSync(appPath, source)
+console.log('Applied registered post-auth persistence hydration.')
