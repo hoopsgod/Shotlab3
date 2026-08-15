@@ -7,6 +7,14 @@ const DEFAULT_PLAYER_EMPTY = "No leaderboard data yet. Log shots to enter the ra
 const DEFAULT_COACH_EMPTY = "No team leaderboard data yet. Players will appear here after they log shots.";
 const DEFAULT_ERROR = "Leaderboard data is temporarily unavailable. Saved training results are still safe.";
 
+function OpenRankRow({ index = 0 }) {
+  return <div key={`open-rank-${index}`} data-leaderboard-placeholder="true" style={{ display: "grid", gridTemplateColumns: "44px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding:"8px 2px", minHeight:52, opacity:.5 }}>
+    <div style={{ width:32, height:32, borderRadius:999, border:"1px dashed var(--stroke-2)", display:"grid", placeItems:"center", color:"var(--text-3)", fontSize:11, fontWeight:900 }}>—</div>
+    <div style={{ color:"var(--text-3)", fontSize:12, fontWeight:700 }}>Open rank</div>
+    <div style={{ color:"var(--text-3)", fontSize:11, fontWeight:800 }}>—</div>
+  </div>;
+}
+
 export default function CompactLeaderboardPreviewCard({
   title = "Team Leaders",
   rows = [],
@@ -47,7 +55,12 @@ export default function CompactLeaderboardPreviewCard({
       ? "Rankings need a retry"
       : isCoachMode ? "Recognition starts with activity" : "Your ranking starts with a result";
   const reservedRows = Math.max(previewRows.length, Math.min(Math.max(1, minimumRows), Math.max(1, limit)));
-  const openRowCount = displayState === "ready" ? Math.max(0, reservedRows - previewRows.length) : 0;
+  const openRowCount = displayState === "ready"
+    ? Math.max(0, reservedRows - previewRows.length)
+    : displayState === "empty"
+      ? reservedRows
+      : 0;
+  const keepsRankingFrame = displayState === "ready" || displayState === "empty";
 
   return (
     <section
@@ -69,8 +82,12 @@ export default function CompactLeaderboardPreviewCard({
         </div>
       </div>
 
-      {displayState === "ready" ? (
-        <div style={{ display: "grid", marginTop: 10 }} data-testid="leaderboard-ready-state">
+      {keepsRankingFrame ? (
+        <div style={{ display: "grid", marginTop: 10 }} data-testid={displayState === "ready" ? "leaderboard-ready-state" : "leaderboard-empty-state"}>
+          {displayState === "empty" ? <div style={{ minHeight:44, display:"grid", alignContent:"center", borderBottom:"1px solid var(--stroke-1)", padding:"4px 2px 8px" }}>
+            <div style={{ color:"var(--text-2)", fontSize:11, fontWeight:800 }}>{recoveryTitle}</div>
+            <div style={{ color:"var(--text-3)", fontSize:10, lineHeight:1.35, marginTop:2 }}>{message}</div>
+          </div> : null}
           {previewRows.map((entry,index) => {
             const displayName = entry.player_display_name || entry.displayName || entry.name || (entry.email ? String(entry.email).split("@")[0] : "Player");
             const scoreValue = entry.metricValue ?? entry.total_home_shots ?? entry.score ?? entry.total ?? "";
@@ -87,20 +104,13 @@ export default function CompactLeaderboardPreviewCard({
               <div style={{ color: index===0?"var(--text-1)":"var(--text-2)", fontSize: 13, fontWeight: 800 }}>{scoreValue}</div>
             </div>;
           })}
-          {Array.from({ length: openRowCount }, (_, placeholderIndex) => {
-            const visualIndex = previewRows.length + placeholderIndex;
-            return <div key={`open-rank-${visualIndex}`} data-leaderboard-placeholder="true" style={{ display: "grid", gridTemplateColumns: "44px 1fr auto", alignItems: "center", gap: 9, borderTop:"1px solid var(--stroke-1)", padding:"8px 2px", minHeight:52, opacity:.5 }}>
-              <div style={{ width:32, height:32, borderRadius:999, border:"1px dashed var(--stroke-2)", display:"grid", placeItems:"center", color:"var(--text-3)", fontSize:11, fontWeight:900 }}>—</div>
-              <div style={{ color:"var(--text-3)", fontSize:12, fontWeight:700 }}>Open rank</div>
-              <div style={{ color:"var(--text-3)", fontSize:11, fontWeight:800 }}>—</div>
-            </div>;
-          })}
+          {Array.from({ length: openRowCount }, (_, placeholderIndex) => <OpenRankRow key={`open-rank-${placeholderIndex}`} index={previewRows.length + placeholderIndex} />)}
         </div>
       ) : (
         <div style={{ marginTop: 10 }}>
           <ShotLabStatePanel
             state={recoveryState}
-            eyebrow={displayState === "loading" ? "Live team data" : displayState === "error" ? "Data recovery" : isCoachMode ? "Recognition" : "First ranking"}
+            eyebrow={displayState === "loading" ? "Live team data" : "Data recovery"}
             title={recoveryTitle}
             detail={message}
             actionLabel={displayState === "error" && typeof onRetry === "function" ? "Retry leaderboard" : undefined}
