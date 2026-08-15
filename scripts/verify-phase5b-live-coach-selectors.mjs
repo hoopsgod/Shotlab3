@@ -14,8 +14,8 @@ const builtCss = fs.readdirSync(assetsDir)
   .join('\n')
 
 const requiredSelectors = [
-  '.mcRafters',
-  '.mcRafters span:nth-child(4)',
+  '.mcCourtArtwork',
+  '.mcCourtFloor',
   '.mcRailBrand',
   '.mcRailBrand .mcRailLogo',
   '.mcDrawerLogo',
@@ -28,6 +28,10 @@ if (missing.length) {
 }
 
 const coachSource = fs.readFileSync(coachSourcePath, 'utf8')
+if (!/className="mcTacticalCourt"/.test(coachSource) || !/<svg\b/.test(coachSource)) {
+  throw new Error('Phase 5B could not verify the live tactical Coach court artwork contract')
+}
+
 const brandLockup = coachSource.match(/<div className="mcBrandLockup">([\s\S]*?)<\/div>/)?.[1]
 if (!brandLockup) {
   throw new Error('Phase 5B could not verify the Coach brand-lockup DOM contract')
@@ -46,4 +50,4 @@ if (/<img\b/.test(brandLockup)) {
   }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach brand-image sizing contract verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); tactical court and live Coach brand-image sizing contracts verified`)
