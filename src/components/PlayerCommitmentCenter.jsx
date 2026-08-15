@@ -4,6 +4,7 @@ import styles from "./PlayerCommitmentCenter.module.css";
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const clean = (value) => String(value ?? "").trim();
 const normalize = (value) => clean(value).toLowerCase();
+const RUNWAY_SLOTS = 3;
 
 function rowDate(row = {}) {
   return clean(row?.date || row?.session_date || row?.created_at).slice(0, 10);
@@ -82,6 +83,22 @@ function QueueRow({ item, mode, confirmed }) {
   );
 }
 
+function QueuePlaceholder({ mode, index }) {
+  return (
+    <div className={`${styles.queueRow} ${styles.queuePlaceholder || ""}`} data-empty-slot="true">
+      <div className={styles.queueDate} aria-hidden="true">
+        <strong>—</strong>
+        <span>OPEN</span>
+      </div>
+      <div className={styles.queueCopy}>
+        <strong>{mode === "strength" ? "Development slot open" : "Schedule slot open"}</strong>
+        <span>{index === 0 ? "Your next published commitment will appear here." : "No additional commitment is scheduled in this slot."}</span>
+      </div>
+      <span className={`${styles.queueStatus} ${styles.confirmed}`}>CLEAR</span>
+    </div>
+  );
+}
+
 export default function PlayerCommitmentCenter({
   mode = "events",
   model,
@@ -137,6 +154,8 @@ export default function PlayerCommitmentCenter({
         : isStrength
           ? "Open S&C workspace"
           : "Open schedule";
+  const runwayItems = state.upcoming.slice(0, RUNWAY_SLOTS);
+  const runwayPlaceholders = Math.max(0, RUNWAY_SLOTS - runwayItems.length);
 
   const revealDetails = () => {
     setDetailsOpen(true);
@@ -207,24 +226,25 @@ export default function PlayerCommitmentCenter({
         </div>
       </div>
 
-      {state.upcoming.length > 0 && (
-        <div className={styles.queue} data-testid={`player-commitment-queue-${mode}`}>
-          <div className={styles.queueHeading}>
-            <div><span>COMING UP</span><strong>{isStrength ? "Development runway" : "Team runway"}</strong></div>
-            <small>{Math.min(3, state.upcoming.length)} of {state.upcoming.length}</small>
-          </div>
-          <div className={styles.queueList}>
-            {state.upcoming.slice(0, 3).map((item) => (
-              <QueueRow
-                key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item, mode)}`}
-                item={item}
-                mode={mode}
-                confirmed={state.confirmed.some((confirmedItem) => clean(confirmedItem?.id) === clean(item?.id))}
-              />
-            ))}
-          </div>
+      <div className={styles.queue} data-testid={`player-commitment-queue-${mode}`} data-runway-slots={RUNWAY_SLOTS}>
+        <div className={styles.queueHeading}>
+          <div><span>COMING UP</span><strong>{isStrength ? "Development runway" : "Team runway"}</strong></div>
+          <small>{Math.min(RUNWAY_SLOTS, state.upcoming.length)} of {state.upcoming.length}</small>
         </div>
-      )}
+        <div className={styles.queueList}>
+          {runwayItems.map((item) => (
+            <QueueRow
+              key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item, mode)}`}
+              item={item}
+              mode={mode}
+              confirmed={state.confirmed.some((confirmedItem) => clean(confirmedItem?.id) === clean(item?.id))}
+            />
+          ))}
+          {Array.from({ length: runwayPlaceholders }, (_, index) => (
+            <QueuePlaceholder key={`empty-runway-${index}`} mode={mode} index={index} />
+          ))}
+        </div>
+      </div>
 
       <details
         ref={detailsRef}
