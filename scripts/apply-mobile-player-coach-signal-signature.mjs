@@ -40,8 +40,8 @@ export function promotePlayerCoachSignal(source) {
   filter: blur(32px);
   pointer-events: none;
 }`.trimStart(),
-    '.hero::after{content:"02";position:absolute;z-index:0;top:34px;right:6px;color:rgba(200,255,26,.11);font:850 124px/.76 sans-serif;letter-spacing:-.095em;pointer-events:none}',
-    'Player editorial numeral',
+    '.hero::after{display:none}',
+    'Player decorative layer removal',
   );
   next = replaceOnce(next,
     '@media (max-width: 700px) {\n  /* Mobile Product Reset — Phase 1: one decision, one CTA, then evidence. */',
@@ -98,6 +98,25 @@ export function promotePlayerCoachSignalComponent(source) {
     'const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" };',
     'const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" };',
     'Player Coach Assignment supporting-value clamp',
+  );
+  next = replaceOnce(
+    next,
+    'const dailyComplete = Number(model.daily?.pct) >= 100 || primary.urgency === "complete";',
+    'const dailyComplete = Number(model.daily?.pct) >= 100 || primary.urgency === "complete";\n  const dailyPct = Math.min(Math.max(Number(model.daily?.pct) || 0, 0), 100);',
+    'Player live daily progress value',
+  );
+  next = replaceOnce(
+    next,
+`        <h1 className={styles.title}>{dailyComplete ? "Daily work banked." : primary.title}</h1>`,
+`        <div data-testid="player-daily-progress-seal" aria-hidden="true" style={{ position: "absolute", right: 18, top: 74, width: 88, height: 88, display: "grid", placeItems: "center", pointerEvents: "none", zIndex: 0 }}>
+          <svg viewBox="0 0 88 88" width="88" height="88" style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}>
+            <circle cx="44" cy="44" r="35" pathLength="100" fill="rgba(6,24,32,.34)" stroke="rgba(220,235,241,.14)" strokeWidth="5" />
+            <circle cx="44" cy="44" r="35" pathLength="100" fill="none" stroke="#c8ff1a" strokeWidth="5" strokeLinecap="round" strokeDasharray={\`${dailyPct} 100\`} />
+          </svg>
+          <span style={{ display: "grid", placeItems: "center", color: "#f5f8f9", fontSize: 24, fontWeight: 820, lineHeight: .9, letterSpacing: "-.045em" }}>{Math.round(dailyPct)}<small style={{ display: "block", marginTop: 4, color: "#a9b9bf", fontSize: 9, fontWeight: 760, letterSpacing: ".09em" }}>% TODAY</small></span>
+        </div>
+        <h1 className={styles.title}>{dailyComplete ? "Daily work banked." : primary.title}</h1>`,
+    'Player live progress seal',
   );
   next = replaceOnce(
     next,
