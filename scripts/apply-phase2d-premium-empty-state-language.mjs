@@ -28,6 +28,21 @@ const replaceFirstKnown = (pairs, label) => {
 };
 
 const cssImport = 'import "./Phase2PremiumEmptyStateLanguage.css";';
+
+// This enhancer is a one-way semantic migration. Route preparation intentionally
+// runs more than once in CI (production build, then Playwright webServer), and
+// downstream enhancers are free to normalize the JSX installed here. Once the
+// stable Phase 2D component + stylesheet markers exist, never attempt to replay
+// the original source-text transforms against that downstream-normalized source.
+const semanticPassAlreadyApplied = next.includes(cssImport)
+  && next.includes('data-phase2-empty-state')
+  && next.includes('phase2-empty-state-label')
+  && next.includes('phase2-empty-state-message');
+if (semanticPassAlreadyApplied) {
+  console.log('Phase 2D premium semantic operational-state language already applied; preserving downstream normalization.');
+  process.exit(0);
+}
+
 if (!next.includes(cssImport)) {
   const anchor = 'import styles from "./CoachDashboardPhase2.module.css";';
   const matches = next.split(anchor).length - 1;
@@ -88,9 +103,10 @@ replaceOnce(
   'follow-up cleared state',
 );
 
-// The mobile parity pass can replace the filtered leaderboard empty state with a fixed
-// ranking frame during a prior build. Treat that state as satisfying this semantic pass
-// so build -> dev enhancer execution is repeatable.
+// The mobile secondary-page parity enhancer may already have replaced the filtered
+// leaderboard empty state with a fixed three-row ranking frame during a prior build.
+// Treat that normalized state as satisfying this semantic-language pass so repeated
+// build -> dev enhancer execution remains idempotent.
 const leaderboardParityAlreadyApplied = next.includes('data-parity-empty-slot="true"')
   && next.includes('data-leaderboard-placeholder="true"')
   && next.includes('Player activity will fill this ranking position.');
@@ -130,16 +146,7 @@ const activityAfter = `      {rows.length ? (
           <EmptyState label="Filtered activity" kind="filter">No team activity matches the selected view.</EmptyState>
         </div>
       )}`;
-
-// The Coach intelligence parity pass owns the final fixed six-row runway. On a second
-// enhancer execution the original Phase 2D branch no longer exists by design; the
-// runway is the semantic successor and must be accepted rather than treated as drift.
-const activityParityAlreadyApplied = next.includes('data-testid="coach-activity-intelligence-results" data-parity-slot-count="6"')
-  && next.includes('data-activity-placeholder="true"')
-  && next.includes('New team activity will appear here.');
-if (!activityParityAlreadyApplied) {
-  replaceOnce(activityBefore, activityAfter, 'activity no-results state');
-}
+replaceOnce(activityBefore, activityAfter, 'activity no-results state');
 
 for (const required of [
   cssImport,
@@ -150,14 +157,11 @@ for (const required of [
   'label="Activity status" kind="activity">No player activity recorded yet.',
   'label="Response status" kind="attendance"',
   'label="Follow-up cleared" tone="positive" kind="complete"',
+  'No team activity matches the selected view.',
 ]) {
   if (!next.includes(required)) {
     throw new Error(`[phase2d-empty-state-language] premium semantic state contract missing: ${required}`);
   }
-}
-
-if (!activityParityAlreadyApplied && !next.includes('No team activity matches the selected view.')) {
-  throw new Error('[phase2d-empty-state-language] activity semantic state contract missing.');
 }
 
 if (next !== source) writeFileSync(path, next);
