@@ -10,6 +10,8 @@ function replaceRequired(needle, replacement, label) {
   source = source.replace(needle, replacement)
 }
 
+const duelEmptyCard = (title, detail) => `<div data-duel-empty-slot="true" style={{background:"rgba(255,255,255,0.66)",border:"1px solid var(--stroke-1)",borderRadius:14,padding:"12px 14px",marginBottom:10,minHeight:86,display:"grid",alignContent:"center",gap:4}}><div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800}}>${title}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,lineHeight:1.35}}>${detail}</div></div>`
+
 // Keep the sandbox reset utility available to the demo safety contract, but remove it
 // from visible product composition so Coach Settings has the same card architecture
 // in Demo and registered accounts. This visually-hidden pattern keeps the existing
@@ -24,7 +26,7 @@ replaceRequired(
 // Completed modules remain in the same order instead of swapping to a different page.
 replaceRequired(
   `{pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={\`${'${pending.length}'} WAITING\`}/>` ,
-  `{<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={\`${'${pending.length}'} WAITING\`}/>{pending.length===0&&<Empty t="No incoming duels" action="New teammate challenges will appear here."/>}` ,
+  `{<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={\`${'${pending.length}'} WAITING\`}/>{pending.length===0&&${duelEmptyCard('No incoming duels','New teammate challenges will appear here.')}}` ,
   'duels incoming section',
 )
 replaceRequired(
@@ -39,7 +41,7 @@ replaceRequired(
 )
 replaceRequired(
   `{resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}` ,
-  `{resolved.length===0&&<Empty t="No completed duels yet" action="Completed teammate challenges will be collected here."/>}` ,
+  `{resolved.length===0&&${duelEmptyCard('No completed duels yet','Completed teammate challenges will be collected here.')}}` ,
   'duels completed empty state',
 )
 
