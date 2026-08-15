@@ -133,8 +133,9 @@ test("registered hydration fails closed when the signed players payload does not
   assert.ok(result.failures.includes("sl:players:authenticated_identity_missing"));
 });
 
-test("production route enhancer finishes authenticated data hydration before exposing the mobile workspace", () => {
+test("production route enhancers are idempotent and finish authenticated data hydration before exposing the mobile workspace", () => {
   const enhancer = fs.readFileSync(new URL("../scripts/apply-post-auth-persistence-hydration.mjs", import.meta.url), "utf8");
+  const signedReadsEnhancer = fs.readFileSync(new URL("../scripts/apply-legacy-signed-collection-reads.mjs", import.meta.url), "utf8");
   const auth = fs.readFileSync(new URL("../src/components/AuthWorkspace.jsx", import.meta.url), "utf8");
   const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 
@@ -143,7 +144,13 @@ test("production route enhancer finishes authenticated data hydration before exp
   assert.match(enhancer, /hydrateAuthenticatedCollectionsToStorage\(\{expectedIdentity:normalizeEmail\(p\.email\)\}\)/);
   assert.match(enhancer, /await hydratePersistedData\(\)/);
   assert.match(enhancer, /setUserIndex < hydrateIndex/);
+  assert.match(enhancer, /Authenticated persistence import must exist exactly once after enhancement/);
+  assert.match(enhancer, /source\.split\(signedImport\)\.join\(''\)/);
+  assert.match(enhancer, /combinedOccurrences > 1/);
   assert.match(enhancer, /AuthWorkspace must not trigger a second post-login hydration\/reload/);
+
+  assert.match(signedReadsEnhancer, /const combinedImport = 'import \{ hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection \}/);
+  assert.match(signedReadsEnhancer, /!source\.includes\(importLine\) && !source\.includes\(combinedImport\)/);
 
   assert.match(auth, /hydrateAuthenticatedCollectionsToStorage/);
   assert.match(auth, /window\.location\?\.reload/);
