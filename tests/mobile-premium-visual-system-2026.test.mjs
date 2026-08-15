@@ -17,10 +17,12 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
 test("major functional page intros are compact instead of oversized title stages", () => {
   assert.match(enhancer, /grid-template-columns:\s*34px minmax\(0, 1fr\)/);
   assert.match(enhancer, /font-size:\s*clamp\(29px, 8vw, 34px\)/);
-  assert.match(enhancer, /padding:\s*3px 0 14px/);
+  assert.match(enhancer, /padding:\s*3px 0 12px/);
+  assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
   assert.match(enhancer, /\.secondaryPageDecision/);
   assert.match(enhancer, /min-height:\s*0/);
-  assert.match(enhancer, /font-size:\s*clamp\(24px, 7vw, 29px\)/);
+  assert.match(enhancer, /\.secondaryPageDecision::after,[\s\S]*\.secondaryPageDecision__icon,[\s\S]*\.secondaryPageDecision__visual \{ display: none; \}/);
+  assert.match(enhancer, /font-size:\s*clamp\(23px, 6\.4vw, 27px\)/);
   assert.match(enhancer, /@media \(max-width: 390px\)/);
 });
 
