@@ -248,6 +248,25 @@ html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetri
     padding: 8px 14px 12px !important;
   }
 
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > strong {
+    white-space: normal;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics > div {
+    min-height: 84px;
+    padding: 11px 12px;
+  }
+
   [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow {
     grid-template-columns: 38px minmax(0, 1fr) auto;
     min-height: 68px;
@@ -266,9 +285,9 @@ html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetri
   }
 }
 
-@media (max-width: 390px) {
+@media (max-width: 340px) {
   [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
