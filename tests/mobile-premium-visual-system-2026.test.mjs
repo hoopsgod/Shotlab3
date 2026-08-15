@@ -100,8 +100,11 @@ test("persistent Player and Coach identity chrome uses compact signature stages 
   assert.match(playerHeader, /data-identity-role="badge"\]\{[\s\S]*color:#c8ff1a!important/);
   assert.match(playerHeader, /data-identity-role="name"\]\{[\s\S]*font-size:25px!important/);
   assert.match(coachHeader, /data-mobile-chrome="native-identity"/);
-  assert.match(coachHeader, /grid-template-columns:44px minmax\(0,1fr\)!important/);
-  assert.match(coachHeader, /min-height:62px!important/);
+  assert.match(coachHeader, /grid-template-columns:66px minmax\(0,1fr\)!important/);
+  assert.match(coachHeader, /min-height:102px!important/);
+  assert.match(coachHeader, /linear-gradient\(126deg,#061923 0%,#082430 58%,#0b2d37 100%\)!important/);
+  assert.match(coachHeader, /data-identity-role="badge"\]\{[\s\S]*color:#c8ff1a!important/);
+  assert.match(coachHeader, /data-identity-role="brand-button"\]\{[\s\S]*width:44px!important;[\s\S]*min-height:44px!important/);
   assert.match(coachHeader, /aria-label="Team Branding Settings"/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
