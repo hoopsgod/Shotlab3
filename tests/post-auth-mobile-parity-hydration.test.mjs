@@ -110,6 +110,38 @@ test("registered post-auth hydration requires every mobile-visible signed collec
   }
 });
 
+test("registered startup overlaps independent signed collection reads instead of serializing mobile login", async () => {
+  const storage = memoryStorage([["sl:session", JSON.stringify({ email: REGISTERED_EMAIL })]]);
+  let active = 0;
+  let maxActive = 0;
+  const started = [];
+
+  const fetchImpl = async (path, options = {}) => {
+    started.push(String(path));
+    assert.equal(new Headers(options.headers || {}).get("x-user-id"), REGISTERED_EMAIL);
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    await new Promise((resolve) => setTimeout(resolve, 8));
+    active -= 1;
+    const payload = endpointPayloads[path];
+    assert.ok(payload, `unexpected signed collection request: ${path}`);
+    return jsonResponse(payload);
+  };
+
+  const result = await hydrateAuthenticatedCollectionsToStorage({
+    fetchImpl,
+    storage,
+    expectedIdentity: REGISTERED_EMAIL,
+    groupAttempts: 1,
+    sessionWaitMs: 20,
+    sessionPollMs: 1,
+  });
+
+  assert.equal(result.ok, true, result.failures.join(" | "));
+  assert.ok(maxActive > 1, `expected overlapping signed collection reads; observed maximum concurrency ${maxActive}`);
+  assert.equal(new Set(started).size, 9, "all nine independent authenticated collection endpoints must participate in startup hydration");
+});
+
 test("registered hydration fails closed when the signed players payload does not contain the authenticated identity", async () => {
   const storage = memoryStorage([["sl:session", JSON.stringify({ email: REGISTERED_EMAIL })]]);
   const fetchImpl = async (path) => {
