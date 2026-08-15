@@ -6,10 +6,10 @@ html body #root .performance-workspace--coach.page {
 }
 
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero {
-  background-color: #0d171e !important;
+  background-color: #071c28 !important;
   background-image:
-    radial-gradient(circle at 92% 6%, color-mix(in srgb, var(--mc, #c8ff1a) 18%, transparent), transparent 34%),
-    linear-gradient(145deg, #0d171e 0%, #13222b 100%) !important;
+    radial-gradient(circle at 88% 12%, rgba(200,255,26,.13), transparent 28%),
+    linear-gradient(145deg, #071c28 0%, #0b2b36 62%, #071820 100%) !important;
 }
 
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroContent {
@@ -49,7 +49,7 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
     margin-left: calc(50% - 50vw) !important;
     margin-right: calc(50% - 50vw) !important;
     overflow-x: clip;
-    box-shadow: 0 -32px 0 #071c28 !important;
+    box-shadow: 0 -36px 0 #071c28 !important;
   }
 
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
@@ -59,34 +59,174 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
     padding-right: max(12px, env(safe-area-inset-right));
   }
 
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeader {
+    min-height: 92px !important;
+    padding-top: max(14px, env(safe-area-inset-top)) !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid rgba(220,235,241,.09) !important;
+    background: #071c28 !important;
+  }
+
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcBrandCopy small {
     display: block;
     overflow: hidden;
+    color: #c8ff1a !important;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcBrandCopy strong {
+    color: #f5f8f9 !important;
+    -webkit-text-fill-color: #f5f8f9 !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcTeamSelect {
+    display: inline-flex !important;
+    width: auto !important;
+    min-width: 44px !important;
+    max-width: 72px !important;
+    min-height: 38px !important;
+    padding: 0 9px !important;
+    border: 1px solid rgba(220,235,241,.13) !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.035) !important;
+    color: #dbe4e8 !important;
+    font-size: 10px !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero {
+    min-height: 430px !important;
+    margin: 0 -12px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero::before {
     content: "01" !important;
     display: block !important;
-    z-index: 4 !important;
-    inset: 34px 12px auto auto !important;
+    z-index: 1 !important;
+    inset: 42px 10px auto auto !important;
     width: auto !important;
     height: auto !important;
     padding: 0 !important;
     background: none !important;
-    color: rgba(200,255,26,.075) !important;
+    color: rgba(200,255,26,.09) !important;
     opacity: 1 !important;
-    font: 850 136px/.78 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif !important;
-    letter-spacing: -.09em !important;
+    font: 850 154px/.76 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif !important;
+    letter-spacing: -.095em !important;
     mix-blend-mode: normal !important;
   }
 
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 20px !important;
+    top: 72px !important;
+    width: 4px !important;
+    height: 72px !important;
+    border-radius: 999px !important;
+    background: #c8ff1a !important;
+    opacity: 1 !important;
+    z-index: 5 !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroContent {
+    grid-template-columns: minmax(0,1fr) !important;
+    min-height: 430px !important;
+    padding: 72px 20px 26px 38px !important;
+    align-content: end !important;
+    gap: 10px !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroTeamMark {
+    display: grid !important;
+    place-items: center !important;
+    top: 34px !important;
+    right: 22px !important;
+    width: 104px !important;
+    height: 104px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: .16 !important;
+    z-index: 3 !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroTeamMark img {
+    width: 96px !important;
+    height: 96px !important;
+    max-width: 96px !important;
+    max-height: 96px !important;
+    object-fit: contain !important;
+  }
+
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero h1 {
-    max-width: 8ch !important;
-    font-size: 46px !important;
-    line-height: .88 !important;
-    letter-spacing: -.055em !important;
+    position: relative !important;
+    z-index: 6 !important;
+    max-width: 7.2ch !important;
+    margin-top: auto !important;
+    font-size: clamp(50px,13.2vw,58px) !important;
+    line-height: .84 !important;
+    letter-spacing: -.063em !important;
+    text-wrap: balance !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroContent > p {
+    position: relative !important;
+    z-index: 6 !important;
+    max-width: 28ch !important;
+    margin-top: 4px !important;
+    color: #b8c5cb !important;
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcCourtArtwork {
+    opacity: .72 !important;
+    filter: contrast(1.05) saturate(.86) !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip {
+    position: relative !important;
+    z-index: 7 !important;
+    margin: 20px 0 0 !important;
+    padding-top: 14px !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(220,235,241,.12) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip > button {
+    min-height: 64px !important;
+    padding: 6px 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip strong {
+    color: #f5f8f9 !important;
+    -webkit-text-fill-color: #f5f8f9 !important;
+    font-size: 29px !important;
+    letter-spacing: -.05em !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip small {
+    color: #9fb0b7 !important;
+    -webkit-text-fill-color: #9fb0b7 !important;
+    font-size: 10px !important;
+    letter-spacing: .06em !important;
+    text-transform: uppercase !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcPrimary {
+    min-height: 54px !important;
+    margin-top: 16px !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
   }
 }
 
