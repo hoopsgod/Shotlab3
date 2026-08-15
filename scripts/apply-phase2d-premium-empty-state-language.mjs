@@ -131,7 +131,16 @@ const activityAfter = `      {rows.length ? (
           <EmptyState label="Filtered activity" kind="filter">No team activity matches the selected view.</EmptyState>
         </div>
       )}`;
-replaceOnce(activityBefore, activityAfter, 'activity no-results state');
+
+// Downstream mobile/parity enhancers are allowed to normalize the surrounding
+// activity markup after this semantic state is installed. On a later build/dev
+// pass, recognize the stable semantic outcome rather than requiring the exact
+// pre-normalization JSX block to still be byte-for-byte present.
+const activitySemanticAlreadyApplied = next.includes('label="Filtered activity" kind="filter"')
+  && next.includes('No team activity matches the selected view.');
+if (!activitySemanticAlreadyApplied) {
+  replaceOnce(activityBefore, activityAfter, 'activity no-results state');
+}
 
 for (const required of [
   cssImport,
