@@ -55,7 +55,9 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
         activeMetric={filter}
         onMetricSelect={onFilterChange}
         testId="coach-players-decision-brief"
-      />
+      >
+        <ExperienceSparkline values={briefing.engagementDistribution} label="Engagement spread" tone={briefing.decision.tone} testId="coach-players-engagement-sparkline" />
+      </CoachRoutePerformanceStage>
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
       </SecondaryPageToolbar>
@@ -94,7 +96,9 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         activeMetric={status}
         onMetricSelect={onStatusChange}
         testId="coach-events-decision-brief"
-      />
+      >
+        <DashboardProgress value={briefing.responseRate} max={100} label="Upcoming RSVP completion" detail={`${briefing.confirmed} confirmed`} />
+      </CoachRoutePerformanceStage>
       <SecondaryPageToolbar testId="coach-events-toolbar">
         <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search title, location, or type" filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]} activeFilter={type} onFilterChange={onTypeChange} testId="coach-events-filter-rail" />
       </SecondaryPageToolbar>
