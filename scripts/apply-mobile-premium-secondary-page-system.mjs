@@ -2,6 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const cssPath = path.resolve(process.cwd(), 'src/components/SecondaryPageSystem.css')
+const appPath = path.resolve(process.cwd(), 'src/App.jsx')
+const metricCssPath = path.resolve(process.cwd(), 'src/components/CoachDashboardPrimitives.module.css')
 let source = fs.readFileSync(cssPath, 'utf8')
 
 const startMarker = '@media (max-width: 760px) {'
@@ -129,4 +131,30 @@ const narrowAuthority = `@media (max-width: 390px) {
 
 source = `${source.slice(0, mobileStart)}${mobileAuthority}${narrowAuthority}${source.slice(motionStart)}`
 fs.writeFileSync(cssPath, source)
-console.log('Applied owner-level premium mobile page hierarchy without an additive authority stylesheet.')
+
+let appSource = fs.readFileSync(appPath, 'utf8')
+const compactCoachTitles = [
+  ['title="Drills Dashboard"', 'title="Drills"'],
+  ['title="Strength & Conditioning Dashboard"', 'title="S&C"'],
+  ['title="Activity Dashboard"', 'title="Activity"'],
+  ['title="Leaderboards Dashboard"', 'title="Leaderboards"'],
+]
+for (const [legacyTitle, compactTitle] of compactCoachTitles) {
+  if (appSource.includes(legacyTitle)) {
+    appSource = appSource.replace(legacyTitle, compactTitle)
+    continue
+  }
+  if (!appSource.includes(compactTitle)) {
+    throw new Error(`Could not locate Coach functional-title contract: ${legacyTitle}`)
+  }
+}
+fs.writeFileSync(appPath, appSource)
+
+let metricCss = fs.readFileSync(metricCssPath, 'utf8')
+const metricHoverMarker = '/* Premium mobile metrics keep a stable row while feedback remains tonal. */'
+if (!metricCss.includes(metricHoverMarker)) {
+  metricCss += `\n\n${metricHoverMarker}\n@media (max-width: 760px), (hover: none) {\n  .metric:hover,\n  .metric:focus-visible { transform: none; }\n}\n`
+}
+fs.writeFileSync(metricCssPath, metricCss)
+
+console.log('Applied owner-level premium mobile page hierarchy, compact Coach functional titles, and stable mobile metric feedback.')
