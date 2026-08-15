@@ -1,1 +1,316 @@
-/* ShotLab mobile premium rules now live in their owning page, identity, and navigation systems. */
+/*
+ * ShotLab 2026 mobile signature authority.
+ * Keep this file intentionally narrow: it aligns cross-screen shell composition
+ * after page-owned styles load. Route/content styling remains with its owner.
+ */
+
+@media (max-width: 700px) {
+  /* Coach Home should open like the Player product, not a cream admin dashboard. */
+  body.mission-control-active [data-mobile-product-reset="phase-1"].missionControl {
+    padding: 0 12px calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 0 !important;
+    background: #f4f3ed !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader {
+    position: relative !important;
+    z-index: 4 !important;
+    min-height: 94px !important;
+    margin-inline: -12px !important;
+    padding: max(13px, env(safe-area-inset-top, 0px)) 16px 13px !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) auto !important;
+    gap: 11px !important;
+    align-items: center !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(200, 255, 26, .15) !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 91% -34%, rgba(200, 255, 26, .16), transparent 42%),
+      linear-gradient(126deg, #061923 0%, #082430 58%, #0b2d37 100%) !important;
+    color: #f5f8f9 !important;
+    box-shadow: 0 12px 30px rgba(7, 28, 40, .12) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+    background:
+      radial-gradient(ellipse 180px 96px at 105% 118%, transparent 63%, rgba(223, 236, 241, .10) 63.5%, transparent 64.2%),
+      linear-gradient(90deg, transparent 0 72%, rgba(223, 236, 241, .05) 72% 72.4%, transparent 72.4%) !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcMobileMenu,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBell {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(223, 236, 241, .14) !important;
+    border-radius: 13px !important;
+    background: rgba(255, 255, 255, .055) !important;
+    color: #e2eaed !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup {
+    min-width: 0 !important;
+    gap: 9px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark {
+    width: 50px !important;
+    height: 50px !important;
+    flex-basis: 50px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark img {
+    width: 48px !important;
+    height: 48px !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .25)) !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small {
+    color: #c8ff1a !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
+    letter-spacing: .07em !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong {
+    max-width: 39vw !important;
+    margin-top: 5px !important;
+    overflow: hidden !important;
+    color: #f7fafb !important;
+    font-size: 22px !important;
+    font-weight: 820 !important;
+    line-height: .98 !important;
+    letter-spacing: -.04em !important;
+    text-overflow: ellipsis !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderActions {
+    gap: 7px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect {
+    min-width: 72px !important;
+    max-width: 86px !important;
+    min-height: 44px !important;
+    padding-inline: 10px !important;
+    border: 1px solid rgba(223, 236, 241, .14) !important;
+    border-radius: 13px !important;
+    background: rgba(255, 255, 255, .055) !important;
+    color: #dce6e9 !important;
+    font-size: 11px !important;
+    font-weight: 720 !important;
+    box-shadow: none !important;
+  }
+
+  /* Primary Coach decision becomes an edge-to-edge performance field. */
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero {
+    min-height: 386px !important;
+    margin: 12px -12px 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-block: 1px solid rgba(200, 255, 26, .13) !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 102% -5%, rgba(200, 255, 26, .14), transparent 36%),
+      linear-gradient(128deg, #061923 0%, #082430 57%, #0b2d37 100%) !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroScrim {
+    background:
+      linear-gradient(90deg, rgba(4, 18, 25, .98) 0%, rgba(4, 18, 25, .88) 52%, rgba(4, 18, 25, .36) 78%, rgba(4, 18, 25, .06) 100%),
+      linear-gradient(180deg, transparent 54%, rgba(4, 18, 25, .56)) !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork {
+    opacity: .58 !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent {
+    grid-template-columns: minmax(0, 1fr) 82px !important;
+    gap: 10px 14px !important;
+    padding: 27px 18px 24px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark {
+    top: 22px !important;
+    right: 17px !important;
+    width: 76px !important;
+    height: 76px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero h1 {
+    max-width: 9.5ch !important;
+    margin-top: 10px !important;
+    color: #f7fafb !important;
+    font-size: clamp(39px, 11.2vw, 45px) !important;
+    font-weight: 820 !important;
+    line-height: .91 !important;
+    letter-spacing: -.055em !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent > p {
+    max-width: 29ch !important;
+    margin-top: 13px !important;
+    color: #b7c4c9 !important;
+    font-size: 14px !important;
+    line-height: 1.42 !important;
+  }
+
+  /* Metrics read as a scoreboard ledger, not a pill inside a card. */
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip {
+    max-width: 100% !important;
+    margin-top: 20px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-block: 1px solid rgba(223, 236, 241, .13) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip > button {
+    min-height: 62px !important;
+    padding: 8px 6px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip > button + button {
+    border-left: 1px solid rgba(223, 236, 241, .13) !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip strong {
+    color: #f7fafb !important;
+    font-size: 25px !important;
+    font-weight: 790 !important;
+    line-height: .95 !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip small {
+    margin-top: 5px !important;
+    color: #a9b7bc !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcPrimary {
+    min-height: 50px !important;
+    margin-top: 20px !important;
+    border: 1px solid #c8ff1a !important;
+    border-radius: 12px !important;
+    background: #c8ff1a !important;
+    color: #102019 !important;
+    font-size: 13px !important;
+    font-weight: 820 !important;
+    box-shadow: 0 13px 28px rgba(113, 145, 14, .14) !important;
+  }
+
+  /* Supporting Coach information is editorial, not a stack of white cards. */
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcSection {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(23, 30, 27, .11) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcFocusGrid,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcLowerGrid {
+    gap: 0 !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcSectionHead {
+    padding: 25px 2px 0 !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcSectionHead small {
+    color: #6f7a73 !important;
+    font-size: 11px !important;
+    font-weight: 760 !important;
+    letter-spacing: .055em !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcSectionHead h2 {
+    margin-top: 5px !important;
+    color: #18201c !important;
+    font-size: 27px !important;
+    font-weight: 800 !important;
+    line-height: .98 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcAttentionList {
+    padding: 14px 0 20px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcAttentionRow {
+    min-height: 70px !important;
+    border: 1px solid rgba(23, 30, 27, .10) !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, .58) !important;
+    color: #17201b !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcAttentionCopy strong {
+    color: #17201b !important;
+    font-size: 14px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcAttentionCopy small,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcAttentionMeta,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRowAction {
+    color: #67736c !important;
+    font-size: 11px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHealthFacts small,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcSectionHead small,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcEyebrow {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong {
+    max-width: 34vw !important;
+    font-size: 20px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect {
+    min-width: 64px !important;
+    max-width: 64px !important;
+  }
+
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero h1 {
+    font-size: 39px !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) and (max-width: 700px) {
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader,
+  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero {
+    background: #071a22 !important;
+  }
+}
