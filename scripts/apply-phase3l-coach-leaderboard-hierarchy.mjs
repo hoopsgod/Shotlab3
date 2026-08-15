@@ -144,7 +144,7 @@ if (!followUpSource.includes(placementMarker)) {
     host.dataset.testid = HOST_TEST_ID;
     drawerBody.appendChild(host);`;
   followUpSource = followUpSource.replace(oldPlacement, newPlacement);
-  writeFileSync(followUpPath, source);
+  writeFileSync(followUpPath, followUpSource);
   changed = true;
 } else {
   console.log('Phase 3L Coach follow-up placement already applied.');
