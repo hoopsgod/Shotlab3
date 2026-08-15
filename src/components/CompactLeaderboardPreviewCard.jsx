@@ -17,6 +17,7 @@ export default function CompactLeaderboardPreviewCard({
   errorMessage,
   loadingMessage = "Loading leaderboard data…",
   maxRows,
+  minimumRows = 3,
   areaTitle = "Leaderboards",
   categoryLabel = "Home Shots",
   fullLeaderboardHref = "",
@@ -45,6 +46,8 @@ export default function CompactLeaderboardPreviewCard({
     : displayState === "error"
       ? "Rankings need a retry"
       : isCoachMode ? "Recognition starts with activity" : "Your ranking starts with a result";
+  const reservedRows = Math.max(previewRows.length, Math.min(Math.max(1, minimumRows), Math.max(1, limit)));
+  const openRowCount = displayState === "ready" ? Math.max(0, reservedRows - previewRows.length) : 0;
 
   return (
     <section
@@ -53,6 +56,7 @@ export default function CompactLeaderboardPreviewCard({
       aria-busy={displayState === "loading"}
       data-testid="compact-leaderboard-preview"
       data-data-state={displayState}
+      data-reserved-rows={reservedRows}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 10 }}>
         <div>
@@ -81,6 +85,14 @@ export default function CompactLeaderboardPreviewCard({
                 : <div style={{ color: "var(--text-3)", fontSize: 12, fontWeight: 900 }}>#{rank}</div>}
               <div style={{ color: currentPlayer?"var(--accent)":"var(--text-1)", fontSize: 13, fontWeight: index===0?800:700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</div>
               <div style={{ color: index===0?"var(--text-1)":"var(--text-2)", fontSize: 13, fontWeight: 800 }}>{scoreValue}</div>
+            </div>;
+          })}
+          {Array.from({ length: openRowCount }, (_, placeholderIndex) => {
+            const visualIndex = previewRows.length + placeholderIndex;
+            return <div key={`open-rank-${visualIndex}`} data-leaderboard-placeholder="true" style={{ display: "grid", gridTemplateColumns: "44px 1fr auto", alignItems: "center", gap: 9, borderTop:"1px solid var(--stroke-1)", padding:"8px 2px", minHeight:52, opacity:.5 }}>
+              <div style={{ width:32, height:32, borderRadius:999, border:"1px dashed var(--stroke-2)", display:"grid", placeItems:"center", color:"var(--text-3)", fontSize:11, fontWeight:900 }}>—</div>
+              <div style={{ color:"var(--text-3)", fontSize:12, fontWeight:700 }}>Open rank</div>
+              <div style={{ color:"var(--text-3)", fontSize:11, fontWeight:800 }}>—</div>
             </div>;
           })}
         </div>
