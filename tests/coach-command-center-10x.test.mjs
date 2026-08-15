@@ -139,7 +139,7 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(navigationCss,/--mobile-tab-bar-height:\s*60px/);
-  assert.match(navigationCss,/bottom:\s*max\(6px, env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(navigationCss,/bottom:\s*max\(8px, env\(safe-area-inset-bottom, 0px\)\)/);
   assert.match(navigationCss,/backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
   assert.match(navigationCss,/width:\s*min\(430px/);
   assert.match(navigationCss,/min-height:\s*50px/);
