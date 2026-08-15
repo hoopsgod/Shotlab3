@@ -63,8 +63,8 @@ export default function PlayerProgressStory({
   const firstName = String(userName || "Player").trim().split(/\s+/)[0] || "Player";
 
   return (
-    <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend}>
-      <div className={styles.hero} data-testid="player-progress-story-hero">
+    <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend} data-page-hierarchy="command-story">
+      <div className={styles.hero} data-testid="player-progress-story-hero" data-layout-role="command-story-header">
         <div className={styles.heroTopline} data-testid="player-progress-story-topline">
           <span>DEVELOPMENT STORY</span>
           <span data-testid="player-progress-trend-badge">{trendWord}</span>
