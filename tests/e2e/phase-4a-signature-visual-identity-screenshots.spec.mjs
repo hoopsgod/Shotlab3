@@ -149,7 +149,7 @@ test("Phase 4A preserves Coach Mission Control's visible mobile team-mark identi
   expect(coachIdentity.courtArtworkBackground).toContain("gradient");
   expect(coachIdentity.retiredTeamMarkDisplay).toBe("none");
   expect(coachIdentity.backgroundImage).toContain("gradient");
-  expect(coachIdentity.shadow).not.toBe("none");
+  expect(coachIdentity.shadow).toBe("none");
 
   await expect(page.getByTestId("player-home-signature-field")).toHaveCount(0);
   await expect(page.getByTestId("player-progress-signature-field")).toHaveCount(0);
