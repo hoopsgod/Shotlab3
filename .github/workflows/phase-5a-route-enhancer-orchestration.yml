@@ -42,6 +42,7 @@ jobs:
           mkdir -p artifacts/phase-5a-route-enhancer-orchestration
           node --test \
             tests/phase-5a-route-enhancer-orchestration.test.mjs \
+            tests/mobile-signature-promotions.test.mjs \
             tests/team-auth-foundation.contract.test.mjs \
             tests/app-store-release-hardening.test.mjs \
             tests/coach-operational-intelligence.test.mjs \
