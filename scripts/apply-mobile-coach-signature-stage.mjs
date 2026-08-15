@@ -19,7 +19,7 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:40px minmax(0,1fr) auto!important;gap:8px!important;padding:max(6px,env(safe-area-inset-top)) 0 4px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:44px minmax(0,1fr) 44px!important;gap:8px!important;margin-inline:-12px!important;padding:max(10px,env(safe-area-inset-top)) 14px 10px!important;border:0!important;border-radius:0!important;background:linear-gradient(126deg,#061923,#0b2d37)!important;color:#f5f8f9!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:44px minmax(0,1fr) 44px!important;gap:8px!important;margin-inline:-12px!important;padding:max(10px,env(safe-area-inset-top)) 14px 10px!important;border:0!important;border-radius:0!important;background:linear-gradient(126deg,#061923,#0b2d37)!important;color:#f5f8f9!important;box-shadow:0 -28px 0 #061923!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}',
     'Coach mobile identity stage',
   );
   next = replaceOnce(next,
