@@ -54,12 +54,12 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:20px 18px!important;gap:8px 12px!important;background:transparent!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin:0 -12px!important;border-radius:0!important}body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 78px!important;padding:27px 20px 24px!important;gap:10px 14px!important;background:transparent!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin:0 -12px!important;border-radius:0!important}body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr)!important;padding:27px 20px 24px!important;gap:10px!important;background:transparent!important}',
     'Coach mobile hero composition',
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark{top:18px!important;right:18px!important;width:64px!important;height:64px!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark{top:22px!important;right:17px!important;width:76px!important;height:76px!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark{display:none!important}',
     'Coach mobile hero mark',
   );
   next = replaceOnce(next,
