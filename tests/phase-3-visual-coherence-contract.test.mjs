@@ -8,6 +8,7 @@ const secondaryJsx = read("../src/components/SecondaryPageSystem.jsx");
 const secondaryCss = read("../src/components/SecondaryPageSystem.css");
 const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
 const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
+const coachRouteStage = read("../src/components/CoachRoutePerformanceStage.jsx");
 const playerDaily = read("../src/components/PlayerDailyCommandCenter.jsx");
 const visualHierarchy = read("../src/components/VisualHierarchy.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
@@ -57,10 +58,13 @@ test("shared dashboard primitives publish material-aware semantic roles", () => 
   assert.match(primitives, /data-action-role="tertiary"/);
 });
 
-test("secondary Coach dashboards opt context-dependent dark primitives into the light editorial material", () => {
-  assert.match(coachSecondary, /<InteractiveMetricStrip surface="light"/);
+test("secondary Coach dashboards use a dark performance stage before light utilities and evidence", () => {
+  assert.match(coachSecondary, /<CoachRoutePerformanceStage/);
+  assert.match(coachRouteStage, /data-surface="dark"/);
+  assert.match(coachRouteStage, /data-visual-role="primary-decision"/);
   assert.match(coachSecondary, /<DashboardFilterRail surface="light"/);
   assert.match(coachSecondary, /<DashboardInsightCard surface="light"/);
+  assert.doesNotMatch(coachSecondary, /<InteractiveMetricStrip/, "Coach route metrics should not be duplicated in a second light card rail");
 });
 
 test("Player Home and disclosure support copy publish stable semantic roles", () => {
