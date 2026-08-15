@@ -57,6 +57,17 @@ async function expectRouteEndBounded(page, options) {
   return geometry;
 }
 
+async function expectDarkNativeDock(dock) {
+  const surface = await dock.evaluate((node) => ({
+    outer: getComputedStyle(node).backgroundColor,
+    inner: getComputedStyle(node.firstElementChild).backgroundColor,
+  }));
+  const channels = (surface.outer.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  expect(channels).toHaveLength(3);
+  expect(Math.max(...channels)).toBeLessThan(55);
+  expect(surface.inner).toBe("rgba(0, 0, 0, 0)");
+}
+
 test("Phase 3 closure: Player Home has one dock reserve, clean support contrast, and no orphaned account band", async ({ page }) => {
   const dock = await enterDemo(page, "Player");
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
@@ -192,17 +203,12 @@ test("Phase 3 closure: Progress keeps development first and deep Profile data in
   await capture(page, "07g-phase3-final-player-account-expanded.png");
 });
 
-test("Phase 3 closure: Coach Mission Control remains intact on the shared native shell", async ({ page }) => {
+test("Phase 3 closure: Coach Mission Control remains intact on the shared branded native shell", async ({ page }) => {
   const dock = await enterDemo(page, "Coach");
   await expect(dock.getByRole("button", { name: "Home", exact: true })).toHaveAttribute("data-icon-name", "home");
   await expect(dock.getByRole("button", { name: "Players", exact: true })).toHaveAttribute("data-icon-name", "team");
   await expect(dock.getByRole("button", { name: "Schedule", exact: true })).toHaveAttribute("data-icon-name", "calendar");
-  const surface = await dock.evaluate((node) => ({
-    outer: getComputedStyle(node).backgroundColor,
-    inner: getComputedStyle(node.firstElementChild).backgroundColor,
-  }));
-  expect(surface.outer).toBe("rgba(252, 252, 250, 0.9)");
-  expect(surface.inner).toBe("rgba(0, 0, 0, 0)");
+  await expectDarkNativeDock(dock);
   await expectNoOverflow(page);
   await capture(page, "07h-phase3-final-coach-home.png");
 });

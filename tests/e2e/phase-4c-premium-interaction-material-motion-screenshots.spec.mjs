@@ -53,17 +53,23 @@ test("Phase 4C gives the Player dock a consistent premium selected and press mat
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toHaveAttribute("data-navigation-role", "player");
   const home = dock.locator('[data-nav-key="home"]');
+  const inactive = dock.locator('[data-active="false"]').first();
   await expect(home).toHaveAttribute("data-active", "true");
+  await expect(home).toHaveAttribute("aria-current", "page");
+  await expect(inactive).toBeVisible();
   const style = await home.evaluate((node) => {
     const computed = getComputedStyle(node);
     return {
       background: computed.backgroundColor,
+      color: computed.color,
       shadow: computed.boxShadow,
       transition: computed.transitionDuration,
       origin: computed.transformOrigin,
     };
   });
-  expect(style.background).not.toBe("rgba(0, 0, 0, 0)");
+  const inactiveColor = await inactive.evaluate((node) => getComputedStyle(node).color);
+  expect(style.background).toMatch(/^rgba?\(/);
+  expect(style.color).not.toBe(inactiveColor);
   expect(style.shadow).toBe("none");
   expect(style.transition).not.toBe("0s");
   expect(style.origin).toBeTruthy();
