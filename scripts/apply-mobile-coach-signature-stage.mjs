@@ -14,7 +14,7 @@ export function promoteCoachCommandCenter(source) {
   let next = source;
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"].missionControl{padding:8px 12px 108px!important;gap:16px!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"].missionControl{padding:0 12px 108px!important;gap:0!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"].mcShellV3 .missionControl{padding:0 12px 108px!important;gap:0!important}',
     'Coach mobile shell rhythm',
   );
   next = replaceOnce(next,
