@@ -138,7 +138,11 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(finalCss,/min-height:\s*286px\s*!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
-  assert.match(navigationCss,/backdrop-filter:\s*blur\(28px\) saturate\(150%\)/);
+  assert.match(navigationCss,/--mobile-tab-bar-height:\s*60px/);
+  assert.match(navigationCss,/bottom:\s*max\(6px, env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(navigationCss,/backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
+  assert.match(navigationCss,/width:\s*min\(430px/);
+  assert.match(navigationCss,/min-height:\s*50px/);
   assert.match(finalCss,/\.mcPrimary:active/);
   assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
