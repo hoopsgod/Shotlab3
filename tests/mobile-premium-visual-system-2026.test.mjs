@@ -5,6 +5,7 @@ import fs from "node:fs";
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
+const playerOperationalCss = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.module.css", import.meta.url), "utf8");
 const mobileNav = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const retiredAuthority = fs.readFileSync(new URL("../src/styles/MobilePremiumVisualSystem2026.css", import.meta.url), "utf8");
 
@@ -16,7 +17,7 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
 
 test("major functional page intros are compact instead of oversized title stages", () => {
   assert.match(enhancer, /grid-template-columns:\s*34px minmax\(0, 1fr\)/);
-  assert.match(enhancer, /font-size:\s*clamp\(29px, 8vw, 34px\)/);
+  assert.match(enhancer, /font-size:\s*clamp\(29px, 8vw, 34px\) !important/);
   assert.match(enhancer, /padding:\s*3px 0 12px/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
   assert.match(enhancer, /\.secondaryPageDecision/);
@@ -24,10 +25,20 @@ test("major functional page intros are compact instead of oversized title stages
   assert.match(enhancer, /\.secondaryPageDecision::after,[\s\S]*\.secondaryPageDecision__icon,[\s\S]*\.secondaryPageDecision__visual \{ display: none; \}/);
   assert.match(enhancer, /font-size:\s*clamp\(23px, 6\.4vw, 27px\)/);
   assert.match(enhancer, /@media \(max-width: 390px\)/);
+  assert.match(enhancer, /font-size: 30px !important/);
   assert.match(enhancer, /\['title="Drills Dashboard"', 'title="Drills"'\]/);
   assert.match(enhancer, /\['title="Strength & Conditioning Dashboard"', 'title="S&C"'\]/);
   assert.match(enhancer, /\['title="Activity Dashboard"', 'title="Activity"'\]/);
   assert.match(enhancer, /\['title="Leaderboards Dashboard"', 'title="Leaderboards"'\]/);
+});
+
+test("specialized Player functional headers follow the same compact Level B discipline", () => {
+  assert.match(playerOperationalCss, /@media\(max-width:700px\)/);
+  assert.match(playerOperationalCss, /\.commandBar\{grid-template-columns:1fr;gap:12px;padding:4px 0 14px\}/);
+  assert.match(playerOperationalCss, /\.title\{font-size:clamp\(29px,8vw,32px\);line-height:1/);
+  assert.match(playerOperationalCss, /\.subtitle\{display:none\}/);
+  assert.match(playerOperationalCss, /\.primaryAction\{width:100%;min-height:44px;border-radius:12px\}/);
+  assert.match(playerOperationalCss, /\.metric\{min-height:88px;padding:13px 14px\}/);
 });
 
 test("mobile metric feedback cannot pull one card out of its visual row", () => {
