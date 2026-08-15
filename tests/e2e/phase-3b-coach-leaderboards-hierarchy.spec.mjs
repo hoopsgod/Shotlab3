@@ -57,7 +57,7 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   await expect(decisionTitle).toBeVisible();
   await expect(decisionDetail).toBeVisible();
   await expect(metricRail).toBeVisible();
-  await expect(metrics).toHaveCount(3);
+  await expect(metrics).toHaveCount(4);
 
   const outputPath = path.join(OUTPUT_DIR, "coach-leaderboards-390x844.png");
   await page.screenshot({ path: outputPath, animations: "disabled" });
@@ -122,7 +122,7 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const metricLabelChannels = visualState.firstMetricLabelFill.match(/\d+/g)?.map(Number).slice(0, 3) || [];
   expect(metricLabelChannels).toHaveLength(3);
   expect(metricLabelChannels.every((value) => value >= 145)).toBeTruthy();
-  expect(visualState.metricCount).toBe(3);
+  expect(visualState.metricCount).toBe(4);
   expect(visualState.metricDisplay).toBe("grid");
   expect(visualState.metricOverflowX).toBe("auto");
 
