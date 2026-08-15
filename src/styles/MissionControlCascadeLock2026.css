@@ -33,5 +33,5 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
 
 @media(min-width:701px){
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan{grid-template-columns:48px minmax(0, 1fr)!important;align-items:start!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan>button{grid-column:1/-1!important;width:100%!important}
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan > button{grid-column: 1 / -1 !important;width:100%!important}
 }
