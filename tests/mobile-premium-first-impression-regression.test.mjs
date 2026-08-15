@@ -8,10 +8,11 @@ const secondaryPageSystem = fs.readFileSync(new URL("../src/components/Secondary
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
 const brandingCss = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
 
-test("final rendered-mobile authority preserves the stronger editorial title scale", () => {
-  assert.match(finalMobileCss, /\.secondaryPageIntro__title\s*\{[\s\S]*font-size:\s*clamp\(34px, 9\.2vw, 38px\) !important/);
-  assert.doesNotMatch(finalMobileCss, /\.secondaryPageIntro__title\s*\{[\s\S]{0,120}font-size:\s*clamp\(29px, 8vw, 34px\)/);
-  assert.match(enhancer, /font-size:\s*clamp\(34px, 9\.6vw, 40px\) !important/);
+test("final rendered-mobile authority keeps editorial titles strong without consuming the first viewport", () => {
+  assert.match(finalMobileCss, /Compact editorial intro: strong title, quiet route mark, no first-viewport overflow/);
+  assert.match(finalMobileCss, /\.secondaryPageIntro \{[\s\S]*min-height: 0 !important;[\s\S]*padding: 5px 0 11px !important/);
+  assert.match(finalMobileCss, /font-size:\s*clamp\(32px, 8\.5vw, 34px\) !important/);
+  assert.match(finalMobileCss, /\.secondaryPageIntro__icon \{[\s\S]*width: 38px !important;[\s\S]*opacity: \.17 !important/);
   assert.match(secondaryPageSystem, /data-mobile-stage="editorial"/);
 });
 
@@ -23,11 +24,18 @@ test("final rendered-mobile authority cannot collapse dark performance contrast"
   assert.match(finalMobileCss, /\.secondaryPageDecision button \{[\s\S]*background: #c8ff1a !important;[\s\S]*color: #102019 !important/);
 });
 
-test("supported iPhone widths keep both actions without stacking two full button rows", () => {
-  assert.match(enhancer, /@media \(max-width: 430px\)/);
-  assert.match(enhancer, /\.secondaryPageIntro__actions \{ width: calc\(100% \+ 64px\); display: grid; grid-template-columns: minmax\(0, 1fr\); align-items: center; gap: 7px; \}/);
-  assert.match(enhancer, /\.secondaryPageIntro__buttonRow \{ width: 100%; display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)/);
-  assert.match(enhancer, /\.secondaryPageAction \{ width: 100%; min-width: 0; padding-inline: 10px; font-size: 11\.5px; \}/);
+test("supported iPhone widths keep both actions inside a bounded two-column row", () => {
+  assert.match(finalMobileCss, /\.secondaryPageIntro__actions \{[\s\S]*width: 100% !important;[\s\S]*grid-template-columns: minmax\(0, 1fr\) !important/);
+  assert.match(finalMobileCss, /\.secondaryPageIntro__buttonRow \{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\) !important/);
+  assert.match(finalMobileCss, /\.secondaryPageAction \{[\s\S]*width: 100% !important;[\s\S]*min-height: 40px !important;[\s\S]*font-size: 11\.5px !important/);
+  assert.doesNotMatch(finalMobileCss, /\.secondaryPageIntro__actions \{[\s\S]{0,180}width: calc\(100% \+ 64px\) !important/);
+});
+
+test("secondary Player routes cannot be pulled back into the legacy rounded identity card", () => {
+  assert.match(finalMobileCss, /Final route framing wins over older Phase 3 card authorities/);
+  assert.match(finalMobileCss, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \[data-testid="player-dashboard-identity-header"\] \{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important;[\s\S]*box-shadow: none !important/);
+  assert.match(finalMobileCss, /player-dashboard-identity-header"\] > div \{[\s\S]*min-height: 50px !important/);
+  assert.match(finalMobileCss, /player-dashboard-identity-header"\] img \{[\s\S]*width: 33px !important;[\s\S]*height: 33px !important/);
 });
 
 test("primary mobile decision moment reaches the viewport edge instead of floating as another card", () => {
