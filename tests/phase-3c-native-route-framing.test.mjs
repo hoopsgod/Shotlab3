@@ -20,13 +20,12 @@ test('Player secondary destinations keep one gutter authority and explicit accou
   assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \.player-quick-actions\{[\s\S]*?height:0!important;[\s\S]*?overflow:visible!important;/);
   assert.match(css, /player-quick-actions button\[aria-label="Logout"\][\s\S]*?min-height:44px!important;[\s\S]*?pointer-events:auto;/);
   assert.doesNotMatch(css, /player-quick-actions\{\s*display:none!important;/s);
-  assert.match(css, /\[data-testid\^="player-workspace-"\]\{\s*margin-left:0!important;\s*margin-right:0!important;/s);
-  assert.match(css, /\[data-testid="premium-leaderboards-hub"\],[\s\S]*?\[data-testid="player-career-history"\][\s\S]*?width:100%!important;/);
+  assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \[data-testid\^="player-workspace-"\]\{margin-left:0!important;margin-right:0!important\}/);
+  assert.match(css, /\[data-testid="premium-leaderboards-hub"\],[\s\S]*?\[data-testid="player-career-history"\]\{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important\}/);
 });
 
-test('Phase 7 supersedes the duplicated Phase 3 return-control paint while retaining shared touch safety', () => {
-  assert.match(css, /--p3c-route-control:44px/);
-  assert.match(css, /--p3c-route-radius:14px/);
+test('Phase 7 owns return-control geometry while Phase 3C keeps only route-density behavior', () => {
+  assert.doesNotMatch(css, /--p3c-route-(?:control|radius|line|shadow)/);
   assert.doesNotMatch(css, /player-scroll-container>button\[type="button"\]/);
   assert.doesNotMatch(css, /page\.pageShell>button\[type="button"\]:first-child/);
   assert.match(phase7Chrome, /\.is-mobile \.shared-dashboard-back-action/);
@@ -36,11 +35,11 @@ test('Phase 7 supersedes the duplicated Phase 3 return-control paint while retai
   assert.match(backEnhancer, /touchAction:"manipulation"/);
 });
 
-test('Leaderboard destination removes the duplicated inner title while keeping context content', () => {
+test('Leaderboard destination removes duplicated inner title rows while keeping context content', () => {
   assert.match(css, /premium-leaderboards-hub"\]>header>div:nth-child\(1\)/);
   assert.match(css, /premium-leaderboards-hub"\]>header>div:nth-child\(2\)/);
-  assert.match(css, /display:none!important;/);
-  assert.match(css, /premium-leaderboards-hub"\]>header\{[\s\S]*?padding:0 0 12px!important;/);
+  assert.match(css, />header>div:nth-child\(2\)\{display:none!important\}/);
+  assert.match(css, /premium-leaderboards-hub"\]>header\{margin-bottom:10px!important;padding:0 0 12px!important\}/);
 });
 
 test('Leaderboard hero cannot claim the top spot for a lower displayed rank', () => {
