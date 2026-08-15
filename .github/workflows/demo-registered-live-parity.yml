@@ -2,12 +2,6 @@ name: Demo Registered Live Parity
 
 on:
   pull_request:
-    paths:
-      - "src/**"
-      - "functions/**"
-      - "migrations/**"
-      - "tests/e2e/demo-registered-live-parity.spec.mjs"
-      - ".github/workflows/demo-registered-live-parity.yml"
   workflow_dispatch:
 
 permissions:
@@ -43,8 +37,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify shared UI source and capability contracts
-        run: node --test tests/demo-visual-parity-contract.test.mjs tests/account-capabilities.test.mjs tests/demo-capability-boundary.test.mjs
+      - name: Verify shared UI, secondary-page parity, capability, post-auth hydration, and release-boundary contracts
+        run: node --test tests/demo-visual-parity-contract.test.mjs tests/demo-registered-parity-release-boundary.test.mjs tests/mobile-secondary-page-parity-contract.test.mjs tests/account-capabilities.test.mjs tests/demo-capability-boundary.test.mjs tests/post-auth-mobile-parity-hydration.test.mjs
 
       - name: Install pinned browser and Cloudflare tooling
         run: npm install --no-save @playwright/test@1.55.1 wrangler@4.30.0
@@ -80,10 +74,88 @@ jobs:
           cat /tmp/demo-registered-live-parity.log
           exit 1
 
+      - name: Prove registered mobile login hydrates real backend state
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/registered-mobile-post-auth-hydration.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --timeout=120000 --retries=0
+
       - name: Certify real Demo versus registered presentation
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/demo-registered-live-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --timeout=120000 --retries=0
+
+      - name: Prove paired Demo and registered screenshot evidence is complete
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+
+          const root = path.resolve('artifacts/demo-registered-live-parity');
+          for (const role of ['coach', 'player']) {
+            const demoDir = path.join(root, role, 'demo');
+            const registeredDir = path.join(root, role, 'registered-populated');
+            assert.ok(fs.existsSync(demoDir), `Missing ${role} Demo evidence`);
+            assert.ok(fs.existsSync(registeredDir), `Missing ${role} populated registered evidence`);
+            const names = (dir) => fs.readdirSync(dir).filter((name) => name.endsWith('.png')).sort();
+            const demoScreens = names(demoDir);
+            const registeredScreens = names(registeredDir);
+            assert.ok(demoScreens.length >= 5, `${role} must capture at least five Demo destinations`);
+            assert.deepEqual(registeredScreens, demoScreens, `${role} Demo and populated registered screenshot route matrices differ`);
+          }
+          NODE
+
+      - name: Prove registered data density changes rendered mobile evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          player_root="artifacts/demo-registered-live-parity/player"
+          coach_root="artifacts/demo-registered-live-parity/coach"
+          test -f "$player_root/registered-empty/home.png"
+          test -f "$player_root/registered-sparse/home.png"
+          test -f "$player_root/registered-populated/home.png"
+          test -f "$coach_root/registered-empty/players.png"
+          test -f "$coach_root/registered-populated/players.png"
+          if cmp -s "$player_root/registered-empty/home.png" "$player_root/registered-sparse/home.png"; then
+            echo "Player empty and sparse Home screenshots are identical; registered backend state did not reach the mobile UI."
+            exit 1
+          fi
+          if cmp -s "$player_root/registered-sparse/home.png" "$player_root/registered-populated/home.png"; then
+            echo "Player sparse and populated Home screenshots are identical; registered backend state did not reach the mobile UI."
+            exit 1
+          fi
+          if cmp -s "$coach_root/registered-empty/players.png" "$coach_root/registered-populated/players.png"; then
+            echo "Coach empty and populated Players screenshots are identical; roster density did not reach the mobile UI."
+            exit 1
+          fi
+
+      - name: Record exact-head parity evidence manifest
+        if: always()
+        shell: bash
+        env:
+          PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p artifacts/demo-registered-live-parity
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+
+          const manifest = {
+            contractVersion: 1,
+            headSha: process.env.PARITY_HEAD_SHA,
+            source: 'exact-built-pr-bundle-with-real-cloudflare-functions',
+            baseUrl: 'http://127.0.0.1:4173',
+            viewport: { width: 390, height: 844 },
+            roles: ['coach', 'player'],
+            registeredStates: ['empty', 'sparse', 'populated'],
+            pairedEvidence: 'demo-versus-registered-populated',
+          };
+          fs.writeFileSync(
+            path.join('artifacts/demo-registered-live-parity', 'parity-evidence-manifest.json'),
+            `${JSON.stringify(manifest, null, 2)}\n`,
+          );
+          NODE
 
       - name: Remove local secret file
         if: always()

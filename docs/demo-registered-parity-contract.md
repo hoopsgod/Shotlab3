@@ -47,24 +47,38 @@ This marker is a display/data-provenance contract, not an authorization boundary
 
 ## Release gates
 
-Every product change must pass both parity layers before its phase can close:
+Every product change must pass all three parity layers before its phase can close:
 
-1. `Demo Registered Experience Parity` protects the shared application tree, equivalent feature behavior, backend-triggered parity contracts, and focused registered/demo journeys.
+1. `Demo Registered Experience Parity` protects the shared application tree, equivalent feature behavior, capability boundaries, and focused registered/demo journeys.
 2. `Demo Registered Runtime Parity` certifies matched Coach and Player data across the complete reachable mobile navigation matrices against the exact built production bundle—or an explicitly supplied deployed URL—comparing structure, geometry, typography, spacing, navigation state, and bounded rendered-pixel drift.
+3. `Demo Registered Live Parity` proves that genuine registered authentication and signed persistence hydrate real backend state through the production Cloudflare Functions path before the mobile workspace is exposed. It exercises empty, sparse, and populated registered states and records paired Demo/registered mobile evidence from the exact pull-request head.
 
 The gates require:
 
 - one shared production component tree;
 - matched data state when registered and demo rendering is compared;
+- real registered post-auth hydration before route exposure;
 - Coach and Player navigation parity;
 - Coach Leaderboards parity;
 - Team Store and Team Branding coverage where reachable;
 - 390×844 mobile overflow safety;
 - production-bundle verification rather than a dev-only substitute;
-- registered remote leaderboard rows to survive self-scoped local-roster filtering only under the server-authoritative contract above.
+- registered remote leaderboard rows to survive self-scoped local-roster filtering only under the server-authoritative contract above;
+- paired Demo and registered screenshots for the same role and route matrix from the same exact commit/build;
+- evidence that registered empty, sparse, and populated backend states produce meaningfully different rendered content where data density should differ.
+
+The live parity gate must run for every pull request. It must not be scoped by source-path filters because visual behavior can be changed by CSS, public assets, build enhancers, generated authorities, or other files outside a single source directory.
+
+## Visual phase closure rule
+
+A visual phase cannot be certified from Demo screenshots alone.
+
+Before a visual phase closes, its evidence must include both Demo and registered mobile captures generated from the same exact pull-request head and the same built production bundle (or the same explicitly supplied deployed URL), at the same 390×844 viewport. The registered experience must be exercised with hydrated production-path data rather than an empty pre-login or partially hydrated state.
+
+Synthetic matched-data runtime comparison and real-backend hydration verification are complementary requirements: the first proves that account type does not change the rendered product, and the second proves that registered data actually reaches that product before the user sees it. Neither may substitute for the other.
 
 ## Phase rule
 
 A visual or functional phase is not certified unless its relevant registered and demo paths have both been exercised. Future phases must branch from the latest certified parity-preserving head, not bypass these gates.
 
-If parity fails, fix the shared component, matched data state, backend provenance contract, or safe demo boundary. Never copy a visual or functional change into a separate demo implementation.
+If parity fails, fix the shared component, matched data state, backend hydration/provenance contract, or safe demo boundary. Never copy a visual or functional change into a separate demo implementation.

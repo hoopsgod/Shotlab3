@@ -86,7 +86,7 @@ if (!source.includes(panelMarker)) {
       />
       {rows.length ? (
         <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results">
-          {rows.map((row) => (
+          {rows.slice(0, 3).map((row) => (
             <button
               type="button"
               className={styles.operationalRow + " coachLeaderboardRow"}
@@ -106,6 +106,13 @@ if (!source.includes(panelMarker)) {
                 <em className={row.improvement > 0 ? styles.deltaPositive : row.improvement < 0 ? styles.deltaNegative : styles.deltaNeutral}>{formatDelta(row.improvement)}</em>
               </span>
             </button>
+          ))}
+          {Array.from({ length: Math.max(0, 3 - rows.length) }, (_, index) => (
+            <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-live-" + index}>
+              <span className="coachLeaderboardRank" aria-hidden="true">—</span>
+              <div className="coachLeaderboardRowCopy"><strong>Open rank</strong><span>Player activity will fill this ranking position.</span></div>
+              <span className="coachLeaderboardWeek"><small>This week</small><strong>—</strong><em className={styles.deltaNeutral}>—</em></span>
+            </div>
           ))}
         </div>
       ) : <EmptyState>No leaderboard players match the selected view.</EmptyState>}

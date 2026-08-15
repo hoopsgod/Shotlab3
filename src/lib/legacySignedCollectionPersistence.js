@@ -4,6 +4,10 @@ const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
 const DEMO_IDENTITIES = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const APP_SESSION_KEY = "sl:session";
+const DEFAULT_SESSION_WAIT_MS = 4_000;
+const DEFAULT_SESSION_POLL_MS = 25;
+const DEFAULT_GROUP_ATTEMPTS = 2;
+const DEFAULT_RETRY_DELAY_MS = 80;
 
 export const LEGACY_SIGNED_COLLECTIONS = Object.freeze({
   teams: { path: "/v1/teams", field: "teams" },
@@ -35,6 +39,12 @@ const AUTHENTICATED_COLLECTION_GROUPS = Object.freeze([
   },
 ]);
 
+export const AUTHENTICATED_COLLECTION_STORAGE_KEYS = Object.freeze(
+  AUTHENTICATED_COLLECTION_GROUPS.flatMap((group) => group.fields.map((binding) => binding.storageKey)),
+);
+
+const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(milliseconds) || 0)));
+
 function readJson(storage, key) {
   try {
     const raw = storage?.getItem?.(key);
@@ -44,15 +54,44 @@ function readJson(storage, key) {
   }
 }
 
+function registeredSessionIdentity(storage) {
+  const session = readJson(storage, APP_SESSION_KEY);
+  const email = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+  if (!email || DEMO_IDENTITIES.has(email)) return "";
+  return email;
+}
+
 export function readLegacyRegisteredIdentity({
   storage = globalThis?.localStorage,
   supabaseAuthEnabled = false,
 } = {}) {
   if (supabaseAuthEnabled) return "";
-  const session = readJson(storage, APP_SESSION_KEY);
-  const email = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
-  if (!email || DEMO_IDENTITIES.has(email)) return "";
-  return email;
+  return registeredSessionIdentity(storage);
+}
+
+export async function waitForRegisteredSession({
+  storage = globalThis?.localStorage,
+  expectedIdentity = "",
+  timeoutMs = DEFAULT_SESSION_WAIT_MS,
+  pollMs = DEFAULT_SESSION_POLL_MS,
+} = {}) {
+  const expected = normalizeIdentity(expectedIdentity);
+  const deadline = Date.now() + Math.max(0, Number(timeoutMs) || 0);
+
+  while (true) {
+    const current = registeredSessionIdentity(storage);
+    if (current && (!expected || current === expected)) {
+      return { ok: true, identity: current };
+    }
+    if (Date.now() >= deadline) {
+      return {
+        ok: false,
+        identity: current,
+        error: expected && current && current !== expected ? "session_identity_mismatch" : "session_not_ready",
+      };
+    }
+    await delay(pollMs);
+  }
 }
 
 async function readJsonResponse(response) {
@@ -63,45 +102,119 @@ async function readJsonResponse(response) {
   }
 }
 
-function signedHeaders(storage) {
+function signedHeaders(storage, requester = "") {
   return buildApiIdentityHeaders({
+    requester,
     storage,
     headers: { Accept: "application/json" },
   });
 }
 
-export async function hydrateAuthenticatedCollectionsToStorage({
-  fetchImpl = globalThis?.fetch,
-  storage = globalThis?.localStorage,
-} = {}) {
-  if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") {
-    return { ok: false, hydrated: [], failures: ["storage_unavailable"] };
-  }
+async function hydrateGroup({
+  group,
+  fetchImpl,
+  storage,
+  requester,
+  attempts = DEFAULT_GROUP_ATTEMPTS,
+  retryDelayMs = DEFAULT_RETRY_DELAY_MS,
+}) {
+  let lastFailure = "failed";
+  const maxAttempts = Math.max(1, Number(attempts) || 1);
 
-  const hydrated = [];
-  const failures = [];
-  for (const group of AUTHENTICATED_COLLECTION_GROUPS) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       const response = await fetchImpl(group.path, {
         method: "GET",
         credentials: "same-origin",
-        headers: signedHeaders(storage),
+        headers: signedHeaders(storage, requester),
       });
       const payload = await readJsonResponse(response);
       if (!response?.ok || payload?.ok === false || payload?.error) {
-        failures.push(`${group.path}:${payload?.error || response?.status || "failed"}`);
-        continue;
-      }
-      for (const binding of group.fields) {
-        if (!Array.isArray(payload?.[binding.field])) continue;
-        storage.setItem(binding.storageKey, JSON.stringify(payload[binding.field]));
-        hydrated.push(binding.storageKey);
+        lastFailure = String(payload?.error || response?.status || "failed");
+      } else {
+        const hydrated = [];
+        const missingFields = [];
+        for (const binding of group.fields) {
+          if (!Array.isArray(payload?.[binding.field])) {
+            missingFields.push(binding.field);
+            continue;
+          }
+          storage.setItem(binding.storageKey, JSON.stringify(payload[binding.field]));
+          hydrated.push(binding.storageKey);
+        }
+        if (!missingFields.length) return { ok: true, hydrated };
+        lastFailure = `missing_fields:${missingFields.join(",")}`;
       }
     } catch (error) {
-      failures.push(`${group.path}:${String(error?.message || "failed")}`);
+      lastFailure = String(error?.message || "failed");
     }
+
+    if (attempt < maxAttempts) await delay(retryDelayMs * attempt);
   }
-  return { ok: hydrated.length > 0, hydrated, failures };
+
+  return { ok: false, hydrated: [], failure: `${group.path}:${lastFailure}` };
+}
+
+export async function hydrateAuthenticatedCollectionsToStorage({
+  fetchImpl = globalThis?.fetch,
+  storage = globalThis?.localStorage,
+  expectedIdentity = "",
+  sessionWaitMs = DEFAULT_SESSION_WAIT_MS,
+  sessionPollMs = DEFAULT_SESSION_POLL_MS,
+  groupAttempts = DEFAULT_GROUP_ATTEMPTS,
+  retryDelayMs = DEFAULT_RETRY_DELAY_MS,
+} = {}) {
+  if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") {
+    return { ok: false, hydrated: [], failures: ["storage_unavailable"], identity: "" };
+  }
+
+  const session = await waitForRegisteredSession({
+    storage,
+    expectedIdentity,
+    timeoutMs: sessionWaitMs,
+    pollMs: sessionPollMs,
+  });
+  if (!session.ok) {
+    return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
+  }
+
+  // These signed GETs are independent and write distinct storage keys. Running them
+  // concurrently keeps registered mobile login bounded by the slowest collection
+  // instead of the sum of every collection latency, while each group retains its own
+  // retry/fail-closed behavior.
+  const results = await Promise.all(
+    AUTHENTICATED_COLLECTION_GROUPS.map((group) => hydrateGroup({
+      group,
+      fetchImpl,
+      storage,
+      requester: session.identity,
+      attempts: groupAttempts,
+      retryDelayMs,
+    })),
+  );
+
+  const hydrated = [];
+  const failures = [];
+  for (const result of results) {
+    hydrated.push(...result.hydrated);
+    if (!result.ok) failures.push(result.failure);
+  }
+
+  const storedPlayers = readJson(storage, "sl:players");
+  const identityHydrated = Array.isArray(storedPlayers)
+    && storedPlayers.some((row) => normalizeIdentity(row?.email) === session.identity);
+  if (!identityHydrated) failures.push("sl:players:authenticated_identity_missing");
+
+  const missingKeys = AUTHENTICATED_COLLECTION_STORAGE_KEYS.filter((key) => !hydrated.includes(key));
+  for (const key of missingKeys) failures.push(`${key}:not_hydrated`);
+
+  return {
+    ok: failures.length === 0,
+    hydrated: [...new Set(hydrated)],
+    failures: [...new Set(failures)],
+    identity: session.identity,
+    identityHydrated,
+  };
 }
 
 export async function requestLegacySignedCollection({
@@ -119,7 +232,7 @@ export async function requestLegacySignedCollection({
     const response = await fetchImpl(config.path, {
       method: "GET",
       credentials: "same-origin",
-      headers: signedHeaders(storage),
+      headers: signedHeaders(storage, requester),
     });
     const payload = await readJsonResponse(response);
     if (!response?.ok || payload?.ok === false || payload?.error) {

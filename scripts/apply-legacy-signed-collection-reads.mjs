@@ -6,8 +6,9 @@ let source = fs.readFileSync(appPath, 'utf8')
 
 const importNeedle = 'import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";'
 const importLine = 'import { requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
+const combinedImport = 'import { hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
 
-if (!source.includes(importLine)) {
+if (!source.includes(importLine) && !source.includes(combinedImport)) {
   if (!source.includes(importNeedle)) throw new Error('Could not find remote persistence import boundary in src/App.jsx.')
   source = source.replace(importNeedle, `${importNeedle}\n${importLine}`)
 }
