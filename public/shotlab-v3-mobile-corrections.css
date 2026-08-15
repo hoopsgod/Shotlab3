@@ -286,10 +286,107 @@ body.mission-control-active .mcPrimary,
 }
 
 @media (max-width: 700px) {
+  /* Home command surfaces use the same edge-to-edge performance language as secondary decisions. */
+  body.mission-control-active .mcHero {
+    margin-inline: -12px !important;
+    border-inline: 0 !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(200,255,26,.11), transparent 31%),
+      linear-gradient(128deg,#071a22 0%,#0a222b 58%,#102e35 100%) !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active .mcHeroContent {
+    padding: 20px 90px 18px 16px !important;
+    background: transparent !important;
+  }
+
+  body.mission-control-active .mcHero h1 {
+    max-width: 10ch !important;
+    color: #f5f7f4 !important;
+    font-size: clamp(34px,9.4vw,39px) !important;
+    font-weight: 760 !important;
+    line-height: .92 !important;
+    letter-spacing: -.055em !important;
+  }
+
   body.mission-control-active .mcHeroContent > p {
-    max-width: 26ch !important;
-    font-size: 15px !important;
-    line-height: 1.42 !important;
+    max-width: 28ch !important;
+    color: #b8c5c2 !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  body.mission-control-active .mcEyebrow { color: #c8ff1a !important; }
+
+  body.mission-control-active .mcHero > .mcHeroTeamMark {
+    top: 17px !important;
+    right: 16px !important;
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+  }
+
+  body.mission-control-active .mcHero > .mcHeroTeamMark img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  body.mission-control-active .mcRealityStrip {
+    border-color: rgba(235,244,240,.11) !important;
+    background: rgba(255,255,255,.045) !important;
+  }
+
+  body.mission-control-active .mcRealityStrip strong { color: #f5f7f4 !important; }
+  body.mission-control-active .mcRealityStrip small { color: #a8b6b3 !important; }
+  body.mission-control-active .mcPrimary {
+    border-color: #c8ff1a !important;
+    background: #c8ff1a !important;
+    color: #102019 !important;
+  }
+
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] {
+    margin: 12px -20px 0 !important;
+    padding: 23px 20px 21px !important;
+    border-inline: 0 !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(200,255,26,.11), transparent 31%),
+      linear-gradient(128deg,#071a22 0%,#0a222b 58%,#102e35 100%) !important;
+    box-shadow: none !important;
+  }
+
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
+    max-width: 10ch !important;
+    color: #f5f7f4 !important;
+    font-size: clamp(34px,9.7vw,40px) !important;
+    line-height: .92 !important;
+    letter-spacing: -.055em !important;
+  }
+
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] p {
+    max-width: 31ch !important;
+    color: #b8c5c2 !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  [data-testid="player-daily-primary-action"] {
+    min-height: 48px !important;
+    border-color: #c8ff1a !important;
+    border-radius: 11px !important;
+    background: #c8ff1a !important;
+    color: #102019 !important;
+    box-shadow: none !important;
+  }
+
+  [data-testid="player-command-evidence"] {
+    margin: 0 -20px !important;
+    padding: 0 20px !important;
+    border-top: 0 !important;
+    background: rgba(255,255,255,.22) !important;
   }
 
   .secondaryPageIntro__title {
