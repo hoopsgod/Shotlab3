@@ -56,7 +56,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         {metrics.map((metric, index) => {
           const interactive = Boolean(metric?.filter || metric?.action);
           const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
-          const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+          const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : ""} ${activeMetric === metric.id ? styles.metricActive : ""}`;
           const metricPriority = index === 0 ? "primary" : "supporting";
 
           if (!interactive) {
