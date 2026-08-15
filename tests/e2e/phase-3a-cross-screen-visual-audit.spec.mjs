@@ -180,7 +180,21 @@ async function navigateByKey(page, key) {
   await page.waitForTimeout(250);
 }
 
-test("Phase 3A captures auth and Coach visual hierarchy at iPhone width", async ({ page }) => {
+async function openFirstCoachPlayerDetail(page) {
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const rows = roster.locator('> .fade-up > [role="button"]');
+  expect(await rows.count()).toBeGreaterThanOrEqual(1);
+  const firstRow = rows.first();
+  const rowName = (await firstRow.locator("span").first().textContent())?.trim() || "Player";
+  await firstRow.click({ position: { x: 18, y: 18 } });
+  const drawer = page.getByRole("dialog", { name: rowName });
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
+  await drawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
+  await expect(page.getByTestId("coach-player-detail-workspace")).toBeVisible({ timeout: 10_000 });
+}
+
+test("Phase 3A captures auth and the complete Coach mobile hierarchy at iPhone width", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
@@ -200,41 +214,74 @@ test("Phase 3A captures auth and Coach visual hierarchy at iPhone width", async 
   await expectCompactFunctionalIntro(page);
   await capture(page, "03-coach-players.png");
 
+  await openFirstCoachPlayerDetail(page);
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "04-coach-player-detail.png");
+
   await navigateByKey(page, "events");
   await expectCompactFunctionalIntro(page);
-  await capture(page, "04-coach-schedule.png");
+  await capture(page, "05-coach-schedule.png");
+
+  await navigateByKey(page, "drills");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "06-coach-drills.png");
+
+  await navigateByKey(page, "sc");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "07-coach-strength.png");
+
+  await navigateByKey(page, "activity");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "08-coach-activity.png");
 
   await navigateByKey(page, "leaderboards");
   await expectCompactFunctionalIntro(page);
-  await capture(page, "05-coach-leaderboards.png");
+  await capture(page, "09-coach-leaderboards.png");
+
+  await navigateByKey(page, "settings");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "10-coach-team-account.png");
+
+  await page.getByTestId("coach-administration-header").getByRole("button", { name: "Team Branding", exact: true }).click();
+  await expect(page.getByTestId("coach-branding-workspace")).toBeVisible({ timeout: 10_000 });
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "11-coach-program-branding.png", { authenticated: false });
 
   expect(pageErrors).toEqual([]);
 });
 
-test("Phase 3A captures Player activation and progress hierarchy at iPhone width", async ({ page }) => {
+test("Phase 3A captures the complete Player training and progress hierarchy at iPhone width", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   await enterDemo(page, "player");
-  await capture(page, "06-player-home.png");
+  await capture(page, "12-player-home.png");
 
   await navigateByKey(page, "log-drill");
   await expectReadablePlayerMetrics(page, "player-at-home-workspace");
   await expectCompactFunctionalIntro(page);
-  await capture(page, "07-player-train.png");
+  await capture(page, "13-player-train.png");
 
-  await navigateByKey(page, "profile");
+  await navigateByKey(page, "duels");
   await expectCompactFunctionalIntro(page);
-  await capture(page, "08-player-progress.png");
+  await capture(page, "14-player-program-training.png");
 
   await navigateByKey(page, "program");
   await expectCompactFunctionalIntro(page);
-  await capture(page, "09-player-program.png");
+  await capture(page, "15-player-events.png");
+
+  await navigateByKey(page, "sc");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "16-player-lifting.png");
 
   await navigateByKey(page, "leaderboards");
   await expectReadablePlayerMetrics(page, "player-leaderboards-workspace");
   await expectCompactFunctionalIntro(page);
-  await capture(page, "10-player-rankings.png");
+  await capture(page, "17-player-rankings.png");
+
+  await navigateByKey(page, "profile");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "18-player-progress.png");
 
   expect(pageErrors).toEqual([]);
 });
