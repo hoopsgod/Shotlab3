@@ -2,12 +2,20 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const appPath = path.resolve(process.cwd(), 'src/App.jsx')
+const coachPanelPath = path.resolve(process.cwd(), 'src/components/CoachDashboardPhase2.jsx')
 let source = fs.readFileSync(appPath, 'utf8')
+let coachPanelSource = fs.readFileSync(coachPanelPath, 'utf8')
 
 function replaceRequired(needle, replacement, label) {
   if (source.includes(replacement)) return
   if (!source.includes(needle)) throw new Error(`Could not locate ${label} parity boundary in src/App.jsx.`)
   source = source.replace(needle, replacement)
+}
+
+function replaceCoachPanelRequired(needle, replacement, label) {
+  if (coachPanelSource.includes(replacement)) return
+  if (!coachPanelSource.includes(needle)) throw new Error(`Could not locate ${label} parity boundary in CoachDashboardPhase2.jsx.`)
+  coachPanelSource = coachPanelSource.replace(needle, replacement)
 }
 
 const duelEmptyCard = (title, detail) => `<div data-duel-empty-slot="true" style={{background:"rgba(255,255,255,0.66)",border:"1px solid var(--stroke-1)",borderRadius:14,padding:"12px 14px",marginBottom:10,minHeight:86,display:"grid",alignContent:"center",gap:4}}><div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800}}>${title}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,lineHeight:1.35}}>${detail}</div></div>`
@@ -54,5 +62,24 @@ replaceRequired(
   'duels completed empty state',
 )
 
+// The Coach leaderboard keeps the same ranked-list footprint when there are no real
+// results yet. Placeholders communicate open positions without inventing players or scores.
+replaceCoachPanelRequired(
+  `      ) : <EmptyState>No leaderboard players match the selected view.</EmptyState>}`,
+  `      ) : (
+        <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results" data-parity-empty-slot="true">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-" + index}>
+              <span className="coachLeaderboardRank" aria-hidden="true">—</span>
+              <div className="coachLeaderboardRowCopy"><strong>Open rank</strong><span>Player activity will fill this ranking position.</span></div>
+              <span className="coachLeaderboardWeek"><small>This week</small><strong>—</strong><em className={styles.deltaNeutral}>—</em></span>
+            </div>
+          ))}
+        </div>
+      )}`,
+  'coach leaderboard empty ranking geometry',
+)
+
 fs.writeFileSync(appPath, source)
+fs.writeFileSync(coachPanelPath, coachPanelSource)
 console.log('Applied stable mobile secondary-page composition for Demo and registered accounts.')
