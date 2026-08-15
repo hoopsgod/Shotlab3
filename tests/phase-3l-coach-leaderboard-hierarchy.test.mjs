@@ -9,6 +9,7 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const app = readFileSync('src/App.jsx', 'utf8');
 const panel = readFileSync('src/components/CoachDashboardPhase2.jsx', 'utf8');
+const routeStage = readFileSync('src/components/CoachRoutePerformanceStage.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/phase-3l-coach-leaderboard-screenshots.spec.mjs', 'utf8');
 const secondaryCss = readFileSync('src/components/SecondaryPageSystem.css', 'utf8');
@@ -67,19 +68,21 @@ test('Leaderboard authority uses light native surfaces, accessible focus, and re
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
-test('mobile Leaderboards preserves the decision and evidence hierarchy', () => {
+test('mobile Leaderboards preserves the decision and performance-evidence hierarchy', () => {
   assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-decision-brief/);
   assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(routeStage, /data-visual-role="primary-decision"/);
+  assert.match(routeStage, /data-visual-role="performance-evidence"/);
+  assert.match(routeStage, /data-route-kind=\{routeKind\}/);
   assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
-  assert.match(secondaryCss, /\.secondaryPageEvidence\s*\{[\s\S]*?border-block: 1px solid/);
 });
 
-test('mobile Leaderboards keeps editorial context readable and metric controls flat', () => {
+test('mobile Leaderboards keeps editorial context readable and route metrics inside the performance stage', () => {
   assert.doesNotMatch(css, /secondaryPageIntro__summary/);
   assert.doesNotMatch(css, /secondaryPageIntro__status/);
   assert.doesNotMatch(css, /font-size: 9px !important/);
-  assert.match(secondaryCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\][\s\S]*?border-block: 1px solid/);
-  assert.match(secondaryCss, /@media \(max-width: 760px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(routeStage, /aria-label="Current performance signals"/);
+  assert.match(routeStage, /aria-pressed=\{active\}/);
 });
 
 test('Player Intelligence establishes a complete dark-native surface boundary when opened from light Leaderboards', () => {
@@ -112,7 +115,9 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /data-nav-key="leaderboards"/);
   assert.match(screenshots, /coach-leaderboard-pulse/);
   assert.match(screenshots, /coach-page-dashboard-leaderboards-decision-brief/);
-  assert.match(screenshots, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(screenshots, /data-visual-role=\"performance-evidence\"/);
+  assert.match(screenshots, /Current Leader:/);
+  assert.match(screenshots, /Archived Seasons:/);
   assert.match(screenshots, /window\.innerHeight/);
   assert.match(screenshots, /coach-leaderboard-operational-results/);
   assert.match(screenshots, /10-coach-leaderboards/);
