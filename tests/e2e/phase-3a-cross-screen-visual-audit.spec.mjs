@@ -62,16 +62,17 @@ async function expectPlayerIdentityInsideViewport(page) {
   if (!(await identity.count())) return;
   const geometry = await identity.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, width: rect.width, viewportWidth: window.innerWidth };
+    return { left: rect.left, right: rect.right, width: rect.width, height: rect.height, viewportWidth: window.innerWidth };
   });
   expect(geometry.left).toBeGreaterThanOrEqual(8);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth - 8);
   expect(geometry.width).toBeGreaterThan(300);
+  expect(geometry.height).toBeLessThanOrEqual(100);
 }
 
 async function expectCompactFunctionalIntro(page) {
-  const intro = page.locator('[data-layout-role="editorial-header"]');
-  if (!(await intro.count())) return;
+  const intro = page.locator('[data-visual-role="page-intro"]');
+  await expect(intro.first()).toBeVisible();
   const geometry = await intro.first().evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
@@ -82,7 +83,7 @@ async function expectCompactFunctionalIntro(page) {
       viewportWidth: window.innerWidth,
     };
   });
-  expect(geometry.height).toBeLessThanOrEqual(190);
+  expect(geometry.height).toBeLessThanOrEqual(170);
   expect(geometry.titleSize).toBeLessThanOrEqual(34.5);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
 }
