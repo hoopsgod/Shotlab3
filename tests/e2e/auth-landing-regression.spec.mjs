@@ -66,7 +66,7 @@ test("normal launch clears stale demo authentication and renders the full welcom
     };
   });
 
-  expect(demoContrast.previewColor).toBe("rgb(68, 81, 91)");
+  expect(demoContrast.previewColor).toBe("rgb(17, 26, 33)");
   expect(demoContrast.previewContrast).toBeGreaterThanOrEqual(4.5);
   expect(demoContrast.buttons).toHaveLength(2);
   for (const button of demoContrast.buttons) {
