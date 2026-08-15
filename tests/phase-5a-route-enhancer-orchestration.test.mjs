@@ -28,6 +28,11 @@ const finalTouchSafety = [
   'scripts/apply-phase4e10-player-profile-account-touch-safety.mjs',
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
 ]
+const registeredParityEnhancers = [
+  'scripts/apply-legacy-signed-collection-reads.mjs',
+  'scripts/apply-post-auth-persistence-hydration.mjs',
+  'scripts/apply-mobile-secondary-page-parity.mjs',
+]
 
 function assertUnique(label, entries) {
   assert.equal(new Set(entries).size, entries.length, `${label} must not contain duplicate enhancers`)
@@ -55,8 +60,8 @@ function performanceFixture() {
 }
 
 test('route enhancer manifests preserve the certified dev/build ordering contract', () => {
-  assert.equal(DEV_ROUTE_ENHANCERS.length, 37)
-  assert.equal(BUILD_ROUTE_ENHANCERS.length, 40)
+  assert.equal(DEV_ROUTE_ENHANCERS.length, 40)
+  assert.equal(BUILD_ROUTE_ENHANCERS.length, 43)
   assertUnique('dev route enhancer manifest', DEV_ROUTE_ENHANCERS)
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
@@ -73,6 +78,15 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
   assert.equal(buildMinifyIndex, 24)
   assert.equal(buildAlignmentIndex, buildMinifyIndex + 1)
   assert.equal(buildPhase5Index, buildAlignmentIndex + 1)
+
+  for (const manifest of [DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS]) {
+    const registeredParityIndexes = registeredParityEnhancers.map((script) => manifest.indexOf(script))
+    assert.ok(registeredParityIndexes.every((index) => index >= 0), 'registered parity enhancers must all be orchestrated')
+    assert.ok(
+      registeredParityIndexes[0] < registeredParityIndexes[1] && registeredParityIndexes[1] < registeredParityIndexes[2],
+      'signed collection reads must precede post-auth hydration, which must precede secondary-page parity',
+    )
+  }
 
   const expectedBuildFromDev = [
     ...buildPrefix,
