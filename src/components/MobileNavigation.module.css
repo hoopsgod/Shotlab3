@@ -14,12 +14,12 @@
   padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
   overflow: hidden;
   border: 0;
-  border-top: 1px solid rgba(17, 26, 33, .09);
+  border-top: 1px solid rgba(200, 255, 26, .12);
   border-radius: 0;
-  background: rgba(250, 249, 245, .965);
-  box-shadow: 0 -8px 22px rgba(17, 26, 33, .075);
-  -webkit-backdrop-filter: blur(18px) saturate(118%);
-  backdrop-filter: blur(18px) saturate(118%);
+  background: rgba(7, 26, 34, .975);
+  box-shadow: 0 -10px 28px rgba(7, 26, 34, .16);
+  -webkit-backdrop-filter: blur(20px) saturate(118%);
+  backdrop-filter: blur(20px) saturate(118%);
   transform: none;
   pointer-events: auto;
   box-sizing: border-box;
@@ -47,9 +47,9 @@
   gap: 1px;
   padding: 3px 4px;
   border: 0;
-  border-radius: 11px;
+  border-radius: 10px;
   background: transparent;
-  color: var(--nav-inactive, #687279);
+  color: #94a29f;
   cursor: pointer;
   touch-action: manipulation;
   transition: color 140ms ease, transform 100ms ease, opacity 140ms ease;
@@ -60,13 +60,13 @@
 .dockItem:focus-visible,
 .sheetItem:focus-visible,
 .closeButton:focus-visible {
-  outline: 3px solid rgba(126, 158, 30, .20);
+  outline: 3px solid rgba(200, 255, 26, .28);
   outline-offset: -2px;
 }
 
 .dockItem.active {
   background: transparent;
-  color: var(--nav-active-text, #5f7600);
+  color: #c8ff1a;
 }
 
 .dockIcon {
@@ -77,11 +77,11 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 9px;
   transition: background 140ms ease;
 }
 
-.dockItem.active .dockIcon { background: rgba(126, 158, 30, .10); }
+.dockItem.active .dockIcon { background: rgba(200, 255, 26, .08); }
 
 .dockIcon svg {
   width: 19px;
@@ -93,10 +93,10 @@
   position: absolute;
   left: 50%;
   bottom: -2px;
-  width: 10px;
+  width: 18px;
   height: 2px;
   border-radius: 999px;
-  background: currentColor;
+  background: #c8ff1a;
   transform: translateX(-50%);
 }
 
@@ -108,10 +108,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: 10px;
-  font-weight: 680;
+  font-size: 9.5px;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -.01em;
+  letter-spacing: -.005em;
 }
 
 .notificationDot {
@@ -121,8 +121,8 @@
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--semantic-warning, #a85f0c);
-  box-shadow: 0 0 0 2px rgba(250, 249, 245, .96);
+  background: var(--semantic-warning, #d47820);
+  box-shadow: 0 0 0 2px #071a22;
 }
 
 .overlay {
@@ -340,7 +340,7 @@
 
 @media (max-width: 370px) {
   .dockInner { padding-inline: 4px; }
-  .dockLabelText { font-size: 9.5px; }
+  .dockLabelText { font-size: 9px; }
   .sheet { padding-inline: 10px; }
   .sheetSummary { max-width: 245px; }
 }
@@ -353,7 +353,7 @@
     backdrop-filter: none;
   }
 
-  .dock { background: #faf9f5; }
+  .dock { background: #071a22; }
 }
 
 @media (prefers-reduced-motion: reduce) {
