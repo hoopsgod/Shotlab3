@@ -55,7 +55,7 @@ export function promotePlayerCoachSignal(source) {
   );
   next = replaceOnce(next,
     '  .hero { margin-top: 12px; padding: 20px 18px 18px; border-radius: 22px; }',
-    '  .hero { margin:0 -18px!important;padding:24px 18px 22px;border:0;border-radius:0;box-shadow:none; }',
+    '  .hero { margin:-12px -18px 0!important;padding:36px 18px 22px;border:0;border-radius:0;box-shadow:none; }',
     'Player mobile continuous performance stage',
   );
   next = replaceOnce(next,
