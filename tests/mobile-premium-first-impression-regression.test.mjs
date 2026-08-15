@@ -64,7 +64,7 @@ test("Program Branding keeps intentional dark identity contrast against later gl
   assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header\{[^}]*background:transparent!important[^}]*box-shadow:none!important/);
   assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header h2\{color:#f8faf6!important/);
   assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header p\{color:#c6d1cf!important/);
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__kicker\{color:#c8ff1a!important/);
+  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__kicker\{color:#c8ff1a!important/);
 });
 
 test("Player Progress remains a purposeful command-story surface instead of gaining a redundant page title", () => {
