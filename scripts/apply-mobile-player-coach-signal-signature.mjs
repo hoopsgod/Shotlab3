@@ -50,7 +50,7 @@ export function promotePlayerCoachSignal(source) {
   );
   next = replaceOnce(next,
     '  .header { min-height: 28px; padding-bottom: 7px; }',
-    '  .header { min-height:48px;margin:0 -18px!important;padding:12px 18px;border-bottom:1px solid rgba(220,235,241,.1);background:#071c28; }',
+    '  .header { min-height:48px;margin:0 -18px!important;padding:12px 18px;border-bottom:1px solid rgba(220,235,241,.1);background:#071c28;box-shadow:0 12px 0 #071c28; }',
     'Player mobile focus rail',
   );
   next = replaceOnce(next,
