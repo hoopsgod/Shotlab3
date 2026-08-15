@@ -87,11 +87,22 @@ replaceOnce(
   '<EmptyState label="Follow-up cleared" tone="positive" kind="complete">Every rostered player has responded.</EmptyState>',
   'follow-up cleared state',
 );
-replaceOnce(
-  '<EmptyState>No leaderboard players match the selected view.</EmptyState>',
-  '<EmptyState label="Filtered view" kind="filter">No leaderboard players match the selected view.</EmptyState>',
-  'leaderboard filtered state',
-);
+
+// The mobile secondary-page parity enhancer may already have replaced the filtered
+// leaderboard empty state with a fixed three-row ranking frame during a prior build.
+// Treat that normalized state as satisfying this semantic-language pass so repeated
+// build -> dev enhancer execution remains idempotent.
+const leaderboardParityAlreadyApplied = next.includes('data-parity-empty-slot="true"')
+  && next.includes('data-leaderboard-placeholder="true"')
+  && next.includes('Player activity will fill this ranking position.');
+if (!leaderboardParityAlreadyApplied) {
+  replaceOnce(
+    '<EmptyState>No leaderboard players match the selected view.</EmptyState>',
+    '<EmptyState label="Filtered view" kind="filter">No leaderboard players match the selected view.</EmptyState>',
+    'leaderboard filtered state',
+  );
+}
+
 replaceOnce(
   '<EmptyState>Create the first season archive to unlock current-versus-previous comparisons.</EmptyState>',
   '<EmptyState label="Season history" kind="history">Create the first season archive to unlock current-versus-previous comparisons.</EmptyState>',
