@@ -10,6 +10,7 @@ const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const app = readFileSync('src/App.jsx', 'utf8');
 const panel = readFileSync('src/components/CoachDashboardPhase2.jsx', 'utf8');
 const routeStage = readFileSync('src/components/CoachRoutePerformanceStage.jsx', 'utf8');
+const routeStageCss = readFileSync('src/components/CoachRoutePerformanceStage.module.css', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/phase-3l-coach-leaderboard-screenshots.spec.mjs', 'utf8');
 const secondaryCss = readFileSync('src/components/SecondaryPageSystem.css', 'utf8');
@@ -77,12 +78,13 @@ test('mobile Leaderboards preserves the decision and performance-evidence hierar
   assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
 });
 
-test('mobile Leaderboards keeps editorial context readable and route metrics inside the performance stage', () => {
-  assert.doesNotMatch(css, /secondaryPageIntro__summary/);
-  assert.doesNotMatch(css, /secondaryPageIntro__status/);
-  assert.doesNotMatch(css, /font-size: 9px !important/);
+test('mobile Leaderboards readability is owned by the premium route stage rather than legacy route CSS', () => {
   assert.match(routeStage, /aria-label="Current performance signals"/);
   assert.match(routeStage, /aria-pressed=\{active\}/);
+  assert.match(routeStageCss, /--stage-accent:\s*#c8ff1a/);
+  assert.match(routeStageCss, /\.title\s*\{[\s\S]*color:\s*#f6f7ef/);
+  assert.match(routeStageCss, /\.metricValue,[\s\S]*color:\s*#f7f8f0/);
+  assert.match(routeStageCss, /min-height:\s*var\(--touch-target, 44px\)/);
 });
 
 test('Player Intelligence establishes a complete dark-native surface boundary when opened from light Leaderboards', () => {
