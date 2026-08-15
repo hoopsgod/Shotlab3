@@ -1,10 +1,10 @@
 /* Premium information architecture for the shared mobile dock and More sheet. */
 [data-testid="mobile-navigation-dock"] {
-  border-top-color: rgba(22, 25, 27, .09) !important;
-  background: rgba(250, 249, 245, .965) !important;
-  box-shadow: 0 -8px 22px rgba(25, 28, 30, .075) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(118%) !important;
-  backdrop-filter: blur(18px) saturate(118%) !important;
+  border-top-color: rgba(200, 255, 26, .12) !important;
+  background: rgba(7, 26, 34, .975) !important;
+  box-shadow: 0 -10px 28px rgba(7, 26, 34, .16) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(118%) !important;
+  backdrop-filter: blur(20px) saturate(118%) !important;
   transition: transform 180ms cubic-bezier(.22,.78,.22,1), opacity 160ms ease, box-shadow 180ms ease;
 }
 
@@ -18,13 +18,13 @@ body.mission-control-active [data-testid="mobile-navigation-dock"][data-navigati
 }
 
 [data-testid="mobile-navigation-dock"] button {
-  color: #747b80;
+  color: #94a29f;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 [data-testid="mobile-navigation-dock"] button[data-active="true"] {
-  color: var(--team-brand-nav-active, var(--accent, #617233));
+  color: #c8ff1a;
 }
 
 [data-testid="mobile-navigation-dock"] button:active {
@@ -33,8 +33,8 @@ body.mission-control-active [data-testid="mobile-navigation-dock"][data-navigati
 
 body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
   transform: translateY(4px) scale(.995) !important;
-  opacity: .82;
-  box-shadow: 0 -5px 18px rgba(25, 28, 30, .055) !important;
+  opacity: .78;
+  box-shadow: 0 -5px 18px rgba(7, 26, 34, .11) !important;
 }
 
 [data-testid="mobile-navigation-overlay"] {
@@ -126,7 +126,7 @@ body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  [data-testid="mobile-navigation-dock"] { background: #faf9f5 !important; }
+  [data-testid="mobile-navigation-dock"] { background: #071a22 !important; }
   [data-testid="mobile-navigation-sheet"] { background: #f8f7f3 !important; }
 }
 
