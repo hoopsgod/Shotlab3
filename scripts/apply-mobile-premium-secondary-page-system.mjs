@@ -4,6 +4,8 @@ import path from 'node:path'
 const cssPath = path.resolve(process.cwd(), 'src/components/SecondaryPageSystem.css')
 const appPath = path.resolve(process.cwd(), 'src/App.jsx')
 const metricCssPath = path.resolve(process.cwd(), 'src/components/CoachDashboardPrimitives.module.css')
+const commitmentPath = path.resolve(process.cwd(), 'src/components/PlayerCommitmentCenter.jsx')
+const commitmentCssPath = path.resolve(process.cwd(), 'src/components/PlayerCommitmentCenter.module.css')
 let source = fs.readFileSync(cssPath, 'utf8')
 
 const startMarker = '@media (max-width: 760px) {'
@@ -35,7 +37,8 @@ const mobileAuthority = `@media (max-width: 760px) {
   .secondaryPageIntro__icon { width: 34px; height: 34px; }
   .secondaryPageIntro__icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
   .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 10.5px; }
-  .secondaryPageIntro__title {
+  .secondaryPageIntro .secondaryPageIntro__title,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title {
     font-size: clamp(29px, 8vw, 34px) !important;
     line-height: .98;
     letter-spacing: -.047em;
@@ -124,7 +127,8 @@ const narrowAuthority = `@media (max-width: 390px) {
   .secondaryPageIntro__status { max-width: 100%; }
   .secondaryPageIntro__buttonRow { width: 100%; justify-content: stretch; }
   .secondaryPageAction { flex: 1 1 0; min-width: 0; }
-  .secondaryPageIntro__title { font-size: 30px !important; }
+  .secondaryPageIntro .secondaryPageIntro__title,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title { font-size: 30px !important; }
 }
 
 `
@@ -157,4 +161,29 @@ if (!metricCss.includes(metricHoverMarker)) {
 }
 fs.writeFileSync(metricCssPath, metricCss)
 
-console.log('Applied owner-level premium mobile page hierarchy, compact Coach functional titles, and stable mobile metric feedback.')
+let commitmentSource = fs.readFileSync(commitmentPath, 'utf8')
+const legacyCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}`
+const premiumCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}\n      data-page-hierarchy="editorial"`
+if (commitmentSource.includes(legacyCommitmentRoot)) {
+  commitmentSource = commitmentSource.replace(legacyCommitmentRoot, premiumCommitmentRoot)
+} else if (!commitmentSource.includes('data-page-hierarchy="editorial"')) {
+  throw new Error('Could not locate Player commitment center hierarchy root.')
+}
+
+const legacyCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`}>`
+const premiumCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`} data-layout-role="editorial-header" data-visual-role="page-intro">`
+if (commitmentSource.includes(legacyCommitmentHeader)) {
+  commitmentSource = commitmentSource.replace(legacyCommitmentHeader, premiumCommitmentHeader)
+} else if (!commitmentSource.includes('data-testid={`player-commitment-route-header-${mode}`} data-layout-role="editorial-header" data-visual-role="page-intro"')) {
+  throw new Error('Could not locate Player commitment center route header.')
+}
+fs.writeFileSync(commitmentPath, commitmentSource)
+
+let commitmentCss = fs.readFileSync(commitmentCssPath, 'utf8')
+const commitmentMarker = '/* Premium Level B commitment header: concise orientation before the actionable commitment surface. */'
+if (!commitmentCss.includes(commitmentMarker)) {
+  commitmentCss += `\n\n${commitmentMarker}\n@media (max-width: 759px) {\n  .routeHeader { padding: 3px 0 12px; border-bottom: 1px solid rgba(23, 26, 24, .10); }\n  .routeTitleRow { align-items: flex-start; flex-direction: column; gap: 5px; margin-top: 5px; }\n  .routeTitleRow h1 { font-size: clamp(29px, 8vw, 32px) !important; line-height: 1; letter-spacing: -.045em; }\n  .routeTitleRow > span { min-height: 18px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }\n  .routeHeader > p { display: none; }\n}\n`
+}
+fs.writeFileSync(commitmentCssPath, commitmentCss)
+
+console.log('Applied owner-level premium mobile page hierarchy, compact Coach and Player functional titles, and stable mobile metric feedback.')
