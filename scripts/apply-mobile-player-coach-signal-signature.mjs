@@ -40,8 +40,22 @@ export function promotePlayerCoachSignal(source) {
   filter: blur(32px);
   pointer-events: none;
 }`.trimStart(),
-    '.hero::after { display:none; }',
-    'Player hero blur-orb removal',
+    `.hero::after {
+  content:"02";
+  position:absolute;
+  top:42px;
+  right:8px;
+  width:auto;
+  height:auto;
+  border-radius:0;
+  background:none;
+  color:color-mix(in srgb,var(--team-brand-primary,var(--accent)) 13%,transparent);
+  filter:none;
+  font:850 148px/.76 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  letter-spacing:-.095em;
+  pointer-events:none;
+}`,
+    'Player editorial numeral',
   );
   next = replaceOnce(next,
     '@media (max-width: 700px) {\n  /* Mobile Product Reset — Phase 1: one decision, one CTA, then evidence. */',
@@ -50,27 +64,32 @@ export function promotePlayerCoachSignal(source) {
   );
   next = replaceOnce(next,
     '  .header { min-height: 28px; padding-bottom: 7px; }',
-    '  .header { min-height:48px;margin:0 -18px!important;padding:12px 18px;border-bottom:1px solid rgba(220,235,241,.1);background:#071c28;box-shadow:0 12px 0 #071c28; }',
+    '  .header { min-height:62px;margin:0 -18px!important;padding:16px 18px 12px;border-bottom:1px solid rgba(220,235,241,.1);background:#071c28;box-shadow:0 14px 0 #071c28; }',
     'Player mobile focus rail',
   );
   next = replaceOnce(next,
     '  .hero { margin-top: 12px; padding: 20px 18px 18px; border-radius: 22px; }',
-    '  .hero { margin:-12px -18px 0!important;padding:36px 18px 22px;border:0;border-radius:0;box-shadow:none; }',
+    '  .hero { min-height:410px;margin:-14px -18px 0!important;padding:74px 22px 28px;border:0;border-radius:0;background:radial-gradient(circle at 92% 4%,color-mix(in srgb,var(--team-brand-primary,var(--accent)) 14%,transparent),transparent 30%),linear-gradient(145deg,#071c28,#0a2a36 62%,#071820)!important;box-shadow:none; }',
     'Player mobile continuous performance stage',
   );
   next = replaceOnce(next,
+    '  .heroTop { min-height: 26px; }',
+    '  .heroTop { position:relative;z-index:3;min-height:30px; }',
+    'Player mobile hero meta rail',
+  );
+  next = replaceOnce(next,
     '  .title { margin-top: 12px; font-size: clamp(32px,9.2vw,37px); line-height: .96; }',
-    '  .title { margin-top:14px;font-size:clamp(38px,10.5vw,44px);line-height:.92;max-width:8.6ch; }',
+    '  .title { position:relative;z-index:3;margin-top:26px;max-width:7.2ch;font-size:clamp(48px,12.8vw,56px);line-height:.84;letter-spacing:-.062em; }',
     'Player mobile title scale',
   );
   next = replaceOnce(next,
     '  .description { font-size: 15px; line-height: 1.48; }',
-    '  .description { max-width:30ch;font-size:14px;line-height:1.48; }',
+    '  .description { position:relative;z-index:3;max-width:28ch;margin-top:14px;font-size:14px;line-height:1.46; }',
     'Player mobile supporting copy',
   );
   next = replaceOnce(next,
     '  .primaryButton { min-height: 52px; margin-top: 17px; font-size: 15px; }',
-    '  .primaryButton { min-height:54px;margin-top:20px;border-radius:12px;font-size:15px;box-shadow:none; }',
+    '  .primaryButton { position:relative;z-index:3;min-height:56px;margin-top:24px;border-radius:12px;font-size:15px;box-shadow:none; }',
     'Player mobile primary action',
   );
   next = replaceOnce(next,
@@ -80,7 +99,7 @@ export function promotePlayerCoachSignal(source) {
   );
   next = replaceOnce(next,
     '  .progressCard { padding-top: 12px; padding-bottom: 13px; }',
-    '  .progressCard { padding-top:14px;padding-bottom:15px; }',
+    '  .progressCard { padding-top:16px;padding-bottom:17px; }',
     'Player mobile score rhythm',
   );
   return next;
