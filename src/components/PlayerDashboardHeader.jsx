@@ -16,6 +16,16 @@ const MOBILE_PRODUCT_RESET_CSS = `
   [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:6px!important;overflow:hidden!important;color:#f7fafb!important;font-size:25px!important;font-weight:820!important;line-height:.98!important;letter-spacing:-.045em!important;text-overflow:ellipsis!important;white-space:nowrap!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="tagline"]{display:block!important;margin:6px 0 0!important;color:#b8c5ca!important;font-size:12px!important;font-weight:590!important;line-height:1.15!important;letter-spacing:.01em!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="mission"]{display:none!important}
+
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{margin:2px 16px 8px!important;overflow:visible!important;border:0!important;border-left:3px solid var(--team-brand-primary,var(--accent,#8fae25))!important;border-bottom:0!important;background:transparent!important;box-shadow:none!important;color:#151a16!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]::before{display:none!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="inner"]{grid-template-columns:62px minmax(0,1fr)!important;gap:12px!important;min-height:68px!important;padding:5px 0 7px 10px!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-panel"]{width:62px!important;min-height:58px!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-mark"]{width:58px!important;height:58px!important;filter:drop-shadow(0 7px 12px rgba(7,28,40,.12))!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"]{color:#617900!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{color:#68716a!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:5px!important;color:#151a16!important;font-size:26px!important;line-height:.96!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] :is([data-identity-role="tagline"],[data-identity-role="mission"]){display:none!important}
 }`;
 
 export default function PlayerDashboardHeader({
