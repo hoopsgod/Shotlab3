@@ -24,62 +24,89 @@ if (mobileStart < 0 || narrowStart < 0 || motionStart < 0) {
 
 const mobileAuthority = `@media (max-width: 760px) {
   .secondaryPageShell {
-    gap: 14px;
-    padding: 6px var(--layout-gutter, 16px) 84px;
+    gap: 12px;
+    padding: 2px var(--layout-gutter, 16px) 84px;
   }
 
-  /* Editorial stage: route icon becomes quiet geometry instead of another boxed control. */
+  /* ShotLab route stage: compact mark + editorial type + one touch-safe action rail. */
   .secondaryPageIntro {
     position: relative;
-    display: block;
-    min-height: 108px;
-    overflow: hidden;
-    padding: 9px 72px 15px 0;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 10px;
+    row-gap: 8px;
+    min-height: 0;
+    overflow: visible;
+    padding: 7px 0 12px;
     border-bottom: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
   }
 
-  .secondaryPageIntro__copy { position: relative; z-index: 1; max-width: none; }
+  .secondaryPageIntro__copy { min-width: 0; max-width: none; }
   .secondaryPageIntro__icon {
-    position: absolute;
-    top: -3px;
-    right: -7px;
-    width: 74px;
-    height: 74px;
-    color: var(--sl-accent, #71851f);
-    opacity: .13;
-    transform: rotate(-7deg);
-    transform-origin: center;
+    position: static;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    margin-top: 1px;
+    border: 1px solid rgba(7, 26, 34, .1);
+    border-radius: 9px;
+    background: #0b2028;
+    color: #c8ff1a;
+    opacity: 1;
+    transform: none;
   }
-  .secondaryPageIntro__icon svg { width: 60px; height: 60px; stroke-width: 1.45; }
-  .secondaryPageIntro[data-page-kind="calendar"] .secondaryPageIntro__icon { transform: rotate(5deg); }
-  .secondaryPageIntro[data-page-kind="team"] .secondaryPageIntro__icon { transform: rotate(-3deg) scale(1.05); }
-  .secondaryPageIntro[data-page-kind="trophy"] .secondaryPageIntro__icon { transform: rotate(7deg); }
-  .secondaryPageIntro__eyebrow { margin-bottom: 5px; font-size: 10px; letter-spacing: .095em; }
+  .secondaryPageIntro__icon svg { width: 16px; height: 16px; stroke-width: 1.85; }
+  .secondaryPageIntro[data-page-kind] .secondaryPageIntro__icon { transform: none; }
+  .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 9.5px; letter-spacing: .1em; }
   .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
   .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {
-    max-width: 9.5ch;
-    font-size: clamp(34px, 9.6vw, 40px) !important;
-    line-height: .91;
-    letter-spacing: -.058em;
+    max-width: 11ch;
+    font-size: clamp(31px, 8.5vw, 34px) !important;
+    line-height: .94;
+    letter-spacing: -.052em;
     overflow-wrap: normal;
     word-break: normal;
     text-wrap: balance;
   }
   .secondaryPageIntro__summary { display: none; }
   .secondaryPageIntro__actions {
-    position: relative;
-    z-index: 1;
-    width: calc(100% + 72px);
+    grid-column: 1 / -1;
+    width: 100%;
     min-width: 0;
-    margin-top: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 9px;
+    margin-top: 1px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
   }
-  .secondaryPageIntro__status { max-width: 48%; font-size: 10.5px; line-height: 1.3; text-align: left; }
-  .secondaryPageIntro__buttonRow { min-width: 0; flex: 0 1 auto; gap: 7px; justify-content: flex-end; }
-  .secondaryPageAction { min-height: 42px; padding-inline: 13px; border-radius: 11px; font-size: 12px; white-space: nowrap; }
+  .secondaryPageIntro__status {
+    max-width: 100%;
+    overflow: hidden;
+    color: #5b665e;
+    font-size: 9.5px;
+    line-height: 1.2;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .secondaryPageIntro__buttonRow {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    justify-content: stretch;
+  }
+  .secondaryPageAction {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 10px;
+    border-radius: 11px;
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
   .secondaryPageAction--primary { background: #18211d; border-color: #18211d; }
 
   /* Score strips are allowed to reach the viewport rhythm instead of becoming more cards. */
@@ -150,7 +177,7 @@ const mobileAuthority = `@media (max-width: 760px) {
   .secondaryPageDecision h2 { max-width: 17ch; font-size: clamp(26px, 7.3vw, 31px); line-height: .96; letter-spacing: -.052em; }
   .secondaryPageDecision p { max-width: 38ch; margin-top: 8px; color: #b8c5c2; font-size: 12.5px; line-height: 1.45; }
   .secondaryPageDecision button {
-    min-height: 43px;
+    min-height: 44px;
     margin-top: 13px;
     padding-inline: 15px;
     border-color: #c8ff1a;
@@ -204,15 +231,13 @@ const mobileAuthority = `@media (max-width: 760px) {
 `
 
 const narrowAuthority = `@media (max-width: 430px) {
-  .secondaryPageIntro { min-height: 102px; padding-right: 64px; }
-  .secondaryPageIntro__icon { right: -12px; width: 68px; height: 68px; }
-  .secondaryPageIntro__icon svg { width: 55px; height: 55px; }
+  .secondaryPageIntro { grid-template-columns: 28px minmax(0, 1fr); column-gap: 9px; }
+  .secondaryPageIntro__icon { width: 28px; height: 28px; border-radius: 8px; }
+  .secondaryPageIntro__icon svg { width: 15px; height: 15px; }
   .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
-  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle { font-size: 36px !important; }
-  .secondaryPageIntro__actions { width: calc(100% + 64px); display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 7px; }
-  .secondaryPageIntro__status { max-width: 100%; }
-  .secondaryPageIntro__buttonRow { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; justify-content: stretch; }
-  .secondaryPageAction { width: 100%; min-width: 0; padding-inline: 10px; font-size: 11.5px; }
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle { font-size: 32px !important; }
+  .secondaryPageIntro__buttonRow { gap: 6px; }
+  .secondaryPageAction { font-size: 11px; }
   .secondaryPageDecision h2 { font-size: 28px; }
 }
 
@@ -275,4 +300,4 @@ if (!commitmentCss.includes(commitmentMarker)) {
 }
 fs.writeFileSync(commitmentCssPath, commitmentCss)
 
-console.log('Applied route-aware editorial mobile stages, edge-to-edge performance bands, compact Coach and Player functional titles, and stable mobile metric feedback.')
+console.log('Applied compact ShotLab route stages, edge-to-edge performance bands, compact Coach and Player functional titles, and stable mobile metric feedback.')
