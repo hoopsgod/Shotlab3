@@ -172,7 +172,6 @@ body.mission-control-active .mcHero h1,
 body.mission-control-active .mcSection h2,
 body.mission-control-active .mcSection h3,
 .secondaryPageIntro__title,
-.secondaryPageDecision h2,
 .secondaryPageEvidence h2,
 .secondaryPageEvidence h3,
 .ts-header h2,
@@ -193,7 +192,6 @@ body.mission-control-active .mcSection small,
 body.mission-control-active .mcAttentionCopy small,
 body.mission-control-active .mcAttentionMeta,
 .secondaryPageIntro__summary,
-.secondaryPageDecision p,
 .secondaryPageEvidence p,
 .secondaryPageEvidence small,
 .ts-header p,
@@ -208,7 +206,6 @@ body.mission-control-active .mcAttentionMeta,
 
 body.mission-control-active .mcHeroContent > p,
 .secondaryPageIntro__summary,
-.secondaryPageDecision p,
 .secondaryPageEvidence p,
 .ts-header p,
 .ts-section-copy,
@@ -230,7 +227,6 @@ body.mission-control-active .mcAttentionMeta,
 
 body.mission-control-active .mcEyebrow,
 .secondaryPageIntro__eyebrow,
-.secondaryPageDecision__eyebrow,
 .ts-eyebrow,
 .ts-section-kicker,
 .ts-progress-intro > span,
@@ -238,6 +234,27 @@ body.mission-control-active .mcEyebrow,
 .ts-player-intro > span {
   color: var(--v3-accent) !important;
   font-weight: 700 !important;
+}
+
+/* Dark performance surfaces keep their own contrast in the final rendered authority. */
+.secondaryPageDecision h2 {
+  color: #f5f7f4 !important;
+  font-weight: 760 !important;
+}
+
+.secondaryPageDecision p {
+  color: #b8c5c2 !important;
+}
+
+.secondaryPageDecision__eyebrow {
+  color: #c8ff1a !important;
+  font-weight: 760 !important;
+}
+
+.secondaryPageDecision button {
+  border-color: #c8ff1a !important;
+  background: #c8ff1a !important;
+  color: #102019 !important;
 }
 
 body.mission-control-active .mcRealityStrip {
@@ -276,16 +293,20 @@ body.mission-control-active .mcPrimary,
   }
 
   .secondaryPageIntro__title {
-    font-size: clamp(29px, 8vw, 34px) !important;
-    line-height: 1 !important;
-    letter-spacing: -.045em !important;
+    font-size: clamp(34px, 9.2vw, 38px) !important;
+    line-height: .92 !important;
+    letter-spacing: -.055em !important;
   }
 
   .secondaryPageIntro__summary,
-  .secondaryPageDecision p,
   .secondaryPageEvidence p {
-    font-size: 15px !important;
-    line-height: 1.5 !important;
+    font-size: 14px !important;
+    line-height: 1.48 !important;
+  }
+
+  .secondaryPageDecision p {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
   }
 
   .ts-header h2 {
