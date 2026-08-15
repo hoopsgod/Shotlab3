@@ -131,10 +131,11 @@ test("Workspace metrics expose click affordances only when they perform an actio
   assert.match(component, /scheduleWorkspaceActionReveal\(metric\.action\)/);
   assert.match(component, /data-interactive="false"/);
   assert.match(component, /data-interactive="true"/);
+  assert.doesNotMatch(component, /styles\.metricStatic/);
   assert.match(routing, /prefers-reduced-motion: reduce/);
   assert.match(routing, /scrollIntoView/);
   assert.match(routing, /focusButtonText/);
+  assert.match(styles, /\.metric\{[\s\S]*?cursor:default/);
   assert.match(styles, /\.metricInteractive\{cursor:pointer\}/);
-  assert.match(styles, /\.metricStatic\{/);
   assert.match(styles, /prefers-reduced-motion/);
 });
