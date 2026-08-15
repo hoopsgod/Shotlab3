@@ -92,11 +92,12 @@ test("floating navigation uses restrained glass and large touch targets", () => 
   assert.match(architectureCss, /background:\s*rgba\(252, 252, 250/);
   assert.match(architectureCss, /background:\s*#f8f7f3/);
   assert.match(navigationCss, /left:\s*50%/);
-  assert.match(navigationCss, /bottom:\s*max\(10px, env\(safe-area-inset-bottom/);
-  assert.match(navigationCss, /border-radius:\s*24px/);
-  assert.match(navigationCss, /backdrop-filter:\s*blur\(28px\) saturate\(150%\)/);
-  assert.match(navigationCss, /min-height:\s*54px/);
+  assert.match(navigationCss, /bottom:\s*max\(6px, env\(safe-area-inset-bottom/);
+  assert.match(navigationCss, /border-radius:\s*19px/);
+  assert.match(navigationCss, /backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
+  assert.match(navigationCss, /min-height:\s*50px/);
   assert.match(navigationCss, /min-height:\s*66px/);
+  assert.match(navigationCss, /width:\s*min\(430px/);
   assert.match(architectureCss, /prefers-reduced-transparency/);
 });
 
@@ -115,7 +116,7 @@ test("App keeps every player and coach destination available to navigation", () 
 });
 
 test("floating dock reserves enough mobile viewport space", () => {
-  assert.match(navigationCss, /--bottom-nav-content-padding:\s*104px/);
+  assert.match(navigationCss, /--bottom-nav-content-padding:\s*96px/);
   assert.match(legacyStylesSource, /var\(--bottom-nav-content-padding, 88px\)/);
   assert.doesNotMatch(legacyStylesSource, /--bottom-nav-content-padding, 132px/);
   assert.doesNotMatch(legacyStylesSource, /--bottom-nav-content-padding, 156px/);
