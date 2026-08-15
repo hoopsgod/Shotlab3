@@ -5,15 +5,23 @@ import { promoteCoachCommandCenter, promoteCoachFinalCss } from '../scripts/appl
 import { reconcileCoachHierarchy } from '../scripts/apply-mobile-coach-cascade-reconciliation.mjs';
 import { promoteAuthSignature } from '../scripts/apply-mobile-auth-signature-stage.mjs';
 import { promoteMobileRouteSignature } from '../scripts/apply-mobile-route-signature-promotion.mjs';
+import { promotePlayerCoachSignal } from '../scripts/apply-mobile-player-coach-signal-signature.mjs';
 
 const routePipeline = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const coachCommand = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
 const coachFinal = readFileSync('src/components/CoachMissionControlFinal.css', 'utf8');
 const coachHierarchy = readFileSync('src/styles/MissionControlHierarchy2026.css', 'utf8');
+const playerDailyCss = readFileSync('src/components/PlayerDailyCommandCenter.module.css', 'utf8');
 const auth = readFileSync('src/components/AuthWorkspace.jsx', 'utf8');
 
-test('signature promotions run after their canonical owners and before residual touch safety', () => {
-  assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-route-signature-promotion\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs[\s\S]*apply-phase4c-coach-event-manage-hit-area\.mjs/);
+test('signature promotions run after canonical owners and auth remains the final presentation mutation', () => {
+  assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-route-signature-promotion\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
+  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs/);
+  const finalEnhancers = routePipeline.slice(routePipeline.indexOf('const FINAL_ROUTE_ENHANCERS'));
+  const authIndex = finalEnhancers.indexOf('apply-mobile-auth-signature-stage.mjs');
+  const arrayEnd = finalEnhancers.indexOf('])');
+  assert.ok(authIndex >= 0 && authIndex < arrayEnd, 'auth signature promotion must remain in FINAL_ROUTE_ENHANCERS');
+  assert.equal(finalEnhancers.slice(authIndex, arrayEnd).match(/scripts\//g)?.length || 0, 1, 'auth signature promotion must be the final route enhancer');
 });
 
 test('Coach Home promotion creates one strong first-impression hierarchy', () => {
@@ -25,6 +33,13 @@ test('Coach Home promotion creates one strong first-impression hierarchy', () =>
   assert.match(finalCss, /min-height: 350px !important;\n    border-radius: 0 !important/);
   assert.match(hierarchy, /background: rgba\(255,255,255,\.055\) !important;/);
   assert.match(hierarchy, /border-top: 1px solid var\(--mc-line\) !important;[\s\S]*background: transparent !important;[\s\S]*box-shadow: none !important;/);
+});
+
+test('Player Coach Assignment uses the ShotLab primary signature rather than a blue article callout', () => {
+  const promoted = promotePlayerCoachSignal(playerDailyCss);
+  assert.match(promoted, /background: var\(--coach-signal-accent,var\(--team-brand-primary,var\(--accent\)\)\);/);
+  assert.match(promoted, /color: color-mix\(in srgb,var\(--coach-signal-accent,var\(--team-brand-primary,var\(--accent\)\)\) 66%,#354039\);/);
+  assert.match(promoted, /font-size: clamp\(21px,4\.4vw,27px\);\n  font-weight: 780;\n  line-height: 1\.02;/);
 });
 
 test('authentication loses the generic frosted card without changing its controls', () => {
