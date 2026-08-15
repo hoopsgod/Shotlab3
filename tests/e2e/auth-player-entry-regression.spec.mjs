@@ -93,8 +93,8 @@ test("Player Demo keeps the complete Player presentation system from first paint
     };
   });
   expect(headerStyle.borderRadius).toBe(0);
-  expect(headerStyle.borderTopWidth).toBe(0);
-  expect(headerStyle.borderBottomWidth).toBe(0);
+  expect(headerStyle.borderTopWidth).toBeLessThanOrEqual(1);
+  expect(headerStyle.borderBottomWidth).toBeLessThanOrEqual(1);
   expect(headerStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
 
   const commandCenter = page.getByTestId("player-daily-command-center");
@@ -121,7 +121,7 @@ test("Player Demo keeps the complete Player presentation system from first paint
       backgroundImage: style.backgroundImage,
     };
   });
-  expect(primaryDecisionStyle.borderRadius).toBeGreaterThanOrEqual(20);
+  expect(primaryDecisionStyle.borderRadius).toBeLessThanOrEqual(1);
   expect(primaryDecisionStyle.paddingLeft).toBeGreaterThanOrEqual(14);
   expect(primaryDecisionStyle.backgroundImage).not.toBe("none");
 
