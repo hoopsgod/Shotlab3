@@ -13,11 +13,20 @@ const secondaryCohesionCss = fs.readFileSync(new URL("../public/shotlab-phase3-s
 const mobileNav = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const navArchitecture = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
 const retiredAuthority = fs.readFileSync(new URL("../src/styles/MobilePremiumVisualSystem2026.css", import.meta.url), "utf8");
+const indexHtml = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 test("premium mobile hierarchy is owner-level instead of a second additive visual authority", () => {
   assert.match(routeRunner, /apply-mobile-premium-secondary-page-system\.mjs/);
   assert.ok(retiredAuthority.length < 160, "retired mobile authority must remain declaration-free");
   assert.doesNotMatch(retiredAuthority, /\{[^}]*:[^}]*\}/);
+});
+
+test("retired Coach dashboard authorities cannot override the current production visual system", () => {
+  assert.doesNotMatch(indexHtml, /shotlab-v6-decision-workspaces\.css/);
+  assert.doesNotMatch(indexHtml, /shotlab-v7-page-authority\.css/);
+  assert.doesNotMatch(indexHtml, /shotlab-v9-secondary-polish\.css/);
+  assert.match(indexHtml, /shotlab-v11-decision-first\.css/);
+  assert.match(indexHtml, /shotlab-phase3-secondary-cohesion\.css/);
 });
 
 test("secondary pages use compact ShotLab route stages instead of repeated icon-title cards or ghost artwork", () => {
