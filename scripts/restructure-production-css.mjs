@@ -67,14 +67,19 @@ async function finalizeProductionCss(files) {
 
 async function main() {
   await stat(DIST_DIR);
-  const files = await listCssFiles(DIST_DIR);
 
   if (FINAL_COACH_MODE) {
+    const files = await listCssFiles(DIST_DIR);
     await finalizeProductionCss(files);
     return;
   }
 
+  // Remove unreferenced authority copies before enumerating the files that will be
+  // restructured. A retired stylesheet can be present in dist after Vite copies
+  // public assets but intentionally absent from index.html; listing first leaves a
+  // stale pathname that is unlinked moments later and then crashes the optimizer.
   const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
+  const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
