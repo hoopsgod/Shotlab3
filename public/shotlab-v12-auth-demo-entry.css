@@ -118,6 +118,53 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
     max-width:72px!important;
     max-height:70px!important;
   }
+
+  /* Mobile entry now uses a deliberate dark member-access stage instead of a
+     floating frosted SaaS card. The editorial cream opening remains intact. */
+  [data-testid="auth-workspace"] .auth-card-enter{
+    margin-left:-18px!important;
+    margin-right:-18px!important;
+    padding:24px 22px 32px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:
+      radial-gradient(circle at 100% 0,rgba(200,255,26,.10),transparent 28%),
+      linear-gradient(150deg,#071c28 0%,#0a2633 100%)!important;
+    box-shadow:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter h2{
+    color:#f5f8f9!important;
+    -webkit-text-fill-color:#f5f8f9!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter p,
+  [data-testid="auth-workspace"] .auth-card-enter label{
+    color:#afbdc4!important;
+    -webkit-text-fill-color:#afbdc4!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter [role="tablist"]{
+    border-color:rgba(220,235,241,.10)!important;
+    background:rgba(255,255,255,.055)!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter [role="tab"][aria-selected="true"]{
+    background:#f5f8f9!important;
+    color:#111a21!important;
+    -webkit-text-fill-color:#111a21!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter [role="tab"][aria-selected="false"]{
+    color:#aebcc2!important;
+    -webkit-text-fill-color:#aebcc2!important;
+  }
+  [data-testid="auth-workspace"] .auth-demo-enter::before{
+    color:#9eabb1!important;
+  }
+  [data-testid="auth-workspace"] .auth-demo-enter .btn-v{
+    border-color:rgba(200,255,26,.24)!important;
+    background:rgba(255,255,255,.035)!important;
+    color:#edf3f5!important;
+    -webkit-text-fill-color:#edf3f5!important;
+  }
 }
 
 @media(max-width:390px){
