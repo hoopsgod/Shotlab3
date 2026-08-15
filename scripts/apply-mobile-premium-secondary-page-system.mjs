@@ -123,10 +123,10 @@ const mobileAuthority = `@media (max-width: 760px) {
 `
 
 const narrowAuthority = `@media (max-width: 390px) {
-  .secondaryPageIntro__actions { align-items: stretch; flex-direction: column; }
+  .secondaryPageIntro__actions { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 6px; }
   .secondaryPageIntro__status { max-width: 100%; }
-  .secondaryPageIntro__buttonRow { width: 100%; justify-content: stretch; }
-  .secondaryPageAction { flex: 1 1 0; min-width: 0; }
+  .secondaryPageIntro__buttonRow { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; justify-content: stretch; }
+  .secondaryPageAction { width: 100%; min-width: 0; padding-inline: 10px; font-size: 11.5px; }
   .secondaryPageIntro .secondaryPageIntro__title,
   .performance-shell .secondaryPageIntro .secondaryPageIntro__title { font-size: 30px !important; }
 }
