@@ -121,7 +121,7 @@ test("Player Demo keeps the complete Player presentation system from first paint
       backgroundImage: style.backgroundImage,
     };
   });
-  expect(primaryDecisionStyle.borderRadius).toBeGreaterThanOrEqual(20);
+  expect(primaryDecisionStyle.borderRadius).toBeLessThanOrEqual(1);
   expect(primaryDecisionStyle.paddingLeft).toBeGreaterThanOrEqual(14);
   expect(primaryDecisionStyle.backgroundImage).not.toBe("none");
 
