@@ -18,15 +18,15 @@ if (mobileStart < 0 || narrowStart < 0 || motionStart < 0) {
 
 const mobileAuthority = `@media (max-width: 760px) {
   .secondaryPageShell {
-    gap: 20px;
+    gap: 18px;
     padding: 8px var(--layout-gutter, 16px) 96px;
   }
 
   .secondaryPageIntro {
     grid-template-columns: 34px minmax(0, 1fr);
     align-items: start;
-    gap: 10px 11px;
-    padding: 3px 0 14px;
+    gap: 8px 11px;
+    padding: 3px 0 12px;
     border-bottom: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
   }
 
@@ -40,7 +40,7 @@ const mobileAuthority = `@media (max-width: 760px) {
     overflow-wrap: normal;
     word-break: normal;
   }
-  .secondaryPageIntro__summary { max-width: 42ch; margin-top: 7px; font-size: 13px; line-height: 1.4; }
+  .secondaryPageIntro__summary { display: none; }
   .secondaryPageIntro__actions {
     grid-column: 1 / -1;
     width: 100%;
@@ -48,7 +48,7 @@ const mobileAuthority = `@media (max-width: 760px) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 9px;
+    gap: 8px;
   }
   .secondaryPageIntro__status { max-width: 48%; font-size: 11px; line-height: 1.25; text-align: left; }
   .secondaryPageIntro__buttonRow { min-width: 0; flex: 0 1 auto; gap: 7px; justify-content: flex-end; }
@@ -68,27 +68,22 @@ const mobileAuthority = `@media (max-width: 760px) {
   }
 
   .secondaryPageDecision {
-    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     min-height: 0;
-    gap: 11px;
+    gap: 8px;
     padding: 18px;
     border-radius: 20px;
     background: linear-gradient(145deg, #171b18, #0c0f0d 72%);
-    box-shadow: 0 16px 38px rgba(25, 31, 26, .13);
+    box-shadow: 0 14px 32px rgba(25, 31, 26, .12);
   }
-  .secondaryPageDecision::after { display: none; }
-  .secondaryPageDecision__icon { width: 36px; height: 36px; border-radius: 11px; }
+  .secondaryPageDecision::after,
+  .secondaryPageDecision__icon,
+  .secondaryPageDecision__visual { display: none; }
   .secondaryPageDecision__eyebrow { margin-bottom: 5px; font-size: 10.5px; }
-  .secondaryPageDecision h2 { font-size: clamp(24px, 7vw, 29px); line-height: 1; }
-  .secondaryPageDecision p { margin-top: 7px; font-size: 12.5px; line-height: 1.43; }
+  .secondaryPageDecision h2 { max-width: 18ch; font-size: clamp(23px, 6.4vw, 27px); line-height: 1; }
+  .secondaryPageDecision p { max-width: 38ch; margin-top: 7px; font-size: 12.5px; line-height: 1.43; }
   .secondaryPageDecision button { min-height: 42px; margin-top: 12px; }
-  .secondaryPageDecision__visual {
-    grid-column: 1 / -1;
-    padding: 12px 0 0;
-    border-top: 1px solid rgba(255, 255, 255, .09);
-    border-left: 0;
-  }
 
   .secondaryPageEvidence { grid-template-columns: 1fr; }
   .secondaryPageEvidence > * { padding: 15px 2px !important; }
