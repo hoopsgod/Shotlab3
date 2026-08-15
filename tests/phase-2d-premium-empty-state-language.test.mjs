@@ -6,11 +6,27 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const TARGET = 'src/components/CoachDashboardPhase2.jsx';
 const read = (path) => readFileSync(path, 'utf8');
 
-test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clean for earlier build enhancers', () => {
+test('Phase 2D enhancer is idempotent, semantic, and survives downstream activity normalization', () => {
   const original = read(TARGET);
 
   try {
     execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
+
+    const enhanced = read(TARGET);
+    const downstreamNormalized = enhanced.replace(
+      '        <div data-testid="coach-activity-intelligence-results">',
+      '        <div data-testid="coach-activity-intelligence-results" data-parity-stable="true">',
+    );
+    assert.notEqual(
+      downstreamNormalized,
+      enhanced,
+      'test fixture must simulate a downstream enhancer changing the installed activity wrapper',
+    );
+    writeFileSync(TARGET, downstreamNormalized);
+
+    // This is the CI-critical build -> Playwright webServer replay. The second
+    // semantic pass must recognize the already-installed outcome even though a
+    // downstream enhancer changed the exact surrounding JSX block.
     execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
 
     const source = read(TARGET);
@@ -34,6 +50,7 @@ test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clea
     assert.match(source, /label="Filtered activity" kind="filter"/);
     assert.match(source, /No team activity matches the selected view\./);
     assert.match(source, /rows\.length \? \(/);
+    assert.match(source, /data-parity-stable="true"/);
   } finally {
     writeFileSync(TARGET, original);
   }
