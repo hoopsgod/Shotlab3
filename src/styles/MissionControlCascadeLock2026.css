@@ -39,7 +39,7 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
 }
 
 @media (max-width: 980px) {
-  html body #root .performance-workspace--coach .ts-launcher {
+  html body.mission-control-active #root .ts-launcher {
     display: none !important;
   }
 
