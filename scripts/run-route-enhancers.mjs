@@ -37,7 +37,6 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-mobile-route-signature-promotion.mjs',
   'scripts/apply-mobile-coach-signature-stage.mjs',
   'scripts/apply-mobile-coach-cascade-reconciliation.mjs',
-  'scripts/apply-mobile-auth-signature-stage.mjs',
   'scripts/apply-phase4c-coach-event-manage-hit-area.mjs',
   'scripts/apply-phase4d-shared-back-hit-area.mjs',
   'scripts/apply-phase4e1-coach-filter-hit-area.mjs',
@@ -54,6 +53,8 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase4e9-player-profile-data-request.mjs',
   'scripts/apply-phase4e10-player-profile-account-touch-safety.mjs',
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
+  'scripts/apply-mobile-player-coach-signal-signature.mjs',
+  'scripts/apply-mobile-auth-signature-stage.mjs',
 ])
 
 const RELEASE_AUTH_RECOVERY_MARKER = 'const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;'
