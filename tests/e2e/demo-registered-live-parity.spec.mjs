@@ -430,7 +430,7 @@ async function assertRegisteredStateHydrated(page, role, state, navKeys) {
   await expectVisibleOn("program", /Team Practice/i, "the seeded team commitment");
   if (state === "populated") {
     await expectVisibleOn("sc", /Weight Room|Turf/i, "the persisted S&C venue");
-    await expectVisibleOn("leaderboards", /Ava Brooks/i, "the populated competitive data");
+    await expectVisibleOn("leaderboards", /THIS WEEK[\s\S]*125/i, "the player-scoped populated competitive data");
   }
 }
 
