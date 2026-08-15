@@ -8,6 +8,8 @@ const secondaryPageSystem = fs.readFileSync(new URL("../src/components/Secondary
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const playerOperationalCss = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.module.css", import.meta.url), "utf8");
+const playerMetricHierarchyCss = fs.readFileSync(new URL("../src/components/PlayerMetricHierarchy.module.css", import.meta.url), "utf8");
+const secondaryCohesionCss = fs.readFileSync(new URL("../public/shotlab-phase3-secondary-cohesion.css", import.meta.url), "utf8");
 const mobileNav = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const navArchitecture = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
 const retiredAuthority = fs.readFileSync(new URL("../src/styles/MobilePremiumVisualSystem2026.css", import.meta.url), "utf8");
@@ -18,18 +20,17 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
   assert.doesNotMatch(retiredAuthority, /\{[^}]*:[^}]*\}/);
 });
 
-test("secondary pages use route-aware editorial stages instead of repeated icon-title cards", () => {
+test("secondary pages use compact ShotLab route stages instead of repeated icon-title cards or ghost artwork", () => {
   assert.match(secondaryPageSystem, /data-page-kind=\{iconName\}/);
   assert.match(secondaryPageSystem, /data-mobile-stage="editorial"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
-  assert.match(enhancer, /Editorial stage: route icon becomes quiet geometry instead of another boxed control/);
-  assert.match(enhancer, /\.secondaryPageIntro \{[\s\S]*position: relative;[\s\S]*display: block;[\s\S]*min-height: 108px/);
-  assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*position: absolute;[\s\S]*width: 74px;[\s\S]*opacity: \.13/);
-  assert.match(enhancer, /font-size:\s*clamp\(34px, 9\.6vw, 40px\) !important/);
+  assert.match(enhancer, /ShotLab route stage: compact mark \+ editorial type \+ one touch-safe action rail/);
+  assert.match(enhancer, /\.secondaryPageIntro \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 30px minmax\(0, 1fr\);[\s\S]*min-height: 0;/);
+  assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*position: static;[\s\S]*width: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
+  assert.match(enhancer, /font-size:\s*clamp\(31px, 8\.5vw, 34px\) !important/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
-  assert.match(enhancer, /data-page-kind="calendar"/);
-  assert.match(enhancer, /data-page-kind="team"/);
-  assert.match(enhancer, /data-page-kind="trophy"/);
+  assert.doesNotMatch(enhancer, /width: 74px/);
+  assert.doesNotMatch(enhancer, /opacity: \.13/);
 });
 
 test("primary decisions are edge-to-edge performance bands rather than floating rounded cards", () => {
@@ -42,11 +43,14 @@ test("primary decisions are edge-to-edge performance bands rather than floating 
   assert.match(enhancer, /background: #c8ff1a;/);
 });
 
-test("mobile metrics and evidence form full-width score and ledger rhythms", () => {
+test("mobile metrics use a hero score band followed by light supporting evidence", () => {
   assert.match(enhancer, /Score strips are allowed to reach the viewport rhythm instead of becoming more cards/);
   assert.match(enhancer, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\] \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\) !important/);
   assert.match(enhancer, /Supporting evidence reads as a ledger beneath the performance band/);
   assert.match(enhancer, /\.secondaryPageEvidence > \* \{ padding: 14px 0 !important; \}/);
+  assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,#071a22 0%,#0a222b 62%,#102e35 100%\)!important;[\s\S]*box-shadow:none!important/);
+  assert.match(playerMetricHierarchyCss, /\.metricSupporting\{[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
+  assert.match(playerMetricHierarchyCss, /\.metricSupporting \+ \.metricSupporting\{border-left:1px solid/);
 });
 
 test("specialized Player functional headers follow the same concise Level B discipline", () => {
@@ -78,16 +82,17 @@ test("Coach detail surfaces use the same edge performance language", () => {
   assert.match(enhancer, /\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2/);
 });
 
-test("persistent Player and Coach identity chrome is native-bar compact rather than repeated hero cards", () => {
+test("persistent Player and Coach identity chrome is compact and secondary Player identity is a signature rail", () => {
   assert.match(playerHeader, /data-mobile-chrome="native-identity"/);
   assert.match(playerHeader, /grid-template-columns:36px minmax\(0,1fr\)!important/);
   assert.match(playerHeader, /min-height:50px!important/);
-  assert.match(playerHeader, /width:33px!important;height:33px/);
-  assert.match(playerHeader, /font-size:17\.5px!important/);
   assert.match(coachHeader, /data-mobile-chrome="native-identity"/);
   assert.match(coachHeader, /grid-template-columns:44px minmax\(0,1fr\)!important/);
   assert.match(coachHeader, /min-height:62px!important/);
   assert.match(coachHeader, /aria-label="Team Branding Settings"/);
+  assert.match(secondaryCohesionCss, /Secondary Player identity is a compact athlete rail/);
+  assert.match(secondaryCohesionCss, /player-dashboard-identity-header"\]\{[\s\S]*border-left:3px solid var\(--p3-accent\)!important;[\s\S]*border-radius:0!important;[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
+  assert.match(secondaryCohesionCss, /player-dashboard-identity-header"\]\>div\{[\s\S]*min-height:50px!important/);
 });
 
 test("mobile navigation is a quiet native edge tab bar, safe-area aware, and touch compliant", () => {
