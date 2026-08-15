@@ -24,6 +24,17 @@ async function expectIcon(dock, name, icon) {
   await expect(dock.getByRole("button", { name, exact: true })).toHaveAttribute("data-icon-name", icon);
 }
 
+async function expectDarkNativeDock(dock) {
+  const surface = await dock.evaluate((node) => ({
+    outer: getComputedStyle(node).backgroundColor,
+    inner: getComputedStyle(node.firstElementChild).backgroundColor,
+  }));
+  const channels = (surface.outer.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  expect(channels).toHaveLength(3);
+  expect(Math.max(...channels)).toBeLessThan(55);
+  expect(surface.inner).toBe("rgba(0, 0, 0, 0)");
+}
+
 test("player dock uses destination-true icons and secondary tools stay visually coherent", async ({ page }) => {
   await installRoutes(page);
   await page.goto("/");
@@ -35,6 +46,7 @@ test("player dock uses destination-true icons and secondary tools stay visually 
   await expectIcon(dock, "Train", "target");
   await expectIcon(dock, "Progress", "momentum");
   await expectIcon(dock, "More", "more");
+  await expectDarkNativeDock(dock);
   await expectNoOverflow(page);
   await capture(page, "05a-player-native-iconography.png");
 
@@ -49,7 +61,7 @@ test("player dock uses destination-true icons and secondary tools stay visually 
   await capture(page, "05b-player-secondary-iconography.png");
 });
 
-test("coach dock uses destination-true icons on the shared light native surface", async ({ page }) => {
+test("coach dock uses destination-true icons on the shared branded native surface", async ({ page }) => {
   await installRoutes(page);
   await page.goto("/");
   await page.getByRole("button", { name: /Coach demo/i }).click();
@@ -60,12 +72,7 @@ test("coach dock uses destination-true icons on the shared light native surface"
   await expectIcon(dock, "Players", "team");
   await expectIcon(dock, "Schedule", "calendar");
   await expectIcon(dock, "More", "more");
-  const surface = await dock.evaluate((node) => ({
-    outer: getComputedStyle(node).backgroundColor,
-    inner: getComputedStyle(node.firstElementChild).backgroundColor,
-  }));
-  expect(surface.outer).toBe("rgba(252, 252, 250, 0.9)");
-  expect(surface.inner).toBe("rgba(0, 0, 0, 0)");
+  await expectDarkNativeDock(dock);
   await expectNoOverflow(page);
   await capture(page, "05c-coach-native-iconography.png");
 });
