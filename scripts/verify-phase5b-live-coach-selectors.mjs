@@ -32,8 +32,18 @@ const brandLockup = coachSource.match(/<div className="mcBrandLockup">([\s\S]*?)
 if (!brandLockup) {
   throw new Error('Phase 5B could not verify the Coach brand-lockup DOM contract')
 }
+
 if (/<img\b/.test(brandLockup)) {
-  throw new Error('Coach brand lockup now renders an image; restore its production image rules before shipping')
+  for (const imageSafetyContract of [
+    /style=\{\{[^}]*width:\s*48[^}]*height:\s*48/,
+    /objectFit:\s*"contain"/,
+    /display:\s*"block"/,
+    /src=\{cleanMarkLogoUrl\}/,
+  ]) {
+    if (!imageSafetyContract.test(brandLockup)) {
+      throw new Error(`Coach brand lockup image is missing production-safe sizing contract: ${imageSafetyContract}`)
+    }
+  }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); dead brand-image contract remains valid`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach brand-image sizing contract verified`)
