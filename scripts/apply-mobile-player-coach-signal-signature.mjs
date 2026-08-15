@@ -92,12 +92,20 @@ export function promotePlayerCoachSignal(source) {
 }
 
 export function promotePlayerCoachSignalComponent(source) {
-  return replaceOnce(
-    source,
+  let next = source;
+  next = replaceOnce(
+    next,
     'const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" };',
     'const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" };',
     'Player Coach Assignment supporting-value clamp',
   );
+  next = replaceOnce(
+    next,
+    '<span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>',
+    '<span>{primaryWorking ? "Opening…" : dailyComplete ? "Keep training" : primary.actionLabel}</span>',
+    'Player completed-state action label',
+  );
+  return next;
 }
 
 export function applyMobilePlayerCoachSignalSignature({ cwd = process.cwd() } = {}) {
