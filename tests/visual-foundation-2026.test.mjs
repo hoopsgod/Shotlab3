@@ -112,15 +112,17 @@ test("authentication segmented controls expose native interaction semantics", ()
   assert.match(auth, /<button type="button" style=\{\{width:"100%"/);
 });
 
-test("mobile navigation is a restrained native edge tab bar", () => {
-  assert.match(mobileNavigation, /background: rgba\(250, 249, 245, \.965\)/);
-  assert.match(mobileNavigation, /box-shadow: 0 -8px 22px rgba\(17, 26, 33, \.075\)/);
+test("mobile navigation is a branded native edge tab rail", () => {
+  assert.match(mobileNavigation, /background: rgba\(7, 26, 34, \.975\)/);
+  assert.match(mobileNavigation, /box-shadow: 0 -10px 28px rgba\(7, 26, 34, \.16\)/);
   assert.match(mobileNavigation, /--mobile-tab-bar-height: 56px/);
   assert.match(mobileNavigation, /border-radius: 0/);
-  assert.match(mobileNavigation, /backdrop-filter: blur\(18px\) saturate\(118%\)/);
+  assert.match(mobileNavigation, /backdrop-filter: blur\(20px\) saturate\(118%\)/);
   assert.match(mobileNavigation, /left: 0/);
   assert.match(mobileNavigation, /right: 0/);
   assert.match(mobileNavigation, /bottom: 0/);
-  assert.match(mobileNavigation, /\.dockItem\.active \.dockIcon \{ background: rgba\(126, 158, 30, \.10\)/);
-  assert.doesNotMatch(mobileNavigation, /background: rgba\(7, 10, 12, \.84\)/);
+  assert.match(mobileNavigation, /\.dockItem\.active \.dockIcon \{ background: rgba\(200, 255, 26, \.08\)/);
+  assert.match(mobileNavigation, /color: #c8ff1a/);
+  assert.match(mobileNavigation, /font-size: var\(--type-micro, 11px\)/);
+  assert.doesNotMatch(mobileNavigation, /background: rgba\(250, 249, 245, \.965\)/);
 });
