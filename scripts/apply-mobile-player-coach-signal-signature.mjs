@@ -112,6 +112,6 @@ export function applyMobilePlayerCoachSignalSignature({ cwd = process.cwd() } = 
   console.log('Aligned Player Coach Assignment with the ShotLab primary signature system.');
 }
 
-const currentFile = fileURLToPath(import.meta/url);
+const currentFile = fileURLToPath(import.meta.url);
 const invokedFile = process.argv[1] ? path.resolve(process.argv[1]) : null;
 if (invokedFile === currentFile) applyMobilePlayerCoachSignalSignature();
