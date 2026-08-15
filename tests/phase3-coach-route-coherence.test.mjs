@@ -35,7 +35,7 @@ test("coach route stage preserves semantic contrast, actions, and truthful metri
 
 test("coach route stages have distinct visual identities without a global override layer", () => {
   requiredRouteKinds.forEach((kind) => {
-    assert.match(stageCss, new RegExp(`data-route-kind=\\"${kind}\\"`), `${kind} needs a route-specific motif`);
+    assert.ok(stageCss.includes(`data-route-kind="${kind}"`), `${kind} needs a route-specific motif`);
   });
   assert.match(stageCss, /min-height:\s*var\(--touch-target, 44px\)/, "primary actions must retain practical mobile targets");
   assert.doesNotMatch(stageCss, /!important/, "component-owned Phase 3 styling should not add another override layer");
