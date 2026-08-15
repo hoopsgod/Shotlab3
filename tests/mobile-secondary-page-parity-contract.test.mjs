@@ -30,6 +30,14 @@ test("demo-only utilities cannot change visible Coach Settings geometry", () => 
   assert.match(parityEnhancer, /pointerEvents:\"none\"/);
 });
 
+test("empty Coach Events stays inside the normal bounded mobile workspace", () => {
+  assert.match(parityEnhancer, /coach-events-mobile-empty-state/);
+  assert.match(parityEnhancer, /data-parity-empty-slot=\"true\"/);
+  assert.match(parityEnhancer, /minHeight:190/);
+  assert.match(parityEnhancer, /borderTop:\"1px solid var\(--stroke-1\)\"/);
+  assert.match(parityEnhancer, /borderBottom:\"1px solid var\(--stroke-1\)\"/);
+});
+
 test("duels preserve Incoming and Completed modules even when no challenge rows exist", () => {
   assert.match(parityEnhancer, /t=\"INCOMING\"/);
   assert.match(parityEnhancer, /No incoming duels/);
