@@ -19,7 +19,7 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:40px minmax(0,1fr) auto!important;gap:8px!important;padding:max(6px,env(safe-area-inset-top)) 0 4px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:52px minmax(0,1fr) auto!important;gap:10px!important;margin-inline:-12px!important;padding:max(12px,env(safe-area-inset-top)) 16px 12px!important;border:0!important;border-radius:0!important;background:linear-gradient(126deg,#061923,#0b2d37)!important;color:#f5f8f9!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:44px minmax(0,1fr) 44px!important;gap:8px!important;margin-inline:-12px!important;padding:max(10px,env(safe-area-inset-top)) 14px 10px!important;border:0!important;border-radius:0!important;background:linear-gradient(126deg,#061923,#0b2d37)!important;color:#f5f8f9!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}',
     'Coach mobile identity stage',
   );
   next = replaceOnce(next,
@@ -34,17 +34,27 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{font-size:10px!important;letter-spacing:.055em!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{color:#c8ff1a!important;font-size:11px!important;letter-spacing:.06em!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{color:#c8ff1a!important;font-size:11px!important;letter-spacing:.065em!important}',
     'Coach mobile role label',
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{max-width:30vw!important;overflow:hidden!important;font-size:18px!important;line-height:1.05!important;text-overflow:ellipsis!important;white-space:nowrap!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{max-width:34vw!important;overflow:hidden!important;color:#f7fafb!important;font-size:22px!important;line-height:1!important;text-overflow:ellipsis!important;white-space:nowrap!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{max-width:50vw!important;overflow:hidden!important;color:#f7fafb!important;font-size:20px!important;line-height:1!important;text-overflow:ellipsis!important;white-space:nowrap!important}',
     'Coach mobile identity name',
   );
   next = replaceOnce(next,
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderActions{display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderActions{display:flex!important;align-items:center!important;justify-content:flex-end!important;width:44px!important;min-width:44px!important;gap:0!important}',
+    'Coach mobile header actions',
+  );
+  next = replaceOnce(next,
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{display:inline-flex!important;min-width:0!important;max-width:min(104px,27vw)!important;padding-inline:8px!important;font-size:var(--type-micro,11px)!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{display:none!important}',
+    'Coach mobile redundant team control',
+  );
+  next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:20px 18px!important;gap:8px 12px!important;background:transparent!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 78px!important;padding:27px 18px 24px!important;gap:10px 14px!important;background:transparent!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin-inline:-12px!important;border-radius:0!important}body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 78px!important;padding:27px 20px 24px!important;gap:10px 14px!important;background:transparent!important}',
     'Coach mobile hero composition',
   );
   next = replaceOnce(next,
@@ -81,6 +91,11 @@ export function promoteCoachCommandCenter(source) {
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcPrimary{min-height:48px!important}',
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcPrimary{min-height:50px!important}',
     'Coach mobile primary action',
+  );
+  next = replaceOnce(next,
+    '<span className="mcBrandCopy"><small>Coach workspace</small><strong>{teamName}</strong></span>',
+    '<span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span>',
+    'Coach mobile role copy',
   );
   return next;
 }
