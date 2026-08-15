@@ -1,0 +1,10 @@
+.secondaryPageShell.secondaryPageShell--embeddedHeader {
+  padding-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  .secondaryPageShell.secondaryPageShell--embeddedHeader {
+    gap: 18px;
+    padding-bottom: 0;
+  }
+}
