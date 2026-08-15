@@ -141,10 +141,18 @@ test.describe("Phase 3 release certification — 390x844", () => {
     await expect(page.getByTestId("coach-page-dashboard-strength")).toBeVisible({ timeout: 20_000 });
     const strengthDecision = page.getByTestId("coach-page-dashboard-strength-decision-brief");
     await expect(strengthDecision).toBeVisible();
+    await expect(strengthDecision).toHaveAttribute("data-surface", "dark");
+    await expect(strengthDecision).toHaveAttribute("data-route-kind", "strength");
+    const strengthTitle = strengthDecision.locator("[data-route-stage-title]");
+    const strengthDetail = strengthDecision.locator("[data-route-stage-detail]");
+    await expect(strengthTitle).toBeVisible();
+    await expect(strengthDetail).toBeVisible();
+    await expectRenderedTextContrast(strengthTitle, 4.5);
+    await expectRenderedTextContrast(strengthDetail, 4.5);
     const strengthContrast = await strengthDecision.evaluate((element) => {
       const channels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
-      const title = element.querySelector("h2");
-      const body = element.querySelector("p");
+      const title = element.querySelector("[data-route-stage-title]");
+      const body = element.querySelector("[data-route-stage-detail]");
       return {
         background: channels(getComputedStyle(element).backgroundColor),
         title: title ? channels(getComputedStyle(title).color) : [],
