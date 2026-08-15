@@ -31,13 +31,14 @@ test("player briefing names the attention queue without inventing performance cl
   assert.equal(model.activeRate, 25);
   assert.equal(model.attentionRows.length, 3);
   assert.equal(model.decision.tone, "attention");
+  assert.equal(model.decision.title, "3 players need attention");
   assert.match(model.insights[0].body, /Ryan, Avery, Mia need a direct next step/);
   assert.doesNotMatch(JSON.stringify(model), /percentile|top \d+%|better than/i);
 });
 
-test("singular player briefing uses polished agreement", () => {
+test("singular player briefing uses concise polished agreement", () => {
   const model = buildCoachPlayerActionBriefing({ metrics: { total: 1, active: 0 }, rows: [{ name: "Ryan Lee", statusKey: "new", engagementScore: 0 }] });
-  assert.equal(model.decision.title, "1 player needs a coaching touchpoint");
+  assert.equal(model.decision.title, "1 player needs attention");
   assert.match(model.decision.detail, /1 player has no recorded activity/);
 });
 
