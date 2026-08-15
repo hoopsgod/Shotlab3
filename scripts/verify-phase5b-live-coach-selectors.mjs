@@ -27,8 +27,8 @@ if (missing.length) {
 }
 
 const coachSource = fs.readFileSync(coachSourcePath, 'utf8')
-if (!/className="mcTacticalCourt"/.test(coachSource) || !/<svg\b/.test(coachSource)) {
-  throw new Error('Phase 5B could not verify the live tactical Coach court artwork contract')
+if (!/function CourtArtwork\(/.test(coachSource) || !/className="mcCourtArtwork"/.test(coachSource)) {
+  throw new Error('Phase 5B could not verify the live Coach court artwork component contract')
 }
 
 const brandLockup = coachSource.match(/<div className="mcBrandLockup">([\s\S]*?)<\/div>/)?.[1]
@@ -49,4 +49,4 @@ if (/<img\b/.test(brandLockup)) {
   }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); tactical court and live Coach brand-image sizing contracts verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork and brand-image sizing contracts verified`)
