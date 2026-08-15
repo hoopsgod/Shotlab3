@@ -1,0 +1,137 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+const cssPath = path.resolve(process.cwd(), 'src/components/SecondaryPageSystem.css')
+let source = fs.readFileSync(cssPath, 'utf8')
+
+const startMarker = '@media (max-width: 760px) {'
+const narrowMarker = '@media (max-width: 390px) {'
+const motionMarker = '@media (prefers-reduced-motion: reduce) {'
+
+const mobileStart = source.indexOf(startMarker)
+const narrowStart = source.indexOf(narrowMarker, mobileStart + startMarker.length)
+const motionStart = source.indexOf(motionMarker, narrowStart + narrowMarker.length)
+
+if (mobileStart < 0 || narrowStart < 0 || motionStart < 0) {
+  throw new Error('Could not locate the owned SecondaryPageSystem mobile breakpoint boundaries.')
+}
+
+const mobileAuthority = `@media (max-width: 760px) {
+  .secondaryPageShell {
+    gap: 20px;
+    padding: 8px var(--layout-gutter, 16px) 96px;
+  }
+
+  .secondaryPageIntro {
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px 11px;
+    padding: 3px 0 14px;
+    border-bottom: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  }
+
+  .secondaryPageIntro__icon { width: 34px; height: 34px; }
+  .secondaryPageIntro__icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
+  .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 10.5px; }
+  .secondaryPageIntro__title {
+    font-size: clamp(29px, 8vw, 34px);
+    line-height: .98;
+    letter-spacing: -.047em;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .secondaryPageIntro__summary { max-width: 42ch; margin-top: 7px; font-size: 13px; line-height: 1.4; }
+  .secondaryPageIntro__actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+  }
+  .secondaryPageIntro__status { max-width: 48%; font-size: 11px; line-height: 1.25; text-align: left; }
+  .secondaryPageIntro__buttonRow { min-width: 0; flex: 0 1 auto; gap: 7px; justify-content: flex-end; }
+  .secondaryPageAction { min-height: 44px; padding-inline: 13px; border-radius: 12px; font-size: 12px; white-space: nowrap; }
+
+  .secondaryPageToolbar [data-visual-role="metric-strip"] {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .secondaryPageToolbar [data-visual-role="metric-strip"]::-webkit-scrollbar { display: none; }
+  .secondaryPageToolbar [data-visual-role="metric-strip"] > button {
+    min-width: 124px !important;
+    min-height: 82px !important;
+    padding: 11px 8px !important;
+    scroll-snap-align: start;
+  }
+
+  .secondaryPageDecision {
+    grid-template-columns: 36px minmax(0, 1fr);
+    align-items: start;
+    min-height: 0;
+    gap: 11px;
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #171b18, #0c0f0d 72%);
+    box-shadow: 0 16px 38px rgba(25, 31, 26, .13);
+  }
+  .secondaryPageDecision::after { display: none; }
+  .secondaryPageDecision__icon { width: 36px; height: 36px; border-radius: 11px; }
+  .secondaryPageDecision__eyebrow { margin-bottom: 5px; font-size: 10.5px; }
+  .secondaryPageDecision h2 { font-size: clamp(24px, 7vw, 29px); line-height: 1; }
+  .secondaryPageDecision p { margin-top: 7px; font-size: 12.5px; line-height: 1.43; }
+  .secondaryPageDecision button { min-height: 42px; margin-top: 12px; }
+  .secondaryPageDecision__visual {
+    grid-column: 1 / -1;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+    border-left: 0;
+  }
+
+  .secondaryPageEvidence { grid-template-columns: 1fr; }
+  .secondaryPageEvidence > * { padding: 15px 2px !important; }
+  .secondaryPageEvidence > * + * {
+    border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
+    border-left: 0 !important;
+  }
+
+  .coachPlayerDetailWorkspace { gap: 16px; }
+  .coachPlayerProfileHero { grid-template-columns: 1fr; gap: 12px; padding: 18px; border-radius: 18px 18px 0 0; box-shadow: 0 14px 34px rgba(25, 31, 26, .12); }
+  .coachPlayerProfileHero__identity { gap: 12px; }
+  .coachPlayerProfileHero h2 { font-size: 27px; }
+  .coachPlayerProfileHero__headline { display: flex; align-items: end; justify-content: space-between; min-width: 0; padding: 12px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); border-left: 0; text-align: left; }
+  .coachPlayerProfileHero__headline small { max-width: 130px; text-align: right; }
+  .coachPlayerProfileMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .coachPlayerProfileMetric:nth-child(3) { border-left: 0; }
+  .coachPlayerProfileMetric:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+  .coachPlayerProfileEvidence { grid-template-columns: 1fr; }
+  .coachPlayerProfileSection { padding: 19px 2px; }
+  .coachPlayerProfileSection + .coachPlayerProfileSection { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-left: 0; }
+
+  .coachAdministrationPulse { padding: 15px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); border-left: 0; }
+  .coachSeasonArchiveForm,
+  .coachAdministrationGrid { grid-template-columns: 1fr; }
+  .coachSeasonArchivePanel { padding: 17px; border-radius: 18px; }
+  .coachSeasonArchivePanel > .cta-primary { width: 100% !important; }
+  .seasonArchiveStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seasonArchiveStat:nth-child(odd) { border-left: 0; }
+  .seasonArchiveStat:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+}
+
+`
+
+const narrowAuthority = `@media (max-width: 390px) {
+  .secondaryPageIntro__actions { align-items: stretch; flex-direction: column; }
+  .secondaryPageIntro__status { max-width: 100%; }
+  .secondaryPageIntro__buttonRow { width: 100%; justify-content: stretch; }
+  .secondaryPageAction { flex: 1 1 0; min-width: 0; }
+  .secondaryPageIntro__title { font-size: 30px; }
+}
+
+`
+
+source = `${source.slice(0, mobileStart)}${mobileAuthority}${narrowAuthority}${source.slice(motionStart)}`
+fs.writeFileSync(cssPath, source)
+console.log('Applied owner-level premium mobile page hierarchy without an additive authority stylesheet.')
