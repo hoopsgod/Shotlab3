@@ -88,10 +88,9 @@ replaceOnce(
   'follow-up cleared state',
 );
 
-// The mobile secondary-page parity enhancer may already have replaced the filtered
-// leaderboard empty state with a fixed three-row ranking frame during a prior build.
-// Treat that normalized state as satisfying this semantic-language pass so repeated
-// build -> dev enhancer execution remains idempotent.
+// The mobile parity pass can replace the filtered leaderboard empty state with a fixed
+// ranking frame during a prior build. Treat that state as satisfying this semantic pass
+// so build -> dev enhancer execution is repeatable.
 const leaderboardParityAlreadyApplied = next.includes('data-parity-empty-slot="true"')
   && next.includes('data-leaderboard-placeholder="true"')
   && next.includes('Player activity will fill this ranking position.');
@@ -131,7 +130,16 @@ const activityAfter = `      {rows.length ? (
           <EmptyState label="Filtered activity" kind="filter">No team activity matches the selected view.</EmptyState>
         </div>
       )}`;
-replaceOnce(activityBefore, activityAfter, 'activity no-results state');
+
+// The Coach intelligence parity pass owns the final fixed six-row runway. On a second
+// enhancer execution the original Phase 2D branch no longer exists by design; the
+// runway is the semantic successor and must be accepted rather than treated as drift.
+const activityParityAlreadyApplied = next.includes('data-testid="coach-activity-intelligence-results" data-parity-slot-count="6"')
+  && next.includes('data-activity-placeholder="true"')
+  && next.includes('New team activity will appear here.');
+if (!activityParityAlreadyApplied) {
+  replaceOnce(activityBefore, activityAfter, 'activity no-results state');
+}
 
 for (const required of [
   cssImport,
@@ -142,11 +150,14 @@ for (const required of [
   'label="Activity status" kind="activity">No player activity recorded yet.',
   'label="Response status" kind="attendance"',
   'label="Follow-up cleared" tone="positive" kind="complete"',
-  'No team activity matches the selected view.',
 ]) {
   if (!next.includes(required)) {
     throw new Error(`[phase2d-empty-state-language] premium semantic state contract missing: ${required}`);
   }
+}
+
+if (!activityParityAlreadyApplied && !next.includes('No team activity matches the selected view.')) {
+  throw new Error('[phase2d-empty-state-language] activity semantic state contract missing.');
 }
 
 if (next !== source) writeFileSync(path, next);
