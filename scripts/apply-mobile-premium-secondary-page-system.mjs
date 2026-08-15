@@ -182,7 +182,7 @@ fs.writeFileSync(commitmentPath, commitmentSource)
 let commitmentCss = fs.readFileSync(commitmentCssPath, 'utf8')
 const commitmentMarker = '/* Premium Level B commitment header: concise orientation before the actionable commitment surface. */'
 if (!commitmentCss.includes(commitmentMarker)) {
-  commitmentCss += `\n\n${commitmentMarker}\n@media (max-width: 759px) {\n  .routeHeader { padding: 3px 0 12px; border-bottom: 1px solid rgba(23, 26, 24, .10); }\n  .routeTitleRow { align-items: flex-start; flex-direction: column; gap: 5px; margin-top: 5px; }\n  .routeTitleRow h1 { font-size: clamp(29px, 8vw, 32px) !important; line-height: 1; letter-spacing: -.045em; }\n  .routeTitleRow > span { min-height: 18px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }\n  .routeHeader > p { display: none; }\n}\n`
+  commitmentCss += `\n${commitmentMarker}\n@media(max-width:759px){.routeHeader{padding-bottom:12px;border-bottom:1px solid rgba(23,26,24,.1)}.routeTitleRow{align-items:flex-start;flex-direction:column;gap:5px}.routeTitleRow h1{font-size:clamp(29px,8vw,32px)!important}.routeHeader>p{display:none}}\n`
 }
 fs.writeFileSync(commitmentCssPath, commitmentCss)
 
