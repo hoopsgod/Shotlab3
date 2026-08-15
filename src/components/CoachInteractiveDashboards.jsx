@@ -119,21 +119,18 @@ const operationalPageConfig = {
     decisionEyebrow: "Training brief",
     emptyTitle: "Build the next training priority",
     emptyDetail: "Add or select a drill so the team has one clear training focus before the library expands.",
-    evidenceLabels: ["Library readiness", "Program signal", "Usage context"],
   },
   "coach-page-dashboard-strength": {
     eyebrow: "Availability decision",
     decisionEyebrow: "Session brief",
     emptyTitle: "Set the next strength session",
     emptyDetail: "Create the next session and make athlete commitments visible before adding more programming.",
-    evidenceLabels: ["Session readiness", "Athlete signal", "Completion context"],
   },
   "coach-page-dashboard-leaderboards": {
     eyebrow: "Recognition decision",
     decisionEyebrow: "Performance brief",
     emptyTitle: "Recognition begins with activity",
     emptyDetail: "Player results will create a meaningful recognition surface after the first verified activity is logged.",
-    evidenceLabels: ["Current leaders", "Movement signal", "Season context"],
   },
 };
 
@@ -149,18 +146,15 @@ function buildOperationalPageModel({ title, summary, metrics = [], testId }) {
     decisionEyebrow: "Decision brief",
     emptyTitle: `Set the next ${String(title || "team").toLowerCase()} priority`,
     emptyDetail: summary || "Use the available evidence to choose one clear next action.",
-    evidenceLabels: ["Current signal", "Supporting context", "Trend context"],
   };
   const meaningful = metrics.filter((metric) => metric && metric.value !== undefined && metric.value !== null && metric.value !== "");
   const primary = meaningful[0];
-  const supporting = meaningful.slice(1, 4);
   return {
     ...config,
     decisionTitle: primary ? `${primary.label}: ${readableMetricValue(primary)}` : config.emptyTitle,
     decisionDetail: primary?.detail || config.emptyDetail,
     decisionTone: primary?.tone || "info",
     primary,
-    supporting,
     meaningful,
   };
 }
@@ -172,7 +166,7 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
     : actions[0];
 
   return (
-    <SecondaryPageShell testId={testId}>
+    <SecondaryPageShell testId={testId} className="secondaryPageShell--embeddedHeader">
       <SecondaryPageIntro eyebrow={eyebrow || model.eyebrow} title={title} summary={summary} status={status} actions={actions} />
       <CoachRoutePerformanceStage
         eyebrow={model.decisionEyebrow}
@@ -185,21 +179,6 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
         onMetricSelect={onMetricSelect}
         testId={`${testId}-decision-brief`}
       />
-      {model.supporting.length ? (
-        <SecondaryPageEvidence testId={`${testId}-evidence`}>
-          {model.supporting.map((metric, index) => (
-            <DashboardInsightCard
-              surface="light"
-              key={metric.key || `${testId}-${index}`}
-              eyebrow={model.evidenceLabels[index] || "Supporting evidence"}
-              title={`${metric.label}: ${readableMetricValue(metric)}`}
-              body={metric.detail || "Use this signal as supporting context, not as a substitute for the coach's decision."}
-              tone={metric.tone || "info"}
-              action={metric.key && onMetricSelect ? { label: `Review ${metric.label}`, onClick: () => onMetricSelect(metric.key) } : undefined}
-            />
-          ))}
-        </SecondaryPageEvidence>
-      ) : null}
     </SecondaryPageShell>
   );
 }
