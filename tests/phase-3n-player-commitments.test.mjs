@@ -96,7 +96,10 @@ test("fresh iPhone evidence covers both commitment routes and verifies legacy co
   assert.match(screenshots, /04n-player-events-commitment/);
   assert.match(screenshots, /04o-player-strength-commitment/);
   assert.match(screenshots, /routeStatus: "1 response needed"/);
-  assert.match(screenshots, /routeStatus: "Schedule clear"/);
+  assert.ok(
+    screenshots.includes('routeStatus: /^(?:Schedule clear|\\d+ responses? needed)$/'),
+    "S&C screenshot evidence must accept the truthful actionable status rather than stale fixed copy",
+  );
   assert.match(screenshots, /compositionStyle\.backgroundColor/);
   assert.match(screenshots, /scrollWidth - window\.innerWidth/);
   assert.match(screenshots, /player-events-operational-list/);
