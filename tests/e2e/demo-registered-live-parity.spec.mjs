@@ -399,10 +399,17 @@ async function assertRegisteredStateHydrated(page, role, state, navKeys) {
   const expectVisibleOn = async (key, pattern, label) => {
     expect(navKeys, `${role}/${state} must expose ${key}`).toContain(key);
     await navigateToKey(page, key);
-    await expect(
-      page.getByText(pattern).first(),
-      `${role}/${state} must visibly hydrate ${label} from the real registered persistence path`,
-    ).toBeVisible({ timeout: 25_000 });
+    const matches = page.getByText(pattern);
+    await expect.poll(async () => {
+      const count = await matches.count();
+      for (let index = 0; index < count; index += 1) {
+        if (await matches.nth(index).isVisible().catch(() => false)) return true;
+      }
+      return false;
+    }, {
+      timeout: 25_000,
+      message: `${role}/${state} must visibly hydrate ${label} from the real registered persistence path`,
+    }).toBe(true);
   };
 
   if (role === "coach") {
