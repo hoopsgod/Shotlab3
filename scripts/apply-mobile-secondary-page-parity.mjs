@@ -12,6 +12,15 @@ function replaceRequired(needle, replacement, label) {
   source = source.replace(needle, replacement)
 }
 
+function replaceRequiredAfter(scopeMarker, needle, replacement, label) {
+  if (source.includes(replacement)) return
+  const scopeIndex = source.indexOf(scopeMarker)
+  if (scopeIndex < 0) throw new Error(`Could not locate ${label} scope in src/App.jsx.`)
+  const needleIndex = source.indexOf(needle, scopeIndex)
+  if (needleIndex < 0) throw new Error(`Could not locate ${label} parity boundary in scoped src/App.jsx content.`)
+  source = `${source.slice(0, needleIndex)}${replacement}${source.slice(needleIndex + needle.length)}`
+}
+
 function replaceCoachPanelRequired(needle, replacement, label) {
   if (coachPanelSource.includes(replacement)) return
   if (!coachPanelSource.includes(needle)) throw new Error(`Could not locate ${label} parity boundary in CoachDashboardPhase2.jsx.`)
@@ -80,15 +89,14 @@ replaceRequired(
   'duels completed empty state',
 )
 
-// Reserve three S&C session cards so the route does not lose nearly a full screen when
-// a paid team has not scheduled the same number of sessions as Demo.
-replaceRequired(
-  `      </div>;
-    })}
+// Reserve three S&C session cards. Scope the insertion to the actual S&C session map
+// so unrelated closing markup cannot satisfy or break this rewrite.
+replaceRequiredAfter(
+  `{filteredCoachStrengthRows.map(({session:s})=>{`,
+  `    })}
   </div>}
 </div>`,
-  `      </div>;
-    })}
+  `    })}
     {Array.from({length:Math.max(0,3-filteredCoachStrengthRows.length)},(_,index)=><div key={"coach-sc-open-"+index}>${coachScOpenSlot}</div>)}
   </div>}
 </div>`,
@@ -98,7 +106,8 @@ replaceRequired(
 // Reserve four visible roster positions without inventing player identities or data.
 const rosterLegacyEmpty = `{roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}`
 if (source.includes(rosterLegacyEmpty)) source = source.replace(rosterLegacyEmpty, '')
-replaceRequired(
+replaceRequiredAfter(
+  `{roster.map(p=>{`,
   `    </div>
   </div>})}
 
@@ -161,6 +170,24 @@ replaceCoachPanelRequired(
           ))}
         </div>`,
   'coach activity fixed intelligence rows',
+)
+replaceCoachPanelRequired(
+  `      ) : (
+        <div data-testid="coach-activity-intelligence-results">
+          <EmptyState label="Filtered activity" kind="filter">No team activity matches the selected view.</EmptyState>
+        </div>
+      )}`,
+  `      ) : (
+        <div className={styles.activityList} data-testid="coach-activity-intelligence-results" data-parity-slot-count="6">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div className={styles.activityRow} data-activity-placeholder="true" key={"coach-open-activity-empty-" + index}>
+              <div><strong>Open activity slot</strong><span>New team activity will appear here.</span></div>
+              <time>—</time>
+            </div>
+          ))}
+        </div>
+      )}`,
+  'coach activity empty intelligence rows',
 )
 
 // Empty leaderboard teams keep the same three-row ranking footprint.
