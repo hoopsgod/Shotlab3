@@ -97,6 +97,64 @@ export function promoteCoachCommandCenter(source) {
     '<span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span>',
     'Coach mobile role copy',
   );
+  next = replaceOnce(next,
+`function CourtArtwork({ logoUrl }) {
+  return (
+    <div className="mcCourtArtwork" aria-hidden="true">
+      <div className="mcArenaGlow" />
+      <div className="mcRafters"><span /><span /><span /><span /></div>
+      <div className="mcArenaLights"><span /><span /><span /></div>
+      <div className="mcHoop"><span className="mcBackboard" /><span className="mcRim" /><span className="mcPost" /></div>
+      <div className="mcCourtFloor"><span className="mcSideline" /><span className="mcCenterLine" /><span className="mcKey" /><span className="mcThreePoint" /><img src={logoUrl || FALLBACK_LOGO} alt="" /></div>
+    </div>
+  );
+}`,
+`function CourtArtwork({ logoUrl }) {
+  const mark = logoUrl || FALLBACK_LOGO;
+  return (
+    <div className="mcCourtArtwork" aria-hidden="true">
+      <svg viewBox="0 0 390 370" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+        <defs>
+          <linearGradient id="mcTacticalWash" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#0b3840" stopOpacity=".08" />
+            <stop offset=".52" stopColor="#0b5a58" stopOpacity=".18" />
+            <stop offset="1" stopColor="#c8ff1a" stopOpacity=".04" />
+          </linearGradient>
+          <radialGradient id="mcTacticalGlow" cx="74%" cy="48%" r="58%">
+            <stop offset="0" stopColor="#c8ff1a" stopOpacity=".16" />
+            <stop offset=".5" stopColor="#0f7a70" stopOpacity=".07" />
+            <stop offset="1" stopColor="#071c28" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="390" height="370" fill="url(#mcTacticalWash)" />
+        <rect width="390" height="370" fill="url(#mcTacticalGlow)" />
+        <g transform="translate(208 22) rotate(-4 86 163)" fill="none" stroke="rgba(220,235,241,.23)" strokeWidth="2" vectorEffect="non-scaling-stroke">
+          <rect x="0" y="0" width="172" height="326" rx="18" />
+          <line x1="0" y1="0" x2="0" y2="326" opacity=".72" />
+          <line x1="172" y1="0" x2="172" y2="326" opacity=".52" />
+          <rect x="105" y="116" width="67" height="94" />
+          <circle cx="105" cy="163" r="47" strokeDasharray="3 5" opacity=".72" />
+          <path d="M172 48h-17C87 58 63 108 63 163s24 105 92 115h17" />
+          <line x1="155" y1="48" x2="172" y2="48" />
+          <line x1="155" y1="278" x2="172" y2="278" />
+          <line x1="151" y1="142" x2="151" y2="184" />
+          <circle cx="143" cy="163" r="6" stroke="#c8ff1a" strokeOpacity=".62" />
+          <path d="M137 163h12" stroke="#c8ff1a" strokeOpacity=".52" />
+          <circle cx="1" cy="163" r="44" opacity=".4" />
+        </g>
+        <g opacity=".58">
+          <circle cx="294" cy="82" r="4" fill="#c8ff1a" />
+          <circle cx="267" cy="191" r="4" fill="#c8ff1a" />
+          <circle cx="319" cy="266" r="4" fill="#c8ff1a" />
+          <path d="M294 82C272 108 263 145 267 191s24 59 52 75" fill="none" stroke="rgba(200,255,26,.28)" strokeWidth="1.5" strokeDasharray="4 7" />
+        </g>
+        <image href={mark} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" />
+      </svg>
+    </div>
+  );
+}`,
+    'Coach tactical court signature',
+  );
   return next;
 }
 
