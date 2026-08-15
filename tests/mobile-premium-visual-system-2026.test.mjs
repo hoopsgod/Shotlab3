@@ -20,27 +20,27 @@ test("mobile hierarchy defines command, functional, and detail-screen density co
 
 test("major functional page intros are compact rather than oversized title stages", () => {
   assert.match(css, /\.secondaryPageIntro\.appHeader/);
-  assert.match(css, /font-size: var\(--type-page-mobile\)/);
-  assert.match(css, /padding: 3px 0 14px/);
+  assert.match(css, /font-size:\s*var\(--type-page-mobile\)/);
+  assert.match(css, /padding:\s*3px\s+0\s+14px/);
   assert.match(css, /\.secondaryPageDecision/);
-  assert.match(css, /min-height: 0/);
+  assert.match(css, /min-height:\s*0/);
   assert.doesNotMatch(css, /font-size:\s*(?:5[0-9]|[6-9][0-9])px[^;]*!important/);
 });
 
 test("persistent player identity is compact and mobile navigation reserves safe-area clearance", () => {
   assert.match(css, /player-dashboard-identity-header/);
-  assert.match(css, /min-height: 62px/);
+  assert.match(css, /min-height:\s*62px/);
   assert.match(css, /mobile-navigation-dock/);
   assert.match(css, /env\(safe-area-inset-bottom/);
-  assert.match(css, /padding-bottom: var\(--mobile-nav-clearance\)/);
+  assert.match(css, /padding-bottom:\s*var\(--mobile-nav-clearance\)/);
 });
 
 test("visual system protects narrow widths, long data, accessibility, and reduced motion", () => {
-  assert.match(css, /@media \(max-width: 390px\)/);
-  assert.match(css, /@media \(min-width: 391px\) and \(max-width: 430px\)/);
-  assert.match(css, /overflow-x: clip/);
-  assert.match(css, /overflow-wrap: anywhere/);
+  assert.match(css, /@media\s*\(max-width:\s*390px\)/);
+  assert.match(css, /@media\s*\(min-width:\s*391px\)\s*and\s*\(max-width:\s*430px\)/);
+  assert.match(css, /overflow-x:\s*clip/);
+  assert.match(css, /overflow-wrap:\s*anywhere/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /prefers-reduced-transparency: reduce/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /prefers-reduced-transparency:\s*reduce/);
 });
