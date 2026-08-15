@@ -9,7 +9,9 @@ const commitmentCssPath = path.resolve(process.cwd(), 'src/components/PlayerComm
 let source = fs.readFileSync(cssPath, 'utf8')
 
 const startMarker = '@media (max-width: 760px) {'
-const narrowMarker = '@media (max-width: 390px) {'
+const currentNarrowMarker = '@media (max-width: 430px) {'
+const legacyNarrowMarker = '@media (max-width: 390px) {'
+const narrowMarker = source.includes(currentNarrowMarker) ? currentNarrowMarker : legacyNarrowMarker
 const motionMarker = '@media (prefers-reduced-motion: reduce) {'
 
 const mobileStart = source.indexOf(startMarker)
@@ -37,8 +39,8 @@ const mobileAuthority = `@media (max-width: 760px) {
   .secondaryPageIntro__icon { width: 34px; height: 34px; }
   .secondaryPageIntro__icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
   .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 10.5px; }
-  .secondaryPageIntro .secondaryPageIntro__title,
-  .performance-shell .secondaryPageIntro .secondaryPageIntro__title {
+  .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {
     font-size: clamp(29px, 8vw, 34px) !important;
     line-height: .98;
     letter-spacing: -.047em;
@@ -122,13 +124,13 @@ const mobileAuthority = `@media (max-width: 760px) {
 
 `
 
-const narrowAuthority = `@media (max-width: 390px) {
+const narrowAuthority = `@media (max-width: 430px) {
   .secondaryPageIntro__actions { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 6px; }
   .secondaryPageIntro__status { max-width: 100%; }
   .secondaryPageIntro__buttonRow { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; justify-content: stretch; }
   .secondaryPageAction { width: 100%; min-width: 0; padding-inline: 10px; font-size: 11.5px; }
-  .secondaryPageIntro .secondaryPageIntro__title,
-  .performance-shell .secondaryPageIntro .secondaryPageIntro__title { font-size: 30px !important; }
+  .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle { font-size: 30px !important; }
 }
 
 `
