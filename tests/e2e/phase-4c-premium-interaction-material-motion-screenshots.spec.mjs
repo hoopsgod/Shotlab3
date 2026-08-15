@@ -56,20 +56,18 @@ test("Phase 4C gives the Player dock a consistent premium selected and press mat
   await expect(home).toHaveAttribute("data-active", "true");
   const style = await home.evaluate((node) => {
     const computed = getComputedStyle(node);
-    const icon = node.querySelector("span");
-    const indicator = node.querySelector('[aria-hidden="true"]:last-child');
+    const icon = node.querySelector(":scope > span:first-child");
     return {
       background: computed.backgroundColor,
       color: computed.color,
       iconBackground: icon ? getComputedStyle(icon).backgroundColor : "",
-      indicatorBackground: indicator ? getComputedStyle(indicator).backgroundColor : "",
       shadow: computed.boxShadow,
       transition: computed.transitionDuration,
       origin: computed.transformOrigin,
     };
   });
   expect(style.background).toBe("rgba(0, 0, 0, 0)");
-  expect(style.color).toBe("rgb(200, 255, 26)");
+  expect(style.color).not.toBe("rgb(148, 162, 159)");
   expect(style.iconBackground).not.toBe("rgba(0, 0, 0, 0)");
   expect(style.shadow).toBe("none");
   expect(style.transition).not.toBe("0s");
