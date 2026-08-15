@@ -18,7 +18,7 @@ function replaceFunction(name, transform) {
   source = `${source.slice(0, block.start)}${next}${source.slice(block.end)}`
 }
 
-const populatedPlaceholders = `          {Array.from({ length: Math.max(0, 3 - rows.length) }, (_, index) => (
+const populatedLeaderboardPlaceholders = `          {Array.from({ length: Math.max(0, 3 - rows.length) }, (_, index) => (
             <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-live-" + index}>
               <span className="coachLeaderboardRank" aria-hidden="true">—</span>
               <div className="coachLeaderboardRowCopy"><strong>Open rank</strong><span>Player activity will fill this ranking position.</span></div>
@@ -26,7 +26,7 @@ const populatedPlaceholders = `          {Array.from({ length: Math.max(0, 3 - r
             </div>
           ))}`
 
-const emptyLeaderboard = `(
+const emptyLeaderboardNode = `(
         <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results" data-parity-empty-slot="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-" + index}>
@@ -36,7 +36,7 @@ const emptyLeaderboard = `(
             </div>
           ))}
         </div>
-      )}`
+      )`
 
 replaceFunction('CoachLeaderboardOperationalPanel', (block) => {
   let next = block
@@ -49,29 +49,28 @@ replaceFunction('CoachLeaderboardOperationalPanel', (block) => {
     if (!mapPattern.test(next)) throw new Error('Could not locate Coach leaderboard row map.')
     next = next.replace(mapPattern, '{rows.slice(0, 3).map((row) => (')
 
-    const listClosePattern = /(\s*\)\}\s*\n\s*<\/div>\s*\n\s*\)\s*:\s*)/
-    const match = next.match(listClosePattern)
-    if (!match) throw new Error('Could not locate Coach leaderboard populated-list close boundary.')
-    next = next.replace(listClosePattern, `${match[1].replace(/\)\s*:\s*$/, '')}${populatedPlaceholders}\n        </div>\n      ) : `)
+    const populatedClosePattern = /(\s*\)\)\}\s*\n)(\s*<\/div>\s*\n\s*\)\s*:)/
+    if (!populatedClosePattern.test(next)) throw new Error('Could not locate Coach leaderboard populated-list close boundary.')
+    next = next.replace(populatedClosePattern, `$1${populatedLeaderboardPlaceholders}\n$2`)
   }
 
   if (!next.includes('data-parity-empty-slot="true"')) {
-    const emptyPattern = /<EmptyState(?:\s+[^>]*)?>No leaderboard players match the selected view\.<\/EmptyState>\}/
+    const emptyPattern = /<EmptyState(?:\s+[^>]*)?>No leaderboard players match the selected view\.<\/EmptyState>/
     if (!emptyPattern.test(next)) throw new Error('Could not locate Coach leaderboard empty state.')
-    next = next.replace(emptyPattern, `${emptyLeaderboard.slice(1)}`)
+    next = next.replace(emptyPattern, emptyLeaderboardNode)
   }
 
   return next
 })
 
-const activityPlaceholders = `          {Array.from({ length: Math.max(0, 6 - rows.length) }, (_, index) => (
+const populatedActivityPlaceholders = `          {Array.from({ length: Math.max(0, 6 - rows.length) }, (_, index) => (
             <div className={styles.activityRow} data-activity-placeholder="true" key={"coach-open-activity-" + index}>
               <div><strong>Open activity slot</strong><span>New team activity will appear here.</span></div>
               <time>—</time>
             </div>
           ))}`
 
-const activityEmptyParity = `        <div className={styles.activityList} data-testid="coach-activity-intelligence-results" data-parity-slot-count="6">
+const emptyActivityNode = `        <div className={styles.activityList} data-testid="coach-activity-intelligence-results" data-parity-slot-count="6">
           {Array.from({ length: 6 }, (_, index) => (
             <div className={styles.activityRow} data-activity-placeholder="true" key={"coach-open-activity-empty-" + index}>
               <div><strong>Open activity slot</strong><span>New team activity will appear here.</span></div>
@@ -96,14 +95,13 @@ replaceFunction('CoachActivityIntelligencePanel', (block) => {
   }
 
   if (!next.includes('coach-open-activity-')) {
-    const firstListClose = /(\s*\)\}\s*\n\s*<\/div>)/
-    const match = next.match(firstListClose)
-    if (!match) throw new Error('Could not locate Coach activity populated-list close boundary.')
-    next = next.replace(firstListClose, `${match[1].replace(/\s*<\/div>$/, '')}\n${activityPlaceholders}\n        </div>`)
+    const populatedClosePattern = /(\s*\)\)\}\s*\n)(\s*<\/div>)/
+    if (!populatedClosePattern.test(next)) throw new Error('Could not locate Coach activity populated-list close boundary.')
+    next = next.replace(populatedClosePattern, `$1${populatedActivityPlaceholders}\n$2`)
   }
 
   const semanticEmptyPattern = /<div data-testid="coach-activity-intelligence-results">\s*<EmptyState(?:\s+[^>]*)?>No team activity matches the selected view\.<\/EmptyState>\s*<\/div>/
-  if (semanticEmptyPattern.test(next)) next = next.replace(semanticEmptyPattern, activityEmptyParity)
+  if (semanticEmptyPattern.test(next)) next = next.replace(semanticEmptyPattern, emptyActivityNode)
 
   return next
 })
