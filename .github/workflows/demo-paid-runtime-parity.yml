@@ -39,8 +39,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify shared UI source contract
-        run: node --test tests/demo-visual-parity-contract.test.mjs
+      - name: Verify shared UI and parity release-boundary contracts
+        run: node --test tests/demo-visual-parity-contract.test.mjs tests/demo-registered-parity-release-boundary.test.mjs
 
       - name: Install pinned parity tooling
         run: npm install --no-save @playwright/test@1.55.1 pngjs@7.0.0
