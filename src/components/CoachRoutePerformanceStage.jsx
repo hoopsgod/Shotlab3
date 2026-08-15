@@ -51,7 +51,7 @@ function StageMetric({ metric, active, onSelect }) {
       data-route-stage-metric
     >
       <span className={styles.metricLabel}>{metric.displayLabel || metric.label}</span>
-      <strong className={styles.metricValue}>{readableMetricValue(metric)}</strong>
+      <span className={styles.metricValue}>{readableMetricValue(metric)}</span>
       {metric.detail ? <span className={styles.metricDetail}>{metric.detail}</span> : null}
     </Component>
   );
@@ -95,8 +95,8 @@ export default function CoachRoutePerformanceStage({
       </div>
 
       <div className={styles.copy}>
-        <h2>{title}</h2>
-        {detail ? <p>{detail}</p> : null}
+        <div className={styles.title} role="heading" aria-level="2">{title}</div>
+        {detail ? <div className={styles.detail}>{detail}</div> : null}
         {action ? (
           <button type="button" className={styles.action} data-action-role="primary" onClick={action.onClick} disabled={action.disabled}>
             <span>{action.label}</span>
