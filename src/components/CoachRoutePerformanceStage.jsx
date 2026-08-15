@@ -1,0 +1,121 @@
+import ShotLabIcon from "./ShotLabIcon.jsx";
+import styles from "./CoachRoutePerformanceStage.module.css";
+
+const ROUTE_ICONS = {
+  players: "team",
+  schedule: "calendar",
+  training: "training",
+  strength: "strength",
+  activity: "activity",
+  leaderboards: "trophy",
+  settings: "settings",
+  default: "target",
+};
+
+const cx = (...values) => values.filter(Boolean).join(" ");
+
+export const resolveCoachRouteKind = ({ testId = "", title = "" } = {}) => {
+  const value = `${testId} ${title}`.toLowerCase();
+  if (value.includes("player") || value.includes("roster")) return "players";
+  if (value.includes("event") || value.includes("schedule") || value.includes("calendar")) return "schedule";
+  if (value.includes("drill") || value.includes("training")) return "training";
+  if (value.includes("strength") || value.includes("lifting") || value.includes("conditioning")) return "strength";
+  if (value.includes("activity") || value.includes("signal")) return "activity";
+  if (value.includes("leader") || value.includes("rank")) return "leaderboards";
+  if (value.includes("account") || value.includes("setting")) return "settings";
+  return "default";
+};
+
+const readableMetricValue = (metric) => {
+  const value = metric?.value;
+  if (value === null || value === undefined || value === "") return "—";
+  return String(value);
+};
+
+function StageMetric({ metric, active, onSelect }) {
+  const interactive = Boolean(onSelect && metric?.key);
+  const Component = interactive ? "button" : "div";
+  const props = interactive
+    ? {
+        type: "button",
+        onClick: () => onSelect(metric.key),
+        "aria-pressed": active,
+        "aria-label": `${metric.label}: ${readableMetricValue(metric)}${metric.detail ? ` · ${metric.detail}` : ""}`,
+      }
+    : {};
+
+  return (
+    <Component
+      {...props}
+      className={cx(styles.metric, active && styles.metricActive)}
+      data-route-stage-metric
+    >
+      <span className={styles.metricLabel}>{metric.displayLabel || metric.label}</span>
+      <strong className={styles.metricValue}>{readableMetricValue(metric)}</strong>
+      {metric.detail ? <span className={styles.metricDetail}>{metric.detail}</span> : null}
+    </Component>
+  );
+}
+
+export default function CoachRoutePerformanceStage({
+  kind,
+  eyebrow,
+  title,
+  detail,
+  tone = "info",
+  action,
+  metrics = [],
+  activeMetric,
+  onMetricSelect,
+  testId,
+}) {
+  const routeKind = kind || resolveCoachRouteKind({ testId, title });
+  const icon = ROUTE_ICONS[routeKind] || ROUTE_ICONS.default;
+  const visibleMetrics = metrics.filter(Boolean).slice(0, 4);
+
+  return (
+    <section
+      className={styles.stage}
+      data-testid={testId}
+      data-surface="dark"
+      data-visual-role="primary-decision"
+      data-route-kind={routeKind}
+      data-tone={tone}
+    >
+      <div className={styles.watermark} aria-hidden="true">
+        <ShotLabIcon name={icon} size={118} />
+      </div>
+
+      <div className={styles.topline}>
+        <span className={styles.routeMark} aria-hidden="true">
+          <ShotLabIcon name={icon} size={20} />
+        </span>
+        <span className={styles.eyebrow}>{eyebrow || "Coach decision"}</span>
+      </div>
+
+      <div className={styles.copy}>
+        <h2>{title}</h2>
+        {detail ? <p>{detail}</p> : null}
+        {action ? (
+          <button type="button" className={styles.action} data-action-role="primary" onClick={action.onClick} disabled={action.disabled}>
+            <span>{action.label}</span>
+            <ShotLabIcon name="arrow" size={15} aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+
+      {visibleMetrics.length ? (
+        <div className={styles.metricRail} data-visual-role="performance-evidence" aria-label="Current performance signals">
+          {visibleMetrics.map((metric) => (
+            <StageMetric
+              key={metric.key || metric.label}
+              metric={metric}
+              active={metric.key === activeMetric}
+              onSelect={onMetricSelect}
+            />
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
