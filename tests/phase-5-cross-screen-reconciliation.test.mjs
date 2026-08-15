@@ -24,13 +24,13 @@ test("Phase 5 gives dark Player metric surfaces explicit readable foreground own
   assert.match(metricCss, /\.metricPrimary,\.metricSupporting/);
 });
 
-test("Phase 5 visual audit measures geometry and foreground contrast rather than relying on page width alone", () => {
+test("Phase 5 visual audit measures geometry and semantic foreground contrast rather than relying on page width alone", () => {
   assert.match(visualAudit, /expectPlayerIdentityInsideViewport/);
   assert.match(visualAudit, /expectReadablePlayerMetrics/);
   assert.match(visualAudit, /player-at-home-workspace/);
   assert.match(visualAudit, /player-leaderboards-workspace/);
-  assert.match(visualAudit, /colors\.values\.length/);
-  assert.match(visualAudit, /toHaveLength\(3\)/);
+  assert.match(visualAudit, /contrastRatios\.length/);
+  assert.match(visualAudit, /toBeGreaterThanOrEqual\(4\.5\)/);
 });
 
 test("Phase 5 restores persistent connectivity feedback after transient notifications settle", () => {
