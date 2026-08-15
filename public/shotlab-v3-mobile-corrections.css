@@ -286,6 +286,106 @@ body.mission-control-active .mcPrimary,
 }
 
 @media (max-width: 700px) {
+  /* Final route framing wins over older Phase 3 card authorities. */
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] {
+    margin: 0 16px 4px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(17,26,33,.09) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] > div {
+    min-height: 50px !important;
+    padding: max(5px, env(safe-area-inset-top)) 0 7px !important;
+  }
+
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] h1 {
+    margin-top: 3px !important;
+    font-size: 17.5px !important;
+    line-height: 1 !important;
+    letter-spacing: -.03em !important;
+  }
+
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] img {
+    width: 33px !important;
+    height: 33px !important;
+  }
+
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] p {
+    display: none !important;
+  }
+
+  /* Compact editorial intro: strong title, quiet route mark, no first-viewport overflow. */
+  .secondaryPageIntro {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 5px 0 11px !important;
+  }
+
+  .secondaryPageIntro__icon {
+    top: 5px !important;
+    right: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    opacity: .17 !important;
+    transform: none !important;
+  }
+
+  .secondaryPageIntro__icon svg {
+    width: 30px !important;
+    height: 30px !important;
+    stroke-width: 1.65 !important;
+  }
+
+  .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
+  .secondaryPageIntro__title {
+    max-width: calc(100% - 48px) !important;
+    font-size: clamp(32px, 8.5vw, 34px) !important;
+    line-height: .94 !important;
+    letter-spacing: -.052em !important;
+  }
+
+  .secondaryPageIntro__actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-top: 8px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .secondaryPageIntro__status {
+    max-width: 100% !important;
+    min-height: 11px !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    text-align: right !important;
+  }
+
+  .secondaryPageIntro__buttonRow {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .secondaryPageAction {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding-inline: 10px !important;
+    border-radius: 11px !important;
+    font-size: 11.5px !important;
+    white-space: nowrap !important;
+  }
+
   /* Home command surfaces use the same edge-to-edge performance language as secondary decisions. */
   body.mission-control-active .mcHero {
     margin-inline: -12px !important;
@@ -387,12 +487,6 @@ body.mission-control-active .mcPrimary,
     padding: 0 20px !important;
     border-top: 0 !important;
     background: rgba(255,255,255,.22) !important;
-  }
-
-  .secondaryPageIntro__title {
-    font-size: clamp(34px, 9.2vw, 38px) !important;
-    line-height: .92 !important;
-    letter-spacing: -.055em !important;
   }
 
   .secondaryPageIntro__summary,
