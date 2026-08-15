@@ -48,19 +48,22 @@ test("first-impression mobile controls and labels respect the product readabilit
   assert.doesNotMatch(enhancer, /font-size:\s*(?:8|9|10)(?:\.\d+)?px\b/);
 });
 
-test("Coach secondary metrics fit the viewport as a score ribbon instead of a clipped carousel", () => {
-  assert.match(metricCss, /grid-template-columns:repeat\(auto-fit,minmax\(76px,1fr\)\)!important/);
-  assert.match(metricCss, /overflow:visible!important/);
-  assert.match(metricCss, /scroll-snap-type:none!important/);
-  assert.match(metricCss, /min-width:0!important/);
+test("Coach secondary metrics use a readable 2x2 scoreboard rather than a clipped or compressed strip", () => {
+  assert.match(metricCss, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+  assert.match(metricCss, /nth-child\(even\)\{border-left:1px solid/);
+  assert.match(metricCss, /nth-child\(n\+3\)\{border-top:1px solid/);
+  assert.match(metricCss, /font-size:31px!important/);
   assert.match(metricCss, /font-size:11px!important/);
+  assert.match(metricCss, /\[data-premium-metric-evidence\]\{display:none!important\}/);
   assert.doesNotMatch(metricCss, /flex-basis:82vw!important/);
+  assert.doesNotMatch(metricCss, /repeat\(auto-fit,minmax\(76px,1fr\)\)/);
 });
 
-test("Schedule disclosure cannot overlap its own supporting copy on mobile", () => {
-  assert.match(scheduleCss, /coachEventsSupportingSummaryCopy>small\{display:none!important\}/);
+test("Schedule disclosure is structurally limited to two non-overlapping information lines", () => {
+  assert.match(scheduleCss, /min-height:60px!important/);
   assert.match(scheduleCss, /position:static!important/);
-  assert.match(scheduleCss, /min-height:62px!important/);
+  assert.match(scheduleCss, /coachEventsSupportingSummaryCopy>span[\s\S]*coachEventsSupportingSummaryCopy>strong/);
+  assert.doesNotMatch(scheduleCss, /coachEventsSupportingSummaryCopy>small/);
   assert.match(scheduleCss, /font:760 11px\/1\.15/);
 });
 
