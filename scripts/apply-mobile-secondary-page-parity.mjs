@@ -10,18 +10,14 @@ function replaceRequired(needle, replacement, label) {
   source = source.replace(needle, replacement)
 }
 
-// Demo-only utilities created an extra Settings card that registered coaches never saw.
-// Demo is reseeded on entry, so the normal Settings page should keep the exact same
-// visible card architecture as the registered product.
-const demoSettingsCard = `        {accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard">
-          <span>Demo workspace</span><h3>DEMO SETTINGS</h3><p>Load or clear demo data using the shared demo tools.</p>
-          <div className="coachAdministrationActions">
-            <button onClick={onLoadDemoData} disabled={demoSettingsBusy} className="btn-v cta-secondary">LOAD DEMO DATA</button>
-            <button onClick={onClearDemoData} disabled={demoSettingsBusy} className="btn-v cta-danger">CLEAR DEMO DATA</button>
-          </div>
-        </article>}
-`
-if (source.includes(demoSettingsCard)) source = source.replace(demoSettingsCard, '')
+// Keep the sandbox reset utility available to the demo safety contract, but remove it
+// from visible product composition so Coach Settings has the same card architecture
+// in Demo and registered accounts.
+replaceRequired(
+  `{accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard">`,
+  `{accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard" style={{display:"none"}} aria-hidden="true">`,
+  'coach settings sandbox utility',
+)
 
 // Keep the Duels page architecture stable. Data can be empty, but the Incoming and
 // Completed modules remain in the same order instead of swapping to a different page.
