@@ -5,6 +5,7 @@ import {
 } from "./CoachDashboardPrimitives.jsx";
 import { ExperienceSparkline } from "./ExperiencePrimitives.jsx";
 import CoachRoutePerformanceStage from "./CoachRoutePerformanceStage.jsx";
+import SecondaryPageDisclosure from "./SecondaryPageDisclosure.jsx";
 import {
   SecondaryPageEvidence,
   SecondaryPageIntro,
@@ -102,13 +103,20 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
       <SecondaryPageToolbar testId="coach-events-toolbar">
         <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search title, location, or type" filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]} activeFilter={type} onFilterChange={onTypeChange} testId="coach-events-filter-rail" />
       </SecondaryPageToolbar>
-      <SecondaryPageEvidence testId="coach-events-insight-grid">
-        {briefing.insights.map((insight) => (
-          <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
-            {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
-          </DashboardInsightCard>
-        ))}
-      </SecondaryPageEvidence>
+      <SecondaryPageDisclosure
+        title="Schedule insights"
+        summary={`${briefing.responseRate}% response · ${briefing.missing} missing`}
+        defaultOpen={typeof window !== "undefined" && window.innerWidth > 760}
+        testId="coach-events-supporting-intelligence"
+      >
+        <SecondaryPageEvidence testId="coach-events-insight-grid">
+          {briefing.insights.map((insight) => (
+            <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
+              {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
+            </DashboardInsightCard>
+          ))}
+        </SecondaryPageEvidence>
+      </SecondaryPageDisclosure>
     </SecondaryPageShell>
   );
 }
