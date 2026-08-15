@@ -38,6 +38,13 @@ test("empty Coach Events stays inside the normal bounded mobile workspace", () =
   assert.match(parityEnhancer, /borderBottom:\"1px solid var\(--stroke-1\)\"/);
 });
 
+test("empty Coach leaderboards reserve ranking rows instead of collapsing the page", () => {
+  assert.match(parityEnhancer, /coach leaderboard empty ranking geometry/);
+  assert.match(parityEnhancer, /data-leaderboard-placeholder=\"true\"/);
+  assert.match(parityEnhancer, /Open rank/);
+  assert.match(parityEnhancer, /Array\.from\(\{ length: 3 \}/);
+});
+
 test("duels preserve Incoming and Completed modules even when no challenge rows exist", () => {
   assert.match(parityEnhancer, /t=\"INCOMING\"/);
   assert.match(parityEnhancer, /No incoming duels/);
