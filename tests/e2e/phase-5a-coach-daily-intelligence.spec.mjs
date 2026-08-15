@@ -68,19 +68,20 @@ test("Phase 5A keeps the accepted full-bleed Coach visual hierarchy while adding
 
   const geometry = await hero.evaluate((node) => {
     const hero = node.getBoundingClientRect();
-    const content = node.querySelector(".mcHeroContent")?.getBoundingClientRect();
+    const content = node.querySelector(".mcHeroContent");
+    const contentStyle = content ? getComputedStyle(content) : null;
     return {
       heroX: hero.x,
       heroRight: hero.right,
       viewportWidth: window.innerWidth,
-      contentX: content?.x ?? -1,
-      contentRight: content?.right ?? -1,
+      contentPaddingLeft: contentStyle ? Number.parseFloat(contentStyle.paddingLeft) : -1,
+      contentPaddingRight: contentStyle ? Number.parseFloat(contentStyle.paddingRight) : -1,
     };
   });
   expect(Math.abs(geometry.heroX)).toBeLessThanOrEqual(1);
   expect(Math.abs(geometry.heroRight - geometry.viewportWidth)).toBeLessThanOrEqual(1);
-  expect(geometry.contentX).toBeGreaterThanOrEqual(14);
-  expect(geometry.contentRight).toBeLessThanOrEqual(geometry.viewportWidth - 14);
+  expect(geometry.contentPaddingLeft).toBeGreaterThanOrEqual(14);
+  expect(geometry.contentPaddingRight).toBeGreaterThanOrEqual(14);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
