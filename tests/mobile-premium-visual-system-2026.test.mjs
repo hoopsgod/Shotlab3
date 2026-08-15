@@ -19,6 +19,8 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
   assert.match(routeRunner, /apply-mobile-premium-secondary-page-system\.mjs/);
   assert.ok(retiredAuthority.length < 160, "retired mobile authority must remain declaration-free");
   assert.doesNotMatch(retiredAuthority, /\{[^}]*:[^}]*\}/);
+  assert.match(secondaryPageSystem, /import "\.\/SecondaryPageSystem\.css"/);
+  assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
 });
 
 test("retired Coach dashboard authorities cannot override the current production visual system", () => {
