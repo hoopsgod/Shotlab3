@@ -50,7 +50,14 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   await expect(page.getByTestId("coach-leaderboard-operational-panel")).toBeVisible({ timeout: 20_000 });
   const decisionBrief = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
   await expect(decisionBrief).toBeVisible();
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-evidence")).toBeVisible();
+  const performanceRail = decisionBrief.locator('[data-visual-role="performance-evidence"]');
+  await expect(performanceRail).toBeVisible();
+  await expect(performanceRail.getByRole("button", { name: /^Current Leader:/ })).toBeVisible();
+  await expect(performanceRail.getByRole("button", { name: /^Archived Seasons:/ })).toBeVisible();
+  await expect(performanceRail.getByRole("button", { name: /^View:/ })).toBeVisible();
+
+  const routeKind = await decisionBrief.getAttribute("data-route-kind");
+  expect(routeKind).toBe("leaderboards");
 
   const pulse = page.getByTestId("coach-leaderboard-pulse");
   await expect(pulse).toBeVisible();
