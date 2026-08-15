@@ -46,9 +46,9 @@ test("Player event and lifting commitment headers join the shared Level B semant
   assert.match(enhancer, /data-page-hierarchy="editorial"/);
   assert.match(enhancer, /data-layout-role="editorial-header" data-visual-role="page-intro"/);
   assert.match(enhancer, /Premium Level B commitment header/);
-  assert.match(enhancer, /\.routeTitleRow h1 \{ font-size: clamp\(29px, 8vw, 32px\) !important/);
-  assert.match(enhancer, /\.routeHeader > p \{ display: none; \}/);
-  assert.match(enhancer, /\.routeTitleRow > span \{ min-height: 18px; margin: 0; padding: 0; border: 0/);
+  assert.match(enhancer, /\.routeTitleRow h1\{font-size:clamp\(29px,8vw,32px\)!important\}/);
+  assert.match(enhancer, /\.routeHeader>p\{display:none\}/);
+  assert.match(enhancer, /\.routeHeader\{padding-bottom:12px;border-bottom:1px solid rgba\(23,26,24,\.1\)\}/);
 });
 
 test("mobile metric feedback cannot pull one card out of its visual row", () => {
