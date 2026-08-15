@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 const commitmentSource = fs.readFileSync(new URL("../src/components/PlayerCommitmentCenter.jsx", import.meta.url), "utf8");
 const leaderboardSource = fs.readFileSync(new URL("../src/components/CompactLeaderboardPreviewCard.jsx", import.meta.url), "utf8");
-const parityEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-secondary-page-parity.mjs", import.meta.url), "utf8");
+const parityEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-secondary-page-parity-v2.mjs", import.meta.url), "utf8");
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 
 test("player commitments keep a fixed mobile runway instead of removing the module when data is sparse", () => {
@@ -54,14 +54,17 @@ test("Coach Activity reserves six operational rows", () => {
   assert.match(parityEnhancer, /rows\.slice\(0, 6\)/);
   assert.match(parityEnhancer, /Math\.max\(0, 6 - rows\.length\)/);
   assert.match(parityEnhancer, /data-activity-placeholder=\"true\"/);
+  assert.match(parityEnhancer, /activityPhase2DBefore/);
 });
 
-test("Coach leaderboards reserve three ranking rows for zero or partial results", () => {
+test("Coach leaderboards reserve three ranking rows for zero or partial results without reverting Phase 3L row composition", () => {
   assert.match(parityEnhancer, /coach leaderboard minimum ranking rows/);
   assert.match(parityEnhancer, /coach leaderboard empty ranking geometry/);
-  assert.match(parityEnhancer, /rows\.slice\(0,3\)/);
+  assert.match(parityEnhancer, /rows\.slice\(0, 3\)/);
   assert.match(parityEnhancer, /Math\.max\(0, 3 - rows\.length\)/);
   assert.match(parityEnhancer, /data-leaderboard-placeholder=\"true\"/);
+  assert.match(parityEnhancer, /leaderboardPhase3LBefore/);
+  assert.match(parityEnhancer, /coachLeaderboardWeek/);
   assert.match(parityEnhancer, /Open rank/);
 });
 
@@ -74,7 +77,7 @@ test("duels preserve Incoming and Completed modules even when no challenge rows 
 });
 
 test("secondary-page parity normalization runs in both dev and production enhancer pipelines", () => {
-  const parityIndex = routeRunner.indexOf("scripts/apply-mobile-secondary-page-parity.mjs");
+  const parityIndex = routeRunner.indexOf("scripts/apply-mobile-secondary-page-parity-v2.mjs");
   const authIndex = routeRunner.indexOf("scripts/apply-post-auth-persistence-hydration.mjs");
   assert.ok(parityIndex > authIndex, "secondary-page parity must run after authenticated persistence hydration is installed");
   assert.match(routeRunner, /const FINAL_ROUTE_ENHANCERS/);
