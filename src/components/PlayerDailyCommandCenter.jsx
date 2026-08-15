@@ -93,17 +93,30 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         <ExperienceSignal eyebrow="First session complete" title={firstSession.title || "First result banked"} detail={firstSession.detail || "Your training baseline is active. Every result from here builds your progress history."} tone="positive" icon="verified" />
       </div>}
 
-      <section className={styles.coachSignal} data-testid="player-coach-priority-signal" data-command-role="coach-priority" data-layout-role="supporting-evidence" data-freshness={coachSignal.freshness || "unknown"} aria-label="Coach assignment" style={coachSignal.stale ? { "--coach-signal-accent": "#ffb547" } : undefined}>
+      <section
+        className={styles.coachSignal}
+        data-testid="player-coach-priority-signal"
+        data-command-role="coach-priority"
+        data-layout-role="supporting-evidence"
+        data-freshness={coachSignal.freshness || "unknown"}
+        aria-label="Coach assignment"
+        style={{
+          "--coach-signal-accent": coachSignal.stale ? "#ffb547" : "var(--team-brand-primary,var(--accent,#c8ff1a))",
+          marginTop: 16,
+          paddingTop: 16,
+          paddingBottom: 14,
+        }}
+      >
         <div className={styles.coachSignalHeader}>
           <div>
             <div className={styles.coachSignalEyebrow} style={coachSignal.stale ? { color: "#ffca76" } : undefined}>{coachSignal.stale ? "Coach assignment needs refresh" : "Coach assignment"}</div>
-            <h2 className={styles.coachSignalTitle}>{coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}</h2>
+            <h2 className={styles.coachSignalTitle} style={{ fontSize: "clamp(19px,5.4vw,23px)", lineHeight: 1.04, maxWidth: "20ch", letterSpacing: "-.032em" }}>{coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}</h2>
           </div>
           <span className={styles.coachSignalStatus} style={coachSignal.stale ? { borderColor: "rgba(255,181,71,.48)", background: "rgba(255,181,71,.12)", color: "#ffd18a", gap: 5 } : { gap: 5 }}>
             <ShotLabIcon name={coachSignalIcon(coachSignal)} size={13} /><span>{coachSignalStatus(coachSignal)}</span>
           </span>
         </div>
-        <div className={styles.coachSignalGrid}>
+        <div className={styles.coachSignalGrid} style={{ marginTop: 10 }}>
           {coachSignal.stale ? <>
             <div className={styles.coachSignalItem}><div className={styles.coachSignalLabel}>Last published</div><div className={styles.coachSignalValue}>{coachSignal.ageDays} days ago</div></div>
             <div className={styles.coachSignalItem}><div className={styles.coachSignalLabel}>What to do</div><div className={styles.coachSignalValue}>Continue your current training plan until your coach republishes Team Focus.</div></div>
