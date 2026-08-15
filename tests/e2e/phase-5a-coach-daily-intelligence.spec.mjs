@@ -49,7 +49,7 @@ test.beforeEach(async ({ page }) => {
   await installRoutes(page);
 });
 
-test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding decision intelligence", async ({ page }) => {
+test("Phase 5A keeps the accepted full-bleed Coach visual hierarchy while adding decision intelligence", async ({ page }) => {
   await enterCoachDemo(page);
 
   const hero = page.getByTestId("coach-primary-objective");
@@ -66,10 +66,21 @@ test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding de
   expect(buttonHeights).toHaveLength(3);
   for (const height of buttonHeights) expect(height).toBeGreaterThanOrEqual(44);
 
-  const heroBox = await hero.boundingBox();
-  expect(heroBox).not.toBeNull();
-  expect(heroBox.x).toBeGreaterThanOrEqual(12);
-  expect(heroBox.x + heroBox.width).toBeLessThanOrEqual(418);
+  const geometry = await hero.evaluate((node) => {
+    const hero = node.getBoundingClientRect();
+    const content = node.querySelector(".mcHeroContent")?.getBoundingClientRect();
+    return {
+      heroX: hero.x,
+      heroRight: hero.right,
+      viewportWidth: window.innerWidth,
+      contentX: content?.x ?? -1,
+      contentRight: content?.right ?? -1,
+    };
+  });
+  expect(Math.abs(geometry.heroX)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.heroRight - geometry.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(geometry.contentX).toBeGreaterThanOrEqual(14);
+  expect(geometry.contentRight).toBeLessThanOrEqual(geometry.viewportWidth - 14);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
