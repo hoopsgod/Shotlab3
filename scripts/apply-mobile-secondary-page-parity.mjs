@@ -62,10 +62,11 @@ replaceRequired(
   'duels completed empty state',
 )
 
-// The Coach leaderboard keeps the same ranked-list footprint when there are no real
-// results yet. Placeholders communicate open positions without inventing players or scores.
+// Phase 2D runs before this enhancer and upgrades the filtered leaderboard state to
+// semantic empty-state markup. Replace that final production form so empty registered
+// teams keep the same ranked-list footprint without inventing players or scores.
 replaceCoachPanelRequired(
-  `      ) : <EmptyState>No leaderboard players match the selected view.</EmptyState>}`,
+  `      ) : <EmptyState label="Filtered view" kind="filter">No leaderboard players match the selected view.</EmptyState>}`,
   `      ) : (
         <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results" data-parity-empty-slot="true">
           {Array.from({ length: 3 }, (_, index) => (
