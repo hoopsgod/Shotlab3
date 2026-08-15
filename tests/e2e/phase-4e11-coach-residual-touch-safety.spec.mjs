@@ -115,21 +115,18 @@ test("Phase 4E.11 closes measured Coach default-state touch targets on current r
   const archivedSeasons = performanceRail.getByRole("button", { name: /^Archived Seasons:/ });
   const reviewView = performanceRail.getByRole("button", { name: /^View:/ });
 
-  await currentLeader.scrollIntoViewIfNeeded();
+  // Measure all controls from the same viewport state. Playwright bounding boxes are viewport-relative,
+  // so comparing boxes captured after separate scrollIntoView calls creates false overlap failures.
+  await performanceRail.scrollIntoViewIfNeeded();
   await settle(page);
   const currentLeaderEvidence = await measureControl(currentLeader, "Current Leader metric");
+  const archivedEvidence = await measureControl(archivedSeasons, "Archived Seasons metric");
+  const viewEvidence = await measureControl(reviewView, "View metric");
+
   await currentLeader.click();
   await expect(currentLeader).toHaveAttribute("aria-pressed", "true");
-
-  await archivedSeasons.scrollIntoViewIfNeeded();
-  await settle(page);
-  const archivedEvidence = await measureControl(archivedSeasons, "Archived Seasons metric");
   await archivedSeasons.click();
   await expect(archivedSeasons).toHaveAttribute("aria-pressed", "true");
-
-  await reviewView.scrollIntoViewIfNeeded();
-  await settle(page);
-  const viewEvidence = await measureControl(reviewView, "View metric");
   await reviewView.click();
   await expect(reviewView).toHaveAttribute("aria-pressed", "true");
 
