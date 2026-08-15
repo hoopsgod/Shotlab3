@@ -1,5 +1,6 @@
 import ShotLabIcon from "./ShotLabIcon.jsx";
 import styles from "./CoachRoutePerformanceStage.module.css";
+import "./CoachInteractiveDashboards.css";
 
 const ROUTE_ICONS = {
   players: "team",
