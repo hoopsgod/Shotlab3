@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync('index.html', 'utf8');
 const css = readFileSync('public/shotlab-phase3-secondary-cohesion.css', 'utf8');
 const acceptanceCss = readFileSync('public/shotlab-phase3-secondary-acceptance.css', 'utf8');
+const playerHeader = readFileSync('src/components/PlayerDashboardHeader.jsx', 'utf8');
 const playerWorkspace = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const playerWorkspaceCss = readFileSync('src/components/PlayerOperationalWorkspace.module.css', 'utf8');
 
@@ -35,13 +36,13 @@ test('Phase 3 is scoped to high-value secondary destinations', () => {
   assert.match(css, /display:none!important/);
 });
 
-test('Player secondary identity chrome is compact without changing the shared component', () => {
+test('Player secondary identity is a compact but unmistakable athlete rail at the rendered owner', () => {
   assert.match(css, /player-dashboard-identity-header/);
-  assert.match(css, /\[data-identity-role="tagline"\]/);
-  assert.match(css, /\[data-identity-role="mission"\]/);
-  assert.match(css, /font-size:26px!important/);
-  assert.match(css, /width:58px!important/);
-  assert.match(css, /height:58px!important/);
+  assert.match(playerHeader, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)/);
+  assert.match(playerHeader, /data-identity-role=\"name\"\]\{[\s\S]*font-size:26px!important/);
+  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:58px!important;height:58px!important/);
+  assert.match(playerHeader, /:is\(\[data-identity-role=\"tagline\"\],\[data-identity-role=\"mission\"\]\)\{display:none!important\}/);
+  assert.doesNotMatch(playerHeader, /performance-shell--player[^`]*font-size:(?:8|9|10)px!important/);
 });
 
 test('Player workspaces own their editorial command and evidence hierarchy', () => {
