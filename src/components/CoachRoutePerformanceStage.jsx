@@ -14,16 +14,21 @@ const ROUTE_ICONS = {
 
 const cx = (...values) => values.filter(Boolean).join(" ");
 
-export const resolveCoachRouteKind = ({ testId = "", title = "" } = {}) => {
-  const value = `${testId} ${title}`.toLowerCase();
-  if (value.includes("player") || value.includes("roster")) return "players";
-  if (value.includes("event") || value.includes("schedule") || value.includes("calendar")) return "schedule";
-  if (value.includes("drill") || value.includes("training")) return "training";
-  if (value.includes("strength") || value.includes("lifting") || value.includes("conditioning")) return "strength";
-  if (value.includes("activity") || value.includes("signal")) return "activity";
-  if (value.includes("leader") || value.includes("rank")) return "leaderboards";
-  if (value.includes("account") || value.includes("setting")) return "settings";
+const classifyRouteValue = (value = "") => {
+  const normalized = String(value).toLowerCase();
+  if (normalized.includes("leader") || normalized.includes("rank")) return "leaderboards";
+  if (normalized.includes("event") || normalized.includes("schedule") || normalized.includes("calendar")) return "schedule";
+  if (normalized.includes("drill") || normalized.includes("training")) return "training";
+  if (normalized.includes("strength") || normalized.includes("lifting") || normalized.includes("conditioning")) return "strength";
+  if (normalized.includes("activity") || normalized.includes("signal")) return "activity";
+  if (normalized.includes("player") || normalized.includes("roster")) return "players";
+  if (normalized.includes("account") || normalized.includes("setting")) return "settings";
   return "default";
+};
+
+export const resolveCoachRouteKind = ({ testId = "", title = "" } = {}) => {
+  const routeKind = classifyRouteValue(testId);
+  return routeKind === "default" ? classifyRouteValue(title) : routeKind;
 };
 
 const readableMetricValue = (metric) => {
