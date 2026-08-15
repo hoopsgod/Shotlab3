@@ -67,11 +67,30 @@ body.mission-control-active [data-testid="coach-follow-up-queue"] {
   return next;
 }
 
+export function reconcileCoachCommandCenter(source) {
+  let next = source;
+  next = replaceOnce(next,
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin-inline:-12px!important;border-radius:0!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin:0 -12px!important;border-radius:0!important}',
+    'Coach continuous header-to-hero stage',
+  );
+  next = replaceOnce(next,
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:16px!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:16px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}',
+    'Coach metric ledger surface',
+  );
+  return next;
+}
+
 export function applyMobileCoachCascadeReconciliation({ cwd = process.cwd() } = {}) {
-  const target = path.resolve(cwd, 'src/styles/MissionControlHierarchy2026.css');
-  const source = readFileSync(target, 'utf8');
-  const next = reconcileCoachHierarchy(source);
-  if (next !== source) writeFileSync(target, next);
+  const hierarchyPath = path.resolve(cwd, 'src/styles/MissionControlHierarchy2026.css');
+  const commandPath = path.resolve(cwd, 'src/components/CoachCommandCenter.jsx');
+  const hierarchySource = readFileSync(hierarchyPath, 'utf8');
+  const commandSource = readFileSync(commandPath, 'utf8');
+  const nextHierarchy = reconcileCoachHierarchy(hierarchySource);
+  const nextCommand = reconcileCoachCommandCenter(commandSource);
+  if (nextHierarchy !== hierarchySource) writeFileSync(hierarchyPath, nextHierarchy);
+  if (nextCommand !== commandSource) writeFileSync(commandPath, nextCommand);
   console.log('Reconciled late Mission Control authority with the ShotLab mobile Coach signature stage.');
 }
 
