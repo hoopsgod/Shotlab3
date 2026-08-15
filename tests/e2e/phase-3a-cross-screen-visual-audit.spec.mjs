@@ -90,6 +90,28 @@ async function expectCompactFunctionalIntro(page) {
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
 }
 
+async function expectProgressStoryCommandSurface(page) {
+  const story = page.locator('[data-page-hierarchy="command-story"]');
+  await expect(story).toBeVisible();
+  const hero = story.locator('[data-layout-role="command-story-header"]');
+  await expect(hero).toBeVisible();
+  const geometry = await hero.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const title = element.querySelector("h2");
+    return {
+      height: rect.height,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      right: rect.right,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  expect(geometry.height).toBeLessThanOrEqual(390);
+  expect(geometry.titleSize).toBeLessThanOrEqual(42);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+  await expect(page.getByTestId("player-progress-metrics")).toBeVisible();
+  await expect(page.getByText("What the work says now", { exact: true })).toBeVisible();
+}
+
 async function expectReadablePlayerMetrics(page, testId) {
   const workspace = page.getByTestId(testId);
   await expect(workspace).toBeVisible();
@@ -282,7 +304,7 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
   await capture(page, "17-player-rankings.png");
 
   await navigateByKey(page, "profile");
-  await expectCompactFunctionalIntro(page);
+  await expectProgressStoryCommandSurface(page);
   await capture(page, "18-player-progress.png");
 
   expect(pageErrors).toEqual([]);
