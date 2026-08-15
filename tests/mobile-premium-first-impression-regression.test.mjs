@@ -9,10 +9,11 @@ const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressS
 test("final rendered-mobile authority preserves the compact Level B title scale", () => {
   assert.match(finalMobileCss, /\.secondaryPageIntro__title\s*\{[\s\S]*font-size:\s*clamp\(29px, 8vw, 34px\) !important/);
   assert.doesNotMatch(finalMobileCss, /\.secondaryPageIntro__title\s*\{[\s\S]{0,120}font-size:\s*36px !important/);
+  assert.match(enhancer, /\.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle/);
 });
 
-test("375px functional intros keep both actions without stacking two full button rows", () => {
-  assert.match(enhancer, /@media \(max-width: 390px\)/);
+test("supported iPhone widths keep both actions without stacking two full button rows", () => {
+  assert.match(enhancer, /@media \(max-width: 430px\)/);
   assert.match(enhancer, /\.secondaryPageIntro__actions \{ display: grid; grid-template-columns: minmax\(0, 1fr\); align-items: center; gap: 6px; \}/);
   assert.match(enhancer, /\.secondaryPageIntro__buttonRow \{ width: 100%; display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(enhancer, /\.secondaryPageAction \{ width: 100%; min-width: 0; padding-inline: 10px; font-size: 11\.5px; \}/);
