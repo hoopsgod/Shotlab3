@@ -93,7 +93,7 @@ test("floating navigation uses restrained glass and large touch targets", () => 
   assert.match(architectureCss, /background:\s*#f8f7f3/);
   assert.match(navigationCss, /left:\s*50%/);
   assert.match(navigationCss, /bottom:\s*max\(8px, env\(safe-area-inset-bottom/);
-  assert.match(navigationCss, /border-radius:\s*19px/);
+  assert.match(navigationCss, /border-radius:\s*20px/);
   assert.match(navigationCss, /backdrop-filter:\s*blur\(18px\) saturate\(125%\)/);
   assert.match(navigationCss, /min-height:\s*50px/);
   assert.match(navigationCss, /min-height:\s*66px/);
