@@ -47,7 +47,10 @@ jobs:
             tests/coach-operational-intelligence.test.mjs \
             2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/source-contracts.log
       - name: Build exact candidate through centralized enhancer pipeline
-        run: npm run build
+        run: |
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          set -o pipefail
+          npm run build 2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/candidate-build.log
       - name: Verify built production CSS integrity
         run: |
           node --test tests/production-css-module-integrity.test.mjs \
