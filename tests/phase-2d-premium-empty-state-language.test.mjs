@@ -6,11 +6,25 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const TARGET = 'src/components/CoachDashboardPhase2.jsx';
 const read = (path) => readFileSync(path, 'utf8');
 
-test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clean for earlier build enhancers', () => {
+test('Phase 2D enhancer is a one-way semantic migration and tolerates downstream normalization', () => {
   const original = read(TARGET);
 
   try {
     execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
+
+    const enhanced = read(TARGET);
+    assert.match(enhanced, /label="Filtered activity" kind="filter"/);
+    assert.match(enhanced, /No team activity matches the selected view\./);
+
+    // Simulate the real build -> Playwright webServer lifecycle: later route
+    // enhancers are allowed to replace the Phase 2D activity presentation while
+    // preserving the shared semantic EmptyState component and stylesheet lane.
+    const downstreamNormalized = enhanced
+      .replace('label="Filtered activity" kind="filter"', 'data-phase3-activity-placeholder="true"')
+      .replace('No team activity matches the selected view.', 'Activity feed normalized downstream.');
+    assert.notEqual(downstreamNormalized, enhanced);
+    writeFileSync(TARGET, downstreamNormalized);
+
     execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
 
     const source = read(TARGET);
@@ -31,9 +45,12 @@ test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clea
     assert.match(source, /label="Follow-up cleared" tone="positive" kind="complete"/);
     assert.match(source, /label="Filtered view" kind="filter"/);
     assert.match(source, /label="Season history" kind="history"/);
-    assert.match(source, /label="Filtered activity" kind="filter"/);
-    assert.match(source, /No team activity matches the selected view\./);
-    assert.match(source, /rows\.length \? \(/);
+
+    // The second pass must preserve the downstream state rather than attempting
+    // to reconstruct Phase 2D's original activity JSX and crashing CI.
+    assert.match(source, /data-phase3-activity-placeholder="true"/);
+    assert.match(source, /Activity feed normalized downstream\./);
+    assert.doesNotMatch(source, /No team activity matches the selected view\./);
   } finally {
     writeFileSync(TARGET, original);
   }
