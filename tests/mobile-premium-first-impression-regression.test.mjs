@@ -10,7 +10,8 @@ const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHea
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
 const brandingCss = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
 const metricCss = fs.readFileSync(new URL("../src/components/Phase2PremiumMetricLayer.css", import.meta.url), "utf8");
-const scheduleCss = fs.readFileSync(new URL("../public/shotlab-phase3j-coach-events-hierarchy.css", import.meta.url), "utf8");
+const scheduleDisclosure = fs.readFileSync(new URL("../src/components/SecondaryPageDisclosure.jsx", import.meta.url), "utf8");
+const scheduleCss = fs.readFileSync(new URL("../src/components/SecondaryPageDisclosure.module.css", import.meta.url), "utf8");
 const routeFramingCss = fs.readFileSync(new URL("../public/shotlab-phase3-native-route-framing.css", import.meta.url), "utf8");
 
 test("secondary routes use one explicit signature owner instead of a late competing first-viewport stylesheet", () => {
@@ -60,11 +61,13 @@ test("Coach secondary metrics use a readable 2x2 scoreboard rather than a clippe
 });
 
 test("Schedule disclosure is structurally limited to two non-overlapping information lines", () => {
-  assert.match(scheduleCss, /min-height:60px!important/);
-  assert.match(scheduleCss, /position:static!important/);
-  assert.match(scheduleCss, /coachEventsSupportingSummaryCopy>span[\s\S]*coachEventsSupportingSummaryCopy>strong/);
-  assert.doesNotMatch(scheduleCss, /coachEventsSupportingSummaryCopy>small/);
-  assert.match(scheduleCss, /font:760 11px\/1\.15/);
+  assert.match(scheduleDisclosure, /data-visual-role="disclosure-title"/);
+  assert.match(scheduleDisclosure, /data-visual-role="disclosure-meta"/);
+  assert.match(scheduleCss, /min-height:\s*60px/);
+  assert.match(scheduleCss, /\.copy \{[\s\S]*display:\s*grid;[\s\S]*gap:\s*4px/);
+  assert.match(scheduleCss, /font:\s*760 11px\/1\.15/);
+  assert.match(scheduleCss, /font:\s*760 14px\/1\.2/);
+  assert.doesNotMatch(scheduleCss, /!important/);
 });
 
 test("secondary route framing spends first-viewport space on content, not dead runway", () => {
