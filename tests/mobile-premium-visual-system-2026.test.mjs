@@ -74,7 +74,7 @@ test("persistent Player identity is compact rather than a repeated route hero", 
 
 test("mobile navigation is quiet, safe-area aware, and touch-target compliant", () => {
   assert.match(mobileNav, /--mobile-tab-bar-height:\s*60px/);
-  assert.match(mobileNav, /bottom:\s*max\(6px, env\(safe-area-inset-bottom/);
+  assert.match(mobileNav, /bottom:\s*max\(8px, env\(safe-area-inset-bottom/);
   assert.match(mobileNav, /width:\s*min\(430px/);
   assert.match(mobileNav, /min-height:\s*50px/);
   assert.match(mobileNav, /background:\s*rgba\(126, 158, 30, \.08\)/);
