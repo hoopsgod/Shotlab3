@@ -79,7 +79,7 @@ function overlapArea(a, b) {
   return width > 2 && height > 2 ? width * height : 0;
 }
 
-test("Phase 4E.11 closes the four measured Coach default-state touch targets", async ({ page }) => {
+test("Phase 4E.11 closes measured Coach default-state touch targets on current route controls", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await enterCoachDemo(page);
@@ -107,42 +107,45 @@ test("Phase 4E.11 closes the four measured Coach default-state touch targets", a
   await expect(dashboard).toBeVisible({ timeout: 20_000 });
 
   const decision = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
-  const evidence = page.getByTestId("coach-page-dashboard-leaderboards-evidence");
-  const currentLeader = evidence.getByRole("button", { name: "Review Current Leader" });
-  const archivedSeasons = evidence.getByRole("button", { name: "Review Archived Seasons" });
-  const reviewView = evidence.getByRole("button", { name: "Review View" });
+  await expect(decision).toBeVisible();
+  const performanceRail = decision.locator('[data-visual-role="performance-evidence"]');
+  await expect(performanceRail).toBeVisible();
+
+  const currentLeader = performanceRail.getByRole("button", { name: /^Current Leader:/ });
+  const archivedSeasons = performanceRail.getByRole("button", { name: /^Archived Seasons:/ });
+  const reviewView = performanceRail.getByRole("button", { name: /^View:/ });
 
   await currentLeader.scrollIntoViewIfNeeded();
   await settle(page);
-  const currentLeaderEvidence = await measureControl(currentLeader, "Review Current Leader");
+  const currentLeaderEvidence = await measureControl(currentLeader, "Current Leader metric");
   await currentLeader.click();
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-metric-strip").getByRole("button", { name: /^Current Leader:/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(currentLeader).toHaveAttribute("aria-pressed", "true");
 
   await archivedSeasons.scrollIntoViewIfNeeded();
   await settle(page);
-  const archivedEvidence = await measureControl(archivedSeasons, "Review Archived Seasons");
+  const archivedEvidence = await measureControl(archivedSeasons, "Archived Seasons metric");
   await archivedSeasons.click();
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-metric-strip").getByRole("button", { name: /^Archived Seasons:/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(archivedSeasons).toHaveAttribute("aria-pressed", "true");
 
   await reviewView.scrollIntoViewIfNeeded();
   await settle(page);
-  const viewEvidence = await measureControl(reviewView, "Review View");
+  const viewEvidence = await measureControl(reviewView, "View metric");
   await reviewView.click();
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-metric-strip").getByRole("button", { name: /^View:/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(reviewView).toHaveAttribute("aria-pressed", "true");
 
   const leaderBoxes = [currentLeaderEvidence.box, archivedEvidence.box, viewEvidence.box];
   for (let i = 0; i < leaderBoxes.length; i += 1) {
     for (let j = i + 1; j < leaderBoxes.length; j += 1) {
-      expect(overlapArea(leaderBoxes[i], leaderBoxes[j]), `leaderboard review action ${i + 1} must not overlap ${j + 1}`).toBe(0);
+      expect(overlapArea(leaderBoxes[i], leaderBoxes[j]), `leaderboard metric ${i + 1} must not overlap ${j + 1}`).toBe(0);
     }
   }
 
   await decision.scrollIntoViewIfNeeded();
   await settle(page);
-  await decision.screenshot({ path: path.join(OUTPUT_DIR, "coach-leaderboards-decision-action.png"), animations: "disabled" });
-  await evidence.scrollIntoViewIfNeeded();
+  await decision.screenshot({ path: path.join(OUTPUT_DIR, "coach-leaderboards-decision-stage.png"), animations: "disabled" });
+  await performanceRail.scrollIntoViewIfNeeded();
   await settle(page);
-  await evidence.screenshot({ path: path.join(OUTPUT_DIR, "coach-leaderboards-evidence-actions.png"), animations: "disabled" });
+  await performanceRail.screenshot({ path: path.join(OUTPUT_DIR, "coach-leaderboards-performance-rail.png"), animations: "disabled" });
   await page.screenshot({ path: path.join(OUTPUT_DIR, "coach-leaderboards-viewport.png"), animations: "disabled" });
 
   const horizontal = await page.evaluate(() => ({ innerWidth, documentWidth: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth }));
@@ -152,7 +155,7 @@ test("Phase 4E.11 closes the four measured Coach default-state touch targets", a
   fs.writeFileSync(path.join(OUTPUT_DIR, "coach-residual-touch-safety.json"), JSON.stringify({
     horizontal,
     viewRoster: viewRosterEvidence,
-    leaderboardActions: {
+    leaderboardMetrics: {
       currentLeader: currentLeaderEvidence,
       archivedSeasons: archivedEvidence,
       view: viewEvidence,
