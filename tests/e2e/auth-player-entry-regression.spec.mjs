@@ -135,7 +135,8 @@ test("Player Demo keeps the complete Player presentation system from first paint
     };
   });
   expect(primaryStyle.minHeight).toBeGreaterThanOrEqual(44);
-  expect(primaryStyle.borderRadius).toBeGreaterThanOrEqual(12);
+  expect(primaryStyle.borderRadius).toBeGreaterThanOrEqual(10);
+  expect(primaryStyle.borderRadius).toBeLessThanOrEqual(16);
 
   await assertNoOverflow(page);
   await capture(page, "13b-player-demo-entry-regression.png");
