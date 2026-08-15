@@ -24,6 +24,16 @@ test("major functional page intros are compact instead of oversized title stages
   assert.match(enhancer, /\.secondaryPageDecision::after,[\s\S]*\.secondaryPageDecision__icon,[\s\S]*\.secondaryPageDecision__visual \{ display: none; \}/);
   assert.match(enhancer, /font-size:\s*clamp\(23px, 6\.4vw, 27px\)/);
   assert.match(enhancer, /@media \(max-width: 390px\)/);
+  assert.match(enhancer, /\['title="Drills Dashboard"', 'title="Drills"'\]/);
+  assert.match(enhancer, /\['title="Strength & Conditioning Dashboard"', 'title="S&C"'\]/);
+  assert.match(enhancer, /\['title="Activity Dashboard"', 'title="Activity"'\]/);
+  assert.match(enhancer, /\['title="Leaderboards Dashboard"', 'title="Leaderboards"'\]/);
+});
+
+test("mobile metric feedback cannot pull one card out of its visual row", () => {
+  assert.match(enhancer, /Premium mobile metrics keep a stable row while feedback remains tonal/);
+  assert.match(enhancer, /@media \(max-width: 760px\), \(hover: none\)/);
+  assert.match(enhancer, /\.metric:hover,[\s\S]*\.metric:focus-visible \{ transform: none; \}/);
 });
 
 test("Coach detail screens start useful content sooner without losing performance hierarchy", () => {
