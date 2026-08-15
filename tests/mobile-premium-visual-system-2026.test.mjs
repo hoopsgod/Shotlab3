@@ -52,12 +52,13 @@ test("primary decisions are edge-to-edge performance bands rather than floating 
   assert.match(enhancer, /background: #c8ff1a;/);
 });
 
-test("mobile metrics use a hero score band followed by light supporting evidence", () => {
+test("mobile metrics use a signature hero score band followed by light supporting evidence", () => {
   assert.match(enhancer, /Score strips are allowed to reach the viewport rhythm instead of becoming more cards/);
   assert.match(enhancer, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\] \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\) !important/);
   assert.match(enhancer, /Supporting evidence reads as a ledger beneath the performance band/);
   assert.match(enhancer, /\.secondaryPageEvidence > \* \{ padding: 14px 0 !important; \}/);
-  assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,#071a22 0%,#0a222b 62%,#102e35 100%\)!important;[\s\S]*box-shadow:none!important/);
+  assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,#061923 0%,#082430 62%,#0b2d37 100%\)!important;[\s\S]*box-shadow:none!important/);
+  assert.match(playerMetricHierarchyCss, /\.metricPrimary \[class\*="metricValue"\]\{[\s\S]*font-size:46px!important/);
   assert.match(playerMetricHierarchyCss, /\.metricSupporting\{[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
   assert.match(playerMetricHierarchyCss, /\.metricSupporting \+ \.metricSupporting\{border-left:1px solid/);
 });
@@ -91,17 +92,18 @@ test("Coach detail surfaces use the same edge performance language", () => {
   assert.match(enhancer, /\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2/);
 });
 
-test("persistent Player and Coach identity chrome is compact and secondary Player identity is a signature rail", () => {
+test("persistent Player and Coach identity chrome uses compact signature stages without legacy white cards", () => {
   assert.match(playerHeader, /data-mobile-chrome="native-identity"/);
-  assert.match(playerHeader, /grid-template-columns:36px minmax\(0,1fr\)!important/);
-  assert.match(playerHeader, /min-height:50px!important/);
+  assert.match(playerHeader, /grid-template-columns:64px minmax\(0,1fr\)!important/);
+  assert.match(playerHeader, /min-height:96px!important/);
+  assert.match(playerHeader, /linear-gradient\(126deg,#061923 0%,#082430 58%,#0b2d37 100%\)!important/);
+  assert.match(playerHeader, /data-identity-role="badge"\]\{[\s\S]*color:#c8ff1a!important/);
+  assert.match(playerHeader, /data-identity-role="name"\]\{[\s\S]*font-size:25px!important/);
   assert.match(coachHeader, /data-mobile-chrome="native-identity"/);
   assert.match(coachHeader, /grid-template-columns:44px minmax\(0,1fr\)!important/);
   assert.match(coachHeader, /min-height:62px!important/);
   assert.match(coachHeader, /aria-label="Team Branding Settings"/);
-  assert.match(secondaryCohesionCss, /Secondary Player identity is a compact athlete rail/);
-  assert.match(secondaryCohesionCss, /player-dashboard-identity-header"\]\{[\s\S]*border-left:3px solid var\(--p3-accent\)!important;[\s\S]*border-radius:0!important;[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
-  assert.match(secondaryCohesionCss, /player-dashboard-identity-header"\]\>div\{[\s\S]*min-height:50px!important/);
+  assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
 
 test("mobile navigation is a ShotLab dark edge rail, safe-area aware, and touch compliant", () => {
