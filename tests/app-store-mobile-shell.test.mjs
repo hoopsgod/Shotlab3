@@ -22,7 +22,7 @@ test("iPhone viewport and launch experience preserve accessibility", () => {
   assert.doesNotMatch(indexSource, /titans-exact-logo/);
 });
 
-test("persistent navigation behaves as a floating native tab bar", () => {
+test("persistent navigation behaves as a native edge tab bar", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
   assert.match(navigationSource, /ROLE_PRIMARY_NAV/);
   assert.match(navigationSource, /\{ key: "home", label: "Home", icon: "home" \}/);
@@ -37,10 +37,14 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(navigationSource, /className=\{styles\.activeIndicator\}/);
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
-  assert.match(navigationCss, /\.dock\s*\{[^}]*left:\s*50%/s);
-  assert.match(navigationCss, /\.dock\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
-  assert.match(navigationCss, /\.dock\s*\{[^}]*border:\s*1px solid/s);
-  assert.match(navigationCss, /\.dock\s*\{[^}]*border-radius:\s*20px/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*left:\s*0/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*right:\s*0/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*bottom:\s*0/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*width:\s*100%/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*border-top:\s*1px solid/s);
+  assert.match(navigationCss, /\.dock\s*\{[^}]*border-radius:\s*0/s);
+  assert.doesNotMatch(navigationCss, /\.dock\s*\{[^}]*left:\s*50%/s);
+  assert.doesNotMatch(navigationCss, /\.dock\s*\{[^}]*translateX\(-50%\)/s);
   assert.match(navigationCss, /-apple-system, BlinkMacSystemFont/);
 });
 
