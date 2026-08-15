@@ -49,10 +49,11 @@ function patchProgressStory() {
     'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "PlayerProgress signature import",
   );
-  source = replaceOne(
+  source = insertAfterOne(
     source,
-    '      <div className={styles.hero} data-testid="player-progress-story-hero">\n        <div className={styles.heroTopline} data-testid="player-progress-story-topline">',
-    '      <div className={styles.hero} data-testid="player-progress-story-hero">\n        <ShotLabSignatureField variant="trajectoryVariant" testId="player-progress-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n        <div className={styles.heroTopline} data-testid="player-progress-story-topline">',
+    /^[ \t]*<div\b(?=[^>\n]*className=\{styles\.hero\})(?=[^>\n]*data-testid="player-progress-story-hero")[^>\n]*>\r?\n/m,
+    '        <ShotLabSignatureField variant="trajectoryVariant" testId="player-progress-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n',
+    'testId="player-progress-signature-field"',
     "PlayerProgress signature field",
   );
   writeFileSync(path, source);

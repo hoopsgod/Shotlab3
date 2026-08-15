@@ -15,6 +15,7 @@ const actionKey = (action = {}) => String(action.id || action.kind || action.tar
 const coachSignalStatus = (signal = {}) => signal.stale ? "Stale" : signal.freshness === "current" ? signal.ageDays === 0 ? "Published today" : `${signal.ageDays}d old` : "Unverified";
 const coachSignalIcon = (signal = {}) => signal.stale ? "clock" : signal.freshness === "current" ? "verified" : "neutral";
 const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
+const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" };
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
@@ -93,23 +94,36 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         <ExperienceSignal eyebrow="First session complete" title={firstSession.title || "First result banked"} detail={firstSession.detail || "Your training baseline is active. Every result from here builds your progress history."} tone="positive" icon="verified" />
       </div>}
 
-      <section className={styles.coachSignal} data-testid="player-coach-priority-signal" data-command-role="coach-priority" data-layout-role="supporting-evidence" data-freshness={coachSignal.freshness || "unknown"} aria-label="Coach assignment" style={coachSignal.stale ? { "--coach-signal-accent": "#ffb547" } : undefined}>
-        <div className={styles.coachSignalHeader}>
-          <div>
+      <section
+        className={styles.coachSignal}
+        data-testid="player-coach-priority-signal"
+        data-command-role="coach-priority"
+        data-layout-role="supporting-evidence"
+        data-freshness={coachSignal.freshness || "unknown"}
+        aria-label="Coach assignment"
+        style={{
+          "--coach-signal-accent": coachSignal.stale ? "#ffb547" : "var(--team-brand-primary,var(--accent,#c8ff1a))",
+          marginTop: 14,
+          paddingTop: 14,
+          paddingBottom: 12,
+        }}
+      >
+        <div className={styles.coachSignalHeader} style={{ display: "block" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
             <div className={styles.coachSignalEyebrow} style={coachSignal.stale ? { color: "#ffca76" } : undefined}>{coachSignal.stale ? "Coach assignment needs refresh" : "Coach assignment"}</div>
-            <h2 className={styles.coachSignalTitle}>{coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}</h2>
+            <span className={styles.coachSignalStatus} style={coachSignal.stale ? { marginTop: 0, borderColor: "rgba(255,181,71,.48)", background: "rgba(255,181,71,.12)", color: "#ffd18a", gap: 5 } : { marginTop: 0, paddingInline: 0, gap: 5 }}>
+              <ShotLabIcon name={coachSignalIcon(coachSignal)} size={13} /><span>{coachSignalStatus(coachSignal)}</span>
+            </span>
           </div>
-          <span className={styles.coachSignalStatus} style={coachSignal.stale ? { borderColor: "rgba(255,181,71,.48)", background: "rgba(255,181,71,.12)", color: "#ffd18a", gap: 5 } : { gap: 5 }}>
-            <ShotLabIcon name={coachSignalIcon(coachSignal)} size={13} /><span>{coachSignalStatus(coachSignal)}</span>
-          </span>
+          <h2 className={styles.coachSignalTitle} style={{ fontSize: "clamp(17px,4.6vw,20px)", lineHeight: 1.04, maxWidth: "none", letterSpacing: "-.03em", marginTop: 7 }}>{coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}</h2>
         </div>
-        <div className={styles.coachSignalGrid}>
+        <div className={styles.coachSignalGrid} style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", marginTop: 9 }}>
           {coachSignal.stale ? <>
-            <div className={styles.coachSignalItem}><div className={styles.coachSignalLabel}>Last published</div><div className={styles.coachSignalValue}>{coachSignal.ageDays} days ago</div></div>
-            <div className={styles.coachSignalItem}><div className={styles.coachSignalLabel}>What to do</div><div className={styles.coachSignalValue}>Continue your current training plan until your coach republishes Team Focus.</div></div>
+            <div className={styles.coachSignalItem} style={{ paddingTop: 9, paddingRight: 12 }}><div className={styles.coachSignalLabel}>Last published</div><div className={styles.coachSignalValue} style={compactCoachValueStyle}>{coachSignal.ageDays} days ago</div></div>
+            <div className={styles.coachSignalItem} style={{ marginTop: 0, paddingTop: 9, paddingLeft: 12, borderTop: 0, borderLeft: "1px solid rgba(23,26,24,.1)" }}><div className={styles.coachSignalLabel}>What to do</div><div className={styles.coachSignalValue} style={compactCoachValueStyle}>Continue your current training plan until your coach republishes Team Focus.</div></div>
           </> : <>
-            <div className={styles.coachSignalItem}><div className={styles.coachSignalLabel}>Priority drill</div><div className={styles.coachSignalValue}>{coachSignal.priorityDrill || "Next unfinished training block"}</div></div>
-            <div className={styles.coachSignalItem}><div className={styles.coachSignalLabel}>Challenge</div><div className={styles.coachSignalValue}>{coachSignal.challenge || "Complete one focused block and log the result."}</div></div>
+            <div className={styles.coachSignalItem} style={{ paddingTop: 9, paddingRight: 12 }}><div className={styles.coachSignalLabel}>Priority drill</div><div className={styles.coachSignalValue} style={compactCoachValueStyle}>{coachSignal.priorityDrill || "Next unfinished training block"}</div></div>
+            <div className={styles.coachSignalItem} style={{ marginTop: 0, paddingTop: 9, paddingLeft: 12, borderTop: 0, borderLeft: "1px solid rgba(23,26,24,.1)" }}><div className={styles.coachSignalLabel}>Challenge</div><div className={styles.coachSignalValue} style={compactCoachValueStyle}>{coachSignal.challenge || "Complete one focused block and log the result."}</div></div>
           </>}
         </div>
       </section>

@@ -2,7 +2,6 @@
 .auth-demo-enter{
   display:grid!important;
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  width:100%!important;
   gap:10px!important;
   margin-top:0!important;
   opacity:1!important;
@@ -14,7 +13,6 @@
 .auth-demo-enter .btn-v{
   min-width:0!important;
   min-height:48px!important;
-  height:auto!important;
   padding:0 14px!important;
   border:1px solid rgba(82,105,0,.42)!important;
   border-radius:13px!important;
@@ -29,15 +27,6 @@
 .auth-demo-enter .btn-v:focus-visible{
   outline:3px solid rgba(97,121,0,.24)!important;
   outline-offset:3px!important;
-}
-.auth-demo-enter::before{
-  content:"Preview the experience";
-  grid-column:1/-1;
-  margin:1px 0 0;
-  color:#44515b!important;
-  font:700 11px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  letter-spacing:.01em;
-  text-align:center;
 }
 
 /* The premium auth lockup uses the shared raster SL mark. Constrain the actual
@@ -62,14 +51,11 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
   text-transform:none!important;
 }
 
-/* Entry regression lock — the auth content wrapper previously inherited a
-   legacy dark .fade-up treatment, producing the large black/charcoal block
-   visible above the sign-in card on iPhone. Auth owns a light canvas, so keep
-   this wrapper and any legacy decorative pseudo-elements transparent. */
+/* Entry regression lock — the auth content wrapper must not inherit legacy
+   card or fade-up surface treatments. */
 [data-testid="auth-workspace"] > .fade-up{
   background:transparent!important;
   background-image:none!important;
-  color:#111a21!important;
   box-shadow:none!important;
   filter:none!important;
   opacity:1!important;
@@ -93,8 +79,7 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
 
 /* First-paint logo safety — DashboardIdentityHeader is role-chunk styled. On a
    cold Player Demo launch the high-resolution team PNG could paint at its
-   natural dimensions before that CSS chunk arrived. These eager constraints
-   are loaded with the auth shell, so the logo can never expand to viewport size. */
+   natural dimensions before that CSS chunk arrived. */
 [data-testid="player-dashboard-identity-header"],
 [data-testid="coach-dashboard-identity-header"]{
   overflow:hidden!important;
@@ -118,11 +103,116 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
     max-width:72px!important;
     max-height:70px!important;
   }
+
+  /* Flagship entry composition: ShotLab brand/performance stage first, then a
+     light access sheet. This mirrors the authenticated dark-stage → evidence
+     rhythm instead of presenting a separate marketing page and SaaS form. */
+  [data-testid="auth-workspace"]{
+    background:#071c28!important;
+    color:#f5f8f9!important;
+  }
+  [data-testid="auth-workspace"] > div[aria-hidden="true"]{
+    background:
+      radial-gradient(circle at 92% 6%,rgba(200,255,26,.13),transparent 30%),
+      linear-gradient(145deg,#061923 0%,#0a2633 58%,#071c28 100%)!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > header{
+    margin-bottom:28px!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > header > div:first-child > div:first-child{
+    border:1px solid rgba(220,235,241,.12)!important;
+    background:rgba(255,255,255,.055)!important;
+    box-shadow:none!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > header > div:first-child > div:last-child > div:first-child{
+    color:#f6f9fa!important;
+    -webkit-text-fill-color:#f6f9fa!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > header > div:first-child > div:last-child > div:last-child{
+    color:#9eacb4!important;
+    -webkit-text-fill-color:#9eacb4!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > header > div:last-child{
+    border-color:rgba(200,255,26,.22)!important;
+    background:rgba(200,255,26,.07)!important;
+    color:#c8ff1a!important;
+    -webkit-text-fill-color:#c8ff1a!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > section{
+    margin-bottom:30px!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > section > div:first-child{
+    color:#c8ff1a!important;
+    -webkit-text-fill-color:#c8ff1a!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > section h1{
+    max-width:360px!important;
+    color:#f6f9fa!important;
+    -webkit-text-fill-color:#f6f9fa!important;
+    font-size:clamp(44px,12vw,56px)!important;
+    line-height:.92!important;
+    letter-spacing:-.06em!important;
+  }
+  [data-testid="auth-workspace"] > .fade-up > section p{
+    max-width:350px!important;
+    color:#aebbc2!important;
+    -webkit-text-fill-color:#aebbc2!important;
+    font-size:14px!important;
+  }
+
+  [data-testid="auth-workspace"] .auth-card-enter{
+    margin-left:-18px!important;
+    margin-right:-18px!important;
+    padding:26px 22px 34px!important;
+    border:0!important;
+    border-top:1px solid rgba(17,26,33,.10)!important;
+    border-radius:0!important;
+    background:#f5f4ef!important;
+    color:#111a21!important;
+    box-shadow:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter h2{
+    color:#111a21!important;
+    -webkit-text-fill-color:#111a21!important;
+    font-size:29px!important;
+    letter-spacing:-.045em!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter p,
+  [data-testid="auth-workspace"] .auth-card-enter label{
+    color:#5e6a72!important;
+    -webkit-text-fill-color:#5e6a72!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter [role="tablist"]{
+    border-color:rgba(17,26,33,.08)!important;
+    background:#e9e8e2!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter [role="tab"][aria-selected="true"]{
+    background:#fff!important;
+    color:#111a21!important;
+    -webkit-text-fill-color:#111a21!important;
+    box-shadow:none!important;
+  }
+  [data-testid="auth-workspace"] .auth-card-enter [role="tab"][aria-selected="false"]{
+    color:#65717a!important;
+    -webkit-text-fill-color:#65717a!important;
+  }
+  [data-testid="auth-workspace"] .auth-demo-enter .btn-v{
+    border-color:rgba(17,26,33,.14)!important;
+    background:transparent!important;
+    color:#26323a!important;
+    -webkit-text-fill-color:#26323a!important;
+  }
+  [data-testid="auth-workspace"] .auth-demo-enter .btn-v:last-child{
+    border-color:#0d171e!important;
+    background:#0d171e!important;
+    color:#f5f8f9!important;
+    -webkit-text-fill-color:#f5f8f9!important;
+  }
 }
 
 @media(max-width:390px){
-  .auth-demo-enter{grid-template-columns:1fr!important}
-  .auth-demo-enter::before{grid-column:1!important}
   html body:has(.auth-card-enter) div:has(> .auth-ball-enter) > div:first-child img{
     width:30px!important;
     height:30px!important;

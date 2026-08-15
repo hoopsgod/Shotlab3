@@ -86,7 +86,7 @@ if (!source.includes(panelMarker)) {
       />
       {rows.length ? (
         <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results">
-          {rows.slice(0, 3).map((row) => (
+          {rows.slice(0,3).map((row) => (
             <button
               type="button"
               className={styles.operationalRow + " coachLeaderboardRow"}

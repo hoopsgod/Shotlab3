@@ -91,7 +91,7 @@ async function enterRole(page, role) {
   await disableVisualNoise(page);
 }
 
-async function expectFloatingDock(page, expectedLabels) {
+async function expectNativeEdgeTabBar(page, expectedLabels) {
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible();
   for (const label of expectedLabels) {
@@ -106,17 +106,18 @@ async function expectFloatingDock(page, expectedLabels) {
       rightGap: window.innerWidth - rect.right,
       bottomGap: window.innerHeight - rect.bottom,
       radius: Number.parseFloat(style.borderTopLeftRadius),
+      height: rect.height,
       position: style.position,
       parentTag: element.parentElement?.tagName || "",
     };
   });
   expect(geometry.position).toBe("fixed");
   expect(geometry.parentTag).toBe("BODY");
-  expect(geometry.leftGap).toBeGreaterThanOrEqual(7);
-  expect(geometry.rightGap).toBeGreaterThanOrEqual(7);
-  expect(Math.abs(geometry.leftGap - geometry.rightGap)).toBeLessThanOrEqual(2);
-  expect(geometry.bottomGap).toBeGreaterThanOrEqual(8);
-  expect(geometry.radius).toBeGreaterThanOrEqual(20);
+  expect(Math.abs(geometry.leftGap)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.rightGap)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.bottomGap)).toBeLessThanOrEqual(1);
+  expect(geometry.radius).toBeLessThanOrEqual(1);
+  expect(geometry.height).toBeGreaterThanOrEqual(56);
 }
 
 async function openAndVerifyMoreSheet(page, role) {
@@ -171,7 +172,7 @@ for (const role of ["coach", "player"]) {
   test(`captures the Phase 2 ${role} native shell and More sheet`, async ({ page }) => {
     const expected = ROLE_EXPECTATIONS[role];
     await enterRole(page, role);
-    await expectFloatingDock(page, expected.tabs);
+    await expectNativeEdgeTabBar(page, expected.tabs);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: `${SCREENSHOT_DIR}/${expected.screenshot}-shell-390x844.png` });
 

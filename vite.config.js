@@ -198,7 +198,7 @@ function bundleVisualAuthorityCss() {
     name: 'shotlab-bundle-visual-authority-css',
     apply: 'build',
     enforce: 'post',
-    async closeBundle() {
+    async writeBundle() {
       const distDir = path.resolve(process.cwd(), 'dist')
       const indexPath = path.join(distDir, 'index.html')
       let html = await readFile(indexPath, 'utf8')

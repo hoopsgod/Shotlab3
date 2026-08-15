@@ -6,8 +6,8 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("Phase 4 navigation motion stays restrained and honors reduced-motion preferences", async () => {
   const css = await read("src/components/MobileNavigation.module.css");
-  assert.match(css, /animation:\s*navOverlayIn\s+150ms/);
-  assert.match(css, /animation:\s*navSheetIn\s+220ms/);
+  assert.match(css, /animation:\s*navOverlayIn\s+140ms\s+ease-out/);
+  assert.match(css, /animation:\s*navSheetIn\s+190ms\s+cubic-bezier/);
   assert.match(css, /@keyframes navOverlayIn/);
   assert.match(css, /@keyframes navSheetIn/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);

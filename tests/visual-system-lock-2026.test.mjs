@@ -51,7 +51,7 @@ test("shared system surfaces no longer fall back to unreadable 8-10px interface 
 
 test("mobile content and navigation use the same premium gutter token", () => {
   assert.match(foundation, /padding-inline: var\(--layout-gutter\) !important/);
-  assert.match(navigation, /var\(--layout-gutter, 16px\) - var\(--layout-gutter, 16px\)/);
+  assert.match(navigation, /calc\(var\(--layout-gutter, 16px\) - 12px\)/);
 });
 
 test("production keeps the bundled visual authority without shipping duplicate legacy copies", () => {
@@ -59,6 +59,10 @@ test("production keeps the bundled visual authority without shipping duplicate l
   assert.match(productionCss, /\^shotlab-\.\*\\\.css\$/);
   assert.match(productionCss, /!referenced\.has\(entry\.name\)/);
   assert.match(productionCss, /unlink\(path\.join\(DIST_DIR, name\)\)/);
+  assert.match(
+    productionCss,
+    /const removedAuthorityCopies = await removeBundledAuthorityDuplicates\(\);\s*const files = await listCssFiles\(DIST_DIR\);/,
+  );
   assert.match(finalAuthorityCleanup, /data-shotlab-authority-bundle/);
   assert.match(finalAuthorityCleanup, /!referenced\.has\(entry\.name\)/);
   assert.match(pkg.scripts.build, /prune-unreachable-global-selectors\.mjs.*remove-unreferenced-authority-css\.mjs$/);

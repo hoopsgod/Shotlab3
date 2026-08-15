@@ -85,7 +85,8 @@ async function expectButtonTouchTargets(root, minimum = 1) {
   for (let index = 0; index < count; index += 1) {
     const box = await buttons.nth(index).boundingBox();
     expect(box).not.toBeNull();
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    // Chromium can report a CSS 44px box as 43.99998px after device-pixel conversion.
+    expect(box.height).toBeGreaterThanOrEqual(43.99);
   }
 }
 

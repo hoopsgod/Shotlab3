@@ -40,7 +40,9 @@ test("Daily Command Center matches the modern player hierarchy without changing 
 test("all six player operational workspaces share the same current design system", () => {
   assert.match(workspaceCss, /\.commandBar\{[\s\S]*?border-bottom:1px solid[\s\S]*?background:transparent/);
   assert.match(workspaceCss, /\.metrics\{[\s\S]*?border-block:1px solid/);
-  assert.match(workspaceCss, /\.metric\{[\s\S]*?border-radius:0[\s\S]*?box-shadow:none/);
+  assert.match(workspaceCss, /\.metric\{[\s\S]*?border:0;[\s\S]*?background:transparent;[\s\S]*?cursor:default/);
+  assert.doesNotMatch(workspaceCss, /\.metric\{[^}]*border-radius:/);
+  assert.doesNotMatch(workspaceCss, /\.metric\{[^}]*box-shadow:/);
   assert.match(workspaceCss, /grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
   assert.match(workspaceCss, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(workspaceCss, /overflow-x:auto/);

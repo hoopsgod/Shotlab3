@@ -2,7 +2,7 @@
   grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
   align-items:stretch;
 }
-.metricPrimary,.metricSupporting{--text-1:#f7f9f5;--text-3:#929e94}
+.metricPrimary,.metricSupporting{--text-1:#f7f9f5;--text-3:#929e94;font-variant-numeric:tabular-nums}
 .metricPrimary{
   min-height:112px!important;
   border-color:color-mix(in srgb,var(--accent) 28%,rgba(255,255,255,.07))!important;
@@ -20,24 +20,96 @@
   background:rgba(14,16,17,.72)!important;
 }
 .metricSupporting [class*="metricValue"]{font-size:27px!important}
+
 @media(max-width:700px){
   .metricsHierarchy{
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:8px!important;
+    gap:0!important;
+    overflow:hidden!important;
+    border-block:1px solid rgba(23,26,24,.11)!important;
+    background:transparent!important;
   }
   .metricPrimary{
+    --text-1:#f6f8f5;
+    --text-3:#aab7b3;
+    position:relative!important;
     grid-column:1 / -1!important;
-    min-height:104px!important;
+    min-height:108px!important;
+    padding:18px 18px 17px 21px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:
+      radial-gradient(circle at 100% -8%,rgba(200,255,26,.15),transparent 39%),
+      radial-gradient(ellipse 170px 90px at 106% 116%,transparent 63%,rgba(223,236,241,.10) 63.5%,transparent 64.2%),
+      linear-gradient(124deg,#061923 0%,#082430 62%,#0b2d37 100%)!important;
+    background-color:#082731!important;
+    box-shadow:none!important;
+  }
+  .metricPrimary::after{
+    left:0!important;
+    right:auto!important;
+    top:18px!important;
+    bottom:18px!important;
+    width:3px!important;
+    height:auto!important;
+    border-radius:0!important;
+    background:#c8ff1a!important;
+    opacity:1!important;
+  }
+  .metricPrimary [class*="metricLabel"]{
+    font-size:11px!important;
+    font-weight:780!important;
+    letter-spacing:.07em!important;
+  }
+  .metricPrimary [class*="metricValue"]{
+    margin-top:6px!important;
+    font-size:46px!important;
+    font-weight:820!important;
+    line-height:.9!important;
+    letter-spacing:-.065em!important;
+  }
+  .metricPrimary [class*="metricDetail"]{
+    margin-top:8px!important;
+    color:#b7c4c9!important;
+    font-size:12px!important;
+    line-height:1.2!important;
   }
   .metricSupporting{
+    --text-1:#171a18;
+    --text-3:#68716a;
     min-height:84px!important;
-    padding:12px!important;
+    padding:13px 10px 12px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
   }
-  .metricPrimary [class*="metricValue"]{font-size:34px!important}
-  .metricSupporting [class*="metricValue"]{font-size:24px!important}
-  .metricSupporting [class*="metricDetail"]{white-space:normal!important;line-height:1.2!important}
+  .metricPrimary + .metricSupporting{border-left:0!important}
+  .metricSupporting + .metricSupporting{border-left:1px solid rgba(23,26,24,.1)!important}
+  .metricSupporting::after{display:none!important}
+  .metricSupporting [class*="metricLabel"]{
+    font-size:11px!important;
+    font-weight:760!important;
+    line-height:1.05!important;
+    letter-spacing:.045em!important;
+  }
+  .metricSupporting [class*="metricValue"]{
+    margin-top:6px!important;
+    font-size:27px!important;
+    font-weight:790!important;
+    line-height:.95!important;
+    letter-spacing:-.05em!important;
+  }
+  .metricSupporting [class*="metricDetail"]{
+    margin-top:6px!important;
+    white-space:normal!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+  }
 }
+
 @media(max-width:390px){
-  .metricSupporting [class*="metricLabel"]{font-size:8px!important;letter-spacing:.04em!important}
-  .metricSupporting [class*="metricValue"]{font-size:22px!important}
+  .metricSupporting{padding-inline:8px!important}
+  .metricSupporting [class*="metricLabel"]{font-size:11px!important;letter-spacing:.025em!important}
+  .metricSupporting [class*="metricValue"]{font-size:25px!important}
 }

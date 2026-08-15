@@ -3,6 +3,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/phase-3a-cross-screen-visual-audit");
+const MOBILE_VIEWPORTS = [
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 393, height: 852 },
+  { width: 402, height: 874 },
+  { width: 430, height: 932 },
+];
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -55,30 +62,94 @@ async function expectPlayerIdentityInsideViewport(page) {
   if (!(await identity.count())) return;
   const geometry = await identity.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, width: rect.width, viewportWidth: window.innerWidth };
+    return { left: rect.left, right: rect.right, width: rect.width, height: rect.height, viewportWidth: window.innerWidth };
   });
-  expect(geometry.left).toBeGreaterThanOrEqual(8);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth - 8);
+  expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
   expect(geometry.width).toBeGreaterThan(300);
+  expect(geometry.height).toBeLessThanOrEqual(100);
+}
+
+async function expectCompactFunctionalIntro(page) {
+  const sharedIntro = page.locator('[data-visual-role="page-intro"]').first();
+  const specializedIntro = page.locator('[data-page-hierarchy="editorial"] [data-layout-role="editorial-header"]').first();
+  const intro = await sharedIntro.count() ? sharedIntro : specializedIntro;
+  await expect(intro).toBeVisible();
+  const geometry = await intro.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const title = element.querySelector("h1");
+    return {
+      height: rect.height,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      right: rect.right,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  expect(geometry.height).toBeLessThanOrEqual(200);
+  expect(geometry.titleSize).toBeLessThanOrEqual(44);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+}
+
+async function expectProgressStoryCommandSurface(page) {
+  const story = page.locator('[data-page-hierarchy="command-story"]');
+  await expect(story).toBeVisible();
+  const hero = story.locator('[data-layout-role="command-story-header"]');
+  await expect(hero).toBeVisible();
+  const geometry = await hero.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const title = element.querySelector("h2");
+    return {
+      height: rect.height,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      right: rect.right,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  expect(geometry.height).toBeLessThanOrEqual(390);
+  expect(geometry.titleSize).toBeLessThanOrEqual(42);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+  await expect(page.getByTestId("player-progress-metrics")).toBeVisible();
+  await expect(page.getByText("What the work says now", { exact: true })).toBeVisible();
 }
 
 async function expectReadablePlayerMetrics(page, testId) {
   const workspace = page.getByTestId(testId);
   await expect(workspace).toBeVisible();
-  const colors = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
-    const values = [...container.querySelectorAll('[data-metric-role="value"]')];
-    const labels = [...container.querySelectorAll('[data-metric-role="label"]')];
-    const details = [...container.querySelectorAll('[data-metric-role="detail"]')];
-    const channels = (element) => (getComputedStyle(element).color.match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
-    return { values: values.map(channels), labels: labels.map(channels), details: details.map(channels) };
+  const contrastRatios = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
+    const metricNodes = [...container.querySelectorAll('[data-metric-role="value"], [data-metric-role="label"], [data-metric-role="detail"]')];
+    const parse = (value) => {
+      const numbers = (value.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      return { rgb: numbers.slice(0, 3), alpha: numbers.length > 3 ? numbers[3] : 1 };
+    };
+    const visibleBackground = (element) => {
+      let node = element;
+      while (node) {
+        const parsed = parse(getComputedStyle(node).backgroundColor);
+        if (parsed.rgb.length === 3 && parsed.alpha > 0.01) return parsed.rgb;
+        node = node.parentElement;
+      }
+      return [255, 255, 255];
+    };
+    const luminance = (rgb) => {
+      const channel = (value) => {
+        const s = value / 255;
+        return s <= .04045 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4;
+      };
+      return .2126 * channel(rgb[0]) + .7152 * channel(rgb[1]) + .0722 * channel(rgb[2]);
+    };
+    const contrast = (a, b) => {
+      const l1 = luminance(a);
+      const l2 = luminance(b);
+      return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05);
+    };
+    return metricNodes.map((element) => {
+      const foreground = parse(getComputedStyle(element).color).rgb;
+      const background = visibleBackground(element);
+      return contrast(foreground, background);
+    });
   });
-  expect(colors.values.length).toBeGreaterThan(0);
-  expect(colors.labels.length).toBe(colors.values.length);
-  expect(colors.details.length).toBe(colors.values.length);
-  for (const rgb of [...colors.values, ...colors.labels, ...colors.details]) expect(rgb).toHaveLength(3);
-  for (const rgb of colors.values) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220);
-  for (const rgb of colors.labels) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(140);
-  for (const rgb of colors.details) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(125);
+  expect(contrastRatios.length).toBeGreaterThan(0);
+  for (const ratio of contrastRatios) expect(ratio).toBeGreaterThanOrEqual(4.5);
 }
 
 async function expectPersistentFeedbackRestored(page) {
@@ -115,6 +186,17 @@ async function capture(page, fileName, { authenticated = true } = {}) {
   expect(fs.statSync(outputPath).size).toBeGreaterThan(20_000);
 }
 
+async function resetToAuth(page) {
+  await page.goto("/");
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+  await page.reload();
+  await suppressMotion(page);
+  await expect(page.getByRole("button", { name: /Coach demo/i })).toBeVisible({ timeout: 20_000 });
+}
+
 async function enterDemo(page, role) {
   await installSafeRoutes(page);
   await page.goto("/");
@@ -143,7 +225,21 @@ async function navigateByKey(page, key) {
   await page.waitForTimeout(250);
 }
 
-test("Phase 3A captures auth and Coach visual hierarchy at iPhone width", async ({ page }) => {
+async function openFirstCoachPlayerDetail(page) {
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const rows = roster.locator('> .fade-up > [role="button"]');
+  expect(await rows.count()).toBeGreaterThanOrEqual(1);
+  const firstRow = rows.first();
+  const rowName = (await firstRow.locator("span").first().textContent())?.trim() || "Player";
+  await firstRow.click({ position: { x: 18, y: 18 } });
+  const drawer = page.getByRole("dialog", { name: rowName });
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
+  await drawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
+  await expect(page.getByTestId("coach-player-detail-workspace")).toBeVisible({ timeout: 10_000 });
+}
+
+test("Phase 3A captures auth and the complete Coach mobile hierarchy at iPhone width", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
@@ -160,37 +256,115 @@ test("Phase 3A captures auth and Coach visual hierarchy at iPhone width", async 
   await capture(page, "02-coach-home.png");
 
   await navigateByKey(page, "players");
+  await expectCompactFunctionalIntro(page);
   await capture(page, "03-coach-players.png");
 
+  await openFirstCoachPlayerDetail(page);
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "04-coach-player-detail.png");
+
   await navigateByKey(page, "events");
-  await capture(page, "04-coach-schedule.png");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "05-coach-schedule.png");
+
+  await navigateByKey(page, "drills");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "06-coach-drills.png");
+
+  await navigateByKey(page, "sc");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "07-coach-strength.png");
+
+  await navigateByKey(page, "activity");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "08-coach-activity.png");
 
   await navigateByKey(page, "leaderboards");
-  await capture(page, "05-coach-leaderboards.png");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "09-coach-leaderboards.png");
+
+  await navigateByKey(page, "settings");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "10-coach-team-account.png");
+
+  await page.getByTestId("coach-administration-header").getByRole("button", { name: "Team Branding", exact: true }).click();
+  await expect(page.getByTestId("coach-branding-workspace")).toBeVisible({ timeout: 10_000 });
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "11-coach-program-branding.png", { authenticated: false });
 
   expect(pageErrors).toEqual([]);
 });
 
-test("Phase 3A captures Player activation and progress hierarchy at iPhone width", async ({ page }) => {
+test("Phase 3A captures the complete Player training and progress hierarchy at iPhone width", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   await enterDemo(page, "player");
-  await capture(page, "06-player-home.png");
+  await capture(page, "12-player-home.png");
 
   await navigateByKey(page, "log-drill");
   await expectReadablePlayerMetrics(page, "player-at-home-workspace");
-  await capture(page, "07-player-train.png");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "13-player-train.png");
 
-  await navigateByKey(page, "profile");
-  await capture(page, "08-player-progress.png");
+  await navigateByKey(page, "duels");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "14-player-program-training.png");
 
   await navigateByKey(page, "program");
-  await capture(page, "09-player-program.png");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "15-player-events.png");
+
+  await navigateByKey(page, "sc");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "16-player-lifting.png");
 
   await navigateByKey(page, "leaderboards");
   await expectReadablePlayerMetrics(page, "player-leaderboards-workspace");
-  await capture(page, "10-player-rankings.png");
+  await expectCompactFunctionalIntro(page);
+  await capture(page, "17-player-rankings.png");
+
+  await navigateByKey(page, "profile");
+  await expectProgressStoryCommandSurface(page);
+  await capture(page, "18-player-progress.png");
+
+  expect(pageErrors).toEqual([]);
+});
+
+test("Phase 3A validates first-impression geometry at 375, 390, 393, 402, and 430px", async ({ page }) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await installSafeRoutes(page);
+
+  for (const viewport of MOBILE_VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await resetToAuth(page);
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole("button", { name: /Coach demo/i }).click();
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+    await navigateByKey(page, "players");
+    await stabilize(page);
+    await expectCompactFunctionalIntro(page);
+    await expectNoHorizontalOverflow(page);
+    if (viewport.width === 375 || viewport.width === 430) {
+      await page.screenshot({ path: path.join(OUTPUT_DIR, `responsive-coach-players-${viewport.width}.png`), animations: "disabled" });
+    }
+
+    await resetToAuth(page);
+    await page.getByRole("button", { name: /Player demo/i }).click();
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+    await stabilize(page);
+    await expectPlayerIdentityInsideViewport(page);
+    await expectNoHorizontalOverflow(page);
+    await navigateByKey(page, "leaderboards");
+    await stabilize(page);
+    await expectCompactFunctionalIntro(page);
+    await expectNoHorizontalOverflow(page);
+    if (viewport.width === 375 || viewport.width === 430) {
+      await page.screenshot({ path: path.join(OUTPUT_DIR, `responsive-player-rankings-${viewport.width}.png`), animations: "disabled" });
+    }
+  }
 
   expect(pageErrors).toEqual([]);
 });

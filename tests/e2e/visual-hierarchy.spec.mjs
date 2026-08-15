@@ -86,11 +86,13 @@ test("coach mobile home presents populated decision intelligence and a current S
 
   const commandCenter = page.getByTestId("coach-command-center-full");
   const objective = page.getByTestId("coach-primary-objective");
+  const objectiveContent = objective.locator(".mcHeroContent");
   const metrics = page.getByTestId("coach-primary-metrics");
   const needsAttention = page.getByRole("heading", { name: "Needs attention", exact: true });
 
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(objective).toBeVisible();
+  await expect(objectiveContent).toBeVisible();
   await expectThreeMetrics(metrics);
   await expect(needsAttention).toBeVisible();
   await expect(page.getByTestId("coach-dashboard-identity-header")).not.toBeVisible();
@@ -98,19 +100,22 @@ test("coach mobile home presents populated decision intelligence and a current S
 
   const shellBox = await commandCenter.boundingBox();
   const objectiveBox = await objective.boundingBox();
+  const objectiveContentBox = await objectiveContent.boundingBox();
   const attentionBox = await needsAttention.boundingBox();
   expect(shellBox).not.toBeNull();
   expect(objectiveBox).not.toBeNull();
+  expect(objectiveContentBox).not.toBeNull();
   expect(attentionBox).not.toBeNull();
   expect(shellBox.x).toBeLessThanOrEqual(1);
   expect(shellBox.width).toBeGreaterThanOrEqual(388);
-  const leftGutter = objectiveBox.x;
-  const rightGutter = 390 - (objectiveBox.x + objectiveBox.width);
-  expect(leftGutter).toBeGreaterThanOrEqual(8);
-  expect(rightGutter).toBeGreaterThanOrEqual(8);
-  expect(leftGutter).toBeLessThanOrEqual(16);
-  expect(rightGutter).toBeLessThanOrEqual(16);
-  expect(Math.abs(leftGutter - rightGutter)).toBeLessThanOrEqual(2);
+  const stageLeftGap = objectiveBox.x;
+  const stageRightGap = 390 - (objectiveBox.x + objectiveBox.width);
+  expect(Math.abs(stageLeftGap)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageRightGap)).toBeLessThanOrEqual(1);
+  const contentLeftGutter = objectiveContentBox.x - objectiveBox.x;
+  const contentRightGutter = objectiveBox.x + objectiveBox.width - (objectiveContentBox.x + objectiveContentBox.width);
+  expect(contentLeftGutter).toBeGreaterThanOrEqual(20);
+  expect(contentRightGutter).toBeGreaterThanOrEqual(20);
   expect(objectiveBox.height).toBeLessThan(520);
   expect(attentionBox.y).toBeLessThan(844);
   await expectNoHorizontalOverflow(page);

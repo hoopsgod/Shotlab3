@@ -42,7 +42,7 @@ export function buildCoachPlayerActionBriefing({ metrics = {}, rows = [] } = {})
   const decision = !total
     ? { title: "Build the roster intelligence signal", detail: "Add the first player to unlock engagement, follow-up, and recognition guidance.", tone: "info", action: { kind: "add-player", label: "Add Player" } }
     : attentionRows.length
-      ? { title: `${pluralize(attentionRows.length, "player")} ${attentionVerb} a coaching touchpoint`, detail: `${pluralize(noActivityRows.length, "player")} ${noActivityVerb} no recorded activity and ${pluralize(followUpRows.length, "player")} ${followUpVerb} active previously but not this week.`, tone: "attention", action: { kind: "filter", value: "attention", label: "Open attention queue" } }
+      ? { title: `${pluralize(attentionRows.length, "player")} ${attentionVerb} attention`, detail: `${pluralize(noActivityRows.length, "player")} ${noActivityVerb} no recorded activity · ${pluralize(followUpRows.length, "player")} ${followUpVerb} active previously but not this week.`, tone: "attention", action: { kind: "filter", value: "attention", label: "Open attention queue" } }
       : { title: "Roster engagement is current", detail: `${pluralize(activeRows.length, "player")} ${activeVerb} current-week activity. Protect the standard with direct recognition and a specific next assignment.`, tone: "positive", action: { kind: "filter", value: "active", label: "Recognize active players" } };
 
   const insights = [

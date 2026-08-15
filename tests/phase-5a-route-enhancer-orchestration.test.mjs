@@ -31,7 +31,8 @@ const finalTouchSafety = [
 const registeredParityEnhancers = [
   'scripts/apply-legacy-signed-collection-reads.mjs',
   'scripts/apply-post-auth-persistence-hydration.mjs',
-  'scripts/apply-mobile-secondary-page-parity.mjs',
+  'scripts/apply-mobile-secondary-page-parity-app.mjs',
+  'scripts/apply-mobile-coach-intelligence-parity.mjs',
 ]
 
 function assertUnique(label, entries) {
@@ -60,8 +61,8 @@ function performanceFixture() {
 }
 
 test('route enhancer manifests preserve the certified dev/build ordering contract', () => {
-  assert.equal(DEV_ROUTE_ENHANCERS.length, 40)
-  assert.equal(BUILD_ROUTE_ENHANCERS.length, 43)
+  assert.equal(DEV_ROUTE_ENHANCERS.length, 42)
+  assert.equal(BUILD_ROUTE_ENHANCERS.length, 45)
   assertUnique('dev route enhancer manifest', DEV_ROUTE_ENHANCERS)
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
@@ -83,8 +84,8 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
     const registeredParityIndexes = registeredParityEnhancers.map((script) => manifest.indexOf(script))
     assert.ok(registeredParityIndexes.every((index) => index >= 0), 'registered parity enhancers must all be orchestrated')
     assert.ok(
-      registeredParityIndexes[0] < registeredParityIndexes[1] && registeredParityIndexes[1] < registeredParityIndexes[2],
-      'signed collection reads must precede post-auth hydration, which must precede secondary-page parity',
+      registeredParityIndexes.every((index, position) => position === 0 || registeredParityIndexes[position - 1] < index),
+      'signed collection reads and post-auth hydration must precede Player and Coach secondary-page parity',
     )
   }
 

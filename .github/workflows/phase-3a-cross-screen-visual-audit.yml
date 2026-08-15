@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Phase 5 reconciliation contracts
-        run: node --test tests/phase-5-cross-screen-reconciliation.test.mjs tests/app-feedback-system.test.mjs
+      - name: Verify Phase 5 reconciliation and premium mobile contracts
+        run: node --test tests/phase-5-cross-screen-reconciliation.test.mjs tests/app-feedback-system.test.mjs tests/mobile-premium-visual-system-2026.test.mjs tests/mobile-premium-first-impression-regression.test.mjs tests/mobile-secondary-page-parity-contract.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1

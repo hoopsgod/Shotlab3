@@ -1,12 +1,9 @@
-import { mkdirSync } from "node:fs";
 import { test, expect } from "@playwright/test";
+import { mkdirSync } from "node:fs";
 
 const SCREENSHOT_DIR = "artifacts/mission-control-phase-2";
 
-test.use({
-  viewport: { width: 390, height: 844 },
-  reducedMotion: "reduce",
-});
+const rgbChannels = (value = "") => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
 
 async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -25,7 +22,7 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
-const rgbChannels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
 
 test.beforeAll(() => mkdirSync(SCREENSHOT_DIR, { recursive: true }));
 
@@ -51,8 +48,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(metrics).toBeVisible();
 
   await expect(page.locator(".mcHeader")).toBeVisible();
-  await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
-  await expect(page.locator(".mcTeamSelect")).toBeVisible();
+  await expect(page.locator(".mcHeaderTeamMark")).toBeVisible();
+  await expect(page.locator(".mcHeroTeamMark")).toBeHidden();
+  await expect(page.locator(".mcTeamSelect")).toBeHidden();
   await expect(page.locator(".mcBell")).toBeVisible();
   await expect(page.locator(".mcMobileMenu")).toBeVisible();
   await expect(page.locator(".mcPrimary")).toBeVisible();
@@ -62,7 +60,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const workspace = document.querySelector(".performance-workspace--coach");
     const hero = document.querySelector(".mcHero");
     const heroContent = document.querySelector(".mcHeroContent");
-    const mark = document.querySelector(".mcHeroTeamMark");
+    const headerMark = document.querySelector(".mcHeaderTeamMark");
+    const heroMark = document.querySelector(".mcHeroTeamMark");
     const primary = document.querySelector(".mcPrimary");
     const section = document.querySelector(".mcSection");
     const reality = document.querySelector(".mcRealityStrip");
@@ -72,7 +71,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const workspaceStyle = workspace ? getComputedStyle(workspace) : null;
     const heroStyle = getComputedStyle(hero);
     const heroContentStyle = getComputedStyle(heroContent);
-    const markStyle = getComputedStyle(mark);
+    const headerMarkStyle = getComputedStyle(headerMark);
+    const heroMarkStyle = getComputedStyle(heroMark);
     const primaryStyle = getComputedStyle(primary);
     const sectionStyle = section ? getComputedStyle(section) : null;
     const realityStyle = getComputedStyle(reality);
@@ -86,15 +86,17 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       heroMaxHeight: heroStyle.maxHeight,
       heroRadius: parseFloat(heroStyle.borderRadius),
       heroContentBackground: heroContentStyle.backgroundColor,
-      markBackground: markStyle.backgroundColor,
-      markWidth: parseFloat(markStyle.width),
+      headerMarkBackground: headerMarkStyle.backgroundColor,
+      headerMarkWidth: parseFloat(headerMarkStyle.width),
+      heroMarkDisplay: heroMarkStyle.display,
       primaryBackground: primaryStyle.backgroundColor,
       primaryHeight: parseFloat(primaryStyle.minHeight),
       supportingBackground: sectionStyle?.backgroundColor || "",
       metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
       teamSelectDisplay: teamSelectStyle.display,
-      teamSelectWidth: parseFloat(teamSelectStyle.width),
       attentionBackground: attentionStyle?.backgroundColor || "",
+      attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 99,
+      attentionShadow: attentionStyle?.boxShadow || "",
       attentionTitleColor: attentionTitleStyle?.color || "",
     };
   });
@@ -104,18 +106,21 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(heroChannels).toHaveLength(3);
   expect(Math.max(...heroChannels)).toBeLessThan(45);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
-  expect(presentation.heroRadius).toBeGreaterThanOrEqual(20);
+  expect(presentation.heroRadius).toBeLessThanOrEqual(1);
   expect(presentation.heroContentBackground).toBe("rgba(0, 0, 0, 0)");
-  expect(presentation.markBackground).toBe("rgba(0, 0, 0, 0)");
-  expect(presentation.markWidth).toBeGreaterThanOrEqual(60);
+  expect(presentation.headerMarkBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(presentation.headerMarkWidth).toBeGreaterThanOrEqual(48);
+  expect(presentation.heroMarkDisplay).toBe("none");
   expect(presentation.primaryBackground).toBe("rgb(200, 255, 26)");
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
-  expect(presentation.supportingBackground).toBe("rgb(255, 255, 255)");
+  expect(presentation.supportingBackground).toBe("rgba(0, 0, 0, 0)");
   expect(presentation.metricColumns).toBe(3);
-  expect(presentation.teamSelectDisplay).toContain("flex");
-  expect(presentation.teamSelectWidth).toBeGreaterThanOrEqual(58);
-  expect(presentation.attentionBackground).toBe("rgb(245, 244, 239)");
+  expect(presentation.teamSelectDisplay).toBe("none");
+  expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
+  expect(presentation.attentionShadow).toBe("none");
   expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
+  const attentionChannels = rgbChannels(presentation.attentionBackground);
+  if (attentionChannels.length === 3) expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
 
   await expectNoHorizontalOverflow(page);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });

@@ -14,8 +14,7 @@ const builtCss = fs.readdirSync(assetsDir)
   .join('\n')
 
 const requiredSelectors = [
-  '.mcRafters',
-  '.mcRafters span:nth-child(4)',
+  '.mcCourtArtwork',
   '.mcRailBrand',
   '.mcRailBrand .mcRailLogo',
   '.mcDrawerLogo',
@@ -28,12 +27,26 @@ if (missing.length) {
 }
 
 const coachSource = fs.readFileSync(coachSourcePath, 'utf8')
+if (!/function CourtArtwork\(/.test(coachSource) || !/className="mcCourtArtwork"/.test(coachSource)) {
+  throw new Error('Phase 5B could not verify the live Coach court artwork component contract')
+}
+
 const brandLockup = coachSource.match(/<div className="mcBrandLockup">([\s\S]*?)<\/div>/)?.[1]
 if (!brandLockup) {
   throw new Error('Phase 5B could not verify the Coach brand-lockup DOM contract')
 }
+
 if (/<img\b/.test(brandLockup)) {
-  throw new Error('Coach brand lockup now renders an image; restore its production image rules before shipping')
+  for (const imageSafetyContract of [
+    /style=\{\{[^}]*width:\s*48[^}]*height:\s*48/,
+    /objectFit:\s*"contain"/,
+    /display:\s*"block"/,
+    /src=\{cleanMarkLogoUrl\}/,
+  ]) {
+    if (!imageSafetyContract.test(brandLockup)) {
+      throw new Error(`Coach brand lockup image is missing production-safe sizing contract: ${imageSafetyContract}`)
+    }
+  }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); dead brand-image contract remains valid`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork and brand-image sizing contracts verified`)

@@ -73,33 +73,34 @@ body:has(#coach-drills-management) .performance-workspace::after{
   display:none!important;
 }
 
-/* Compact player identity chrome on secondary destinations. Keep identity and brand, remove repeated Home-only mission content. */
+/* Secondary Player identity is a compact athlete rail, not another dashboard card. */
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{
-  margin:10px 16px 8px!important;
-  overflow:hidden!important;
-  border:1px solid var(--p3-line)!important;
-  border-radius:22px!important;
-  background:rgba(255,255,255,.92)!important;
-  box-shadow:0 8px 24px rgba(24,31,27,.055)!important;
+  margin:2px 16px 4px!important;
+  overflow:visible!important;
+  border:0!important;
+  border-left:3px solid var(--p3-accent)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
   transform:none!important;
 }
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]>div{
-  min-height:78px!important;
-  padding:13px 15px!important;
+  min-height:50px!important;
+  padding:4px 0 6px 10px!important;
   align-items:center!important;
 }
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] h1{
-  margin:4px 0 0!important;
-  font-size:26px!important;
+  margin:2px 0 0!important;
+  font-size:20px!important;
   line-height:1!important;
-  letter-spacing:-.045em!important;
+  letter-spacing:-.04em!important;
 }
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] :is([data-identity-role="tagline"],[data-identity-role="mission"]){
   display:none!important;
 }
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] img{
-  width:58px!important;
-  height:58px!important;
+  width:34px!important;
+  height:34px!important;
   object-fit:contain!important;
 }
 
@@ -272,14 +273,14 @@ body:has(#coach-drills-management) .performance-shell :is(input,textarea)::place
   -webkit-text-fill-color:var(--p3-dim)!important;
 }
 
-/* Keep the floating dock visually above long management screens without obscuring content. */
+/* Keep the navigation visually above long management screens without obscuring content. */
 body:has([data-testid="premium-leaderboards-hub"]) [data-testid="mobile-navigation-dock"],
 body:has([data-testid="player-career-history"]) [data-testid="mobile-navigation-dock"],
 body:has([data-testid="coach-players-interactive-dashboard"]) [data-testid="mobile-navigation-dock"],
 body:has([data-testid="coach-events-interactive-dashboard"]) [data-testid="mobile-navigation-dock"],
 body:has(#coach-drills-management) [data-testid="mobile-navigation-dock"]{
   border-color:rgba(21,26,22,.08)!important;
-  box-shadow:0 14px 38px rgba(24,31,27,.15)!important;
+  box-shadow:0 8px 24px rgba(24,31,27,.10)!important;
 }
 
 @media(max-width:700px){
@@ -294,7 +295,7 @@ body:has(#coach-drills-management) [data-testid="mobile-navigation-dock"]{
 @media(max-width:390px){
   [data-testid="premium-leaderboards-hub"],
   [data-testid="player-career-history"]{width:calc(100% - 20px)!important;padding:14px!important}
-  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{margin-inline:10px!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{margin-inline:12px!important}
 }
 
 @media(prefers-reduced-motion:reduce){

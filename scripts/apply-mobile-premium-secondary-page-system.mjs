@@ -1,0 +1,303 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+const cssPath = path.resolve(process.cwd(), 'src/components/SecondaryPageSystem.css')
+const appPath = path.resolve(process.cwd(), 'src/App.jsx')
+const metricCssPath = path.resolve(process.cwd(), 'src/components/CoachDashboardPrimitives.module.css')
+const commitmentPath = path.resolve(process.cwd(), 'src/components/PlayerCommitmentCenter.jsx')
+const commitmentCssPath = path.resolve(process.cwd(), 'src/components/PlayerCommitmentCenter.module.css')
+let source = fs.readFileSync(cssPath, 'utf8')
+
+const startMarker = '@media (max-width: 760px) {'
+const currentNarrowMarker = '@media (max-width: 430px) {'
+const legacyNarrowMarker = '@media (max-width: 390px) {'
+const narrowMarker = source.includes(currentNarrowMarker) ? currentNarrowMarker : legacyNarrowMarker
+const motionMarker = '@media (prefers-reduced-motion: reduce) {'
+
+const mobileStart = source.indexOf(startMarker)
+const narrowStart = source.indexOf(narrowMarker, mobileStart + startMarker.length)
+const motionStart = source.indexOf(motionMarker, narrowStart + narrowMarker.length)
+
+if (mobileStart < 0 || narrowStart < 0 || motionStart < 0) {
+  throw new Error('Could not locate the owned SecondaryPageSystem mobile breakpoint boundaries.')
+}
+
+const mobileAuthority = `@media (max-width: 760px) {
+  .secondaryPageShell {
+    gap: 12px;
+    padding: 2px var(--layout-gutter, 16px) 84px;
+  }
+
+  /* ShotLab route stage: compact mark + editorial type + one touch-safe action rail. */
+  .secondaryPageIntro {
+    position: relative;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 10px;
+    row-gap: 8px;
+    min-height: 0;
+    overflow: visible;
+    padding: 7px 0 12px;
+    border-bottom: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  }
+
+  .secondaryPageIntro__copy { min-width: 0; max-width: none; }
+  .secondaryPageIntro__icon {
+    position: static;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    margin-top: 1px;
+    border: 1px solid rgba(7, 26, 34, .1);
+    border-radius: 9px;
+    background: #0b2028;
+    color: #c8ff1a;
+    opacity: 1;
+    transform: none;
+  }
+  .secondaryPageIntro__icon svg { width: 16px; height: 16px; stroke-width: 1.85; }
+  .secondaryPageIntro[data-page-kind] .secondaryPageIntro__icon { transform: none; }
+  .secondaryPageIntro__eyebrow { margin-bottom: 4px; font-size: 11px; letter-spacing: .09em; }
+  .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {
+    max-width: 11ch;
+    font-size: clamp(31px, 8.5vw, 34px) !important;
+    line-height: .94;
+    letter-spacing: -.052em;
+    overflow-wrap: normal;
+    word-break: normal;
+    text-wrap: balance;
+  }
+  .secondaryPageIntro__summary { display: none; }
+  .secondaryPageIntro__actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    margin-top: 1px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .secondaryPageIntro__status {
+    max-width: 100%;
+    overflow: hidden;
+    color: #5b665e;
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .secondaryPageIntro__buttonRow {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    justify-content: stretch;
+  }
+  .secondaryPageAction {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 10px;
+    border-radius: 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .secondaryPageAction--primary { background: #18211d; border-color: #18211d; }
+
+  /* Score strips are allowed to reach the viewport rhythm instead of becoming more cards. */
+  .secondaryPageToolbar [data-visual-role="metric-strip"] {
+    margin-inline: calc(var(--layout-gutter, 16px) * -1) !important;
+    padding-inline: var(--layout-gutter, 16px) !important;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .secondaryPageToolbar [data-visual-role="metric-strip"]::-webkit-scrollbar { display: none; }
+  .secondaryPageToolbar [data-visual-role="metric-strip"] > button {
+    min-width: 116px !important;
+    min-height: 76px !important;
+    padding: 10px 8px !important;
+    scroll-snap-align: start;
+  }
+
+  /* Performance band: one edge-to-edge decisive moment, not a floating dashboard card. */
+  .secondaryPageDecision {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    min-height: 0;
+    gap: 7px;
+    margin-inline: calc(var(--layout-gutter, 16px) * -1);
+    padding: 23px var(--layout-gutter, 16px) 22px;
+    overflow: hidden;
+    border-inline: 0;
+    border-radius: 0;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(200, 255, 26, .105), transparent 31%),
+      linear-gradient(128deg, #071a22 0%, #0a222b 58%, #102e35 100%);
+    box-shadow: none;
+  }
+  .secondaryPageDecision::after {
+    content: "";
+    position: absolute;
+    top: -72px;
+    right: -92px;
+    z-index: 0;
+    width: 184px;
+    height: 184px;
+    display: block;
+    border: 1px solid rgba(200, 255, 26, .13);
+    border-radius: 50%;
+    background: transparent;
+    filter: none;
+    pointer-events: none;
+  }
+  .secondaryPageDecision__copy { position: relative; z-index: 1; min-width: 0; padding-right: 46px; }
+  .secondaryPageDecision__icon {
+    position: absolute;
+    top: 19px;
+    right: var(--layout-gutter, 16px);
+    z-index: 1;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(200, 255, 26, .085);
+    color: #c8ff1a;
+  }
+  .secondaryPageDecision__icon svg { width: 19px; height: 19px; stroke-width: 1.7; }
+  .secondaryPageDecision__visual { display: none; }
+  .secondaryPageDecision__eyebrow { margin-bottom: 6px; color: #c8ff1a; font-size: 11px; letter-spacing: .09em; }
+  .secondaryPageDecision h2 { max-width: 17ch; font-size: clamp(26px, 7.3vw, 31px); line-height: .96; letter-spacing: -.052em; }
+  .secondaryPageDecision p { max-width: 38ch; margin-top: 8px; color: #b8c5c2; font-size: 12.5px; line-height: 1.45; }
+  .secondaryPageDecision button {
+    min-height: 44px;
+    margin-top: 13px;
+    padding-inline: 15px;
+    border-color: #c8ff1a;
+    border-radius: 11px;
+    background: #c8ff1a;
+    color: #102019;
+    font-weight: 780;
+  }
+  .secondaryPageDecision button:hover:not(:disabled) { background: #d2ff49; transform: translateY(-1px); }
+
+  /* Supporting evidence reads as a ledger beneath the performance band. */
+  .secondaryPageEvidence { grid-template-columns: 1fr; border-top: 0; }
+  .secondaryPageEvidence > * { padding: 14px 0 !important; }
+  .secondaryPageEvidence > * + * {
+    border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
+    border-left: 0 !important;
+  }
+
+  .coachPlayerDetailWorkspace { gap: 14px; }
+  .coachPlayerProfileHero {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-inline: calc(var(--layout-gutter, 16px) * -1);
+    padding: 21px var(--layout-gutter, 16px);
+    border-inline: 0;
+    border-radius: 0;
+    background: radial-gradient(circle at 100% 0%, rgba(200,255,26,.1), transparent 32%), linear-gradient(128deg,#071a22,#0a222b 62%,#102e35);
+    box-shadow: none;
+  }
+  .coachPlayerProfileHero__identity { gap: 12px; }
+  .coachPlayerProfileHero h2 { font-size: 29px; }
+  .coachPlayerProfileHero__headline { display: flex; align-items: end; justify-content: space-between; min-width: 0; padding: 12px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); border-left: 0; text-align: left; }
+  .coachPlayerProfileHero__headline small { max-width: 130px; text-align: right; }
+  .coachPlayerProfileMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .coachPlayerProfileMetric:nth-child(3) { border-left: 0; }
+  .coachPlayerProfileMetric:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+  .coachPlayerProfileEvidence { grid-template-columns: 1fr; }
+  .coachPlayerProfileSection { padding: 17px 0; }
+  .coachPlayerProfileSection + .coachPlayerProfileSection { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-left: 0; }
+
+  .coachAdministrationPulse { padding: 14px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); border-left: 0; }
+  .coachSeasonArchiveForm,
+  .coachAdministrationGrid { grid-template-columns: 1fr; }
+  .coachSeasonArchivePanel { padding: 17px 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .coachSeasonArchivePanel > .cta-primary { width: 100% !important; }
+  .seasonArchiveStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seasonArchiveStat:nth-child(odd) { border-left: 0; }
+  .seasonArchiveStat:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+}
+
+`
+
+const narrowAuthority = `@media (max-width: 430px) {
+  .secondaryPageIntro { grid-template-columns: 28px minmax(0, 1fr); column-gap: 9px; }
+  .secondaryPageIntro__icon { width: 28px; height: 28px; border-radius: 8px; }
+  .secondaryPageIntro__icon svg { width: 15px; height: 15px; }
+  .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
+  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle { font-size: 32px !important; }
+  .secondaryPageIntro__buttonRow { gap: 6px; }
+  .secondaryPageAction { font-size: 11.5px; }
+  .secondaryPageDecision h2 { font-size: 28px; }
+}
+
+`
+
+source = `${source.slice(0, mobileStart)}${mobileAuthority}${narrowAuthority}${source.slice(motionStart)}`
+fs.writeFileSync(cssPath, source)
+
+let appSource = fs.readFileSync(appPath, 'utf8')
+const compactCoachTitles = [
+  ['title="Drills Dashboard"', 'title="Drills"'],
+  ['title="Strength & Conditioning Dashboard"', 'title="S&C"'],
+  ['title="Activity Dashboard"', 'title="Activity"'],
+  ['title="Leaderboards Dashboard"', 'title="Leaderboards"'],
+]
+for (const [legacyTitle, compactTitle] of compactCoachTitles) {
+  if (appSource.includes(legacyTitle)) {
+    appSource = appSource.replace(legacyTitle, compactTitle)
+    continue
+  }
+  if (!appSource.includes(compactTitle)) {
+    throw new Error(`Could not locate Coach functional-title contract: ${legacyTitle}`)
+  }
+}
+fs.writeFileSync(appPath, appSource)
+
+let metricCss = fs.readFileSync(metricCssPath, 'utf8')
+const metricHoverMarker = '/* Premium mobile metrics keep a stable row while feedback remains tonal. */'
+if (!metricCss.includes(metricHoverMarker)) {
+  metricCss += `\n\n${metricHoverMarker}\n@media (max-width: 760px), (hover: none) {\n  .metric:hover,\n  .metric:focus-visible { transform: none; }\n}\n`
+}
+fs.writeFileSync(metricCssPath, metricCss)
+
+let commitmentSource = fs.readFileSync(commitmentPath, 'utf8')
+const legacyCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}`
+const premiumCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}\n      data-page-hierarchy="editorial"`
+if (commitmentSource.includes(premiumCommitmentRoot)) {
+  // Already upgraded. The premium root contains the legacy prefix, so check it first.
+} else if (commitmentSource.includes(legacyCommitmentRoot)) {
+  commitmentSource = commitmentSource.replace(legacyCommitmentRoot, premiumCommitmentRoot)
+} else {
+  throw new Error('Could not locate Player commitment center hierarchy root.')
+}
+
+const legacyCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`}>`
+const premiumCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`} data-layout-role="editorial-header" data-visual-role="page-intro">`
+if (commitmentSource.includes(premiumCommitmentHeader)) {
+  // Already upgraded.
+} else if (commitmentSource.includes(legacyCommitmentHeader)) {
+  commitmentSource = commitmentSource.replace(legacyCommitmentHeader, premiumCommitmentHeader)
+} else {
+  throw new Error('Could not locate Player commitment center route header.')
+}
+fs.writeFileSync(commitmentPath, commitmentSource)
+
+let commitmentCss = fs.readFileSync(commitmentCssPath, 'utf8')
+const commitmentMarker = '/* Premium Level B commitment header: concise orientation before the actionable commitment surface. */'
+if (!commitmentCss.includes(commitmentMarker)) {
+  commitmentCss += `\n${commitmentMarker}\n@media(max-width:759px){.routeHeader{padding-bottom:12px;border-bottom:1px solid rgba(23,26,24,.1)}.routeTitleRow{align-items:flex-start;flex-direction:column;gap:5px}.routeTitleRow h1{font-size:clamp(31px,8.8vw,36px)!important;line-height:.94!important;letter-spacing:-.05em!important}.routeHeader>p{display:none}}\n`
+}
+fs.writeFileSync(commitmentCssPath, commitmentCss)
+
+console.log('Applied compact ShotLab route stages, edge-to-edge performance bands, compact Coach and Player functional titles, and stable mobile metric feedback.')

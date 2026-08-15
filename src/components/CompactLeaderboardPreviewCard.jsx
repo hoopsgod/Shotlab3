@@ -83,7 +83,11 @@ export default function CompactLeaderboardPreviewCard({
       </div>
 
       {keepsRankingFrame ? (
-        <div style={{ display: "grid", marginTop: 10 }} data-testid={displayState === "ready" ? "leaderboard-ready-state" : "leaderboard-empty-state"}>
+        <div
+          style={{ display: "grid", marginTop: 10 }}
+          data-testid={displayState === "ready" ? "leaderboard-ready-state" : "leaderboard-empty-state"}
+          data-state={displayState}
+        >
           {displayState === "empty" ? <div style={{ minHeight:44, display:"grid", alignContent:"center", borderBottom:"1px solid var(--stroke-1)", padding:"4px 2px 8px" }}>
             <div style={{ color:"var(--text-2)", fontSize:11, fontWeight:800 }}>{recoveryTitle}</div>
             <div style={{ color:"var(--text-3)", fontSize:10, lineHeight:1.35, marginTop:2 }}>{message}</div>

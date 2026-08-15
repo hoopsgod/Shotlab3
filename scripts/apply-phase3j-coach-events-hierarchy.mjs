@@ -41,8 +41,7 @@ const newBlock = `      <details
         <summary className="coachEventsSupportingSummary">
           <span className="coachEventsSupportingSummaryCopy">
             <span>Schedule insights</span>
-            <strong>RSVP & calendar context</strong>
-            <small>{briefing.missing} missing responses · {briefing.responseRate}% response</small>
+            <strong>{briefing.responseRate}% response · {briefing.missing} missing</strong>
           </span>
           <span className="coachEventsSupportingChevron" aria-hidden="true">›</span>
         </summary>
