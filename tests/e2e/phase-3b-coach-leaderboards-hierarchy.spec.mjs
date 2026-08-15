@@ -47,8 +47,17 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const title = shell.locator(".secondaryPageIntro__title");
   const summary = shell.locator(".secondaryPageIntro__summary");
   const decision = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
-  const metricStrip = page.getByTestId("coach-page-dashboard-leaderboards-metric-strip");
-  const metrics = metricStrip.locator("[data-premium-metric]");
+  await expect(decision).toHaveAttribute("data-surface", "dark");
+  await expect(decision).toHaveAttribute("data-route-kind", "leaderboards");
+  const decisionTitle = decision.locator("[data-route-stage-title]");
+  const decisionDetail = decision.locator("[data-route-stage-detail]");
+  const metricRail = decision.locator('[data-visual-role="performance-evidence"]');
+  const metrics = metricRail.locator("[data-route-stage-metric]");
+
+  await expect(decisionTitle).toBeVisible();
+  await expect(decisionDetail).toBeVisible();
+  await expect(metricRail).toBeVisible();
+  await expect(metrics).toHaveCount(3);
 
   const outputPath = path.join(OUTPUT_DIR, "coach-leaderboards-390x844.png");
   await page.screenshot({ path: outputPath, animations: "disabled" });
@@ -59,17 +68,18 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
     const titleNode = shellNode?.querySelector(".secondaryPageIntro__title");
     const summaryNode = shellNode?.querySelector(".secondaryPageIntro__summary");
     const decisionNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards-decision-brief"]');
-    const decisionTitleNode = decisionNode?.querySelector("h2");
-    const metricStripNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards-metric-strip"]');
-    const metricNodes = [...(metricStripNode?.querySelectorAll("[data-premium-metric]") || [])];
-    const metricValueNode = metricStripNode?.querySelector("[data-premium-metric-value]");
-    const metricLabelNode = metricStripNode?.querySelector("[data-premium-metric-label]");
-    if (!pageSurfaceNode || !titleNode || !summaryNode || !decisionNode || !decisionTitleNode || !metricStripNode || !metricValueNode || !metricLabelNode) {
+    const decisionTitleNode = decisionNode?.querySelector("[data-route-stage-title]");
+    const decisionDetailNode = decisionNode?.querySelector("[data-route-stage-detail]");
+    const metricRailNode = decisionNode?.querySelector('[data-visual-role="performance-evidence"]');
+    const metricNodes = [...(metricRailNode?.querySelectorAll("[data-route-stage-metric]") || [])];
+    const metricValueNode = metricRailNode?.querySelector("[data-route-stage-metric-value]");
+    const metricLabelNode = metricRailNode?.querySelector("[data-route-stage-metric-label]");
+    if (!pageSurfaceNode || !titleNode || !summaryNode || !decisionNode || !decisionTitleNode || !decisionDetailNode || !metricRailNode || !metricValueNode || !metricLabelNode) {
       throw new Error("Missing Coach Leaderboards visual-contract target");
     }
     const metricGeometry = metricNodes.map((node) => {
       const rect = node.getBoundingClientRect();
-      return { left: rect.left, right: rect.right, top: rect.top, width: rect.width };
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
     });
     return {
       pageBackground: getComputedStyle(pageSurfaceNode).backgroundColor,
@@ -78,12 +88,13 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
       summaryColor: getComputedStyle(summaryNode).color,
       summaryBackground: getComputedStyle(summaryNode).backgroundColor,
       decisionTitleColor: getComputedStyle(decisionTitleNode).color,
-      decisionBackgroundColor: getComputedStyle(decisionNode).backgroundColor,
+      decisionDetailColor: getComputedStyle(decisionDetailNode).color,
       decisionBackgroundImage: getComputedStyle(decisionNode).backgroundImage,
       firstMetricValueFill: getComputedStyle(metricValueNode).webkitTextFillColor,
       firstMetricLabelFill: getComputedStyle(metricLabelNode).webkitTextFillColor,
       metricCount: metricNodes.length,
-      metricDisplay: getComputedStyle(metricStripNode).display,
+      metricDisplay: getComputedStyle(metricRailNode).display,
+      metricOverflowX: getComputedStyle(metricRailNode).overflowX,
       metricGeometry,
       overflow: document.documentElement.scrollWidth - window.innerWidth,
     };
@@ -96,25 +107,35 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   expect(titleChannels.slice(0, 3).every((value) => value <= 40)).toBeTruthy();
   expect(visualState.summaryColor).toBe("rgb(93, 102, 95)");
   expect(visualState.summaryBackground).toBe("rgba(0, 0, 0, 0)");
-  const decisionTitleChannels = visualState.decisionTitleColor.match(/\d+/g)?.map(Number) || [];
+
+  const decisionTitleChannels = visualState.decisionTitleColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
   expect(decisionTitleChannels).toHaveLength(3);
   expect(decisionTitleChannels.every((value) => value >= 240)).toBeTruthy();
-  const decisionBackgroundChannels = visualState.decisionBackgroundColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
-  expect(decisionBackgroundChannels).toHaveLength(3);
-  expect(decisionBackgroundChannels.every((value) => value <= 60)).toBeTruthy();
-  expect(visualState.firstMetricValueFill).toBe("rgb(23, 26, 24)");
-  expect(visualState.firstMetricLabelFill).toBe("rgb(82, 96, 89)");
-  expect(visualState.metricCount).toBe(4);
-  expect(visualState.metricDisplay).toBe("grid");
+  const decisionDetailChannels = visualState.decisionDetailColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
+  expect(decisionDetailChannels).toHaveLength(3);
+  expect(decisionDetailChannels.every((value) => value >= 170)).toBeTruthy();
+  expect(visualState.decisionBackgroundImage).not.toBe("none");
 
-  const metricGeometry = visualState.metricGeometry;
-  expect(metricGeometry[0].right).toBeLessThanOrEqual(374);
-  expect(metricGeometry[1].right).toBeLessThanOrEqual(374);
-  // CSS-grid percentage sizing can resolve adjacent card boxes on neighboring device pixels.
-  // A 2px tolerance preserves a strict visual-row contract without treating subpixel rounding as a defect.
-  expect(Math.abs(metricGeometry[0].top - metricGeometry[1].top)).toBeLessThanOrEqual(2);
-  expect(metricGeometry[2].top).toBeGreaterThan(metricGeometry[0].top + 60);
-  expect(Math.abs(metricGeometry[0].width - metricGeometry[1].width)).toBeLessThanOrEqual(2);
+  const metricValueChannels = visualState.firstMetricValueFill.match(/\d+/g)?.map(Number).slice(0, 3) || [];
+  expect(metricValueChannels).toHaveLength(3);
+  expect(metricValueChannels.every((value) => value >= 230)).toBeTruthy();
+  const metricLabelChannels = visualState.firstMetricLabelFill.match(/\d+/g)?.map(Number).slice(0, 3) || [];
+  expect(metricLabelChannels).toHaveLength(3);
+  expect(metricLabelChannels.every((value) => value >= 145)).toBeTruthy();
+  expect(visualState.metricCount).toBe(3);
+  expect(visualState.metricDisplay).toBe("grid");
+  expect(visualState.metricOverflowX).toBe("auto");
+
+  for (const [index, box] of visualState.metricGeometry.entries()) {
+    expect(box.width, `metric ${index + 1} width`).toBeGreaterThanOrEqual(118);
+    expect(box.height, `metric ${index + 1} height`).toBeGreaterThanOrEqual(44);
+  }
+  for (let index = 1; index < visualState.metricGeometry.length; index += 1) {
+    const previous = visualState.metricGeometry[index - 1];
+    const current = visualState.metricGeometry[index];
+    expect(Math.abs(current.top - previous.top)).toBeLessThanOrEqual(2);
+    expect(current.left).toBeGreaterThanOrEqual(previous.right - 2);
+  }
 
   expect(visualState.overflow).toBeLessThanOrEqual(1);
   expect(pageErrors).toEqual([]);
