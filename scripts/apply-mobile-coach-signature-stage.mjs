@@ -54,7 +54,7 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:20px 18px!important;gap:8px 12px!important;background:transparent!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin-inline:-12px!important;border-radius:0!important}body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 78px!important;padding:27px 20px 24px!important;gap:10px 14px!important;background:transparent!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero{margin:0 -12px!important;border-radius:0!important}body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 78px!important;padding:27px 20px 24px!important;gap:10px 14px!important;background:transparent!important}',
     'Coach mobile hero composition',
   );
   next = replaceOnce(next,
@@ -74,7 +74,7 @@ export function promoteCoachCommandCenter(source) {
   );
   next = replaceOnce(next,
     'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:8px!important}',
-    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:16px!important}',
+    'body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:16px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}',
     'Coach mobile metric rhythm',
   );
   next = replaceOnce(next,
