@@ -6,6 +6,7 @@ const commitmentSource = fs.readFileSync(new URL("../src/components/PlayerCommit
 const leaderboardSource = fs.readFileSync(new URL("../src/components/CompactLeaderboardPreviewCard.jsx", import.meta.url), "utf8");
 const appParityEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-secondary-page-parity-app.mjs", import.meta.url), "utf8");
 const coachParityEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-coach-intelligence-parity.mjs", import.meta.url), "utf8");
+const emptyStateEnhancer = fs.readFileSync(new URL("../scripts/apply-phase2d-premium-empty-state-language.mjs", import.meta.url), "utf8");
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const parityEnhancer = `${appParityEnhancer}\n${coachParityEnhancer}`;
 
@@ -58,6 +59,15 @@ test("Coach Activity reserves six operational rows using semantic function bound
   assert.match(coachParityEnhancer, /rows\.slice\(0, 6\)/);
   assert.match(coachParityEnhancer, /Math\.max\(0, 6 - rows\.length\)/);
   assert.match(coachParityEnhancer, /data-activity-placeholder=\"true\"/);
+});
+
+test("Phase 2D semantic activity language accepts the parity runway on a repeated build-to-dev enhancer pass", () => {
+  assert.match(emptyStateEnhancer, /activityParityAlreadyApplied/);
+  assert.match(emptyStateEnhancer, /data-testid=\"coach-activity-intelligence-results\" data-parity-slot-count=\"6\"/);
+  assert.match(emptyStateEnhancer, /data-activity-placeholder=\"true\"/);
+  assert.match(emptyStateEnhancer, /New team activity will appear here/);
+  assert.match(emptyStateEnhancer, /if \(!activityParityAlreadyApplied\) \{\s*replaceOnce\(activityBefore, activityAfter, 'activity no-results state'\)/);
+  assert.match(emptyStateEnhancer, /if \(!activityParityAlreadyApplied && !next\.includes\('No team activity matches the selected view\.'\)\)/);
 });
 
 test("Coach leaderboards reserve three ranking rows without depending on the exact Phase 3L row body", () => {
