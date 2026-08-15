@@ -2,50 +2,49 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
-const mainSource = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
-const systemSource = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
-const css = fs.readFileSync(new URL("../src/styles/MobilePremiumVisualSystem2026.css", import.meta.url), "utf8");
+const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
+const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
+const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
+const mobileNav = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
+const retiredAuthority = fs.readFileSync(new URL("../src/styles/MobilePremiumVisualSystem2026.css", import.meta.url), "utf8");
 
-test("premium mobile visual authority loads once at the app root after canonical 2026 surface contracts", () => {
-  const surfaceIndex = mainSource.indexOf("./styles/Phase3SurfaceContracts.css");
-  const mobileIndex = mainSource.indexOf("./styles/MobilePremiumVisualSystem2026.css");
-  assert.ok(surfaceIndex >= 0);
-  assert.ok(mobileIndex > surfaceIndex);
-  assert.doesNotMatch(systemSource, /MobilePremiumVisualSystem2026\.css/);
+test("premium mobile hierarchy is owner-level instead of a second additive visual authority", () => {
+  assert.match(routeRunner, /apply-mobile-premium-secondary-page-system\.mjs/);
+  assert.ok(retiredAuthority.length < 160, "retired mobile authority must remain declaration-free");
+  assert.doesNotMatch(retiredAuthority, /\{[^}]*:[^}]*\}/);
 });
 
-test("mobile hierarchy defines command, functional, and detail-screen density contracts", () => {
-  assert.match(css, /LEVEL B — functional pages/);
-  assert.match(css, /LEVEL C — detail screens/);
-  assert.match(css, /LEVEL A — dashboards/);
-  assert.match(css, /--type-page-mobile:/);
-  assert.match(css, /--mobile-section-gap:/);
-  assert.match(css, /--mobile-nav-clearance:/);
+test("major functional page intros are compact instead of oversized title stages", () => {
+  assert.match(enhancer, /grid-template-columns:\s*34px minmax\(0, 1fr\)/);
+  assert.match(enhancer, /font-size:\s*clamp\(29px, 8vw, 34px\)/);
+  assert.match(enhancer, /padding:\s*3px 0 14px/);
+  assert.match(enhancer, /\.secondaryPageDecision/);
+  assert.match(enhancer, /min-height:\s*0/);
+  assert.match(enhancer, /font-size:\s*clamp\(24px, 7vw, 29px\)/);
+  assert.match(enhancer, /@media \(max-width: 390px\)/);
 });
 
-test("major functional page intros are compact rather than oversized title stages", () => {
-  assert.match(css, /\.secondaryPageIntro\.appHeader/);
-  assert.match(css, /font-size:\s*var\(--type-page-mobile\)/);
-  assert.match(css, /padding:\s*3px\s+0\s+14px/);
-  assert.match(css, /\.secondaryPageDecision/);
-  assert.match(css, /min-height:\s*0/);
-  assert.doesNotMatch(css, /font-size:\s*(?:5[0-9]|[6-9][0-9])px[^;]*!important/);
+test("Coach detail screens start useful content sooner without losing performance hierarchy", () => {
+  assert.match(enhancer, /\.coachPlayerDetailWorkspace \{ gap: 16px/);
+  assert.match(enhancer, /\.coachPlayerProfileHero \{ grid-template-columns: 1fr; gap: 12px; padding: 18px/);
+  assert.match(enhancer, /\.coachPlayerProfileHero h2 \{ font-size: 27px/);
+  assert.match(enhancer, /\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2/);
 });
 
-test("persistent player identity is compact and mobile navigation reserves safe-area clearance", () => {
-  assert.match(css, /player-dashboard-identity-header/);
-  assert.match(css, /min-height:\s*62px/);
-  assert.match(css, /mobile-navigation-dock/);
-  assert.match(css, /env\(safe-area-inset-bottom/);
-  assert.match(css, /padding-bottom:\s*var\(--mobile-nav-clearance\)/);
+test("persistent Player identity is compact rather than a repeated route hero", () => {
+  assert.match(playerHeader, /min-height:62px/);
+  assert.match(playerHeader, /grid-template-columns:46px minmax\(0,1fr\)/);
+  assert.match(playerHeader, /width:44px!important;height:44px/);
+  assert.match(playerHeader, /font-size:20px!important/);
+  assert.match(playerHeader, /text-overflow:ellipsis/);
 });
 
-test("visual system protects narrow widths, long data, accessibility, and reduced motion", () => {
-  assert.match(css, /@media\s*\(max-width:\s*390px\)/);
-  assert.match(css, /@media\s*\(min-width:\s*391px\)\s*and\s*\(max-width:\s*430px\)/);
-  assert.match(css, /overflow-x:\s*clip/);
-  assert.match(css, /overflow-wrap:\s*anywhere/);
-  assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /prefers-reduced-transparency:\s*reduce/);
+test("mobile navigation is quiet, safe-area aware, and touch-target compliant", () => {
+  assert.match(mobileNav, /--mobile-tab-bar-height:\s*60px/);
+  assert.match(mobileNav, /bottom:\s*max\(6px, env\(safe-area-inset-bottom/);
+  assert.match(mobileNav, /width:\s*min\(430px/);
+  assert.match(mobileNav, /min-height:\s*50px/);
+  assert.match(mobileNav, /background:\s*rgba\(126, 158, 30, \.08\)/);
+  assert.match(mobileNav, /prefers-reduced-motion:\s*reduce/);
+  assert.match(mobileNav, /prefers-reduced-transparency:\s*reduce/);
 });
