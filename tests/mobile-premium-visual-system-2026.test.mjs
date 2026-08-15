@@ -17,6 +17,7 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
 
 test("major functional page intros are compact instead of oversized title stages", () => {
   assert.match(enhancer, /grid-template-columns:\s*34px minmax\(0, 1fr\)/);
+  assert.match(enhancer, /\.performance-shell \.secondaryPageIntro \.secondaryPageIntro__title/);
   assert.match(enhancer, /font-size:\s*clamp\(29px, 8vw, 34px\) !important/);
   assert.match(enhancer, /padding:\s*3px 0 12px/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
@@ -39,6 +40,15 @@ test("specialized Player functional headers follow the same compact Level B disc
   assert.match(playerOperationalCss, /\.subtitle\{display:none\}/);
   assert.match(playerOperationalCss, /\.primaryAction\{width:100%;min-height:44px;border-radius:12px\}/);
   assert.match(playerOperationalCss, /\.metric\{min-height:88px;padding:13px 14px\}/);
+});
+
+test("Player event and lifting commitment headers join the shared Level B semantics", () => {
+  assert.match(enhancer, /data-page-hierarchy="editorial"/);
+  assert.match(enhancer, /data-layout-role="editorial-header" data-visual-role="page-intro"/);
+  assert.match(enhancer, /Premium Level B commitment header/);
+  assert.match(enhancer, /\.routeTitleRow h1 \{ font-size: clamp\(29px, 8vw, 32px\) !important/);
+  assert.match(enhancer, /\.routeHeader > p \{ display: none; \}/);
+  assert.match(enhancer, /\.routeTitleRow > span \{ min-height: 18px; margin: 0; padding: 0; border: 0/);
 });
 
 test("mobile metric feedback cannot pull one card out of its visual row", () => {
