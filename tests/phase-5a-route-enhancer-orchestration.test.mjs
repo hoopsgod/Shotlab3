@@ -26,6 +26,7 @@ const buildPrefix = [
 const finalPresentationChain = [
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
   'scripts/apply-mobile-player-coach-signal-signature.mjs',
+  'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
 ]
 const registeredParityEnhancers = [
@@ -67,8 +68,8 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
   assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(0, 2), buildPrefix)
-  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-3), finalPresentationChain)
-  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-3), finalPresentationChain)
+  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-4), finalPresentationChain)
+  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-4), finalPresentationChain)
 
   const devMinifyIndex = DEV_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
   const buildMinifyIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
