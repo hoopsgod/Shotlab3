@@ -135,7 +135,7 @@ test("Phase 4C makes active score entry feel deliberate without changing score b
   await capture(page, "10c-phase4c-player-score-focus.png");
 });
 
-test("Phase 4C gives training completion a restrained arrival and tactile next action", async ({ page }) => {
+test("Phase 4C keeps training completion restrained while preserving a tactile next action", async ({ page }) => {
   await enableMotion(page);
   await enterPlayerDemo(page);
   await openCalipariDrill(page);
@@ -146,11 +146,18 @@ test("Phase 4C gives training completion a restrained arrival and tactile next a
   await save.click();
   const completion = page.getByTestId("player-training-completion");
   await expect(completion).toBeVisible({ timeout: 15_000 });
-  const completionStyle = await completion.evaluate((node) => ({ animationName: getComputedStyle(node).animationName }));
+  const completionStyle = await completion.evaluate((node) => ({
+    animationName: getComputedStyle(node).animationName,
+    animationDuration: getComputedStyle(node).animationDuration,
+  }));
   const next = page.getByTestId("player-training-next-action");
   const nextStyle = await next.evaluate((node) => ({ transition: getComputedStyle(node).transitionDuration }));
-  expect(completionStyle.animationName).not.toBe("none");
-  expect(nextStyle.transition).not.toBe("0s");
+  const nextBox = await next.boundingBox();
+  expect(completionStyle.animationName).toBe("none");
+  expect(parseFloat(completionStyle.animationDuration) || 0).toBe(0);
+  expect(parseFloat(nextStyle.transition) || 0).toBeLessThanOrEqual(0.2);
+  expect(nextBox).not.toBeNull();
+  expect(nextBox.height).toBeGreaterThanOrEqual(44);
   await noOverflow(page);
   await capture(page, "10d-phase4c-player-training-completion.png");
 });
