@@ -46,11 +46,11 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
         <path d={TARGET_PATH} pathLength="100" className={styles.courtTargetValue} strokeDasharray={targetDash} />
 
         {visual.state === "above" ? <>
-          <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowTrack} />
-          <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowValue} strokeDasharray={overflowDash} />
+          <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowTrack} data-performance-layer="above-target-track" />
+          <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowValue} strokeDasharray={overflowDash} data-performance-layer="above-target-value" />
         </> : null}
 
-        <g className={styles.courtTargetLock}>
+        <g className={styles.courtTargetLock} data-performance-layer="target-lock">
           <circle cx="80" cy="23" r="5" />
           <path d="M77.5 23l1.7 1.8 3.7-4" />
         </g>
