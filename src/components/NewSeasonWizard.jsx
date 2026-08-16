@@ -11,6 +11,15 @@ const archiveStrength = (archive) => { const value = archiveValue(archive); retu
 const rowId = (row = {}) => String(row.id || row.drillId || row.drill_id || row.templateId || row.template_id || "").trim();
 const rowLabel = (row = {}, fallback = "Item") => row.name || row.title || row.drillName || row.sessionType || fallback;
 const makeTransitionId = () => globalThis.crypto?.randomUUID?.() || `rollover-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const technicalErrorPattern = /(pgrst|postgres|supabase|jwt|schema|column|relation|typeerror|stack|fetch failed|networkerror|http\s*\d{3}|\b5\d\d\b)/i;
+
+export function friendlySeasonCreationError(value) {
+  const message = String(value || "").trim();
+  if (!message || message.length > 180 || technicalErrorPattern.test(message)) {
+    return "The season could not be created. Review the setup and try again.";
+  }
+  return message;
+}
 
 const styles = {
   shell: { border: "1px solid var(--stroke-1, #333)", borderRadius: 18, padding: 16, background: "var(--surface-1, #151515)", color: "var(--text-1, #fff)" },
@@ -20,7 +29,7 @@ const styles = {
   grid: { display: "grid", gap: 10, marginTop: 14 },
   input: { width: "100%", minHeight: 44, borderRadius: 10, border: "1px solid var(--stroke-1, #333)", background: "var(--surface-0, #0b0b0b)", color: "inherit", padding: "10px 12px", boxSizing: "border-box" },
   row: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, border: "1px solid var(--stroke-1, #333)", borderRadius: 12, padding: 11 },
-  button: { minHeight: 44, borderRadius: 11, border: 0, padding: "0 14px", fontWeight: 800, cursor: "pointer" },
+  button: { minHeight: 44, borderRadius: 11, border: 0, padding: "0 14px", fontWeight: 800, cursor: "pointer", touchAction: "manipulation", WebkitTapHighlightColor: "transparent" },
 };
 
 function CheckList({ rows, selected, onToggle, empty }) {
@@ -73,59 +82,64 @@ export default function NewSeasonWizard({
   const submit = async () => {
     if (status.state === "saving") return;
     setStatus({ state: "saving", message: "Creating new season…" });
-    const result = await createNewSeason({
-      coach,
-      teamId,
-      sourceArchive,
-      seasonName,
-      seasonStartDate: startDate,
-      projectedEndDate: endDate,
-      playerSelections,
-      selectedProgramDrillIds: drills,
-      selectedEventTemplateIds: events,
-      selectedStrengthTemplateIds: strength,
-      existingActiveSeasons,
-      transitionId,
-      persistPlan,
-      fetchImpl,
-    });
-    if (!result?.ok) {
-      setStatus({ state: "error", message: result?.error || "The season could not be created." });
-      return;
+    try {
+      const result = await createNewSeason({
+        coach,
+        teamId,
+        sourceArchive,
+        seasonName,
+        seasonStartDate: startDate,
+        projectedEndDate: endDate,
+        playerSelections,
+        selectedProgramDrillIds: drills,
+        selectedEventTemplateIds: events,
+        selectedStrengthTemplateIds: strength,
+        existingActiveSeasons,
+        transitionId,
+        persistPlan,
+        fetchImpl,
+      });
+      if (!result?.ok) {
+        setStatus({ state: "error", message: friendlySeasonCreationError(result?.error) });
+        return;
+      }
+      setStatus({ state: "success", message: result.idempotent ? "This season was already created safely." : "New season created. Historical results were not copied." });
+      onCreated?.(result);
+    } catch (caught) {
+      setStatus({ state: "error", message: friendlySeasonCreationError(caught?.message) });
     }
-    setStatus({ state: "success", message: result.idempotent ? "This season was already created safely." : "New season created. Historical results were not copied." });
-    onCreated?.(result);
   };
 
   const canContinue = [Boolean(sourceArchive), Boolean(seasonName.trim() && startDate), true, true][step];
   const headings = ["Choose archive", "Season details", "Returning players", "Reusable setup"];
+  const isSaving = status.state === "saving";
 
-  return <section style={styles.shell} data-testid="new-season-wizard" aria-labelledby="new-season-wizard-title">
+  return <section style={styles.shell} data-testid="new-season-wizard" aria-labelledby="new-season-wizard-title" aria-busy={isSaving || undefined}>
     <div style={styles.eyebrow}>Season management · Step {step + 1} of 4</div>
     <h2 id="new-season-wizard-title" style={styles.title}>Start a New Season</h2>
     <p style={styles.copy}>Build the next active season from a frozen archive. Scores, attendance, RSVPs, streaks, and completed sessions always start at zero.</p>
-    <div role="status" aria-live="polite" style={{ ...styles.copy, marginTop: 8 }}>{status.message}</div>
+    {status.message ? <div role={status.state === "error" ? "alert" : "status"} aria-live={status.state === "error" ? "assertive" : "polite"} style={{ ...styles.copy, marginTop: 8, color: status.state === "error" ? "#ff8f8f" : styles.copy.color }}>{status.message}</div> : null}
 
     <div style={{ marginTop: 16 }}>
       <h3 style={{ margin: 0, fontSize: 17 }}>{headings[step]}</h3>
       {step === 0 && <div style={styles.grid}>
         {archives.length === 0 ? <div style={styles.copy}>Archive a completed season before starting the next one.</div> : archives.map((archive) => <label key={archive.id} style={{ ...styles.row, borderColor: archiveId === archive.id ? "var(--accent, #c8ff00)" : "var(--stroke-1, #333)" }}>
           <span><strong>{archive.seasonName || "Archived season"}</strong><br/><small style={styles.copy}>{archive.seasonStartDate} — {archive.seasonEndDate}</small></span>
-          <input type="radio" name="source-archive" value={archive.id} checked={archiveId === archive.id} onChange={() => selectArchive(String(archive.id))} />
+          <input type="radio" name="source-archive" value={archive.id} checked={archiveId === archive.id} onChange={() => selectArchive(String(archive.id))} disabled={isSaving} />
         </label>)}
       </div>}
 
       {step === 1 && <div style={styles.grid}>
-        <label>Season name<input data-testid="new-season-name" style={styles.input} value={seasonName} onChange={(event) => setSeasonName(event.target.value)} placeholder="Summer 2027" /></label>
-        <label>Start date<input data-testid="new-season-start" style={styles.input} type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
-        <label>Projected end date <span style={styles.copy}>(optional)</span><input style={styles.input} type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
+        <label>Season name<input data-testid="new-season-name" autoComplete="off" disabled={isSaving} style={styles.input} value={seasonName} onChange={(event) => setSeasonName(event.target.value)} placeholder="Summer 2027" /></label>
+        <label>Start date<input data-testid="new-season-start" disabled={isSaving} style={styles.input} type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
+        <label>Projected end date <span style={styles.copy}>(optional)</span><input disabled={isSaving} style={styles.input} type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
       </div>}
 
       {step === 2 && <div style={styles.grid}>
         <div style={styles.copy}>Every player defaults to Not Returning. Choose Returning only for players who should enter the new active roster.</div>
         {players.map((player) => <div key={player.identity} style={styles.row}>
           <div><strong>{player.name || player.email || "Player"}</strong><div style={styles.copy}>{player.email || player.identity}</div></div>
-          <select aria-label={`Status for ${player.name || player.email || player.identity}`} style={{ ...styles.input, width: "auto" }} value={playerSelections[player.identity] || ROLLOVER_PLAYER_STATUSES.NOT_RETURNING} onChange={(event) => setPlayer(player.identity, event.target.value)}>
+          <select aria-label={`Status for ${player.name || player.email || player.identity}`} disabled={isSaving} style={{ ...styles.input, width: "auto" }} value={playerSelections[player.identity] || ROLLOVER_PLAYER_STATUSES.NOT_RETURNING} onChange={(event) => setPlayer(player.identity, event.target.value)}>
             <option value={ROLLOVER_PLAYER_STATUSES.NOT_RETURNING}>Not Returning</option>
             <option value={ROLLOVER_PLAYER_STATUSES.RETURNING}>Returning</option>
             <option value={ROLLOVER_PLAYER_STATUSES.GRADUATED}>Graduated</option>
@@ -146,9 +160,9 @@ export default function NewSeasonWizard({
     </div>
 
     <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
-      {step > 0 && <button type="button" style={{ ...styles.button, flex: 1, background: "transparent", color: "inherit", border: "1px solid var(--stroke-1, #333)" }} onClick={() => setStep((value) => value - 1)}>Back</button>}
-      {step < 3 ? <button type="button" style={{ ...styles.button, flex: 1, background: "var(--accent, #c8ff00)", color: "#0b0b0b", opacity: canContinue ? 1 : .5 }} disabled={!canContinue} onClick={() => setStep((value) => value + 1)}>Continue</button>
-        : <button data-testid="create-new-season" type="button" style={{ ...styles.button, flex: 1, background: "var(--accent, #c8ff00)", color: "#0b0b0b" }} disabled={status.state === "saving"} onClick={submit}>{status.state === "saving" ? "Creating…" : "Create Season"}</button>}
+      {step > 0 && <button type="button" disabled={isSaving} style={{ ...styles.button, flex: 1, background: "transparent", color: "inherit", border: "1px solid var(--stroke-1, #333)", opacity: isSaving ? .55 : 1 }} onClick={() => setStep((value) => value - 1)}>Back</button>}
+      {step < 3 ? <button type="button" style={{ ...styles.button, flex: 1, background: "var(--accent, #c8ff00)", color: "#0b0b0b", opacity: canContinue ? 1 : .5 }} disabled={!canContinue || isSaving} onClick={() => setStep((value) => value + 1)}>Continue</button>
+        : <button data-testid="create-new-season" type="button" aria-busy={isSaving || undefined} data-working={isSaving ? "true" : undefined} style={{ ...styles.button, flex: 1, background: "var(--accent, #c8ff00)", color: "#0b0b0b", opacity: isSaving ? .68 : 1, cursor: isSaving ? "progress" : "pointer" }} disabled={isSaving} onClick={submit}>{isSaving ? "Creating…" : "Create Season"}</button>}
     </div>
     {status.state === "error" && <button type="button" style={{ ...styles.button, marginTop: 10, width: "100%", background: "transparent", color: "inherit", border: "1px solid var(--stroke-1, #333)" }} onClick={() => { setTransitionId(makeTransitionId()); setStatus({ state: "idle", message: "" }); }}>Reset attempt</button>}
   </section>;
