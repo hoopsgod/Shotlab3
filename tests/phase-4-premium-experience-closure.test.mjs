@@ -26,7 +26,7 @@ test("Phase 4 live metrics communicate change without decorative motion", async 
   assert.match(css, /\.metricValue \{ animation: none; \}/);
 });
 
-test("Phase 4 drill completion keeps bounded result motion after Target Court replaces the generic track", async () => {
+test("Phase 4 drill completion uses Target Court proof and restrained tactile feedback", async () => {
   const source = await read("src/components/PlayerTrainingCompletion.jsx");
   const css = await read("src/components/PlayerTrainingCompletion.module.css");
   const courtCss = await read("src/components/PlayerDailyPrimitives.module.css");
@@ -35,14 +35,14 @@ test("Phase 4 drill completion keeps bounded result motion after Target Court re
   assert.match(source, /PERSONAL BEST/);
   assert.match(source, /player-training-target-court/);
   assert.match(source, /ShotLabPerformanceCourt/);
-  assert.match(css, /completionPanelSettle\s+240ms/);
-  assert.match(css, /completionMarkSettle\s+260ms/);
-  assert.match(css, /completionScoreSettle\s+220ms/);
-  assert.doesNotMatch(css, /completionTrackSettle/);
+  assert.doesNotMatch(css, /completionPanelSettle|completionMarkSettle|completionScoreSettle|completionTrackSettle/);
+  assert.match(css, /\.primaryAction:active\s*\{\s*transform:\s*scale\(\.985\)/);
+  assert.match(css, /\.primaryAction\s*\{[\s\S]*?min-height:\s*50px/);
   assert.match(courtCss, /transition: opacity 220ms ease/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(css, /animation: none !important/);
+  assert.match(css, /\.primaryAction:active,[\s\S]*?transform:\s*none/);
   assert.match(courtCss, /transition: none !important/);
+  assert.doesNotMatch(css, /confetti|bounce|infinite/i);
 });
 
 test("Phase 4 player commitment actions provide bounded completion feedback", async () => {
