@@ -3,7 +3,7 @@ name: Dashboard Showstopper Phase 3
 on:
   pull_request:
     branches:
-      - dashboard-showstopper-phase-2
+      - march-3-reset-85393dd
     paths:
       - src/components/PlayerDailyPrimitives.jsx
       - src/components/PlayerDailyPrimitives.module.css
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
-      - name: Check out exact stacked PR head
+      - name: Check out exact production-closeout PR head
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
