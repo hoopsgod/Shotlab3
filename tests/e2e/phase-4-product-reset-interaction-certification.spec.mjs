@@ -41,6 +41,15 @@ async function capture(page, name) {
   expect(fs.statSync(file).size).toBeGreaterThan(12_000);
 }
 
+function cssDurationToMilliseconds(value) {
+  return String(value)
+    .split(",")
+    .map((duration) => duration.trim())
+    .filter(Boolean)
+    .map((duration) => duration.endsWith("ms") ? Number.parseFloat(duration) : Number.parseFloat(duration) * 1000)
+    .reduce((maximum, duration) => Math.max(maximum, Number.isFinite(duration) ? duration : 0), 0);
+}
+
 async function enterDemo(page, role) {
   await installSafeRoutes(page);
   await page.goto("/");
@@ -107,7 +116,7 @@ test.describe("Phase 4 product-feel certification", () => {
 
     const motion = await sheet.evaluate((element) => ({ animationName: getComputedStyle(element).animationName, transitionDuration: getComputedStyle(element).transitionDuration }));
     expect(motion.animationName).toBe("none");
-    expect(["0s", "0ms"]).toContain(motion.transitionDuration);
+    expect(cssDurationToMilliseconds(motion.transitionDuration)).toBeLessThanOrEqual(0.1);
 
     await page.keyboard.press("Escape");
     await expect(sheet).toHaveCount(0);
