@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { deriveShotLabPerformanceVisual } from "../src/lib/shotlabPerformanceVisual.js";
 
 const cases = [
@@ -46,4 +47,20 @@ test("the visual adapts to non-100 targets and sanitizes unsafe values", () => {
   assert.equal(invalid.made, 0);
   assert.equal(invalid.target, 0);
   assert.equal(invalid.state, "untargeted");
+});
+
+test("Player Home explicitly owns the accessible Phase 2 Target Court and legacy CSS cannot recreate Phase 1 treatments", async () => {
+  const home = await readFile(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
+  const primitives = await readFile(new URL("../src/components/PlayerDailyPrimitives.jsx", import.meta.url), "utf8");
+  const reconciliation = await readFile(new URL("../scripts/apply-mobile-player-composition-reconciliation.mjs", import.meta.url), "utf8");
+
+  assert.match(home, /ShotLabPerformanceCourt/);
+  assert.match(home, /data-phase="dashboard-showstopper-phase-2"/);
+  assert.match(home, /testId="player-daily-performance-court"/);
+  assert.doesNotMatch(home, /heroRing\} aria-hidden=/);
+  assert.match(primitives, /export function ShotLabPerformanceCourt/);
+  assert.match(primitives, /role="img"/);
+  assert.match(primitives, /aria-label=\{visual\.accessibleLabel\}/);
+  assert.match(primitives, /export function ExperienceProgressRing\(props\)/);
+  assert.match(reconciliation, /includes\('data-phase="dashboard-showstopper-phase-'\)/);
 });
