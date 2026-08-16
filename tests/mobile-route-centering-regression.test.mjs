@@ -70,7 +70,7 @@ test('mobile secondary route mastheads resolve to a compact centered team-brande
   assert.match(centered, /grid-template-columns: minmax\(0, 1fr\);[\s\S]*justify-items: center;[\s\S]*row-gap: 3px;[\s\S]*text-align: center;/)
   assert.match(centered, /padding: 2px 0 7px;/)
   assert.match(centered, /\.secondaryPageIntro__copy \{[\s\S]*max-width: 360px;[\s\S]*margin-inline: auto;[\s\S]*text-align: center;/)
-  assert.match(centered, /width: 52px;\n    height: 52px;/)
+  assert.match(centered, /width: 56px;\n    height: 56px;/)
   assert.match(centered, /margin: 0 auto;\n    border: 0;\n    border-radius: 0;\n    background: transparent;/)
   assert.match(centered, /max-width: 10\.5ch;[\s\S]*margin-inline: auto;[\s\S]*text-align: center;/)
   assert.match(centered, /\.secondaryPageIntro__actions \{[\s\S]*max-width: 360px;[\s\S]*margin: 0 auto;[\s\S]*justify-items: center;[\s\S]*gap: 5px;/)
@@ -79,7 +79,7 @@ test('mobile secondary route mastheads resolve to a compact centered team-brande
   assert.match(centered, /\.coachAdministrationWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 16ch !important;/)
   assert.match(centered, /\.brandingEditorialWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 18ch !important;\n    white-space: nowrap;/)
   assert.match(centered, /@media \(max-width: 430px\) \{\n  \.secondaryPageIntro \{ grid-template-columns: minmax\(0, 1fr\); column-gap: 0; \}/)
-  assert.match(centered, /\.secondaryPageIntro__icon \{ width: 48px; height: 48px; border-radius: 0; \}/)
+  assert.match(centered, /\.secondaryPageIntro__icon \{ width: 54px; height: 54px; border-radius: 0; \}/)
 })
 
 test('centering transform is idempotent', () => {
