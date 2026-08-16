@@ -20,7 +20,7 @@ test("Phase 4A introduces one reusable basketball signature asset system", () =>
   assert.match(signatureCss, /\.identity\s+\.court/);
 });
 
-test("Phase 4A applies the signature to entry, Player Home, and Player Progress only", () => {
+test("Phase 4A applies the existing signature to entry, Player Home, and Player Progress only", () => {
   assert.match(script, /auth-signature-field/);
   assert.match(script, /player-home-signature-field/);
   assert.match(script, /player-progress-signature-field/);
@@ -39,10 +39,10 @@ test("Phase 4A signature imports remain idempotent across repeated production en
   }
 });
 
-test("Phase 4A anchors Player Home by stable structure instead of an exact attribute list", () => {
+test("Phase 4A anchors Player Home by the stable command-center root, not a retired child layout", () => {
   assert.match(script, /const insertAfterOne =/);
   assert.match(script, /data-testid=\"player-daily-command-center\"/);
-  assert.match(script, /data-layout-role=\"editorial-header\"/);
+  assert.doesNotMatch(script, /data-layout-role=\"editorial-header\"/);
   assert.doesNotMatch(script, /data-page-hierarchy=\"activation-loop\" aria-label/);
 });
 
