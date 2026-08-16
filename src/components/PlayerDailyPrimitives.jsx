@@ -17,7 +17,7 @@ const OVERFLOW_PATH = "M14 104V89C14 34 44 14 80 14S146 34 146 89V104";
 
 export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId }) {
   const visual = deriveShotLabPerformanceVisual({ value, target: max });
-  const width = Math.max(104, Math.round(Number(size || 92) * 1.28));
+  const width = Math.max(116, Math.round(Number(size || 92) * 1.52));
   const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
   const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
 
