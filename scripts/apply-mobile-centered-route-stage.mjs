@@ -62,13 +62,13 @@ export function centerMobileRouteStage(source) {
   next = replaceOnce(
     next,
     `    width: 46px;\n    height: 54px;`,
-    `    width: 52px;\n    height: 52px;`,
+    `    width: 56px;\n    height: 56px;`,
     'mobile masthead team mark geometry',
   )
 
   next = replaceDeclarationsInBlock(
     next,
-    `  .secondaryPageIntro__icon {\n    position: static;\n    width: 52px;\n    height: 52px;`,
+    `  .secondaryPageIntro__icon {\n    position: static;\n    width: 56px;\n    height: 56px;`,
     [
       [`    margin-top: 1px;`, `    margin: 0 auto;`, 'margin'],
       [`    border: 1px solid rgba(7, 26, 34, .1);`, `    border: 0;`, 'border'],
@@ -117,7 +117,7 @@ export function centerMobileRouteStage(source) {
   next = replaceOnce(
     next,
     `  .secondaryPageIntro__icon { width: 44px; height: 50px; border-radius: 0; }`,
-    `  .secondaryPageIntro__icon { width: 48px; height: 48px; border-radius: 0; }`,
+    `  .secondaryPageIntro__icon { width: 54px; height: 54px; border-radius: 0; }`,
     'narrow masthead team mark geometry',
   )
 
