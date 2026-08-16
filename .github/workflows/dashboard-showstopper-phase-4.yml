@@ -12,9 +12,12 @@ on:
       - src/components/PlayerTrainingCompletion.module.css
       - src/components/PlayerSessionCloseout.jsx
       - src/components/PlayerSessionCloseout.module.css
+      - src/lib/shotlabPerformanceVisual.js
       - tests/dashboard-showstopper-phase-4.test.mjs
       - tests/e2e/dashboard-showstopper-phase-4.spec.mjs
       - tests/e2e/phase-3p-player-training-completion-screenshots.spec.mjs
+      - tests/e2e/phase-3o-player-training-session-screenshots.spec.mjs
+      - tests/e2e/phase-4c-premium-interaction-material-motion-screenshots.spec.mjs
       - .github/workflows/dashboard-showstopper-phase-4.yml
   workflow_dispatch:
 
@@ -63,8 +66,6 @@ jobs:
           tests/player-interface-decomposition.test.mjs
           tests/phase-2-command-hierarchy.test.mjs
           tests/phase-3-unified-experience.test.mjs
-          tests/phase-3q-player-session-closeout.test.mjs
-          tests/phase-3r-player-progress-intelligence.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
