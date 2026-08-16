@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
+import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
 import PlayerSessionCloseout from "./PlayerSessionCloseout.jsx";
 import styles from "./PlayerTrainingCompletion.module.css";
 
@@ -14,16 +15,27 @@ function ResultMark({ isPB }) {
     <span className={styles.resultMark} data-pb={isPB ? "true" : "false"} aria-hidden="true">
       {isPB ? (
         <svg viewBox="0 0 24 24">
-          <path d="M12 3 14.7 8.5 21 9.4l-4.5 4.4 1.1 6.2L12 17l-5.6 3 1.1-6.2L3 9.4l6.3-.9L12 3Z" />
+          <circle cx="12" cy="12" r="7" />
+          <circle cx="12" cy="12" r="2.5" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
         </svg>
       ) : (
         <svg viewBox="0 0 24 24">
-          <path d="m5 12 4 4L19 6" />
+          <path d="M5 19h14M7 19v-7h10v7M8.5 12a3.5 3.5 0 0 0 7 0M8 15h8" />
+          <ellipse cx="12" cy="16" rx="2.5" ry=".8" />
         </svg>
       )}
     </span>
   );
 }
+
+const targetInterpretation = (visual) => {
+  if (!visual) return "RESULT BANKED";
+  if (visual.state === "above") return `+${Math.round(visual.aboveTarget)} ABOVE TARGET`;
+  if (visual.state === "complete") return "TARGET LOCKED";
+  if (visual.state === "near") return `${Math.round(visual.remaining)} TO LOCK`;
+  return `${Math.round(visual.remaining)} TO TARGET`;
+};
 
 export default function PlayerTrainingCompletion({
   data,
@@ -45,6 +57,7 @@ export default function PlayerTrainingCompletion({
   const isPB = Boolean(data?.isPB);
   const isProgram = data?.src === "program";
   const hasMax = max !== null && max > 0;
+  const targetVisual = hasMax ? deriveShotLabPerformanceVisual({ value: score, target: max }) : null;
   const liveStreak = numberOrNull(currentStreak);
   const homeMomentum = Math.max(1, liveStreak ?? ((numberOrNull(data?.streak) ?? 0) + 1));
   const safeCompleted = Math.max(0, Number(completedCount) || 0);
@@ -93,16 +106,16 @@ export default function PlayerTrainingCompletion({
   const handleNext = planComplete ? () => setShowSessionCloseout(true) : onContinue;
 
   return (
-    <section className={styles.root} data-testid="player-training-completion" data-pb={isPB ? "true" : "false"}>
+    <section className={styles.root} data-testid="player-training-completion" data-pb={isPB ? "true" : "false"} data-performance-language="shotlab-target-court">
       <div className={styles.kickerRow}>
-        <span className={styles.kicker}>RESULT LOGGED</span>
+        <span className={styles.kicker}>SESSION RESULT</span>
         <span className={styles.mode}>{isProgram ? "PROGRAM" : "AT HOME"}</span>
       </div>
 
       <div className={styles.resultHero} data-testid="player-training-result-hero">
         <ResultMark isPB={isPB} />
         <div className={styles.resultCopy}>
-          <span>{isPB ? "PERSONAL BEST" : "DRILL COMPLETE"}</span>
+          <span>{isPB ? "PERSONAL BEST" : "RESULT BANKED"}</span>
           <h2>{clean(data?.drill) || "Training drill"}</h2>
         </div>
         <div className={styles.score} data-testid="player-training-result">
@@ -114,14 +127,16 @@ export default function PlayerTrainingCompletion({
       {hasMax ? (
         <div className={styles.targetCourtEvidence} data-testid="player-training-target-court">
           <div className={styles.targetCourtCopy}>
-            <span>DRILL TARGET</span>
-            <strong>{score}<small>/{max}</small></strong>
+            <span>TARGET COURT</span>
+            <strong data-testid="player-training-target-interpretation">{targetInterpretation(targetVisual)}</strong>
+            <p>{score} / {max} on this drill</p>
           </div>
           <ShotLabPerformanceCourt
             value={score}
             max={max}
             size={72}
             label="Target path"
+            contextLabel="on this drill"
             testId="player-training-target-visual"
           />
         </div>
