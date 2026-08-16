@@ -3,6 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/dashboard-showstopper-phase-1");
+const DEMO_EMAIL = "demo@shotlab.app";
+const DEMO_TEAM_ID = "team-demo-titans";
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", async (route) => {
@@ -13,12 +15,7 @@ async function installRoutes(page) {
   });
 }
 
-async function enterPlayerDemo(page) {
-  await page.addInitScript(() => window.localStorage.clear());
-  await page.goto("/?demo=1");
-  const button = page.getByRole("button", { name: "Player demo", exact: true });
-  await expect(button).toBeVisible({ timeout: 20_000 });
-  await button.click();
+async function settleHome(page) {
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.evaluate(async () => {
@@ -27,6 +24,67 @@ async function enterPlayerDemo(page) {
     document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
+}
+
+async function enterPlayerDemo(page) {
+  await page.goto("/");
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+  await page.reload();
+  const button = page.getByRole("button", { name: "Player demo", exact: true });
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
+  await settleHome(page);
+}
+
+async function applyDemoPerformanceState(page, { makes, coachCurrent = false, weeklyTarget } = {}) {
+  await page.evaluate(({ makes, coachCurrent, weeklyTarget, demoEmail, demoTeamId }) => {
+    const date = new Date();
+    const pad = (value) => String(value).padStart(2, "0");
+    const today = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const existingLogs = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
+    const otherPlayers = existingLogs.filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
+    const nextLogs = [...otherPlayers];
+    if (Number(makes) > 0) {
+      nextLogs.push({
+        id: `dashboard-showstopper-state-${makes}`,
+        email: demoEmail,
+        playerId: demoEmail,
+        teamId: demoTeamId,
+        name: "Demo Player",
+        made: Number(makes),
+        date: today,
+        ts: Date.now(),
+      });
+    }
+    window.localStorage.setItem("sl:shotlogs", JSON.stringify(nextLogs));
+
+    const meta = JSON.parse(window.localStorage.getItem("sl:demo-data-meta") || "{}");
+    window.localStorage.setItem("sl:demo-data-meta", JSON.stringify({ ...meta, source: "dashboard-showstopper-certification", teamId: demoTeamId }));
+
+    const priorities = JSON.parse(window.localStorage.getItem("sl:coach-priorities") || "{}");
+    const current = priorities[demoTeamId] || {};
+    priorities[demoTeamId] = {
+      ...current,
+      ...(weeklyTarget === undefined ? {} : { weeklyMakesTarget: weeklyTarget }),
+      ...(coachCurrent ? {
+        todayFocusText: "Create paint pressure, then own the next game-speed block.",
+        priorityDrillText: "2:30 Shooting",
+        challengeText: "Complete 2:30 Shooting with game-speed footwork.",
+        updatedAt: new Date().toISOString(),
+      } : {}),
+    };
+    window.localStorage.setItem("sl:coach-priorities", JSON.stringify(priorities));
+  }, { makes, coachCurrent, weeklyTarget, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
+  await page.reload();
+  await settleHome(page);
+}
+
+async function capture(page, name) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  await page.screenshot({ path: path.join(OUTPUT_DIR, `${name}.png`), fullPage: true, animations: "disabled" });
 }
 
 async function certifyViewport(page, width, height, name) {
@@ -55,8 +113,7 @@ async function certifyViewport(page, width, height, name) {
   expect(layout.action.height).toBeGreaterThanOrEqual(44);
   expect(layout.dock).not.toBeNull();
 
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  await page.screenshot({ path: path.join(OUTPUT_DIR, `${name}.png`), fullPage: true, animations: "disabled" });
+  await capture(page, name);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -67,6 +124,33 @@ test("Player Home is stable at 375, 390, and 430 widths", async ({ page }) => {
   await certifyViewport(page, 375, 844, "player-home-375");
   await certifyViewport(page, 390, 844, "player-home-390");
   await certifyViewport(page, 430, 932, "player-home-430");
+});
+
+test("390px visual evidence covers zero, partial, near, complete, above-target, and coach-directed states", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await enterPlayerDemo(page);
+
+  const states = [
+    { makes: 0, interpretation: "100 TO TARGET", heading: "Today starts here.", name: "player-home-state-zero-390" },
+    { makes: 25, interpretation: "75 TO TARGET", heading: "Stay on today’s standard.", name: "player-home-state-partial-25-390" },
+    { makes: 85, interpretation: "15 TO TARGET", heading: "Stay on today’s standard.", name: "player-home-state-near-85-390" },
+    { makes: 100, interpretation: "TARGET COMPLETE", heading: "Daily work banked.", name: "player-home-state-complete-100-390" },
+    { makes: 125, interpretation: "+25 ABOVE TARGET", heading: "Daily work banked.", name: "player-home-state-above-125-390" },
+  ];
+
+  for (const state of states) {
+    await applyDemoPerformanceState(page, { makes: state.makes });
+    await expect(page.getByTestId("player-today-performance")).toContainText(String(state.makes));
+    await expect(page.getByTestId("player-target-interpretation")).toHaveText(state.interpretation);
+    await expect(page.getByTestId("player-daily-command-center").getByRole("heading", { level: 1 })).toHaveText(state.heading);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+    await capture(page, state.name);
+  }
+
+  await applyDemoPerformanceState(page, { makes: 25, coachCurrent: true });
+  await expect(page.getByText("Coach plan", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-coach-priority-signal")).toContainText("Create paint pressure, then own the next game-speed block.");
+  await capture(page, "player-home-state-coach-assignment-390");
 });
 
 test("375px athlete credential survives long player and team names without clipping or overflow", async ({ page }) => {
@@ -95,7 +179,7 @@ test("375px athlete credential survives long player and team names without clipp
   expect(contract.documentOverflow).toBeLessThanOrEqual(1);
   expect(contract.nameVisible).toBe(true);
   expect(contract.teamVisible).toBe(true);
-  await page.screenshot({ path: path.join(OUTPUT_DIR, "player-home-375-long-identity.png"), fullPage: true, animations: "disabled" });
+  await capture(page, "player-home-375-long-identity");
 });
 
 test("Player Home keeps one dominant action, readable light chapter, and bottom-nav clearance", async ({ page }) => {
@@ -129,7 +213,7 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
     return { bottomPadding: parseFloat(style.paddingBottom) || 0, dockHeight: dock.getBoundingClientRect().height };
   });
   if (clearance) expect(clearance.bottomPadding).toBeGreaterThanOrEqual(clearance.dockHeight - 1);
-  await page.screenshot({ path: path.join(OUTPUT_DIR, "player-home-390-scrolled.png"), fullPage: true, animations: "disabled" });
+  await capture(page, "player-home-390-scrolled");
 });
 
 test("Player Home retains desktop sanity", async ({ page }) => {
@@ -137,5 +221,5 @@ test("Player Home retains desktop sanity", async ({ page }) => {
   await enterPlayerDemo(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible();
-  await page.screenshot({ path: path.join(OUTPUT_DIR, "player-home-desktop-1280.png"), fullPage: true, animations: "disabled" });
+  await capture(page, "player-home-desktop-1280");
 });
