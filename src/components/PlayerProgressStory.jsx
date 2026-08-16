@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { PLAYER_DAILY_SHOT_TARGET } from "../lib/appDataModels.js";
 import { derivePlayerProgressStory } from "../lib/playerProgressStory.js";
-import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
 import styles from "./PlayerProgressStory.module.css";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
@@ -47,15 +46,12 @@ export default function PlayerProgressStory({
   const trendWord = story.trend === "rising" ? "RISING" : story.trend === "cooling" ? "RESET" : "STEADY";
   const firstName = String(userName || "Player").trim().split(/\s+/)[0] || "Player";
   const todayMakes = Math.max(0, Number(story.dailyMakes?.[story.dailyMakes.length - 1]?.made) || 0);
-  const todayVisual = deriveShotLabPerformanceVisual({ value: todayMakes, target: PLAYER_DAILY_SHOT_TARGET });
   const remainingToday = Math.max(0, PLAYER_DAILY_SHOT_TARGET - todayMakes);
-  const todayInterpretation = todayVisual.state === "above"
-    ? `+${Math.round(todayVisual.aboveTarget)} above today’s standard`
-    : todayVisual.state === "complete"
-      ? "Today’s standard locked"
-      : todayVisual.state === "zero"
-        ? "Today starts here"
-        : `${Math.round(remainingToday)} to today’s standard`;
+  const todayInterpretation = todayMakes >= PLAYER_DAILY_SHOT_TARGET
+    ? todayMakes > PLAYER_DAILY_SHOT_TARGET
+      ? `+${todayMakes - PLAYER_DAILY_SHOT_TARGET} above today’s standard`
+      : "Today’s standard locked"
+    : `${remainingToday} to today’s standard`;
 
   return (
     <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend} data-page-hierarchy="command-story">
@@ -70,7 +66,7 @@ export default function PlayerProgressStory({
             <h2>{story.headline}</h2>
             <p>{story.trendDetail}</p>
           </div>
-          <div className={styles.targetPanel} data-testid="player-progress-target-court" data-performance-state={todayVisual.state}>
+          <div className={styles.targetPanel} data-testid="player-progress-target-court">
             <div className={styles.targetPanelCopy} data-testid="player-progress-target-summary">
               <span>TODAY’S STANDARD</span>
               <strong>{todayMakes}<small> MADE</small></strong>
@@ -78,7 +74,7 @@ export default function PlayerProgressStory({
             </div>
             <ShotLabPerformanceCourt
               value={todayMakes}
-              target={PLAYER_DAILY_SHOT_TARGET}
+              max={PLAYER_DAILY_SHOT_TARGET}
               size={76}
               label="Target path"
               testId="player-progress-target-visual"
