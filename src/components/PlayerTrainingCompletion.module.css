@@ -5,20 +5,10 @@
   border-radius: 30px;
   padding: 20px;
   color: #f8faf5;
-  background:
-    radial-gradient(circle at 88% 10%, rgba(200,255,26,.13), transparent 34%),
-    linear-gradient(145deg, #111411 0%, #171b16 58%, #101310 100%);
+  background: radial-gradient(circle at 88% 10%, rgba(200,255,26,.13), transparent 34%), #111411;
   box-shadow: 0 24px 50px rgba(8,10,8,.18);
   text-align: left;
-  animation: completionPanelSettle 240ms cubic-bezier(.2,.75,.25,1) both;
-}
-
-.root::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg, rgba(255,255,255,.035), transparent 38%);
+  animation: completionPanelSettle 220ms cubic-bezier(.2,.75,.25,1) both;
 }
 
 .kickerRow,
@@ -26,6 +16,7 @@
 .targetCourtEvidence,
 .insightGrid,
 .nextCard,
+.finishSession,
 .secondaryActions,
 .sharePanel {
   position: relative;
@@ -71,9 +62,9 @@
   place-items: center;
   border-radius: 16px;
   color: #c8ff1a;
-  background: rgba(200,255,26,.09);
-  border: 1px solid rgba(200,255,26,.22);
-  animation: completionMarkSettle 260ms 70ms cubic-bezier(.2,.75,.25,1) both;
+  background: rgba(200,255,26,.075);
+  border: 1px solid rgba(200,255,26,.20);
+  animation: completionMarkSettle 240ms 60ms cubic-bezier(.2,.75,.25,1) both;
 }
 
 .resultMark[data-pb="true"] {
@@ -86,7 +77,7 @@
   height: 23px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -96,7 +87,7 @@
 .resultCopy h2 {
   margin: 3px 0 0;
   font-family: "Bebas Neue", Impact, sans-serif;
-  font-size: clamp(28px, 8vw, 38px);
+  font-size: clamp(28px,8vw,38px);
   line-height: .95;
   letter-spacing: .03em;
   color: #f8faf5;
@@ -108,16 +99,14 @@
   white-space: nowrap;
   text-align: right;
   color: #c8ff1a;
-  animation: completionScoreSettle 220ms 90ms cubic-bezier(.2,.75,.25,1) both;
+  animation: completionScoreSettle 210ms 75ms cubic-bezier(.2,.75,.25,1) both;
 }
-
 .score strong {
   font-family: "Bebas Neue", Impact, sans-serif;
-  font-size: clamp(42px, 12vw, 58px);
+  font-size: clamp(42px,12vw,58px);
   line-height: .8;
   letter-spacing: -.01em;
 }
-
 .score small {
   margin-left: 2px;
   color: rgba(248,250,245,.55);
@@ -130,22 +119,23 @@
   justify-content: space-between;
   gap: 14px;
   margin-top: 18px;
-  padding-top: 15px;
+  padding: 15px 0;
   border-top: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid rgba(255,255,255,.10);
 }
-
 .targetCourtCopy {
   min-width: 0;
   display: grid;
   gap: 5px;
 }
-
 .targetCourtCopy > span { color: rgba(248,250,245,.46); }
 .targetCourtCopy strong {
   max-width: 230px;
   color: #c8ff1a;
-  font: 850 17px/1.02 "Barlow Condensed", "Arial Narrow", sans-serif;
-  letter-spacing: .01em;
+  font: 850 18px/1.02 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: .015em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 .targetCourtCopy p {
   margin: 0;
@@ -156,21 +146,19 @@
 .insightGrid {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 10px;
-  margin-top: 18px;
+  margin-top: 4px;
 }
-
 .insight {
-  min-height: 124px;
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.075);
+  min-width: 0;
+  padding: 16px 14px 16px 0;
 }
-
+.insight + .insight {
+  padding-left: 14px;
+  padding-right: 0;
+  border-left: 1px solid rgba(255,255,255,.08);
+}
 .insight > span,
 .nextCard > span { color: rgba(248,250,245,.43); }
-
 .insight strong,
 .nextCard strong {
   display: block;
@@ -179,7 +167,6 @@
   font: 800 16px/1.05 "Barlow Condensed", "Arial Narrow", sans-serif;
   letter-spacing: .01em;
 }
-
 .insight p,
 .nextCard p {
   margin: 7px 0 0;
@@ -188,13 +175,11 @@
 }
 
 .nextCard {
-  margin-top: 10px;
   padding: 17px;
   border-radius: 22px;
   background: #f7f8f4;
   color: #101310;
 }
-
 .nextCard > span { color: #71786f; }
 .nextCard strong { color: #101310; font-size: 19px; }
 .nextCard p { color: #626960; }
@@ -217,25 +202,34 @@
   text-transform: uppercase;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+  transition: transform 130ms ease, filter 130ms ease;
 }
-
 .primaryAction:active { transform: scale(.985); }
+.primaryAction span:last-child { font-size: 22px; line-height: 1; }
 
-.primaryAction span:last-child {
-  font-size: 22px;
-  line-height: 1;
+.finishSession {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 9px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: rgba(248,250,245,.68);
+  font: 800 11px/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
 }
+.finishSession:active { color: #f8faf5; }
 
 .secondaryActions {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 4px;
 }
-
 .secondaryActions > :only-child { grid-column: 1 / -1; }
-
 .secondaryAction {
   min-height: 44px;
   padding: 0 12px;
@@ -247,41 +241,36 @@
   letter-spacing: .035em;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease;
+  transition: transform 130ms ease, background-color 130ms ease, border-color 130ms ease;
 }
-
 .secondaryAction:active { transform: scale(.985); }
+.primaryAction:focus-visible,
+.finishSession:focus-visible,
+.secondaryAction:focus-visible { outline: 2px solid #c8ff1a; outline-offset: 2px; }
 
 .sharePanel {
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid rgba(255,255,255,.08);
-  animation: completionShareSettle 180ms ease both;
+  animation: completionShareSettle 170ms ease both;
 }
-
-.shareLabel {
-  margin-bottom: 10px;
-  color: rgba(248,250,245,.45);
-}
+.shareLabel { margin-bottom: 10px; color: rgba(248,250,245,.45); }
 
 @keyframes completionPanelSettle {
-  from { opacity: .62; transform: translate3d(0, 5px, 0) scale(.995); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  from { opacity: .62; transform: translate3d(0,5px,0) scale(.995); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
-
 @keyframes completionMarkSettle {
   from { opacity: .55; transform: scale(.92); }
   to { opacity: 1; transform: scale(1); }
 }
-
 @keyframes completionScoreSettle {
-  from { opacity: .58; transform: translate3d(0, 2px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  from { opacity: .58; transform: translate3d(0,2px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
 }
-
 @keyframes completionShareSettle {
-  from { opacity: .55; transform: translate3d(0, 3px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  from { opacity: .55; transform: translate3d(0,3px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
 }
 
 @media (max-width: 390px) {
@@ -291,7 +280,8 @@
   .targetCourtEvidence { gap: 8px; }
   .targetCourtCopy strong { max-width: 172px; font-size: 16px; }
   .insightGrid { grid-template-columns: 1fr; }
-  .insight { min-height: 0; }
+  .insight { padding: 15px 0; }
+  .insight + .insight { padding: 15px 0; border-left: 0; border-top: 1px solid rgba(255,255,255,.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -301,4 +291,6 @@
   .sharePanel { animation: none !important; }
   .primaryAction,
   .secondaryAction { transition: none; }
+  .primaryAction:active,
+  .secondaryAction:active { transform: none; }
 }
