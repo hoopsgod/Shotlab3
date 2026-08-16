@@ -112,7 +112,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           onClick={() => runAction(primary)}
         >
           <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
-          <ShotLabIcon name={primaryWorking ? "clock" : dailyComplete ? "check" : "arrow"} size={18} />
+          <ShotLabIcon name={primaryWorking ? "clock" : primary.urgency === "complete" ? "check" : "arrow"} size={18} />
         </button>
       </div>
 
