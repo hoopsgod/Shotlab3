@@ -106,3 +106,10 @@ test("Program Score save is synchronously single-flight", () => {
   assert.match(source, /finally \{[\s\S]*submitInFlightRef\.current = false;[\s\S]*setSaving\(false\)/);
   assert.match(source, /friendlyProgramScoreError/);
 });
+
+test("Coach Team Store mobile preview keeps readable text on the immersive light surface", () => {
+  const source = fs.readFileSync(new URL("../public/shotlab-phase3i-team-store-immersive.css", import.meta.url), "utf8");
+
+  assert.match(source, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel h4 \{[\s\S]*color: #171a18 !important;[\s\S]*-webkit-text-fill-color: #171a18 !important;/);
+  assert.match(source, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel p \{[\s\S]*color: #5f6861 !important;[\s\S]*-webkit-text-fill-color: #5f6861 !important;/);
+});
