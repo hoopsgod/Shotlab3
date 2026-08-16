@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer.js";
 import { derivePlayerPerformanceNarrative } from "../lib/playerPerformanceNarrative.js";
-import { ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
+import { ExperienceSignal, ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyCommandCenter.module.css";
 
@@ -63,7 +63,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   const primaryWorking = activeAction === actionKey(primary);
 
   return (
-    <section className={styles.root} data-testid="player-daily-command-center" data-phase="dashboard-showstopper-phase-1" data-page-hierarchy="performance-command-center" data-mobile-product-reset="phase-1" aria-label="Daily training command center">
+    <section className={styles.root} data-testid="player-daily-command-center" data-phase="dashboard-showstopper-phase-2" data-page-hierarchy="performance-command-center" data-mobile-product-reset="phase-1" aria-label="Daily training command center">
       <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary" data-layout-role="primary-decision">
         <div className={styles.heroKicker}>
           <span>Today</span>
@@ -80,8 +80,8 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
               {narrative.interpretation}
             </div>
           </div>
-          <div className={styles.heroRing} aria-hidden="true">
-            <ExperienceProgressRing value={narrative.makes} max={narrative.goal} label="Today" detail={`${narrative.makes} of ${narrative.goal} makes`} size={86} testId="player-daily-progress-ring" />
+          <div className={styles.heroRing}>
+            <ShotLabPerformanceCourt value={narrative.makes} max={narrative.goal} label="Target path" size={86} testId="player-daily-performance-court" />
           </div>
         </div>
 

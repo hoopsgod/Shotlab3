@@ -1,63 +1,74 @@
-.progressRing {
-  position: relative;
+.performanceCourt {
+  --court-line: rgba(226, 235, 238, .32);
+  --court-line-strong: rgba(226, 235, 238, .56);
+  --court-accent: var(--team-brand-primary, var(--page-accent, var(--accent, #c9ff3d)));
   display: grid;
-  place-items: center;
-  width: var(--ring-size, 92px);
-  min-width: var(--ring-size, 92px);
+  justify-items: center;
+  width: var(--court-size, 118px);
+  min-width: var(--court-size, 118px);
 }
 
-.progressRing svg {
-  width: var(--ring-size, 92px);
-  height: var(--ring-size, 92px);
-  transform: rotate(-90deg);
-}
+.performanceCourt svg { display: block; width: 100%; }
 
-.progressRingTrack,
-.progressRingValue {
-  fill: none;
-  stroke-width: 7;
-}
+.courtBaseline,
+.courtLane,
+.courtFreeThrow,
+.courtRestricted,
+.courtBackboard,
+.courtNet,
+.courtTargetTrack,
+.courtTargetValue,
+.courtOverflowTrack,
+.courtOverflowValue,
+.courtTargetLock path { fill: none; }
 
-.progressRingTrack { stroke: rgba(255, 255, 255, .08); }
-
-.progressRingValue {
-  stroke: var(--page-accent, var(--team-brand-primary, var(--accent)));
+.courtBaseline,
+.courtLane,
+.courtFreeThrow,
+.courtRestricted,
+.courtBackboard,
+.courtNet {
+  stroke: var(--court-line);
+  stroke-width: 1.35;
   stroke-linecap: round;
-  transition: stroke-dashoffset 260ms cubic-bezier(.2, .74, .22, 1);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--page-accent, var(--accent)) 28%, transparent));
 }
 
-.progressRingCopy {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
+.courtBaseline { stroke: var(--court-line-strong); }
+.courtBackboard { stroke: rgba(226, 235, 238, .68); stroke-width: 1.8; }
+.courtNet { stroke: rgba(226, 235, 238, .40); }
+.courtRim { fill: rgba(7, 24, 32, .96); stroke: rgba(226, 235, 238, .76); stroke-width: 1.6; }
+
+.courtTargetTrack,
+.courtTargetValue,
+.courtOverflowTrack,
+.courtOverflowValue { stroke-width: 3.4; stroke-linecap: round; }
+.courtTargetTrack { stroke: rgba(226, 235, 238, .18); stroke-dasharray: 5 2.5; }
+.courtTargetValue { stroke: var(--court-accent); }
+.courtOverflowTrack { stroke: color-mix(in srgb, var(--court-accent) 24%, transparent); stroke-dasharray: 4.2 3.1; }
+.courtOverflowValue { stroke: var(--court-accent); stroke-width: 2.8; }
+
+.courtTargetLock { opacity: 0; transition: opacity 220ms ease; }
+.courtTargetLock circle { fill: var(--court-accent); stroke: #071820; stroke-width: 1.5; }
+.courtTargetLock path { stroke: #071007; stroke-width: 1.45; stroke-linecap: round; }
+.performanceCourt[data-performance-state="complete"] .courtRim,
+.performanceCourt[data-performance-state="above"] .courtRim { fill: var(--court-accent); stroke: var(--court-accent); }
+.performanceCourt[data-performance-state="complete"] .courtTargetLock,
+.performanceCourt[data-performance-state="above"] .courtTargetLock { opacity: 1; }
+
+.performanceCourtState {
+  display: block;
+  margin-top: -1px;
+  color: rgba(226, 235, 238, .67);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .09em;
   text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
-
-.progressRingCopy strong {
-  color: var(--text-1, #f5f7f8);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 23px;
-  font-weight: 780;
-  line-height: .95;
-  letter-spacing: -.035em;
-}
-
-.progressRingCopy span,
-.progressRingDetail {
-  color: var(--text-3, #9ba7ae);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-  font-size: var(--type-micro, 11px);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: .045em;
-}
-
-.progressRingDetail {
-  margin-top: 7px;
-  text-align: center;
-}
+.performanceCourt[data-performance-state="complete"] .performanceCourtState,
+.performanceCourt[data-performance-state="above"] .performanceCourtState { color: var(--court-accent); }
 
 .signal {
   --text-1: #f5f7f8;
@@ -86,41 +97,12 @@
   background: color-mix(in srgb, currentColor 7%, transparent);
   color: currentColor;
 }
-
 .signalCopy { min-width: 0; }
-
 .signalEyebrow,
-.signalDetail {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-}
-
-.signalEyebrow {
-  color: currentColor;
-  font-size: var(--type-micro, 11px);
-  font-weight: 750;
-  letter-spacing: .075em;
-  text-transform: uppercase;
-}
-
-.signalTitle {
-  margin-top: 5px;
-  color: var(--text-1, #f5f7f8);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 18px;
-  font-weight: 760;
-  line-height: 1.1;
-  letter-spacing: -.025em;
-}
-
-.signalDetail {
-  margin-top: 6px;
-  color: var(--text-2, #b6c0c6);
-  font-size: 13px;
-  font-weight: 520;
-  line-height: 1.4;
-  letter-spacing: -.006em;
-}
-
+.signalDetail { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif; }
+.signalEyebrow { color: currentColor; font-size: var(--type-micro, 11px); font-weight: 750; letter-spacing: .075em; text-transform: uppercase; }
+.signalTitle { margin-top: 5px; color: var(--text-1, #f5f7f8); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; font-size: 18px; font-weight: 760; line-height: 1.1; letter-spacing: -.025em; }
+.signalDetail { margin-top: 6px; color: var(--text-2, #b6c0c6); font-size: 13px; font-weight: 520; line-height: 1.4; letter-spacing: -.006em; }
 .signalVisual { min-width: 112px; }
 
 .pill {
@@ -155,5 +137,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progressRingValue { transition: none; }
+  .performanceCourt .courtTargetLock {
+    transition: none !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
 }

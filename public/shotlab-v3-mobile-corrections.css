@@ -448,7 +448,7 @@ body.mission-control-active .mcPrimary,
   }
 
   [data-testid="player-daily-command-center"] [data-command-role="primary"] {
-    margin: 12px -20px 0 !important;
+    margin: 12px calc(var(--phase4e-mobile-gutter, 20px) * -1) 0 !important;
     padding: 23px 20px 21px !important;
     border-inline: 0 !important;
     border-radius: 0 !important;
@@ -483,7 +483,7 @@ body.mission-control-active .mcPrimary,
   }
 
   [data-testid="player-command-evidence"] {
-    margin: 0 -20px !important;
+    margin: 0 calc(var(--phase4e-mobile-gutter, 20px) * -1) !important;
     padding: 0 20px !important;
     border-top: 0 !important;
     background: rgba(255,255,255,.22) !important;

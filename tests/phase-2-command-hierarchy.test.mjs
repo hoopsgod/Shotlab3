@@ -10,7 +10,8 @@ test("Phase 2 hierarchy contracts remain intact beneath the Dashboard Showstoppe
  const order=['data-command-role="primary"','data-testid="player-command-evidence"','data-command-role="coach-priority"','data-command-role="next-actions"','data-command-role="progress-details"'].map(v=>player.indexOf(v));
  assert.ok(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])));
  for(const value of ['data-testid="player-progress-disclosure"','className="playerProgressDisclosure"','Progress snapshot','View details','data-layout-role="primary-decision"','data-layout-role="supporting-evidence"','data-layout-role="quiet-secondary"','aria-label="Weekly progress and momentum"']) assert.ok(player.includes(value));
- assert.ok(player.includes('data-phase="dashboard-showstopper-phase-1"'));
+ assert.ok(player.includes('data-phase="dashboard-showstopper-phase-2"'));
+ assert.ok(player.includes('player-daily-performance-court'));
  assert.ok(hierarchy.includes('[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"]'));
  assert.ok(hierarchy.includes('grid-template-columns: repeat(3, minmax(0, 1fr))'));
  assert.ok(hierarchy.includes('[data-command-role="primary"]'));

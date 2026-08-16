@@ -98,7 +98,7 @@ test("Player home preserves the command hierarchy beneath the Dashboard Showstop
   const disclosure = page.getByTestId("player-progress-disclosure");
 
   await expect(root).toBeVisible({ timeout: 20_000 });
-  await expect(root).toHaveAttribute("data-phase", "dashboard-showstopper-phase-1");
+  await expect(root).toHaveAttribute("data-phase", "dashboard-showstopper-phase-2");
   await expect(primary).toBeVisible();
   await expect(root.getByRole("heading", { level: 1 })).toContainText("Daily work banked.");
   await expect(evidence).toBeVisible();
