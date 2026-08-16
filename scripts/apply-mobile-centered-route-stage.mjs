@@ -70,6 +70,13 @@ export function centerMobileRouteStage(source) {
     'mobile masthead status centering',
   )
 
+  const detailRule = `  .coachPlayerDetailWorkspace .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {\n    max-width: 16ch !important;\n    white-space: normal;\n  }\n`
+  if (!next.includes(detailRule)) {
+    const narrowAnchor = `}\n\n@media (max-width: 430px) {\n  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`
+    const narrowReplacement = `${detailRule}}\n\n@media (max-width: 430px) {\n  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`
+    next = replaceOnce(next, narrowAnchor, narrowReplacement, 'Coach player-detail title measure')
+  }
+
   next = replaceOnce(
     next,
     `  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`,
