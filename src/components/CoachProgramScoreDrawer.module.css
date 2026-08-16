@@ -6,7 +6,7 @@
 .close{flex:0 0 44px;width:44px;height:44px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:#d8dde1;font-size:24px;line-height:1;touch-action:manipulation}
 .guardrail{margin:22px 0;color:rgba(255,255,255,.67);font-size:13px;line-height:1.5}
 .form{display:grid;gap:16px}.form label>span{margin-bottom:7px;color:rgba(255,255,255,.58)}
-.form select,.form input{width:100%;min-height:50px;padding:0 13px;border:1px solid rgba(255,255,255,.14);border-radius:12px;outline:0;background:#05080b;color:#f5f7f8;font:700 15px inherit}
+.form select,.form input{width:100%;min-height:50px;padding:0 13px;border:1px solid rgba(255,255,255,.14);border-radius:12px;outline:0;background:#05080b;color:#f5f7f8;font-family:inherit;font-size:15px;font-weight:700}
 .form select:focus,.form input:focus{border-color:var(--team-brand-primary,#c8ff1a);outline:2px solid color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 18%,transparent);outline-offset:1px}
 .close:focus-visible,.submit:focus-visible{outline:3px solid color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 24%,transparent);outline-offset:2px}
 .row{display:grid;grid-template-columns:.8fr 1.2fr;gap:12px}.limit{margin-top:-8px;color:rgba(255,255,255,.5);font-size:11px;font-weight:700}
