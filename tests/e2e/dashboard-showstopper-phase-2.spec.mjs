@@ -62,6 +62,26 @@ async function assertNoOverflow(page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 }
 
+async function assertPrimaryHeroContained(page) {
+  const bounds = await page.evaluate(() => {
+    const hero = document.querySelector('[data-testid="player-daily-command-center"] [data-command-role="primary"]');
+    const action = document.querySelector('[data-testid="player-daily-primary-action"]');
+    const heroRect = hero?.getBoundingClientRect();
+    const actionRect = action?.getBoundingClientRect();
+    return {
+      viewport: window.innerWidth,
+      heroLeft: heroRect?.left ?? -999,
+      heroRight: heroRect?.right ?? 9999,
+      actionLeft: actionRect?.left ?? -999,
+      actionRight: actionRect?.right ?? 9999,
+    };
+  });
+  expect(bounds.heroLeft).toBeGreaterThanOrEqual(-1);
+  expect(bounds.heroRight).toBeLessThanOrEqual(bounds.viewport + 1);
+  expect(bounds.actionLeft).toBeGreaterThanOrEqual(-1);
+  expect(bounds.actionRight).toBeLessThanOrEqual(bounds.viewport + 1);
+}
+
 test.beforeEach(async ({ page }) => installRoutes(page));
 
 test("ShotLab Target Court owns the 0/25/85/100/125 performance states", async ({ page }) => {
@@ -115,6 +135,7 @@ test("Target Court remains composed at 375, 390, 430 and desktop widths", async 
     await expect(page.locator('[data-performance-visual="shotlab-target-court"]')).toBeVisible();
     await expect(page.getByTestId("player-daily-primary-action")).toBeVisible();
     await assertNoOverflow(page);
+    if (width === 375) await assertPrimaryHeroContained(page);
     await capture(page, name);
   }
 });
@@ -130,6 +151,7 @@ test("long athlete identity and the Hero to cream chapter retain mobile clearanc
     if (team) team.textContent = "Webster Thomas Elite Player Development Program";
   });
   await assertNoOverflow(page);
+  await assertPrimaryHeroContained(page);
   await capture(page, "player-home-375-long-identity");
 
   await page.setViewportSize({ width: 390, height: 844 });
