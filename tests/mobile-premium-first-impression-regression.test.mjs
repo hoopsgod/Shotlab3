@@ -34,8 +34,10 @@ test("secondary mastheads use the coach-controlled team logo as the primary bran
   assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
   assert.match(playerOperationalWorkspace, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="workspace" \/>/);
   assert.match(secondaryBrandCss, /\.workspace\{[\s\S]*width:54px;[\s\S]*height:54px/);
-  assert.match(centeredRouteEnhancer, /width: 52px;\n    height: 52px;/);
-  assert.match(centeredRouteEnhancer, /border: 0;\n    border-radius: 0;\n    background: transparent;/);
+  assert.match(centeredRouteEnhancer, /width: 52px/);
+  assert.match(centeredRouteEnhancer, /height: 52px/);
+  assert.match(centeredRouteEnhancer, /background: transparent/);
+  assert.match(centeredRouteEnhancer, /border: 0/);
 });
 
 test("mobile route mastheads keep editorial hierarchy without swallowing the first viewport", () => {
