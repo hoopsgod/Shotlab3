@@ -18,25 +18,25 @@ test('Player composition reconciliation runs after the signature enhancer withou
 
 test('Player Home hero removes the absolute progress-seal collision and centers the decision composition in its owning stylesheet', () => {
   assert.match(reconciliation, /PlayerDailyCommandCenter\.module\.css/)
-  assert.match(reconciliation, /\[data-testid="player-daily-progress-seal"\][\s\S]*position: relative !important;[\s\S]*margin: 18px auto 0 !important;/)
-  assert.match(reconciliation, /\.title \{[\s\S]*margin: 15px auto 0 !important;[\s\S]*text-align: center;/)
-  assert.match(reconciliation, /\.progressCard \{[^}]*text-align: center !important;/)
+  assert.match(reconciliation, /\[data-testid="player-daily-progress-seal"\]\{[^}]*position:relative!important;[^}]*margin:18px auto 0!important/)
+  assert.match(reconciliation, /\.title\{[^}]*margin:15px auto 0!important;[^}]*text-align:center/)
+  assert.match(reconciliation, /\.progressCard\{text-align:center!important\}/)
 })
 
 test('expanded Player momentum restores dark contrast and centered geometry in the shared command hierarchy owner', () => {
   assert.match(reconciliation, /CommandHierarchy2026\.css/)
-  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\][\s\S]*grid-template-columns: minmax\(0, 1fr\) !important;/)
-  assert.match(reconciliation, /linear-gradient\(145deg, #0b2633, #071820 72%\) !important;/)
-  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\] \[class\*="signalVisual"\][\s\S]*justify-self: center !important;/)
+  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\]\{[^}]*grid-template-columns:1fr!important/)
+  assert.match(reconciliation, /linear-gradient\(145deg,#0b2633,#071820 72%\)!important/)
+  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\] \[class\*="signalVisual"\]\{[^}]*justify-self:center!important/)
 })
 
-test('Player operational and commitment surfaces use centered mobile headers, metrics, filters, and training-plan framing', () => {
+test('Player operational and commitment surfaces keep centered mobile headers, metrics, filters, and training-plan framing', () => {
   assert.match(reconciliation, /PlayerOperationalWorkspace\.module\.css/)
-  assert.match(reconciliation, /\.commandBar \{ justify-items: center; text-align: center; \}/)
-  assert.match(reconciliation, /\.metric \{[^}]*text-align: center;/)
-  assert.match(reconciliation, /\.filterRail \{ justify-content: center;/)
+  assert.match(reconciliation, /\.commandBar,.copy\{text-align:center\}/)
+  assert.match(reconciliation, /\.metric\{text-align:center\}/)
+  assert.match(reconciliation, /\.filterRail\{justify-content:center;padding-inline:0\}/)
   assert.match(reconciliation, /PlayerCommitmentCenter\.module\.css/)
-  assert.match(reconciliation, /\.routeTitleRow \{[^}]*align-items: center;[^}]*justify-content: center;/)
-  assert.match(reconciliation, /\.player-training-kicker \{[^}]*justify-content: center !important;/)
-  assert.match(reconciliation, /\.player-training-plan__header \{[\s\S]*justify-items: center !important;[\s\S]*text-align: center !important;/)
+  assert.match(reconciliation, /\.routeTitleRow\{[^}]*align-items:center;[^}]*justify-content:center/)
+  assert.match(reconciliation, /\.player-training-kicker\{[^}]*justify-content:center!important/)
+  assert.match(reconciliation, /\.player-training-plan__header\{[^}]*justify-items:center!important;[^}]*text-align:center!important/)
 })
