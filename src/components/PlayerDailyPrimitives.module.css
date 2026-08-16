@@ -1,62 +1,187 @@
-.progressRing {
+.performanceCourt {
+  --court-line: rgba(226, 235, 238, .25);
+  --court-line-strong: rgba(226, 235, 238, .48);
+  --court-accent: var(--team-brand-primary, var(--page-accent, var(--accent, #c9ff3d)));
   position: relative;
   display: grid;
-  place-items: center;
-  width: var(--ring-size, 92px);
-  min-width: var(--ring-size, 92px);
+  justify-items: center;
+  width: var(--court-size, 118px);
+  min-width: var(--court-size, 118px);
+  isolation: isolate;
 }
 
-.progressRing svg {
-  width: var(--ring-size, 92px);
-  height: var(--ring-size, 92px);
-  transform: rotate(-90deg);
+.performanceCourt svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.progressRingTrack,
-.progressRingValue {
+.courtBaseline,
+.courtLane,
+.courtFreeThrow,
+.courtRestricted,
+.courtBackboard,
+.courtNet,
+.courtTargetTrack,
+.courtTargetValue,
+.courtOverflowTrack,
+.courtOverflowValue,
+.courtMaskPath,
+.courtOverflowMaskPath,
+.courtTargetLock path {
   fill: none;
-  stroke-width: 7;
+  vector-effect: non-scaling-stroke;
 }
 
-.progressRingTrack { stroke: rgba(255, 255, 255, .08); }
-
-.progressRingValue {
-  stroke: var(--page-accent, var(--team-brand-primary, var(--accent)));
+.courtBaseline,
+.courtLane,
+.courtFreeThrow,
+.courtRestricted,
+.courtBackboard,
+.courtNet {
+  stroke: var(--court-line);
+  stroke-width: 1.35;
   stroke-linecap: round;
-  transition: stroke-dashoffset 260ms cubic-bezier(.2, .74, .22, 1);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--page-accent, var(--accent)) 28%, transparent));
+  stroke-linejoin: round;
 }
 
-.progressRingCopy {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
+.courtBaseline { stroke: var(--court-line-strong); }
+.courtBackboard { stroke: rgba(226, 235, 238, .62); stroke-width: 1.8; }
+.courtNet { stroke: rgba(226, 235, 238, .34); stroke-width: 1.1; }
+
+.courtRim {
+  fill: rgba(7, 24, 32, .96);
+  stroke: rgba(226, 235, 238, .72);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  transition: fill 280ms ease, stroke 280ms ease, filter 280ms ease;
+}
+
+.courtTargetTrack,
+.courtTargetValue,
+.courtOverflowTrack,
+.courtOverflowValue {
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.courtTargetTrack {
+  stroke: rgba(226, 235, 238, .13);
+  stroke-dasharray: 5 2.5;
+}
+
+.courtTargetValue {
+  stroke: var(--court-accent);
+  transition: stroke-dasharray 420ms cubic-bezier(.2, .74, .22, 1), filter 240ms ease;
+}
+
+.courtMaskPath {
+  stroke: #fff;
+  stroke-width: 4.3;
+  stroke-dasharray: 5 2.5;
+  stroke-linecap: round;
+}
+
+.courtOverflowTrack {
+  stroke: color-mix(in srgb, var(--court-accent) 21%, transparent);
+  stroke-dasharray: 4.2 3.1;
+}
+
+.courtOverflowValue {
+  stroke: var(--court-accent);
+  stroke-width: 2.8;
+  transition: stroke-dasharray 460ms cubic-bezier(.2, .74, .22, 1), filter 240ms ease;
+}
+
+.courtOverflowMaskPath {
+  stroke: #fff;
+  stroke-width: 3.7;
+  stroke-dasharray: 4.2 3.1;
+  stroke-linecap: round;
+}
+
+.courtTargetLock {
+  opacity: 0;
+  transform: translateY(3px) scale(.78);
+  transform-origin: 80px 23px;
+  transition: opacity 220ms ease, transform 300ms cubic-bezier(.2, .78, .22, 1);
+}
+
+.courtTargetLock circle {
+  fill: var(--court-accent);
+  stroke: #071820;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.courtTargetLock path {
+  stroke: #071007;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.performanceCourt[data-performance-state="near"] .courtTargetValue {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--court-accent) 20%, transparent));
+}
+
+.performanceCourt[data-performance-state="complete"] .courtTargetValue,
+.performanceCourt[data-performance-state="above"] .courtTargetValue,
+.performanceCourt[data-performance-state="above"] .courtOverflowValue {
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--court-accent) 30%, transparent));
+}
+
+.performanceCourt[data-performance-state="complete"] .courtRim,
+.performanceCourt[data-performance-state="above"] .courtRim {
+  fill: var(--court-accent);
+  stroke: var(--court-accent);
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--court-accent) 30%, transparent));
+}
+
+.performanceCourt[data-performance-state="complete"] .courtTargetLock,
+.performanceCourt[data-performance-state="above"] .courtTargetLock {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.performanceCourt[data-performance-state="zero"] .courtTargetTrack,
+.performanceCourt[data-performance-state="untargeted"] .courtTargetTrack {
+  stroke: rgba(226, 235, 238, .18);
+}
+
+.performanceCourtState,
+.performanceCourtDetail {
+  display: block;
+  max-width: 100%;
   text-align: center;
-}
-
-.progressRingCopy strong {
-  color: var(--text-1, #f5f7f8);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 23px;
-  font-weight: 780;
-  line-height: .95;
-  letter-spacing: -.035em;
-}
-
-.progressRingCopy span,
-.progressRingDetail {
-  color: var(--text-3, #9ba7ae);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-  font-size: var(--type-micro, 11px);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: .045em;
+  white-space: nowrap;
 }
 
-.progressRingDetail {
-  margin-top: 7px;
-  text-align: center;
+.performanceCourtState {
+  margin-top: -1px;
+  color: rgba(226, 235, 238, .67);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.performanceCourt[data-performance-state="complete"] .performanceCourtState,
+.performanceCourt[data-performance-state="above"] .performanceCourtState {
+  color: var(--court-accent);
+}
+
+.performanceCourtDetail {
+  margin-top: 4px;
+  color: rgba(226, 235, 238, .46);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: .025em;
 }
 
 .signal {
@@ -155,5 +280,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progressRingValue { transition: none; }
+  .courtTargetValue,
+  .courtOverflowValue,
+  .courtRim,
+  .courtTargetLock { transition: none; }
 }
