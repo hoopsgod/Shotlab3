@@ -95,15 +95,15 @@ test("player mobile home presents performance, interpretation, momentum, and one
   if (!(await progressDisclosure.evaluate((element) => element.open))) await progressDisclosure.locator("summary").click();
   const momentumSignal = page.getByTestId("player-daily-momentum-signal");
   await expect(momentumSignal).toBeVisible();
-  const signalColors = await momentumSignal.evaluate((node) => {
-    return [...node.querySelectorAll('[class*="signalEyebrow"],[class*="signalTitle"],[class*="signalDetail"]')]
-      .filter((element) => element.textContent?.trim())
-      .map((element) => getComputedStyle(element).color);
-  });
-  expect(signalColors.length).toBeGreaterThanOrEqual(2);
-  for (const signalColor of signalColors) {
-    expect(signalColor).not.toBe("rgb(245, 242, 234)");
-    expect(signalColor).not.toBe("rgb(245, 248, 249)");
+  const signalText = [
+    momentumSignal.getByText("Momentum", { exact: true }),
+    momentumSignal.getByText("Daily target complete", { exact: true }),
+  ];
+  for (const locator of signalText) {
+    await expect(locator).toBeVisible();
+    const color = await locator.evaluate((element) => getComputedStyle(element).color);
+    expect(color).not.toBe("rgb(245, 242, 234)");
+    expect(color).not.toBe("rgb(245, 248, 249)");
   }
 
   await schedule.locator("summary").click();
