@@ -94,7 +94,7 @@
   align-items: center;
   gap: 8px;
   padding-left: 14px;
-  border-left: 1px solid rgba(255,255,255,.10);
+  border-left: 1px solid rgba(255,255,255,.1);
 }
 .targetPanelCopy { min-width: 0; }
 .targetPanelCopy > span { display: block; color: rgba(248,250,245,.46); }
@@ -214,7 +214,7 @@
     min-width: 0;
     padding: 10px 0 0;
     border-left: 0;
-    border-top: 1px solid rgba(255,255,255,.10);
+    border-top: 1px solid rgba(255,255,255,.1);
   }
   .metricStrip { margin-top: 14px; }
   .readoutHeader { display: grid; gap: 7px; }
