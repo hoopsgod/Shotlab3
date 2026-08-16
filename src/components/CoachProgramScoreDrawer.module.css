@@ -8,3 +8,4 @@
 .row{display:grid;grid-template-columns:.8fr 1.2fr;gap:10px}.limit{color:#fff8;font-size:11px}.error,.empty{padding:10px;border-radius:10px;background:#ff4b4b16;color:#ff9a9a}.empty{color:#fffb}
 .submit{min-height:52px;border:0;border-radius:10px;background:var(--team-brand-primary,#c8ff1a);color:var(--team-brand-primary-text,#050701);font-weight:900;touch-action:manipulation}.submit:active:not(:disabled),.close:active:not(:disabled){opacity:.78}.submit:disabled,.close:disabled{cursor:progress;opacity:.6}
 @media(max-width:540px){.drawer{padding:20px 16px calc(20px + env(safe-area-inset-bottom))}.row{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.submit,.close{transition:none}}
