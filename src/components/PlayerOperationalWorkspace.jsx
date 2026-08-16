@@ -3,7 +3,7 @@ import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
-const MOBILE_OPERATIONAL_COMPOSITION_CSS = `@media(max-width:700px){[data-player-workspace-filter-rail="true"]{justify-content:center}[data-metric-priority]{text-align:center}}`;
+const MOBILE_OPERATIONAL_COMPOSITION_CSS = `@media(max-width:700px){[data-player-workspace-title-row="true"]{align-items:center;justify-content:center}[data-player-workspace-filter-rail="true"]{justify-content:center}[data-metric-priority]{text-align:center}}`;
 
 function MetricContent({ metric }) {
   return (
@@ -44,7 +44,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         <header className={styles.commandBar} data-layout-role="editorial-header">
           <div className={styles.copy}>
             <div className={styles.eyebrow}>{model.eyebrow}</div>
-            <div className={styles.titleRow}>
+            <div className={styles.titleRow} data-player-workspace-title-row="true">
               <h1 className={styles.title}>{model.title}</h1>
               <span className={styles.status}>{model.status}</span>
             </div>
