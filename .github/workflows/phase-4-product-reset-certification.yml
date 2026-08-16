@@ -86,6 +86,23 @@ jobs:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/phase-4-product-reset-interaction-certification.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
+      - name: Retain broad Coach and Player interaction ergonomics
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-4a-interaction-state-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Retain targeted mobile touch contracts
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: >-
+          npx playwright test
+          tests/e2e/phase-4d-shared-back-hit-area.spec.mjs
+          tests/e2e/phase-4e4-player-program-rsvp-hit-area.spec.mjs
+          tests/e2e/phase-4e6-player-profile-tabs-hit-area.spec.mjs
+          tests/e2e/phase-4e10-player-profile-account-touch-safety.spec.mjs
+          tests/e2e/phase-4e11-coach-residual-touch-safety.spec.mjs
+          --config=playwright.acceptance.config.mjs --reporter=line
+
       - name: Certify mobile navigation and Coach Player flows
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
@@ -126,6 +143,12 @@ jobs:
           name: phase-4-product-reset-certification
           path: |
             artifacts/phase-4-product-reset-interaction/
+            artifacts/phase-4a-interaction-state-audit/
+            artifacts/phase-4d-shared-back-hit-area/
+            artifacts/phase-4e4-player-program-rsvp-hit-area/
+            artifacts/phase-4e6-player-profile-tabs-hit-area/
+            artifacts/phase-4e10-player-profile-account-touch-safety/
+            artifacts/phase-4e11-coach-residual-touch-safety/
             artifacts/phase-3a-cross-screen-visual-audit/
             artifacts/phase-3-release-certification/
             artifacts/phase-4-product-reset-certification/
