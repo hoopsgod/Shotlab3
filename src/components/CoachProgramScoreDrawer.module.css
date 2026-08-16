@@ -1,6 +1,4 @@
-.backdrop{position:fixed;inset:0;z-index:1200;display:flex;justify-content:flex-end;background:#000b}
-.drawer{width:min(100%,470px);padding:24px;overflow:auto;background:#090d11;color:#f5f7f8}
-.header{display:flex;justify-content:space-between;gap:16px}.close{flex:0 0 44px;width:44px;height:44px;border:1px solid #fff2;background:#fff1;color:inherit;font-size:24px}
+.drawer{padding:24px}.close{flex:0 0 44px;width:44px;height:44px;border:1px solid #fff2;background:#fff1;color:inherit;font-size:24px}
 .form{display:grid;gap:14px}.form select,.form input{width:100%;min-height:50px;padding:0 12px;border:1px solid #fff3;border-radius:10px;background:#05080b;color:inherit}
 .form select:focus-visible,.form input:focus-visible,.close:focus-visible,.submit:focus-visible{outline:3px solid var(--team-brand-primary,#c8ff1a);outline-offset:2px}
 .row{display:grid;grid-template-columns:.8fr 1.2fr;gap:10px}.error,.empty{padding:10px;border-radius:10px;background:#ff4b4b16;color:#ff9a9a}
