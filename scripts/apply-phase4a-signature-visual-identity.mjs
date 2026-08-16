@@ -32,7 +32,7 @@ function patchPlayerDaily() {
   );
   source = insertAfterOne(
     source,
-    /^[ \t]*<section\b(?=[^>\n]*data-testid="player-daily-command-center")[^>\n]*>\r?\n(?=[ \t]*<div className=\{styles\.header\} data-layout-role="editorial-header">)/m,
+    /^[ \t]*<section\b(?=[^>\n]*data-testid="player-daily-command-center")[^>\n]*>\r?\n/m,
     '      <ShotLabSignatureField variant="court" testId="player-home-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n',
     'testId="player-home-signature-field"',
     "PlayerDaily signature field",
