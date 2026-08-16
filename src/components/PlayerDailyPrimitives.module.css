@@ -2,19 +2,15 @@
   --court-line: rgba(226, 235, 238, .25);
   --court-line-strong: rgba(226, 235, 238, .48);
   --court-accent: var(--team-brand-primary, var(--page-accent, var(--accent, #c9ff3d)));
-  position: relative;
   display: grid;
   justify-items: center;
   width: var(--court-size, 118px);
   min-width: var(--court-size, 118px);
-  isolation: isolate;
 }
 
 .performanceCourt svg {
   display: block;
   width: 100%;
-  height: auto;
-  overflow: visible;
 }
 
 .courtBaseline,
@@ -29,10 +25,7 @@
 .courtOverflowValue,
 .courtMaskPath,
 .courtOverflowMaskPath,
-.courtTargetLock path {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-}
+.courtTargetLock path { fill: none; }
 
 .courtBaseline,
 .courtLane,
@@ -43,19 +36,17 @@
   stroke: var(--court-line);
   stroke-width: 1.35;
   stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 .courtBaseline { stroke: var(--court-line-strong); }
 .courtBackboard { stroke: rgba(226, 235, 238, .62); stroke-width: 1.8; }
-.courtNet { stroke: rgba(226, 235, 238, .34); stroke-width: 1.1; }
+.courtNet { stroke: rgba(226, 235, 238, .34); }
 
 .courtRim {
   fill: rgba(7, 24, 32, .96);
   stroke: rgba(226, 235, 238, .72);
   stroke-width: 1.6;
-  vector-effect: non-scaling-stroke;
-  transition: fill 280ms ease, stroke 280ms ease, filter 280ms ease;
+  transition: fill 280ms ease, stroke 280ms ease;
 }
 
 .courtTargetTrack,
@@ -64,7 +55,6 @@
 .courtOverflowValue {
   stroke-width: 3.4;
   stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 .courtTargetTrack {
@@ -74,14 +64,13 @@
 
 .courtTargetValue {
   stroke: var(--court-accent);
-  transition: stroke-dasharray 420ms cubic-bezier(.2, .74, .22, 1), filter 240ms ease;
+  transition: stroke-dasharray 420ms cubic-bezier(.2, .74, .22, 1);
 }
 
 .courtMaskPath {
   stroke: #fff;
   stroke-width: 4.3;
   stroke-dasharray: 5 2.5;
-  stroke-linecap: round;
 }
 
 .courtOverflowTrack {
@@ -92,64 +81,40 @@
 .courtOverflowValue {
   stroke: var(--court-accent);
   stroke-width: 2.8;
-  transition: stroke-dasharray 460ms cubic-bezier(.2, .74, .22, 1), filter 240ms ease;
+  transition: stroke-dasharray 460ms cubic-bezier(.2, .74, .22, 1);
 }
 
 .courtOverflowMaskPath {
   stroke: #fff;
   stroke-width: 3.7;
   stroke-dasharray: 4.2 3.1;
-  stroke-linecap: round;
 }
 
 .courtTargetLock {
   opacity: 0;
-  transform: translateY(3px) scale(.78);
-  transform-origin: 80px 23px;
-  transition: opacity 220ms ease, transform 300ms cubic-bezier(.2, .78, .22, 1);
+  transition: opacity 220ms ease;
 }
 
 .courtTargetLock circle {
   fill: var(--court-accent);
   stroke: #071820;
   stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
 }
 
 .courtTargetLock path {
   stroke: #071007;
   stroke-width: 1.45;
   stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.performanceCourt[data-performance-state="near"] .courtTargetValue {
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--court-accent) 20%, transparent));
-}
-
-.performanceCourt[data-performance-state="complete"] .courtTargetValue,
-.performanceCourt[data-performance-state="above"] .courtTargetValue,
-.performanceCourt[data-performance-state="above"] .courtOverflowValue {
-  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--court-accent) 30%, transparent));
 }
 
 .performanceCourt[data-performance-state="complete"] .courtRim,
 .performanceCourt[data-performance-state="above"] .courtRim {
   fill: var(--court-accent);
   stroke: var(--court-accent);
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--court-accent) 30%, transparent));
 }
 
 .performanceCourt[data-performance-state="complete"] .courtTargetLock,
-.performanceCourt[data-performance-state="above"] .courtTargetLock {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.performanceCourt[data-performance-state="zero"] .courtTargetTrack,
-.performanceCourt[data-performance-state="untargeted"] .courtTargetTrack {
-  stroke: rgba(226, 235, 238, .18);
-}
+.performanceCourt[data-performance-state="above"] .courtTargetLock { opacity: 1; }
 
 .performanceCourtState,
 .performanceCourtDetail {
@@ -171,9 +136,7 @@
 }
 
 .performanceCourt[data-performance-state="complete"] .performanceCourtState,
-.performanceCourt[data-performance-state="above"] .performanceCourtState {
-  color: var(--court-accent);
-}
+.performanceCourt[data-performance-state="above"] .performanceCourtState { color: var(--court-accent); }
 
 .performanceCourtDetail {
   margin-top: 4px;
