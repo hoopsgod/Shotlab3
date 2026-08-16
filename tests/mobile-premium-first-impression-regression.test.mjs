@@ -4,7 +4,11 @@ import fs from "node:fs";
 
 const finalMobileCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
+const centeredRouteEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-centered-route-stage.mjs", import.meta.url), "utf8");
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
+const secondaryBrandMark = fs.readFileSync(new URL("../src/components/SecondaryTeamBrandMark.jsx", import.meta.url), "utf8");
+const secondaryBrandCss = fs.readFileSync(new URL("../src/components/SecondaryTeamBrandMark.module.css", import.meta.url), "utf8");
+const playerOperationalWorkspace = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
@@ -23,12 +27,24 @@ test("secondary routes use one explicit signature owner instead of a late compet
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
 });
 
+test("secondary mastheads use the coach-controlled team logo as the primary brand mark", () => {
+  assert.match(secondaryBrandMark, /useTeamBranding/);
+  assert.match(secondaryBrandMark, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
+  assert.match(secondaryBrandMark, /useCleanTeamLogo/);
+  assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
+  assert.match(playerOperationalWorkspace, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="workspace" \/>/);
+  assert.match(secondaryBrandCss, /\.workspace\{[\s\S]*width:54px;[\s\S]*height:54px/);
+  assert.match(centeredRouteEnhancer, /width: 52px;\n    height: 52px;/);
+  assert.match(centeredRouteEnhancer, /border: 0;\n    border-radius: 0;\n    background: transparent;/);
+});
+
 test("mobile route mastheads keep editorial hierarchy without swallowing the first viewport", () => {
   assert.match(enhancer, /\.secondaryPageIntro \{[\s\S]*min-height: 0;[\s\S]*padding: 7px 0 12px;/);
   assert.match(enhancer, /\.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle,[\s\S]*font-size: clamp\(31px, 8\.5vw, 34px\) !important/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
   assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*width: 30px;[\s\S]*height: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
   assert.doesNotMatch(enhancer, /width: 74px/);
+  assert.doesNotMatch(centeredRouteEnhancer, /width: (?:7[0-9]|8[0-9]|9[0-9])px/);
 });
 
 test("primary decision moment is a full-bleed dark performance stage rather than another floating card", () => {
