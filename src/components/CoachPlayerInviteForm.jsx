@@ -96,7 +96,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
       <DSInput aria-label="Player email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" value={form.email} onChange={update("email")} placeholder="Player email" style={{ ...styles.input, gridColumn: "1 / -1" }} />
       <DSInput aria-label="Jersey number" inputMode="numeric" pattern="[0-9]*" value={form.jerseyNumber} onChange={update("jerseyNumber")} placeholder="Jersey # (optional)" style={styles.input} />
     </div>
-    <DSButton type="submit" variant="primary" loading={busy} loadingLabel="Sending invite" style={styles.button}>ADD PLAYER &amp; SEND INVITE</DSButton>
+    <DSButton type="submit" variant="primary" loading={busy} loadingLabel="Sending invite" style={styles.button}>ADD PLAYER & SEND INVITE</DSButton>
     {message && <div role="status" aria-live="polite" style={{ color: "var(--accent, #c8ff00)", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{message}</div>}
     {error && <div role="alert" aria-live="assertive" style={{ color: "#ff8f8f", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{error}</div>}
     {setupUrl && <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8 }}>
