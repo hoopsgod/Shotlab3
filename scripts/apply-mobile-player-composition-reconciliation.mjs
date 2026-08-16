@@ -16,7 +16,7 @@ function appendOwnedBlock(relativePath, css) {
 
 function hasDashboardShowstopperHome() {
   const target = path.resolve(ROOT, 'src/components/PlayerDailyCommandCenter.jsx')
-  return readFileSync(target, 'utf8').includes('data-phase="dashboard-showstopper-phase-1"')
+  return readFileSync(target, 'utf8').includes('data-phase="dashboard-showstopper-phase-')
 }
 
 function injectCommitmentRuntimeStyle() {
