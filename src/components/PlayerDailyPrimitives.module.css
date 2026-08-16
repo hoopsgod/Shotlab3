@@ -133,12 +133,9 @@
 .performanceCourt[data-performance-state="above"] .performanceCourtState { color: var(--court-accent); }
 
 .performanceCourtDetail {
-  margin-top: 4px;
   color: rgba(226, 235, 238, .46);
   font-size: 9px;
-  font-weight: 650;
   line-height: 1.1;
-  letter-spacing: .025em;
 }
 
 .signal {
