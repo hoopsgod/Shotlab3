@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   coachProgramScoreDrillOptions,
   coachProgramScorePlayerOptions,
@@ -35,6 +35,7 @@ export default function CoachProgramScoreDrawer({
   const [date, setDate] = useState(today);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const submitInFlightRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -44,6 +45,7 @@ export default function CoachProgramScoreDrawer({
     setDate(today());
     setError("");
     setSaving(false);
+    submitInFlightRef.current = false;
   }, [open, playerOptions, drillOptions]);
 
   useEffect(() => {
@@ -65,7 +67,7 @@ export default function CoachProgramScoreDrawer({
 
   const submit = async (event) => {
     event.preventDefault();
-    if (saving) return;
+    if (submitInFlightRef.current) return;
     const validation = validateCoachProgramScoreEntry({
       player: selectedPlayer,
       drill: selectedDrill,
@@ -76,6 +78,7 @@ export default function CoachProgramScoreDrawer({
       setError(validation.error);
       return;
     }
+    submitInFlightRef.current = true;
     setSaving(true);
     setError("");
     try {
@@ -93,6 +96,7 @@ export default function CoachProgramScoreDrawer({
     } catch (caught) {
       setError(friendlyProgramScoreError(caught?.message));
     } finally {
+      submitInFlightRef.current = false;
       setSaving(false);
     }
   };
