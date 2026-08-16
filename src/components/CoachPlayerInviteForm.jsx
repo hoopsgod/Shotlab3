@@ -92,16 +92,16 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     <p style={styles.copy}>Add the player to your roster and send a single-use account setup link. ShotLab never displays a permanent password.</p>
     <div style={styles.grid}>
       <DSInput aria-label="First name" autoComplete="given-name" value={form.firstName} onChange={update("firstName")} placeholder="First name" style={styles.input} />
-      <DSInput aria-label="Last name" autoComplete="family-name" value={form.lastName} onChange={update("lastName")} placeholder="Last name" style={styles.input} />
+      <DSInput aria-label="Last name" autoComplete="family-name" value={form.lastName} onChange={update("Last name")} placeholder="Last name" style={styles.input} />
       <DSInput aria-label="Player email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" value={form.email} onChange={update("email")} placeholder="Player email" style={{ ...styles.input, gridColumn: "1 / -1" }} />
       <DSInput aria-label="Jersey number" inputMode="numeric" pattern="[0-9]*" value={form.jerseyNumber} onChange={update("jerseyNumber")} placeholder="Jersey # (optional)" style={styles.input} />
     </div>
-    <DSButton type="submit" variant="primary" loading={busy} loadingLabel="Sending invite" style={styles.button}>Add Player &amp; Send Invite</DSButton>
+    <DSButton type="submit" variant="primary" loading={busy} loadingLabel="Sending invite" style={styles.button}>ADD PLAYER &amp; SEND INVITE</DSButton>
     {message && <div role="status" aria-live="polite" style={{ color: "var(--accent, #c8ff00)", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{message}</div>}
     {error && <div role="alert" aria-live="assertive" style={{ color: "#ff8f8f", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{error}</div>}
     {setupUrl && <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8 }}>
-      <DSButton type="button" variant="secondary" onClick={copySetupLink} style={{ ...styles.button, background: "transparent", color: "var(--text-1, #fff)", border: "1px solid var(--stroke-1, #333)" }}>Copy Secure Link</DSButton>
-      <DSButton type="button" variant="secondary" onClick={openEmailApp} style={{ ...styles.button, background: "transparent", color: "var(--accent, #c8ff00)", border: "1px solid rgba(200,255,0,.45)" }}>Open Email App</DSButton>
+      <DSButton type="button" variant="secondary" onClick={copySetupLink} style={{ ...styles.button, background: "transparent", color: "var(--text-1, #fff)", border: "1px solid var(--stroke-1, #333)" }}>COPY SECURE LINK</DSButton>
+      <DSButton type="button" variant="secondary" onClick={openEmailApp} style={{ ...styles.button, background: "transparent", color: "var(--accent, #c8ff00)", border: "1px solid rgba(200,255,0,.45)" }}>OPEN EMAIL APP</DSButton>
     </div>}
     {recent.length > 0 && <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid var(--stroke-1, #333)" }}>
       <div style={{ ...styles.title, fontSize: 12, color: "var(--text-3, #aaa)" }}>Recent Player Invitations</div>
