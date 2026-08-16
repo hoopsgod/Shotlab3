@@ -22,9 +22,9 @@ for (const required of [
 
 for (const required of [
   'testId={`${testId}-decision-brief`}',
-  'testId={`${testId}-evidence`}',
+  'className="secondaryPageShell--embeddedHeader"',
   'label: `Review ${model.primary.label}`',
-  'label: `Review ${metric.label}`',
+  '<CoachRoutePerformanceStage',
 ]) {
   if (!dashboard.includes(required)) throw new Error(`Phase 4E.11 Coach dashboard contract missing: ${required}`);
 }
@@ -32,13 +32,14 @@ for (const required of [
 const compactAuthority = authority.replace(/\s+/g, '');
 for (const required of [
   'coach-player-invite-dashboard-section',
-  'coach-page-dashboard-leaderboards-decision-brief',
-  'coach-page-dashboard-leaderboards-evidence',
   'min-height:44px!important',
   'box-sizing:border-box!important',
   'touch-action:manipulation!important',
 ]) {
   if (!compactAuthority.includes(required)) throw new Error(`Phase 4E.11 final geometry authority missing: ${required}`);
+}
+if (compactAuthority.includes('coach-page-dashboard-leaderboards-evidence')) {
+  throw new Error('Phase 4E.11 still targets retired leaderboard evidence cards.');
 }
 
 const phase4e10Link = '  <link id="shotlab-phase4e10-player-profile-account-touch-safety" rel="stylesheet" href="/shotlab-phase4e10-player-profile-account-touch-safety.css" />';
@@ -52,4 +53,4 @@ if (!index.includes(phase4e11Link)) {
   console.log('Phase 4E.11 final stylesheet link already applied.');
 }
 
-console.log('Applied Phase 4E.11 final measured Coach default-state touch-target corrections.');
+console.log('Applied Phase 4E.11 remaining Coach invite touch-target correction; premium route stages own their own geometry.');

@@ -3,6 +3,8 @@ import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
+const MOBILE_OPERATIONAL_COMPOSITION_CSS = `@media(max-width:700px){[data-player-workspace-title-row="true"]{align-items:center;justify-content:center}[data-player-workspace-filter-rail="true"]{justify-content:center}[data-metric-priority]{text-align:center}}`;
+
 function MetricContent({ metric }) {
   return (
     <>
@@ -36,64 +38,67 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   const subtitle = resolveWorkspaceSubtitle(model);
 
   return (
-    <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial">
-      <header className={styles.commandBar} data-layout-role="editorial-header">
-        <div className={styles.copy}>
-          <div className={styles.eyebrow}>{model.eyebrow}</div>
-          <div className={styles.titleRow}>
-            <h1 className={styles.title}>{model.title}</h1>
-            <span className={styles.status}>{model.status}</span>
+    <>
+      <style>{MOBILE_OPERATIONAL_COMPOSITION_CSS}</style>
+      <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial">
+        <header className={styles.commandBar} data-layout-role="editorial-header">
+          <div className={styles.copy}>
+            <div className={styles.eyebrow}>{model.eyebrow}</div>
+            <div className={styles.titleRow} data-player-workspace-title-row="true">
+              <h1 className={styles.title}>{model.title}</h1>
+              <span className={styles.status}>{model.status}</span>
+            </div>
+            <p className={styles.subtitle}>{subtitle}</p>
           </div>
-          <p className={styles.subtitle}>{subtitle}</p>
-        </div>
-        {model.primaryAction && (
-          <button type="button" className={styles.primaryAction} onClick={() => runAction(model.primaryAction)}>
-            {model.primaryAction.label} →
-          </button>
-        )}
-      </header>
-      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
-        {metrics.map((metric, index) => {
-          const interactive = Boolean(metric?.filter || metric?.action);
-          const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
-          const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : ""} ${activeMetric === metric.id ? styles.metricActive : ""}`;
-          const metricPriority = index === 0 ? "primary" : "supporting";
+          {model.primaryAction && (
+            <button type="button" className={styles.primaryAction} onClick={() => runAction(model.primaryAction)}>
+              {model.primaryAction.label} →
+            </button>
+          )}
+        </header>
+        <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
+          {metrics.map((metric, index) => {
+            const interactive = Boolean(metric?.filter || metric?.action);
+            const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
+            const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : ""} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+            const metricPriority = index === 0 ? "primary" : "supporting";
 
-          if (!interactive) {
+            if (!interactive) {
+              return (
+                <div
+                  key={metric.id}
+                  className={metricClassName}
+                  data-interactive="false"
+                  data-metric-priority={metricPriority}
+                >
+                  <MetricContent metric={metric} />
+                </div>
+              );
+            }
+
             return (
-              <div
+              <button
+                type="button"
                 key={metric.id}
                 className={metricClassName}
-                data-interactive="false"
+                data-interactive="true"
                 data-metric-priority={metricPriority}
+                onClick={() => runMetric(metric)}
+                aria-pressed={activeMetric === metric.id}
               >
                 <MetricContent metric={metric} />
-              </div>
+              </button>
             );
-          }
-
-          return (
-            <button
-              type="button"
-              key={metric.id}
-              className={metricClassName}
-              data-interactive="true"
-              data-metric-priority={metricPriority}
-              onClick={() => runMetric(metric)}
-              aria-pressed={activeMetric === metric.id}
-            >
-              <MetricContent metric={metric} />
-            </button>
-          );
-        })}
-      </div>
-    </section>
+          })}
+        </div>
+      </section>
+    </>
   );
 }
 
 export function PlayerWorkspaceFilterRail({ value = "all", onChange, options = [], ariaLabel = "Workspace filters", testId }) {
   return (
-    <div className={styles.filterRail} role="group" aria-label={ariaLabel} data-testid={testId}>
+    <div className={styles.filterRail} role="group" aria-label={ariaLabel} data-testid={testId} data-player-workspace-filter-rail="true">
       {options.map((option) => (
         <button
           type="button"

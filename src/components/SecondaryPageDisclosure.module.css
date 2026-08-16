@@ -1,0 +1,89 @@
+.disclosure {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(23, 26, 24, .1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .72);
+  color: #171a18;
+  box-shadow: none;
+}
+
+.summary {
+  min-height: 60px;
+  padding: 10px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+  background: transparent;
+  color: #171a18;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.summary::-webkit-details-marker { display: none; }
+.summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, #2b718c 28%, transparent);
+  outline-offset: -3px;
+}
+
+.copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.title {
+  color: #2b718c;
+  font: 760 11px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.meta {
+  color: #38423c;
+  font: 760 14px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.015em;
+}
+
+.chevron {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: color-mix(in srgb, #2b718c 8%, #fff);
+  color: #2b718c;
+  font: 650 18px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  transition: transform 150ms ease;
+}
+
+.disclosure[open] .chevron { transform: rotate(180deg); }
+
+.body {
+  padding: 0 12px 12px;
+  border-top: 1px solid rgba(23, 26, 24, .08);
+  background: #fbfbf8;
+}
+
+.body > :first-child { margin-top: 12px; }
+
+@media (min-width: 761px) {
+  .disclosure { border: 0; border-radius: 0; background: transparent; }
+  .summary { display: none; }
+  .body { padding: 0; border: 0; background: transparent; }
+  .body > :first-child { margin-top: 0; }
+}
+
+@media (max-width: 390px) {
+  .summary { padding-inline: 12px; }
+  .meta { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron { transition: none; }
+}

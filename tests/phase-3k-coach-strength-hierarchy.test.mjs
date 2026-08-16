@@ -12,7 +12,7 @@ const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/phase-3k-coach-strength-screenshots.spec.mjs', 'utf8');
 
-test('Phase 3K enhancer runs after accepted Phase 3J and remains guarded/idempotent', () => {
+test('Phase 3K enhancer runs after accepted Phase 3J validation and remains guarded/idempotent', () => {
   assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
   assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
   assert.match(routeEnhancers, /apply-phase3j-coach-events-hierarchy\.mjs[\s\S]*apply-phase3k-coach-strength-hierarchy\.mjs/);
@@ -103,8 +103,9 @@ test('Phase 3K preserves existing S&C management and operational actions', () =>
   assert.match(phasePanel, /Open Session/);
 });
 
-test('Phase 3K authority loads after Phase 3J', () => {
-  assert.match(html, /shotlab-phase3j-coach-events-hierarchy\.css[\s\S]*shotlab-phase3k-coach-strength-hierarchy\.css/);
+test('Phase 3K authority remains active after the retired Phase 3J stylesheet', () => {
+  assert.doesNotMatch(html, /shotlab-phase3j-coach-events-hierarchy\.css/);
+  assert.match(html, /shotlab-phase3i-team-store-immersive\.css[\s\S]*shotlab-phase3k-coach-strength-hierarchy\.css[\s\S]*shotlab-phase3l-coach-leaderboard-hierarchy\.css/);
 });
 
 test('rendered iPhone evidence proves compact and expanded Coach S&C states with session work preserved', () => {

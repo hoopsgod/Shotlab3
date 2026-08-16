@@ -69,6 +69,20 @@ async function expectPremiumHeader(page) {
   expect(visual.shadow).not.toBe("none");
 }
 
+async function expectCoachPerformanceRail(page) {
+  const stage = page.locator('[data-visual-role="primary-decision"]').first();
+  await expect(stage).toBeVisible({ timeout: 20_000 });
+  await expect(stage).toHaveAttribute("data-surface", "dark");
+  const rail = stage.locator('[data-visual-role="performance-evidence"]');
+  await expect(rail).toBeVisible();
+  const controls = rail.getByRole("button");
+  expect(await controls.count()).toBeGreaterThanOrEqual(1);
+  for (let index = 0; index < await controls.count(); index += 1) {
+    const box = await controls.nth(index).boundingBox();
+    expect(box?.height || 0, `performance signal ${index + 1} height`).toBeGreaterThanOrEqual(44);
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
@@ -83,14 +97,14 @@ test("coach secondary workspaces share the Mission Control visual system", async
   await expectWorkspace(page, "coach", "players");
   await expectPremiumHeader(page);
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible();
-  await expect(page.getByTestId("coach-players-metric-strip")).toBeVisible();
+  await expectCoachPerformanceRail(page);
   await expect(page.getByRole("heading", { name: "PLAYER ROSTER", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /ADD PLAYER & SEND INVITE/i })).toBeVisible();
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
   await expectWorkspace(page, "coach", "events");
   await expect(page.getByTestId("coach-events-command-bar")).toBeVisible();
-  await expect(page.getByTestId("coach-events-metric-strip")).toBeVisible();
+  await expectCoachPerformanceRail(page);
   await expect(page.getByRole("button", { name: /CREATE EVENT/i }).first()).toBeVisible();
 
   await openMoreDestination(page, "drills");

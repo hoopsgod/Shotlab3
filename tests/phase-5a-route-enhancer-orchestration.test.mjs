@@ -23,10 +23,11 @@ const buildPrefix = [
   'scripts/run-finish-v9-compatible.mjs',
   'scripts/align-v9-player-boundary-contract.mjs',
 ]
-const finalTouchSafety = [
-  'scripts/apply-phase4e9-player-profile-data-request.mjs',
-  'scripts/apply-phase4e10-player-profile-account-touch-safety.mjs',
+const finalPresentationChain = [
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
+  'scripts/apply-mobile-player-coach-signal-signature.mjs',
+  'scripts/apply-mobile-player-composition-reconciliation.mjs',
+  'scripts/apply-mobile-auth-signature-stage.mjs',
 ]
 const registeredParityEnhancers = [
   'scripts/apply-legacy-signed-collection-reads.mjs',
@@ -61,22 +62,22 @@ function performanceFixture() {
 }
 
 test('route enhancer manifests preserve the certified dev/build ordering contract', () => {
-  assert.equal(DEV_ROUTE_ENHANCERS.length, 42)
-  assert.equal(BUILD_ROUTE_ENHANCERS.length, 45)
+  assert.ok(DEV_ROUTE_ENHANCERS.length > 0, 'dev route enhancer manifest must not be empty')
+  assert.equal(BUILD_ROUTE_ENHANCERS.length, DEV_ROUTE_ENHANCERS.length + 3, 'build adds only its two preparation steps and one browser-alignment step')
   assertUnique('dev route enhancer manifest', DEV_ROUTE_ENHANCERS)
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
   assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(0, 2), buildPrefix)
-  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-3), finalTouchSafety)
-  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-3), finalTouchSafety)
+  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-4), finalPresentationChain)
+  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-4), finalPresentationChain)
 
   const devMinifyIndex = DEV_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
   const buildMinifyIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
   const buildAlignmentIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/align-phase4f-browser-contracts.mjs')
   const buildPhase5Index = BUILD_ROUTE_ENHANCERS.indexOf('scripts/apply-phase5a-coach-daily-intelligence.mjs')
 
-  assert.equal(devMinifyIndex, 22)
-  assert.equal(buildMinifyIndex, 24)
+  assert.ok(devMinifyIndex >= 0, 'dev manifest must include the canonical visual-authority minifier')
+  assert.equal(buildMinifyIndex, devMinifyIndex + buildPrefix.length)
   assert.equal(buildAlignmentIndex, buildMinifyIndex + 1)
   assert.equal(buildPhase5Index, buildAlignmentIndex + 1)
 

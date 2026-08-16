@@ -107,6 +107,14 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
+async function currentPerformanceRail(page) {
+  const stage = page.locator('[data-visual-role="primary-decision"]').first();
+  await expect(stage).toBeVisible({ timeout: 20_000 });
+  const rail = stage.locator('[data-visual-role="performance-evidence"]');
+  await expect(rail).toBeVisible();
+  return rail;
+}
+
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
@@ -117,13 +125,14 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
 
   const rosterResults = page.locator("#coach-roster-operations");
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("coach-players-metric-strip")).toBeVisible();
+  const performanceRail = await currentPerformanceRail(page);
   await expect(page.getByTestId("coach-players-filter-rail")).toBeVisible();
   await expect(rosterResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
 
-  await page.getByTestId("coach-players-metric-strip").getByRole("button", { name: /Needs Attention/i }).click();
-  await expect(page.getByTestId("coach-players-metric-strip").getByRole("button", { name: /Needs Attention/i })).toHaveAttribute("aria-pressed", "true");
+  const needsAttention = performanceRail.getByRole("button", { name: /^Needs Attention:/i });
+  await needsAttention.click();
+  await expect(needsAttention).toHaveAttribute("aria-pressed", "true");
   await expect(rosterResults.getByText("Active Player", { exact: true })).toHaveCount(0);
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("New Player", { exact: true }).first()).toBeVisible();
@@ -141,12 +150,13 @@ test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({
 
   const scheduleResults = page.getByTestId("coach-events-mobile-page");
   await expect(page.getByTestId("coach-events-command-bar")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("coach-events-metric-strip")).toBeVisible();
+  const performanceRail = await currentPerformanceRail(page);
   await expect(page.getByTestId("coach-events-filter-rail")).toBeVisible();
   await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
 
-  await page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Awaiting RSVP/i }).click();
-  await expect(page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Awaiting RSVP/i })).toHaveAttribute("aria-pressed", "true");
+  const awaitingRsvp = performanceRail.getByRole("button", { name: /^Awaiting RSVP:/i });
+  await awaitingRsvp.click();
+  await expect(awaitingRsvp).toHaveAttribute("aria-pressed", "true");
 
   const search = page.getByTestId("coach-events-filter-rail").getByRole("searchbox");
   await search.fill("Summer Game");

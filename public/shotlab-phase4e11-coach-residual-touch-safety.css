@@ -1,8 +1,6 @@
-/* Phase 4E.11 — final measured Coach default-state touch-target corrections.
-   Existing visual language remains authoritative; this layer changes physical geometry only. */
-[data-testid="coach-player-invite-dashboard-section"] > div:first-child > button,
-[data-testid="coach-page-dashboard-leaderboards-decision-brief"] button,
-[data-testid="coach-page-dashboard-leaderboards-evidence"] button {
+/* Phase 4E.11 — remaining measured Coach invite touch-target correction.
+   Premium route stages own their action and metric geometry directly. */
+[data-testid="coach-player-invite-dashboard-section"] > div:first-child > button {
   min-height: 44px !important;
   box-sizing: border-box !important;
   touch-action: manipulation !important;
