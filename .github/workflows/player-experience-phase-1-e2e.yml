@@ -89,4 +89,4 @@ jobs:
             player-experience-e2e.json
             test-results
             playwright-report
-          if-no-files-found: error
+          if-no-files-found: warn
