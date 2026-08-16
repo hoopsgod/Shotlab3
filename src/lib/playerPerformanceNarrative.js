@@ -39,6 +39,16 @@ export const derivePlayerPerformanceNarrative = ({ daily = {}, weekly = {}, stre
         ? `${remaining} makes remain. Finish the standard, then decide what comes next.`
         : `Your daily standard is ${goal} makes. Start a focused block and bank the result.`;
 
+  const contextLabel = firstSession.pending
+    ? "Baseline"
+    : primaryAction.source === "coach"
+      ? "Coach plan"
+      : primaryAction.source === "team"
+        ? "Team commitment"
+        : complete
+          ? "Target complete"
+          : "Daily standard";
+
   return {
     makes,
     goal,
@@ -49,7 +59,7 @@ export const derivePlayerPerformanceNarrative = ({ daily = {}, weekly = {}, stre
     interpretationTone,
     headline,
     description,
-    contextLabel: firstSession.pending ? "Baseline" : primaryAction.source === "coach" ? "Coach plan" : complete ? "Target complete" : "Daily standard",
+    contextLabel,
     weeklyText: weeklyGoal > 0 ? `${weeklyMakes} / ${weeklyGoal}` : `${weeklyMakes}`,
     weeklyLabel: weeklyGoal > 0 ? "This week" : "This week · no target",
     streakText: run > 0 ? `${run} day${run === 1 ? "" : "s"} run` : "No active run",
