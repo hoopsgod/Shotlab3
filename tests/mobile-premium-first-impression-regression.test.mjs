@@ -33,7 +33,8 @@ test("secondary mastheads use the coach-controlled team logo as the primary bran
   assert.match(secondaryBrandMark, /useCleanTeamLogo/);
   assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
   assert.match(playerOperationalWorkspace, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="workspace" \/>/);
-  assert.match(secondaryBrandCss, /\.workspace\{[\s\S]*width:54px;[\s\S]*height:54px/);
+  assert.match(secondaryBrandCss, /\.workspace\{[\s\S]*width:52px;[\s\S]*height:52px/);
+  assert.match(secondaryBrandCss, /@media\(max-width:700px\)\{[\s\S]*\.workspace\{[\s\S]*width:50px;[\s\S]*height:50px;[\s\S]*margin:0 auto 3px/);
   assert.match(centeredRouteEnhancer, /width: 52px/);
   assert.match(centeredRouteEnhancer, /height: 52px/);
   assert.match(centeredRouteEnhancer, /background: transparent/);
@@ -45,6 +46,7 @@ test("mobile route mastheads keep editorial hierarchy without swallowing the fir
   assert.match(enhancer, /\.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle,[\s\S]*font-size: clamp\(31px, 8\.5vw, 34px\) !important/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
   assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*width: 30px;[\s\S]*height: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
+  assert.match(centeredRouteEnhancer, /coachAdministrationWorkspace[\s\S]*max-width: 16ch !important/);
   assert.doesNotMatch(enhancer, /width: 74px/);
   assert.doesNotMatch(centeredRouteEnhancer, /width: (?:7[0-9]|8[0-9]|9[0-9])px/);
 });
