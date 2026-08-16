@@ -105,6 +105,44 @@ test.describe("Phase 4 product-feel certification", () => {
     await capture(page, "02-coach-add-player-error-state-390");
   });
 
+  test("Coach player intelligence keeps the player workspace ahead of the follow-up workflow", async ({ page }) => {
+    await enterDemo(page, "coach");
+    await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+
+    const roster = page.locator("#coach-roster-operations");
+    await expect(roster).toBeVisible({ timeout: 20_000 });
+    await roster.getByText("Demo Player", { exact: true }).first().click();
+
+    const drawer = page.getByTestId("coach-player-intelligence-drawer");
+    await expect(drawer).toBeVisible({ timeout: 20_000 });
+    await expect(drawer.getByRole("heading", { name: "Demo Player", exact: true })).toBeVisible();
+    await expect(drawer.getByRole("button", { name: "Open Full Profile", exact: true })).toBeVisible();
+
+    const followUpHost = drawer.getByTestId("coach-follow-up-ledger-host");
+    await expect(followUpHost).toBeAttached({ timeout: 20_000 });
+    const layout = await drawer.evaluate((root) => {
+      const dialog = root.querySelector('[role="dialog"]');
+      const followUp = root.querySelector('[data-testid="coach-follow-up-ledger-host"]');
+      const profileButton = [...(dialog?.querySelectorAll("button") || [])].find((button) => button.textContent?.trim() === "Open Full Profile");
+      const scrollBody = profileButton?.parentElement?.parentElement;
+      const profileRect = profileButton?.getBoundingClientRect();
+      const bodyRect = scrollBody?.getBoundingClientRect();
+      return {
+        followUpParentIsDialog: Boolean(followUp && dialog && followUp.parentElement === dialog),
+        followUpSharesPlayerBody: Boolean(followUp && scrollBody && followUp.parentElement === scrollBody),
+        bodyHeight: bodyRect?.height || 0,
+        profileFullyInsideBody: Boolean(profileRect && bodyRect && profileRect.top >= bodyRect.top && profileRect.bottom <= bodyRect.bottom),
+      };
+    });
+
+    expect(layout.followUpParentIsDialog).toBe(false);
+    expect(layout.followUpSharesPlayerBody).toBe(true);
+    expect(layout.bodyHeight).toBeGreaterThan(300);
+    expect(layout.profileFullyInsideBody).toBe(true);
+    await expectNoHorizontalOverflow(page);
+    await capture(page, "03-coach-player-intelligence-390");
+  });
+
   test("navigation drawer keeps focus, closes cleanly, and removes motion when the user requests it", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await enterDemo(page, "player");
@@ -122,7 +160,7 @@ test.describe("Phase 4 product-feel certification", () => {
     await expect(sheet).toHaveCount(0);
     await expect(more).toBeFocused();
     await expectMinimumTouchHeight(page.getByTestId("mobile-navigation-dock").getByRole("button"));
-    await capture(page, "03-player-home-reduced-motion-390");
+    await capture(page, "04-player-home-reduced-motion-390");
   });
 
   test("Player Train and Events preserve touch safety, active state, and overflow while moving through real routes", async ({ page }) => {
@@ -132,7 +170,7 @@ test.describe("Phase 4 product-feel certification", () => {
     await expect(dock.getByRole("button", { name: "Train", exact: true })).toHaveAttribute("aria-current", "page");
     await expectMinimumTouchHeight(dock.getByRole("button"));
     await expectNoHorizontalOverflow(page);
-    await capture(page, "04-player-train-390");
+    await capture(page, "05-player-train-390");
 
     await page.getByTestId("mobile-navigation-more").click();
     const sheet = page.getByTestId("mobile-navigation-sheet");
@@ -142,7 +180,7 @@ test.describe("Phase 4 product-feel certification", () => {
     await expect(page).toHaveURL(/\/events$/);
     await expect(page.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
     await expectNoHorizontalOverflow(page);
-    await capture(page, "05-player-events-390");
+    await capture(page, "06-player-events-390");
   });
 
   test("430px representative Coach and Player routes stay clear of browser edges", async ({ page }) => {
@@ -150,7 +188,7 @@ test.describe("Phase 4 product-feel certification", () => {
     await enterDemo(page, "coach");
     await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
     await expectNoHorizontalOverflow(page);
-    await capture(page, "06-coach-schedule-430");
+    await capture(page, "07-coach-schedule-430");
 
     await page.goto("/");
     await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
@@ -159,6 +197,6 @@ test.describe("Phase 4 product-feel certification", () => {
     await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
     await expect(page.getByTestId("player-progress-story")).toBeVisible({ timeout: 20_000 });
     await expectNoHorizontalOverflow(page);
-    await capture(page, "07-player-progress-430");
+    await capture(page, "08-player-progress-430");
   });
 });
