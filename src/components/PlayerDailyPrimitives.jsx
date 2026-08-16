@@ -80,16 +80,18 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
         </g>
       </svg>
       <span className={styles.performanceCourtState} aria-hidden="true">
-        {visual.state === "above" ? `+${Math.round(visual.aboveTarget)} banked` : visual.state === "complete" ? "Target locked" : label || "Target path"}
+        {visual.state === "above" ? `+${Math.round(visual.aboveTarget)} banked` : visual.state === "complete" ? "Target locked" : visual.state === "near" ? "Finish line" : label || "Target path"}
       </span>
       {detail ? <span className={styles.performanceCourtDetail}>{detail}</span> : null}
     </div>
   );
 }
 
-// Compatibility export: Player Home callers keep their Phase 1 API while the
-// canonical Phase 2 primitive is ShotLabPerformanceCourt.
-export const ExperienceProgressRing = ShotLabPerformanceCourt;
+// Compatibility wrapper retained for older isolated Player contracts. Player Home
+// imports ShotLabPerformanceCourt directly so the Phase 2 visual is explicit.
+export function ExperienceProgressRing(props) {
+  return <ShotLabPerformanceCourt {...props} />;
+}
 
 export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", icon, children, testId }) {
   const iconName = icon || signalIcon(tone, eyebrow);
