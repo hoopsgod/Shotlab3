@@ -49,7 +49,7 @@ async function seedBoundedDrill(page) {
       ...existing.filter((item) => item?.id !== boundedDrill.id),
     ]));
   }, BOUNDED_DRILL);
-  await page.reload();
+  await page.goto("/?demo=1");
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
