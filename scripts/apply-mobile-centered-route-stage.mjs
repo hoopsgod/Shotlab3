@@ -17,8 +17,15 @@ export function centerMobileRouteStage(source) {
   next = replaceOnce(
     next,
     `    grid-template-columns: 46px minmax(0, 1fr);\n    align-items: start;\n    column-gap: 10px;\n    row-gap: 8px;`,
-    `    grid-template-columns: minmax(0, 1fr);\n    align-items: start;\n    justify-items: center;\n    row-gap: 8px;\n    text-align: center;`,
+    `    grid-template-columns: minmax(0, 1fr);\n    align-items: start;\n    justify-items: center;\n    row-gap: 5px;\n    text-align: center;`,
     'mobile masthead grid',
+  )
+
+  next = replaceOnce(
+    next,
+    `    padding: 7px 0 12px;`,
+    `    padding: 4px 0 8px;`,
+    'mobile masthead vertical runway',
   )
 
   next = replaceOnce(
@@ -30,8 +37,15 @@ export function centerMobileRouteStage(source) {
 
   next = replaceOnce(
     next,
+    `    width: 46px;\n    height: 54px;`,
+    `    width: 42px;\n    height: 42px;`,
+    'mobile masthead mark geometry',
+  )
+
+  next = replaceOnce(
+    next,
     `    margin-top: 1px;\n    border: 1px solid rgba(7, 26, 34, .1);`,
-    `    margin: 1px auto 0;\n    border: 1px solid rgba(7, 26, 34, .1);`,
+    `    margin: 0 auto;\n    border: 1px solid rgba(7, 26, 34, .1);`,
     'mobile masthead mark centering',
   )
 
@@ -45,7 +59,7 @@ export function centerMobileRouteStage(source) {
   next = replaceOnce(
     next,
     `    grid-column: 1 / -1;\n    width: 100%;\n    min-width: 0;\n    margin-top: 1px;\n    display: grid;\n    grid-template-columns: minmax(0, 1fr);\n    gap: 6px;`,
-    `    grid-column: 1 / -1;\n    width: 100%;\n    max-width: 360px;\n    min-width: 0;\n    margin: 1px auto 0;\n    display: grid;\n    grid-template-columns: minmax(0, 1fr);\n    justify-items: center;\n    gap: 6px;`,
+    `    grid-column: 1 / -1;\n    width: 100%;\n    max-width: 360px;\n    min-width: 0;\n    margin: 0 auto;\n    display: grid;\n    grid-template-columns: minmax(0, 1fr);\n    justify-items: center;\n    gap: 5px;`,
     'mobile masthead action rail centering',
   )
 
@@ -63,6 +77,13 @@ export function centerMobileRouteStage(source) {
     'narrow masthead centering',
   )
 
+  next = replaceOnce(
+    next,
+    `  .secondaryPageIntro__icon { width: 44px; height: 50px; border-radius: 0; }`,
+    `  .secondaryPageIntro__icon { width: 40px; height: 40px; border-radius: 0; }`,
+    'narrow masthead mark geometry',
+  )
+
   return next
 }
 
@@ -71,7 +92,7 @@ export function applyMobileCenteredRouteStage({ cwd = process.cwd() } = {}) {
   const source = readFileSync(target, 'utf8')
   const next = centerMobileRouteStage(source)
   if (next !== source) writeFileSync(target, next)
-  console.log('Centered ShotLab mobile secondary-route mastheads.')
+  console.log('Centered and compacted ShotLab mobile secondary-route mastheads.')
 }
 
 const currentFile = fileURLToPath(import.meta.url)
