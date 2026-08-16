@@ -4,12 +4,29 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = process.cwd()
 const MARKER = '/* Phase-close mobile optical composition reconciliation. */'
+const COMMITMENT_RUNTIME_MARKER = 'MOBILE_COMMITMENT_COMPOSITION_CSS'
 
 function appendOwnedBlock(relativePath, css) {
   const target = path.resolve(ROOT, relativePath)
   const source = readFileSync(target, 'utf8')
   if (source.includes(MARKER)) return false
   writeFileSync(target, `${source.trimEnd()}\n\n${MARKER}\n${css.trim()}\n`)
+  return true
+}
+
+function injectCommitmentRuntimeStyle() {
+  const target = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.jsx')
+  const source = readFileSync(target, 'utf8')
+  if (source.includes(COMMITMENT_RUNTIME_MARKER)) return false
+  const constantAnchor = 'const RUNWAY_SLOTS = 3;'
+  const headerAnchor = '      <header className={styles.routeHeader}'
+  if (!source.includes(constantAnchor) || !source.includes(headerAnchor)) {
+    throw new Error('[mobile-player-composition] commitment runtime style anchor missing')
+  }
+  const runtimeCss = 'const MOBILE_COMMITMENT_COMPOSITION_CSS = `@media(max-width:759px){[data-testid^="player-commitment-route-header-"]{text-align:center}[data-testid^="player-commitment-route-header-"]>div:nth-of-type(2){align-items:center}}`;'
+  let next = source.replace(constantAnchor, `${constantAnchor}\n${runtimeCss}`)
+  next = next.replace(headerAnchor, `      <style>{MOBILE_COMMITMENT_COMPOSITION_CSS}</style>\n${headerAnchor}`)
+  writeFileSync(target, next)
   return true
 }
 
@@ -26,9 +43,6 @@ const workspaceCss = `
 .commandBar{text-align:center;justify-items:center}.titleRow{align-items:center;justify-content:center}.primaryAction{max-width:360px;margin-inline:auto}.metric{text-align:center}.filterRail{justify-content:center}}
 `
 
-const commitmentCss = `
-@media(max-width:759px){.routeHeader{text-align:center}.routeTitleRow{align-items:center}}`
-
 const hierarchyCss = `
 @media(max-width:760px){
 .playerProgressDisclosure>summary{position:relative;justify-content:center!important;padding-inline:58px!important}.playerProgressDisclosure>summary>span:first-child{align-items:center}.playerProgressDisclosure>summary::after{position:absolute;right:14px;top:50%;transform:translateY(-50%)}
@@ -41,10 +55,10 @@ export function applyMobilePlayerCompositionReconciliation() {
   const changed = [
     appendOwnedBlock('src/components/PlayerDailyCommandCenter.module.css', homeCss),
     appendOwnedBlock('src/components/PlayerOperationalWorkspace.module.css', workspaceCss),
-    appendOwnedBlock('src/components/PlayerCommitmentCenter.module.css', commitmentCss),
+    injectCommitmentRuntimeStyle(),
     appendOwnedBlock('src/styles/CommandHierarchy2026.css', hierarchyCss),
   ].filter(Boolean).length
-  console.log(`Reconciled Player mobile optical composition in ${changed} owning style file(s).`)
+  console.log(`Reconciled Player mobile optical composition in ${changed} owned surface(s).`)
 }
 
 const currentFile = fileURLToPath(import.meta.url)
