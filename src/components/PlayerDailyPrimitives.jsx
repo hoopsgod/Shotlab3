@@ -15,9 +15,8 @@ const signalIcon = (tone, eyebrow = "") => {
 const TARGET_PATH = "M22 104V92C22 45 47 23 80 23S138 45 138 92V104";
 const OVERFLOW_PATH = "M14 104V89C14 34 44 14 80 14S146 34 146 89V104";
 
-export function ShotLabPerformanceCourt({ value = 0, target, max = 100, label, detail, size = 92, testId, ariaLabel }) {
-  const resolvedTarget = target ?? max;
-  const visual = deriveShotLabPerformanceVisual({ value, target: resolvedTarget });
+export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId }) {
+  const visual = deriveShotLabPerformanceVisual({ value, target: max });
   const width = Math.max(116, Math.round(Number(size || 92) * 1.52));
   const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
   const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
@@ -32,7 +31,7 @@ export function ShotLabPerformanceCourt({ value = 0, target, max = 100, label, d
       data-target-percent={visual.targetPercent}
       data-above-target={Math.round(visual.aboveTarget)}
       role="img"
-      aria-label={ariaLabel || visual.accessibleLabel}
+      aria-label={visual.accessibleLabel}
     >
       <svg viewBox="0 0 160 118" aria-hidden="true" focusable="false">
         <path className={styles.courtBaseline} d="M14 104H146" />
