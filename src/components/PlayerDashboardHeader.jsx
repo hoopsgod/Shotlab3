@@ -22,7 +22,7 @@ const DASHBOARD_SHOWSTOPPER_CSS = `
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="brand-mark"]{width:54px!important;height:54px!important;filter:drop-shadow(0 7px 12px rgba(7,28,40,.12))!important}
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"]{color:#617900!important}
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{color:#68716a!important}
-  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:4px!important;color:#151a16!important;font-size:25px!important;line-height:.97!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:4px!important;color:#151a16!important;font-size:26px!important;line-height:.97!important}
 }
 `;
 
