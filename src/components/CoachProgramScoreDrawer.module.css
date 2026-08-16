@@ -54,12 +54,11 @@
   border-radius: 10px;
   color: #d8dde1;
   cursor: pointer;
-  flex: 0 0 44px;
+  flex-shrink: 0;
   font-size: 24px;
   height: 44px;
   line-height: 1;
   touch-action: manipulation;
-  transition: transform 120ms ease;
   width: 44px;
 }
 
@@ -96,13 +95,16 @@
   width: 100%;
 }
 
-.form select:focus-visible,
-.form input:focus-visible,
+.form select:focus,
+.form input:focus {
+  border-color: var(--team-brand-primary, #c8ff1a);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, transparent);
+}
+
 .close:focus-visible,
 .submit:focus-visible {
-  border-color: var(--team-brand-primary, #c8ff1a);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 18%, transparent);
-  outline: none;
+  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 24%, transparent);
+  outline-offset: 2px;
 }
 
 .row {
@@ -142,7 +144,6 @@
   min-height: 52px;
   text-transform: uppercase;
   touch-action: manipulation;
-  transition: transform 120ms ease;
 }
 
 .submit:active:not(:disabled),
@@ -154,7 +155,6 @@
 .close:disabled {
   cursor: progress;
   opacity: 0.6;
-  transform: none;
 }
 
 @media (max-width: 540px) {
@@ -169,8 +169,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .close,
-  .submit {
-    transition: none;
-  }
+  .submit:active,
+  .close:active { transform: none; }
 }
