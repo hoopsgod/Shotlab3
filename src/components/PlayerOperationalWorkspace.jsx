@@ -1,17 +1,7 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
-import SecondaryTeamBrandMark from "./SecondaryTeamBrandMark.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
-
-const WORKSPACE_ICONS = {
-  events: "calendar",
-  lifting: "training",
-  leaderboards: "trophy",
-  rankings: "trophy",
-  progress: "chart",
-  training: "training",
-};
 
 function MetricContent({ metric }) {
   return (
@@ -44,13 +34,11 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   };
   const metrics = model.metrics || [];
   const subtitle = resolveWorkspaceSubtitle(model);
-  const iconName = WORKSPACE_ICONS[model.id] || "target";
 
   return (
     <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial">
       <header className={styles.commandBar} data-layout-role="editorial-header">
         <div className={styles.copy}>
-          <SecondaryTeamBrandMark iconName={iconName} variant="workspace" />
           <div className={styles.eyebrow}>{model.eyebrow}</div>
           <div className={styles.titleRow}>
             <h1 className={styles.title}>{model.title}</h1>
