@@ -18,8 +18,9 @@ test('Player composition reconciliation runs after the signature enhancer withou
 
 test('Player Home hero removes the absolute progress-seal collision and centers the decision composition in its owning stylesheet', () => {
   assert.match(reconciliation, /PlayerDailyCommandCenter\.module\.css/)
+  assert.match(reconciliation, /\.hero\{text-align:center\}/)
   assert.match(reconciliation, /\[data-testid="player-daily-progress-seal"\]\{[^}]*position:relative!important;[^}]*margin:18px auto 0!important/)
-  assert.match(reconciliation, /\.title\{[^}]*margin:15px auto 0!important;[^}]*text-align:center/)
+  assert.match(reconciliation, /\.title\{[^}]*margin:15px auto 0!important/)
   assert.match(reconciliation, /\.progressCard\{text-align:center!important\}/)
 })
 
@@ -32,11 +33,11 @@ test('expanded Player momentum restores dark contrast and centered geometry in t
 
 test('Player operational and commitment surfaces keep centered mobile headers, metrics, filters, and training-plan framing', () => {
   assert.match(reconciliation, /PlayerOperationalWorkspace\.module\.css/)
-  assert.match(reconciliation, /\.commandBar,.copy\{text-align:center\}/)
+  assert.match(reconciliation, /\.commandBar\{text-align:center;justify-items:center\}/)
   assert.match(reconciliation, /\.metric\{text-align:center\}/)
-  assert.match(reconciliation, /\.filterRail\{justify-content:center;padding-inline:0\}/)
+  assert.match(reconciliation, /\.filterRail\{justify-content:center\}/)
   assert.match(reconciliation, /PlayerCommitmentCenter\.module\.css/)
-  assert.match(reconciliation, /\.routeTitleRow\{[^}]*align-items:center;[^}]*justify-content:center/)
-  assert.match(reconciliation, /\.player-training-kicker\{[^}]*justify-content:center!important/)
-  assert.match(reconciliation, /\.player-training-plan__header\{[^}]*justify-items:center!important;[^}]*text-align:center!important/)
+  assert.match(reconciliation, /\.routeHeader\{text-align:center\}\.routeTitleRow\{align-items:center\}/)
+  assert.match(reconciliation, /\.player-training-kicker\{justify-content:center!important\}/)
+  assert.match(reconciliation, /\.player-training-plan__header\{display:grid!important;justify-items:center!important;text-align:center!important\}/)
 })
