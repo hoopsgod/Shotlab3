@@ -13,7 +13,7 @@ const TEAM_ID = crypto.randomUUID();
 const COACH_EMAIL = `shotlab-live-parity-coach-${RUN_ID}@example.invalid`;
 const PLAYER_EMAIL = `shotlab-live-parity-player-${RUN_ID}@example.invalid`;
 const COACH_USER_UUID = emailUuid(COACH_EMAIL);
-const REGISTERED_STATES = ["empty", "sparse", "populated"];
+const REGISTERED_STATES = ["empty", "sparse", "complete", "populated"];
 
 const identities = {
   coach: { email: COACH_EMAIL, name: "Demo Coach" },
@@ -221,7 +221,7 @@ async function applyRegisteredState(state) {
     name: "Demo Player",
     player_id: PLAYER_EMAIL,
     team_id: TEAM_ID,
-    made: state === "sparse" ? 45 : 125,
+    made: state === "sparse" ? 45 : state === "complete" ? 100 : 125,
     date: localDateKey(0),
     ts: new Date(now + 2).toISOString(),
   }];
