@@ -38,7 +38,7 @@ test("Target Court semantics distinguish daily makes from drill result context",
   assert.match(completion, /contextLabel="on this drill"/);
   assert.match(closeout, /contextLabel="on this drill"/);
   assert.match(court, /role="img"/);
-  assert.match(court, /aria-label=\{accessibleLabel\}/);
+  assert.match(court, /aria-label=\{visual\.accessibleLabel\}/);
 });
 
 test("live training removes generic progress bars and carries deterministic target state", () => {
@@ -56,6 +56,7 @@ test("live training removes generic progress bars and carries deterministic targ
 test("completion answers result, meaning, and next action without generic success UI", () => {
   assert.match(completion, /RESULT LOGGED/);
   assert.match(completion, /WHAT CHANGED/);
+  assert.match(completion, /DRILL TARGET/);
   assert.match(completion, /TARGET COURT/);
   assert.match(completion, /player-training-target-interpretation/);
   assert.match(completion, /NEXT MOVE/);
