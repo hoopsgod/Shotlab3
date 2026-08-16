@@ -66,3 +66,23 @@ test("assignment mutation controls expose busy state and recover in finally", ()
   assert.match(player, /aria-busy=\{busy\}/);
   assert.match(player, /finally \{[\s\S]*actionInFlightRef\.current = false;[\s\S]*setBusy\(false\)/);
 });
+
+test("team branding form meets practical touch and duplicate-submit contracts", () => {
+  const source = fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /minHeight: 44/);
+  assert.doesNotMatch(source, /minHeight: (?:40|42)/);
+  assert.match(source, /if \(saving \|\| cleaning \|\| submitInFlightRef\.current\) return/);
+  assert.match(source, /submitInFlightRef\.current = true/);
+  assert.match(source, /submitInFlightRef\.current = false/);
+  assert.match(source, /aria-busy=\{saving \|\| cleaning \|\| submitting\}/);
+  assert.match(source, /role="alert"/);
+});
+
+test("team branding errors stay user-facing rather than dumping raw exception text", () => {
+  const source = fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx", import.meta.url), "utf8");
+
+  assert.doesNotMatch(source, /setUploadError\(error\.message/);
+  assert.match(source, /This logo could not be prepared\. Try another image or use the logo URL field\./);
+  assert.match(source, /Team branding could not be saved\. Your changes are still here; try again\./);
+});
