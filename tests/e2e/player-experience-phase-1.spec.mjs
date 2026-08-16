@@ -115,10 +115,10 @@ test("daily command center resolves urgent commitment then launches one bounded 
   await expect(cue).toContainText("Event participation confirmed");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
-  await expect(page.getByText("First session · Create your baseline", { exact: true })).toBeVisible();
+  await expect(commandCenter.getByRole("heading", { name: "Set your baseline.", exact: true })).toBeVisible();
+  await expect(commandCenter.getByText("Baseline", { exact: true })).toBeVisible();
+  await expect(commandCenter).toContainText("Log one completed shooting set");
   await expect(page.getByTestId("player-daily-primary-action")).toHaveText(/Log first result/i);
-  await expect(commandCenter.getByText("Log your first shooting result", { exact: true })).toBeVisible();
-  await expect(commandCenter).toContainText("Use Form Shooting as your focus");
   await page.getByTestId("player-daily-primary-action").click();
 
   await expect(page.getByRole("spinbutton").first()).toBeVisible({ timeout: 20_000 });
@@ -144,7 +144,8 @@ test("logging the first result activates progress and confirms the baseline", as
   await expect(page.getByTestId("player-first-result-confirmation")).toBeVisible();
   await expect(page.getByTestId("player-first-result-confirmation")).toContainText("First result banked");
   await expect(commandCenter.getByText(/First-week activation/)).toContainText("2/3 complete");
-  await expect(page.getByText("33/100", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-today-performance")).toContainText("33");
+  await expect(page.getByTestId("player-target-interpretation")).toHaveText("67 TO TARGET");
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
     return rows.some((row) => Number(row.made) === 33 && String(row.email || "").toLowerCase() === "demo@shotlab.app");
