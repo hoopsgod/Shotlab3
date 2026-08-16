@@ -76,6 +76,37 @@ test("coach player provisioning uses mobile-native inputs, semantic submission, 
   assert.doesNotMatch(source, /setError\(result\.error\)/);
 });
 
+test("Coach Program score logging is single-flight, thumb-safe, and shields technical failures", async () => {
+  const source = await read("src/components/CoachProgramScoreDrawer.jsx");
+  const css = await read("src/components/CoachProgramScoreDrawer.module.css");
+
+  assert.match(source, /if \(saving\) return/);
+  assert.match(source, /aria-busy=\{saving \|\| undefined\}/);
+  assert.match(source, /data-working=\{saving \? "true" : undefined\}/);
+  assert.match(source, /friendlyProgramScoreError/);
+  assert.match(source, /catch \(caught\)/);
+  assert.match(source, /role="alert" aria-live="assertive"/);
+  assert.doesNotMatch(source, /setError\(result\?\.error \|\| result\?\.err\?\.message/);
+  assert.match(css, /height:\s*44px/);
+  assert.match(css, /width:\s*44px/);
+  assert.match(css, /\.submit:active:not\(:disabled\)/);
+  assert.match(css, /focus-visible/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+});
+
+test("new-season creation uses a designed working, error, and retry contract", async () => {
+  const source = await read("src/components/NewSeasonWizard.jsx");
+
+  assert.match(source, /if \(status\.state === "saving"\) return/);
+  assert.match(source, /friendlySeasonCreationError/);
+  assert.match(source, /catch \(caught\)/);
+  assert.match(source, /aria-busy=\{isSaving \|\| undefined\}/);
+  assert.match(source, /data-working=\{isSaving \? "true" : undefined\}/);
+  assert.match(source, /role=\{status\.state === "error" \? "alert" : "status"\}/);
+  assert.match(source, /Reset attempt/);
+  assert.doesNotMatch(source, /message:\s*result\?\.error \|\|/);
+});
+
 test("roster controls do not fake latency and preserve 44px filter targets", async () => {
   const source = await read("src/screens/PlayersScreen.jsx");
 
