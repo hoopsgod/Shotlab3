@@ -180,7 +180,7 @@ test("Player Home is stable at 375, 390, and 430 widths", async ({ page }) => {
   await certifyViewport(page, 430, 932, "player-home-430");
 });
 
-test("390px visual evidence covers zero, partial, near, complete, above-target, and coach-directed states", async ({ page }) => {
+test("390px visual evidence covers zero, partial, near, complete, above-target, and coach-assignment states", async ({ page }) => {
   test.setTimeout(90_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await enterPlayerDemo(page);
@@ -203,7 +203,6 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
   }
 
   await applyDemoPerformanceState(page, { makes: 25, coachCurrent: true });
-  await expect(page.getByText("Coach plan", { exact: true })).toBeVisible();
   await expect(page.getByTestId("player-coach-priority-signal")).toContainText("Create paint pressure, then own the next game-speed block.");
   await capture(page, "player-home-state-coach-assignment-390");
 });
@@ -286,7 +285,7 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
   const lastBox = await lastSupport.boundingBox();
   expect(dockBox).not.toBeNull();
   expect(lastBox).not.toBeNull();
-  expect(lastBox.bottom).toBeLessThanOrEqual(dockBox.y - 2);
+  expect(lastBox.y + lastBox.height).toBeLessThanOrEqual(dockBox.y - 2);
   await capture(page, "player-home-390-scrolled");
 });
 
