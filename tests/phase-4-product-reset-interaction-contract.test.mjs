@@ -1,0 +1,66 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("shared controls expose premium mobile touch, working, focus, and reduced-motion states", async () => {
+  const source = await read("src/components/ui/designSystem.jsx");
+  const css = await read("src/components/ui/designSystem.css");
+
+  assert.match(source, /minHeight:\s*44/);
+  assert.match(source, /loading\s*=\s*false/);
+  assert.match(source, /aria-busy=\{loading \|\| undefined\}/);
+  assert.match(source, /data-working=\{loading \? "true" : undefined\}/);
+  assert.match(source, /disabled=\{isDisabled\}/);
+  assert.match(source, /className="ds-skeleton-line"/);
+  assert.match(source, /aria-busy="true"/);
+
+  assert.match(css, /\.ds-button:active:not\(:disabled\)/);
+  assert.match(css, /\.ds-button:focus-visible/);
+  assert.match(css, /\.ds-button:disabled/);
+  assert.match(css, /touch-action:\s*manipulation/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /\.ds-button__spinner/);
+  assert.doesNotMatch(css, /bounce|glow.*infinite/i);
+});
+
+test("shared state actions acknowledge pending work without allowing duplicate actions", async () => {
+  const source = await read("src/components/ShotLabStatePanel.jsx");
+  const css = await read("src/components/ShotLabStatePanel.module.css");
+
+  assert.match(source, /actionPending = false/);
+  assert.match(source, /actionPendingLabel = "Working"/);
+  assert.match(source, /disabled=\{actionPending\}/);
+  assert.match(source, /aria-busy=\{actionPending \|\| undefined\}/);
+  assert.match(source, /data-working=\{actionPending \? "true" : undefined\}/);
+  assert.match(css, /\.action:disabled/);
+  assert.match(css, /\.actionSpinner/);
+  assert.match(css, /@keyframes stateActionSpin/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+});
+
+test("coach player provisioning uses mobile-native inputs, semantic submission, and safe user-facing failures", async () => {
+  const source = await read("src/components/CoachPlayerInviteForm.jsx");
+
+  assert.match(source, /<form[^>]+aria-busy=\{busy \|\| undefined\}[^>]+onSubmit=\{submit\}/);
+  assert.match(source, /if \(busy\) return/);
+  assert.match(source, /loading=\{busy\}/);
+  assert.match(source, /loadingLabel="Sending invite"/);
+  assert.match(source, /type="email"/);
+  assert.match(source, /inputMode="email"/);
+  assert.match(source, /autoComplete="email"/);
+  assert.match(source, /inputMode="numeric"/);
+  assert.match(source, /pattern="\[0-9\]\*"/);
+  assert.match(source, /friendlyPlayerInviteError/);
+  assert.match(source, /technicalErrorPattern/);
+  assert.match(source, /role="alert" aria-live="assertive"/);
+  assert.doesNotMatch(source, /setError\(result\.error\)/);
+});
+
+test("Phase 4 remains component-owned instead of introducing a new global visual authority", async () => {
+  const main = await read("src/main.jsx");
+  assert.doesNotMatch(main, /Phase4.*\.css|phase-4.*\.css/i);
+  const sharedCss = await read("src/components/ui/designSystem.css");
+  assert.doesNotMatch(sharedCss, /(^|\n)\s*(html|body|:root|\*)\s*\{/m);
+});
