@@ -136,4 +136,10 @@
   .signalVisual { grid-column: 1 / -1; min-width: 0; }
 }
 
-@media (prefers-reduced-motion: reduce) { .courtTargetLock { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .performanceCourt .courtTargetLock {
+    transition: none !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
