@@ -1,11 +1,9 @@
 .backdrop{position:fixed;inset:0;z-index:1200;display:flex;justify-content:flex-end;background:#000b}
 .drawer{width:min(100%,470px);padding:24px;overflow:auto;background:#090d11;color:#f5f7f8}
-.header{display:flex;justify-content:space-between;gap:16px}.header h2{margin:6px 0 0;font-size:30px}
-.close{flex:0 0 44px;width:44px;height:44px;border:1px solid #fff2;border-radius:10px;background:#fff1;color:inherit;font-size:24px;touch-action:manipulation}
-.guardrail{margin:20px 0;color:#fffa}.form{display:grid;gap:14px}.form label>span{display:block;margin-bottom:6px;color:#fff9;font-size:11px;font-weight:800}
-.form select,.form input{box-sizing:border-box;width:100%;min-height:50px;padding:0 12px;border:1px solid #fff3;border-radius:10px;background:#05080b;color:inherit;font:inherit}
+.header{display:flex;justify-content:space-between;gap:16px}.close{flex:0 0 44px;width:44px;height:44px;border:1px solid #fff2;background:#fff1;color:inherit;font-size:24px}
+.form{display:grid;gap:14px}.form select,.form input{width:100%;min-height:50px;padding:0 12px;border:1px solid #fff3;border-radius:10px;background:#05080b;color:inherit}
 .form select:focus-visible,.form input:focus-visible,.close:focus-visible,.submit:focus-visible{outline:3px solid var(--team-brand-primary,#c8ff1a);outline-offset:2px}
-.row{display:grid;grid-template-columns:.8fr 1.2fr;gap:10px}.limit{color:#fff8;font-size:11px}.error,.empty{padding:10px;border-radius:10px;background:#ff4b4b16;color:#ff9a9a}.empty{color:#fffb}
-.submit{min-height:52px;border:0;border-radius:10px;background:var(--team-brand-primary,#c8ff1a);color:var(--team-brand-primary-text,#050701);font-weight:900;touch-action:manipulation}.submit:active:not(:disabled),.close:active:not(:disabled){opacity:.78}.submit:disabled,.close:disabled{cursor:progress;opacity:.6}
+.row{display:grid;grid-template-columns:.8fr 1.2fr;gap:10px}.error,.empty{padding:10px;border-radius:10px;background:#ff4b4b16;color:#ff9a9a}
+.submit{min-height:52px;border:0;background:var(--team-brand-primary,#c8ff1a);color:var(--team-brand-primary-text,#050701);font-weight:900}.close,.submit{border-radius:10px;touch-action:manipulation}.submit:active:not(:disabled),.close:active:not(:disabled){opacity:.78}.submit:disabled,.close:disabled{cursor:progress;opacity:.6}
 @media(max-width:540px){.drawer{padding:20px 16px calc(20px + env(safe-area-inset-bottom))}.row{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.submit,.close{transition:none}}
