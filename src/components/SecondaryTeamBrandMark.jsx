@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import ShotLabIcon from "./ShotLabIcon";
 import useCleanTeamLogo from "./useCleanTeamLogo";
-import styles from "./SecondaryTeamBrandMark.module.css";
+
+const markStyle = { position: "relative", display: "grid", placeItems: "center", minWidth: 0, width: "100%", height: "100%", overflow: "visible" };
+const logoStyle = { display: "block", width: "100%", height: "100%", objectFit: "contain", objectPosition: "center", transform: "scale(1.45)", filter: "drop-shadow(0 11px 17px rgba(7,26,34,.2))", userSelect: "none" };
 
 export default function SecondaryTeamBrandMark({ iconName = "target", variant = "route", className = "" }) {
   const { branding } = useTeamBranding();
@@ -13,22 +15,12 @@ export default function SecondaryTeamBrandMark({ iconName = "target", variant = 
 
   useEffect(() => setFailed(false), [logoSrc]);
 
-  const classes = [styles.mark, styles[variant], className].filter(Boolean).join(" ");
-
   return (
-    <span className={classes} data-secondary-team-brand="true" data-brand-variant={variant}>
+    <span className={className} style={markStyle} data-secondary-team-brand="true" data-brand-variant={variant}>
       {logoSrc && !failed ? (
-        <img
-          className={styles.logo}
-          src={logoSrc}
-          alt={`${teamName} logo`}
-          onError={() => setFailed(true)}
-          draggable="false"
-        />
+        <img style={logoStyle} src={logoSrc} alt={`${teamName} logo`} onError={() => setFailed(true)} draggable="false" />
       ) : (
-        <span className={styles.fallback} aria-hidden="true">
-          <ShotLabIcon name={iconName} size={22} />
-        </span>
+        <ShotLabIcon name={iconName} size={22} />
       )}
     </span>
   );
