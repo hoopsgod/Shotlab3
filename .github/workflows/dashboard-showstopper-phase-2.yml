@@ -11,7 +11,10 @@ on:
       - src/components/PlayerDailyPrimitives.module.css
       - src/lib/playerPerformanceNarrative.js
       - src/lib/shotlabPerformanceVisual.js
+      - scripts/apply-mobile-player-composition-reconciliation.mjs
       - tests/dashboard-showstopper-phase-2.test.mjs
+      - tests/player-interface-decomposition.test.mjs
+      - tests/phase-3-unified-experience.test.mjs
       - tests/e2e/dashboard-showstopper-phase-1.spec.mjs
       - tests/e2e/dashboard-showstopper-phase-2.spec.mjs
       - .github/workflows/dashboard-showstopper-phase-2.yml
@@ -43,8 +46,8 @@ jobs:
       - name: Install application dependencies
         run: npm ci
 
-      - name: Verify Phase 1 narrative and Phase 2 visual-state contracts
-        run: node --test tests/player-daily-command-center.test.mjs tests/dashboard-showstopper-phase-1.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/player-first-result-release-quality.test.mjs tests/dashboard-showstopper-phase-2.test.mjs
+      - name: Verify Phase 1 narrative, Phase 2 visual states, and Player architecture contracts
+        run: node --test tests/player-daily-command-center.test.mjs tests/dashboard-showstopper-phase-1.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/player-first-result-release-quality.test.mjs tests/dashboard-showstopper-phase-2.test.mjs tests/player-interface-decomposition.test.mjs tests/phase-3-unified-experience.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
