@@ -46,38 +46,65 @@ test.beforeEach(async ({ page }) => {
   await startClean(page);
 });
 
-test("player mobile home prioritizes one daily command center, three evidence metrics, and collapsed support", async ({ page }) => {
+test("player mobile home presents performance, interpretation, momentum, and one dominant action", async ({ page }) => {
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "player");
 
   const commandCenter = page.getByTestId("player-daily-command-center");
+  const todayPerformance = page.getByTestId("player-today-performance");
+  const interpretation = page.getByTestId("player-target-interpretation");
+  const momentum = page.getByTestId("player-command-evidence");
   const primaryAction = page.getByTestId("player-daily-primary-action");
-  const metrics = page.getByTestId("player-command-evidence");
   const schedule = page.getByTestId("player-upcoming-schedule");
   const standings = page.getByTestId("player-team-standings");
   const guidance = page.getByTestId("player-coach-guidance");
   const secondary = page.getByTestId("player-secondary-intelligence");
 
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
+  await expect(todayPerformance).toBeVisible();
+  await expect(interpretation).toBeVisible();
+  await expect(momentum).toBeVisible();
+  await expect(momentum.locator(":scope > *")).toHaveCount(2);
   await expect(primaryAction).toBeVisible();
-  await expectThreeMetrics(metrics);
+  await expect(page.getByTestId("player-daily-progress-ring")).toBeVisible();
+  await expect(page.getByTestId("player-daily-primary-action")).toHaveCount(1);
+
   for (const disclosure of [schedule, standings, guidance, secondary]) {
     await expect(disclosure).toBeVisible();
     expect(await disclosure.evaluate((element) => element.open)).toBe(false);
   }
 
   const commandCenterBox = await commandCenter.boundingBox();
+  const todayBox = await todayPerformance.boundingBox();
+  const momentumBox = await momentum.boundingBox();
   const primaryActionBox = await primaryAction.boundingBox();
-  const metricBox = await metrics.boundingBox();
   const scheduleBox = await schedule.boundingBox();
   expect(commandCenterBox).not.toBeNull();
+  expect(todayBox).not.toBeNull();
+  expect(momentumBox).not.toBeNull();
   expect(primaryActionBox).not.toBeNull();
-  expect(metricBox).not.toBeNull();
   expect(scheduleBox).not.toBeNull();
-  expect(primaryActionBox.y).toBeGreaterThan(commandCenterBox.y);
-  expect(metricBox.y).toBeGreaterThan(primaryActionBox.y);
+  expect(todayBox.y).toBeGreaterThanOrEqual(commandCenterBox.y);
+  expect(momentumBox.y).toBeGreaterThan(todayBox.y);
+  expect(primaryActionBox.y).toBeGreaterThan(momentumBox.y);
   expect(commandCenterBox.y).toBeLessThan(scheduleBox.y);
   expect(primaryActionBox.y).toBeLessThan(844);
+
+  const progressDisclosure = page.getByTestId("player-progress-disclosure");
+  if (!(await progressDisclosure.evaluate((element) => element.open))) await progressDisclosure.locator("summary").click();
+  const momentumSignal = page.getByTestId("player-daily-momentum-signal");
+  await expect(momentumSignal).toBeVisible();
+  const signalText = [
+    momentumSignal.getByText("Momentum", { exact: true }),
+    momentumSignal.getByText("Daily target complete", { exact: true }),
+  ];
+  for (const locator of signalText) {
+    await expect(locator).toBeVisible();
+    const color = await locator.evaluate((element) => getComputedStyle(element).color);
+    expect(color).not.toBe("rgb(245, 242, 234)");
+    expect(color).not.toBe("rgb(245, 248, 249)");
+  }
 
   await schedule.locator("summary").click();
   expect(await schedule.evaluate((element) => element.open)).toBe(true);

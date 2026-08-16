@@ -1,21 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer.js";
-import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
+import { derivePlayerPerformanceNarrative } from "../lib/playerPerformanceNarrative.js";
+import { ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyCommandCenter.module.css";
 
-const urgencyLabel = (urgency = "normal") => {
-  if (urgency === "urgent") return "Needs attention";
-  if (urgency === "priority") return "Priority";
-  if (urgency === "complete") return "Complete";
-  return "Next action";
-};
 const rankLabel = (rank = 0) => (Number(rank) > 0 ? `#${Number(rank)}` : "—");
 const actionKey = (action = {}) => String(action.id || action.kind || action.target || action.title || "action");
 const coachSignalStatus = (signal = {}) => signal.stale ? "Stale" : signal.freshness === "current" ? signal.ageDays === 0 ? "Published today" : `${signal.ageDays}d old` : "Unverified";
 const coachSignalIcon = (signal = {}) => signal.stale ? "clock" : signal.freshness === "current" ? "verified" : "neutral";
 const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
-const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" };
+const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" };
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
@@ -28,21 +23,35 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   useEffect(() => () => {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
   }, []);
+
   if (!model?.primaryAction) return null;
 
   const primary = model.primaryAction;
   const queue = Array.isArray(model.queue) ? model.queue.slice(1, 3) : [];
   const coachSignal = model.coachSignal || {};
   const firstSession = model.firstSession || {};
-  const dailyRemaining = Math.max((Number(model.daily?.goal) || 0) - (Number(model.daily?.makes) || 0), 0);
-  const dailyComplete = Number(model.daily?.pct) >= 100 || primary.urgency === "complete";
-  const weeklyComplete = Number(model.weekly?.pct) >= 100;
+  const narrative = derivePlayerPerformanceNarrative({
+    daily: model.daily,
+    weekly: model.weekly,
+    streak: model.streak,
+    firstSession,
+    primaryAction: primary,
+  });
+  const dailyRemaining = narrative.remaining;
+  const dailyComplete = narrative.complete;
+  const weeklyGoal = Number(model.weekly?.goal) || 0;
+  const weeklyComplete = weeklyGoal > 0 && Number(model.weekly?.pct) >= 100;
   const momentumTone = dailyComplete ? "positive" : primary.urgency === "urgent" ? "attention" : "info";
   const momentumTitle = dailyComplete ? "Daily target complete" : dailyRemaining > 0 ? `${dailyRemaining} makes from today’s target` : "Your next action is ready";
   const momentumDetail = dailyComplete
-    ? weeklyComplete ? "Today and this week are complete. Review progress or protect the streak with optional work." : `${model.weekly.makes} of ${model.weekly.goal} makes this week. Choose the next action that best builds on today’s work.`
-    : `${model.streak || 0}-day streak · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
+    ? weeklyComplete
+      ? "Today and this week are complete. Review progress or protect the streak with optional work."
+      : weeklyGoal > 0
+        ? `${model.weekly.makes} of ${weeklyGoal} makes this week. Choose the next action that best builds on today’s work.`
+        : `${model.weekly?.makes || 0} makes logged this week. No weekly target is set, so choose the next action that best builds on today’s work.`
+    : `${narrative.streakText} · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
   const progressShouldOpen = dailyComplete || primary.urgency === "urgent";
+
   const runAction = (action) => {
     const key = actionKey(action);
     setActiveAction(key);
@@ -50,44 +59,61 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     feedbackTimer.current = setTimeout(() => setActiveAction(""), 900);
   };
+
   const primaryWorking = activeAction === actionKey(primary);
-  const evidence = [
-    { label: "Today", value: `${model.daily.makes}/${model.daily.goal}`, pct: model.daily.pct, aria: `Today: ${model.daily.makes} of ${model.daily.goal} makes` },
-    { label: "This week", value: `${model.weekly.makes}/${model.weekly.goal}`, pct: model.weekly.pct, aria: `This week: ${model.weekly.makes} of ${model.weekly.goal} makes` },
-    { label: "Streak", value: `${model.streak || 0}d`, aria: `Current streak: ${model.streak || 0} days` },
-  ];
 
   return (
-    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" data-mobile-product-reset="phase-1" aria-label="Daily training command center">
-      <div className={styles.header} data-layout-role="editorial-header">
-        <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today’s focus"}</div>
-        <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
-      </div>
-
+    <section className={styles.root} data-testid="player-daily-command-center" data-phase="dashboard-showstopper-phase-1" data-page-hierarchy="performance-command-center" data-mobile-product-reset="phase-1" aria-label="Daily training command center">
       <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary" data-layout-role="primary-decision">
-        <div className={styles.heroTop}>
-          <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <ShotLabIcon name={primary.source === "activation" ? "plus" : primary.source === "coach" ? "coach" : primary.source === "team" ? "team" : "training"} size={13} />
-              {primary.source === "activation" ? "First result" : primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}
-            </span>
-          </ExperiencePill>
-          <div className={styles.meta}>About {primary.estimatedMinutes || 1} min</div>
+        <div className={styles.heroKicker}>
+          <span>Today</span>
+          <strong>{narrative.contextLabel}</strong>
         </div>
-        <h1 className={styles.title}>{dailyComplete ? "Daily work banked." : primary.title}</h1>
-        <p className={styles.description}>{dailyComplete ? "Today’s standard is complete. Build on the week, review progress, or handle the next team commitment." : primary.detail}</p>
-        <button type="button" className={styles.primaryButton} style={iconButtonStyle} data-testid="player-daily-primary-action" data-state={primaryWorking ? "working" : "idle"} onClick={() => runAction(primary)}>
-          <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
-          <ShotLabIcon name={primaryWorking ? "clock" : dailyComplete ? "check" : "arrow"} size={18} />
-        </button>
-      </div>
 
-      <div className={styles.progressGrid} role="group" data-testid="player-command-evidence" data-layout-role="supporting-evidence" aria-label="Today’s training evidence">
-        {evidence.map((item) => <div className={styles.progressCard} key={item.label} aria-label={item.aria}>
-          <div className={styles.progressHeader}><div className={styles.sectionLabel}>{item.label}</div>{item.pct != null && <div className={styles.meta}>{item.pct}%</div>}</div>
-          <div className={styles.progressValue}>{item.value}</div>
-          {item.pct != null && <div className={styles.progressTrack} aria-hidden="true"><div className={styles.progressFill} style={{ width: `${item.pct}%` }} /></div>}
-        </div>)}
+        <div className={styles.performanceStage} data-testid="player-today-performance">
+          <div className={styles.todayMetric}>
+            <div className={styles.todayValue} aria-label={`${narrative.makes} makes today`}>
+              <span>{narrative.makes}</span>
+              <span className={styles.todayUnit}>Made</span>
+            </div>
+            <div className={styles.interpretation} data-tone={narrative.interpretationTone} data-testid="player-target-interpretation">
+              {narrative.interpretation}
+            </div>
+          </div>
+          <div className={styles.heroRing} aria-hidden="true">
+            <ExperienceProgressRing value={narrative.makes} max={narrative.goal} label="Today" detail={`${narrative.makes} of ${narrative.goal} makes`} size={86} testId="player-daily-progress-ring" />
+          </div>
+        </div>
+
+        <div className={styles.statusBlock}>
+          <h1 className={styles.title}>{narrative.headline}</h1>
+          <p className={styles.description}>{narrative.description}</p>
+        </div>
+
+        <div className={styles.momentumRow} role="group" data-testid="player-command-evidence" data-layout-role="supporting-evidence" aria-label="Weekly progress and momentum">
+          <div className={styles.momentumItem} aria-label={`${narrative.weeklyText} ${narrative.weeklyLabel}`}>
+            <div className={styles.momentumValue}>{narrative.weeklyText}</div>
+            <div className={styles.momentumLabel}>{narrative.weeklyLabel}</div>
+          </div>
+          <div className={styles.momentumItem} aria-label={`Momentum: ${narrative.streakText}`}>
+            <div className={styles.momentumValue}>{narrative.streakText}</div>
+            <div className={styles.momentumLabel}>Momentum</div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={styles.primaryButton}
+          style={iconButtonStyle}
+          data-testid="player-daily-primary-action"
+          data-state={primaryWorking ? "working" : "idle"}
+          aria-busy={primaryWorking || undefined}
+          disabled={primaryWorking}
+          onClick={() => runAction(primary)}
+        >
+          <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
+          <ShotLabIcon name={primaryWorking ? "clock" : primary.urgency === "complete" ? "check" : "arrow"} size={18} />
+        </button>
       </div>
 
       {firstSession.complete && !model.activation.complete && <div className={styles.momentumSignal} data-testid="player-first-result-confirmation" data-command-role="confirmation">
@@ -136,19 +162,17 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
             return <div className={styles.taskRow} key={task.id}>
               <div className={styles.taskIndex} aria-label={`Queued action ${index + 2}`}><ShotLabIcon name="neutral" size={17} /></div>
               <div className={styles.taskCopy}><div className={styles.taskTitle}>{task.title}</div><div className={styles.taskMeta}>{task.detail} · {task.estimatedMinutes || 1} min</div></div>
-              <button type="button" className={styles.taskButton} style={iconButtonStyle} data-state={taskWorking ? "working" : "idle"} onClick={() => runAction(task)}><span>{taskWorking ? "Opening…" : task.actionLabel}</span><ShotLabIcon name={taskWorking ? "clock" : "arrow"} size={16} /></button>
+              <button type="button" className={styles.taskButton} style={iconButtonStyle} data-state={taskWorking ? "working" : "idle"} disabled={taskWorking} aria-busy={taskWorking || undefined} onClick={() => runAction(task)}><span>{taskWorking ? "Opening…" : task.actionLabel}</span><ShotLabIcon name={taskWorking ? "clock" : "arrow"} size={16} /></button>
             </div>;
           })}
         </div>
       </div>}
 
       <details className="playerProgressDisclosure" data-testid="player-progress-disclosure" data-command-role="progress-details" data-layout-role="quiet-secondary" open={progressShouldOpen || undefined}>
-        <summary><span><small>Progress snapshot</small><strong>{model.daily.pct}% today · {model.weekly.pct}% this week</strong></span><span>View details</span></summary>
+        <summary><span><small>Progress snapshot</small><strong>{narrative.makes} made today · {narrative.weeklyText} {narrative.weeklyLabel.toLowerCase()}</strong></span><span>View details</span></summary>
         <div className="playerProgressDisclosureBody">
           <div className={styles.momentumSignal}>
-            <ExperienceSignal eyebrow="Momentum" title={momentumTitle} detail={momentumDetail} tone={momentumTone} testId="player-daily-momentum-signal">
-              <ExperienceProgressRing value={model.daily.makes} max={model.daily.goal || 1} label="Today" detail={`${model.daily.makes} of ${model.daily.goal} makes`} size={88} testId="player-daily-progress-ring" />
-            </ExperienceSignal>
+            <ExperienceSignal eyebrow="Momentum" title={momentumTitle} detail={momentumDetail} tone={momentumTone} testId="player-daily-momentum-signal" />
           </div>
           <div className={styles.metrics} aria-label="Supporting player metrics">
             <div className={styles.metric}><div className={styles.metricValue}>{rankLabel(model.leaderboardRank)}</div><div className={styles.metricLabel}>Team rank</div></div>

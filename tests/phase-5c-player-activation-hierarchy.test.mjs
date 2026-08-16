@@ -12,22 +12,23 @@ const commandCss = read("src/components/PlayerDailyCommandCenter.module.css");
 const hierarchyCss = read("src/styles/CommandHierarchy2026.css");
 const criticalCss = read("public/shotlab-phase2-critical.css");
 
-test("Player Home encodes editorial, primary-decision, evidence, and quiet-secondary regions", () => {
-  assert.match(header, /data-layout-role="editorial-header"/);
-  assert.match(command, /data-page-hierarchy="activation-loop"/);
-  assert.match(command, /data-layout-role="editorial-header"/);
+test("Player Home encodes compact identity, performance, evidence, and quiet-secondary regions", () => {
+  assert.match(header, /data-layout-role="compact-athlete-credential"/);
+  assert.match(command, /data-page-hierarchy="performance-command-center"/);
+  assert.match(command, /data-testid="player-today-performance"/);
   assert.match(command, /data-layout-role="primary-decision"/);
   assert.match(command, /data-layout-role="supporting-evidence"/);
   assert.match(command, /data-layout-role="quiet-secondary"/);
 });
 
-test("Player identity and command framing are unboxed while the action hero stays elevated", () => {
+test("Player identity and command framing are unboxed while the performance hero stays elevated", () => {
   assert.match(headerCss, /\.header\.player\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-bottom:\s*1px solid[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
   assert.match(headerCss, /\.player \.brandPanel\s*\{[\s\S]*?background:\s*transparent;/);
-  assert.match(commandCss, /\.root\s*\{[\s\S]*?overflow:\s*visible;[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
-  assert.match(commandCss, /\.hero\s*\{[\s\S]*?border-radius:\s*24px;[\s\S]*?linear-gradient/);
-  assert.match(commandCss, /\.progressGrid\s*\{[\s\S]*?gap:\s*0;[\s\S]*?border-block:\s*1px solid/);
-  assert.match(commandCss, /\.progressCard\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;[\s\S]*?box-shadow:\s*none;/);
+  assert.match(commandCss, /\.root\s*\{[\s\S]*?overflow:visible;[\s\S]*?color:var\(--text-1\)/);
+  assert.match(commandCss, /\.hero\s*\{[\s\S]*?border-radius:var\(--radius-xl,24px\);[\s\S]*?linear-gradient/);
+  assert.match(commandCss, /\.momentumRow\s*\{[\s\S]*?grid-template-columns:minmax\(0,1\.25fr\) minmax\(0,\.75fr\);[\s\S]*?border-block:1px solid/);
+  assert.doesNotMatch(commandCss, /\.progressGrid\s*\{/);
+  assert.doesNotMatch(commandCss, /\.progressCard\s*\{/);
 });
 
 test("At Home and Program expose one primary region with flat supporting training rows", () => {
@@ -38,11 +39,11 @@ test("At Home and Program expose one primary region with flat supporting trainin
   assert.match(app, /data-layout-role=\{isPrimarySession\?"primary-program-session":"quiet-secondary"\}/);
   assert.match(app, /className=\{`player-drill-row/);
 
-  assert.match(hierarchyCss, /\.player-primary-logging-region\s*\{[\s\S]*?border-radius:\s*24px;[\s\S]*?linear-gradient/);
+  assert.match(hierarchyCss, /\.player-primary-logging-region\s*\{[\s\S]*?border-radius:\s*var\(--radius-xl, 24px\);[\s\S]*?linear-gradient/);
   assert.match(hierarchyCss, /\.player-training-plan\s*\{[\s\S]*?border-block:\s*1px solid/);
   assert.match(hierarchyCss, /\.player-drill-row\s*\{[\s\S]*?border:\s*0;[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent;/);
   assert.match(hierarchyCss, /\.player-program-session\s*\{[\s\S]*?border-top:\s*1px solid/);
-  assert.match(hierarchyCss, /\.player-program-session--primary\s*\{[\s\S]*?border-radius:\s*24px;[\s\S]*?background:/);
+  assert.match(hierarchyCss, /\.player-program-session--primary\s*\{[\s\S]*?border-radius:\s*var\(--radius-xl, 24px\);[\s\S]*?background:/);
 });
 
 test("legacy critical authority no longer recreates nested task and disclosure cards", () => {

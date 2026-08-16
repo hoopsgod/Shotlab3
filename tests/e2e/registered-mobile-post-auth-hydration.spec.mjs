@@ -210,10 +210,8 @@ test("registered Player mobile login hydrates real persisted state before presen
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem("sl:demoMode"))).not.toBe("true");
 
   await navigateToKey(page, "home");
-  await expect.poll(
-    () => page.locator("body").innerText(),
-    { timeout: 30_000, message: "registered Player Home must render the signed backend shot marker instead of the pre-login empty state" },
-  ).toMatch(new RegExp(`${SHOT_MARKER}\\/100`));
+  await expect(page.getByTestId("player-today-performance"), "registered Player Home must render the signed backend shot marker instead of the pre-login empty state").toContainText(String(SHOT_MARKER), { timeout: 30_000 });
+  await expect(page.getByTestId("player-target-interpretation")).toHaveText("+25 ABOVE TARGET");
   await expect(page.locator("body")).not.toContainText("Log your first shooting result");
 
   const persistedShotLogs = await page.evaluate(() => JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]"));

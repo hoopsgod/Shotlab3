@@ -96,11 +96,13 @@ test("Coach detail surfaces use the same edge performance language", () => {
 
 test("persistent Player and Coach identity chrome uses compact signature stages without legacy white cards", () => {
   assert.match(playerHeader, /data-mobile-chrome="native-identity"/);
-  assert.match(playerHeader, /grid-template-columns:64px minmax\(0,1fr\)!important/);
-  assert.match(playerHeader, /min-height:96px!important/);
-  assert.match(playerHeader, /linear-gradient\(126deg,#061923 0%,#082430 58%,#0b2d37 100%\)!important/);
+  assert.match(playerHeader, /grid-template-columns:56px minmax\(0,1fr\)!important/);
+  assert.match(playerHeader, /min-height:82px!important/);
+  assert.match(playerHeader, /linear-gradient\(126deg,#061923 0%,#082430 60%,#0a2933 100%\)!important/);
   assert.match(playerHeader, /data-identity-role="badge"\]\{[\s\S]*color:#c8ff1a!important/);
-  assert.match(playerHeader, /data-identity-role="name"\]\{[\s\S]*font-size:25px!important/);
+  assert.match(playerHeader, /data-identity-role="name"\]\{[\s\S]*font-size:23px!important/);
+  assert.match(playerHeader, /overflow-wrap:anywhere!important/);
+  assert.match(playerHeader, /data-identity-role="tagline"\],\[data-identity-role="mission"\]\)\{display:none!important/);
   assert.match(coachHeader, /data-mobile-chrome="native-identity"/);
   assert.match(coachHeader, /grid-template-columns:66px minmax\(0,1fr\)!important/);
   assert.match(coachHeader, /min-height:102px!important/);

@@ -5,6 +5,7 @@ import test from "node:test";
 const app = fs.readFileSync("src/App.jsx", "utf8");
 const component = fs.readFileSync("src/components/PlayerDailyCommandCenter.jsx", "utf8");
 const selector = fs.readFileSync("src/lib/playerDailyCommandCenter.js", "utf8");
+const narrative = fs.readFileSync("src/lib/playerPerformanceNarrative.js", "utf8");
 const workflow = fs.readFileSync(".github/workflows/player-experience-phase-1-e2e.yml", "utf8");
 
 test("Player Home uses the shared daily command center", () => {
@@ -38,7 +39,8 @@ test("first-result conversion is a single bounded player path", () => {
   assert.match(selector, /milestone: "first-training-result"/);
   assert.match(selector, /firstResultPending/);
   assert.match(selector, /firstSession:/);
-  assert.match(component, /First session · Create your baseline/);
+  assert.match(component, /derivePlayerPerformanceNarrative/);
+  assert.match(narrative, /Set your baseline\./);
   assert.match(component, /data-testid="player-first-result-confirmation"/);
   assert.match(component, /First session complete/);
 });

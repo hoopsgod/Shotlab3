@@ -17,19 +17,21 @@ test('Player composition reconciliation runs after the signature enhancer withou
   assert.doesNotMatch(retiredAuthority, /@import/)
 })
 
-test('Player Home hero removes the absolute progress-seal collision and centers the decision composition in its owning stylesheet', () => {
-  assert.match(reconciliation, /PlayerDailyCommandCenter\.module\.css/)
+test('Dashboard Showstopper Home bypasses the retired centered KPI-card mutation path', () => {
+  assert.match(reconciliation, /function hasDashboardShowstopperHome\(\)/)
+  assert.match(reconciliation, /data-phase=\"dashboard-showstopper-phase-1\"/)
+  assert.match(reconciliation, /hasDashboardShowstopperHome\(\) \? false : appendOwnedBlock\('src\/components\/PlayerDailyCommandCenter\.module\.css', legacyHomeCss\)/)
   assert.match(reconciliation, /\.hero\{text-align:center\}/)
-  assert.match(reconciliation, /\[data-testid="player-daily-progress-seal"\]\{[^}]*position:relative!important;[^}]*margin:18px auto 0!important/)
-  assert.match(reconciliation, /\.title\{[^}]*margin:15px auto 0!important/)
   assert.match(reconciliation, /\.progressCard\{text-align:center!important\}/)
+  assert.match(reconciliation, /player-daily-progress-seal/)
 })
 
-test('expanded Player momentum restores dark contrast and centered geometry in the shared command hierarchy owner', () => {
+test('expanded Player momentum stays dark-on-light in the shared command hierarchy owner', () => {
   assert.match(reconciliation, /CommandHierarchy2026\.css/)
-  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\]\{[^}]*grid-template-columns:1fr!important/)
-  assert.match(reconciliation, /linear-gradient\(145deg,#0b2633,#071820 72%\)!important/)
-  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\] \[class\*="signalVisual"\]\{[^}]*justify-self:center!important/)
+  assert.match(reconciliation, /\[data-testid="player-daily-momentum-signal"\]\{[^}]*--text-1:#17211a!important/)
+  assert.match(reconciliation, /background:transparent!important/)
+  assert.match(reconciliation, /text-align:left!important/)
+  assert.doesNotMatch(reconciliation, /player-daily-momentum-signal[^`]*linear-gradient\(145deg,#0b2633,#071820 72%\)!important/)
 })
 
 test('Player operational and commitment surfaces keep centered mobile headers, metrics, filters, and training-plan framing', () => {
