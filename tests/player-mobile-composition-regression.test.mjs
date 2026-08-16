@@ -4,6 +4,7 @@ import fs from 'node:fs'
 
 const runner = fs.readFileSync(new URL('../scripts/run-route-enhancers.mjs', import.meta.url), 'utf8')
 const reconciliation = fs.readFileSync(new URL('../scripts/apply-mobile-player-composition-reconciliation.mjs', import.meta.url), 'utf8')
+const operationalWorkspace = fs.readFileSync(new URL('../src/components/PlayerOperationalWorkspace.jsx', import.meta.url), 'utf8')
 const retiredAuthority = fs.readFileSync(new URL('../src/styles/MobilePremiumVisualSystem2026.css', import.meta.url), 'utf8')
 
 test('Player composition reconciliation runs after the signature enhancer without reviving the retired global authority', () => {
@@ -35,7 +36,9 @@ test('Player operational and commitment surfaces keep centered mobile headers, m
   assert.match(reconciliation, /PlayerOperationalWorkspace\.module\.css/)
   assert.match(reconciliation, /\.commandBar\{text-align:center;justify-items:center\}/)
   assert.match(reconciliation, /\.metric\{text-align:center\}/)
-  assert.match(reconciliation, /\.filterRail\{justify-content:center\}/)
+  assert.match(operationalWorkspace, /MOBILE_FILTER_RAIL_CSS/)
+  assert.match(operationalWorkspace, /data-player-workspace-filter-rail="true"/)
+  assert.match(operationalWorkspace, /justify-content:center/)
   assert.match(reconciliation, /MOBILE_COMMITMENT_COMPOSITION_CSS/)
   assert.match(reconciliation, /player-commitment-route-header-/)
   assert.match(reconciliation, /text-align:center/)
