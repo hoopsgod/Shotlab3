@@ -76,6 +76,8 @@ test('mobile secondary route mastheads resolve to a compact centered team-brande
   assert.match(centered, /\.secondaryPageIntro__actions \{[\s\S]*max-width: 360px;[\s\S]*margin: 0 auto;[\s\S]*justify-items: center;[\s\S]*gap: 5px;/)
   assert.match(centered, /line-height: 1\.25;\n    text-align: center;/)
   assert.match(centered, /\.coachPlayerDetailWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 16ch !important;/)
+  assert.match(centered, /\.coachAdministrationWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 16ch !important;/)
+  assert.match(centered, /\.brandingEditorialWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 18ch !important;\n    white-space: nowrap;/)
   assert.match(centered, /@media \(max-width: 430px\) \{\n  \.secondaryPageIntro \{ grid-template-columns: minmax\(0, 1fr\); column-gap: 0; \}/)
   assert.match(centered, /\.secondaryPageIntro__icon \{ width: 48px; height: 48px; border-radius: 0; \}/)
 })
