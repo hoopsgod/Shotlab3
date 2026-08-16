@@ -8,7 +8,7 @@ This inventory is intentionally limited to release-hardening defects. It does no
 
 ## P0 — Blocks use / data safety
 
-No P0 defect confirmed in the initial audit.
+No P0 defect confirmed in the audit.
 
 ## P1 — Serious reliability or trust
 
@@ -22,7 +22,7 @@ No P0 defect confirmed in the initial audit.
 
 **Repair:** Only a successful assignment result may populate the confirmed delivery indicator. Failed or fallback states use explicit unconfirmed/retry language while preserving the editable local draft.
 
-**Regression:** `tests/phase-5-release-hardening.test.mjs`
+**Regression:** `tests/phase-5-release-hardening.test.mjs`, `tests/e2e/phase-5-release-hardening.spec.mjs`
 
 **Status:** Repaired; certification pending.
 
@@ -36,7 +36,35 @@ React disabled/busy state alone does not synchronously lock a handler during the
 
 **Repair:** Add synchronous `useRef` single-flight guards, retain disabled UI state, expose `aria-busy`, and release locks in `finally`.
 
-**Regression:** `tests/phase-5-release-hardening.test.mjs`
+**Regression:** `tests/phase-5-release-hardening.test.mjs`, `tests/e2e/phase-5-release-hardening.spec.mjs`
+
+**Status:** Repaired; certification pending.
+
+### P1-03 — Add Player could begin duplicate provisioning requests
+
+**Area:** Coach Players → Add Player & Send Login Invite
+
+The form disabled itself after `busy` rendered, but there was no synchronous lock inside the submit handler.
+
+**Risk:** A rapid repeated submit could race player provisioning/invitation requests, creating duplicate account/invite work or conflicting success states.
+
+**Repair:** Add a synchronous provisioning single-flight guard and always release it in `finally` while preserving existing accessible busy/error behavior.
+
+**Regression:** `tests/phase-5-release-hardening.test.mjs` plus the existing Coach Player Invitations E2E gate.
+
+**Status:** Repaired; certification pending.
+
+### P1-04 — Program Score could begin duplicate save requests
+
+**Area:** Coach Program scoring
+
+The score drawer used React `saving` state as its only duplicate-submit defense.
+
+**Risk:** Rapid repeated submits could produce duplicate supervised score writes and undermine leaderboard/data trust.
+
+**Repair:** Add a synchronous score-submit single-flight guard while retaining validation, user-safe errors, disabled controls, and `aria-busy`.
+
+**Regression:** `tests/phase-5-release-hardening.test.mjs` plus existing Program scoring contracts.
 
 **Status:** Repaired; certification pending.
 
