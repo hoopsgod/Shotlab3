@@ -27,7 +27,7 @@ const workspaceCss = `
 `
 
 const commitmentCss = `
-@media(max-width:759px){.routeHeader{text-align:center}.routeTitleRow{align-items:center}.routeHeader>p{margin-inline:auto}}`
+@media(max-width:759px){.routeHeader{text-align:center}.routeTitleRow{align-items:center}}`
 
 const hierarchyCss = `
 @media(max-width:760px){
