@@ -18,6 +18,7 @@ on:
       - tests/e2e/phase-3r-player-progress-story-screenshots.spec.mjs
       - tests/e2e/coach-dashboard-phase-2.spec.mjs
       - tests/e2e/demo-paid-parity.spec.mjs
+      - playwright.phase3-mobile.config.mjs
       - .github/workflows/dashboard-showstopper-phase-3.yml
   workflow_dispatch:
 
@@ -67,7 +68,8 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: dashboard-showstopper-phase-3-e2e.json
         run: |
           set -o pipefail
-          npx playwright test tests/e2e/dashboard-showstopper-phase-2.spec.mjs tests/e2e/phase-3p-player-training-completion-screenshots.spec.mjs tests/e2e/phase-3r-player-progress-story-screenshots.spec.mjs tests/e2e/coach-dashboard-phase-2.spec.mjs tests/e2e/demo-paid-parity.spec.mjs --project=chromium-desktop --reporter=line,json 2>&1 | tee dashboard-showstopper-phase-3-e2e.log
+          npx playwright test tests/e2e/dashboard-showstopper-phase-2.spec.mjs tests/e2e/coach-dashboard-phase-2.spec.mjs tests/e2e/demo-paid-parity.spec.mjs --project=chromium-desktop --reporter=line,json 2>&1 | tee dashboard-showstopper-phase-3-e2e.log
+          npx playwright test tests/e2e/phase-3p-player-training-completion-screenshots.spec.mjs tests/e2e/phase-3r-player-progress-story-screenshots.spec.mjs --config=playwright.phase3-mobile.config.mjs --project=chromium-phase3-mobile --reporter=line 2>&1 | tee -a dashboard-showstopper-phase-3-e2e.log
 
       - name: Record exact candidate SHA and performance evidence
         if: always()
