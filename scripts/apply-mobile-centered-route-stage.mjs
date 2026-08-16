@@ -28,6 +28,13 @@ function replaceDeclarationsInBlock(source, blockStart, replacements, label) {
   return `${source.slice(0, start)}${block}${source.slice(end + 4)}`
 }
 
+function insertBeforeNarrowMedia(source, rule, label) {
+  if (source.includes(rule)) return source
+  const anchor = `}\n\n@media (max-width: 430px) {\n  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`
+  const replacement = `${rule}}\n\n@media (max-width: 430px) {\n  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`
+  return replaceOnce(source, anchor, replacement, label)
+}
+
 export function centerMobileRouteStage(source) {
   let next = source
 
@@ -92,11 +99,10 @@ export function centerMobileRouteStage(source) {
   )
 
   const detailRule = `  .coachPlayerDetailWorkspace .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {\n    max-width: 16ch !important;\n    white-space: normal;\n  }\n`
-  if (!next.includes(detailRule)) {
-    const narrowAnchor = `}\n\n@media (max-width: 430px) {\n  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`
-    const narrowReplacement = `${detailRule}}\n\n@media (max-width: 430px) {\n  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`
-    next = replaceOnce(next, narrowAnchor, narrowReplacement, 'Coach player-detail title measure')
-  }
+  next = insertBeforeNarrowMedia(next, detailRule, 'Coach player-detail title measure')
+
+  const administrationRule = `  .coachAdministrationWorkspace .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {\n    max-width: 16ch !important;\n  }\n`
+  next = insertBeforeNarrowMedia(next, administrationRule, 'Coach administration title measure')
 
   next = replaceOnce(
     next,
