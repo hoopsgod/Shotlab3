@@ -1,4 +1,5 @@
 import React from "react";
+import "./designSystem.css";
 
 export const DS_TOKENS = {
   radius: { sm: 10, md: 12, lg: 14, xl: 16 },
@@ -30,7 +31,7 @@ export const DS_TOKENS = {
 };
 
 const BASE_BUTTON = {
-  minHeight: 42,
+  minHeight: 44,
   borderRadius: DS_TOKENS.radius.md,
   padding: "10px 14px",
   cursor: "pointer",
@@ -43,13 +44,26 @@ const BASE_BUTTON = {
   willChange: "transform",
 };
 
-export function DSButton({ variant = "secondary", style, ...props }) {
+export function DSButton({ variant = "secondary", style, className = "", loading = false, loadingLabel = "Working", disabled = false, children, ...props }) {
   const variants = {
     primary: { border: "1px solid var(--accent)", background: "var(--accent)", color: "#0B0D10", boxShadow: DS_TOKENS.shadow.glow },
     secondary: { border: "1px solid var(--stroke-1)", background: "var(--surface-1)", color: "var(--text-2)" },
     ghost: { border: "1px solid transparent", background: "transparent", color: "var(--text-2)" },
   };
-  return <button {...props} className="ds-button" style={{ ...BASE_BUTTON, ...(variants[variant] || variants.secondary), ...style }} />;
+  const isDisabled = disabled || loading;
+  return (
+    <button
+      {...props}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      data-working={loading ? "true" : undefined}
+      className={["ds-button", className].filter(Boolean).join(" ")}
+      style={{ ...BASE_BUTTON, ...(variants[variant] || variants.secondary), ...style }}
+    >
+      {loading ? <span className="ds-button__spinner" aria-hidden="true" /> : null}
+      <span>{loading ? loadingLabel : children}</span>
+    </button>
+  );
 }
 
 export function DSCard({ children, style, accent = false, ...props }) {
@@ -61,16 +75,16 @@ export function DSMetricCard({ label, value, onClick, style, valueStyle }) {
 }
 
 export function DSSectionHeader({ title, meta }) { return <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: DS_TOKENS.spacing.sm, marginBottom: DS_TOKENS.spacing.md }}><div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 800, letterSpacing: "0.07em", textTransform: "uppercase", lineHeight: 1.2 }}>{title}</div>{meta ? <div style={{ color: "var(--text-3)", fontSize: DS_TOKENS.type.label.fontSize, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: DS_TOKENS.type.label.lineHeight }}>{meta}</div> : null}</div>; }
-export function DSChip({ active, children, style, ...props }) { return <button type="button" className="ds-chip" aria-pressed={Boolean(active)} {...props} style={{ minHeight: 38, borderRadius: DS_TOKENS.radius.sm, border: `1px solid ${active ? "var(--accent)" : "var(--stroke-1)"}`, background: active ? "var(--accent-soft)" : "var(--surface-2)", color: active ? "var(--accent)" : "var(--text-2)", fontSize: DS_TOKENS.type.label.fontSize, lineHeight: DS_TOKENS.type.label.lineHeight, fontWeight: 700, padding: "0 12px", textTransform: "uppercase", cursor: "pointer", transition: `transform ${DS_TOKENS.motion.fast} ${DS_TOKENS.motion.easeStandard}, border-color ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, background ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, color ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}`, willChange: "transform", ...style }}>{children}</button>; }
-export function DSInput({ style, ...props }) { return <input {...props} className="ds-input" style={{ minHeight: 42, borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-1)", color: "var(--text-1)", padding: "10px 12px", transition: `border-color ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, box-shadow ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, background ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}`, ...style }} />; }
+export function DSChip({ active, children, style, className = "", ...props }) { return <button type="button" className={["ds-chip", className].filter(Boolean).join(" ")} aria-pressed={Boolean(active)} {...props} style={{ minHeight: 44, borderRadius: DS_TOKENS.radius.sm, border: `1px solid ${active ? "var(--accent)" : "var(--stroke-1)"}`, background: active ? "var(--accent-soft)" : "var(--surface-2)", color: active ? "var(--accent)" : "var(--text-2)", fontSize: DS_TOKENS.type.label.fontSize, lineHeight: DS_TOKENS.type.label.lineHeight, fontWeight: 700, padding: "0 12px", textTransform: "uppercase", cursor: "pointer", transition: `transform ${DS_TOKENS.motion.fast} ${DS_TOKENS.motion.easeStandard}, border-color ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, background ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, color ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}`, willChange: "transform", ...style }}>{children}</button>; }
+export function DSInput({ style, className = "", ...props }) { return <input {...props} className={["ds-input", className].filter(Boolean).join(" ")} style={{ minHeight: 44, borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-1)", color: "var(--text-1)", padding: "10px 12px", transition: `border-color ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, box-shadow ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}, background ${DS_TOKENS.motion.base} ${DS_TOKENS.motion.easeStandard}`, ...style }} />; }
 export function DSEmptyState({ title, message, style }) { return <div style={{ borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: "var(--text-2)", fontSize: 13, padding: "16px 14px", fontWeight: 600, ...style }}><div style={{ color: "var(--text-1)", fontWeight: 700, marginBottom: 4 }}>{title}</div><div>{message}</div></div>; }
 
 export function DSLoadingState({ label = "Loading", lines = 3, style }) {
   const skeletonLines = Array.from({ length: Math.max(1, lines) });
-  return <div role="status" aria-live="polite" style={{ borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", padding: "14px", ...style }}>
+  return <div role="status" aria-live="polite" aria-busy="true" style={{ borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", padding: "14px", ...style }}>
     <div style={{ color: "var(--text-2)", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>{label}…</div>
     <div style={{ display: "grid", gap: 8 }}>
-      {skeletonLines.map((_, index) => <div key={index} className="tb" style={{ height: 10, borderRadius: 999, width: `${index === skeletonLines.length - 1 ? 72 : 100}%`, background: "linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.13), rgba(255,255,255,0.03))" }} />)}
+      {skeletonLines.map((_, index) => <div key={index} className="ds-skeleton-line" style={{ height: 10, borderRadius: 999, width: `${index === skeletonLines.length - 1 ? 72 : 100}%`, background: "linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.13), rgba(255,255,255,0.03))" }} />)}
     </div>
   </div>;
 }
