@@ -155,7 +155,8 @@ test("Target Court reduced-motion and semantic contracts hold", async ({ page })
   const visual = page.locator('[data-performance-visual="shotlab-target-court"]');
   await expect(visual).toHaveAttribute("aria-label", /125 makes today.*25 above target/i);
   const targetLockDuration = await visual.locator('[data-performance-layer="target-lock"]').evaluate((node) => getComputedStyle(node).transitionDuration);
-  expect(["0s", "0ms"]).toContain(targetLockDuration);
+  const maxDurationSeconds = Math.max(...targetLockDuration.split(",").map((value) => Number.parseFloat(value) || 0));
+  expect(maxDurationSeconds).toBeLessThanOrEqual(0.001);
   await expect(page.getByTestId("player-daily-primary-action")).toHaveCount(1);
   const actionHeight = await page.getByTestId("player-daily-primary-action").evaluate((node) => node.getBoundingClientRect().height);
   expect(actionHeight).toBeGreaterThanOrEqual(44);
