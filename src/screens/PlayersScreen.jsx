@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { DominantObjectiveCard, MetricStrip, QuietSection } from "../components/VisualHierarchy.jsx";
-import { DSButton, DSCard, DSChip, DSEmptyState, DSInput, DSLoadingState, DSSectionHeader } from "../components/ui/designSystem";
+import { DSButton, DSCard, DSChip, DSEmptyState, DSInput, DSSectionHeader } from "../components/ui/designSystem";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -22,7 +22,6 @@ export default function PlayersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL PLAYERS");
   const [copied, setCopied] = useState(false);
-  const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   const players = [];
   const totalPlayers = players.length;
@@ -51,11 +50,6 @@ export default function PlayersScreen() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsBootstrapping(false), 650);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="premium-roster-workspace" style={{ minHeight: "100%", padding: "4px 0 28px", display: "grid", gap: 12 }}>
@@ -89,7 +83,8 @@ export default function PlayersScreen() {
       <QuietSection title="Roster controls" eyebrow="Find and segment">
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 10, alignItems: "center" }} className="roster-control-grid">
           <DSInput
-            type="text"
+            type="search"
+            aria-label="Search players"
             placeholder="Search players"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -97,7 +92,7 @@ export default function PlayersScreen() {
           />
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
-              <DSChip key={filter} active={activeFilter === filter} onClick={() => setActiveFilter(filter)} style={{ borderRadius: 999, minHeight: 38 }}>
+              <DSChip key={filter} active={activeFilter === filter} onClick={() => setActiveFilter(filter)} style={{ borderRadius: 999 }}>
                 {filter}
               </DSChip>
             ))}
@@ -105,15 +100,7 @@ export default function PlayersScreen() {
         </div>
       </QuietSection>
 
-      {isBootstrapping ? (
-        <DSLoadingState
-          label="Preparing your player workspace"
-          lines={4}
-          style={{ minHeight: 170, display: "grid", alignContent: "center", borderRadius: 18 }}
-        />
-      ) : null}
-
-      {!isBootstrapping && players.length === 0 ? (
+      {players.length === 0 ? (
         <DSCard style={{ padding: 18, borderRadius: 20, background: "var(--pw-surface)", border: "1px solid var(--pw-border)", boxShadow: "var(--pw-shadow)" }}>
           <div style={{ minHeight: 260, display: "grid", alignContent: "center", justifyItems: "center", gap: 14 }}>
             <div style={{ width: 70, height: 70, borderRadius: 20, display: "grid", placeItems: "center", border: "1px solid color-mix(in srgb,var(--pw-accent) 28%,var(--pw-border))", background: "var(--pw-accent-faint)", boxShadow: "0 18px 40px rgba(0,0,0,.28)" }}>
@@ -137,12 +124,12 @@ export default function PlayersScreen() {
             </DSButton>
           </div>
         </DSCard>
-      ) : !isBootstrapping ? (
+      ) : (
         <>
           <DSSectionHeader title="Roster" meta={`${filteredPlayers.length} shown`} />
           <div style={{ display: "grid", gap: 9 }}>
             {filteredPlayers.map((player) => (
-              <DSCard key={player.id} className="ch" style={{ padding: 14, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+              <DSCard key={player.id} className="ch" style={{ padding: 14, display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 44, height: 44, background: "var(--surface-1)", borderRadius: 14, display: "grid", placeItems: "center", fontSize: 16, fontWeight: 700, color: "var(--text-1)", border: player.active ? "1px solid var(--pw-accent)" : "1px solid var(--pw-border)" }}>
                   {player.name?.[0] || "?"}
                 </div>
@@ -155,7 +142,7 @@ export default function PlayersScreen() {
             ))}
           </div>
         </>
-      ) : null}
+      )}
 
       <style>{`@media (max-width:760px){.roster-control-grid{grid-template-columns:1fr!important}}`}</style>
     </div>
