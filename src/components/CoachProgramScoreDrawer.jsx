@@ -156,7 +156,7 @@ export default function CoachProgramScoreDrawer({
             ) : null}
             {error ? <div className={styles.error} role="alert" aria-live="assertive">{error}</div> : null}
             <button className={styles.submit} type="submit" disabled={saving} aria-busy={saving || undefined} data-working={saving ? "true" : undefined}>
-              {saving ? <><span className={styles.spinner} aria-hidden="true" />Saving verified result…</> : "Save verified result"}
+              {saving ? "Saving verified result…" : "Save verified result"}
             </button>
           </form>
         )}
