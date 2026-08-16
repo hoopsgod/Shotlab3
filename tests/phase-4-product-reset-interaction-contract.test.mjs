@@ -10,6 +10,7 @@ test("shared controls expose premium mobile touch, working, focus, and reduced-m
 
   assert.match(source, /minHeight:\s*44/);
   assert.match(source, /loading\s*=\s*false/);
+  assert.match(source, /loadingLabel = "Working"/);
   assert.match(source, /aria-busy=\{loading \|\| undefined\}/);
   assert.match(source, /data-working=\{loading \? "true" : undefined\}/);
   assert.match(source, /disabled=\{isDisabled\}/);
@@ -21,7 +22,6 @@ test("shared controls expose premium mobile touch, working, focus, and reduced-m
   assert.match(css, /\.ds-button:disabled/);
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /\.ds-button__spinner/);
   assert.doesNotMatch(css, /bounce|glow.*infinite/i);
 });
 
@@ -34,9 +34,9 @@ test("shared state actions acknowledge pending work without allowing duplicate a
   assert.match(source, /disabled=\{actionPending\}/);
   assert.match(source, /aria-busy=\{actionPending \|\| undefined\}/);
   assert.match(source, /data-working=\{actionPending \? "true" : undefined\}/);
+  assert.match(source, /actionPending \? actionPendingLabel : actionLabel/);
   assert.match(css, /\.action:disabled/);
-  assert.match(css, /\.actionSpinner/);
-  assert.match(css, /@keyframes stateActionSpin/);
+  assert.match(css, /\.action:active:not\(:disabled\)/);
   assert.match(css, /prefers-reduced-motion:reduce/);
 });
 
@@ -83,6 +83,7 @@ test("Coach Program score logging is single-flight, thumb-safe, and shields tech
   assert.match(source, /if \(saving\) return/);
   assert.match(source, /aria-busy=\{saving \|\| undefined\}/);
   assert.match(source, /data-working=\{saving \? "true" : undefined\}/);
+  assert.match(source, /Saving verified result/);
   assert.match(source, /friendlyProgramScoreError/);
   assert.match(source, /catch \(caught\)/);
   assert.match(source, /role="alert" aria-live="assertive"/);
