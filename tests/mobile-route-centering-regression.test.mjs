@@ -25,6 +25,8 @@ const promotedFixture = `@media (max-width: 760px) {
     place-items: center;
     margin-top: 1px;
     border: 1px solid rgba(7, 26, 34, .1);
+    border-radius: 0;
+    background: #0b2028;
   }
   .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
   .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {
@@ -63,18 +65,19 @@ test('final route enhancer runs after the signature promotion that previously re
   assert.ok(centeringIndex > promotionIndex)
 })
 
-test('mobile secondary route mastheads resolve to a compact centered one-column title stage', () => {
+test('mobile secondary route mastheads resolve to a compact centered team-branded title stage', () => {
   const centered = centerMobileRouteStage(promotedFixture)
-  assert.match(centered, /grid-template-columns: minmax\(0, 1fr\);[\s\S]*justify-items: center;[\s\S]*row-gap: 5px;[\s\S]*text-align: center;/)
-  assert.match(centered, /padding: 4px 0 8px;/)
+  assert.match(centered, /grid-template-columns: minmax\(0, 1fr\);[\s\S]*justify-items: center;[\s\S]*row-gap: 3px;[\s\S]*text-align: center;/)
+  assert.match(centered, /padding: 2px 0 7px;/)
   assert.match(centered, /\.secondaryPageIntro__copy \{[\s\S]*max-width: 360px;[\s\S]*margin-inline: auto;[\s\S]*text-align: center;/)
-  assert.match(centered, /width: 42px;\n    height: 42px;/)
+  assert.match(centered, /width: 52px;\n    height: 52px;/)
+  assert.match(centered, /margin: 0 auto;\n    border: 0;\n    border-radius: 0;\n    background: transparent;/)
   assert.match(centered, /max-width: 10\.5ch;[\s\S]*margin-inline: auto;[\s\S]*text-align: center;/)
   assert.match(centered, /\.secondaryPageIntro__actions \{[\s\S]*max-width: 360px;[\s\S]*margin: 0 auto;[\s\S]*justify-items: center;[\s\S]*gap: 5px;/)
   assert.match(centered, /line-height: 1\.25;\n    text-align: center;/)
   assert.match(centered, /\.coachPlayerDetailWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 16ch !important;/)
   assert.match(centered, /@media \(max-width: 430px\) \{\n  \.secondaryPageIntro \{ grid-template-columns: minmax\(0, 1fr\); column-gap: 0; \}/)
-  assert.match(centered, /\.secondaryPageIntro__icon \{ width: 40px; height: 40px; border-radius: 0; \}/)
+  assert.match(centered, /\.secondaryPageIntro__icon \{ width: 48px; height: 48px; border-radius: 0; \}/)
 })
 
 test('centering transform is idempotent', () => {
