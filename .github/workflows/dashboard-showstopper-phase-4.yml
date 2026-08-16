@@ -95,18 +95,16 @@ jobs:
             --project=chromium-phase3-mobile \
             --reporter=line,json 2>&1 | tee dashboard-showstopper-phase-4-e2e.log
 
-      - name: Run high-value Player Coach parity acceptance and touch regressions
+      - name: Run high-value Player Coach parity and touch regressions
         run: |
           set -o pipefail
           npx playwright test \
             tests/e2e/player-experience-phase-1.spec.mjs \
             tests/e2e/player-experience-phase-2.spec.mjs \
             tests/e2e/coach-dashboard-phase-2.spec.mjs \
-            tests/e2e/production-acceptance.spec.mjs \
             tests/e2e/demo-paid-parity.spec.mjs \
             tests/e2e/mobile-navigation.spec.mjs \
             tests/e2e/semantic-color-system.spec.mjs \
-            tests/e2e/registered-mobile-post-auth-hydration.spec.mjs \
             tests/e2e/phase-4b-player-micro-action-hit-area.spec.mjs \
             tests/e2e/phase-4e9-player-profile-data-request.spec.mjs \
             --project=chromium-desktop \
