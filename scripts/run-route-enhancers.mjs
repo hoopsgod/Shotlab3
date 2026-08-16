@@ -55,6 +55,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase4e10-player-profile-account-touch-safety.mjs',
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
   'scripts/apply-mobile-player-coach-signal-signature.mjs',
+  'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
 ])
 
