@@ -251,9 +251,11 @@ export function installCoachFollowUpEnhancer() {
     mountedKey = nextKey;
     const dialog = drawer.querySelector('[role="dialog"]');
     if (!dialog) return;
+    const body = dialog.querySelector('[data-visual-role="dashboard-section"]')?.parentElement;
+    if (!body || body === dialog) return;
     host = document.createElement("div");
     host.dataset.testid = HOST_TEST_ID;
-    dialog.appendChild(host);
+    body.appendChild(host);
     root = createRoot(host);
     root.render(React.createElement(CoachFollowUpPanel, { context }));
   };
