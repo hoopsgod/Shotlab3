@@ -15,11 +15,22 @@ const signalIcon = (tone, eyebrow = "") => {
 const TARGET_PATH = "M22 104V92C22 45 47 23 80 23S138 45 138 92V104";
 const OVERFLOW_PATH = "M14 104V89C14 34 44 14 80 14S146 34 146 89V104";
 
-export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId }) {
+const contextualCourtLabel = (visual, value, max, contextLabel) => {
+  const context = String(contextLabel || "").trim();
+  if (!context) return visual.accessibleLabel;
+  const amount = Math.max(0, Number(value) || 0);
+  const target = Math.max(1, Number(max) || 1);
+  if (visual.state === "above") return `${amount} ${context}. Target ${target}. ${Math.round(visual.aboveTarget)} above target.`;
+  if (visual.state === "complete") return `${amount} ${context}. Target ${target}. Target complete.`;
+  return `${amount} ${context}. Target ${target}. ${Math.round(visual.remaining)} to target.`;
+};
+
+export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId, contextLabel = "" }) {
   const visual = deriveShotLabPerformanceVisual({ value, target: max });
   const width = Math.max(116, Math.round(Number(size || 92) * 1.52));
   const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
   const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
+  const accessibleLabel = contextualCourtLabel(visual, value, max, contextLabel);
 
   return (
     <div
@@ -31,7 +42,7 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
       data-target-percent={visual.targetPercent}
       data-above-target={Math.round(visual.aboveTarget)}
       role="img"
-      aria-label={visual.accessibleLabel}
+      aria-label={accessibleLabel}
     >
       <svg viewBox="0 0 160 118" aria-hidden="true" focusable="false">
         <path className={styles.courtBaseline} d="M14 104H146" />
