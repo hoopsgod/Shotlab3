@@ -10,7 +10,7 @@ const actionKey = (action = {}) => String(action.id || action.kind || action.tar
 const coachSignalStatus = (signal = {}) => signal.stale ? "Stale" : signal.freshness === "current" ? signal.ageDays === 0 ? "Published today" : `${signal.ageDays}d old` : "Unverified";
 const coachSignalIcon = (signal = {}) => signal.stale ? "clock" : signal.freshness === "current" ? "verified" : "neutral";
 const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
-const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" };
+const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" };
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
@@ -39,12 +39,17 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   });
   const dailyRemaining = narrative.remaining;
   const dailyComplete = narrative.complete;
-  const weeklyComplete = Number(model.weekly?.pct) >= 100;
+  const weeklyGoal = Number(model.weekly?.goal) || 0;
+  const weeklyComplete = weeklyGoal > 0 && Number(model.weekly?.pct) >= 100;
   const momentumTone = dailyComplete ? "positive" : primary.urgency === "urgent" ? "attention" : "info";
   const momentumTitle = dailyComplete ? "Daily target complete" : dailyRemaining > 0 ? `${dailyRemaining} makes from today’s target` : "Your next action is ready";
   const momentumDetail = dailyComplete
-    ? weeklyComplete ? "Today and this week are complete. Review progress or protect the streak with optional work." : `${model.weekly.makes} of ${model.weekly.goal} makes this week. Choose the next action that best builds on today’s work.`
-    : `${model.streak || 0}-day streak · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
+    ? weeklyComplete
+      ? "Today and this week are complete. Review progress or protect the streak with optional work."
+      : weeklyGoal > 0
+        ? `${model.weekly.makes} of ${weeklyGoal} makes this week. Choose the next action that best builds on today’s work.`
+        : `${model.weekly?.makes || 0} makes logged this week. No weekly target is set, so choose the next action that best builds on today’s work.`
+    : `${narrative.streakText} · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
   const progressShouldOpen = dailyComplete || primary.urgency === "urgent";
 
   const runAction = (action) => {
@@ -164,7 +169,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
       </div>}
 
       <details className="playerProgressDisclosure" data-testid="player-progress-disclosure" data-command-role="progress-details" data-layout-role="quiet-secondary" open={progressShouldOpen || undefined}>
-        <summary><span><small>Progress snapshot</small><strong>{model.daily.pct}% today · {model.weekly.pct}% this week</strong></span><span>View details</span></summary>
+        <summary><span><small>Progress snapshot</small><strong>{narrative.makes} made today · {narrative.weeklyText} {narrative.weeklyLabel.toLowerCase()}</strong></span><span>View details</span></summary>
         <div className="playerProgressDisclosureBody">
           <div className={styles.momentumSignal}>
             <ExperienceSignal eyebrow="Momentum" title={momentumTitle} detail={momentumDetail} tone={momentumTone} testId="player-daily-momentum-signal" />
