@@ -26,11 +26,13 @@ const contextualCourtLabel = (visual, value, max, contextLabel) => {
 };
 
 export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId, contextLabel = "" }) {
-  const visual = deriveShotLabPerformanceVisual({ value, target: max });
+  const derivedVisual = deriveShotLabPerformanceVisual({ value, target: max });
+  const visual = contextLabel
+    ? { ...derivedVisual, accessibleLabel: contextualCourtLabel(derivedVisual, value, max, contextLabel) }
+    : derivedVisual;
   const width = Math.max(116, Math.round(Number(size || 92) * 1.52));
   const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
   const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
-  const accessibleLabel = contextualCourtLabel(visual, value, max, contextLabel);
 
   return (
     <div
@@ -42,7 +44,7 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
       data-target-percent={visual.targetPercent}
       data-above-target={Math.round(visual.aboveTarget)}
       role="img"
-      aria-label={accessibleLabel}
+      aria-label={visual.accessibleLabel}
     >
       <svg viewBox="0 0 160 118" aria-hidden="true" focusable="false">
         <path className={styles.courtBaseline} d="M14 104H146" />
