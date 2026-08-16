@@ -99,6 +99,10 @@
   min-height:var(--touch-target,44px);
   margin-top:11px;
   padding:0 13px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
   border:1px solid color-mix(in srgb,var(--state-accent) 55%,transparent);
   border-radius:11px;
   background:color-mix(in srgb,var(--state-accent) 10%,transparent);
@@ -107,10 +111,21 @@
   letter-spacing:.02em;
   cursor:pointer;
   touch-action:manipulation;
-  transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease,opacity .16s ease;
 }
-.action:active{transform:scale(.975)}
+.action:active:not(:disabled){transform:scale(.975)}
 .action:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--state-accent) 22%,transparent)}
+.action:disabled{cursor:progress;opacity:.6;transform:none}
+.actionSpinner{
+  width:13px;
+  height:13px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:999px;
+  opacity:.8;
+  animation:stateActionSpin .68s linear infinite;
+}
 .loading{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
 .empty{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
 .firstUse{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
@@ -142,6 +157,8 @@
   from{opacity:.55;transform:scale(.92)}
   to{opacity:1;transform:scale(1)}
 }
+@keyframes stateActionSpin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){
-  .loading .iconWell,.completion .iconWell,.loadingTrack::after,.action{animation:none!important;transition:none!important}
+  .loading .iconWell,.completion .iconWell,.loadingTrack::after,.action,.actionSpinner{animation:none!important;transition:none!important}
+  .actionSpinner{border-right-color:currentColor;opacity:.45}
 }
