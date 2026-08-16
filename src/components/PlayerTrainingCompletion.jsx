@@ -45,14 +45,6 @@ export default function PlayerTrainingCompletion({
   const isPB = Boolean(data?.isPB);
   const isProgram = data?.src === "program";
   const hasMax = max !== null && max > 0;
-  const drillRemaining = hasMax ? Math.max(0, max - score) : 0;
-  const drillTargetCopy = !hasMax
-    ? "Result recorded"
-    : score > max
-      ? `+${Math.round(score - max)} beyond drill target`
-      : score === max
-        ? "Drill target locked"
-        : `${Math.round(drillRemaining)} from drill target`;
   const liveStreak = numberOrNull(currentStreak);
   const homeMomentum = Math.max(1, liveStreak ?? ((numberOrNull(data?.streak) ?? 0) + 1));
   const safeCompleted = Math.max(0, Number(completedCount) || 0);
@@ -123,8 +115,7 @@ export default function PlayerTrainingCompletion({
         <div className={styles.targetCourtEvidence} data-testid="player-training-target-court">
           <div className={styles.targetCourtCopy}>
             <span>DRILL TARGET</span>
-            <strong>{drillTargetCopy}</strong>
-            <p>Session result · {score} of {max}</p>
+            <strong>{score}<small>/{max}</small></strong>
           </div>
           <ShotLabPerformanceCourt
             value={score}
