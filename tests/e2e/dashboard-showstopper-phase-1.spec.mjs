@@ -82,7 +82,8 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
   await page.evaluate(({ makes, coachCurrent, weeklyTarget, demoEmail, demoTeamId }) => {
     const date = new Date();
     const pad = (value) => String(value).padStart(2, "0");
-    const today = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const dateKey = (value) => `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+    const today = dateKey(date);
     const existingLogs = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
     const otherPlayers = existingLogs.filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
     const nextLogs = [...otherPlayers];
@@ -96,6 +97,19 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
         made: Number(makes),
         date: today,
         ts: Date.now(),
+      });
+    } else {
+      const prior = new Date(date);
+      prior.setDate(prior.getDate() - 8);
+      nextLogs.push({
+        id: "dashboard-showstopper-prior-result",
+        email: demoEmail,
+        playerId: demoEmail,
+        teamId: demoTeamId,
+        name: "Demo Player",
+        made: 20,
+        date: dateKey(prior),
+        ts: prior.getTime(),
       });
     }
     window.localStorage.setItem("sl:shotlogs", JSON.stringify(nextLogs));
@@ -258,18 +272,21 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
     expect(item.color, `${item.text} must not use the dark-hero foreground on cream`).not.toBe("rgb(245, 248, 249)");
   }
 
-  const scroll = page.locator(".player-scroll-container");
-  if (await scroll.count()) await scroll.evaluate((node) => node.scrollTo(0, node.scrollHeight));
   const dock = page.getByTestId("mobile-navigation-dock");
+  const lastSupport = page.getByTestId("player-secondary-intelligence");
   await expect(dock).toBeVisible();
-  const clearance = await page.evaluate(() => {
-    const scroll = document.querySelector(".player-scroll-container");
-    const dock = document.querySelector('[data-testid="mobile-navigation-dock"]');
-    if (!scroll || !dock) return null;
-    const style = getComputedStyle(scroll);
-    return { bottomPadding: parseFloat(style.paddingBottom) || 0, dockHeight: dock.getBoundingClientRect().height };
+  await expect(lastSupport).toBeVisible();
+  await page.evaluate(async () => {
+    const nested = document.querySelector(".player-scroll-container");
+    const scroller = nested && nested.scrollHeight > nested.clientHeight + 1 ? nested : document.scrollingElement;
+    scroller?.scrollTo(0, scroller.scrollHeight);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
-  if (clearance) expect(clearance.bottomPadding).toBeGreaterThanOrEqual(clearance.dockHeight - 1);
+  const dockBox = await dock.boundingBox();
+  const lastBox = await lastSupport.boundingBox();
+  expect(dockBox).not.toBeNull();
+  expect(lastBox).not.toBeNull();
+  expect(lastBox.bottom).toBeLessThanOrEqual(dockBox.y - 2);
   await capture(page, "player-home-390-scrolled");
 });
 
