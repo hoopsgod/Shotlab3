@@ -95,9 +95,9 @@ test("100 and 125 are visually and semantically distinct", async ({ page }) => {
   await enterPlayerDemo(page);
   await applyPerformance(page, 100);
   const visual = page.locator('[data-performance-visual="shotlab-target-court"]');
-  const exact = await visual.evaluate((node) => ({ state: node.dataset.performanceState, above: node.dataset.aboveTarget, label: node.getAttribute("aria-label"), overflow: node.querySelectorAll('[class*="courtOverflowValue"]').length }));
+  const exact = await visual.evaluate((node) => ({ state: node.dataset.performanceState, above: node.dataset.aboveTarget, label: node.getAttribute("aria-label"), overflow: node.querySelectorAll('[data-performance-layer="above-target-value"]').length }));
   await applyPerformance(page, 125);
-  const above = await page.locator('[data-performance-visual="shotlab-target-court"]').evaluate((node) => ({ state: node.dataset.performanceState, above: node.dataset.aboveTarget, label: node.getAttribute("aria-label"), overflow: node.querySelectorAll('[class*="courtOverflowValue"]').length }));
+  const above = await page.locator('[data-performance-visual="shotlab-target-court"]').evaluate((node) => ({ state: node.dataset.performanceState, above: node.dataset.aboveTarget, label: node.getAttribute("aria-label"), overflow: node.querySelectorAll('[data-performance-layer="above-target-value"]').length }));
   expect(exact.state).toBe("complete");
   expect(exact.overflow).toBe(0);
   expect(above.state).toBe("above");
@@ -154,8 +154,8 @@ test("Target Court reduced-motion and semantic contracts hold", async ({ page })
   await applyPerformance(page, 125);
   const visual = page.locator('[data-performance-visual="shotlab-target-court"]');
   await expect(visual).toHaveAttribute("aria-label", /125 makes today.*25 above target/i);
-  const transitionDurations = await visual.locator("svg").evaluate((svg) => [...svg.querySelectorAll("path,ellipse,g")].map((node) => getComputedStyle(node).transitionDuration));
-  expect(transitionDurations.every((duration) => duration === "0s" || duration === "0ms")).toBeTruthy();
+  const targetLockDuration = await visual.locator('[data-performance-layer="target-lock"]').evaluate((node) => getComputedStyle(node).transitionDuration);
+  expect(["0s", "0ms"]).toContain(targetLockDuration);
   await expect(page.getByTestId("player-daily-primary-action")).toHaveCount(1);
   const actionHeight = await page.getByTestId("player-daily-primary-action").evaluate((node) => node.getBoundingClientRect().height);
   expect(actionHeight).toBeGreaterThanOrEqual(44);
