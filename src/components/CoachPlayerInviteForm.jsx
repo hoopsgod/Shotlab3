@@ -44,6 +44,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
   const submit = async (event) => {
     event?.preventDefault?.();
+    if (busy) return;
     if (provisionInFlightRef.current) return;
     const invitationEmail = form.email.trim().toLowerCase();
     const invitationName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || "Player";
