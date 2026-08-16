@@ -106,13 +106,13 @@ One logo-processing catch path rendered `error.message` directly.
 
 **Area:** Coach Team Store → setup preview at mobile widths
 
-Exact-SHA screenshot inspection found the `Official Team Store` preview title and supporting copy rendered with desktop dark-card text colors after the immersive mobile stylesheet moved the portal onto a light full-screen surface.
+Exact-SHA screenshot inspection found the `Official Team Store` preview title and supporting copy rendered with desktop dark-card text colors after the immersive mobile shell moved the portal onto a light full-screen surface. The first stylesheet-only correction still failed the production build because the Phase 3I route enhancer injects a later runtime style during build preparation, overriding the static file.
 
-**Risk:** The preview became visibly white-on-light and failed the intended contrast and release-polish standard despite automated layout checks passing.
+**Risk:** The preview became visibly white-on-light and failed the intended contrast and release-polish standard despite automated layout checks passing. A downstream-only fix could also appear correct in source while being silently undone in the actual production artifact.
 
-**Repair:** Add a mobile Coach-preview cascade correction for the preview title and copy only. Desktop dark-preview styling and the broader Team Store architecture remain unchanged.
+**Repair:** Correct both the static mobile Coach-preview cascade and the Phase 3I runtime-style generator that is the production source of truth. Desktop dark-preview styling and the broader Team Store architecture remain unchanged.
 
-**Regression:** `tests/phase-5-release-hardening.test.mjs` plus rendered 4.5:1 contrast assertions in `tests/e2e/phase-3-release-certification.spec.mjs`.
+**Regression:** `tests/phase-5-release-hardening.test.mjs` protects both static and generated CSS, and `tests/e2e/phase-3-release-certification.spec.mjs` enforces rendered 4.5:1 contrast in the built production preview.
 
 **Status:** Repaired; exact-head certification and screenshot reinspection pending.
 
