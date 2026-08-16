@@ -5,10 +5,49 @@ import path from "node:path";
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/dashboard-showstopper-phase-1");
 const DEMO_EMAIL = "demo@shotlab.app";
 const DEMO_TEAM_ID = "team-demo-titans";
+const DEMO_COACH_EMAIL = "coach.demo@shotlab.app";
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", async (route) => {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) });
+  });
+  await page.route("**/v1/legacy-auth/restore", async (route) => {
+    const payload = route.request().postDataJSON?.() || {};
+    const email = String(payload?.email || "").trim().toLowerCase();
+    if (email !== DEMO_EMAIL) {
+      await route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: "profile_not_found" }) });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        profile: {
+          email: DEMO_EMAIL,
+          name: "Demo Player",
+          role: "player",
+          team_id: DEMO_TEAM_ID,
+          hide_from_leaderboards: false,
+        },
+      }),
+    });
+  });
+  await page.route("**/v1/teams/restore-context", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        team: {
+          id: DEMO_TEAM_ID,
+          name: "ShotLab Team",
+          ownerCoachId: DEMO_COACH_EMAIL,
+          joinCode: "SHOTLAB",
+          createdAt: Date.now() - 86400000,
+        },
+      }),
+    });
   });
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
     await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
@@ -61,8 +100,6 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
     }
     window.localStorage.setItem("sl:shotlogs", JSON.stringify(nextLogs));
 
-    // Mark the already-seeded bundle as certification-owned so a demo bootstrap
-    // cannot replace the explicit state fixture while this exact-SHA visual test runs.
     const meta = JSON.parse(window.localStorage.getItem("sl:demo-data-meta") || "{}");
     window.localStorage.setItem("sl:demo-data-meta", JSON.stringify({ ...meta, source: "dashboard-showstopper-certification", teamId: demoTeamId }));
 
@@ -81,8 +118,6 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
     window.localStorage.setItem("sl:coach-priorities", JSON.stringify(priorities));
   }, { makes, coachCurrent, weeklyTarget, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
 
-  // Demo auth is intentionally query-explicit. Keep that contract during a
-  // certification reload instead of relying on removed legacy demo persistence.
   await page.goto("/?demo=1");
   await settleHome(page);
 }
@@ -209,12 +244,15 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
   if (!(await progress.evaluate((node) => node.open))) await progress.locator("summary").click();
   const signal = page.getByTestId("player-daily-momentum-signal");
   await expect(signal).toBeVisible();
-  const contrastContract = await signal.evaluate((node) => {
-    const textNodes = [...node.querySelectorAll('[class*="signalEyebrow"],[class*="signalTitle"],[class*="signalDetail"]')]
-      .filter((element) => element.textContent?.trim());
-    return textNodes.map((element) => ({ text: element.textContent.trim(), color: getComputedStyle(element).color }));
-  });
-  expect(contrastContract.length).toBeGreaterThanOrEqual(2);
+  const signalText = [
+    signal.getByText("Momentum", { exact: true }),
+    signal.getByText("Daily target complete", { exact: true }),
+  ];
+  const contrastContract = [];
+  for (const locator of signalText) {
+    await expect(locator).toBeVisible();
+    contrastContract.push(await locator.evaluate((element) => ({ text: element.textContent.trim(), color: getComputedStyle(element).color })));
+  }
   for (const item of contrastContract) {
     expect(item.color, `${item.text} must not use the former cream-on-cream foreground`).not.toBe("rgb(245, 242, 234)");
     expect(item.color, `${item.text} must not use the dark-hero foreground on cream`).not.toBe("rgb(245, 248, 249)");
