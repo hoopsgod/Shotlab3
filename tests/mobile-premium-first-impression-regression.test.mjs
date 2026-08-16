@@ -33,7 +33,7 @@ test("team branding is prominent once per secondary-page identity hierarchy", ()
   assert.match(secondaryBrandMark, /useCleanTeamLogo/);
   assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
   assert.match(secondaryBrandCss, /\.route\{[\s\S]*width:100%;[\s\S]*height:100%[\s\S]*overflow:visible/);
-  assert.match(secondaryBrandCss, /\.route \.logo\{[\s\S]*transform:scale\(1\.28\)/);
+  assert.match(secondaryBrandCss, /\.route \.logo\{[\s\S]*transform:scale\(1\.45\)/);
   assert.match(centeredRouteEnhancer, /width: 56px/);
   assert.match(centeredRouteEnhancer, /height: 56px/);
   assert.match(centeredRouteEnhancer, /background: transparent/);
