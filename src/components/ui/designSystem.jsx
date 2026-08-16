@@ -60,8 +60,7 @@ export function DSButton({ variant = "secondary", style, className = "", loading
       className={["ds-button", className].filter(Boolean).join(" ")}
       style={{ ...BASE_BUTTON, ...(variants[variant] || variants.secondary), ...style }}
     >
-      {loading ? <span className="ds-button__spinner" aria-hidden="true" /> : null}
-      <span>{loading ? loadingLabel : children}</span>
+      {loading ? <><span className="ds-button__spinner" aria-hidden="true" /><span>{loadingLabel}</span></> : children}
     </button>
   );
 }
