@@ -77,7 +77,9 @@ test("logged bounded training result becomes a ShotLab target-court completion f
   await expect(targetVisual).toBeVisible();
   await expect(targetVisual).toHaveAttribute("data-performance-visual", "shotlab-target-court");
   await expect(targetVisual).toHaveAttribute("role", "img");
-  await expect(targetVisual).toHaveAttribute("aria-label", /TARGET COURT 50 result: 20 of 50/i);
+  await expect(targetVisual).toHaveAttribute("aria-label", /20 makes today\. Target 50\. 30 to target\./i);
+  await expect(targetVisual).toHaveAttribute("data-target-percent", "40");
+  await expect(targetVisual).toHaveAttribute("data-performance-state", "partial");
   await expect(completion.locator('[class*="performanceTrack"], [class*="performanceFill"]')).toHaveCount(0);
 
   const nextAction = completion.getByTestId("player-training-next-action");
