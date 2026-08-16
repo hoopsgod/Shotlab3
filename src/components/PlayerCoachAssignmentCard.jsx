@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { formatAssignmentDueDate } from "../lib/assignmentDeadline.js";
 import { derivePlayerAssignmentPriority } from "../lib/playerAssignmentPriority.js";
 import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
@@ -15,6 +15,7 @@ export default function PlayerCoachAssignmentCard() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+  const actionInFlightRef = useRef(false);
 
   const refresh = useCallback(async () => {
     const result = await loadPlayerAssignment();
@@ -59,15 +60,23 @@ export default function PlayerCoachAssignmentCard() {
   const dueLabel = formatAssignmentDueDate(assignment.dueDate);
 
   const advance = async () => {
-    if (!next || busy) return;
+    if (!next || actionInFlightRef.current) return;
+    actionInFlightRef.current = true;
     setBusy(true);
     setError(false);
     setMessage("Saving…");
-    const result = await updatePlayerAssignmentState({ teamId: assignment.teamId, action: next.action });
-    setBusy(false);
-    setAssignment(result.assignment || assignment);
-    setError(!result.ok);
-    setMessage(result.message || (result.ok ? "Assignment updated." : "Assignment status could not be updated."));
+    try {
+      const result = await updatePlayerAssignmentState({ teamId: assignment.teamId, action: next.action });
+      setAssignment(result.assignment || assignment);
+      setError(!result.ok);
+      setMessage(result.message || (result.ok ? "Assignment updated." : "Assignment status could not be updated. Try again."));
+    } catch {
+      setError(true);
+      setMessage("Assignment status could not be updated. Try again.");
+    } finally {
+      actionInFlightRef.current = false;
+      setBusy(false);
+    }
   };
 
   return (
@@ -115,7 +124,7 @@ export default function PlayerCoachAssignmentCard() {
       )}
 
       <div className={styles.actions}>
-        {next ? <button type="button" className={styles.primary} onClick={advance} disabled={busy} data-testid="player-assignment-action">{busy ? "Saving…" : next.label}</button> : <button type="button" className={styles.primary} disabled data-testid="player-assignment-action">Assignment complete</button>}
+        {next ? <button type="button" className={styles.primary} onClick={advance} disabled={busy} aria-busy={busy} data-testid="player-assignment-action">{busy ? "Saving…" : next.label}</button> : <button type="button" className={styles.primary} disabled data-testid="player-assignment-action">Assignment complete</button>}
         <span className={styles.meta}>{assignment.updatedAt ? `Updated ${formatDate(assignment.updatedAt)}` : "Coach assigned"}</span>
       </div>
       <div className={`${styles.message} ${error ? styles.messageError : ""}`} role="status">{message}</div>
