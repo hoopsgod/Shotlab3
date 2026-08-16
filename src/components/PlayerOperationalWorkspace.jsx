@@ -3,6 +3,8 @@ import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
+const MOBILE_FILTER_RAIL_CSS = `@media(max-width:700px){[data-player-workspace-filter-rail="true"]{justify-content:center}}`;
+
 function MetricContent({ metric }) {
   return (
     <>
@@ -93,20 +95,23 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
 
 export function PlayerWorkspaceFilterRail({ value = "all", onChange, options = [], ariaLabel = "Workspace filters", testId }) {
   return (
-    <div className={styles.filterRail} role="group" aria-label={ariaLabel} data-testid={testId}>
-      {options.map((option) => (
-        <button
-          type="button"
-          key={option.value}
-          className={`${styles.filterButton} ${value === option.value ? styles.filterActive : ""}`}
-          onClick={() => onChange?.(option.value)}
-          aria-pressed={value === option.value}
-        >
-          <span>{option.label}</span>
-          {option.count !== undefined && <strong>{option.count}</strong>}
-        </button>
-      ))}
-    </div>
+    <>
+      <style>{MOBILE_FILTER_RAIL_CSS}</style>
+      <div className={styles.filterRail} role="group" aria-label={ariaLabel} data-testid={testId} data-player-workspace-filter-rail="true">
+        {options.map((option) => (
+          <button
+            type="button"
+            key={option.value}
+            className={`${styles.filterButton} ${value === option.value ? styles.filterActive : ""}`}
+            onClick={() => onChange?.(option.value)}
+            aria-pressed={value === option.value}
+          >
+            <span>{option.label}</span>
+            {option.count !== undefined && <strong>{option.count}</strong>}
+          </button>
+        ))}
+      </div>
+    </>
   );
 }
 
