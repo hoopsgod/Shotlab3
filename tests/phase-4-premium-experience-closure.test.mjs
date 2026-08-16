@@ -26,18 +26,23 @@ test("Phase 4 live metrics communicate change without decorative motion", async 
   assert.match(css, /\.metricValue \{ animation: none; \}/);
 });
 
-test("Phase 4 drill completion uses a bounded result transition with reduced-motion fallback", async () => {
+test("Phase 4 drill completion keeps bounded result motion after Target Court replaces the generic track", async () => {
   const source = await read("src/components/PlayerTrainingCompletion.jsx");
   const css = await read("src/components/PlayerTrainingCompletion.module.css");
+  const courtCss = await read("src/components/PlayerDailyPrimitives.module.css");
   assert.match(source, /data-testid="player-training-completion"/);
   assert.match(source, /DRILL COMPLETE/);
   assert.match(source, /PERSONAL BEST/);
+  assert.match(source, /player-training-target-court/);
+  assert.match(source, /ShotLabPerformanceCourt/);
   assert.match(css, /completionPanelSettle\s+240ms/);
   assert.match(css, /completionMarkSettle\s+260ms/);
   assert.match(css, /completionScoreSettle\s+220ms/);
-  assert.match(css, /completionTrackSettle\s+340ms/);
+  assert.doesNotMatch(css, /completionTrackSettle/);
+  assert.match(courtCss, /transition: opacity 220ms ease/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /animation: none !important/);
+  assert.match(courtCss, /transition: none !important/);
 });
 
 test("Phase 4 player commitment actions provide bounded completion feedback", async () => {

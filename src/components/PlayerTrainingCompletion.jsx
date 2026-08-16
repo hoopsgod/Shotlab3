@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import PlayerSessionCloseout from "./PlayerSessionCloseout.jsx";
 import styles from "./PlayerTrainingCompletion.module.css";
 
@@ -44,7 +45,6 @@ export default function PlayerTrainingCompletion({
   const isPB = Boolean(data?.isPB);
   const isProgram = data?.src === "program";
   const hasMax = max !== null && max > 0;
-  const pct = hasMax ? Math.max(0, Math.min(100, Math.round((score / max) * 100))) : null;
   const liveStreak = numberOrNull(currentStreak);
   const homeMomentum = Math.max(1, liveStreak ?? ((numberOrNull(data?.streak) ?? 0) + 1));
   const safeCompleted = Math.max(0, Number(completedCount) || 0);
@@ -111,9 +111,19 @@ export default function PlayerTrainingCompletion({
         </div>
       </div>
 
-      {pct !== null ? (
-        <div className={styles.performanceTrack} aria-label={`${pct}% of drill maximum`}>
-          <span style={{ width: `${pct}%` }} />
+      {hasMax ? (
+        <div className={styles.targetCourtEvidence} data-testid="player-training-target-court">
+          <div className={styles.targetCourtCopy}>
+            <span>DRILL TARGET</span>
+            <strong>{score}<small>/{max}</small></strong>
+          </div>
+          <ShotLabPerformanceCourt
+            value={score}
+            max={max}
+            size={72}
+            label="Target path"
+            testId="player-training-target-visual"
+          />
         </div>
       ) : null}
 

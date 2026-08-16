@@ -20,7 +20,7 @@ async function noOverflow(page) {
   expect(amount).toBeLessThanOrEqual(1);
 }
 
-test("player progress profile opens with a factual development story before deep analytics", async ({ page }) => {
+test("player progress opens with ShotLab Target Court before deep analytics", async ({ page }) => {
   await installRoutes(page);
   await page.goto("/");
   await page.getByRole("button", { name: /Player demo/i }).click();
@@ -33,7 +33,13 @@ test("player progress profile opens with a factual development story before deep
   const story = page.getByTestId("player-progress-story");
   await expect(story).toBeVisible({ timeout: 20_000 });
   await expect(story.getByText("DEVELOPMENT STORY", { exact: true })).toBeVisible();
-  await expect(story.getByTestId("player-progress-trend-chart")).toBeVisible();
+  await expect(story.getByTestId("player-progress-target-court")).toBeVisible();
+  await expect(story.getByTestId("player-progress-target-summary")).toBeVisible();
+  const targetVisual = story.getByTestId("player-progress-target-visual");
+  await expect(targetVisual).toBeVisible();
+  await expect(targetVisual).toHaveAttribute("data-performance-visual", "shotlab-target-court");
+  await expect(targetVisual).toHaveAttribute("role", "img");
+  await expect(targetVisual).toHaveAttribute("aria-label", /made today|target/i);
   await expect(story.getByTestId("player-progress-metrics")).toBeVisible();
   await expect(story.getByTestId("player-progress-strongest-signal")).toBeVisible();
   await expect(story.getByTestId("player-progress-opportunity")).toBeVisible();
@@ -42,6 +48,7 @@ test("player progress profile opens with a factual development story before deep
   await expect(story.getByTestId("player-progress-open-profile")).toBeVisible();
   await expect(page.getByTestId("player-progress-full-profile")).toBeVisible();
   await expect(page.getByTestId("player-profile-readout")).toBeHidden();
+  await expect(story.getByTestId("player-progress-trend-chart")).toHaveCount(0);
 
   const heroStyle = await story.getByTestId("player-progress-story-hero").evaluate((node) => ({
     backgroundColor: getComputedStyle(node).backgroundColor,
@@ -58,7 +65,7 @@ test("player progress profile opens with a factual development story before deep
     "player-progress-story-topline",
     "player-progress-story-hero-grid",
     "player-progress-story-copy",
-    "player-progress-trend-summary",
+    "player-progress-target-court",
   ];
   for (const testId of transparentHeroSeams) {
     const style = await story.getByTestId(testId).evaluate((node) => ({
@@ -69,14 +76,12 @@ test("player progress profile opens with a factual development story before deep
     expect(style.backgroundImage, `${testId} must not receive demo background art`).toBe("none");
   }
 
-  const trendStyle = await story.getByTestId("player-progress-trend-chart").evaluate((node) => ({
-    backgroundColor: getComputedStyle(node).backgroundColor,
-    backgroundImage: getComputedStyle(node).backgroundImage,
-    scoreColor: getComputedStyle(node.querySelector("strong")).color,
-  }));
-  expect(trendStyle.backgroundColor).toBe("rgba(255, 255, 255, 0.04)");
-  expect(trendStyle.backgroundImage).toBe("none");
-  expect(trendStyle.scoreColor).toBe("rgb(248, 250, 245)");
+  const courtBox = await targetVisual.boundingBox();
+  const heroBox = await story.getByTestId("player-progress-story-hero").boundingBox();
+  expect(courtBox).not.toBeNull();
+  expect(heroBox).not.toBeNull();
+  expect(courtBox.x).toBeGreaterThanOrEqual(heroBox.x - 1);
+  expect(courtBox.x + courtBox.width).toBeLessThanOrEqual(heroBox.x + heroBox.width + 1);
 
   const focusStyle = await story.getByTestId("player-progress-start-focus").evaluate((node) => ({
     backgroundColor: getComputedStyle(node).backgroundColor,
@@ -88,7 +93,7 @@ test("player progress profile opens with a factual development story before deep
 
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
   await page.waitForTimeout(120);
-  await captureViewport(page, "04v-player-progress-story.png");
+  await captureViewport(page, "04v-player-progress-target-court.png");
 
   await story.getByTestId("player-progress-open-profile").click();
   const readout = page.getByTestId("player-profile-readout");
