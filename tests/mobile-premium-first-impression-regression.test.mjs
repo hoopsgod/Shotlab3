@@ -27,18 +27,19 @@ test("secondary routes use one explicit signature owner instead of a late compet
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
 });
 
-test("secondary mastheads use the coach-controlled team logo as the primary brand mark", () => {
+test("team branding is prominent once per secondary-page identity hierarchy", () => {
   assert.match(secondaryBrandMark, /useTeamBranding/);
   assert.match(secondaryBrandMark, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
   assert.match(secondaryBrandMark, /useCleanTeamLogo/);
   assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
-  assert.match(playerOperationalWorkspace, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="workspace" \/>/);
-  assert.match(secondaryBrandCss, /\.workspace\{[\s\S]*width:52px;[\s\S]*height:52px/);
-  assert.match(secondaryBrandCss, /@media\(max-width:700px\)\{[\s\S]*\.workspace\{[\s\S]*width:50px;[\s\S]*height:50px;[\s\S]*margin:0 auto 3px/);
+  assert.match(secondaryBrandCss, /\.route\{[\s\S]*width:100%;[\s\S]*height:100%/);
   assert.match(centeredRouteEnhancer, /width: 52px/);
   assert.match(centeredRouteEnhancer, /height: 52px/);
   assert.match(centeredRouteEnhancer, /background: transparent/);
   assert.match(centeredRouteEnhancer, /border: 0/);
+  assert.match(playerHeader, /useTeamBranding/);
+  assert.match(playerHeader, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
+  assert.doesNotMatch(playerOperationalWorkspace, /SecondaryTeamBrandMark/);
 });
 
 test("mobile route mastheads keep editorial hierarchy without swallowing the first viewport", () => {
@@ -47,6 +48,7 @@ test("mobile route mastheads keep editorial hierarchy without swallowing the fir
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
   assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*width: 30px;[\s\S]*height: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
   assert.match(centeredRouteEnhancer, /coachAdministrationWorkspace[\s\S]*max-width: 16ch !important/);
+  assert.match(centeredRouteEnhancer, /brandingEditorialWorkspace[\s\S]*max-width: 18ch !important;[\s\S]*white-space: nowrap/);
   assert.doesNotMatch(enhancer, /width: 74px/);
   assert.doesNotMatch(centeredRouteEnhancer, /width: (?:7[0-9]|8[0-9]|9[0-9])px/);
 });
