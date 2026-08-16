@@ -26,8 +26,7 @@ test("post-session completion uses Target Court instead of a generic percentage 
   assert.match(completion, /player-training-target-court/);
   assert.match(completion, /player-training-target-visual/);
   assert.match(completion, /max=\{max\}/);
-  assert.match(completion, /Drill target locked/);
-  assert.match(completion, /beyond drill target/);
+  assert.match(completion, /DRILL TARGET/);
   assert.doesNotMatch(completion, /Math\.min\(100/);
   assert.doesNotMatch(completionCss, /performanceTrack|performanceFill|revealProgress/);
 });
@@ -37,6 +36,8 @@ test("Target Court remains the single accessible state engine for every contextu
   assert.match(primitives, /deriveShotLabPerformanceVisual\(\{ value, target: max \}\)/);
   assert.match(primitives, /aria-label=\{visual\.accessibleLabel\}/);
   assert.match(primitives, /data-performance-visual="shotlab-target-court"/);
+  assert.match(primitives, /visual\.state === "above"/);
+  assert.match(primitives, /visual\.state === "complete"/);
   assert.doesNotMatch(progress, /deriveShotLabPerformanceVisual/);
   assert.doesNotMatch(completion, /deriveShotLabPerformanceVisual/);
 });
