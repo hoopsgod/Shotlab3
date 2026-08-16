@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const header = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
 const headerCss = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
+const daily = fs.readFileSync("src/components/PlayerDailyCommandCenter.jsx", "utf8");
 const dailyCss = fs.readFileSync("src/components/PlayerDailyCommandCenter.module.css", "utf8");
 const workspaceCss = fs.readFileSync("src/components/PlayerOperationalWorkspace.module.css", "utf8");
 
@@ -24,15 +25,19 @@ test("player identity uses an unboxed editorial shell with authoritative team br
   assert.doesNotMatch(headerCss, legacyCondensedFont);
 });
 
-test("Daily Command Center matches the modern player hierarchy without changing its actions", () => {
-  assert.match(dailyCss, /\.root\s*\{[\s\S]*?border-radius:\s*0;[\s\S]*?background:\s*transparent/);
-  assert.match(dailyCss, /\.hero\s*\{[\s\S]*?border-radius:\s*var\(--radius-xl,24px\)/);
-  assert.match(dailyCss, /\.progressCard\s*\{[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent/);
-  assert.match(dailyCss, /min-height:\s*48px/);
+test("Daily Command Center uses performance narrative hierarchy without changing its actions", () => {
+  assert.match(daily, /data-page-hierarchy="performance-command-center"/);
+  assert.match(daily, /data-testid="player-today-performance"/);
+  assert.match(daily, /data-testid="player-target-interpretation"/);
+  assert.match(daily, /data-testid="player-command-evidence"/);
+  assert.equal((daily.match(/data-testid="player-daily-primary-action"/g) || []).length, 1);
+  assert.match(dailyCss, /\.performanceStage\s*\{/);
+  assert.match(dailyCss, /\.todayValue\s*\{[\s\S]*?font-size:clamp\(54px,15\.4vw,70px\)/);
+  assert.match(dailyCss, /\.momentumRow\s*\{[\s\S]*?grid-template-columns:minmax\(0,1\.25fr\) minmax\(0,\.75fr\)/);
+  assert.match(dailyCss, /\.primaryButton\s*\{[\s\S]*?min-height:54px/);
   assert.match(dailyCss, /\.coachSignal/);
-  assert.match(dailyCss, /\.progressGrid/);
-  assert.match(dailyCss, /scroll-snap-type:\s*x proximity/);
-  assert.match(dailyCss, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.doesNotMatch(dailyCss, /\.progressCard\s*\{|\.progressGrid\s*\{|scroll-snap-type:\s*x proximity/);
+  assert.match(dailyCss, /@media \(prefers-reduced-motion:reduce\)/);
   assert.match(dailyCss, systemFont);
   assert.doesNotMatch(dailyCss, legacyCondensedFont);
 });
@@ -53,7 +58,7 @@ test("all six player operational workspaces share the same current design system
 });
 
 test("the modernization remains presentation-only", () => {
-  for (const source of [header, headerCss, dailyCss, workspaceCss]) {
+  for (const source of [header, headerCss, daily, dailyCss, workspaceCss]) {
     assert.doesNotMatch(source, /supabase|auth\.|fetch\(|localStorage|sessionStorage|create table|alter table/i);
   }
 });
