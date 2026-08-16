@@ -113,10 +113,14 @@ jobs:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
-      - name: Certify Demo and registered parity
+      - name: Certify Demo and registered built-preview parity
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
-        run: npx playwright test tests/e2e/demo-registered-live-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+        run: >-
+          npx playwright test
+          tests/e2e/demo-paid-parity.spec.mjs
+          tests/e2e/demo-paid-responsive-parity.spec.mjs
+          --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Capture mandatory 375-430 mobile visual matrix
         env:
