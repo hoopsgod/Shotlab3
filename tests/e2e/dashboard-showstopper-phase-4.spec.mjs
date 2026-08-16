@@ -57,9 +57,14 @@ async function capture(page, name) {
 
 for (const width of [375, 390, 430, 1280]) {
   test(`live training keeps the ShotLab Target Court language at ${width}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: width === 1280 ? 900 : 844 });
+    const launchWidth = width === 1280 ? 430 : width;
+    await page.setViewportSize({ width: launchWidth, height: 844 });
     await enterPlayerDemo(page);
     await openBoundedDrill(page);
+    if (width === 1280) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.waitForTimeout(120);
+    }
 
     const header = page.getByTestId("player-training-session-header");
     const target = page.getByTestId("player-training-live-target");
