@@ -63,8 +63,9 @@ export default function PlayerSessionCloseout({
       <div className={styles.hero} data-testid="player-session-closeout-hero">
         <div className={styles.heroCopy}>
           <span>{planComplete ? "PLAN COMPLETE" : "WORK BANKED"}</span>
-          <h2>{planComplete ? "The work is in." : "Bank it. Know what’s left."}</h2>
+          <h2>TODAY’S WORK IS BANKED.</h2>
           <p>{planComplete ? "Your planned results are logged. Read the proof, close the loop, then recover." : `You logged ${completed} of ${total || completed} planned results. The saved work stays in your history and the remaining plan stays clear.`}</p>
+          {hasMax ? <strong className={styles.targetMeaning}>{targetMeaning(targetVisual)}</strong> : null}
         </div>
         {hasMax ? (
           <div className={styles.heroCourt} data-testid="player-session-closeout-target-court">
@@ -85,9 +86,9 @@ export default function PlayerSessionCloseout({
       </div>
 
       <div className={styles.proofRail} data-testid="player-session-closeout-metrics" aria-label="Session performance proof">
-        <div><span>WORK LOGGED</span><strong>{planLabel}</strong><small>{total > 0 ? "planned results" : "results"}</small></div>
-        <div><span>LATEST TARGET</span><strong>{targetMeaning(targetVisual)}</strong><small>{hasMax ? `${score} / ${max} latest drill` : clean(data?.drill) || "Latest result"}</small></div>
-        <div><span>RHYTHM</span><strong>{data?.src === "program" ? "Program banked" : `${momentum} days`}</strong><small>{data?.src === "program" ? "team work saved" : "current streak"}</small></div>
+        <div><span>RESULTS LOGGED</span><strong>{planLabel}</strong><small>{total > 0 ? "planned results" : "results"}</small></div>
+        <div><span>PLAN STATUS</span><strong>{planComplete ? "Complete" : "Work remains"}</strong><small>{total > 0 ? `${completed} of ${total} banked` : "session saved"}</small></div>
+        <div><span>MOMENTUM</span><strong>{data?.src === "program" ? "Program banked" : `${momentum}-day rhythm`}</strong><small>{data?.src === "program" ? "team work saved" : "current streak"}</small></div>
       </div>
 
       <div className={styles.meaningGrid}>
