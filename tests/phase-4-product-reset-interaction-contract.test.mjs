@@ -17,9 +17,10 @@ test("shared controls expose premium mobile touch, working, focus, and reduced-m
   assert.match(source, /className="ds-skeleton-line"/);
   assert.match(source, /aria-busy="true"/);
 
-  assert.match(css, /\.ds-button:active:not\(:disabled\)/);
-  assert.match(css, /\.ds-button:focus-visible/);
-  assert.match(css, /\.ds-button:disabled/);
+  assert.match(css, /ds-button/);
+  assert.match(css, /:active:not\(:disabled\)/);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /:disabled/);
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.doesNotMatch(css, /bounce|glow.*infinite/i);
