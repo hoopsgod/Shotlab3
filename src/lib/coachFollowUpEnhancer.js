@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { loadCoachFollowUp, saveCoachFollowUp } from "./coachFollowUpService.js";
 import { loadPlayerAssignment, savePlayerAssignment } from "./playerAssignmentService.js";
@@ -91,6 +91,7 @@ function CoachFollowUpPanel({ context }) {
   const [status, setStatus] = useState("Loading follow-up record…");
   const [error, setError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const saveInFlightRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -100,18 +101,35 @@ function CoachFollowUpPanel({ context }) {
     ]).then(([result, deliveryResult]) => {
       if (cancelled) return;
       const parsedNote = parseCoachResponseNote(result.record?.note || "");
+      const confirmedDelivery = deliveryResult.ok ? deliveryResult.assignment || null : null;
       setRecord(result.record || null);
-      setDelivery(deliveryResult.assignment || null);
+      setDelivery(confirmedDelivery);
       setAssignment(deliveryResult.assignment?.assignmentText || parsedNote.assignment || (responseContext ? buildNextAssignmentSuggestion(responseContext) : ""));
       setNote(parsedNote.privateNote);
-      setError((!result.ok && Boolean(result.error)) || (!deliveryResult.ok && Boolean(deliveryResult.error)));
-      setStatus(deliveryResult.assignment
-        ? `Player delivery status: ${deliveryLabel(deliveryResult.assignment.state)}.`
-        : result.record
-          ? "Existing follow-up record loaded."
-          : responseContext
-            ? "Result loaded. Confirm the next assignment before recording it."
-            : "No follow-up has been recorded.");
+      const followUpFailed = !result.ok && Boolean(result.error);
+      const deliveryFailed = !deliveryResult.ok && Boolean(deliveryResult.error);
+      setError(followUpFailed || deliveryFailed);
+      if (deliveryFailed) {
+        setStatus(deliveryResult.assignment
+          ? "Player delivery could not be confirmed. The assignment is saved locally so you can retry when connected."
+          : "Player delivery could not be refreshed. Retry when connected.");
+      } else if (followUpFailed) {
+        setStatus(result.record
+          ? "A local follow-up record is available, but team sync could not be refreshed."
+          : "Follow-up could not be refreshed. Close and reopen this player to retry.");
+      } else {
+        setStatus(confirmedDelivery
+          ? `Player delivery status: ${deliveryLabel(confirmedDelivery.state)}.`
+          : result.record
+            ? "Existing follow-up record loaded."
+            : responseContext
+              ? "Result loaded. Confirm the next assignment before recording it."
+              : "No follow-up has been recorded.");
+      }
+    }).catch(() => {
+      if (cancelled) return;
+      setError(true);
+      setStatus("Follow-up could not be loaded. Close and reopen this player to retry.");
     });
     return () => { cancelled = true; };
   }, [context.teamId, context.playerIdentity, responseContext?.openedAt]);
@@ -122,36 +140,54 @@ function CoachFollowUpPanel({ context }) {
       setStatus("Add a next assignment before recording it.");
       return;
     }
+    if (saveInFlightRef.current) return;
+    saveInFlightRef.current = true;
     setSaving(true);
     setError(false);
     setStatus(requireAssignment ? "Saving private context and delivering assignment…" : "Saving…");
-    const followUpPromise = saveCoachFollowUp({
-      ...context,
-      state: nextState,
-      note: serializeCoachResponseNote({ assignment, privateNote: note }),
-    });
-    const deliveryPromise = requireAssignment
-      ? savePlayerAssignment({
-          ...context,
-          assignmentText: assignment,
-          resultDetail: responseContext?.resultDetail || "",
-        })
-      : Promise.resolve(null);
-    const [result, deliveryResult] = await Promise.all([followUpPromise, deliveryPromise]);
-    setSaving(false);
-    setRecord(result.record || record);
-    if (deliveryResult?.assignment) setDelivery(deliveryResult.assignment);
-    const parsedNote = parseCoachResponseNote(result.record?.note ?? serializeCoachResponseNote({ assignment, privateNote: note }));
-    setAssignment(deliveryResult?.assignment?.assignmentText || parsedNote.assignment);
-    setNote(parsedNote.privateNote);
-    const failed = !result.ok || (requireAssignment && !deliveryResult?.ok);
-    setError(failed);
-    if (requireAssignment) {
-      setStatus(deliveryResult?.ok
-        ? deliveryResult.message || "Assignment delivered to the player."
-        : deliveryResult?.message || "Private follow-up saved, but player delivery failed.");
-    } else {
-      setStatus(result.message || (result.ok ? "Follow-up record saved." : "Follow-up could not be synced."));
+    try {
+      const followUpPromise = saveCoachFollowUp({
+        ...context,
+        state: nextState,
+        note: serializeCoachResponseNote({ assignment, privateNote: note }),
+      });
+      const deliveryPromise = requireAssignment
+        ? savePlayerAssignment({
+            ...context,
+            assignmentText: assignment,
+            resultDetail: responseContext?.resultDetail || "",
+          })
+        : Promise.resolve(null);
+      const [result, deliveryResult] = await Promise.all([followUpPromise, deliveryPromise]);
+      setRecord(result.record || record);
+      if (deliveryResult?.ok && deliveryResult.assignment) setDelivery(deliveryResult.assignment);
+      const parsedNote = parseCoachResponseNote(result.record?.note ?? serializeCoachResponseNote({ assignment, privateNote: note }));
+      setAssignment(deliveryResult?.assignment?.assignmentText || parsedNote.assignment);
+      setNote(parsedNote.privateNote);
+      const followUpOk = Boolean(result.ok);
+      const deliveryOk = !requireAssignment || Boolean(deliveryResult?.ok);
+      setError(!followUpOk || !deliveryOk);
+      if (requireAssignment) {
+        if (followUpOk && deliveryOk) {
+          setStatus(deliveryResult.message || "Assignment delivered to the player.");
+        } else if (deliveryOk) {
+          setStatus("Assignment delivered, but private follow-up sync failed. Your private follow-up remains saved locally.");
+        } else if (followUpOk) {
+          setStatus("Private follow-up saved, but player delivery could not be confirmed. Retry when connected.");
+        } else {
+          setStatus("Saved locally, but team sync and player delivery could not be confirmed. Retry when connected.");
+        }
+      } else {
+        setStatus(result.message || (result.ok ? "Follow-up record saved." : "Follow-up could not be synced. Retry when connected."));
+      }
+    } catch {
+      setError(true);
+      setStatus(requireAssignment
+        ? "The assignment could not be confirmed. Your edits are still on screen; retry when connected."
+        : "The follow-up could not be saved. Your edits are still on screen; try again.");
+    } finally {
+      saveInFlightRef.current = false;
+      setSaving(false);
     }
   };
 
@@ -186,13 +222,13 @@ function CoachFollowUpPanel({ context }) {
     React.createElement("label", { className: "coachFollowUpField is-assignment" },
       React.createElement("span", null, "Next assignment to deliver"),
       React.createElement("textarea", { value: assignment, maxLength: 2000, placeholder: "Example: Repeat the form shooting block and match today’s makes with balanced footwork.", onChange: (event) => setAssignment(event.target.value), disabled: saving, "data-testid": "coach-next-assignment-input" })),
-    React.createElement("button", { type: "button", className: "coachAssignmentSave", onClick: () => save("planned", { requireAssignment: true }), disabled: saving }, "Deliver next assignment"),
+    React.createElement("button", { type: "button", className: "coachAssignmentSave", onClick: () => save("planned", { requireAssignment: true }), disabled: saving, "aria-busy": saving }, "Deliver next assignment"),
     React.createElement("label", { className: "coachFollowUpField" },
       React.createElement("span", null, "Private coach note"),
       React.createElement("textarea", { value: note, maxLength: 2000, placeholder: "Example: Check in after practice about completing the priority drill.", onChange: (event) => setNote(event.target.value), disabled: saving })),
     React.createElement("div", { className: "coachFollowUpActions" },
-      React.createElement("button", { type: "button", onClick: () => save(primaryState), disabled: saving }, primaryLabel),
-      React.createElement("button", { type: "button", onClick: () => save("dismissed"), disabled: saving || !state }, "Clear record")),
+      React.createElement("button", { type: "button", onClick: () => save(primaryState), disabled: saving, "aria-busy": saving }, primaryLabel),
+      React.createElement("button", { type: "button", onClick: () => save("dismissed"), disabled: saving || !state, "aria-busy": saving }, "Clear record")),
     React.createElement("div", { className: `coachFollowUpStatus ${error ? "is-error" : ""}`, role: "status" }, status),
     record?.updatedAt ? React.createElement("div", { className: "coachFollowUpMeta" }, `Updated ${formatDate(record.updatedAt)}${record.updatedBy ? ` · ${record.updatedBy}` : ""}`) : null,
   );
