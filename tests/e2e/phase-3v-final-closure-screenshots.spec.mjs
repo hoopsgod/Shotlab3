@@ -119,8 +119,8 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
       detailColor: getComputedStyle(detail).color,
     };
   });
-  expect(momentumContrast.titleColor).toBe("rgb(245, 247, 248)");
-  expect(momentumContrast.detailColor).toBe("rgb(174, 184, 176)");
+  expect(momentumContrast.titleColor).toBe("rgb(23, 33, 26)");
+  expect(momentumContrast.detailColor).toBe("rgb(70, 81, 73)");
 
   await expectRouteEndBounded(page, { route: "home", finalSelector: '[data-testid="player-secondary-intelligence"]' });
   await expectNoOverflow(page);
