@@ -40,7 +40,7 @@ const homeCss = `
 
 const workspaceCss = `
 @media(max-width:700px){
-.commandBar{text-align:center;justify-items:center}.titleRow{align-items:center;justify-content:center}.primaryAction{max-width:360px;margin-inline:auto}}
+.commandBar{text-align:center;justify-items:center}.primaryAction{max-width:360px;margin-inline:auto}}
 `
 
 const hierarchyCss = `
