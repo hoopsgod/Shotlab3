@@ -6,31 +6,31 @@
   border-radius: 0;
 }
 
-[data-testid="player-daily-command-center"] [data-command-role="primary"] {
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="primary"] {
   margin-top: 14px;
   padding: clamp(20px, 3.6vw, 28px);
   border-radius: var(--radius-xl, 24px);
 }
-[data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="primary"] h1 {
   max-width: 14ch;
   font-size: clamp(34px, 7vw, 52px);
 }
-[data-testid="player-command-evidence"] {
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 14px;
 }
-[data-testid="player-command-evidence"] > div {
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] > div {
   min-height: 92px;
   padding: 13px;
 }
-[data-testid="player-command-evidence"] [class*="progressValue"] {
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] [class*="progressValue"] {
   font-size: clamp(20px, 4.8vw, 26px);
   white-space: nowrap;
 }
-[data-testid="player-command-evidence"] [class*="progressTrack"] { height: 4px; }
-[data-testid="player-daily-command-center"] [data-command-role="coach-priority"] { margin-top: 18px; }
-[data-testid="player-daily-command-center"] [data-command-role="next-actions"] { margin-top: 20px; padding-top: 20px; }
-[data-testid="player-daily-command-center"] [data-command-role="activation"] { margin-top: 18px; }
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] [class*="progressTrack"] { height: 4px; }
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="coach-priority"] { margin-top: 18px; }
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="next-actions"] { margin-top: 20px; padding-top: 20px; }
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="activation"] { margin-top: 18px; }
 
 .playerProgressDisclosure {
   margin-top: 20px;
@@ -95,11 +95,13 @@
   box-shadow: none;
 }
 
-/* Keep dark progress intelligence legible inside the light Player workspace. */
+/* Player Home progress intelligence lives on a light surface. */
 [data-testid="player-daily-momentum-signal"] {
-  --text-1: #f5f7f8;
-  --text-2: #aeb8b0;
-  --text-3: #9aa59d;
+  --surface-elevated: transparent;
+  --text-1: #17211a;
+  --text-2: #465149;
+  --text-3: #667069;
+  --neon: #617900;
 }
 
 /* VisualHierarchy defaults to the dark workspace; Player Home disclosures are light. */
@@ -351,15 +353,15 @@
 
 @media (max-width: 760px) {
   [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] { padding: 0; border-radius: 0; }
-  [data-testid="player-daily-command-center"] [data-command-role="primary"] { padding: 19px 17px; }
-  [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 { font-size: clamp(32px, 10vw, 44px); }
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="primary"] { padding: 19px 17px; }
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-command-role="primary"] h1 { font-size: clamp(32px, 10vw, 44px); }
   .player-primary-logging-region { padding: 19px 17px; }
   .player-program-session--primary { padding: 18px 16px; }
 }
 @media (max-width: 390px) {
-  [data-testid="player-command-evidence"] { gap: 0; }
-  [data-testid="player-command-evidence"] > div { min-height: 86px; padding: 10px 9px; }
-  [data-testid="player-command-evidence"] [class*="sectionLabel"] { letter-spacing: .035em; }
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] { gap: 0; }
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] > div { min-height: 86px; padding: 10px 9px; }
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] [data-testid="player-command-evidence"] [class*="sectionLabel"] { letter-spacing: .035em; }
   .playerProgressDisclosure > summary { padding-inline: 13px; }
   .player-logging-fields { grid-template-columns: 1fr; }
 }
