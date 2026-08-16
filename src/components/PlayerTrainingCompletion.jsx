@@ -127,7 +127,7 @@ export default function PlayerTrainingCompletion({
       {hasMax ? (
         <div className={styles.targetCourtEvidence} data-testid="player-training-target-court">
           <div className={styles.targetCourtCopy}>
-            <span>TARGET COURT</span>
+            <span>DRILL TARGET · TARGET COURT</span>
             <strong data-testid="player-training-target-interpretation">{targetInterpretation(targetVisual)}</strong>
             <p>{score} / {max} on this drill</p>
           </div>
