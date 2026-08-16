@@ -13,6 +13,7 @@ const DASHBOARD_SHOWSTOPPER_CSS = `
   [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"],[data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{font-size:10.5px!important;line-height:1.12!important;letter-spacing:.065em!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"]{flex:0 0 auto!important;min-height:auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#c8ff1a!important;font-weight:820!important;text-transform:uppercase!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{min-width:0!important;max-width:100%!important;color:#aebcc2!important;font-weight:700!important;overflow-wrap:anywhere!important;white-space:normal!important}
+  .performance-shell--player.is-mobile[data-workspace-tab="home"] [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{display:inline!important}
   [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:5px!important;max-width:100%!important;overflow:visible!important;color:#f7fafb!important;font-size:23px!important;font-weight:830!important;line-height:.98!important;letter-spacing:-.044em!important;overflow-wrap:anywhere!important;white-space:normal!important}
   [data-testid="player-dashboard-identity-header"] :is([data-identity-role="tagline"],[data-identity-role="mission"]){display:none!important}
 
@@ -23,6 +24,9 @@ const DASHBOARD_SHOWSTOPPER_CSS = `
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"]{color:#617900!important}
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{color:#68716a!important}
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="name"]{margin-top:4px!important;color:#151a16!important;font-size:26px!important;line-height:.97!important}
+}
+@media(max-width:380px){
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"]{display:none!important}
 }
 `;
 
