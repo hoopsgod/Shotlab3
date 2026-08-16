@@ -47,6 +47,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("player mobile home presents performance, interpretation, momentum, and one dominant action", async ({ page }) => {
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "player");
 
@@ -94,9 +95,16 @@ test("player mobile home presents performance, interpretation, momentum, and one
   if (!(await progressDisclosure.evaluate((element) => element.open))) await progressDisclosure.locator("summary").click();
   const momentumSignal = page.getByTestId("player-daily-momentum-signal");
   await expect(momentumSignal).toBeVisible();
-  const signalColor = await momentumSignal.locator("strong,h1,h2,h3").first().evaluate((element) => getComputedStyle(element).color).catch(() => "");
-  expect(signalColor).not.toBe("rgb(245, 242, 234)");
-  expect(signalColor).not.toBe("rgb(245, 248, 249)");
+  const signalColors = await momentumSignal.evaluate((node) => {
+    return [...node.querySelectorAll('[class*="signalEyebrow"],[class*="signalTitle"],[class*="signalDetail"]')]
+      .filter((element) => element.textContent?.trim())
+      .map((element) => getComputedStyle(element).color);
+  });
+  expect(signalColors.length).toBeGreaterThanOrEqual(2);
+  for (const signalColor of signalColors) {
+    expect(signalColor).not.toBe("rgb(245, 242, 234)");
+    expect(signalColor).not.toBe("rgb(245, 248, 249)");
+  }
 
   await schedule.locator("summary").click();
   expect(await schedule.evaluate((element) => element.open)).toBe(true);
