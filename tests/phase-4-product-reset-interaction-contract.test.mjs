@@ -40,6 +40,24 @@ test("shared state actions acknowledge pending work without allowing duplicate a
   assert.match(css, /prefers-reduced-motion:reduce/);
 });
 
+test("authentication is single-flight, reports working state, and shields technical failures", async () => {
+  const source = await read("src/components/AuthWorkspace.jsx");
+
+  assert.match(source, /useRef, useState/);
+  assert.match(source, /busyRef\.current/);
+  assert.match(source, /if\(busyRef\.current\)return false/);
+  assert.match(source, /aria-busy=\{Boolean\(busyAction\)\|\|undefined\}/);
+  assert.match(source, /disabled=\{Boolean\(busyAction\)\}/);
+  assert.match(source, /data-working=\{primaryBusy\?"true":undefined\}/);
+  assert.match(source, /friendlyAuthError/);
+  assert.match(source, /technicalAuthErrorPattern/);
+  assert.match(source, /role="status" aria-live="polite"/);
+  assert.match(source, /role="alert" aria-live="assertive"/);
+  assert.match(source, /minHeight:44/);
+  assert.doesNotMatch(source, /setErr\(r\.err\)/);
+  assert.doesNotMatch(source, /setErr\(demo\.err/);
+});
+
 test("coach player provisioning uses mobile-native inputs, semantic submission, and safe user-facing failures", async () => {
   const source = await read("src/components/CoachPlayerInviteForm.jsx");
 
@@ -56,6 +74,16 @@ test("coach player provisioning uses mobile-native inputs, semantic submission, 
   assert.match(source, /technicalErrorPattern/);
   assert.match(source, /role="alert" aria-live="assertive"/);
   assert.doesNotMatch(source, /setError\(result\.error\)/);
+});
+
+test("roster controls do not fake latency and preserve 44px filter targets", async () => {
+  const source = await read("src/screens/PlayersScreen.jsx");
+
+  assert.doesNotMatch(source, /isBootstrapping/);
+  assert.doesNotMatch(source, /setTimeout\(\(\) => setIsBootstrapping/);
+  assert.doesNotMatch(source, /minHeight:\s*38/);
+  assert.match(source, /type="search"/);
+  assert.match(source, /aria-label="Search players"/);
 });
 
 test("Phase 4 remains component-owned instead of introducing a new global visual authority", async () => {
