@@ -104,6 +104,9 @@ export function centerMobileRouteStage(source) {
   const administrationRule = `  .coachAdministrationWorkspace .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {\n    max-width: 16ch !important;\n  }\n`
   next = insertBeforeNarrowMedia(next, administrationRule, 'Coach administration title measure')
 
+  const brandingRule = `  .brandingEditorialWorkspace .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {\n    max-width: 18ch !important;\n    white-space: nowrap;\n  }\n`
+  next = insertBeforeNarrowMedia(next, brandingRule, 'Program Branding title measure')
+
   next = replaceOnce(
     next,
     `  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }`,
