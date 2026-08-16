@@ -102,6 +102,20 @@ One logo-processing catch path rendered `error.message` directly.
 
 **Status:** Repaired; certification pending.
 
+### P2-04 — Coach Team Store mobile preview lost text contrast on the immersive light surface
+
+**Area:** Coach Team Store → setup preview at mobile widths
+
+Exact-SHA screenshot inspection found the `Official Team Store` preview title and supporting copy rendered with desktop dark-card text colors after the immersive mobile stylesheet moved the portal onto a light full-screen surface.
+
+**Risk:** The preview became visibly white-on-light and failed the intended contrast and release-polish standard despite automated layout checks passing.
+
+**Repair:** Add a mobile Coach-preview cascade correction for the preview title and copy only. Desktop dark-preview styling and the broader Team Store architecture remain unchanged.
+
+**Regression:** `tests/phase-5-release-hardening.test.mjs` plus rendered 4.5:1 contrast assertions in `tests/e2e/phase-3-release-certification.spec.mjs`.
+
+**Status:** Repaired; exact-head certification and screenshot reinspection pending.
+
 ## P3 — Polish
 
 No P3-only change is being taken ahead of reliability certification.
