@@ -99,9 +99,13 @@ test("secondary route framing spends first-viewport space on content, not dead r
   assert.match(routeFramingCss, /font-size:11px!important/);
 });
 
-test("Coach and Player home identity stages carry visible team branding instead of tiny utility chrome", () => {
-  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:58px!important;height:58px!important/);
-  assert.match(playerHeader, /data-identity-role=\"tagline\"\]\{display:block!important/);
+test("Player Home uses a compact athlete credential while Coach retains its existing identity controls", () => {
+  assert.match(playerHeader, /grid-template-columns:56px minmax\(0,1fr\)!important/);
+  assert.match(playerHeader, /min-height:82px!important/);
+  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:52px!important;height:52px!important/);
+  assert.match(playerHeader, /data-identity-role=\"name\"\]\{[\s\S]*font-size:23px!important/);
+  assert.match(playerHeader, /data-identity-role=\"team-name\"\][\s\S]*overflow-wrap:anywhere!important/);
+  assert.match(playerHeader, /data-identity-role=\"tagline\"\],\[data-identity-role=\"mission\"\]\)\{display:none!important/);
   assert.match(coachHeader, /data-identity-role=\"brand-mark\"\]\{width:60px!important;height:60px!important/);
   assert.match(coachHeader, /data-identity-role=\"brand-button\"\]\{[\s\S]*width:44px!important;min-height:44px!important/);
 });
