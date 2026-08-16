@@ -8,6 +8,9 @@ import styles from "./CoachProgramScoreDrawer.module.css";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const technicalErrorPattern = /(pgrst|postgres|supabase|jwt|schema|column|relation|typeerror|stack|fetch failed|networkerror|http\s*\d{3}|\b5\d\d\b)/i;
+const backdropStyle = { position: "fixed", inset: 0, zIndex: 1200, display: "flex", justifyContent: "flex-end", background: "#000b" };
+const drawerStyle = { width: "min(100%,470px)", overflow: "auto", background: "#090d11", color: "#f5f7f8" };
+const headerStyle = { display: "flex", justifyContent: "space-between", gap: 16 };
 
 export function friendlyProgramScoreError(value) {
   const message = String(value || "").trim();
@@ -97,9 +100,9 @@ export default function CoachProgramScoreDrawer({
   const unavailable = playerOptions.length === 0 || drillOptions.length === 0;
 
   return (
-    <div className={styles.backdrop} onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose?.()}>
-      <section className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="coach-program-score-title" aria-busy={saving || undefined} data-testid="coach-program-score-drawer">
-        <div className={styles.header}>
+    <div style={backdropStyle} onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose?.()}>
+      <section className={styles.drawer} style={drawerStyle} role="dialog" aria-modal="true" aria-labelledby="coach-program-score-title" aria-busy={saving || undefined} data-testid="coach-program-score-drawer">
+        <div style={headerStyle}>
           <div>
             <div className={styles.eyebrow}>Coach-verified result</div>
             <h2 id="coach-program-score-title">Record Program Score</h2>
