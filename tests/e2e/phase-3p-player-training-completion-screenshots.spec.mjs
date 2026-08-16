@@ -3,6 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 
 const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
+const BOUNDED_DRILL = {
+  id: "e2e-target-court-50",
+  name: "TARGET COURT 50",
+  desc: "Make 50 shots at game pace.",
+  max: 50,
+  icon: "mr",
+  instructions: "Complete the reps and log the result.",
+  slug: "e2e-target-court-50",
+  mode: "home",
+};
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -31,11 +41,23 @@ async function enterPlayerDemo(page) {
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
-async function openTrainingDrill(page) {
+async function seedBoundedDrill(page) {
+  await page.evaluate((boundedDrill) => {
+    const existing = JSON.parse(localStorage.getItem("sl:drills") || "[]");
+    localStorage.setItem("sl:drills", JSON.stringify([
+      boundedDrill,
+      ...existing.filter((item) => item?.id !== boundedDrill.id),
+    ]));
+  }, BOUNDED_DRILL);
+  await page.reload();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function openTrainingDrill(page, drillName) {
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
 
-  const drill = page.getByRole("button", { name: /CALIPARI SHOOTING/i });
+  const drill = page.getByRole("button", { name: new RegExp(drillName, "i") });
   await expect(drill).toBeVisible();
   await drill.click();
   await expect(page.getByTestId("player-training-session")).toBeVisible({ timeout: 15_000 });
@@ -48,7 +70,8 @@ async function captureViewport(page, name) {
 
 test("logged training result becomes a ShotLab target-court completion flow", async ({ page }) => {
   await enterPlayerDemo(page);
-  await openTrainingDrill(page);
+  await seedBoundedDrill(page);
+  await openTrainingDrill(page, BOUNDED_DRILL.name);
 
   const session = page.getByTestId("player-training-session");
   const scoreInput = session.locator('input[type="number"]').first();
@@ -74,7 +97,7 @@ test("logged training result becomes a ShotLab target-court completion flow", as
   await expect(targetVisual).toBeVisible();
   await expect(targetVisual).toHaveAttribute("data-performance-visual", "shotlab-target-court");
   await expect(targetVisual).toHaveAttribute("role", "img");
-  await expect(targetVisual).toHaveAttribute("aria-label", /Calipari Shooting result: 20 of/i);
+  await expect(targetVisual).toHaveAttribute("aria-label", /TARGET COURT 50 result: 20 of 50/i);
   await expect(completion.locator('[class*="performanceTrack"], [class*="performanceFill"]')).toHaveCount(0);
 
   const nextAction = completion.getByTestId("player-training-next-action");
