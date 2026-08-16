@@ -35,10 +35,11 @@ test('expanded Player momentum restores dark contrast and centered geometry in t
 test('Player operational and commitment surfaces keep centered mobile headers, metrics, filters, and training-plan framing', () => {
   assert.match(reconciliation, /PlayerOperationalWorkspace\.module\.css/)
   assert.match(reconciliation, /\.commandBar\{text-align:center;justify-items:center\}/)
-  assert.match(reconciliation, /\.metric\{text-align:center\}/)
-  assert.match(operationalWorkspace, /MOBILE_FILTER_RAIL_CSS/)
+  assert.match(operationalWorkspace, /MOBILE_OPERATIONAL_COMPOSITION_CSS/)
   assert.match(operationalWorkspace, /data-player-workspace-filter-rail="true"/)
+  assert.match(operationalWorkspace, /data-metric-priority/)
   assert.match(operationalWorkspace, /justify-content:center/)
+  assert.match(operationalWorkspace, /text-align:center/)
   assert.match(reconciliation, /MOBILE_COMMITMENT_COMPOSITION_CSS/)
   assert.match(reconciliation, /player-commitment-route-header-/)
   assert.match(reconciliation, /text-align:center/)
