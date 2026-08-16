@@ -31,7 +31,7 @@ const TEXT_SCALE_OPTIONS = [
 
 const inputStyle = {
   width: "100%",
-  minHeight: 42,
+  minHeight: 44,
   padding: "10px 12px",
   border: "1px solid rgba(255,255,255,0.14)",
   borderRadius: 10,
@@ -69,6 +69,8 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
   const [values, setValues] = useState(initial);
   const [uploadError, setUploadError] = useState("");
   const [cleaning, setCleaning] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
   const fullLogoInputRef = useRef(null);
   const markLogoInputRef = useRef(null);
   const cleanFullLogo = useCleanTeamLogo(values.logoUrl || FALLBACK_LOGO);
@@ -110,8 +112,8 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
       const transparentPng = await cleanTeamLogoSource(dataUrl);
       handleChange(FILE_TO_FIELD_MAP[kind], transparentPng);
       setUploadError("");
-    } catch (error) {
-      setUploadError(error.message || "Could not prepare this logo.");
+    } catch {
+      setUploadError("This logo could not be prepared. Try another image or use the logo URL field.");
     } finally {
       setCleaning(false);
     }
@@ -133,10 +135,21 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
     }
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
+    if (saving || cleaning || submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
+    setSubmitting(true);
+    setUploadError("");
     const safePalette = APPROVED_BRAND_PALETTES.find((palette) => palette.primaryColor === values.primaryColor) || APPROVED_BRAND_PALETTES[0];
-    onSave?.({ ...values, primaryColor: safePalette.primaryColor, secondaryColor: safePalette.secondaryColor, accentColor: safePalette.accentColor, textOnPrimary: safePalette.textOnPrimary });
+    try {
+      await Promise.resolve(onSave?.({ ...values, primaryColor: safePalette.primaryColor, secondaryColor: safePalette.secondaryColor, accentColor: safePalette.accentColor, textOnPrimary: safePalette.textOnPrimary }));
+    } catch {
+      setUploadError("Team branding could not be saved. Your changes are still here; try again.");
+    } finally {
+      submitInFlightRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   const sectionTitle = (title, description) => (
@@ -147,7 +160,7 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
   );
 
   return (
-    <form noValidate onSubmit={submit} style={{ display: "grid", gap: 18 }}>
+    <form noValidate onSubmit={submit} aria-busy={saving || cleaning || submitting} style={{ display: "grid", gap: 18 }}>
       <section style={{ display: "grid", gap: 11 }}>
         {sectionTitle("Brand colors", "These colors flow through coach and player surfaces.")}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
@@ -168,7 +181,7 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
         <div role="radiogroup" aria-label="Text size" style={{ display: "grid", gap: 8 }}>
           {TEXT_SCALE_OPTIONS.map((option) => {
             const selected = values.textScale === option.key;
-            return <button key={option.key} type="button" role="radio" aria-checked={selected} onClick={() => handleChange("textScale", option.key)} style={{ minHeight: 42, padding: "9px 12px", borderRadius: 10, border: selected ? "1px solid rgba(157,255,122,0.9)" : "1px solid rgba(255,255,255,0.14)", background: selected ? "rgba(157,255,122,0.1)" : "#111620", color: "#E5E7EB", display: "grid", gap: 2, textAlign: "left", cursor: "pointer" }}><span style={{ fontSize: 12.5, fontWeight: 700 }}>{option.label}</span><span style={{ fontSize: 11.5, color: "#9CA3AF" }}>{option.hint}</span></button>;
+            return <button key={option.key} type="button" role="radio" aria-checked={selected} onClick={() => handleChange("textScale", option.key)} style={{ minHeight: 44, padding: "9px 12px", borderRadius: 10, border: selected ? "1px solid rgba(157,255,122,0.9)" : "1px solid rgba(255,255,255,0.14)", background: selected ? "rgba(157,255,122,0.1)" : "#111620", color: "#E5E7EB", display: "grid", gap: 2, textAlign: "left", cursor: "pointer" }}><span style={{ fontSize: 12.5, fontWeight: 700 }}>{option.label}</span><span style={{ fontSize: 11.5, color: "#9CA3AF" }}>{option.hint}</span></button>;
           })}
         </div>
       </section>
@@ -177,20 +190,20 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
         {sectionTitle("Team logos", "Upload transparent PNG or SVG files when possible. ShotLab automatically removes simple flat backgrounds and saves the cleaned result as a PNG.")}
         <div style={{ display: "grid", gap: 10 }}>{LOGO_FIELDS.map((field) => <Field key={field.name} field={field} value={values[field.name]} onChange={handleChange} />)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-          <button type="button" onClick={() => fullLogoInputRef.current?.click()} disabled={cleaning} style={{ minHeight: 42, borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)", color: "#E5E7EB" }}>Upload full logo</button>
-          <button type="button" onClick={() => markLogoInputRef.current?.click()} disabled={cleaning} style={{ minHeight: 42, borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)", color: "#E5E7EB" }}>Upload logo mark</button>
+          <button type="button" onClick={() => fullLogoInputRef.current?.click()} disabled={cleaning} style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)", color: "#E5E7EB" }}>Upload full logo</button>
+          <button type="button" onClick={() => markLogoInputRef.current?.click()} disabled={cleaning} style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)", color: "#E5E7EB" }}>Upload logo mark</button>
           <input ref={fullLogoInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: "none" }} onChange={(event) => { handleLogoUpload("full", event.target.files?.[0]); event.target.value = ""; }} />
           <input ref={markLogoInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: "none" }} onChange={(event) => { handleLogoUpload("mark", event.target.files?.[0]); event.target.value = ""; }} />
         </div>
-        <button type="button" onClick={cleanCurrentLogos} disabled={cleaning} style={{ minHeight: 40, borderRadius: 10, border: "1px solid rgba(200,255,26,0.34)", background: "rgba(200,255,26,0.06)", color: "#DFFF75", fontWeight: 700 }}>{cleaning ? "Preparing transparent logos…" : "Clean logo backgrounds"}</button>
-        {uploadError ? <div style={{ color: "#FF929D", fontSize: 12, lineHeight: 1.4 }}>{uploadError}</div> : null}
+        <button type="button" onClick={cleanCurrentLogos} disabled={cleaning} style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(200,255,26,0.34)", background: "rgba(200,255,26,0.06)", color: "#DFFF75", fontWeight: 700 }}>{cleaning ? "Preparing transparent logos…" : "Clean logo backgrounds"}</button>
+        {uploadError ? <div role="alert" style={{ color: "#FF929D", fontSize: 12, lineHeight: 1.4 }}>{uploadError}</div> : null}
         <LogoPreview src={cleanFullLogo} label="Full logo" />
         <LogoPreview src={cleanMarkLogo} label="Logo mark" />
       </section>
 
       <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-        <button type="submit" disabled={saving || cleaning} className="cta-primary" style={{ width: "auto", margin: 0, minHeight: 42, borderRadius: 10, padding: "0 16px", boxShadow: "0 6px 16px rgba(0,0,0,0.34)" }}>{saving ? "Saving..." : "Save team branding"}</button>
-        <button type="button" onClick={onCancel} style={{ minHeight: 42, borderRadius: 10, padding: "0 14px", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.02)", color: "#E5E7EB" }}>Cancel</button>
+        <button type="submit" disabled={saving || cleaning || submitting} className="cta-primary" style={{ width: "auto", margin: 0, minHeight: 44, borderRadius: 10, padding: "0 16px", boxShadow: "0 6px 16px rgba(0,0,0,0.34)" }}>{saving || submitting ? "Saving..." : "Save team branding"}</button>
+        <button type="button" onClick={onCancel} disabled={saving || cleaning || submitting} style={{ minHeight: 44, borderRadius: 10, padding: "0 14px", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.02)", color: "#E5E7EB" }}>Cancel</button>
       </div>
     </form>
   );
