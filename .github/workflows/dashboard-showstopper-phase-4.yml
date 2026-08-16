@@ -1,0 +1,151 @@
+name: Dashboard Showstopper Phase 4
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - src/components/PlayerDailyPrimitives.jsx
+      - src/components/PlayerTrainingSessionHeader.jsx
+      - src/components/PlayerTrainingSessionHeader.module.css
+      - src/components/PlayerTrainingCompletion.jsx
+      - src/components/PlayerTrainingCompletion.module.css
+      - src/components/PlayerSessionCloseout.jsx
+      - src/components/PlayerSessionCloseout.module.css
+      - tests/dashboard-showstopper-phase-4.test.mjs
+      - tests/e2e/dashboard-showstopper-phase-4.spec.mjs
+      - tests/e2e/phase-3p-player-training-completion-screenshots.spec.mjs
+      - .github/workflows/dashboard-showstopper-phase-4.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dashboard-showstopper-phase-4-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-head-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out exact Phase 4 PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Record candidate SHA before any certification work
+        shell: bash
+        run: |
+          mkdir -p artifacts/dashboard-showstopper-phase-4
+          git rev-parse HEAD | tee artifacts/dashboard-showstopper-phase-4/exact-head-sha.txt
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Verify Dashboard Showstopper architecture and product contracts
+        run: >-
+          node --test
+          tests/player-daily-command-center.test.mjs
+          tests/dashboard-showstopper-phase-1.test.mjs
+          tests/dashboard-showstopper-phase-2.test.mjs
+          tests/dashboard-showstopper-phase-3.test.mjs
+          tests/dashboard-showstopper-phase-4.test.mjs
+          tests/player-experience-phase-1-contract.test.mjs
+          tests/player-first-result-release-quality.test.mjs
+          tests/player-interface-decomposition.test.mjs
+          tests/phase-2-command-hierarchy.test.mjs
+          tests/phase-3-unified-experience.test.mjs
+          tests/phase-3q-player-session-closeout.test.mjs
+          tests/phase-3r-player-progress-intelligence.test.mjs
+
+      - name: Install pinned Playwright test runner
+        run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Verify unchanged production performance budget
+        run: npm run verify:performance-budget
+
+      - name: Run exact-head Phase 4 Player cohesion and prior Showstopper visual contracts
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: dashboard-showstopper-phase-4-e2e.json
+        run: |
+          set -o pipefail
+          npx playwright test \
+            tests/e2e/dashboard-showstopper-phase-4.spec.mjs \
+            tests/e2e/dashboard-showstopper-phase-2.spec.mjs \
+            tests/e2e/phase-3p-player-training-completion-screenshots.spec.mjs \
+            tests/e2e/phase-3q-player-session-closeout-screenshots.spec.mjs \
+            tests/e2e/phase-3r-player-progress-story-screenshots.spec.mjs \
+            tests/e2e/phase-3s-navigation-progress-ia-screenshots.spec.mjs \
+            --config=playwright.phase3-mobile.config.mjs \
+            --project=chromium-phase3-mobile \
+            --reporter=line,json 2>&1 | tee dashboard-showstopper-phase-4-e2e.log
+
+      - name: Run high-value Player Coach parity acceptance and touch regressions
+        run: |
+          set -o pipefail
+          npx playwright test \
+            tests/e2e/player-experience-phase-1.spec.mjs \
+            tests/e2e/player-experience-phase-2.spec.mjs \
+            tests/e2e/coach-dashboard-phase-2.spec.mjs \
+            tests/e2e/production-acceptance.spec.mjs \
+            tests/e2e/demo-paid-parity.spec.mjs \
+            tests/e2e/mobile-navigation.spec.mjs \
+            tests/e2e/semantic-color-system.spec.mjs \
+            tests/e2e/registered-mobile-post-auth-hydration.spec.mjs \
+            tests/e2e/phase-4b-player-micro-action-hit-area.spec.mjs \
+            tests/e2e/phase-4e9-player-profile-data-request.spec.mjs \
+            --project=chromium-desktop \
+            --reporter=line 2>&1 | tee -a dashboard-showstopper-phase-4-e2e.log
+
+      - name: Capture App Store presentation surfaces
+        run: |
+          set -o pipefail
+          npx playwright test tests/e2e/app-store-screenshots.spec.mjs --project=chromium-desktop --reporter=line 2>&1 | tee -a dashboard-showstopper-phase-4-e2e.log
+
+      - name: Collect exact-head Phase 4 evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/dashboard-showstopper-phase-4
+          git rev-parse HEAD > artifacts/dashboard-showstopper-phase-4/exact-head-sha.txt
+          node scripts/verify-performance-budget.mjs > artifacts/dashboard-showstopper-phase-4/performance-budget.txt 2>&1 || true
+          cp artifacts/performance/build-metrics.json artifacts/dashboard-showstopper-phase-4/build-metrics.json 2>/dev/null || true
+          cp -R artifacts/design-audit artifacts/dashboard-showstopper-phase-4/design-audit 2>/dev/null || true
+          cp dashboard-showstopper-phase-4-e2e.log artifacts/dashboard-showstopper-phase-4/e2e.log 2>/dev/null || true
+          cp dashboard-showstopper-phase-4-e2e.json artifacts/dashboard-showstopper-phase-4/e2e.json 2>/dev/null || true
+
+      - name: Upload exact-head Phase 4 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-showstopper-phase-4-evidence
+          path: artifacts/dashboard-showstopper-phase-4/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-showstopper-phase-4-failure
+          path: |
+            dashboard-showstopper-phase-4-e2e.log
+            dashboard-showstopper-phase-4-e2e.json
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
