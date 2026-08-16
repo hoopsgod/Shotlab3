@@ -8,10 +8,7 @@
   min-width: var(--court-size, 118px);
 }
 
-.performanceCourt svg {
-  display: block;
-  width: 100%;
-}
+.performanceCourt svg { display: block; width: 100%; }
 
 .courtBaseline,
 .courtLane,
@@ -23,8 +20,6 @@
 .courtTargetValue,
 .courtOverflowTrack,
 .courtOverflowValue,
-.courtMaskPath,
-.courtOverflowMaskPath,
 .courtTargetLock path { fill: none; }
 
 .courtBaseline,
@@ -41,73 +36,22 @@
 .courtBaseline { stroke: var(--court-line-strong); }
 .courtBackboard { stroke: rgba(226, 235, 238, .62); stroke-width: 1.8; }
 .courtNet { stroke: rgba(226, 235, 238, .34); }
-
-.courtRim {
-  fill: rgba(7, 24, 32, .96);
-  stroke: rgba(226, 235, 238, .72);
-  stroke-width: 1.6;
-}
+.courtRim { fill: rgba(7, 24, 32, .96); stroke: rgba(226, 235, 238, .72); stroke-width: 1.6; }
 
 .courtTargetTrack,
 .courtTargetValue,
 .courtOverflowTrack,
-.courtOverflowValue {
-  stroke-width: 3.4;
-  stroke-linecap: round;
-}
-
-.courtTargetTrack {
-  stroke: rgba(226, 235, 238, .13);
-  stroke-dasharray: 5 2.5;
-}
-
+.courtOverflowValue { stroke-width: 3.4; stroke-linecap: round; }
+.courtTargetTrack { stroke: rgba(226, 235, 238, .13); stroke-dasharray: 5 2.5; }
 .courtTargetValue { stroke: var(--court-accent); }
+.courtOverflowTrack { stroke: color-mix(in srgb, var(--court-accent) 21%, transparent); stroke-dasharray: 4.2 3.1; }
+.courtOverflowValue { stroke: var(--court-accent); stroke-width: 2.8; }
 
-.courtMaskPath {
-  stroke: #fff;
-  stroke-width: 4.3;
-  stroke-dasharray: 5 2.5;
-}
-
-.courtOverflowTrack {
-  stroke: color-mix(in srgb, var(--court-accent) 21%, transparent);
-  stroke-dasharray: 4.2 3.1;
-}
-
-.courtOverflowValue {
-  stroke: var(--court-accent);
-  stroke-width: 2.8;
-}
-
-.courtOverflowMaskPath {
-  stroke: #fff;
-  stroke-width: 3.7;
-  stroke-dasharray: 4.2 3.1;
-}
-
-.courtTargetLock {
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
-
-.courtTargetLock circle {
-  fill: var(--court-accent);
-  stroke: #071820;
-  stroke-width: 1.5;
-}
-
-.courtTargetLock path {
-  stroke: #071007;
-  stroke-width: 1.45;
-  stroke-linecap: round;
-}
-
+.courtTargetLock { opacity: 0; transition: opacity 220ms ease; }
+.courtTargetLock circle { fill: var(--court-accent); stroke: #071820; stroke-width: 1.5; }
+.courtTargetLock path { stroke: #071007; stroke-width: 1.45; stroke-linecap: round; }
 .performanceCourt[data-performance-state="complete"] .courtRim,
-.performanceCourt[data-performance-state="above"] .courtRim {
-  fill: var(--court-accent);
-  stroke: var(--court-accent);
-}
-
+.performanceCourt[data-performance-state="above"] .courtRim { fill: var(--court-accent); stroke: var(--court-accent); }
 .performanceCourt[data-performance-state="complete"] .courtTargetLock,
 .performanceCourt[data-performance-state="above"] .courtTargetLock { opacity: 1; }
 
@@ -123,7 +67,6 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
-
 .performanceCourt[data-performance-state="complete"] .performanceCourtState,
 .performanceCourt[data-performance-state="above"] .performanceCourtState { color: var(--court-accent); }
 
@@ -154,41 +97,12 @@
   background: color-mix(in srgb, currentColor 7%, transparent);
   color: currentColor;
 }
-
 .signalCopy { min-width: 0; }
-
 .signalEyebrow,
-.signalDetail {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-}
-
-.signalEyebrow {
-  color: currentColor;
-  font-size: var(--type-micro, 11px);
-  font-weight: 750;
-  letter-spacing: .075em;
-  text-transform: uppercase;
-}
-
-.signalTitle {
-  margin-top: 5px;
-  color: var(--text-1, #f5f7f8);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 18px;
-  font-weight: 760;
-  line-height: 1.1;
-  letter-spacing: -.025em;
-}
-
-.signalDetail {
-  margin-top: 6px;
-  color: var(--text-2, #b6c0c6);
-  font-size: 13px;
-  font-weight: 520;
-  line-height: 1.4;
-  letter-spacing: -.006em;
-}
-
+.signalDetail { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif; }
+.signalEyebrow { color: currentColor; font-size: var(--type-micro, 11px); font-weight: 750; letter-spacing: .075em; text-transform: uppercase; }
+.signalTitle { margin-top: 5px; color: var(--text-1, #f5f7f8); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; font-size: 18px; font-weight: 760; line-height: 1.1; letter-spacing: -.025em; }
+.signalDetail { margin-top: 6px; color: var(--text-2, #b6c0c6); font-size: 13px; font-weight: 520; line-height: 1.4; letter-spacing: -.006em; }
 .signalVisual { min-width: 112px; }
 
 .pill {
@@ -222,6 +136,4 @@
   .signalVisual { grid-column: 1 / -1; min-width: 0; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .courtTargetLock { transition: none; }
-}
+@media (prefers-reduced-motion: reduce) { .courtTargetLock { transition: none; } }
