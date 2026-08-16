@@ -89,7 +89,7 @@ test.beforeEach(async ({ page }) => {
   await startClean(page);
 });
 
-test("Player home presents action, evidence, priority, and disclosure in order", async ({ page }) => {
+test("Player home preserves the command hierarchy beneath the Dashboard Showstopper successor", async ({ page }) => {
   await enterDemo(page, "player");
   const root = page.getByTestId("player-daily-command-center");
   const primary = page.getByTestId("player-daily-primary-action");
@@ -98,7 +98,7 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   const disclosure = page.getByTestId("player-progress-disclosure");
 
   await expect(root).toBeVisible({ timeout: 20_000 });
-  await expect(root).toHaveAttribute("data-phase", "phase-2-command-hierarchy");
+  await expect(root).toHaveAttribute("data-phase", "dashboard-showstopper-phase-1");
   await expect(primary).toBeVisible();
   await expect(root.getByRole("heading", { level: 1 })).toContainText("Daily work banked.");
   await expect(evidence).toBeVisible();
