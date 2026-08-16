@@ -23,6 +23,12 @@ async function settleHome(page) {
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
   if ((page.viewportSize()?.width || 390) <= 700) await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.evaluate(async () => {
+    if (!document.querySelector('style[data-phase3-overlay-scrollbars]')) {
+      const style = document.createElement("style");
+      style.dataset.phase3OverlayScrollbars = "true";
+      style.textContent = '.player-scroll-container{scrollbar-width:none!important}.player-scroll-container::-webkit-scrollbar{width:0!important;height:0!important}';
+      document.head.append(style);
+    }
     if (document.fonts?.ready) await document.fonts.ready;
     window.scrollTo(0, 0);
     document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
