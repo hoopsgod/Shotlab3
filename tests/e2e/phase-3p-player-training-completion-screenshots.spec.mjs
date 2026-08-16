@@ -46,7 +46,7 @@ async function captureViewport(page, name) {
   await page.screenshot({ path: path.join(outputDir, name), fullPage: false, animations: "disabled" });
 }
 
-test("logged training result becomes a momentum-first completion flow", async ({ page }) => {
+test("logged training result becomes a ShotLab target-court completion flow", async ({ page }) => {
   await enterPlayerDemo(page);
   await openTrainingDrill(page);
 
@@ -67,6 +67,15 @@ test("logged training result becomes a momentum-first completion flow", async ({
   await expect(completion.getByTestId("player-training-result").getByText("20", { exact: true })).toBeVisible();
   await expect(completion.getByText("WHAT CHANGED", { exact: true })).toBeVisible();
   await expect(completion.getByText("NEXT MOVE", { exact: true })).toBeVisible();
+
+  const targetCourt = completion.getByTestId("player-training-target-court");
+  const targetVisual = completion.getByTestId("player-training-target-visual");
+  await expect(targetCourt).toBeVisible();
+  await expect(targetVisual).toBeVisible();
+  await expect(targetVisual).toHaveAttribute("data-performance-visual", "shotlab-target-court");
+  await expect(targetVisual).toHaveAttribute("role", "img");
+  await expect(targetVisual).toHaveAttribute("aria-label", /Calipari Shooting result: 20 of/i);
+  await expect(completion.locator('[class*="performanceTrack"], [class*="performanceFill"]')).toHaveCount(0);
 
   const nextAction = completion.getByTestId("player-training-next-action");
   const shareToggle = completion.getByTestId("player-training-share-toggle");
@@ -94,6 +103,13 @@ test("logged training result becomes a momentum-first completion flow", async ({
   expect(resultHeroStyle.backgroundImage).toBe("none");
   expect(resultHeroStyle.titleColor).toBe("rgb(248, 250, 245)");
 
+  const targetCourtStyle = await targetCourt.evaluate((node) => ({
+    backgroundColor: getComputedStyle(node).backgroundColor,
+    backgroundImage: getComputedStyle(node).backgroundImage,
+  }));
+  expect(targetCourtStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+  expect(targetCourtStyle.backgroundImage).toBe("none");
+
   const resultColor = await completion.getByTestId("player-training-result").evaluate((node) => getComputedStyle(node).color);
   expect(resultColor).toBe("rgb(200, 255, 26)");
   const nextStyle = await nextAction.evaluate((node) => ({
@@ -103,10 +119,17 @@ test("logged training result becomes a momentum-first completion flow", async ({
   expect(nextStyle.backgroundColor).toBe("rgb(200, 255, 26)");
   expect(nextStyle.color).toBe("rgb(16, 19, 16)");
 
+  const targetBox = await targetVisual.boundingBox();
+  const completionBoxBeforeScroll = await completion.boundingBox();
+  expect(targetBox).not.toBeNull();
+  expect(completionBoxBeforeScroll).not.toBeNull();
+  expect(targetBox.x).toBeGreaterThanOrEqual(completionBoxBeforeScroll.x - 1);
+  expect(targetBox.x + targetBox.width).toBeLessThanOrEqual(completionBoxBeforeScroll.x + completionBoxBeforeScroll.width + 1);
+
   await noOverflow(page);
   await page.getByTestId("player-training-completion-wrap").scrollIntoViewIfNeeded();
   await page.waitForTimeout(120);
-  await captureViewport(page, "04r-player-training-completion.png");
+  await captureViewport(page, "04r-player-training-target-court.png");
 
   await shareToggle.click();
   const sharePanel = completion.getByTestId("player-training-share-card");
