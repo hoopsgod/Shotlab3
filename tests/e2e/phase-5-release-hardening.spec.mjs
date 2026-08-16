@@ -131,4 +131,38 @@ test.describe("Phase 5 release hardening", () => {
     }
     await expectNoHorizontalOverflow(page);
   });
+
+  test("long names, assignments, and notes remain contained at 375, 390, and 430px", async ({ page }) => {
+    await installSafeRoutes(page);
+    await page.route("**/v1/player-assignments**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", assignments: [] }) }));
+    await enterCoachDemo(page);
+    const drawer = await openDemoPlayerDrawer(page);
+    const longName = "Alexandria Montgomery-Washington-Santiago Very Long Player Name";
+    const longAssignment = "Complete the controlled catch-and-shoot progression from both corners, both wings, and the top while recording balanced footwork, clean shot preparation, and the exact makes from every location before the next team session. ".repeat(4).trim();
+    const longNote = "Private coach context: monitor pace, balance, response to correction, and whether the player can repeat the same mechanics under fatigue without rushing the release. ".repeat(6).trim();
+
+    await drawer.evaluate((root, replacement) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      for (const node of nodes) {
+        if (node.nodeValue?.trim() === "Demo Player") node.nodeValue = replacement;
+      }
+    }, longName);
+    await drawer.getByTestId("coach-next-assignment-input").fill(longAssignment);
+    await drawer.getByLabel("Private coach note").fill(longNote);
+
+    for (const width of [375, 390, 430]) {
+      await page.setViewportSize({ width, height: width === 430 ? 932 : width === 375 ? 812 : 844 });
+      await expect(drawer).toBeVisible();
+      await expect(drawer.getByRole("button", { name: "Deliver next assignment", exact: true })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      const drawerGeometry = await drawer.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, viewport: innerWidth };
+      });
+      expect(drawerGeometry.left).toBeGreaterThanOrEqual(-1);
+      expect(drawerGeometry.right).toBeLessThanOrEqual(drawerGeometry.viewport + 1);
+    }
+  });
 });
