@@ -68,10 +68,10 @@ test("training completion emphasizes the saved result and Target Court without a
   assert.doesNotMatch(css, /completionPanelSettle|completionMarkSettle|completionScoreSettle|completionTrackSettle/);
   assert.match(css, /\.primaryAction:active\s*\{\s*transform:\s*scale\(\.985\)/);
   assert.match(css, /\.primaryAction\s*\{[\s\S]*?min-height:\s*50px/);
-  assert.match(courtCss, /transition: opacity 220ms ease/);
-  assert.match(css, /touch-action: manipulation/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(courtCss, /transition:\s*opacity\s+220ms\s+ease/);
+  assert.match(css, /touch-action:\s*manipulation/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /\.primaryAction:active,[\s\S]*?transform:\s*none/);
-  assert.match(courtCss, /transition: none !important/);
+  assert.match(courtCss, /transition:\s*none\s*!important/);
   assert.doesNotMatch(css, /confetti|bounce|infinite/i);
 });
