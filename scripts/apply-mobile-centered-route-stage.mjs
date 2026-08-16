@@ -11,6 +11,23 @@ function replaceOnce(source, from, to, label) {
   return source.replace(from, to)
 }
 
+function replaceDeclarationsInBlock(source, blockStart, replacements, label) {
+  const start = source.indexOf(blockStart)
+  if (start < 0) fail(`${label}: owning block not found`)
+  const end = source.indexOf('\n  }', start + blockStart.length)
+  if (end < 0) fail(`${label}: owning block end not found`)
+
+  let block = source.slice(start, end + 4)
+  replacements.forEach(([from, to, declarationLabel]) => {
+    if (block.includes(to)) return
+    const count = block.split(from).length - 1
+    if (count !== 1) fail(`${label} ${declarationLabel}: expected one declaration, found ${count}`)
+    block = block.replace(from, to)
+  })
+
+  return `${source.slice(0, start)}${block}${source.slice(end + 4)}`
+}
+
 export function centerMobileRouteStage(source) {
   let next = source
 
@@ -42,10 +59,14 @@ export function centerMobileRouteStage(source) {
     'mobile masthead team mark geometry',
   )
 
-  next = replaceOnce(
+  next = replaceDeclarationsInBlock(
     next,
-    `    margin-top: 1px;\n    border: 1px solid rgba(7, 26, 34, .1);\n    border-radius: 0;\n    background: #0b2028;`,
-    `    margin: 0 auto;\n    border: 0;\n    border-radius: 0;\n    background: transparent;`,
+    `  .secondaryPageIntro__icon {\n    position: static;\n    width: 52px;\n    height: 52px;`,
+    [
+      [`    margin-top: 1px;`, `    margin: 0 auto;`, 'margin'],
+      [`    border: 1px solid rgba(7, 26, 34, .1);`, `    border: 0;`, 'border'],
+      [`    background: #0b2028;`, `    background: transparent;`, 'background'],
+    ],
     'mobile masthead team mark treatment',
   )
 
