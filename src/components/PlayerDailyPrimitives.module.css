@@ -62,10 +62,7 @@
   stroke-dasharray: 5 2.5;
 }
 
-.courtTargetValue {
-  stroke: var(--court-accent);
-  transition: stroke-dasharray 420ms cubic-bezier(.2, .74, .22, 1);
-}
+.courtTargetValue { stroke: var(--court-accent); }
 
 .courtMaskPath {
   stroke: #fff;
@@ -81,7 +78,6 @@
 .courtOverflowValue {
   stroke: var(--court-accent);
   stroke-width: 2.8;
-  transition: stroke-dasharray 460ms cubic-bezier(.2, .74, .22, 1);
 }
 
 .courtOverflowMaskPath {
@@ -243,8 +239,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .courtTargetValue,
-  .courtOverflowValue,
   .courtRim,
   .courtTargetLock { transition: none; }
 }
