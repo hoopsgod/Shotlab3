@@ -4,7 +4,7 @@
 .eyebrow,.form label>span{display:block;color:var(--team-brand-primary,#c8ff1a);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.form label>span{margin-bottom:6px;color:#fff9}
 .close{flex:0 0 44px;width:44px;height:44px;border:1px solid #fff2;border-radius:10px;background:#fff1;color:#ddd;font-size:24px;touch-action:manipulation}
 .guardrail{margin:20px 0;color:#fffa;font-size:13px;line-height:1.45}.form{display:grid;gap:14px}
-.form select,.form input{box-sizing:border-box;width:100%;min-height:50px;padding:0 12px;border:1px solid #fff3;border-radius:10px;background:#05080b;color:#fff;font:700 15px inherit}
+.form select,.form input{box-sizing:border-box;width:100%;min-height:50px;padding:0 12px;border:1px solid #fff3;border-radius:10px;background:#05080b;color:#fff;font-family:inherit;font-size:15px;font-weight:700}
 .form select:focus-visible,.form input:focus-visible,.close:focus-visible,.submit:focus-visible{outline:3px solid color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 25%,transparent);outline-offset:2px}
 .row{display:grid;grid-template-columns:.8fr 1.2fr;gap:10px}.limit{margin-top:-6px;color:#fff8;font-size:11px}
 .error,.empty{padding:10px;border-radius:10px;background:#ff4b4b16;color:#ff9a9a;font-size:12px;font-weight:700;line-height:1.4}.empty{color:#fffb}
