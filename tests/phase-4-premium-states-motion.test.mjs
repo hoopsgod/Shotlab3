@@ -59,12 +59,18 @@ test("premium completion cue motion stays bounded while navigation motion remain
   assert.doesNotMatch(motion, /bounce|spin|pulse.*infinite/i);
 });
 
-test("training completion emphasizes the saved result with short settle motion", async () => {
+test("training completion emphasizes the saved result and Target Court with short settle motion", async () => {
+  const source = await read("src/components/PlayerTrainingCompletion.jsx");
   const css = await read("src/components/PlayerTrainingCompletion.module.css");
+  const courtCss = await read("src/components/PlayerDailyPrimitives.module.css");
+  assert.match(source, /player-training-target-court/);
+  assert.match(source, /ShotLabPerformanceCourt/);
   assert.match(css, /completionPanelSettle 240ms/);
   assert.match(css, /completionMarkSettle 260ms/);
   assert.match(css, /completionScoreSettle 220ms/);
-  assert.match(css, /completionTrackSettle 340ms/);
+  assert.doesNotMatch(css, /completionTrackSettle/);
+  assert.match(courtCss, /transition: opacity 220ms ease/);
   assert.match(css, /touch-action: manipulation/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(courtCss, /transition: none !important/);
 });

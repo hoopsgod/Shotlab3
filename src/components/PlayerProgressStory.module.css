@@ -7,7 +7,6 @@
 }
 
 .hero {
-  position: relative;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 30px;
@@ -37,7 +36,7 @@
 
 .heroTopline > span:first-child,
 .playerLabel,
-.trendPanel span,
+.targetPanelCopy > span,
 .metricStrip span,
 .readoutHeader span,
 .signalCard > span,
@@ -65,7 +64,7 @@
 .heroGrid {
   align-items: stretch;
   justify-content: space-between;
-  gap: 18px;
+  gap: 20px;
 }
 
 .heroCopy { flex: 1 1 54%; min-width: 0; padding: 5px 0 3px; }
@@ -87,24 +86,25 @@
   line-height: 1.5;
 }
 
-.trendPanel {
-  flex: 0 0 35%;
-  min-width: 190px;
-  display: grid;
-  align-content: space-between;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 18px;
-  background: rgba(255,255,255,.035);
+.targetPanel {
+  flex: 0 0 37%;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(255,255,255,.1);
 }
-.trendPanel > div { display: grid; gap: 2px; }
-.trendPanel span { color: rgba(248,250,245,.42); }
-.trendPanel strong { color: #f8faf5; font-size: 30px; line-height: 1; letter-spacing: -.035em; }
-.trendPanel small { color: rgba(248,250,245,.52); font-size: 10px; }
-.sparkline { width: 100%; height: 66px; overflow: visible; }
-.sparkTrack { stroke: rgba(255,255,255,.10); stroke-width: 1; }
-.sparkPath { fill: none; stroke: #c8ff1a; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.targetPanelCopy { min-width: 0; }
+.targetPanelCopy > span { display: block; color: rgba(248,250,245,.46); }
+.targetPanelCopy strong {
+  display: block;
+  color: #f8faf5;
+  font-size: clamp(28px, 5vw, 38px);
+  line-height: .9;
+}
+.targetPanelCopy strong small { color: rgba(248,250,245,.54); font-size: 10px; }
+.targetPanelCopy p { margin: 4px 0 0; color: #c8ff1a; font-size: 10px; }
 
 .metricStrip {
   margin-top: 18px;
@@ -206,10 +206,16 @@
 @media (max-width: 620px) {
   .root { gap: 14px; }
   .hero { border-radius: 26px; padding: 17px; }
-  .heroGrid { display: grid; gap: 14px; }
+  .heroGrid { display: grid; gap: 10px; }
   .heroCopy h2 { font-size: clamp(34px, 11vw, 46px); }
-  .trendPanel { min-width: 0; grid-template-columns: 112px minmax(0,1fr); align-items: end; gap: 10px; }
-  .sparkline { height: 54px; }
+  .heroCopy p { display: none; }
+  .targetPanel {
+    min-width: 0;
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .metricStrip { margin-top: 14px; }
   .readoutHeader { display: grid; gap: 7px; }
   .readoutHeader > p { max-width: none; text-align: left; }
   .signalGrid { grid-template-columns: 1fr; }
@@ -225,7 +231,7 @@
   .heroCopy h2 { font-size: 37px; }
   .metricStrip > div { padding: 11px 9px; }
   .metricStrip strong { font-size: 20px; }
-  .trendPanel { grid-template-columns: 96px minmax(0,1fr); }
+  .targetPanelCopy strong { font-size: 30px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

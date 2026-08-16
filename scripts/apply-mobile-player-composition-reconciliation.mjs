@@ -35,6 +35,19 @@ function injectCommitmentRuntimeStyle() {
   return true
 }
 
+function trimLegacyCoachEmptyStateTooltip() {
+  const target = path.resolve(ROOT, 'src/App.jsx')
+  const source = readFileSync(target, 'utf8')
+  const legacyConstant = '  const legacyCoachEmptyStateCopy = "No activity yet — invite players or have them log their first workout.";\n'
+  const legacyTitle = ' title={legacyCoachEmptyStateCopy}'
+  if (!source.includes(legacyConstant) && !source.includes(legacyTitle)) return false
+  if (!source.includes(legacyConstant) || !source.includes(legacyTitle)) {
+    throw new Error('[mobile-player-composition] legacy Coach empty-state tooltip contract is partially applied')
+  }
+  writeFileSync(target, source.replace(legacyConstant, '').replace(legacyTitle, ''))
+  return true
+}
+
 const legacyHomeCss = `
 @media(max-width:700px){
 .hero{text-align:center}.heroTop{justify-content:center!important;flex-wrap:wrap}
@@ -60,6 +73,7 @@ export function applyMobilePlayerCompositionReconciliation() {
     hasDashboardShowstopperHome() ? false : appendOwnedBlock('src/components/PlayerDailyCommandCenter.module.css', legacyHomeCss),
     appendOwnedBlock('src/components/PlayerOperationalWorkspace.module.css', workspaceCss),
     injectCommitmentRuntimeStyle(),
+    trimLegacyCoachEmptyStateTooltip(),
     appendOwnedBlock('src/styles/CommandHierarchy2026.css', hierarchyCss),
   ].filter(Boolean).length
   console.log(`Reconciled Player mobile optical composition in ${changed} owned surface(s).`)
