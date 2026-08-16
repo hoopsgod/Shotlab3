@@ -1,4 +1,3 @@
-import { useId } from "react";
 import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyPrimitives.module.css";
@@ -18,8 +17,6 @@ const OVERFLOW_PATH = "M14 104V89C14 34 44 14 80 14S146 34 146 89V104";
 
 export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId }) {
   const visual = deriveShotLabPerformanceVisual({ value, target: max });
-  const maskId = `shotlab-target-mask-${useId().replace(/:/g, "")}`;
-  const overflowMaskId = `shotlab-overflow-mask-${useId().replace(/:/g, "")}`;
   const width = Math.max(104, Math.round(Number(size || 92) * 1.28));
   const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
   const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
@@ -37,15 +34,6 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
       aria-label={visual.accessibleLabel}
     >
       <svg viewBox="0 0 160 118" aria-hidden="true" focusable="false">
-        <defs>
-          <mask id={maskId}>
-            <path d={TARGET_PATH} pathLength="100" className={styles.courtMaskPath} />
-          </mask>
-          <mask id={overflowMaskId}>
-            <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowMaskPath} />
-          </mask>
-        </defs>
-
         <path className={styles.courtBaseline} d="M14 104H146" />
         <path className={styles.courtLane} d="M59 104V63H101V104" />
         <path className={styles.courtFreeThrow} d="M59 63H101M65 63a15 15 0 0 0 30 0" />
@@ -55,23 +43,11 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
         <path className={styles.courtNet} d="M73 84l4 10h6l4-10M76 88h8" />
 
         <path d={TARGET_PATH} pathLength="100" className={styles.courtTargetTrack} />
-        <path
-          d={TARGET_PATH}
-          pathLength="100"
-          className={styles.courtTargetValue}
-          strokeDasharray={targetDash}
-          mask={`url(#${maskId})`}
-        />
+        <path d={TARGET_PATH} pathLength="100" className={styles.courtTargetValue} strokeDasharray={targetDash} />
 
         {visual.state === "above" ? <>
           <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowTrack} />
-          <path
-            d={OVERFLOW_PATH}
-            pathLength="100"
-            className={styles.courtOverflowValue}
-            strokeDasharray={overflowDash}
-            mask={`url(#${overflowMaskId})`}
-          />
+          <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowValue} strokeDasharray={overflowDash} />
         </> : null}
 
         <g className={styles.courtTargetLock}>
