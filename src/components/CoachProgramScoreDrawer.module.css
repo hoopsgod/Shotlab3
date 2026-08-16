@@ -49,22 +49,18 @@
 }
 
 .close {
-  align-items: center;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   color: #d8dde1;
   cursor: pointer;
-  display: inline-flex;
   flex: 0 0 44px;
   font-size: 24px;
   height: 44px;
-  justify-content: center;
   line-height: 1;
   touch-action: manipulation;
-  transition: transform 120ms cubic-bezier(.2,0,0,1), background-color 180ms cubic-bezier(.2,0,0,1), border-color 180ms cubic-bezier(.2,0,0,1), opacity 180ms cubic-bezier(.2,0,0,1);
+  transition: transform 120ms ease;
   width: 44px;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .guardrail {
@@ -97,7 +93,6 @@
   min-height: 50px;
   outline: none;
   padding: 0 13px;
-  transition: border-color 180ms cubic-bezier(.2,0,0,1), box-shadow 180ms cubic-bezier(.2,0,0,1), opacity 180ms cubic-bezier(.2,0,0,1);
   width: 100%;
 }
 
@@ -137,22 +132,17 @@
 }
 
 .submit {
-  align-items: center;
   background: var(--team-brand-primary, #c8ff1a);
   border: 0;
   border-radius: 12px;
   color: var(--team-brand-primary-text, #050701);
   cursor: pointer;
-  display: inline-flex;
   font: 900 12px var(--font-body, "Barlow Condensed", sans-serif);
-  gap: 8px;
-  justify-content: center;
   letter-spacing: 0.1em;
   min-height: 52px;
   text-transform: uppercase;
   touch-action: manipulation;
-  transition: transform 120ms cubic-bezier(.2,0,0,1), box-shadow 180ms cubic-bezier(.2,0,0,1), opacity 180ms cubic-bezier(.2,0,0,1);
-  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease;
 }
 
 .submit:active:not(:disabled),
@@ -165,19 +155,6 @@
   cursor: progress;
   opacity: 0.6;
   transform: none;
-}
-
-.spinner {
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  border-right-color: transparent;
-  height: 14px;
-  width: 14px;
-  animation: scoreSpinner 680ms linear infinite;
-}
-
-@keyframes scoreSpinner {
-  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 540px) {
@@ -193,15 +170,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .close,
-  .form select,
-  .form input,
   .submit {
     transition: none;
-  }
-
-  .spinner {
-    animation: none;
-    border-right-color: currentColor;
-    opacity: .45;
   }
 }
