@@ -67,8 +67,7 @@ export default function ShotLabStatePanel({
             data-working={actionPending ? "true" : undefined}
             onClick={onAction}
           >
-            {actionPending ? <span className={styles.actionSpinner} aria-hidden="true" /> : null}
-            <span>{actionPending ? actionPendingLabel : actionLabel}</span>
+            {actionPending ? actionPendingLabel : actionLabel}
           </button>
         ) : null}
       </div>
