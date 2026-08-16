@@ -67,6 +67,7 @@ export default function CoachProgramScoreDrawer({
 
   const submit = async (event) => {
     event.preventDefault();
+    if (saving) return;
     if (submitInFlightRef.current) return;
     const validation = validateCoachProgramScoreEntry({
       player: selectedPlayer,
