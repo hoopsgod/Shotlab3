@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import PlayerSessionCloseout from "./PlayerSessionCloseout.jsx";
 import styles from "./PlayerTrainingCompletion.module.css";
@@ -46,17 +45,14 @@ export default function PlayerTrainingCompletion({
   const isPB = Boolean(data?.isPB);
   const isProgram = data?.src === "program";
   const hasMax = max !== null && max > 0;
-  const drillVisual = hasMax ? deriveShotLabPerformanceVisual({ value: score, target: max }) : null;
   const drillRemaining = hasMax ? Math.max(0, max - score) : 0;
-  const drillTargetCopy = !drillVisual
+  const drillTargetCopy = !hasMax
     ? "Result recorded"
-    : drillVisual.state === "above"
-      ? `+${Math.round(drillVisual.aboveTarget)} beyond drill target`
-      : drillVisual.state === "complete"
+    : score > max
+      ? `+${Math.round(score - max)} beyond drill target`
+      : score === max
         ? "Drill target locked"
-        : drillVisual.state === "zero"
-          ? "Target set. Next rep starts here."
-          : `${Math.round(drillRemaining)} from drill target`;
+        : `${Math.round(drillRemaining)} from drill target`;
   const liveStreak = numberOrNull(currentStreak);
   const homeMomentum = Math.max(1, liveStreak ?? ((numberOrNull(data?.streak) ?? 0) + 1));
   const safeCompleted = Math.max(0, Number(completedCount) || 0);
@@ -124,7 +120,7 @@ export default function PlayerTrainingCompletion({
       </div>
 
       {hasMax ? (
-        <div className={styles.targetCourtEvidence} data-testid="player-training-target-court" data-performance-state={drillVisual?.state || "zero"}>
+        <div className={styles.targetCourtEvidence} data-testid="player-training-target-court">
           <div className={styles.targetCourtCopy}>
             <span>DRILL TARGET</span>
             <strong>{drillTargetCopy}</strong>
@@ -132,11 +128,10 @@ export default function PlayerTrainingCompletion({
           </div>
           <ShotLabPerformanceCourt
             value={score}
-            target={max}
+            max={max}
             size={72}
             label="Target path"
             testId="player-training-target-visual"
-            ariaLabel={`${clean(data?.drill) || "Training drill"} result: ${score} of ${max}. ${drillTargetCopy}`}
           />
         </div>
       ) : null}
