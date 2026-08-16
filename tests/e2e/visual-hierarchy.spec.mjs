@@ -37,6 +37,10 @@ function visibleCreateEventButton(page) {
   return page.getByRole("button", { name: "Create Event", exact: true });
 }
 
+function futureDateInput(daysAhead = 7) {
+  return new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 test.beforeEach(async ({ page }) => {
   await installRoutes(page);
   await startClean(page);
@@ -166,7 +170,7 @@ test("coach can create and revisit a mobile event without breaking navigation", 
   await createEvent.click();
   const reopenedDialog = page.getByRole("dialog", { name: "Create event" });
   await reopenedDialog.getByPlaceholder("Open Gym Run").fill("E2E Team Practice");
-  await reopenedDialog.locator('input[type="date"]').fill("2026-08-15");
+  await reopenedDialog.locator('input[type="date"]').fill(futureDateInput());
   await reopenedDialog.getByPlaceholder("6:00 PM").fill("6:30 PM");
   await reopenedDialog.getByPlaceholder("Main Gym — Court 1").fill("Thomas Gym");
   await reopenedDialog.getByRole("button", { name: "SAVE EVENT", exact: true }).click();
