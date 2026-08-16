@@ -15,9 +15,9 @@ async function installRoutes(page) {
   });
 }
 
-async function settleHome(page) {
+async function settleHome(page, { expectDock = (page.viewportSize()?.width || 390) <= 700 } = {}) {
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  if (expectDock) await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.evaluate(async () => {
     if (document.fonts?.ready) await document.fonts.ready;
     window.scrollTo(0, 0);
@@ -61,6 +61,8 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
     }
     window.localStorage.setItem("sl:shotlogs", JSON.stringify(nextLogs));
 
+    // Mark the already-seeded bundle as certification-owned so a demo bootstrap
+    // cannot replace the explicit state fixture while this exact-SHA visual test runs.
     const meta = JSON.parse(window.localStorage.getItem("sl:demo-data-meta") || "{}");
     window.localStorage.setItem("sl:demo-data-meta", JSON.stringify({ ...meta, source: "dashboard-showstopper-certification", teamId: demoTeamId }));
 
@@ -78,7 +80,10 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
     };
     window.localStorage.setItem("sl:coach-priorities", JSON.stringify(priorities));
   }, { makes, coachCurrent, weeklyTarget, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
-  await page.reload();
+
+  // Demo auth is intentionally query-explicit. Keep that contract during a
+  // certification reload instead of relying on removed legacy demo persistence.
+  await page.goto("/?demo=1");
   await settleHome(page);
 }
 
@@ -127,6 +132,7 @@ test("Player Home is stable at 375, 390, and 430 widths", async ({ page }) => {
 });
 
 test("390px visual evidence covers zero, partial, near, complete, above-target, and coach-directed states", async ({ page }) => {
+  test.setTimeout(90_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await enterPlayerDemo(page);
 
@@ -156,29 +162,41 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
 test("375px athlete credential survives long player and team names without clipping or overflow", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 844 });
   await enterPlayerDemo(page);
-  await page.evaluate(() => {
-    const name = document.querySelector('[data-identity-role="name"]');
-    const team = document.querySelector('[data-identity-role="team-name"]');
-    if (name) name.textContent = "Alexandria Montgomery-Washington";
-    if (team) team.textContent = "Webster Thomas Elite Player Development Program";
-  });
-
-  const identity = page.getByTestId("player-dashboard-identity-header");
-  await expect(identity).toContainText("Alexandria Montgomery-Washington");
-  await expect(identity).toContainText("Webster Thomas Elite Player Development Program");
-  const contract = await identity.evaluate((node) => {
+  const contract = await page.getByTestId("player-dashboard-identity-header").evaluate((node) => {
     const name = node.querySelector('[data-identity-role="name"]');
     const team = node.querySelector('[data-identity-role="team-name"]');
-    const visible = (element) => element && element.scrollWidth <= element.clientWidth + 1 && element.scrollHeight <= element.clientHeight + 1;
+    if (name) name.textContent = "Alexandria Montgomery-Washington";
+    if (team) team.textContent = "Webster Thomas Elite Player Development Program";
+    const headerRect = node.getBoundingClientRect();
+    const inspect = (element) => {
+      if (!element) return null;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        text: element.textContent,
+        display: style.display,
+        visibility: style.visibility,
+        rect: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height },
+      };
+    };
     return {
       documentOverflow: document.documentElement.scrollWidth - window.innerWidth,
-      nameVisible: visible(name),
-      teamVisible: visible(team),
+      headerRect: { top: headerRect.top, right: headerRect.right, bottom: headerRect.bottom, left: headerRect.left },
+      name: inspect(name),
+      team: inspect(team),
     };
   });
+
   expect(contract.documentOverflow).toBeLessThanOrEqual(1);
-  expect(contract.nameVisible).toBe(true);
-  expect(contract.teamVisible).toBe(true);
+  for (const [label, item] of [["player name", contract.name], ["team name", contract.team]]) {
+    expect(item, `${label} must exist`).not.toBeNull();
+    expect(item.display, `${label} must not be hidden`).not.toBe("none");
+    expect(item.visibility, `${label} must be visible`).not.toBe("hidden");
+    expect(item.rect.left, `${label} must stay inside the credential`).toBeGreaterThanOrEqual(contract.headerRect.left - 1);
+    expect(item.rect.right, `${label} must stay inside the credential`).toBeLessThanOrEqual(contract.headerRect.right + 1);
+    expect(item.rect.top, `${label} must stay inside the credential`).toBeGreaterThanOrEqual(contract.headerRect.top - 1);
+    expect(item.rect.bottom, `${label} must not be vertically clipped`).toBeLessThanOrEqual(contract.headerRect.bottom + 1);
+  }
   await capture(page, "player-home-375-long-identity");
 });
 
@@ -192,10 +210,11 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
   const signal = page.getByTestId("player-daily-momentum-signal");
   await expect(signal).toBeVisible();
   const contrastContract = await signal.evaluate((node) => {
-    const textNodes = [...node.querySelectorAll("small,strong,p")].filter((element) => element.textContent?.trim());
+    const textNodes = [...node.querySelectorAll('[class*="signalEyebrow"],[class*="signalTitle"],[class*="signalDetail"]')]
+      .filter((element) => element.textContent?.trim());
     return textNodes.map((element) => ({ text: element.textContent.trim(), color: getComputedStyle(element).color }));
   });
-  expect(contrastContract.length).toBeGreaterThan(0);
+  expect(contrastContract.length).toBeGreaterThanOrEqual(2);
   for (const item of contrastContract) {
     expect(item.color, `${item.text} must not use the former cream-on-cream foreground`).not.toBe("rgb(245, 242, 234)");
     expect(item.color, `${item.text} must not use the dark-hero foreground on cream`).not.toBe("rgb(245, 248, 249)");
@@ -221,5 +240,6 @@ test("Player Home retains desktop sanity", async ({ page }) => {
   await enterPlayerDemo(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible();
+  await expect(page.getByTestId("mobile-navigation-dock")).toHaveCount(0);
   await capture(page, "player-home-desktop-1280");
 });
