@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildCoachPlayerInviteEmailLink, loadCoachPlayerInvitations, provisionCoachPlayer } from "../lib/coachPlayerInvitationService.js";
 import { DSButton, DSInput } from "./ui/designSystem.jsx";
 
@@ -32,6 +32,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const [setupPlayerName, setSetupPlayerName] = useState("");
   const [setupExpiresAt, setSetupExpiresAt] = useState("");
   const [invitations, setInvitations] = useState([]);
+  const provisionInFlightRef = useRef(false);
 
   const refresh = async () => {
     const result = await loadCoachPlayerInvitations({ coach, teamId });
@@ -43,9 +44,10 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
   const submit = async (event) => {
     event?.preventDefault?.();
-    if (busy) return;
+    if (provisionInFlightRef.current) return;
     const invitationEmail = form.email.trim().toLowerCase();
     const invitationName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || "Player";
+    provisionInFlightRef.current = true;
     setBusy(true);
     setMessage("");
     setError("");
@@ -73,6 +75,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     } catch (caught) {
       setError(friendlyPlayerInviteError(caught?.message));
     } finally {
+      provisionInFlightRef.current = false;
       setBusy(false);
     }
   };
@@ -92,7 +95,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     <p style={styles.copy}>Add the player to your roster and send a single-use account setup link. ShotLab never displays a permanent password.</p>
     <div style={styles.grid}>
       <DSInput aria-label="First name" autoComplete="given-name" value={form.firstName} onChange={update("firstName")} placeholder="First name" style={styles.input} />
-      <DSInput aria-label="Last name" autoComplete="family-name" value={form.lastName} onChange={update("lastName")} placeholder="Last name" style={styles.input} />
+      <DSInput aria-label="Last name" autoComplete="family-name" value={form.lastName} onChange={update("Last name") ? update("lastName") : update("lastName")} placeholder="Last name" style={styles.input} />
       <DSInput aria-label="Player email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" value={form.email} onChange={update("email")} placeholder="Player email" style={{ ...styles.input, gridColumn: "1 / -1" }} />
       <DSInput aria-label="Jersey number" inputMode="numeric" pattern="[0-9]*" value={form.jerseyNumber} onChange={update("jerseyNumber")} placeholder="Jersey # (optional)" style={{ ...styles.input, gridColumn: "1 / -1" }} />
     </div>
