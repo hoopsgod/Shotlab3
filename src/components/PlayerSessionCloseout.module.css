@@ -5,27 +5,16 @@
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 30px;
   color: #f8faf5;
-  background:
-    radial-gradient(circle at 86% 8%, rgba(200,255,26,.14), transparent 34%),
-    linear-gradient(150deg, #0f120f 0%, #171b16 58%, #101310 100%);
+  background: radial-gradient(circle at 86% 8%, rgba(200,255,26,.13), transparent 34%), #0f120f;
   box-shadow: 0 24px 56px rgba(8,10,8,.20);
   text-align: left;
 }
 
-.root::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg, rgba(255,255,255,.035), transparent 38%);
-}
-
 .topline,
 .hero,
-.planProgress,
-.metrics,
-.signalGrid,
-.closeoutCard,
+.proofRail,
+.meaningGrid,
+.nextChapter,
 .actions {
   position: relative;
   z-index: 1;
@@ -40,10 +29,10 @@
 }
 
 .topline span,
-.hero > div > span,
-.metrics span,
-.signal > span,
-.closeoutCard > span {
+.heroCopy > span,
+.proofRail span,
+.meaning > span,
+.nextChapter > span {
   font: 800 10px/1 "Barlow Condensed", "Arial Narrow", sans-serif;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -54,38 +43,20 @@
 
 .hero {
   display: grid;
-  grid-template-columns: auto minmax(0,1fr);
-  align-items: start;
-  gap: 14px;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
 }
 
-.mark {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 17px;
-  color: #101310;
-  background: #c8ff1a;
-}
-
-.mark svg {
-  width: 25px;
-  height: 25px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.hero > div > span { color: rgba(248,250,245,.46); }
+.heroCopy { min-width: 0; }
+.heroCopy > span { color: rgba(248,250,245,.46); }
 .hero h2 {
   margin: 5px 0 0;
   color: #f8faf5;
-  font: 400 clamp(34px, 9vw, 46px)/.92 "Bebas Neue", Impact, sans-serif;
+  font: 400 clamp(34px,9vw,46px)/.92 "Bebas Neue", Impact, sans-serif;
   letter-spacing: .02em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 .hero p {
   max-width: 520px;
@@ -93,84 +64,103 @@
   color: rgba(248,250,245,.64);
   font: 600 13px/1.5 "Barlow Condensed", "Arial Narrow", sans-serif;
 }
-
-.planProgress {
-  height: 5px;
-  margin-top: 18px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255,255,255,.08);
+.targetMeaning {
+  display: inline-block;
+  margin-top: 10px;
+  color: #c8ff1a;
+  font: 850 12px/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
-.planProgress span {
+
+.heroCourt { min-width: 116px; }
+.rimMark {
+  width: 112px;
+  color: rgba(200,255,26,.78);
+}
+.rimMark svg {
   display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: #c8ff1a;
+  width: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.metrics {
+.proofRail {
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 8px;
-  margin-top: 16px;
+  margin-top: 18px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid rgba(255,255,255,.10);
 }
-.metrics > div {
+.proofRail > div {
   min-width: 0;
-  padding: 13px;
-  border: 1px solid rgba(255,255,255,.075);
-  border-radius: 17px;
-  background: rgba(255,255,255,.05);
+  padding: 0 12px;
+  border-right: 1px solid rgba(255,255,255,.08);
 }
-.metrics span { color: rgba(248,250,245,.40); }
-.metrics strong {
+.proofRail > div:first-child { padding-left: 0; }
+.proofRail > div:last-child { padding-right: 0; border-right: 0; }
+.proofRail span { color: rgba(248,250,245,.40); }
+.proofRail strong {
   display: block;
   margin-top: 7px;
   color: #f8faf5;
-  font: 800 17px/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  font: 820 16px/1.05 "Barlow Condensed", "Arial Narrow", sans-serif;
   overflow-wrap: anywhere;
 }
+.proofRail small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(248,250,245,.44);
+  font: 600 10px/1.25 "Barlow Condensed", "Arial Narrow", sans-serif;
+}
 
-.signalGrid {
+.meaningGrid {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 9px;
-  margin-top: 9px;
+  gap: 0;
+  margin-top: 4px;
 }
-.signal {
-  min-height: 118px;
-  padding: 15px;
-  border-radius: 19px;
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.075);
+.meaning {
+  min-width: 0;
+  padding: 16px 14px 16px 0;
 }
-.signal > span { color: rgba(248,250,245,.40); }
-.signal strong {
+.meaning + .meaning {
+  padding-left: 14px;
+  padding-right: 0;
+  border-left: 1px solid rgba(255,255,255,.08);
+}
+.meaning > span { color: rgba(248,250,245,.40); }
+.meaning strong {
   display: block;
   margin-top: 7px;
   color: #f8faf5;
   font: 800 17px/1.05 "Barlow Condensed", "Arial Narrow", sans-serif;
+  overflow-wrap: anywhere;
 }
-.signal p {
+.meaning p {
   margin: 7px 0 0;
   color: rgba(248,250,245,.60);
   font: 600 12px/1.42 "Barlow Condensed", "Arial Narrow", sans-serif;
 }
 
-.closeoutCard {
-  margin-top: 10px;
+.nextChapter {
   padding: 17px;
   border-radius: 22px;
   background: #f7f8f4;
   color: #101310;
 }
-.closeoutCard > span { color: #71786f; }
-.closeoutCard strong {
+.nextChapter > span { color: #71786f; }
+.nextChapter strong {
   display: block;
   margin-top: 6px;
   color: #101310;
   font: 800 20px/1.05 "Barlow Condensed", "Arial Narrow", sans-serif;
 }
-.closeoutCard p {
+.nextChapter p {
   margin: 7px 0 0;
   color: #626960;
   font: 600 12px/1.45 "Barlow Condensed", "Arial Narrow", sans-serif;
@@ -192,8 +182,12 @@
   letter-spacing: .07em;
   text-transform: uppercase;
   cursor: pointer;
+  touch-action: manipulation;
 }
 .primary span:last-child { font-size: 18px; }
+.primary:active { transform: scale(.99); }
+.primary:focus-visible,
+.actions button:focus-visible { outline: 2px solid #c8ff1a; outline-offset: 2px; }
 
 .actions {
   display: grid;
@@ -212,17 +206,23 @@
   font: 800 11px/1.15 "Barlow Condensed", "Arial Narrow", sans-serif;
   letter-spacing: .035em;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 @media (max-width: 390px) {
   .root { padding: 17px; border-radius: 26px; }
-  .metrics { grid-template-columns: 1fr 1fr; }
-  .metrics > div:last-child { grid-column: 1 / -1; }
-  .signalGrid { grid-template-columns: 1fr; }
-  .signal { min-height: 0; }
+  .hero { gap: 6px; }
+  .hero h2 { font-size: 35px; }
+  .proofRail > div { padding: 0 8px; }
+  .proofRail strong { font-size: 14px; }
+  .proofRail span { font-size: 8px; letter-spacing: .11em; }
+  .meaningGrid { grid-template-columns: 1fr; }
+  .meaning { padding: 15px 0; }
+  .meaning + .meaning { padding: 15px 0; border-left: 0; border-top: 1px solid rgba(255,255,255,.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .primary,
   .actions button { transition: none; }
+  .primary:active { transform: none; }
 }
