@@ -8,11 +8,16 @@ on:
       - src/App.jsx
       - src/components/PlayerDailyCommandCenter.jsx
       - src/components/PlayerDailyCommandCenter.module.css
+      - src/components/PlayerDashboardHeader.jsx
       - src/lib/playerDailyCommandCenter.js
+      - src/lib/playerPerformanceNarrative.js
       - tests/player-daily-command-center.test.mjs
+      - tests/dashboard-showstopper-phase-1.test.mjs
       - tests/player-experience-phase-1-contract.test.mjs
       - tests/player-first-result-release-quality.test.mjs
       - tests/e2e/player-experience-phase-1.spec.mjs
+      - tests/e2e/visual-hierarchy.spec.mjs
+      - tests/e2e/dashboard-showstopper-phase-1.spec.mjs
       - .github/workflows/player-experience-phase-1-e2e.yml
   workflow_dispatch:
 
@@ -39,8 +44,8 @@ jobs:
       - name: Install application dependencies
         run: npm ci
 
-      - name: Verify command-center decisions and source contracts
-        run: node --test tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/player-first-result-release-quality.test.mjs
+      - name: Verify command-center decisions and dashboard state contracts
+        run: node --test tests/player-daily-command-center.test.mjs tests/dashboard-showstopper-phase-1.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/player-first-result-release-quality.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
@@ -51,12 +56,28 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run Player Experience mobile flows
+      - name: Run Player Experience and dashboard hierarchy flows
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: player-experience-e2e.json
         run: |
           set -o pipefail
-          npx playwright test tests/e2e/player-experience-phase-1.spec.mjs --project=chromium-desktop --reporter=line,json 2>&1 | tee player-experience-e2e.log
+          npx playwright test tests/e2e/player-experience-phase-1.spec.mjs tests/e2e/visual-hierarchy.spec.mjs tests/e2e/dashboard-showstopper-phase-1.spec.mjs --project=chromium-desktop --reporter=line,json 2>&1 | tee player-experience-e2e.log
+
+      - name: Record exact dashboard candidate SHA
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/dashboard-showstopper-phase-1
+          git rev-parse HEAD > artifacts/dashboard-showstopper-phase-1/exact-head-sha.txt
+
+      - name: Upload exact-head dashboard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-showstopper-phase-1-evidence
+          path: artifacts/dashboard-showstopper-phase-1/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload browser failure artifacts
         if: failure()
