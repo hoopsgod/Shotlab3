@@ -14,6 +14,11 @@ function appendOwnedBlock(relativePath, css) {
   return true
 }
 
+function hasDashboardShowstopperHome() {
+  const target = path.resolve(ROOT, 'src/components/PlayerDailyCommandCenter.jsx')
+  return readFileSync(target, 'utf8').includes('data-phase="dashboard-showstopper-phase-1"')
+}
+
 function injectCommitmentRuntimeStyle() {
   const target = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.jsx')
   const source = readFileSync(target, 'utf8')
@@ -30,7 +35,7 @@ function injectCommitmentRuntimeStyle() {
   return true
 }
 
-const homeCss = `
+const legacyHomeCss = `
 @media(max-width:700px){
 .hero{text-align:center}.heroTop{justify-content:center!important;flex-wrap:wrap}
 [data-testid="player-daily-progress-seal"]{position:relative!important;inset:auto!important;width:88px!important;height:88px!important;margin:18px auto 0!important}
@@ -45,15 +50,14 @@ const workspaceCss = `
 
 const hierarchyCss = `
 @media(max-width:760px){
-.playerProgressDisclosure>summary{position:relative;justify-content:center!important;padding-inline:58px!important}.playerProgressDisclosure>summary>span:first-child{align-items:center}.playerProgressDisclosure>summary::after{position:absolute;right:14px;top:50%;transform:translateY(-50%)}
-[data-testid="player-daily-momentum-signal"]{grid-template-columns:1fr!important;justify-items:center!important;padding:22px 18px!important;border-radius:20px!important;background:linear-gradient(145deg,#0b2633,#071820 72%)!important;text-align:center!important}
-[data-testid="player-daily-momentum-signal"] [class*="signalVisual"]{grid-column:auto!important;min-width:0!important;justify-self:center!important}
+.playerProgressDisclosure>summary{position:relative;justify-content:space-between!important;padding-inline:14px 54px!important}.playerProgressDisclosure>summary>span:first-child{align-items:flex-start}.playerProgressDisclosure>summary::after{position:absolute;right:14px;top:50%;transform:translateY(-50%)}
+[data-testid="player-daily-momentum-signal"]{--surface-elevated:transparent!important;--text-1:#17211a!important;--text-2:#465149!important;--text-3:#667069!important;--neon:#617900!important;grid-template-columns:1fr!important;justify-items:start!important;padding:18px 0!important;border-radius:0!important;background:transparent!important;text-align:left!important;box-shadow:none!important}
 .player-training-kicker{justify-content:center!important}.player-primary-logging-region .player-logging-field label{text-align:center}.player-training-plan__header{display:grid!important;justify-items:center!important;text-align:center!important}}
 `
 
 export function applyMobilePlayerCompositionReconciliation() {
   const changed = [
-    appendOwnedBlock('src/components/PlayerDailyCommandCenter.module.css', homeCss),
+    hasDashboardShowstopperHome() ? false : appendOwnedBlock('src/components/PlayerDailyCommandCenter.module.css', legacyHomeCss),
     appendOwnedBlock('src/components/PlayerOperationalWorkspace.module.css', workspaceCss),
     injectCommitmentRuntimeStyle(),
     appendOwnedBlock('src/styles/CommandHierarchy2026.css', hierarchyCss),
