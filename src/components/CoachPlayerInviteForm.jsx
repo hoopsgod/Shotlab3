@@ -92,7 +92,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     <p style={styles.copy}>Add the player to your roster and send a single-use account setup link. ShotLab never displays a permanent password.</p>
     <div style={styles.grid}>
       <DSInput aria-label="First name" autoComplete="given-name" value={form.firstName} onChange={update("firstName")} placeholder="First name" style={styles.input} />
-      <DSInput aria-label="Last name" autoComplete="family-name" value={form.lastName} onChange={update("Last name")} placeholder="Last name" style={styles.input} />
+      <DSInput aria-label="Last name" autoComplete="family-name" value={form.lastName} onChange={update("lastName")} placeholder="Last name" style={styles.input} />
       <DSInput aria-label="Player email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" value={form.email} onChange={update("email")} placeholder="Player email" style={{ ...styles.input, gridColumn: "1 / -1" }} />
       <DSInput aria-label="Jersey number" inputMode="numeric" pattern="[0-9]*" value={form.jerseyNumber} onChange={update("jerseyNumber")} placeholder="Jersey # (optional)" style={styles.input} />
     </div>
