@@ -63,6 +63,14 @@ test("cream progress disclosure owns readable light-surface semantic tokens", as
   assert.doesNotMatch(css, /player-daily-momentum-signal[\s\S]{0,220}--text-1:#f5f2ea!important/);
 });
 
+test("dark ExperienceSignal surfaces own readable light text before route overrides", async () => {
+  const css = await readFile(new URL("../src/components/PlayerDailyPrimitives.module.css", import.meta.url), "utf8");
+  assert.match(css, /\.signal\s*\{[\s\S]*--text-1:\s*#f5f7f8/);
+  assert.match(css, /\.signal\s*\{[\s\S]*--text-2:\s*#b6c0c6/);
+  assert.match(css, /\.signalTitle\s*\{[\s\S]*color:\s*var\(--text-1/);
+  assert.match(css, /\.signalDetail\s*\{[\s\S]*color:\s*var\(--text-2/);
+});
+
 test("hero composition has one dominant action and no legacy KPI-card strip", async () => {
   const source = await readFile(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
   assert.match(source, /data-testid="player-today-performance"/);
