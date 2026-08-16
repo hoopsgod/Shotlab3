@@ -89,36 +89,23 @@
 
 .targetPanel {
   flex: 0 0 37%;
-  min-width: 236px;
+  min-width: 220px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 6px 0 6px 17px;
+  gap: 8px;
+  padding-left: 14px;
   border-left: 1px solid rgba(255,255,255,.10);
 }
-.targetPanelCopy { min-width: 0; display: grid; align-content: center; gap: 5px; }
-.targetPanelCopy > span { color: rgba(248,250,245,.46); }
+.targetPanelCopy { min-width: 0; }
+.targetPanelCopy > span { display: block; color: rgba(248,250,245,.46); }
 .targetPanelCopy strong {
+  display: block;
   color: #f8faf5;
   font-size: clamp(28px, 5vw, 38px);
   line-height: .9;
-  letter-spacing: -.035em;
-  white-space: nowrap;
 }
-.targetPanelCopy strong small {
-  color: rgba(248,250,245,.54);
-  font-size: 10px;
-  letter-spacing: .08em;
-}
-.targetPanelCopy p {
-  max-width: 120px;
-  margin: 1px 0 0;
-  color: #c8ff1a;
-  font-size: 10px;
-  font-weight: 760;
-  line-height: 1.25;
-}
+.targetPanelCopy strong small { color: rgba(248,250,245,.54); font-size: 10px; }
+.targetPanelCopy p { margin: 4px 0 0; color: #c8ff1a; font-size: 10px; }
 
 .metricStrip {
   margin-top: 18px;
@@ -220,15 +207,16 @@
 @media (max-width: 620px) {
   .root { gap: 14px; }
   .hero { border-radius: 26px; padding: 17px; }
-  .heroGrid { display: grid; gap: 15px; }
+  .heroGrid { display: grid; gap: 10px; }
   .heroCopy h2 { font-size: clamp(34px, 11vw, 46px); }
+  .heroCopy p { display: none; }
   .targetPanel {
     min-width: 0;
-    padding: 14px 0 0;
+    padding: 10px 0 0;
     border-left: 0;
     border-top: 1px solid rgba(255,255,255,.10);
   }
-  .targetPanelCopy p { max-width: 150px; }
+  .metricStrip { margin-top: 14px; }
   .readoutHeader { display: grid; gap: 7px; }
   .readoutHeader > p { max-width: none; text-align: left; }
   .signalGrid { grid-template-columns: 1fr; }
