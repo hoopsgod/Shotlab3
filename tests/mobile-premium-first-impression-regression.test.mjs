@@ -7,7 +7,6 @@ const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-second
 const centeredRouteEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-centered-route-stage.mjs", import.meta.url), "utf8");
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
 const secondaryBrandMark = fs.readFileSync(new URL("../src/components/SecondaryTeamBrandMark.jsx", import.meta.url), "utf8");
-const secondaryBrandCss = fs.readFileSync(new URL("../src/components/SecondaryTeamBrandMark.module.css", import.meta.url), "utf8");
 const playerOperationalWorkspace = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
@@ -33,8 +32,8 @@ test("team branding is prominent once per secondary-page identity hierarchy", ()
   assert.match(secondaryBrandMark, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
   assert.match(secondaryBrandMark, /useCleanTeamLogo/);
   assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
-  assert.match(secondaryBrandCss, /\.route\{[\s\S]*width:100%;[\s\S]*height:100%[\s\S]*overflow:visible/);
-  assert.match(secondaryBrandCss, /\.route \.logo\{[\s\S]*transform:scale\(1\.45\)/);
+  assert.match(secondaryBrandMark, /width: "100%", height: "100%", overflow: "visible"/);
+  assert.match(secondaryBrandMark, /transform: "scale\(1\.45\)"/);
   assert.match(centeredRouteEnhancer, /width: 56px/);
   assert.match(centeredRouteEnhancer, /height: 56px/);
   assert.match(centeredRouteEnhancer, /background: transparent/);
@@ -49,8 +48,8 @@ test("mobile route mastheads keep editorial hierarchy without swallowing the fir
   assert.match(enhancer, /\.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle,[\s\S]*font-size: clamp\(31px, 8\.5vw, 34px\) !important/);
   assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
   assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*width: 30px;[\s\S]*height: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
-  assert.match(centeredRouteEnhancer, /coachAdministrationWorkspace[\s\S]*max-width: 16ch !important/);
-  assert.match(centeredRouteEnhancer, /brandingEditorialWorkspace[\s\S]*max-width: 18ch !important;[\s\S]*white-space: nowrap/);
+  assert.match(secondaryPageSystem, /coachPlayerDetailWorkspace \.secondaryPageIntro__title,.coachAdministrationWorkspace \.secondaryPageIntro__title\{max-width:16ch!important\}/);
+  assert.match(secondaryPageSystem, /brandingEditorialWorkspace \.secondaryPageIntro__title\{max-width:18ch!important;white-space:nowrap\}/);
   assert.doesNotMatch(enhancer, /width: 74px/);
   assert.doesNotMatch(centeredRouteEnhancer, /width: (?:7[0-9]|8[0-9]|9[0-9])px/);
 });
