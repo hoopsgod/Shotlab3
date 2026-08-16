@@ -7,7 +7,6 @@
 }
 
 .hero {
-  position: relative;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 30px;
