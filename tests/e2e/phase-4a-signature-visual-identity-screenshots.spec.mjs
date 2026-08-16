@@ -55,7 +55,7 @@ test("Phase 4A entry experience carries the ShotLab basketball signature without
   await capture(page, "08a-phase4a-auth-signature.png");
 });
 
-test("Phase 4A Player Home uses signature court geometry and branded stat instrumentation", async ({ page }) => {
+test("Phase 4A Player Home keeps signature court geometry inside the Showstopper performance hierarchy", async ({ page }) => {
   await enterDemo(page, "Player");
   const command = page.getByTestId("player-daily-command-center");
   const field = page.getByTestId("player-home-signature-field");
@@ -63,21 +63,36 @@ test("Phase 4A Player Home uses signature court geometry and branded stat instru
   await expect(field).toBeVisible();
   await expect(field).toHaveAttribute("data-shotlab-signature", "court");
   expect(await field.evaluate((node) => node.parentElement?.getAttribute("data-testid"))).toBe("player-daily-command-center");
-  const firstMetric = page.getByTestId("player-command-evidence").locator(":scope > div").first();
-  const metricAccent = await firstMetric.evaluate((node) => {
-    const track = node.querySelector('[aria-hidden="true"]');
-    const fill = track?.firstElementChild;
+
+  const todayPerformance = page.getByTestId("player-today-performance");
+  const interpretation = page.getByTestId("player-target-interpretation");
+  const evidence = page.getByTestId("player-command-evidence");
+  const primaryAction = page.getByTestId("player-daily-primary-action");
+  await expect(todayPerformance).toBeVisible();
+  await expect(interpretation).toBeVisible();
+  await expect(evidence).toBeVisible();
+  await expect(primaryAction).toBeVisible();
+  await expect(primaryAction).toHaveCount(1);
+
+  const hierarchy = await page.evaluate(() => {
+    const performance = document.querySelector('[data-testid="player-today-performance"]');
+    const interpretationNode = document.querySelector('[data-testid="player-target-interpretation"]');
+    const evidenceNode = document.querySelector('[data-testid="player-command-evidence"]');
+    if (!performance || !interpretationNode || !evidenceNode) throw new Error("Missing Showstopper hierarchy targets");
+    const performanceRect = performance.getBoundingClientRect();
+    const interpretationRect = interpretationNode.getBoundingClientRect();
+    const evidenceRect = evidenceNode.getBoundingClientRect();
     return {
-      backgroundColor: getComputedStyle(node).backgroundColor,
-      borderRadius: Number.parseFloat(getComputedStyle(node).borderRadius),
-      trackHeight: track ? Number.parseFloat(getComputedStyle(track).height) : 0,
-      fillImage: fill ? getComputedStyle(fill).backgroundImage : "none",
+      performanceFont: Number.parseFloat(getComputedStyle(performance).fontSize),
+      interpretationFont: Number.parseFloat(getComputedStyle(interpretationNode).fontSize),
+      performanceTop: performanceRect.top,
+      interpretationTop: interpretationRect.top,
+      evidenceTop: evidenceRect.top,
     };
   });
-  expect(metricAccent.backgroundColor).toBe("rgba(0, 0, 0, 0)");
-  expect(metricAccent.borderRadius).toBe(0);
-  expect(metricAccent.trackHeight).toBeGreaterThanOrEqual(4);
-  expect(metricAccent.fillImage).not.toBe("none");
+  expect(hierarchy.performanceFont).toBeGreaterThan(hierarchy.interpretationFont);
+  expect(hierarchy.performanceTop).toBeLessThan(hierarchy.interpretationTop);
+  expect(hierarchy.interpretationTop).toBeLessThan(hierarchy.evidenceTop);
   await expectNoOverflow(page);
   await capture(page, "08b-phase4a-player-home-signature.png");
 });
