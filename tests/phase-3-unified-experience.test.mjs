@@ -30,9 +30,10 @@ test("Coach Players converts metrics into a decision brief with specific causes"
   assert.match(briefingSource, /Protect the standard|individual blockers still need direct follow-up/);
 });
 
-test("Player Home prioritizes one action, progress meaning, and visible feedback", () => {
+test("Player Home prioritizes one action, ShotLab basketball progress meaning, and visible feedback", () => {
   assert.match(playerSource, /player-daily-momentum-signal/);
-  assert.match(playerSource, /player-daily-progress-ring/);
+  assert.match(playerSource, /ShotLabPerformanceCourt/);
+  assert.match(playerSource, /player-daily-performance-court/);
   assert.match(playerSource, /Daily target complete/);
   assert.match(playerSource, /Opening…/);
   assert.match(playerSource, /Your next moves/);
