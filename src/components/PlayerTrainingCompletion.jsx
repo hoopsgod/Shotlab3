@@ -108,14 +108,14 @@ export default function PlayerTrainingCompletion({
   return (
     <section className={styles.root} data-testid="player-training-completion" data-pb={isPB ? "true" : "false"} data-performance-language="shotlab-target-court">
       <div className={styles.kickerRow}>
-        <span className={styles.kicker}>SESSION RESULT</span>
+        <span className={styles.kicker}>RESULT LOGGED</span>
         <span className={styles.mode}>{isProgram ? "PROGRAM" : "AT HOME"}</span>
       </div>
 
       <div className={styles.resultHero} data-testid="player-training-result-hero">
         <ResultMark isPB={isPB} />
         <div className={styles.resultCopy}>
-          <span>{isPB ? "PERSONAL BEST" : "RESULT BANKED"}</span>
+          <span>{isPB ? "PERSONAL BEST" : "DRILL COMPLETE"}</span>
           <h2>{clean(data?.drill) || "Training drill"}</h2>
         </div>
         <div className={styles.score} data-testid="player-training-result">
