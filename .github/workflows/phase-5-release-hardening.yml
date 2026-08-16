@@ -51,6 +51,8 @@ jobs:
           node --test
           tests/phase-5-release-hardening.test.mjs
           tests/coach-follow-up-integrity.test.mjs
+          tests/coach-player-response-loop.test.mjs
+          tests/coach-player-invitation-contract.test.mjs
           tests/player-assignment-delivery.test.mjs
           tests/demo-mode-cleanup.test.mjs
           tests/demo-visual-parity-contract.test.mjs
