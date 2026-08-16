@@ -45,7 +45,7 @@ export default function PlayerDashboardHeader({
             <span className={styles.badge} data-identity-role="badge">Player Mode</span>
             <span className={styles.teamName} data-identity-role="team-name">{teamName}</span>
           </div>
-          <h1 className={styles.name} data-identity-role="name">{displayName}</h1>
+          <div className={styles.name} data-identity-role="name">{displayName}</div>
           <p className={styles.tagline} data-identity-role="tagline">{subtitle}</p>
           <div className={styles.mission} data-identity-role="mission">
             <span className={styles.dot} aria-hidden="true" />
