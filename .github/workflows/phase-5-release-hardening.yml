@@ -1,0 +1,175 @@
+name: Phase 5 Release Hardening
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: true
+  PHASE5_BASELINE_SHA: 7ef019cfe76f9b6026c0691821be1464eddb73de
+
+concurrency:
+  group: phase-5-release-hardening-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+
+    steps:
+      - name: Check out exact Phase 5 candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate and locked production baseline
+        shell: bash
+        run: |
+          actual="$(git rev-parse HEAD)"
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          printf 'Expected head: %s\nActual head:   %s\nPhase 5 base: %s\n' "$expected" "$actual" "$PHASE5_BASELINE_SHA"
+          test "$actual" = "$expected"
+          git merge-base --is-ancestor "$PHASE5_BASELINE_SHA" HEAD
+          test "$(git rev-parse "$PHASE5_BASELINE_SHA")" = "$PHASE5_BASELINE_SHA"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Phase 5 reliability and privacy contracts
+        run: >-
+          node --test
+          tests/phase-5-release-hardening.test.mjs
+          tests/coach-follow-up-integrity.test.mjs
+          tests/coach-player-response-loop.test.mjs
+          tests/coach-player-invitation-contract.test.mjs
+          tests/player-assignment-delivery.test.mjs
+          tests/demo-mode-cleanup.test.mjs
+          tests/demo-visual-parity-contract.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build exact production candidate
+        run: npm run build
+
+      - name: Verify unchanged production performance budget
+        run: npm run verify:performance-budget
+
+      - name: Start built production preview
+        shell: bash
+        run: |
+          npm run preview:agent > /tmp/phase-5-preview.log 2>&1 &
+          echo $! > /tmp/phase-5-preview.pid
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/phase-5-preview.log
+          exit 1
+
+      - name: Certify Phase 5 trust, retry, duplicate-submit, and touch regressions
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-5-release-hardening.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Retain Phase 4 Player Intelligence, overlay, form, navigation, and reduced-motion contracts
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-4-product-reset-interaction-certification.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Verify Coach assignment delivery and Player response loop
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: >-
+          npx playwright test
+          tests/e2e/coach-player-assignment-delivery.spec.mjs
+          tests/e2e/coach-follow-up-queue.spec.mjs
+          --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Verify event management and Player RSVP touch path
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: >-
+          npx playwright test
+          tests/e2e/phase-4c-coach-event-manage-hit-area.spec.mjs
+          tests/e2e/phase-4e4-player-program-rsvp-hit-area.spec.mjs
+          --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Run production acceptance
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Certify Demo and registered presentation parity
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: >-
+          npx playwright test
+          tests/e2e/demo-paid-parity.spec.mjs
+          tests/e2e/demo-paid-responsive-parity.spec.mjs
+          --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture mandatory 375-430 Coach and Player visual matrix
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture secondary, Team Store, 430px, and desktop evidence
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: >-
+          npx playwright test
+          tests/e2e/phase-3-release-certification.spec.mjs
+          tests/e2e/phase-3-team-store-portal-certification.spec.mjs
+          --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Record exact Phase 5 candidate SHA
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/phase-5-release-hardening
+          git rev-parse HEAD > artifacts/phase-5-release-hardening/exact-head-sha.txt
+          printf '%s\n' "$PHASE5_BASELINE_SHA" > artifacts/phase-5-release-hardening/baseline-sha.txt
+
+      - name: Upload exact-head Phase 5 visual and certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-5-release-hardening-evidence
+          path: |
+            artifacts/phase-5-release-hardening/
+            artifacts/phase-4-product-reset-interaction/
+            artifacts/phase-3a-cross-screen-visual-audit/
+            artifacts/phase-3-release-certification/
+            artifacts/phase-3-team-store-portal-certification/
+            tests/e2e/screenshots/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-5-release-hardening-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/phase-5-preview.log
+          if-no-files-found: ignore
+          retention-days: 7

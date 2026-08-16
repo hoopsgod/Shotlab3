@@ -117,6 +117,16 @@
     box-sizing: border-box;
   }
 
+  html.team-store-portal-open .ts-coach-content .ts-preview-column .ts-preview-panel h4 {
+    color: #171a18 !important;
+    -webkit-text-fill-color: #171a18 !important;
+  }
+
+  html.team-store-portal-open .ts-coach-content .ts-preview-column .ts-preview-panel p {
+    color: #5f6861 !important;
+    -webkit-text-fill-color: #5f6861 !important;
+  }
+
   html.team-store-portal-open .ts-empty-state {
     position: relative;
     width: min(520px, calc(100% - 8px));

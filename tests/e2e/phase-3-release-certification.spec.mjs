@@ -175,6 +175,8 @@ test.describe("Phase 3 release certification — 390x844", () => {
     await openMoreDestination(page, "team-store");
     const store = page.locator(".ts-panel");
     await expect(store).toBeVisible({ timeout: 10_000 });
+    await expectRenderedTextContrast(store.locator(".ts-preview-column .ts-preview-panel h4"), 4.5);
+    await expectRenderedTextContrast(store.locator(".ts-preview-column .ts-preview-panel p"), 4.5);
     await capture(page, "16-coach-team-store");
   });
 

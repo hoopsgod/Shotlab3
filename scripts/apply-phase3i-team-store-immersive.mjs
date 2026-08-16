@@ -67,6 +67,8 @@ const immersiveEffect = `  useEffect(() => {
       'html.team-store-portal-open .ts-eyebrow{color:#5b7119!important;-webkit-text-fill-color:#5b7119!important;}',
       'html.team-store-portal-open .ts-close{min-width:44px!important;min-height:44px!important;border-color:rgba(23,26,24,.14)!important;background:#fff!important;color:#171a18!important;-webkit-text-fill-color:#171a18!important;touch-action:manipulation;}',
       'html.team-store-portal-open .ts-coach-content,html.team-store-portal-open .ts-player-content{min-height:calc(100dvh - 84px - env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box;}',
+      'html.team-store-portal-open .ts-coach-content .ts-preview-column .ts-preview-panel h4{color:#171a18!important;-webkit-text-fill-color:#171a18!important;}',
+      'html.team-store-portal-open .ts-coach-content .ts-preview-column .ts-preview-panel p{color:#5f6861!important;-webkit-text-fill-color:#5f6861!important;}',
       'html.team-store-portal-open .ts-empty-state{min-height:calc(100dvh - 160px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));align-content:center;padding:32px 18px calc(36px + env(safe-area-inset-bottom,0px))!important;color:#171a18!important;}',
       'html.team-store-portal-open .ts-empty-icon{border:1px solid rgba(91,113,25,.16)!important;background:rgba(91,113,25,.08)!important;color:#5b7119!important;}',
       'html.team-store-portal-open .ts-empty-state h3{color:#171a18!important;-webkit-text-fill-color:#171a18!important;}',

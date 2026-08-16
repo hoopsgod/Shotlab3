@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildCoachPlayerInviteEmailLink, loadCoachPlayerInvitations, provisionCoachPlayer } from "../lib/coachPlayerInvitationService.js";
 import { DSButton, DSInput } from "./ui/designSystem.jsx";
 
@@ -32,6 +32,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const [setupPlayerName, setSetupPlayerName] = useState("");
   const [setupExpiresAt, setSetupExpiresAt] = useState("");
   const [invitations, setInvitations] = useState([]);
+  const provisionInFlightRef = useRef(false);
 
   const refresh = async () => {
     const result = await loadCoachPlayerInvitations({ coach, teamId });
@@ -44,8 +45,10 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const submit = async (event) => {
     event?.preventDefault?.();
     if (busy) return;
+    if (provisionInFlightRef.current) return;
     const invitationEmail = form.email.trim().toLowerCase();
     const invitationName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || "Player";
+    provisionInFlightRef.current = true;
     setBusy(true);
     setMessage("");
     setError("");
@@ -73,6 +76,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     } catch (caught) {
       setError(friendlyPlayerInviteError(caught?.message));
     } finally {
+      provisionInFlightRef.current = false;
       setBusy(false);
     }
   };
