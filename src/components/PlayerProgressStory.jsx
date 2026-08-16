@@ -1,25 +1,10 @@
 import { useMemo } from "react";
+import { PLAYER_DAILY_SHOT_TARGET } from "../lib/appDataModels.js";
 import { derivePlayerProgressStory } from "../lib/playerProgressStory.js";
+import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
 import styles from "./PlayerProgressStory.module.css";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
-
-function TrendSparkline({ points = [] }) {
-  const values = points.map((point) => Number(point?.made) || 0);
-  const max = Math.max(...values, 1);
-  const width = 260;
-  const height = 66;
-  const polyline = values.map((value, index) => {
-    const x = values.length <= 1 ? 0 : (index / (values.length - 1)) * width;
-    const y = height - 8 - ((value / max) * (height - 18));
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
-  }).join(" ");
-  return (
-    <svg className={styles.sparkline} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Fourteen day at-home make trend" preserveAspectRatio="none">
-      <line x1="0" y1={height - 8} x2={width} y2={height - 8} className={styles.sparkTrack} />
-      <polyline points={polyline} className={styles.sparkPath} />
-    </svg>
-  );
-}
+import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 
 function SignalCard({ eyebrow, title, detail, testId }) {
   return (
@@ -61,6 +46,16 @@ export default function PlayerProgressStory({
 
   const trendWord = story.trend === "rising" ? "RISING" : story.trend === "cooling" ? "RESET" : "STEADY";
   const firstName = String(userName || "Player").trim().split(/\s+/)[0] || "Player";
+  const todayMakes = Math.max(0, Number(story.dailyMakes?.[story.dailyMakes.length - 1]?.made) || 0);
+  const todayVisual = deriveShotLabPerformanceVisual({ value: todayMakes, target: PLAYER_DAILY_SHOT_TARGET });
+  const remainingToday = Math.max(0, PLAYER_DAILY_SHOT_TARGET - todayMakes);
+  const todayInterpretation = todayVisual.state === "above"
+    ? `+${Math.round(todayVisual.aboveTarget)} above today’s standard`
+    : todayVisual.state === "complete"
+      ? "Today’s standard locked"
+      : todayVisual.state === "zero"
+        ? "Today starts here"
+        : `${Math.round(remainingToday)} to today’s standard`;
 
   return (
     <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend} data-page-hierarchy="command-story">
@@ -75,13 +70,19 @@ export default function PlayerProgressStory({
             <h2>{story.headline}</h2>
             <p>{story.trendDetail}</p>
           </div>
-          <div className={styles.trendPanel} data-testid="player-progress-trend-chart">
-            <div data-testid="player-progress-trend-summary">
-              <span>AT-HOME VOLUME</span>
-              <strong>{story.recent7Makes}</strong>
-              <small>makes · last 7 days</small>
+          <div className={styles.targetPanel} data-testid="player-progress-target-court" data-performance-state={todayVisual.state}>
+            <div className={styles.targetPanelCopy} data-testid="player-progress-target-summary">
+              <span>TODAY’S STANDARD</span>
+              <strong>{todayMakes}<small> MADE</small></strong>
+              <p>{todayInterpretation}</p>
             </div>
-            <TrendSparkline points={story.dailyMakes} />
+            <ShotLabPerformanceCourt
+              value={todayMakes}
+              target={PLAYER_DAILY_SHOT_TARGET}
+              size={76}
+              label="Target path"
+              testId="player-progress-target-visual"
+            />
           </div>
         </div>
         <div className={styles.metricStrip} data-testid="player-progress-metrics">
