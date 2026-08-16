@@ -50,6 +50,7 @@ const promotedFixture = `@media (max-width: 760px) {
     text-overflow: ellipsis;
   }
 }
+
 @media (max-width: 430px) {
   .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }
   .secondaryPageIntro__icon { width: 44px; height: 50px; border-radius: 0; }
@@ -71,6 +72,7 @@ test('mobile secondary route mastheads resolve to a compact centered one-column 
   assert.match(centered, /max-width: 10\.5ch;[\s\S]*margin-inline: auto;[\s\S]*text-align: center;/)
   assert.match(centered, /\.secondaryPageIntro__actions \{[\s\S]*max-width: 360px;[\s\S]*margin: 0 auto;[\s\S]*justify-items: center;[\s\S]*gap: 5px;/)
   assert.match(centered, /line-height: 1\.25;\n    text-align: center;/)
+  assert.match(centered, /\.coachPlayerDetailWorkspace \.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle \{\n    max-width: 16ch !important;/)
   assert.match(centered, /@media \(max-width: 430px\) \{\n  \.secondaryPageIntro \{ grid-template-columns: minmax\(0, 1fr\); column-gap: 0; \}/)
   assert.match(centered, /\.secondaryPageIntro__icon \{ width: 40px; height: 40px; border-radius: 0; \}/)
 })
