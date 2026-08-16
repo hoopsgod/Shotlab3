@@ -119,6 +119,15 @@ test("roster controls do not fake latency and preserve 44px filter targets", asy
   assert.match(source, /aria-label="Search players"/);
 });
 
+test("Coach player follow-up stays inside the intelligence drawer scroll body", async () => {
+  const source = await read("src/lib/coachFollowUpEnhancer.js");
+
+  assert.match(source, /const body = dialog\.querySelector\('\[data-visual-role="dashboard-section"\]'\)\?\.parentElement/);
+  assert.match(source, /if \(!body \|\| body === dialog\) return/);
+  assert.match(source, /body\.appendChild\(host\)/);
+  assert.doesNotMatch(source, /dialog\.appendChild\(host\)/);
+});
+
 test("Phase 4 remains component-owned instead of introducing a new global visual authority", async () => {
   const main = await read("src/main.jsx");
   assert.doesNotMatch(main, /Phase4.*\.css|phase-4.*\.css/i);
