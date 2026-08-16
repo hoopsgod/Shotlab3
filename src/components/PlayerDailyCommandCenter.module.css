@@ -194,14 +194,14 @@
 
 /* The progress disclosure lives on ShotLab's cream chapter. Keep semantic primitive tokens light-surface-safe even when global route styling is regenerated. */
 .root :global(.playerProgressDisclosure) [data-testid="player-daily-momentum-signal"] {
-  --surface-elevated:transparent!important;
-  --border-soft:rgba(23,26,24,.12)!important;
+  background:transparent!important;
+  border-color:rgba(23,26,24,.12)!important;
+  box-shadow:none!important;
   --text-1:#17211a!important;
   --text-2:#465149!important;
   --text-3:#667069!important;
   --neon:#617900!important;
 }
-.root :global(.playerProgressDisclosure) [data-testid="player-daily-momentum-signal"] [class*="signalRing"] { border-color:rgba(23,26,24,.12)!important; }
 
 @media (max-width:700px) {
   .hero { padding:17px 18px 18px; border-radius:0; }
