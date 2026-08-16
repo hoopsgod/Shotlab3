@@ -1,7 +1,8 @@
+import { useId } from "react";
+import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyPrimitives.module.css";
 
-const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, Number(value) || 0));
 const signalIcon = (tone, eyebrow = "") => {
   const value = String(eyebrow).toLowerCase();
   if (value.includes("coach")) return "coach";
@@ -12,26 +13,83 @@ const signalIcon = (tone, eyebrow = "") => {
   return "target";
 };
 
-export function ExperienceProgressRing({ value = 0, max = 100, label, detail, size = 92, testId }) {
-  const pct = clamp(max > 0 ? (Number(value) / Number(max)) * 100 : 0);
-  const radius = 34;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (pct / 100) * circumference;
+const TARGET_PATH = "M22 104V92C22 45 47 23 80 23S138 45 138 92V104";
+const OVERFLOW_PATH = "M14 104V89C14 34 44 14 80 14S146 34 146 89V104";
+
+export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId }) {
+  const visual = deriveShotLabPerformanceVisual({ value, target: max });
+  const maskId = `shotlab-target-mask-${useId().replace(/:/g, "")}`;
+  const overflowMaskId = `shotlab-overflow-mask-${useId().replace(/:/g, "")}`;
+  const width = Math.max(104, Math.round(Number(size || 92) * 1.28));
+  const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
+  const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
 
   return (
-    <div className={styles.progressRing} style={{ "--ring-size": `${size}px` }} data-testid={testId} aria-label={`${label || "Progress"}: ${Math.round(pct)}%`}>
-      <svg viewBox="0 0 84 84" aria-hidden="true">
-        <circle className={styles.progressRingTrack} cx="42" cy="42" r={radius} />
-        <circle className={styles.progressRingValue} cx="42" cy="42" r={radius} strokeDasharray={circumference} strokeDashoffset={dashOffset} />
+    <div
+      className={styles.performanceCourt}
+      style={{ "--court-size": `${width}px` }}
+      data-testid={testId}
+      data-performance-visual="shotlab-target-court"
+      data-performance-state={visual.state}
+      data-target-percent={visual.targetPercent}
+      data-above-target={Math.round(visual.aboveTarget)}
+      role="img"
+      aria-label={visual.accessibleLabel}
+    >
+      <svg viewBox="0 0 160 118" aria-hidden="true" focusable="false">
+        <defs>
+          <mask id={maskId}>
+            <path d={TARGET_PATH} pathLength="100" className={styles.courtMaskPath} />
+          </mask>
+          <mask id={overflowMaskId}>
+            <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowMaskPath} />
+          </mask>
+        </defs>
+
+        <path className={styles.courtBaseline} d="M14 104H146" />
+        <path className={styles.courtLane} d="M59 104V63H101V104" />
+        <path className={styles.courtFreeThrow} d="M59 63H101M65 63a15 15 0 0 0 30 0" />
+        <path className={styles.courtRestricted} d="M69 84a11 11 0 0 1 22 0" />
+        <path className={styles.courtBackboard} d="M67 78H93" />
+        <ellipse className={styles.courtRim} cx="80" cy="82" rx="9" ry="2.6" />
+        <path className={styles.courtNet} d="M73 84l4 10h6l4-10M76 88h8" />
+
+        <path d={TARGET_PATH} pathLength="100" className={styles.courtTargetTrack} />
+        <path
+          d={TARGET_PATH}
+          pathLength="100"
+          className={styles.courtTargetValue}
+          strokeDasharray={targetDash}
+          mask={`url(#${maskId})`}
+        />
+
+        {visual.state === "above" ? <>
+          <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowTrack} />
+          <path
+            d={OVERFLOW_PATH}
+            pathLength="100"
+            className={styles.courtOverflowValue}
+            strokeDasharray={overflowDash}
+            mask={`url(#${overflowMaskId})`}
+          />
+        </> : null}
+
+        <g className={styles.courtTargetLock}>
+          <circle cx="80" cy="23" r="5" />
+          <path d="M77.5 23l1.7 1.8 3.7-4" />
+        </g>
       </svg>
-      <div className={styles.progressRingCopy}>
-        <strong>{Math.round(pct)}%</strong>
-        {label ? <span>{label}</span> : null}
-      </div>
-      {detail ? <div className={styles.progressRingDetail}>{detail}</div> : null}
+      <span className={styles.performanceCourtState} aria-hidden="true">
+        {visual.state === "above" ? `+${Math.round(visual.aboveTarget)} banked` : visual.state === "complete" ? "Target locked" : label || "Target path"}
+      </span>
+      {detail ? <span className={styles.performanceCourtDetail}>{detail}</span> : null}
     </div>
   );
 }
+
+// Compatibility export: Player Home callers keep their Phase 1 API while the
+// canonical Phase 2 primitive is ShotLabPerformanceCourt.
+export const ExperienceProgressRing = ShotLabPerformanceCourt;
 
 export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", icon, children, testId }) {
   const iconName = icon || signalIcon(tone, eyebrow);
