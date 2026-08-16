@@ -1,6 +1,6 @@
 .performanceCourt {
-  --court-line: rgba(226, 235, 238, .25);
-  --court-line-strong: rgba(226, 235, 238, .48);
+  --court-line: rgba(226, 235, 238, .32);
+  --court-line-strong: rgba(226, 235, 238, .56);
   --court-accent: var(--team-brand-primary, var(--page-accent, var(--accent, #c9ff3d)));
   display: grid;
   justify-items: center;
@@ -34,17 +34,17 @@
 }
 
 .courtBaseline { stroke: var(--court-line-strong); }
-.courtBackboard { stroke: rgba(226, 235, 238, .62); stroke-width: 1.8; }
-.courtNet { stroke: rgba(226, 235, 238, .34); }
-.courtRim { fill: rgba(7, 24, 32, .96); stroke: rgba(226, 235, 238, .72); stroke-width: 1.6; }
+.courtBackboard { stroke: rgba(226, 235, 238, .68); stroke-width: 1.8; }
+.courtNet { stroke: rgba(226, 235, 238, .40); }
+.courtRim { fill: rgba(7, 24, 32, .96); stroke: rgba(226, 235, 238, .76); stroke-width: 1.6; }
 
 .courtTargetTrack,
 .courtTargetValue,
 .courtOverflowTrack,
 .courtOverflowValue { stroke-width: 3.4; stroke-linecap: round; }
-.courtTargetTrack { stroke: rgba(226, 235, 238, .13); stroke-dasharray: 5 2.5; }
+.courtTargetTrack { stroke: rgba(226, 235, 238, .18); stroke-dasharray: 5 2.5; }
 .courtTargetValue { stroke: var(--court-accent); }
-.courtOverflowTrack { stroke: color-mix(in srgb, var(--court-accent) 21%, transparent); stroke-dasharray: 4.2 3.1; }
+.courtOverflowTrack { stroke: color-mix(in srgb, var(--court-accent) 24%, transparent); stroke-dasharray: 4.2 3.1; }
 .courtOverflowValue { stroke: var(--court-accent); stroke-width: 2.8; }
 
 .courtTargetLock { opacity: 0; transition: opacity 220ms ease; }
