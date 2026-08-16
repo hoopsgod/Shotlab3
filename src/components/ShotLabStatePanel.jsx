@@ -23,6 +23,8 @@ export default function ShotLabStatePanel({
   title,
   detail,
   actionLabel,
+  actionPending = false,
+  actionPendingLabel = "Working",
   onAction,
   compact = false,
   surface = "dark",
@@ -30,7 +32,7 @@ export default function ShotLabStatePanel({
 }) {
   const meta = STATE_META[state] || STATE_META.empty;
   const role = state === "error" ? "alert" : "status";
-  const busy = state === "loading";
+  const busy = state === "loading" || actionPending;
   const className = [
     styles.root,
     stateClass(state),
@@ -55,10 +57,17 @@ export default function ShotLabStatePanel({
         <div className={styles.eyebrow}>{eyebrow || meta.eyebrow}</div>
         <h3 className={styles.title}>{title || meta.title}</h3>
         {detail ? <p className={styles.detail}>{detail}</p> : null}
-        {busy ? <div className={styles.loadingTrack} aria-hidden="true" /> : null}
+        {state === "loading" ? <div className={styles.loadingTrack} aria-hidden="true" /> : null}
         {actionLabel && typeof onAction === "function" ? (
-          <button type="button" className={styles.action} onClick={onAction}>
-            {actionLabel}
+          <button
+            type="button"
+            className={styles.action}
+            disabled={actionPending}
+            aria-busy={actionPending || undefined}
+            data-working={actionPending ? "true" : undefined}
+            onClick={onAction}
+          >
+            {actionPending ? actionPendingLabel : actionLabel}
           </button>
         ) : null}
       </div>

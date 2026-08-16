@@ -62,9 +62,14 @@ function patchProgressStory() {
 function patchAuth() {
   const path = "src/components/AuthWorkspace.jsx";
   let source = readFileSync(path, "utf8");
+  const authReactImport = [
+    'import { useRef, useState } from "react";\n',
+    'import { useState } from "react";\n',
+  ].find((anchor) => source.includes(anchor));
+  if (!authReactImport) fail("Auth signature import: React state import anchor not found");
   source = ensureImportAfter(
     source,
-    'import { useState } from "react";\n',
+    authReactImport,
     'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "Auth signature import",
   );

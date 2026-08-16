@@ -68,6 +68,18 @@ fs.writeFileSync(appPath, source)
 
 let authSource = fs.readFileSync(authPath, 'utf8')
 authSource = authSource.replace('import { hydrateAuthenticatedCollectionsToStorage } from "../lib/legacySignedCollectionPersistence.js";\n', '')
+
+// App owns registered post-login hydration before the authenticated workspace becomes interactive.
+// Remove only AuthWorkspace's duplicate hydration/reload sequence so Auth can keep its current
+// user-facing error, loading, and accessibility treatment without this enhancer depending on it.
+for (const duplicateHydration of [
+  'await hydrateAuthenticatedCollectionsToStorage().catch(()=>null);\nif(typeof window!=="undefined"&&typeof window.location?.reload==="function")window.location.reload();',
+  'await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:id}).catch(()=>null);\nif(typeof window!=="undefined"&&typeof window.location?.reload==="function")window.location.reload();',
+]) {
+  authSource = authSource.split(duplicateHydration).join('')
+}
+
+// Preserve compatibility with older source shapes if this enhancer is applied to an unpolished checkout.
 authSource = authSource.replace(
   'if(!r.ok){setErr(r.err);return}\nawait hydrateAuthenticatedCollectionsToStorage().catch(()=>null);\nif(typeof window!=="undefined"&&typeof window.location?.reload==="function")window.location.reload();',
   'if(!r.ok){setErr(r.err);return}',

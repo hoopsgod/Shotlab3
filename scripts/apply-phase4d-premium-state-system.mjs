@@ -5,6 +5,12 @@ const requireOne = (source, anchor, label) => {
   const count = source.split(anchor).length - 1;
   if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
 };
+const firstExactAnchor = (source, anchors, label) => {
+  const matches = anchors.filter((anchor) => source.includes(anchor));
+  if (matches.length !== 1) fail(`${label}: expected one supported anchor, found ${matches.length}`);
+  requireOne(source, matches[0], label);
+  return matches[0];
+};
 
 const appPath = "src/App.jsx";
 let app = readFileSync(appPath, "utf8");
@@ -32,18 +38,24 @@ writeFileSync(appPath, app);
 const authPath = "src/components/AuthWorkspace.jsx";
 let auth = readFileSync(authPath, "utf8");
 if (!auth.includes('import ShotLabStatePanel from "./ShotLabStatePanel.jsx";')) {
-  const importAnchor = 'import { useState } from "react";\n';
-  requireOne(auth, importAnchor, "Auth useState import");
+  const importAnchor = firstExactAnchor(auth, [
+    'import { useRef, useState } from "react";\n',
+    'import { useState } from "react";\n',
+  ], "Auth React state import");
   auth = auth.replace(importAnchor, `${importAnchor}import ShotLabStatePanel from "./ShotLabStatePanel.jsx";\n`);
 }
 if (!auth.includes('testId="auth-success-state"')) {
-  const noticeAnchor = '{accountNotice&&<div role="status" style={{background:"rgba(126,158,30,.09)",border:"1px solid rgba(126,158,30,.22)",borderRadius:14,padding:"12px 14px",fontFamily:"-apple-system,BlinkMacSystemFont,\'SF Pro Text\',\'Segoe UI\',sans-serif",color:"#334006",fontSize:13,lineHeight:1.45,marginBottom:16}}>{accountNotice}</div>}';
-  requireOne(auth, noticeAnchor, "Auth account notice");
+  const noticeAnchor = firstExactAnchor(auth, [
+    '{accountNotice&&<div role="status" style={{background:"rgba(126,158,30,.09)",border:"1px solid rgba(126,158,30,.22)",borderRadius:14,padding:"12px 14px",fontFamily:"-apple-system,BlinkMacSystemFont,\'SF Pro Text\',\'Segoe UI\',sans-serif",color:"#334006",fontSize:13,lineHeight:1.45,marginBottom:16}}>{accountNotice}</div>}',
+    '{accountNotice&&<div role="status" aria-live="polite" style={{background:"rgba(126,158,30,.09)",border:"1px solid rgba(126,158,30,.22)",borderRadius:14,padding:"12px 14px",fontFamily:"-apple-system,BlinkMacSystemFont,\'SF Pro Text\',\'Segoe UI\',sans-serif",color:"#334006",fontSize:13,lineHeight:1.45,marginBottom:16}}>{accountNotice}</div>}',
+  ], "Auth account notice");
   auth = auth.replace(noticeAnchor, '{accountNotice&&<div style={{marginBottom:16}}><ShotLabStatePanel state="success" eyebrow="Account update" title="Request complete" detail={accountNotice} compact surface="light" testId="auth-success-state"/></div>}');
 }
 if (!auth.includes('testId="auth-error-state"')) {
-  const errorAnchor = '{err&&<p role="alert" style={{fontFamily:"-apple-system,BlinkMacSystemFont,\'SF Pro Text\',\'Segoe UI\',sans-serif",color:"#C33B49",fontSize:13,margin:"0 0 14px",lineHeight:1.4}}>{err}</p>}';
-  requireOne(auth, errorAnchor, "Auth inline error");
+  const errorAnchor = firstExactAnchor(auth, [
+    '{err&&<p role="alert" style={{fontFamily:"-apple-system,BlinkMacSystemFont,\'SF Pro Text\',\'Segoe UI\',sans-serif",color:"#C33B49",fontSize:13,margin:"0 0 14px",lineHeight:1.4}}>{err}</p>}',
+    '{err&&<p role="alert" aria-live="assertive" style={{fontFamily:"-apple-system,BlinkMacSystemFont,\'SF Pro Text\',\'Segoe UI\',sans-serif",color:"#C33B49",fontSize:13,margin:"0 0 14px",lineHeight:1.4}}>{err}</p>}',
+  ], "Auth inline error");
   auth = auth.replace(errorAnchor, '{err&&<div style={{margin:"0 0 14px"}}><ShotLabStatePanel state="error" eyebrow="Check your details" title="We could not continue" detail={err} compact surface="light" testId="auth-error-state"/></div>}');
 }
 writeFileSync(authPath, auth);

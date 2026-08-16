@@ -1,0 +1,14 @@
+:is(.ds-button,.ds-chip,.ds-metric-card){
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+:is(.ds-button,.ds-chip,.ds-metric-card):active:not(:disabled){transform:scale(.985)}
+:is(.ds-button,.ds-chip,.ds-metric-card,.ds-input):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--accent,#c8ff1a) 32%,transparent);
+  outline-offset:2px;
+}
+:is(.ds-button,.ds-chip,.ds-metric-card):disabled{opacity:.52;transform:none}
+.ds-button[data-working="true"]{cursor:progress}
+@media (prefers-reduced-motion:reduce){
+  :is(.ds-button,.ds-chip,.ds-metric-card,.ds-input){transition:none!important}
+}

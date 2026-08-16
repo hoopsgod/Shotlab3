@@ -129,21 +129,30 @@ if (!source.includes(panelMarker)) {
 
 const followUpPath = 'src/lib/coachFollowUpEnhancer.js';
 let followUpSource = readFileSync(followUpPath, 'utf8');
-const placementMarker = `const drawerBody = dialog.querySelector('[class*="drawerBody"]') || dialog;`;
+const placementMarker = `const body = dialog.querySelector('[data-visual-role="dashboard-section"]')?.parentElement;`;
 
 if (!followUpSource.includes(placementMarker)) {
-  const oldPlacement = `    host = document.createElement("div");
+  const directPlacement = `    host = document.createElement("div");
     host.dataset.testid = HOST_TEST_ID;
     dialog.appendChild(host);`;
-  const placementOccurrences = followUpSource.split(oldPlacement).length - 1;
-  if (placementOccurrences !== 1) {
-    throw new Error(`Phase 3L expected exactly one Coach follow-up drawer placement anchor, found ${placementOccurrences}.`);
-  }
-  const newPlacement = `    const drawerBody = dialog.querySelector('[class*="drawerBody"]') || dialog;
+  const legacyScrollPlacement = `    const drawerBody = dialog.querySelector('[class*="drawerBody"]') || dialog;
     host = document.createElement("div");
     host.dataset.testid = HOST_TEST_ID;
     drawerBody.appendChild(host);`;
-  followUpSource = followUpSource.replace(oldPlacement, newPlacement);
+  const desiredPlacement = `    const body = dialog.querySelector('[data-visual-role="dashboard-section"]')?.parentElement;
+    if (!body || body === dialog) return;
+    host = document.createElement("div");
+    host.dataset.testid = HOST_TEST_ID;
+    body.appendChild(host);`;
+
+  const directOccurrences = followUpSource.split(directPlacement).length - 1;
+  const legacyOccurrences = followUpSource.split(legacyScrollPlacement).length - 1;
+  if (directOccurrences + legacyOccurrences !== 1) {
+    throw new Error(`Phase 3L expected exactly one Coach follow-up drawer placement anchor, found ${directOccurrences + legacyOccurrences}.`);
+  }
+  followUpSource = directOccurrences === 1
+    ? followUpSource.replace(directPlacement, desiredPlacement)
+    : followUpSource.replace(legacyScrollPlacement, desiredPlacement);
   writeFileSync(followUpPath, followUpSource);
   changed = true;
 } else {

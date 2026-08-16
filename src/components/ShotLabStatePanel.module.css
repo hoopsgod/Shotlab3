@@ -109,8 +109,9 @@
   touch-action:manipulation;
   transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
 }
-.action:active{transform:scale(.975)}
+.action:active:not(:disabled){transform:scale(.975)}
 .action:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--state-accent) 22%,transparent)}
+.action:disabled{cursor:progress;opacity:.6;transform:none}
 .loading{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
 .empty{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
 .firstUse{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}

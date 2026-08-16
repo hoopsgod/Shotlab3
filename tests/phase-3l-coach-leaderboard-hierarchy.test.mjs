@@ -52,12 +52,13 @@ test('Phase 3L keeps leaderboard filtering and player drill-down behavior intact
   assert.match(app, /filterLeaderboardIntelligenceRows/);
 });
 
-test('Phase 3L moves the intentional follow-up workflow into the drawer scroll body', () => {
+test('Phase 3L keeps the intentional follow-up workflow inside the drawer scroll body', () => {
   assert.match(enhancer, /coachFollowUpEnhancer\.js/);
   assert.match(enhancer, /expected exactly one Coach follow-up drawer placement anchor/);
-  assert.match(enhancer, /const drawerBody = dialog\.querySelector\('\[class\*=\"drawerBody\"\]'\) \|\| dialog/);
-  assert.match(enhancer, /drawerBody\.appendChild\(host\)/);
-  assert.doesNotMatch(enhancer, /newPlacement = `[\s\S]*dialog\.appendChild\(host\)/);
+  assert.match(enhancer, /const body = dialog\.querySelector\('\[data-visual-role=\"dashboard-section\"\]'\)\?\.parentElement/);
+  assert.match(enhancer, /if \(!body \|\| body === dialog\) return/);
+  assert.match(enhancer, /body\.appendChild\(host\)/);
+  assert.doesNotMatch(enhancer, /desiredPlacement = `[\s\S]*dialog\.appendChild\(host\)/);
 });
 
 test('Leaderboard authority uses light native surfaces, accessible focus, and restrained motion', () => {

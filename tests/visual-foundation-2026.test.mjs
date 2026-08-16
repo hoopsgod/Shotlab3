@@ -109,7 +109,7 @@ test("authentication segmented controls expose native interaction semantics", ()
   assert.match(auth, /role="radiogroup"/);
   assert.match(auth, /role="radio" aria-checked=/);
   assert.match(auth, /type="button" className="btn-v cta-primary"/);
-  assert.match(auth, /<button type="button" style=\{\{width:"100%"/);
+  assert.match(auth, /<button type="button"[^>]*style=\{\{width:"100%"/);
 });
 
 test("mobile navigation is a branded native edge tab rail", () => {

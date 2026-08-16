@@ -7,6 +7,18 @@ import {
 import styles from "./CoachProgramScoreDrawer.module.css";
 
 const today = () => new Date().toISOString().slice(0, 10);
+const technicalErrorPattern = /(pgrst|postgres|supabase|jwt|schema|column|relation|typeerror|stack|fetch failed|networkerror|http\s*\d{3}|\b5\d\d\b)/i;
+const backdropStyle = { position: "fixed", inset: 0, zIndex: 1200, display: "flex", justifyContent: "flex-end", background: "#000b" };
+const drawerStyle = { width: "min(100%,470px)", overflow: "auto", background: "#090d11", color: "#f5f7f8" };
+const headerStyle = { display: "flex", justifyContent: "space-between", gap: 16 };
+
+export function friendlyProgramScoreError(value) {
+  const message = String(value || "").trim();
+  if (!message || message.length > 180 || technicalErrorPattern.test(message)) {
+    return "Could not save the Program result. Check the entry and try again.";
+  }
+  return message;
+}
 
 export default function CoachProgramScoreDrawer({
   open = false,
@@ -53,6 +65,7 @@ export default function CoachProgramScoreDrawer({
 
   const submit = async (event) => {
     event.preventDefault();
+    if (saving) return;
     const validation = validateCoachProgramScoreEntry({
       player: selectedPlayer,
       drill: selectedDrill,
@@ -65,26 +78,31 @@ export default function CoachProgramScoreDrawer({
     }
     setSaving(true);
     setError("");
-    const result = await onSubmit?.({
-      player: selectedPlayer,
-      drillId,
-      score: validation.score,
-      date,
-    });
-    if (result?.ok) {
-      onClose?.();
-      return;
+    try {
+      const result = await onSubmit?.({
+        player: selectedPlayer,
+        drillId,
+        score: validation.score,
+        date,
+      });
+      if (result?.ok) {
+        onClose?.();
+        return;
+      }
+      setError(friendlyProgramScoreError(result?.error || result?.err?.message));
+    } catch (caught) {
+      setError(friendlyProgramScoreError(caught?.message));
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setError(result?.error || result?.err?.message || "Could not save the Program result. Try again.");
   };
 
   const unavailable = playerOptions.length === 0 || drillOptions.length === 0;
 
   return (
-    <div className={styles.backdrop} onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose?.()}>
-      <section className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="coach-program-score-title" data-testid="coach-program-score-drawer">
-        <div className={styles.header}>
+    <div style={backdropStyle} onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose?.()}>
+      <section className={styles.drawer} style={drawerStyle} role="dialog" aria-modal="true" aria-labelledby="coach-program-score-title" aria-busy={saving || undefined} data-testid="coach-program-score-drawer">
+        <div style={headerStyle}>
           <div>
             <div className={styles.eyebrow}>Coach-verified result</div>
             <h2 id="coach-program-score-title">Record Program Score</h2>
@@ -103,7 +121,7 @@ export default function CoachProgramScoreDrawer({
               : "Create a Program drill before recording a result."}
           </div>
         ) : (
-          <form onSubmit={submit} className={styles.form}>
+          <form onSubmit={submit} className={styles.form} aria-busy={saving || undefined}>
             <label>
               <span>Player</span>
               <select value={playerId} onChange={(event) => { setPlayerId(event.target.value); setError(""); }} disabled={saving}>
@@ -139,8 +157,8 @@ export default function CoachProgramScoreDrawer({
             {selectedDrillHasMax ? (
               <div className={styles.limit}>Accepted range: {selectedDrill?.allowZeroScore === true || selectedDrill?.minScore === 0 ? 0 : 1}–{selectedDrill.max}</div>
             ) : null}
-            {error ? <div className={styles.error} role="alert">{error}</div> : null}
-            <button className={styles.submit} type="submit" disabled={saving}>
+            {error ? <div className={styles.error} role="alert" aria-live="assertive">{error}</div> : null}
+            <button className={styles.submit} type="submit" disabled={saving} aria-busy={saving || undefined} data-working={saving ? "true" : undefined}>
               {saving ? "Saving verified result…" : "Save verified result"}
             </button>
           </form>
