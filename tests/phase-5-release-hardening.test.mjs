@@ -86,3 +86,23 @@ test("team branding errors stay user-facing rather than dumping raw exception te
   assert.match(source, /This logo could not be prepared\. Try another image or use the logo URL field\./);
   assert.match(source, /Team branding could not be saved\. Your changes are still here; try again\./);
 });
+
+test("Add Player provisioning is synchronously single-flight", () => {
+  const source = fs.readFileSync(new URL("../src/components/CoachPlayerInviteForm.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /const provisionInFlightRef = useRef\(false\)/);
+  assert.match(source, /if \(provisionInFlightRef\.current\) return/);
+  assert.match(source, /provisionInFlightRef\.current = true/);
+  assert.match(source, /finally \{[\s\S]*provisionInFlightRef\.current = false;[\s\S]*setBusy\(false\)/);
+  assert.match(source, /aria-busy=\{busy \|\| undefined\}/);
+});
+
+test("Program Score save is synchronously single-flight", () => {
+  const source = fs.readFileSync(new URL("../src/components/CoachProgramScoreDrawer.jsx", import.meta.url), "utf8");
+
+  assert.match(source, /const submitInFlightRef = useRef\(false\)/);
+  assert.match(source, /if \(submitInFlightRef\.current\) return/);
+  assert.match(source, /submitInFlightRef\.current = true/);
+  assert.match(source, /finally \{[\s\S]*submitInFlightRef\.current = false;[\s\S]*setSaving\(false\)/);
+  assert.match(source, /friendlyProgramScoreError/);
+});
