@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 const enhancer = readFileSync("scripts/apply-phase3n-player-commitments.mjs", "utf8");
 const component = readFileSync("src/components/PlayerCommitmentCenter.jsx", "utf8");
 const css = readFileSync("src/components/PlayerCommitmentCenter.module.css", "utf8");
+const sharedCss = readFileSync("src/components/EventsMobileSystem.css", "utf8");
 const authority = readFileSync("public/shotlab-phase3n-player-commitments.css", "utf8");
 const primitives = readFileSync("src/components/EventsMobilePrimitives.jsx", "utf8");
 const html = readFileSync("index.html", "utf8");
@@ -20,35 +21,37 @@ test("Phase 3N runs after accepted Phase 3M with a guarded idempotent route tran
   assert.match(enhancer, /expected exactly one anchor/);
   assert.match(enhancer, /const marker = 'PlayerCommitmentCenter mode="events"'/);
   assert.match(enhancer, /source\.includes\(marker\)/);
-  assert.match(enhancer, /Player Commitments hierarchy already applied/);
+  assert.match(enhancer, /promoteSourceOwnedEvents/);
 });
 
-test("Events and S&C keep one specialized player commitment integration instead of duplicate generic command bars", () => {
+test("Events and S&C keep intentional role-specific commitment integrations without duplicate Player Events presentation", () => {
   for (const seam of [
     'PlayerCommitmentCenter mode="events"',
     'PlayerCommitmentCenter mode="strength"',
-    'data-testid="player-events-operational-list"',
     'data-testid="player-strength-operational-panel"',
+    'premium Player Events now owns schedule, detail, and RSVP presentation',
   ]) assert.ok(enhancer.includes(seam), `missing specialized commitment seam: ${seam}`);
-  assert.match(enhancer, /specialized commitment route still contains retired generic command bar/);
+  assert.match(enhancer, /retired duplicate Player Events presentation remains/);
 });
 
 test("Phase 3N preserves RSVP, S&C RSVP, logging, and completion capabilities", () => {
   for (const preserved of [
     "toggleRsvp={toggleRsvp}",
+    "onCompletionCue={pushCompletionCue}",
     "toggleScRsvp={toggleScRsvp}",
     "addScLog={addScLog}",
-    "onCompletionCue={pushCompletionCue}",
-    "<EventsPanel events={events}",
     "<SCPanel sessions={scSessions}",
   ]) assert.ok(enhancer.includes(preserved), `missing preserved player commitment capability: ${preserved}`);
+  assert.match(enhancer, /function EventsPanel\(/);
+  assert.match(enhancer, /player-events-operational-list/);
 });
 
-test("Player Events now exposes a personal schedule hierarchy and keeps S&C commitment disclosure", () => {
+test("Player Events exposes a personal schedule hierarchy and keeps S&C commitment disclosure", () => {
   for (const seam of [
-    'data-testid="player-events-next-up"',
+    'testId="player-events-next-up"',
     'data-testid="player-events-upcoming-list"',
     'data-testid="player-commitment-details-events"',
+    'data-testid="player-event-detail"',
     'data-testid="player-commitment-hero-strength"',
     'data-testid="player-commitment-details-strength"',
     "RSVP REQUIRED",
@@ -62,12 +65,14 @@ test("Player Events now exposes a personal schedule hierarchy and keeps S&C comm
   assert.match(component, /<details/);
 });
 
-test("Player Events prioritizes the next chronological obligation and makes its personal response state explicit", () => {
+test("Player Events prioritizes the next chronological obligation and keeps response action personal", () => {
   assert.match(component, /const focus = state\.upcoming\[0\] \|\| null/);
   assert.match(component, /const focusConfirmed = Boolean/);
-  assert.match(component, /const focusNeedsResponse = Boolean/);
-  assert.match(component, /focusNeedsResponse \? "RSVP REQUIRED" : "✓ GOING"/);
-  assert.match(component, /focusNeedsResponse \? "Respond" : "Change response"/);
+  assert.match(component, /status=\{focusConfirmed \? "✓ GOING" : "RSVP REQUIRED"\}/);
+  assert.match(component, /action=\{focusConfirmed \? "View response" : "Respond"\}/);
+  assert.match(component, /selectedId/);
+  assert.match(component, /Confirm going/);
+  assert.match(component, /Remove RSVP/);
 });
 
 test("Player RSVP derivation remains identity and team scoped", () => {
@@ -80,24 +85,24 @@ test("Player RSVP derivation remains identity and team scoped", () => {
 test("Events visual system is week-first, editorial, safe-area aware, and not card stacked", () => {
   assert.match(primitives, /data-testid="events-week-rail"/);
   assert.match(primitives, /<details className="eventsMonthPanel"/);
-  assert.match(css, /\.eventsHero[\s\S]*linear-gradient/s);
+  assert.match(sharedCss, /\.eventsNext[\s\S]*linear-gradient/s);
   assert.match(css, /\.eventRow\s*\{[\s\S]*border-radius:\s*0/s);
   assert.match(css, /safe-area-inset-bottom/);
-  assert.match(css, /@media \(max-width: 390px\)/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /@media\(max-width:390px\)/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
 });
 
-test("legacy late authority remains constrained to the old commitment hero seam and cannot repaint the new Events hero", () => {
+test("legacy late authority remains constrained to the S&C commitment hero and cannot repaint the new Events hero", () => {
   assert.match(html, /shotlab-phase3m-player-team-store-retail\.css[\s\S]*shotlab-phase3n-player-commitments\.css/);
   assert.match(authority, /player-commitment-hero-strength/);
   assert.doesNotMatch(authority, /player-events-next-up/);
 });
 
-test("fresh iPhone evidence configuration still covers both commitment routes", () => {
+test("fresh iPhone evidence configuration covers the source-owned Events route and S&C route", () => {
   assert.match(screenshotConfig, /phase-3n-player-commitments-screenshots\.spec\.mjs/);
   assert.match(screenshots, /04n-player-events-commitment/);
   assert.match(screenshots, /04o-player-strength-commitment/);
   assert.match(screenshots, /scrollWidth - window\.innerWidth/);
-  assert.match(screenshots, /player-events-operational-list/);
+  assert.match(screenshots, /player-event-detail/);
   assert.match(screenshots, /player-strength-operational-panel/);
 });
