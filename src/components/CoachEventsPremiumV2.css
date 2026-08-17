@@ -1,0 +1,475 @@
+/* Premium Coach Events v2 — calendar-first mobile schedule composition. */
+.coachEventsCalendar {
+  --calendar-ink: #171a18;
+  --calendar-muted: #6c736e;
+  --calendar-paper: #f6f3e9;
+  --calendar-line: rgba(23, 26, 24, 0.11);
+  --calendar-deep: #07100f;
+  --calendar-lime: var(--accent, #c8ff1a);
+  --calendar-practice: #8da81f;
+  --calendar-game: #d87527;
+  --calendar-camp: #17748f;
+  --calendar-meeting: #737b75;
+  --calendar-challenge: #7f64b8;
+  color: var(--calendar-ink);
+  border: 1px solid rgba(23, 26, 24, 0.11);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 94% -10%, color-mix(in srgb, var(--calendar-lime) 12%, transparent), transparent 32%),
+    linear-gradient(180deg, #fbfaf5 0%, var(--calendar-paper) 100%);
+  box-shadow: 0 22px 50px rgba(16, 21, 18, 0.09);
+  overflow: hidden;
+}
+
+.coachEventsCalendar__masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 20px 18px 15px;
+}
+
+.coachEventsCalendar__eyebrow,
+.coachEventsCalendar__agendaHeader span {
+  display: block;
+  color: #66750f;
+  font: 800 9px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.coachEventsCalendar__masthead h2 {
+  margin: 5px 0 0;
+  color: var(--calendar-ink);
+  font: 780 clamp(28px, 8vw, 34px)/0.98 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -0.05em;
+}
+
+.coachEventsCalendar__masthead p {
+  margin: 6px 0 0;
+  color: var(--calendar-muted);
+  font: 560 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachEventsCalendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.coachEventsCalendar__nav > button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(23, 26, 24, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--calendar-ink);
+  box-shadow: none;
+  font: 650 24px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+.coachEventsCalendar__nav > button:hover,
+.coachEventsCalendar__nav > button:focus-visible {
+  border-color: color-mix(in srgb, var(--calendar-lime) 58%, rgba(23, 26, 24, 0.12));
+  background: color-mix(in srgb, var(--calendar-lime) 11%, white);
+}
+
+.coachEventsCalendar__nav > button:focus-visible,
+.coachEventsCalendar__day:focus-visible,
+.coachEventsCalendar__agendaItem:focus-visible,
+.coachEventsCalendar__emptyMonth button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--calendar-lime) 32%, transparent);
+  outline-offset: 2px;
+}
+
+.coachEventsCalendar__nav .coachEventsCalendar__today {
+  width: auto;
+  min-width: 58px;
+  padding-inline: 12px;
+  font: 760 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.coachEventsCalendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 0 14px 7px;
+}
+
+.coachEventsCalendar__weekdays span {
+  text-align: center;
+  color: #838983;
+  font: 760 8px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.coachEventsCalendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0 12px 14px;
+}
+
+.coachEventsCalendar__day {
+  position: relative;
+  min-width: 0;
+  min-height: 47px;
+  height: 47px;
+  display: grid;
+  align-content: space-between;
+  justify-items: start;
+  padding: 7px 6px 6px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--calendar-ink);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.coachEventsCalendar__day[data-in-month="false"] {
+  opacity: 0.23;
+  pointer-events: none;
+}
+
+.coachEventsCalendar__day[data-has-events="true"] {
+  border-color: rgba(23, 26, 24, 0.08);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.coachEventsCalendar__day[data-today="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid color-mix(in srgb, var(--calendar-lime) 68%, #526314);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.coachEventsCalendar__day[data-selected="true"] {
+  border-color: var(--calendar-deep);
+  background: var(--calendar-deep);
+  color: #f8f8ef;
+  box-shadow: 0 8px 18px rgba(7, 16, 15, 0.16);
+}
+
+.coachEventsCalendar__day[data-selected="true"]::after {
+  border-color: color-mix(in srgb, var(--calendar-lime) 80%, transparent);
+}
+
+.coachEventsCalendar__dayNumber {
+  position: relative;
+  z-index: 1;
+  font: 720 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.coachEventsCalendar__eventMarks {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.coachEventsCalendar__eventMarks i,
+.coachEventsCalendar__legend i {
+  width: 5px;
+  height: 5px;
+  display: inline-block;
+  border-radius: 999px;
+  background: var(--calendar-meeting);
+}
+
+.coachEventsCalendar [data-event-tone="practice"] { --event-tone: var(--calendar-practice); }
+.coachEventsCalendar [data-event-tone="game"] { --event-tone: var(--calendar-game); }
+.coachEventsCalendar [data-event-tone="camp"] { --event-tone: var(--calendar-camp); }
+.coachEventsCalendar [data-event-tone="meeting"] { --event-tone: var(--calendar-meeting); }
+.coachEventsCalendar [data-event-tone="challenge"] { --event-tone: var(--calendar-challenge); }
+.coachEventsCalendar [data-event-tone="event"] { --event-tone: #667069; }
+.coachEventsCalendar__eventMarks i[data-event-tone],
+.coachEventsCalendar__legend i[data-event-tone] { background: var(--event-tone); }
+.coachEventsCalendar__day[data-selected="true"] .coachEventsCalendar__eventMarks i { box-shadow: 0 0 0 1px rgba(255,255,255,.2); }
+
+.coachEventsCalendar__eventMarks b {
+  color: currentColor;
+  font: 740 7px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachEventsCalendar__legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px 15px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.coachEventsCalendar__legend::-webkit-scrollbar { display: none; }
+
+.coachEventsCalendar__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #737a74;
+  font: 650 8px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.coachEventsCalendar__agenda {
+  border-top: 1px solid var(--calendar-line);
+  background: rgba(255,255,255,.52);
+}
+
+.coachEventsCalendar__agendaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 18px 11px;
+}
+
+.coachEventsCalendar__agendaHeader strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--calendar-ink);
+  font: 720 14px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.coachEventsCalendar__agendaHeader em {
+  min-width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--calendar-deep);
+  color: #f8f8ef;
+  font: 740 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  font-style: normal;
+}
+
+.coachEventsCalendar__agendaList {
+  display: grid;
+  padding: 0 18px 12px;
+}
+
+.coachEventsCalendar__agendaItem {
+  position: relative;
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0 11px 12px;
+  border: 0;
+  border-top: 1px solid rgba(23, 26, 24, 0.09);
+  background: transparent;
+  color: var(--calendar-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.coachEventsCalendar__agendaItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--event-tone, var(--calendar-meeting));
+}
+
+.coachEventsCalendar__agendaTime {
+  color: #505750;
+  font: 760 10px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachEventsCalendar__agendaCopy {
+  min-width: 0;
+}
+
+.coachEventsCalendar__agendaCopy strong,
+.coachEventsCalendar__agendaCopy small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coachEventsCalendar__agendaCopy strong {
+  color: var(--calendar-ink);
+  font: 740 13px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -0.012em;
+}
+
+.coachEventsCalendar__agendaCopy small {
+  margin-top: 4px;
+  color: var(--calendar-muted);
+  font: 530 9px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachEventsCalendar__agendaArrow {
+  color: #59625b;
+  font: 650 15px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachEventsCalendar__emptyMonth {
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px 14px;
+  color: var(--calendar-muted);
+  font: 550 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachEventsCalendar__emptyMonth button {
+  min-height: 42px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--calendar-deep);
+  color: #f8f8ef;
+  font: 720 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+/* Page-level refinement: calendar becomes the hero; the decision stage becomes supporting context. */
+@media (max-width: 760px) {
+  .coachEventsPremiumWorkspace {
+    gap: 16px !important;
+    padding-top: 4px !important;
+  }
+
+  [data-testid="coach-events-command-bar"] {
+    padding-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__eyebrow {
+    color: #65750f !important;
+  }
+
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__title {
+    font-size: clamp(42px, 12.5vw, 50px) !important;
+    letter-spacing: -0.06em !important;
+  }
+
+  [data-testid="coach-events-command-bar"] .secondaryPageIntro__summary {
+    max-width: 30ch !important;
+    color: #606963 !important;
+  }
+
+  [data-testid="coach-events-command-bar"] .secondaryPageAction {
+    min-height: 48px !important;
+    border: 1px solid color-mix(in srgb, var(--accent, #c8ff1a) 72%, #1a201c) !important;
+    border-radius: 999px !important;
+    background: var(--accent, #c8ff1a) !important;
+    color: #111511 !important;
+    font-weight: 820 !important;
+    box-shadow: 0 10px 22px rgba(109, 134, 19, 0.14) !important;
+  }
+
+  [data-testid="coach-events-decision-brief"] {
+    margin-top: 2px !important;
+    padding: 15px 16px 0 !important;
+    border-radius: 18px !important;
+    background:
+      radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--accent, #c8ff1a) 11%, transparent), transparent 36%),
+      linear-gradient(145deg, #151b18, #07100f 74%) !important;
+    box-shadow: 0 14px 30px rgba(7, 16, 15, 0.11) !important;
+  }
+
+  [data-testid="coach-events-decision-brief"] [data-route-stage-title] {
+    max-width: 18ch !important;
+    font-size: clamp(24px, 7.2vw, 30px) !important;
+  }
+
+  [data-testid="coach-events-decision-brief"] [data-route-stage-detail] {
+    font-size: 11px !important;
+  }
+
+  [data-testid="coach-events-decision-brief"] [data-visual-role="performance-evidence"] {
+    margin-top: 14px !important;
+  }
+
+  [data-testid="coach-events-decision-brief"] [data-route-stage-metric] {
+    min-height: 70px !important;
+    padding-top: 10px !important;
+    padding-bottom: 9px !important;
+  }
+
+  [data-testid="coach-events-filter-rail"] > label {
+    min-height: 48px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+  }
+
+  [data-testid="coach-events-filter-rail"] > div[role="group"] button {
+    min-height: 42px !important;
+    border-radius: 999px !important;
+  }
+
+  [data-testid="coach-events-mobile-page"] > div[style*="display: grid"] {
+    gap: 0 !important;
+    padding-top: 5px !important;
+  }
+
+  [data-testid="coach-events-mobile-page"] section > div[style*="align-items: baseline"] {
+    padding-top: 14px !important;
+    padding-bottom: 5px !important;
+  }
+
+  [data-testid="coach-events-mobile-page"] article {
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 14px 2px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(23, 26, 24, 0.11) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  [data-testid="coach-events-mobile-page"] article > div:first-child > div:first-child > div:first-child {
+    font-size: 14px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  [data-testid="coach-events-mobile-page"] article > div:first-child > span {
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.58) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .coachEventsCalendar__masthead { padding-inline: 16px; }
+  .coachEventsCalendar__grid { gap: 3px; padding-inline: 10px; }
+  .coachEventsCalendar__day { min-height: 44px; height: 44px; padding-inline: 5px; }
+  .coachEventsCalendar__legend,
+  .coachEventsCalendar__agendaHeader,
+  .coachEventsCalendar__agendaList { padding-left: 16px; padding-right: 16px; }
+  .coachEventsCalendar__agendaItem { grid-template-columns: 50px minmax(0, 1fr) 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coachEventsCalendar *,
+  .coachEventsCalendar *::before,
+  .coachEventsCalendar *::after { transition: none !important; }
+}
