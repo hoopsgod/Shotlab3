@@ -110,7 +110,7 @@ test("Coach Events reset renders top, editorial list, secondary month, and manag
   await expect(dashboard).toBeVisible({ timeout: 20_000 });
   await expect(title).toBeVisible();
   await expect(title.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
-  await expect(title.getByRole("button", { name: "Create new event" })).toBeVisible();
+  await expect(title.getByRole("button", { name: /\+ New|New/i })).toBeVisible();
   await expect(hero).toBeVisible();
   await expect(week.getByRole("button")).toHaveCount(7);
   await expect(month).not.toHaveAttribute("open", "");
@@ -156,7 +156,7 @@ test("Player Events reset renders personal RSVP, editorial list, secondary month
 
   await expect(center).toBeVisible({ timeout: 20_000 });
   await expect(title.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
-  await expect(title.getByRole("button", { name: "Create new event" })).toHaveCount(0);
+  await expect(title.getByRole("button", { name: /\+ New|New/i })).toHaveCount(0);
   await expect(hero).toBeVisible();
   await expect(hero.getByText(/^(?:RSVP REQUIRED|✓ GOING)$/, { exact: false })).toBeVisible();
   await expect(week.getByRole("button")).toHaveCount(7);
@@ -177,16 +177,16 @@ test("Player Events reset renders personal RSVP, editorial list, secondary month
   await capture(page, "player-c-month");
 
   await hero.scrollIntoViewIfNeeded();
-  const responseBefore = await hero.getAttribute("data-response-state");
+  const responseBefore = await hero.getAttribute("data-state");
   await hero.getByRole("button").click();
   await expect(details).toHaveAttribute("open", "");
   await expect(page.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 10_000 });
   await capture(page, "player-d-event-detail-rsvp");
 
-  if (responseBefore === "needed") {
+  if (responseBefore === "action") {
     await resetScroll(page);
     await settle(page);
-    await expect(hero).toHaveAttribute("data-response-state", "going");
+    await expect(hero).toHaveAttribute("data-state", "calm");
     await expect(hero.getByText("✓ GOING", { exact: true })).toBeVisible();
     await capture(page, "player-e-rsvp-completed");
   }
