@@ -45,8 +45,23 @@ jobs:
       - name: Verify secondary-page parity contracts
         run: node --test tests/mobile-secondary-page-parity-contract.test.mjs
 
-      - name: Verify mobile Events contracts
-        run: node --test tests/mobile-events-system-reset.test.mjs
+      - name: Verify Events shared grammar
+        run: node --test --test-name-pattern="Coach and Player use one Events design grammar" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Events Next Up hierarchy
+        run: node --test --test-name-pattern="Next Up owns the first-view date" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Player Events privacy
+        run: node --test --test-name-pattern="Player Events makes personal RSVP state" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Coach Events management intelligence
+        run: node --test --test-name-pattern="Coach Events keeps management intelligence" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Events RSVP persistence
+        run: node --test --test-name-pattern="stable RSVP persistence path" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Events mobile density
+        run: node --test --test-name-pattern="mobile density and safe-area rules" tests/mobile-events-system-reset.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
