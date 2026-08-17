@@ -21,13 +21,13 @@ test("player commitments keep a fixed mobile runway instead of removing the modu
 test("player leaderboards keep ranking geometry when the registered account has fewer or zero rows", () => {
   assert.match(leaderboardSource, /minimumRows = 3/);
   assert.match(leaderboardSource, /data-reserved-rows=\{reservedRows\}/);
+  assert.match(leaderboardSource, /runwayPlaceholders/);
   assert.match(leaderboardSource, /displayState === "empty"\s*\? reservedRows/);
-  assert.match(leaderboardSource, /data-leaderboard-placeholder="true"/);
   assert.match(leaderboardSource, /keepsRankingFrame = displayState === "ready" \|\| displayState === "empty"/);
 });
 
 test("demo-only utilities cannot change visible Coach Settings geometry", () => {
-  assert.match(appParityEnhancer, /data-sandbox-utility="true"/);
+  assert.match(appParityEnhancer, /data-sandbox-utility=\"true\"/);
   assert.match(appParityEnhancer, /position:\"absolute\"/);
   assert.match(appParityEnhancer, /width:1,height:1/);
   assert.match(appParityEnhancer, /pointerEvents:\"none\"/);
@@ -35,6 +35,8 @@ test("demo-only utilities cannot change visible Coach Settings geometry", () => 
 
 test("Coach Events parity preserves the premium short empty state and natural schedule length", () => {
   assert.match(appParityEnhancer, /Coach Events now owns a deliberate short empty state and natural schedule length/);
+  assert.match(appParityEnhancer, /legacy Coach Events empty state visibility/);
+  assert.match(appParityEnhancer, /aria-hidden=\"true\" style=\{\{display:\"none\"\}\}/);
   assert.match(appParityEnhancer, /Legacy Coach Events parity runway must not be present/);
   assert.doesNotMatch(appParityEnhancer, /data-parity-slot-count=\"4\"/);
   assert.doesNotMatch(appParityEnhancer, /Math\.max\(0,4-filteredEvents\.length\)/);
