@@ -22,20 +22,21 @@ test("month calendar owns stable six-week geometry and real event-day signals", 
   assert.match(calendar, /data-testid="coach-events-month-calendar"/);
   assert.match(calendar, /data-testid="coach-events-calendar-month"/);
   assert.match(calendar, /data-testid="coach-events-calendar-agenda"/);
-  assert.match(calendar, /rowsByDate\.get\(key\)/);
+  assert.match(calendar, /byDate\.get\(key\)/);
   assert.match(calendar, /cell\.events\.slice\(0, 3\)/);
-  assert.match(calendar, /eventCount > 3/);
+  assert.match(calendar, /count > 3/);
 });
 
 test("month calendar supports month navigation, filtering, selected-day agenda, and event drill-down", () => {
   assert.match(calendar, /aria-label="Previous month"/);
   assert.match(calendar, /aria-label="Next month"/);
-  assert.match(calendar, /setMonthOffset/);
-  assert.match(calendar, /sameEventType\(row, activeType\)/);
-  assert.match(calendar, /setSelectedDate\(cell\.key\)/);
-  assert.match(calendar, /onOpenEvent\(eventId\)/);
+  assert.match(calendar, /setOffset/);
+  assert.match(calendar, /activeType === "all"/);
+  assert.match(calendar, /setSelected\(cell\.key\)/);
+  assert.match(calendar, /onOpenEvent\?\.\(eventId\)/);
   assert.match(calendar, /responded/);
   assert.match(calendar, /rosterCount/);
+  assert.match(calendar, />Today<\/button>/);
 });
 
 test("premium Events v2 uses restrained editorial geometry instead of another stack of cards", () => {
