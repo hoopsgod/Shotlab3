@@ -24,16 +24,18 @@ test('Phase 3L runs after accepted Phase 3K and remains guarded/idempotent', () 
   assert.match(enhancer, /Phase 3L Coach leaderboard hierarchy already applied/);
 });
 
-test('Coach leaderboard exposes one competitive pulse before filters and ranked work', () => {
+test('Coach leaderboard exposes one truthful weekly pulse before filters and ranked work', () => {
   assert.match(enhancer, /data-testid="coach-leaderboard-pulse"/);
-  assert.match(enhancer, /Competitive pulse/);
-  assert.match(enhancer, /Weekly leader/);
+  assert.match(enhancer, />This week<\/span>/);
+  assert.match(enhancer, /The weekly race is open/);
   assert.match(enhancer, /Risers/);
   assert.match(enhancer, /active this week/);
   assert.match(enhancer, /coachLeaderboardRank/);
   assert.match(enhancer, /coachLeaderboardWeek/);
   assert.match(enhancer, /data-rank=\{row\.rank\}/);
   assert.match(enhancer, /data-trend=/);
+  assert.match(enhancer, /rows\.slice\(0,3\)\.map/);
+  assert.doesNotMatch(enhancer, /data-leaderboard-placeholder/);
 });
 
 test('Phase 3L keeps leaderboard filtering and player drill-down behavior intact', () => {
@@ -61,9 +63,11 @@ test('Phase 3L keeps the intentional follow-up workflow inside the drawer scroll
   assert.doesNotMatch(enhancer, /desiredPlacement = `[\s\S]*dialog\.appendChild\(host\)/);
 });
 
-test('Leaderboard authority uses light native surfaces, accessible focus, and restrained motion', () => {
+test('Leaderboard authority uses flat editorial surfaces, accessible focus, and restrained motion', () => {
   assert.match(css, /coachLeaderboardPulse/);
-  assert.match(css, /rgba\(255,\s*255,\s*255,\s*\.95\)/);
+  assert.match(css, /coachLeaderboardPulse\s*\{[\s\S]*background:\s*transparent/);
+  assert.match(css, /coachLeaderboardPulse\s*\{[\s\S]*border-top:[\s\S]*border-bottom:/);
+  assert.match(css, /coachLeaderboardRow\s*\{[\s\S]*border-radius:\s*0[\s\S]*background:\s*transparent[\s\S]*box-shadow:\s*none/);
   assert.match(css, /color:\s*#171a18/);
   assert.match(css, /coachLeaderboardRow:focus-visible/);
   assert.match(css, /outline:\s*3px solid/);
@@ -72,8 +76,9 @@ test('Leaderboard authority uses light native surfaces, accessible focus, and re
 });
 
 test('mobile Leaderboards preserves the decision and performance-evidence hierarchy', () => {
-  assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-decision-brief/);
-  assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(css, /coach-page-dashboard-leaderboards-decision-brief/);
+  assert.match(css, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(css, /overflow:\s*hidden/);
   assert.match(routeStage, /data-visual-role="primary-decision"/);
   assert.match(routeStage, /data-visual-role="performance-evidence"/);
   assert.match(routeStage, /data-route-kind=\{routeKind\}/);
@@ -87,6 +92,8 @@ test('mobile Leaderboards readability is owned by the premium route stage rather
   assert.match(routeStageCss, /\.title\s*\{[\s\S]*color:\s*#f6f7ef/);
   assert.match(routeStageCss, /\.metricValue,[\s\S]*color:\s*#f7f8f0/);
   assert.match(routeStageCss, /min-height:\s*var\(--touch-target, 44px\)/);
+  assert.match(routeStageCss, /stage\[data-route-kind="leaderboards"\]\s+\.metricRail\s*\{[\s\S]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(routeStageCss, /stage\[data-route-kind="leaderboards"\]\s+\.metricDetail\s*\{[\s\S]*display:\s*none/);
 });
 
 test('Player Intelligence establishes a complete dark-native surface boundary when opened from light Leaderboards', () => {
