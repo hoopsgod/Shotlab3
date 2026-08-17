@@ -105,7 +105,7 @@ test("training completion resolves target meaning and closes into performance pr
   await expect(completion).toBeVisible({ timeout: 15_000 });
   await expect(completion).toHaveAttribute("data-performance-language", "shotlab-target-court");
   await expect(target).toHaveAttribute("data-performance-state", "complete");
-  await expect(target).toHaveAttribute("aria-label", /50 on this drill\. Target 50\. Target complete\./i);
+  await expect(target).toHaveAttribute("aria-label", /50 on this drill\. Target 50\. Target locked\./i);
   await expect(completion.getByTestId("player-training-target-interpretation")).toHaveText("TARGET LOCKED");
   await expect(completion.getByText("WHAT CHANGED", { exact: true })).toBeVisible();
   await expect(completion.getByText("NEXT MOVE", { exact: true })).toBeVisible();
@@ -126,7 +126,7 @@ test("training completion resolves target meaning and closes into performance pr
   await expect(closeout.locator('[class*="planProgress"]')).toHaveCount(0);
   const closeoutTarget = closeout.getByTestId("player-session-closeout-target-visual");
   await expect(closeoutTarget).toHaveAttribute("data-performance-state", "complete");
-  await expect(closeoutTarget).toHaveAttribute("aria-label", /50 on this drill\. Target 50\. Target complete\./i);
+  await expect(closeoutTarget).toHaveAttribute("aria-label", /50 on this drill\. Target 50\. Target locked\./i);
   await noOverflow(page);
   await closeout.scrollIntoViewIfNeeded();
   await capture(page, "phase4-session-closeout-390.png");
