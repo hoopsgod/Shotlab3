@@ -1,9 +1,11 @@
+import { mkdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-dashboard-e2e";
 const COACH_EMAIL = "coach.demo@shotlab.app";
+const SCREENSHOT_DIR = "artifacts/coach-events-mobile";
 const dateOffset = (days) => {
   const date = new Date();
   date.setHours(12, 0, 0, 0);
@@ -78,15 +80,20 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function enterSeededDemoCoach(page) {
-  await page.addInitScript((payload) => {
+async function enterSeededDemoCoach(page, payload = seedData) {
+  await page.addInitScript((data) => {
     if (window.sessionStorage.getItem("coach-dashboard-e2e-seeded") === "1") return;
-    for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
+    for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
     window.sessionStorage.setItem("coach-dashboard-e2e-seeded", "1");
-  }, seedData);
+  }, payload);
   await page.goto("/");
   await page.getByRole("button", { name: "Coach demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function openSchedule(page) {
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
+  await expect(page.getByTestId("coach-events-command-bar")).toBeVisible({ timeout: 20_000 });
 }
 
 async function openMoreDestination(page, key) {
@@ -113,6 +120,11 @@ async function currentPerformanceRail(page) {
   const rail = stage.locator('[data-visual-role="performance-evidence"]');
   await expect(rail).toBeVisible();
   return rail;
+}
+
+async function captureEventsPage(page, name) {
+  await mkdir(SCREENSHOT_DIR, { recursive: true });
+  await page.screenshot({ path: `${SCREENSHOT_DIR}/${name}.png`, fullPage: true });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -144,15 +156,32 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
   await expectNoHorizontalOverflow(page);
 });
 
-test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({ page }) => {
+test("Coach Events exposes one premium schedule hierarchy, creation entry point, RSVP gaps, and searchable controls", async ({ page }) => {
   await enterSeededDemoCoach(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
+  await openSchedule(page);
 
   const scheduleResults = page.getByTestId("coach-events-mobile-page");
-  await expect(page.getByTestId("coach-events-command-bar")).toBeVisible({ timeout: 20_000 });
+  const commandBar = page.getByTestId("coach-events-command-bar");
+  const decisionBrief = page.getByTestId("coach-events-decision-brief");
   const performanceRail = await currentPerformanceRail(page);
   await expect(page.getByTestId("coach-events-filter-rail")).toBeVisible();
+  await expect(commandBar.getByText("SCHEDULE", { exact: true })).toBeVisible();
+  await expect(commandBar.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
+  await expect(decisionBrief.getByText("NEXT TEAM MOMENT", { exact: true })).toBeVisible();
   await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
+  await expect(performanceRail.getByRole("button")).toHaveCount(3);
+  await expectNoHorizontalOverflow(page);
+  await captureEventsPage(page, "events-populated-390");
+
+  const createEvent = commandBar.getByRole("button", { name: /Create Event/i });
+  await expect(createEvent).toHaveCount(1);
+  await createEvent.click();
+  const createDialog = page.getByRole("dialog", { name: "Create event" });
+  await expect(createDialog).toBeVisible();
+  await expect(createDialog.getByText("CREATE EVENT", { exact: true })).toBeVisible();
+  await expect(createDialog.getByPlaceholder("Open Gym Run")).toBeVisible();
+  await createDialog.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(createDialog).toHaveCount(0);
 
   const awaitingRsvp = performanceRail.getByRole("button", { name: /^Awaiting RSVP:/i });
   await awaitingRsvp.click();
@@ -162,6 +191,28 @@ test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({
   await search.fill("Summer Game");
   await expect(scheduleResults.getByText("Summer Game", { exact: true }).first()).toBeVisible();
   await expect(scheduleResults.getByText("Team Practice", { exact: true })).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("Coach Events keeps the zero-event mobile page short and overflow-safe on narrow iPhone widths", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  const emptyScheduleSeed = { ...seedData, "sl:events": [], "sl:rsvps": [] };
+  await enterSeededDemoCoach(page, emptyScheduleSeed);
+  await openSchedule(page);
+
+  const commandBar = page.getByTestId("coach-events-command-bar");
+  const decisionBrief = page.getByTestId("coach-events-decision-brief");
+  const emptyState = page.getByTestId("coach-events-premium-empty-state");
+  await expect(decisionBrief.getByText("Calendar is open", { exact: true })).toBeVisible();
+  await expect(commandBar.getByRole("button", { name: /Create Event/i })).toHaveCount(1);
+  await expect(emptyState.getByText("Nothing scheduled yet", { exact: true })).toBeVisible();
+  await expect(page.getByText("OPEN SCHEDULE SLOT", { exact: true })).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+  await captureEventsPage(page, "events-empty-375");
+
+  await page.setViewportSize({ width: 320, height: 740 });
+  await expect(commandBar).toBeVisible();
+  await expect(decisionBrief).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 

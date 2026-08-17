@@ -13,6 +13,21 @@ const replaceRequired = (source, from, to, label) => {
 };
 
 update("src/components/CoachInteractiveDashboards.jsx", (source) => {
+  if (source.includes('className="coachEventsPremiumWorkspace"')) {
+    for (const expected of [
+      'label: "Awaiting RSVP"',
+      'displayLabel: "RSVP Gaps"',
+      'displayLabel: "Response"',
+      'summary="Plan practices, games and team moments."',
+    ]) {
+      if (!source.includes(expected)) throw new Error(`[phase5b-practice-readiness] premium Events contract missing: ${expected}`);
+    }
+    if (source.includes('label: "Missing RSVPs"') || source.includes('`${briefing.confirmed} confirmations`') || source.includes("briefing.attending")) {
+      throw new Error("[phase5b-practice-readiness] rejected RSVP/attendance conflation remains in premium Events dashboard.");
+    }
+    return source;
+  }
+
   let next = source;
   next = replaceRequired(
     next,

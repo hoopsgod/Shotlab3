@@ -1,6 +1,15 @@
 const normalize = (value) => String(value || "").trim().toLowerCase();
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+const normalizeEventType = (value) => {
+  const type = normalize(value);
+  if (type === "run" || type === "practice") return "run";
+  if (type === "game" || type === "games") return "game";
+  if (type === "clinic" || type === "camp") return "clinic";
+  if (type === "recovery" || type === "meeting" || type === "film") return "recovery";
+  if (type === "challenge") return "challenge";
+  return type || "event";
+};
 
 const identityKeys = (row = {}) => new Set([
   row.email,
@@ -119,7 +128,7 @@ export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster =
       key: String(event.id || `${event.title}-${date}`),
       event,
       title: event.title || "Team Event",
-      type: String(event.type || "event").toLowerCase(),
+      type: normalizeEventType(event.type),
       date,
       time: event.time || "TBD",
       location: event.location || "Location TBD",
@@ -139,12 +148,14 @@ export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster =
 
 export function filterCoachEventDashboardRows(rows = [], { status = "upcoming", type = "all", query = "" } = {}) {
   const normalizedQuery = normalize(query);
+  let normalizedType = normalizeEventType(type);
+  if (normalize(type) === "all") normalizedType = "all";
   return safeArray(rows).filter((row) => {
     if (status === "upcoming" && row.statusKey !== "upcoming") return false;
     if (status === "past" && row.statusKey !== "past") return false;
     if (status === "gaps" && !row.needsResponse) return false;
-    if (type !== "all" && row.type !== type) return false;
-    if (normalizedQuery && !normalize(`${row.title} ${row.location} ${row.type}`).includes(normalizedQuery)) return false;
+    if (normalizedType !== "all" && row.type !== normalizedType) return false;
+    if (normalizedQuery && !normalize(`${row.title} ${row.location} ${row.type} ${row.event?.type || ""}`).includes(normalizedQuery)) return false;
     return true;
   });
 }

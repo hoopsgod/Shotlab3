@@ -46,6 +46,45 @@ async function enterCoachEvents(page) {
   await settle(page);
 }
 
+async function captureSearchDiagnostics(page) {
+  const input = page.getByTestId("coach-events-filter-rail").getByRole("searchbox");
+  await expect(input).toBeVisible();
+  return input.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const matchedRules = [];
+    const visitRules = (rules, source) => {
+      for (const rule of rules || []) {
+        if (rule.cssRules) {
+          visitRules(rule.cssRules, source);
+          continue;
+        }
+        if (!rule.selectorText) continue;
+        try {
+          if (node.matches(rule.selectorText)) matchedRules.push({ source, selector: rule.selectorText, cssText: rule.style?.cssText || "" });
+        } catch {}
+      }
+    };
+    for (const sheet of document.styleSheets) {
+      try { visitRules(sheet.cssRules, sheet.href || "inline"); } catch {}
+    }
+    return {
+      borderTopWidth: style.borderTopWidth,
+      borderRightWidth: style.borderRightWidth,
+      borderBottomWidth: style.borderBottomWidth,
+      borderLeftWidth: style.borderLeftWidth,
+      borderTopColor: style.borderTopColor,
+      borderRadius: style.borderRadius,
+      backgroundColor: style.backgroundColor,
+      boxShadow: style.boxShadow,
+      outlineStyle: style.outlineStyle,
+      appearance: style.appearance,
+      width: style.width,
+      minHeight: style.minHeight,
+      matchedRules,
+    };
+  });
+}
+
 test("Coach Events MANAGE micro-actions stay visually quiet while becoming touch-safe", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
@@ -102,12 +141,14 @@ test("Coach Events MANAGE micro-actions stay visually quiet while becoming touch
   expect(viewport.documentWidth - viewport.innerWidth).toBeLessThanOrEqual(1);
   expect(viewport.bodyWidth - viewport.innerWidth).toBeLessThanOrEqual(1);
 
+  const searchDiagnostics = await captureSearchDiagnostics(page);
+
   const first = actions.first();
   await first.scrollIntoViewIfNeeded();
   await page.waitForTimeout(60);
   await page.screenshot({ path: path.join(OUTPUT_DIR, "coach-events-manage-actions.png"), animations: "disabled" });
   await first.screenshot({ path: path.join(OUTPUT_DIR, "coach-event-manage-control.png"), animations: "disabled" });
-  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-event-manage-actions.json"), JSON.stringify({ evidence, viewport }, null, 2));
+  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-event-manage-actions.json"), JSON.stringify({ evidence, viewport, searchDiagnostics }, null, 2));
 
   await first.click();
   await page.waitForTimeout(80);

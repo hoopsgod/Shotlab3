@@ -39,11 +39,26 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Install WebKit
+        run: npx playwright install --with-deps webkit
+
       - name: Build application
         run: npm run build
 
       - name: Run interactive coach dashboard flows
         run: npx playwright test tests/e2e/coach-interactive-dashboards.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Run Coach Events in WebKit
+        run: npx playwright test tests/e2e/coach-interactive-dashboards.spec.mjs --config=playwright.events-webkit.config.mjs --grep "Coach Events" --reporter=line
+
+      - name: Upload Coach Events mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-events-mobile-screenshots
+          path: artifacts/coach-events-mobile/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Upload browser failure artifacts
         if: failure()
