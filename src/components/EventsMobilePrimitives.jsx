@@ -75,7 +75,7 @@ export function NextEventSurface({ testId, stamp, title, type, time, location, s
   const dayStamp = normalizeStamp(stamp);
 
   return (
-    <section className="eventsNext" data-testid={testId} data-state={calm ? "calm" : "action"}>
+    <section className="eventsNext" data-testid={testId} data-surface="dark" data-state={calm ? "calm" : "action"}>
       <div className="eventsNext__top">
         <span>NEXT UP</span>
         {hasEvent ? <EventTypeBadge type={type} /> : null}
