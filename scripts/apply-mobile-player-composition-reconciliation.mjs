@@ -23,6 +23,24 @@ function injectCommitmentRuntimeStyle() {
   const target = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.jsx')
   const source = readFileSync(target, 'utf8')
   if (source.includes(COMMITMENT_RUNTIME_MARKER)) return false
+
+  const eventsSystemIsSourceOwned = [
+    '<EventsTitleStage role="player"',
+    'data-testid="player-events-next-up"',
+    '<EventsWeekRail',
+    '<EventsMonthPanel',
+    'data-testid="player-commitment-details-events"',
+  ].every((marker) => source.includes(marker))
+
+  // The 2026 Events reset owns its mobile composition directly through the shared
+  // Events primitives/CSS. Earlier enhancers have already promoted/centered the
+  // remaining legacy commitment masthead (S&C), so injecting a second runtime
+  // style here would duplicate authority and can accidentally restyle Events.
+  if (eventsSystemIsSourceOwned) {
+    console.log('[mobile-player-composition] Player Events composition is source-owned; legacy commitment runtime style injection retired.')
+    return false
+  }
+
   const constantAnchor = source.includes('const RUNWAY_SLOTS = 4;') ? 'const RUNWAY_SLOTS = 4;' : 'const RUNWAY_SLOTS = 3;'
   const headerAnchor = '      <header className={styles.routeHeader}'
   if (!source.includes(constantAnchor) || !source.includes(headerAnchor)) {
