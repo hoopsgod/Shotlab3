@@ -33,32 +33,14 @@ jobs:
       - name: Verify selectors and source contracts
         run: node --test tests/coach-operational-dashboard.test.mjs tests/coach-interactive-dashboard-contract.test.mjs
 
-      - name: Build application
-        shell: bash
-        run: |
-          set +e
-          npm run build 2>&1 | tee build-output.log
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ]; then
-            {
-              echo "--- build head ---"
-              head -n 35 build-output.log
-              echo "--- matching failure lines ---"
-              grep -nEi "error|failed|cannot|could not|unexpected|ENOENT|not found|resolve|unterminated|syntax" build-output.log | head -n 40 || true
-            } | while IFS= read -r line; do
-              safe_line=${line//'%'/'%25'}
-              safe_line=${safe_line//$'\r'/'%0D'}
-              safe_line=${safe_line//$'\n'/'%0A'}
-              echo "::error title=Vite build::${safe_line}"
-            done
-            exit "$status"
-          fi
-
       - name: Install Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
 
       - name: Run interactive coach dashboard flows
         run: npx playwright test tests/e2e/coach-interactive-dashboards.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
