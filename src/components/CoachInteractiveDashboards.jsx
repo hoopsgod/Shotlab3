@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   DashboardFilterRail,
   DashboardInsightCard,
@@ -5,7 +6,16 @@ import {
 } from "./CoachDashboardPrimitives.jsx";
 import { ExperienceSparkline } from "./ExperiencePrimitives.jsx";
 import CoachRoutePerformanceStage from "./CoachRoutePerformanceStage.jsx";
-import CoachEventsMonthCalendar from "./CoachEventsMonthCalendar.jsx";
+import {
+  EventTimeLocation,
+  EventTypeBadge,
+  EventsMonthPanel,
+  EventsSectionHeader,
+  EventsTitleStage,
+  EventsWeekRail,
+  formatEventDayStamp,
+  formatMonthLabel,
+} from "./EventsMobilePrimitives.jsx";
 import {
   SecondaryPageEvidence,
   SecondaryPageIntro,
@@ -15,8 +25,8 @@ import {
 import {
   buildCoachEventActionBriefing,
   buildCoachPlayerActionBriefing,
-  formatCoachScheduleDate,
 } from "../lib/coachActionBriefings.js";
+import "./CoachEventsPremiumV2.css";
 
 const normalizeEventsSearchSurface = (node) => {
   const input = node?.querySelector?.('input[type="search"]');
@@ -38,7 +48,6 @@ const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
 };
 
 const safeCount = (value) => Math.max(0, Number(value) || 0);
-const eventTypeLabel = (value) => ({ run: "Practice", game: "Game", clinic: "Camp", recovery: "Meeting", challenge: "Challenge" }[value] || "Team event");
 
 export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
@@ -87,49 +96,70 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   const nextResponded = safeCount(next?.responded ?? next?.rsvpConfirmed ?? next?.confirmed);
   const nextAwaiting = safeCount(next?.awaitingResponse ?? next?.missing);
   const nextRoster = safeCount(next?.rosterCount || (nextResponded + nextAwaiting));
-  const nextMomentDetail = next
-    ? `${eventTypeLabel(next.type || nextEvent?.type)} · ${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"} · ${next.location || "Location TBD"} · ${nextResponded} / ${nextRoster || nextResponded} responded`
-    : "Create the next team event to begin RSVP tracking and player communication.";
-  const nextMomentAction = next && typeof onOpenEvent === "function" && nextEvent?.id != null
-    ? { label: "View Event", onClick: () => onOpenEvent(nextEvent.id) }
-    : undefined;
-  const metricItems = [
-    { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
-    { key: "gaps", label: "Awaiting RSVP", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
-    { key: "all", label: "Response Rate", displayLabel: "Response", value: next ? `${briefing.responseRate}%` : "—", detail: next ? `${briefing.responded} responses recorded` : "No RSVP signal", tone: !next ? "info" : briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
-  ];
+  const [selectedDate, setSelectedDate] = useState("");
+  const activeDate = selectedDate || next?.date || new Date().toISOString().slice(0, 10);
+  const nextStamp = formatEventDayStamp(next?.date);
   const showingPast = status === "past";
-  const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
+  const listHeading = showingPast ? "Past events" : status === "gaps" ? "RSVP gaps" : status === "all" ? "Schedule" : "Upcoming schedule";
+  const responseSignal = !next
+    ? "NO EVENT SCHEDULED"
+    : nextAwaiting > 0
+      ? `${nextAwaiting} RSVP GAP${nextAwaiting === 1 ? "" : "S"}`
+      : nextRoster > 0
+        ? "TEAM RESPONSE COMPLETE"
+        : "READY TO MANAGE";
+
+  const openNext = () => {
+    if (nextEvent?.id != null) onOpenEvent?.(nextEvent.id);
+  };
+  const selectDate = (date) => {
+    setSelectedDate(date);
+    const row = rows.find((candidate) => candidate.date === date);
+    const id = row?.event?.id ?? row?.id;
+    if (id != null) onOpenEvent?.(id);
+  };
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
-      <SecondaryPageIntro
-        eyebrow="SCHEDULE"
-        title="Events"
-        summary="Plan practices, games and team moments."
-        actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
-        testId="coach-events-command-bar"
-      />
-      <CoachEventsMonthCalendar rows={rows} onOpenEvent={onOpenEvent} />
-      <CoachRoutePerformanceStage
-        kind="schedule"
-        eyebrow="NEXT TEAM MOMENT"
-        title={next ? next.title || "Next team event" : "Calendar is open"}
-        detail={nextMomentDetail}
-        tone={!next ? "info" : nextAwaiting ? "attention" : "positive"}
-        action={nextMomentAction}
-        metrics={metricItems}
-        activeMetric={status}
-        onMetricSelect={onStatusChange}
-        testId="coach-events-decision-brief"
-      />
+      <EventsTitleStage role="coach" month={formatMonthLabel(next?.date || activeDate)} onCreate={onCreateEvent} />
+
+      <section className="coachEventsNext" data-testid="coach-events-next-team-moment" data-needs-attention={nextAwaiting > 0 ? "true" : "false"}>
+        <div className="coachEventsNext__topline">
+          <span>NEXT UP{next ? ` · ${nextStamp.weekday} ${nextStamp.day}` : ""}</span>
+          {next ? <EventTypeBadge type={next.type || nextEvent?.type} /> : null}
+        </div>
+        {next ? (
+          <>
+            <h2>{next.title || nextEvent?.title || "Team event"}</h2>
+            <EventTimeLocation time={next.time || nextEvent?.time} location={next.location || nextEvent?.location} />
+            <div className="coachEventsNext__command">
+              <div>
+                <strong>{responseSignal}</strong>
+                <small>{nextRoster ? `${nextResponded} of ${nextRoster} responded` : "Open event management"}</small>
+              </div>
+              <button type="button" onClick={openNext}>Manage event <span aria-hidden="true">→</span></button>
+            </div>
+          </>
+        ) : (
+          <div className="coachEventsNext__empty">
+            <h2>Calendar is open</h2>
+            <p>Create the next team moment to begin schedule and RSVP tracking.</p>
+            <button type="button" onClick={onCreateEvent}>Create event →</button>
+          </div>
+        )}
+      </section>
+
+      <EventsWeekRail rows={rows.filter((row) => row.statusKey !== "past")} anchorDate={next?.date || activeDate} selectedDate={activeDate} onSelectDate={selectDate} />
+
+      <EventsSectionHeader eyebrow="TEAM SCHEDULE" title={listHeading} meta={`${briefing.upcoming || 0} upcoming`} />
+
       <SecondaryPageToolbar testId="coach-events-toolbar">
         <div className="coachEventsFilterShell" ref={normalizeEventsSearchSurface}>
           <DashboardFilterRail
             surface="light"
             searchValue={query}
             onSearchChange={onQueryChange}
-            searchPlaceholder="Search events"
+            searchPlaceholder="Search schedule"
             filters={[
               { key: "all", label: "All" },
               { key: "run", label: "Practice" },
@@ -141,13 +171,15 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
             onFilterChange={onTypeChange}
             trailing={typeof onStatusChange === "function" ? (
               <button type="button" className="coachEventsHistoryAction" onClick={() => onStatusChange(showingPast ? "upcoming" : "past")} aria-pressed={showingPast}>
-                <span>{showingPast ? "Upcoming" : "Past Events"}</span><span aria-hidden="true">→</span>
+                <span>{showingPast ? "Upcoming" : "Past"}</span><span aria-hidden="true">→</span>
               </button>
             ) : null}
             testId="coach-events-filter-rail"
           />
         </div>
       </SecondaryPageToolbar>
+
+      <EventsMonthPanel rows={rows} anchorDate={next?.date || activeDate} selectedDate={activeDate} onSelectDate={setSelectedDate} />
       <div className="coachEventsMobileListHeading" data-testid="coach-events-mobile-list-heading">{listHeading}</div>
     </SecondaryPageShell>
   );
