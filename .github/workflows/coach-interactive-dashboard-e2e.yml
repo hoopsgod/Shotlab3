@@ -46,7 +46,12 @@ jobs:
           npm run build 2>&1 | tee build-output.log
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
-            tail -n 30 build-output.log | while IFS= read -r line; do
+            {
+              echo "--- build head ---"
+              head -n 35 build-output.log
+              echo "--- matching failure lines ---"
+              grep -nEi "error|failed|cannot|could not|unexpected|ENOENT|not found|resolve|unterminated|syntax" build-output.log | head -n 40 || true
+            } | while IFS= read -r line; do
               safe_line=${line//'%'/'%25'}
               safe_line=${safe_line//$'\r'/'%0D'}
               safe_line=${safe_line//$'\n'/'%0A'}
