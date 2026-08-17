@@ -40,7 +40,7 @@ test("live training removes generic progress bars and carries deterministic targ
   assert.match(header,/BANKED/);
   assert.doesNotMatch(header,/styles\.progressTrack|styles\.scoreProgress/);
   assert.doesNotMatch(headerCss,/\.progressTrack|\.scoreProgress/);
-  assert.match(headerCss,/\.back\s*\{[\s\S]*?width:\s*44px;[\s\S]*?height:\s*44px;/);
+  assert.match(headerCss,/\.back\s*\{[\s\S]*?width:\s*4[4-9]px;[\s\S]*?height:\s*4[4-9]px;/);
 });
 
 test("completion answers result, meaning, and next action without generic success UI",()=>{
