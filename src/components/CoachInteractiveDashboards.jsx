@@ -128,7 +128,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
       <SecondaryPageIntro
         eyebrow="SCHEDULE"
         title="Events"
-        summary="See the month. Run the next team moment."
+        summary="Plan practices, games and team moments."
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
         testId="coach-events-command-bar"
       />
