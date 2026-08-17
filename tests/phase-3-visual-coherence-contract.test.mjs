@@ -13,6 +13,7 @@ const playerDaily = read("../src/components/PlayerDailyCommandCenter.jsx");
 const visualHierarchy = read("../src/components/VisualHierarchy.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
+const authenticatedVisualAuthority = read("../src/styles/AuthenticatedVisualAuthority2026.css");
 const v5CoachIntegrityCss = read("../public/shotlab-v5-coach-integrity.css");
 const parityCss = read("../public/shotlab-v8-demo-parity.css");
 const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
@@ -162,9 +163,24 @@ test("surface contract is role-neutral for Coach, Player, demo and registered se
   assert.doesNotMatch(parityCss, /demoCard|demoPanel|demoBanner|demoNotice|demoBadge/);
 });
 
-test("semantic surface contract loads after the previous cascade lock", () => {
-  const cascadeLock = main.indexOf("MissionControlCascadeLock2026.css");
-  const phase3 = main.indexOf("Phase3SurfaceContracts.css");
-  assert.ok(cascadeLock >= 0, "existing cascade lock import must remain present");
-  assert.ok(phase3 > cascadeLock, "Phase 3 semantic contract must load after the previous visual authority");
+test("semantic surface contract keeps the established authenticated visual-authority cascade order", () => {
+  assert.match(main, /await import\('\.\/styles\/AuthenticatedVisualAuthority2026\.css'\)/);
+  const visualFoundation = authenticatedVisualAuthority.indexOf("VisualFoundation2026.css");
+  const commandHierarchy = authenticatedVisualAuthority.indexOf("CommandHierarchy2026.css");
+  const missionControlHierarchy = authenticatedVisualAuthority.indexOf("MissionControlHierarchy2026.css");
+  const cascadeLock = authenticatedVisualAuthority.indexOf("MissionControlCascadeLock2026.css");
+  const phase3 = authenticatedVisualAuthority.indexOf("Phase3SurfaceContracts.css");
+  for (const [label, index] of [
+    ["VisualFoundation2026", visualFoundation],
+    ["CommandHierarchy2026", commandHierarchy],
+    ["MissionControlHierarchy2026", missionControlHierarchy],
+    ["MissionControlCascadeLock2026", cascadeLock],
+    ["Phase3SurfaceContracts", phase3],
+  ]) {
+    assert.ok(index >= 0, `${label} must remain present in the authenticated visual authority bundle`);
+  }
+  assert.ok(visualFoundation < commandHierarchy, "Visual foundation must load before command hierarchy");
+  assert.ok(commandHierarchy < missionControlHierarchy, "Command hierarchy must load before Mission Control hierarchy");
+  assert.ok(missionControlHierarchy < cascadeLock, "Mission Control hierarchy must load before its cascade lock");
+  assert.ok(cascadeLock < phase3, "Phase 3 semantic contract must load after the previous visual authority");
 });
