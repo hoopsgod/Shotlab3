@@ -3,6 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 
 const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
+const BOUNDED_DRILL = {
+  id: "phase-4-target-court-50",
+  name: "TARGET COURT 50",
+  desc: "Make 50 shots at game pace.",
+  max: 50,
+  icon: "mr",
+  instructions: "Complete the reps and log the result.",
+  slug: "phase-4-target-court-50",
+  mode: "home",
+};
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -17,6 +27,14 @@ async function noOverflow(page) {
 
 async function enterPlayerDemo(page) {
   await installRoutes(page);
+  await page.addInitScript((boundedDrill) => {
+    const key = "sl:drills";
+    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+    localStorage.setItem(key, JSON.stringify([
+      boundedDrill,
+      ...existing.filter((item) => item?.id !== boundedDrill.id),
+    ]));
+  }, BOUNDED_DRILL);
   await page.goto("/");
   await page.getByRole("button", { name: /Player demo/i }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
@@ -32,7 +50,7 @@ test("Player Train opens a focused drill session with live Target Court feedback
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
 
-  const drill = page.getByRole("button", { name: /CALIPARI SHOOTING/i });
+  const drill = page.getByRole("button", { name: /TARGET COURT 50/i });
   await expect(drill).toBeVisible();
   await drill.click();
 
@@ -43,13 +61,14 @@ test("Player Train opens a focused drill session with live Target Court feedback
   await expect(header.getByText("AT HOME SESSION", { exact: true })).toBeVisible();
   await expect(header.getByText("CURRENT WORK", { exact: true })).toBeVisible();
   await expect(header.getByText("SESSION PATH", { exact: true })).toBeVisible();
-  await expect(header.getByText("DRILL STANDARD", { exact: true })).toBeVisible();
+  await expect(header.getByText("DRILL TARGET", { exact: true })).toBeVisible();
   await expect(header.getByRole("button", { name: "Back to training plan" })).toBeVisible();
 
   const liveTarget = header.getByTestId("player-training-live-target");
-  await expect(liveTarget).toBeVisible();
+  await expect(liveTarget).toBeVisible({ timeout: 10_000 });
   await expect(liveTarget).toHaveAttribute("data-performance-visual", "shotlab-target-court");
   await expect(liveTarget).toHaveAttribute("data-performance-state", "zero");
+  await expect(liveTarget).toHaveAttribute("aria-label", "0 on this drill. Target 50. 50 to target.");
 
   const heroBox = await header.boundingBox();
   const viewportHeight = await page.evaluate(() => window.innerHeight);
