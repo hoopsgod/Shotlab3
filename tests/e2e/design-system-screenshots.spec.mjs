@@ -154,12 +154,21 @@ test("Coach visual system remains integrated across command and management pages
   await capture(page, "06c-coach-team-account");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
-  const calendar = page.getByTestId("coach-events-month-calendar");
-  await expect(calendar).toBeVisible({ timeout: 20_000 });
-  await expect(calendar.getByTestId("coach-events-calendar-month")).toBeVisible();
-  await expect(calendar.getByRole("button", { name: "Previous month" })).toBeVisible();
-  await expect(calendar.getByRole("button", { name: "Next month" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /MANAGE/ }).first()).toBeVisible();
+  const events = page.getByTestId("coach-events-interactive-dashboard");
+  const title = page.getByTestId("coach-events-title-stage");
+  const hero = page.getByTestId("coach-events-next-team-moment");
+  const week = events.getByTestId("events-week-rail");
+  const month = events.getByTestId("events-month-panel");
+  await expect(events).toBeVisible({ timeout: 20_000 });
+  await expect(title.getByText("SCHEDULE", { exact: true })).toBeVisible();
+  await expect(title.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
+  await expect(title.getByRole("button", { name: "Create new event" })).toBeVisible();
+  await expect(hero).toBeVisible();
+  await expect(hero.getByRole("button", { name: /Manage event/i })).toBeVisible();
+  await expect(week.getByRole("button")).toHaveCount(7);
+  await expect(month).toBeVisible();
+  await expect(month).not.toHaveAttribute("open", "");
+  await noOverflow(page);
   await capture(page, "07-coach-events");
 
   let sheet = await more(page);
