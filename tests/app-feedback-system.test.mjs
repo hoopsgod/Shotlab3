@@ -23,15 +23,18 @@ test("shared feedback layer exposes accessible keyed premium states", async () =
 
 test("feedback styling uses restrained motion mobile safe areas and touch-safe dismissal", async () => {
   const css = await read("src/components/AppFeedbackLayer.css");
-  assert.match(css, /env\(safe-area-inset-top\)/);
-  assert.match(css, /env\(safe-area-inset-bottom\)/);
+  assert.match(css, /env\(safe-area-inset-top(?:,\s*0px)?\)/);
+  assert.match(css, /env\(safe-area-inset-bottom(?:,\s*0px)?\)/);
   assert.match(css, /app-feedback--leaving/);
   assert.match(css, /width:\s*44px/);
   assert.match(css, /height:\s*44px/);
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /prefers-reduced-transparency: reduce/);
   assert.match(css, /focus-visible/);
+  assert.ok(
+    !/backdrop-filter/.test(css) || /prefers-reduced-transparency: reduce/.test(css),
+    "translucent feedback must either avoid backdrop blur or provide reduced-transparency handling",
+  );
   assert.doesNotMatch(css, /confetti|bounce/);
 });
 
