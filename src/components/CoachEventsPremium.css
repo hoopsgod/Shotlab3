@@ -224,24 +224,31 @@
   }
 
   [data-testid="coach-events-filter-rail"] > label input {
-    min-height: 48px;
+    all: unset !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
     color: var(--events-ink) !important;
-    font-size: 14px;
+    font: 550 14px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+    letter-spacing: -0.008em !important;
+    cursor: text !important;
     -webkit-appearance: none !important;
     appearance: none !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    outline: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+  }
+
+  [data-testid="coach-events-filter-rail"] > label input::placeholder {
+    color: #7a827c !important;
+    opacity: 1 !important;
   }
 
   [data-testid="coach-events-filter-rail"] > label input::-webkit-search-decoration,
   [data-testid="coach-events-filter-rail"] > label input::-webkit-search-cancel-button,
   [data-testid="coach-events-filter-rail"] > label input::-webkit-search-results-button,
   [data-testid="coach-events-filter-rail"] > label input::-webkit-search-results-decoration {
-    -webkit-appearance: none;
-    appearance: none;
+    -webkit-appearance: none !important;
+    appearance: none !important;
   }
 
   [data-testid="coach-events-filter-rail"] > div[role="group"] {
