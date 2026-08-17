@@ -10,11 +10,13 @@ const emptyStateEnhancer = fs.readFileSync(new URL("../scripts/apply-phase2d-pre
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const parityEnhancer = `${appParityEnhancer}\n${coachParityEnhancer}`;
 
-test("player commitments keep a fixed mobile runway instead of removing the module when data is sparse", () => {
-  assert.match(commitmentSource, /const RUNWAY_SLOTS = 3/);
-  assert.match(commitmentSource, /data-runway-slots=\{RUNWAY_SLOTS\}/);
-  assert.match(commitmentSource, /runwayPlaceholders/);
-  assert.match(commitmentSource, /Schedule slot open|Development slot open/);
+test("player commitments preserve intentional role-specific mobile density when data is sparse", () => {
+  assert.match(commitmentSource, /const RUNWAY_SLOTS = 4/);
+  assert.match(commitmentSource, /state\.upcoming\.slice\(0, RUNWAY_SLOTS\)/);
+  assert.match(commitmentSource, /const runwayItems = state\.upcoming\.slice\(0, 3\)/);
+  assert.match(commitmentSource, /const runwayPlaceholders = Math\.max\(0, 3 - runwayItems\.length\)/);
+  assert.match(commitmentSource, /data-runway-slots="3"/);
+  assert.match(commitmentSource, /Development slot open/);
   assert.doesNotMatch(commitmentSource, /state\.upcoming\.length\s*>\s*0\s*&&\s*\(\s*<div className=\{styles\.queue\}/);
 });
 
