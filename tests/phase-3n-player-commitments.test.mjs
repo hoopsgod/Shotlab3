@@ -6,6 +6,7 @@ const enhancer = readFileSync("scripts/apply-phase3n-player-commitments.mjs", "u
 const component = readFileSync("src/components/PlayerCommitmentCenter.jsx", "utf8");
 const css = readFileSync("src/components/PlayerCommitmentCenter.module.css", "utf8");
 const authority = readFileSync("public/shotlab-phase3n-player-commitments.css", "utf8");
+const primitives = readFileSync("src/components/EventsMobilePrimitives.jsx", "utf8");
 const html = readFileSync("index.html", "utf8");
 const screenshots = readFileSync("tests/e2e/phase-3n-player-commitments-screenshots.spec.mjs", "utf8");
 const screenshotConfig = readFileSync("playwright.screenshots.config.mjs", "utf8");
@@ -22,7 +23,7 @@ test("Phase 3N runs after accepted Phase 3M with a guarded idempotent route tran
   assert.match(enhancer, /Player Commitments hierarchy already applied/);
 });
 
-test("Events and S&C use one specialized player commitment hierarchy instead of duplicate generic command bars", () => {
+test("Events and S&C keep one specialized player commitment integration instead of duplicate generic command bars", () => {
   for (const seam of [
     'PlayerCommitmentCenter mode="events"',
     'PlayerCommitmentCenter mode="strength"',
@@ -43,67 +44,60 @@ test("Phase 3N preserves RSVP, S&C RSVP, logging, and completion capabilities", 
   ]) assert.ok(enhancer.includes(preserved), `missing preserved player commitment capability: ${preserved}`);
 });
 
-test("PlayerCommitmentCenter exposes route identity, next action, runway, and progressive disclosure", () => {
+test("Player Events now exposes a personal schedule hierarchy and keeps S&C commitment disclosure", () => {
   for (const seam of [
-    "player-commitment-route-header-",
-    "player-commitment-hero-",
-    "player-commitment-queue-",
-    "player-commitment-details-",
-    "NEXT TEAM COMMITMENT",
+    'data-testid="player-events-next-up"',
+    'data-testid="player-events-upcoming-list"',
+    'data-testid="player-commitment-details-events"',
+    'data-testid="player-commitment-route-header-strength"',
+    'data-testid="player-commitment-hero-strength"',
+    'data-testid="player-commitment-details-strength"',
+    "RSVP REQUIRED",
+    "✓ GOING",
     "NEXT DEVELOPMENT BLOCK",
-    "FULL WORKSPACE",
   ]) assert.ok(component.includes(seam), `missing player commitment UI seam: ${seam}`);
+  assert.match(component, /<EventsTitleStage role="player"/);
+  assert.match(component, /<EventsWeekRail/);
+  assert.match(component, /<EventsMonthPanel/);
   assert.match(component, /<details/);
-  assert.match(component, /onAction\?\.\(model\.primaryAction\)/);
 });
 
-test("Player commitment hero prioritizes unresolved decisions over already-confirmed chronological items", () => {
-  assert.match(component, /const focus = unresolved\[0\] \|\| upcoming\[0\] \|\| null/);
-  assert.match(component, /const requiresResponse = state\.unresolved\.length > 0/);
-  assert.match(component, /requiresResponse[\s\S]*"Respond now"/);
-  assert.match(component, /requiresResponse[\s\S]*"RESPONSE NEEDED"/);
+test("Player Events prioritizes the next chronological obligation and makes its personal response state explicit", () => {
+  assert.match(component, /const focus = state\.upcoming\[0\] \|\| null/);
+  assert.match(component, /const focusConfirmed = Boolean/);
+  assert.match(component, /const focusNeedsResponse = Boolean/);
+  assert.match(component, /focusNeedsResponse \? "RSVP REQUIRED" : "✓ GOING"/);
+  assert.match(component, /focusNeedsResponse \? "Respond" : "Change response"/);
 });
 
-test("Route status and subtitle summarize the actionable commitment state rather than stale model copy", () => {
-  assert.match(component, /const routeStatus = requiresResponse[\s\S]*response[\s\S]*needed/);
-  assert.match(component, /const routeSubtitle = requiresResponse[\s\S]*upcoming commitment/);
-  assert.match(component, /<span>{routeStatus}<\/span>/);
-  assert.match(component, /<p>{routeSubtitle}<\/p>/);
+test("Player RSVP derivation remains identity and team scoped", () => {
+  assert.match(component, /identityMatches\(row, userEmail\)/);
+  assert.match(component, /teamMatches\(row, teamId\)/);
+  assert.match(component, /const responseIds = new Set/);
+  assert.doesNotMatch(component, /RSVP GAP|TEAM RESPONSE COMPLETE|Manage event/);
 });
 
-test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
-  assert.match(css, /\.routeTitleRow h1[\s\S]*clamp\(/);
-  assert.match(css, /\.signalStrip[\s\S]*grid-template-columns: repeat\(3/);
-  assert.match(css, /\.queue[\s\S]*background: rgba\(255, 255, 255, \.94\)/);
-  assert.match(css, /\.details\[open\]/);
-  assert.match(css, /@media \(max-width: 759px\)/);
+test("Events visual system is week-first, editorial, safe-area aware, and not card stacked", () => {
+  assert.match(primitives, /data-testid="events-week-rail"/);
+  assert.match(primitives, /<details className="eventsMonthPanel"/);
+  assert.match(css, /\.eventsHero[\s\S]*linear-gradient/s);
+  assert.match(css, /\.eventRow\s*\{[\s\S]*border-radius:\s*0/s);
+  assert.match(css, /safe-area-inset-bottom/);
+  assert.match(css, /@media \(max-width: 390px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
-test("Phase 3N uses a stable late authority boundary so demo normalization cannot wash out the dark commitment hero", () => {
+test("legacy late authority remains constrained to the old commitment hero seam and cannot repaint the new Events hero", () => {
   assert.match(html, /shotlab-phase3m-player-team-store-retail\.css[\s\S]*shotlab-phase3n-player-commitments\.css/);
-  assert.match(authority, /html body #root \[data-testid="player-commitment-center-events"\] \[data-testid="player-commitment-hero-events"\]/);
-  assert.match(authority, /background-color: #111411 !important/);
-  assert.match(authority, /background-image:[\s\S]*linear-gradient\(152deg[\s\S]*!important/);
-  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] > div[\s\S]*background-color: transparent !important/);
-  assert.match(authority, /> div:nth-child\(2\) > div\[aria-label\][\s\S]*rgba\(255, 255, 255, \.045\) !important/);
-  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] h2[\s\S]*#f8faf5 !important/);
-  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] button[\s\S]*background-color: var\(--accent, #c8ff1a\) !important/);
+  assert.match(authority, /player-commitment-hero-strength/);
+  assert.doesNotMatch(authority, /player-events-next-up/);
 });
 
-test("fresh iPhone evidence covers both commitment routes and verifies legacy controls on demand", () => {
+test("fresh iPhone evidence configuration still covers both commitment routes", () => {
   assert.match(screenshotConfig, /phase-3n-player-commitments-screenshots\.spec\.mjs/);
   assert.match(screenshots, /04n-player-events-commitment/);
   assert.match(screenshots, /04o-player-strength-commitment/);
-  assert.match(screenshots, /routeStatus: "1 response needed"/);
-  assert.ok(
-    screenshots.includes('routeStatus: /^(?:Schedule clear|\\d+ responses? needed)$/'),
-    "S&C screenshot evidence must accept the truthful actionable status rather than stale fixed copy",
-  );
-  assert.match(screenshots, /compositionStyle\.backgroundColor/);
   assert.match(screenshots, /scrollWidth - window\.innerWidth/);
   assert.match(screenshots, /player-events-operational-list/);
   assert.match(screenshots, /player-strength-operational-panel/);
-  assert.match(screenshots, /toBeHidden/);
-  assert.match(screenshots, /toBeVisible/);
 });
