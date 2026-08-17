@@ -46,26 +46,25 @@ if (!source.includes(panelMarker)) {
 
   const newBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onScopeChange, onQueryChange, onOpenPlayer }) {
   const risers = rows.filter((row) => row.improvement > 0).length;
-  const overallLeader = [...rows].sort((a, b) => a.rank - b.rank)[0];
   const weeklyLeader = [...rows].sort((a, b) => b.weekly - a.weekly || a.rank - b.rank)[0];
   const activeThisWeek = rows.filter((row) => row.weekly > 0).length;
   return (
     <div className={styles.phasePanel} data-testid="coach-leaderboard-operational-panel">
       <section className="coachLeaderboardPulse" data-testid="coach-leaderboard-pulse" aria-label="Leaderboard performance pulse">
         <div className="coachLeaderboardPulseCopy">
-          <span>Competitive pulse</span>
-          <strong>{overallLeader?.name || "Waiting on first ranking"}</strong>
-          <small>{overallLeader ? "#" + overallLeader.rank + " overall · " + overallLeader.total + " total" : "Rankings will appear after players log work."}</small>
+          <span>This week</span>
+          <strong>{weeklyLeader?.weekly > 0 ? weeklyLeader.name : "The weekly race is open"}</strong>
+          <small>{weeklyLeader?.weekly > 0 ? weeklyLeader.weekly + " verified makes this week · " + activeThisWeek + " active" : "New verified activity will establish the weekly pace."}</small>
         </div>
         <div className="coachLeaderboardPulseMetrics">
           <div>
-            <span>Weekly leader</span>
-            <strong>{weeklyLeader?.name || "—"}</strong>
-            <small>{weeklyLeader ? weeklyLeader.weekly + " this week" : "No weekly makes"}</small>
-          </div>
-          <div>
             <span>Risers</span>
             <strong>{risers}</strong>
+            <small>{risers === 1 ? "player moving up" : "players moving up"}</small>
+          </div>
+          <div>
+            <span>Ranked</span>
+            <strong>{rows.length}</strong>
             <small>{activeThisWeek} active this week</small>
           </div>
         </div>
@@ -106,13 +105,6 @@ if (!source.includes(panelMarker)) {
                 <em className={row.improvement > 0 ? styles.deltaPositive : row.improvement < 0 ? styles.deltaNegative : styles.deltaNeutral}>{formatDelta(row.improvement)}</em>
               </span>
             </button>
-          ))}
-          {Array.from({ length: Math.max(0, 3 - rows.length) }, (_, index) => (
-            <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-live-" + index}>
-              <span className="coachLeaderboardRank" aria-hidden="true">—</span>
-              <div className="coachLeaderboardRowCopy"><strong>Open rank</strong><span>Player activity will fill this ranking position.</span></div>
-              <span className="coachLeaderboardWeek"><small>This week</small><strong>—</strong><em className={styles.deltaNeutral}>—</em></span>
-            </div>
           ))}
         </div>
       ) : <EmptyState>No leaderboard players match the selected view.</EmptyState>}
