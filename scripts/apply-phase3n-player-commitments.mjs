@@ -6,49 +6,21 @@ const requireOne = (source, anchor, label) => {
   if (count !== 1) fail(`${label}: expected exactly one anchor, found ${count}`);
 };
 
-const stripNamedFunction = (input, signature) => {
-  const start = input.indexOf(signature);
-  if (start < 0) return input;
-  const open = input.indexOf('{', start + signature.length);
-  if (open < 0) fail(`could not locate opening brace for ${signature}`);
-  let depth = 0;
-  let quote = null;
-  let escaped = false;
-  let lineComment = false;
-  let blockComment = false;
-  for (let index = open; index < input.length; index += 1) {
-    const char = input[index];
-    const next = input[index + 1];
-    if (lineComment) {
-      if (char === '\n') lineComment = false;
-      continue;
-    }
-    if (blockComment) {
-      if (char === '*' && next === '/') { blockComment = false; index += 1; }
-      continue;
-    }
-    if (quote) {
-      if (escaped) { escaped = false; continue; }
-      if (char === '\\') { escaped = true; continue; }
-      if (char === quote) quote = null;
-      continue;
-    }
-    if (char === '/' && next === '/') { lineComment = true; index += 1; continue; }
-    if (char === '/' && next === '*') { blockComment = true; index += 1; continue; }
-    if (char === '"' || char === "'" || char === '`') { quote = char; continue; }
-    if (char === '{') depth += 1;
-    if (char === '}') {
-      depth -= 1;
-      if (depth === 0) {
-        const sectionStart = input.lastIndexOf('// ═══════════════════════════════════════', start);
-        const removeStart = sectionStart >= 0 ? sectionStart : start;
-        let end = index + 1;
-        while (end < input.length && /[\r\n]/.test(input[end])) end += 1;
-        return `${input.slice(0, removeStart)}${input.slice(end)}`;
-      }
-    }
-  }
-  fail(`could not locate closing brace for ${signature}`);
+const SECTION_RULE = '// ═══════════════════════════════════════';
+const stripSectionContainingFunction = (input, signature) => {
+  const functionStart = input.indexOf(signature);
+  if (functionStart < 0) return input;
+
+  const sectionStart = input.lastIndexOf(SECTION_RULE, functionStart);
+  if (sectionStart < 0) fail(`could not locate section start for ${signature}`);
+
+  const nextSection = input.indexOf(SECTION_RULE, functionStart + signature.length);
+  if (nextSection < 0) fail(`could not locate section boundary after ${signature}`);
+  if (nextSection <= sectionStart) fail(`invalid section boundaries for ${signature}`);
+
+  const removed = input.slice(sectionStart, nextSection);
+  if (!removed.includes(signature)) fail(`section boundary did not contain ${signature}`);
+  return `${input.slice(0, sectionStart)}${input.slice(nextSection)}`;
 };
 
 const path = 'src/App.jsx';
@@ -62,7 +34,7 @@ const promoteSourceOwnedEvents = (input) => {
   if (next.includes(legacyRoute)) next = next.replace(legacyRoute, promotedEvents);
   else if (!next.includes(promotedEvents)) fail('source-owned Player Events route contract was not found');
 
-  next = stripNamedFunction(next, 'function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue})');
+  next = stripSectionContainingFunction(next, 'function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue})');
   return next;
 };
 
