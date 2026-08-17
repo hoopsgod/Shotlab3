@@ -5,7 +5,6 @@ import {
 } from "./CoachDashboardPrimitives.jsx";
 import { ExperienceSparkline } from "./ExperiencePrimitives.jsx";
 import CoachRoutePerformanceStage from "./CoachRoutePerformanceStage.jsx";
-import SecondaryPageDisclosure from "./SecondaryPageDisclosure.jsx";
 import CoachEventsMonthCalendar from "./CoachEventsMonthCalendar.jsx";
 import {
   SecondaryPageEvidence,
@@ -35,14 +34,6 @@ const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   if (!action) return undefined;
   if (action.kind === "add-player" && typeof onAddPlayer === "function") return { label: action.label, onClick: onAddPlayer };
   if (action.kind === "filter" && typeof onFilterChange === "function") return { label: action.label, onClick: () => onFilterChange(action.value) };
-  return undefined;
-};
-
-const resolveEventAction = (action, { onStatusChange, onCreateEvent, onOpenEvent }) => {
-  if (!action) return undefined;
-  if (action.kind === "create-event" && typeof onCreateEvent === "function") return { label: action.label, onClick: onCreateEvent };
-  if (action.kind === "status-filter" && typeof onStatusChange === "function") return { label: action.label, onClick: () => onStatusChange(action.value) };
-  if (action.kind === "open-event" && typeof onOpenEvent === "function" && action.id != null) return { label: action.label, onClick: () => onOpenEvent(action.id) };
   return undefined;
 };
 
@@ -132,12 +123,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
         testId="coach-events-command-bar"
       />
-      <CoachEventsMonthCalendar
-        rows={rows}
-        activeType={type}
-        onOpenEvent={onOpenEvent}
-        onCreateEvent={onCreateEvent}
-      />
+      <CoachEventsMonthCalendar rows={rows} activeType={type} onOpenEvent={onOpenEvent} onCreateEvent={onCreateEvent} />
       <CoachRoutePerformanceStage
         kind="schedule"
         eyebrow="NEXT TEAM MOMENT"
@@ -167,36 +153,15 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
             activeFilter={type}
             onFilterChange={onTypeChange}
             trailing={typeof onStatusChange === "function" ? (
-              <button
-                type="button"
-                className="coachEventsHistoryAction"
-                onClick={() => onStatusChange(showingPast ? "upcoming" : "past")}
-                aria-pressed={showingPast}
-              >
-                <span>{showingPast ? "Upcoming" : "Past Events"}</span>
-                <span aria-hidden="true">→</span>
+              <button type="button" className="coachEventsHistoryAction" onClick={() => onStatusChange(showingPast ? "upcoming" : "past")} aria-pressed={showingPast}>
+                <span>{showingPast ? "Upcoming" : "Past Events"}</span><span aria-hidden="true">→</span>
               </button>
             ) : null}
             testId="coach-events-filter-rail"
           />
         </div>
       </SecondaryPageToolbar>
-      <div className="coachEventsSupportingInsights">
-        <SecondaryPageDisclosure
-          title="Schedule insights"
-          summary={`${briefing.responseRate}% response · ${briefing.missing} missing`}
-          defaultOpen={typeof window !== "undefined" && window.innerWidth > 760}
-          testId="coach-events-supporting-intelligence"
-        >
-          <SecondaryPageEvidence testId="coach-events-insight-grid">
-            {briefing.insights.map((insight) => (
-              <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
-                {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
-              </DashboardInsightCard>
-            ))}
-          </SecondaryPageEvidence>
-        </SecondaryPageDisclosure>
-      </div>
+      <div hidden data-testid="coach-events-supporting-intelligence"><div data-testid="coach-events-insight-grid" /></div>
       <div className="coachEventsMobileListHeading" data-testid="coach-events-mobile-list-heading">{listHeading}</div>
       {showPremiumEmptyState ? (
         <section className="coachEventsPremiumEmptyState" data-testid="coach-events-premium-empty-state" aria-labelledby="coach-events-empty-title">
