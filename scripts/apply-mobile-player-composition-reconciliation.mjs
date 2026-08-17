@@ -23,7 +23,7 @@ function injectCommitmentRuntimeStyle() {
   const target = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.jsx')
   const source = readFileSync(target, 'utf8')
   if (source.includes(COMMITMENT_RUNTIME_MARKER)) return false
-  const constantAnchor = 'const RUNWAY_SLOTS = 3;'
+  const constantAnchor = source.includes('const RUNWAY_SLOTS = 4;') ? 'const RUNWAY_SLOTS = 4;' : 'const RUNWAY_SLOTS = 3;'
   const headerAnchor = '      <header className={styles.routeHeader}'
   if (!source.includes(constantAnchor) || !source.includes(headerAnchor)) {
     throw new Error('[mobile-player-composition] commitment runtime style anchor missing')
