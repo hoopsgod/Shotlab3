@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import baseConfig from './vite.config.js'
 import { createCssModuleDeadSelectorPruner } from './scripts/css-module-dead-selector-pruner.mjs'
 
+const APP_SUFFIX = '/src/App.jsx'
+const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";'
 const COACH_COMMAND_CENTER_SUFFIX = '/src/components/CoachCommandCenter.jsx'
 const COACH_MISSION_CONTROL_V2_SUFFIX = '/src/components/CoachMissionControlV2.css'
 const SHARED_SECONDARY_PAGE_FRAGMENT = '/src/components/SecondaryPageSystem'
@@ -44,6 +46,21 @@ const V2_PRODUCTION_REWRITES = [
 
 function normalizeModuleId(id = '') {
   return String(id).replaceAll('\\', '/')
+}
+
+function ownCoachInteractiveStylesInWorkspace() {
+  return {
+    name: 'shotlab-own-coach-interactive-styles-in-workspace',
+    apply: 'build',
+    enforce: 'pre',
+    transform(source, id) {
+      if (!normalizeModuleId(id).endsWith(APP_SUFFIX)) return null
+      if (!source.includes(APP_COACH_STYLE_IMPORT)) {
+        throw new Error('Phase 5B expected App Coach interactive stylesheet import is missing.')
+      }
+      return { code: source.replace(APP_COACH_STYLE_IMPORT, ''), map: null }
+    },
+  }
 }
 
 function applyExpectedV2Rewrites(source) {
@@ -90,6 +107,7 @@ export default defineConfig(async (environment) => {
   return {
     ...resolvedBase,
     plugins: [
+      ownCoachInteractiveStylesInWorkspace(),
       retireSupersededMissionControlCss(),
       createCssModuleDeadSelectorPruner(),
       ...(resolvedBase.plugins || []),
