@@ -111,26 +111,25 @@ test("Phase 4E.11 closes measured Coach default-state touch targets on current r
   const performanceRail = decision.locator('[data-visual-role="performance-evidence"]');
   await expect(performanceRail).toBeVisible();
 
+  const rankedPlayers = performanceRail.getByRole("button", { name: /^Ranked Players:/ });
   const currentLeader = performanceRail.getByRole("button", { name: /^Current Leader:/ });
   const archivedSeasons = performanceRail.getByRole("button", { name: /^Archived Seasons:/ });
-  const reviewView = performanceRail.getByRole("button", { name: /^View:/ });
 
-  // Measure all controls from the same viewport state. Playwright bounding boxes are viewport-relative,
-  // so comparing boxes captured after separate scrollIntoView calls creates false overlap failures.
+  // Measure all three source-owned decision controls from the same viewport state.
   await performanceRail.scrollIntoViewIfNeeded();
   await settle(page);
+  const rankedEvidence = await measureControl(rankedPlayers, "Ranked Players metric");
   const currentLeaderEvidence = await measureControl(currentLeader, "Current Leader metric");
   const archivedEvidence = await measureControl(archivedSeasons, "Archived Seasons metric");
-  const viewEvidence = await measureControl(reviewView, "View metric");
 
+  await rankedPlayers.click();
+  await expect(rankedPlayers).toHaveAttribute("aria-pressed", "true");
   await currentLeader.click();
   await expect(currentLeader).toHaveAttribute("aria-pressed", "true");
   await archivedSeasons.click();
   await expect(archivedSeasons).toHaveAttribute("aria-pressed", "true");
-  await reviewView.click();
-  await expect(reviewView).toHaveAttribute("aria-pressed", "true");
 
-  const leaderBoxes = [currentLeaderEvidence.box, archivedEvidence.box, viewEvidence.box];
+  const leaderBoxes = [rankedEvidence.box, currentLeaderEvidence.box, archivedEvidence.box];
   for (let i = 0; i < leaderBoxes.length; i += 1) {
     for (let j = i + 1; j < leaderBoxes.length; j += 1) {
       expect(overlapArea(leaderBoxes[i], leaderBoxes[j]), `leaderboard metric ${i + 1} must not overlap ${j + 1}`).toBe(0);
@@ -153,9 +152,9 @@ test("Phase 4E.11 closes measured Coach default-state touch targets on current r
     horizontal,
     viewRoster: viewRosterEvidence,
     leaderboardMetrics: {
+      rankedPlayers: rankedEvidence,
       currentLeader: currentLeaderEvidence,
       archivedSeasons: archivedEvidence,
-      view: viewEvidence,
     },
     rosterScroll: { before: beforeScroll, after: afterScroll },
   }, null, 2));
