@@ -14,7 +14,7 @@ test("Coach Events places a real month calendar before the next-event decision s
   assert.match(dashboard, /rows=\{rows\}/);
   assert.match(dashboard, /activeType=\{type\}/);
   assert.match(dashboard, /onOpenEvent=\{onOpenEvent\}/);
-  assert.match(dashboard, /See the month\. Run the next team moment\./);
+  assert.match(dashboard, /summary="Plan practices, games and team moments\."/);
 });
 
 test("month calendar owns stable six-week geometry and real event-day signals", () => {
