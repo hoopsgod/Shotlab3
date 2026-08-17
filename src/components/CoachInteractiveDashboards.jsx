@@ -6,6 +6,7 @@ import {
 import { ExperienceSparkline } from "./ExperiencePrimitives.jsx";
 import CoachRoutePerformanceStage from "./CoachRoutePerformanceStage.jsx";
 import SecondaryPageDisclosure from "./SecondaryPageDisclosure.jsx";
+import CoachEventsMonthCalendar from "./CoachEventsMonthCalendar.jsx";
 import {
   SecondaryPageEvidence,
   SecondaryPageIntro,
@@ -127,9 +128,15 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
       <SecondaryPageIntro
         eyebrow="SCHEDULE"
         title="Events"
-        summary="Plan practices, games and team moments."
+        summary="See the month. Run the next team moment."
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
         testId="coach-events-command-bar"
+      />
+      <CoachEventsMonthCalendar
+        rows={rows}
+        activeType={type}
+        onOpenEvent={onOpenEvent}
+        onCreateEvent={onCreateEvent}
       />
       <CoachRoutePerformanceStage
         kind="schedule"
