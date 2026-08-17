@@ -9,7 +9,7 @@ const coachCss = readFileSync(new URL("../src/components/CoachEventsPremiumV2.cs
 
 test("Coach Events is week-first and keeps month view secondary", () => {
   const titleIndex = dashboard.indexOf("<EventsTitleStage");
-  const nextIndex = dashboard.indexOf('data-testid="coach-events-next-team-moment"');
+  const nextIndex = dashboard.indexOf('testId="coach-events-next-team-moment"');
   const weekIndex = dashboard.indexOf("<EventsWeekRail");
   const monthIndex = dashboard.indexOf("<EventsMonthPanel");
 
@@ -43,7 +43,8 @@ test("Coach Events prioritizes one operational response signal and compact manag
 test("premium Events system uses editorial rows, controlled lime and mobile safe-area clearance", () => {
   assert.match(sharedCss, /\.eventsWeekRail__days\s*\{[\s\S]*repeat\(7,\s*minmax\(0,\s*1fr\)\)/s);
   assert.match(sharedCss, /\.eventsMonthPanel\s*\{[\s\S]*border-top:[\s\S]*background:\s*transparent/s);
+  assert.match(sharedCss, /\.eventsNext__action strong\s*\{[\s\S]*color:\s*var\(--events-lime\)/s);
+  assert.match(sharedCss, /\.eventsNext__primaryAction\s*\{[\s\S]*background:\s*var\(--events-lime\)/s);
   assert.match(coachCss, /coach-events-mobile-page[\s\S]*article[\s\S]*border-radius:\s*0\s*!important[\s\S]*background:\s*transparent\s*!important/s);
   assert.match(coachCss, /safe-area-inset-bottom/);
-  assert.match(coachCss, /\.coachEventsNext__command strong[\s\S]*var\(--coach-events-lime\)/s);
 });
