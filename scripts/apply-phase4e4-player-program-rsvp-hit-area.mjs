@@ -28,19 +28,29 @@ const legacyTarget = `.performance-shell[data-workspace-tab="program"] button[da
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
-const safeTarget = `.performance-shell[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
+const intermediateTarget = `.performance-shell[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
   min-height: 45px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}`;
+const safeTarget = `html body #root .performance-shell.performance-shell--player[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
+  min-height: 46px !important;
+  height: 46px !important;
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
 
 if (!authority.includes(authorityMarker)) {
-  authority += `\n\n/* ${authorityMarker}. Verified in the user-reachable expanded Program workspace with a 1px rounding safety margin. */\n${safeTarget}\n`;
+  authority += `\n\n/* ${authorityMarker}. Final cascade owner with a 2px physical safety margin above the 44px minimum. */\n${safeTarget}\n`;
   writeFileSync(authorityPath, authority);
 } else if (authority.includes(legacyTarget)) {
   authority = authority.replace(legacyTarget, safeTarget);
   writeFileSync(authorityPath, authority);
-  console.log('Phase 4E.4 upgraded Player Program RSVP target with subpixel rounding safety margin.');
+  console.log('Phase 4E.4 upgraded legacy Player Program RSVP target with final-cascade safety margin.');
+} else if (authority.includes(intermediateTarget)) {
+  authority = authority.replace(intermediateTarget, safeTarget);
+  writeFileSync(authorityPath, authority);
+  console.log('Phase 4E.4 promoted Player Program RSVP target above later cascade overrides.');
 } else if (!authority.includes(safeTarget)) {
   throw new Error('Phase 4E.4 RSVP marker exists but the physical target contract is unrecognized.');
 } else {
