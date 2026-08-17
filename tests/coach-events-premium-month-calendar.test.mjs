@@ -5,6 +5,7 @@ import test from "node:test";
 const dashboard = readFileSync(new URL("../src/components/CoachInteractiveDashboards.jsx", import.meta.url), "utf8");
 const calendar = readFileSync(new URL("../src/components/CoachEventsMonthCalendar.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/components/CoachEventsPremiumV2.css", import.meta.url), "utf8");
+const integrationCss = readFileSync(new URL("../src/styles/CoachInteractiveDashboard.css", import.meta.url), "utf8");
 
 test("Coach Events places a real month calendar before the next-event decision stage", () => {
   const calendarIndex = dashboard.indexOf("<CoachEventsMonthCalendar");
@@ -14,6 +15,7 @@ test("Coach Events places a real month calendar before the next-event decision s
   assert.match(dashboard, /rows=\{rows\}/);
   assert.match(dashboard, /onOpenEvent=\{onOpenEvent\}/);
   assert.match(dashboard, /summary="Plan practices, games and team moments\."/);
+  assert.match(integrationCss, /coach-events-interactive-dashboard[^}]*> \.coachEventsCalendar\s*\{\s*order:\s*2\s*!important/s);
 });
 
 test("month calendar owns stable six-week geometry and real event-day signals", () => {
