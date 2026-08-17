@@ -49,13 +49,13 @@ test("Player Events now exposes a personal schedule hierarchy and keeps S&C comm
     'data-testid="player-events-next-up"',
     'data-testid="player-events-upcoming-list"',
     'data-testid="player-commitment-details-events"',
-    'data-testid="player-commitment-route-header-strength"',
     'data-testid="player-commitment-hero-strength"',
     'data-testid="player-commitment-details-strength"',
     "RSVP REQUIRED",
     "✓ GOING",
     "NEXT DEVELOPMENT BLOCK",
   ]) assert.ok(component.includes(seam), `missing player commitment UI seam: ${seam}`);
+  assert.match(component, /data-testid=\{`player-commitment-route-header-\$\{mode\}`\}/);
   assert.match(component, /<EventsTitleStage role="player"/);
   assert.match(component, /<EventsWeekRail/);
   assert.match(component, /<EventsMonthPanel/);
