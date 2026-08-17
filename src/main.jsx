@@ -184,7 +184,7 @@ window.addEventListener('shotlab:app-ready', () => {
     }).catch(() => markBoot('backend_health', 'health_check_failed'))
 
     if (DEV) {
-      verifySupabaseSchema().then(status => markBoot('schema_verify', status.status)
+      verifySupabaseSchema().then(status => markBoot('schema_verify', status.status))
         .catch(() => markBoot('schema_verify', 'schema_check_failed'))
     }
 
