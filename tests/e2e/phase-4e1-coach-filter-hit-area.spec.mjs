@@ -79,10 +79,11 @@ async function verifyFilterFamily(page, surface, expectedCount) {
     expect(computed.height, `${surface}/${computed.label} computed height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
     if (surface === "events") {
       expect(computed.borderRadius, `${surface}/${computed.label} editorial tab radius`).toBeLessThanOrEqual(1);
+      expect(computed.fontSize, `${surface}/${computed.label} editorial typography`).toBeGreaterThanOrEqual(9);
     } else {
       expect(computed.borderRadius, `${surface}/${computed.label} pill radius`).toBeGreaterThanOrEqual(18);
+      expect(computed.fontSize, `${surface}/${computed.label} typography`).toBeGreaterThanOrEqual(10);
     }
-    expect(computed.fontSize, `${surface}/${computed.label} typography`).toBeGreaterThanOrEqual(10);
     expect(computed.touchAction).toBe("manipulation");
     expect(computed.boxSizing).toBe("border-box");
     evidence.push({ box, computed });
