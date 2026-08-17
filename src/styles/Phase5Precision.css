@@ -25,6 +25,10 @@
     min-width: var(--phase5-touch-floor);
   }
 
+  :where(.performance-shell, .premium-screen) .cta-primary {
+    min-height: var(--phase5-touch-primary) !important;
+  }
+
   .performance-shell .pageHeaderPill,
   .premium-screen .pageHeaderPill {
     min-height: 46px !important;
