@@ -4,8 +4,9 @@ import { readFileSync } from 'node:fs';
 
 const enhancer = readFileSync('scripts/apply-phase3j-coach-events-hierarchy.mjs', 'utf8');
 const dashboards = readFileSync('src/components/CoachInteractiveDashboards.jsx', 'utf8');
-const calendar = readFileSync('src/components/CoachEventsMonthCalendar.jsx', 'utf8');
-const calendarCss = readFileSync('src/components/CoachEventsPremiumV2.css', 'utf8');
+const primitives = readFileSync('src/components/EventsMobilePrimitives.jsx', 'utf8');
+const sharedCss = readFileSync('src/components/EventsMobileSystem.css', 'utf8');
+const coachCss = readFileSync('src/components/CoachEventsPremiumV2.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
@@ -20,47 +21,49 @@ test('Phase 3J build hook remains present but no longer mutates presentation sou
   assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
   assert.match(routeEnhancers, /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3j-coach-events-hierarchy\.mjs/);
   assert.match(enhancer, /legacy mutation retired/);
-  assert.match(enhancer, /CoachEventsMonthCalendar/);
   assert.doesNotMatch(enhancer, /writeFileSync|source\.replace/);
 });
 
-test('Coach Events schedule intelligence is calendar-first and source-owned', () => {
-  const calendarIndex = eventsDashboard.indexOf('<CoachEventsMonthCalendar');
-  const decisionIndex = eventsDashboard.indexOf('<CoachRoutePerformanceStage', calendarIndex);
+test('Coach Events schedule intelligence is now week-first and source-owned', () => {
+  const titleIndex = eventsDashboard.indexOf('<EventsTitleStage');
+  const nextIndex = eventsDashboard.indexOf('coach-events-next-team-moment');
+  const weekIndex = eventsDashboard.indexOf('<EventsWeekRail');
+  const monthIndex = eventsDashboard.indexOf('<EventsMonthPanel');
   assert.ok(eventsStart >= 0 && eventsEnd > eventsStart);
-  assert.ok(calendarIndex > 0 && decisionIndex > calendarIndex);
-  assert.match(eventsDashboard, /rows=\{rows\}/);
-  assert.match(calendar, /data-testid="coach-events-month-calendar"/);
-  assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
-  assert.doesNotMatch(eventsDashboard, /briefing\.insights\.map/);
+  assert.ok(titleIndex >= 0 && nextIndex > titleIndex && weekIndex > nextIndex && monthIndex > weekIndex);
+  assert.match(eventsDashboard, /rows=\{rows/);
+  assert.match(primitives, /data-testid="events-week-rail"/);
+  assert.match(primitives, /data-testid="events-month-panel"/);
+  assert.match(primitives, /Array\.from\(\{ length: 42 \}/);
+  assert.doesNotMatch(eventsDashboard, /CoachEventsMonthCalendar/);
 });
 
-test('calendar keeps month navigation, readable event marks, and mobile touch geometry', () => {
-  assert.match(calendar, /aria-label="Previous month"/);
-  assert.match(calendar, /aria-label="Next month"/);
-  assert.match(calendar, /coachEventsCalendar__eventMarks/);
-  assert.match(calendarCss, /\.coachEventsCalendar__day\s*\{[\s\S]*min-height:\s*47px/);
-  assert.match(calendarCss, /@media \(max-width: 390px\)[\s\S]*\.coachEventsCalendar__day \{ min-height: 44px; height: 44px;/);
-  assert.match(calendarCss, /:focus-visible/);
-  assert.match(calendarCss, /prefers-reduced-motion:\s*reduce/);
+test('shared calendar primitives keep readable event marks, focus geometry, and compact mobile containment', () => {
+  assert.match(sharedCss, /\.eventsWeekRail__day\s*\{[\s\S]*min-height:\s*58px/);
+  assert.match(sharedCss, /\.eventsMonthPanel__day\s*\{[\s\S]*min-height:\s*40px/);
+  assert.match(sharedCss, /:focus-visible/);
+  assert.match(sharedCss, /@media \(max-width: 390px\)/);
+  assert.match(sharedCss, /prefers-reduced-motion: reduce/);
 });
 
-test('Phase 3J preserves event creation, drill-down, RSVP briefing, and status actions', () => {
-  for (const marker of ['onCreateEvent','onOpenEvent','onStatusChange','Create Event','buildCoachEventActionBriefing']) {
+test('Coach Events preserves event creation, drill-down, response briefing, and status actions', () => {
+  for (const marker of ['onCreateEvent','onOpenEvent','onStatusChange','buildCoachEventActionBriefing']) {
     assert.ok(eventsDashboard.includes(marker), `missing preserved event capability marker: ${marker}`);
   }
-  assert.match(calendar, /onOpenEvent\?\.\(/);
-  assert.match(eventsDashboard, /briefing\.responseRate/);
-  assert.match(eventsDashboard, /briefing\.missing/);
+  assert.match(eventsDashboard, /RSVP GAP/);
+  assert.match(eventsDashboard, /TEAM RESPONSE COMPLETE/);
+  assert.match(eventsDashboard, /Manage event/);
+  assert.match(eventsDashboard, /onCreate=\{onCreateEvent\}/);
 });
 
-test('obsolete Phase 3J stylesheet is no longer an active visual authority', () => {
+test('Coach Events presentation removes the card-first mobile list and keeps safe-area clearance', () => {
+  assert.match(coachCss, /coach-events-mobile-page[\s\S]*article[\s\S]*border-radius:\s*0\s*!important[\s\S]*background:\s*transparent\s*!important/s);
+  assert.match(coachCss, /safe-area-inset-bottom/);
   assert.doesNotMatch(html, /shotlab-phase3j-coach-events-hierarchy\.css/);
 });
 
 test('rendered iPhone evidence continues to capture Coach Events', () => {
   assert.match(screenshots, /07-coach-events/);
-  assert.match(screenshots, /getByRole\(\"button\", \{ name: \/MANAGE\//);
 });
 
 test('App Store workflow carries the Phase 3J semantic contract and evidence package', () => {
