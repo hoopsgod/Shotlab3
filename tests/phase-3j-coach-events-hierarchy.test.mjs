@@ -11,6 +11,9 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
+const eventsStart = dashboards.indexOf('export function CoachEventsInteractiveDashboard');
+const eventsEnd = dashboards.indexOf('\nconst operationalPageConfig', eventsStart);
+const eventsDashboard = dashboards.slice(eventsStart, eventsEnd);
 
 test('Phase 3J build hook remains present but no longer mutates presentation source', () => {
   assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
@@ -22,13 +25,14 @@ test('Phase 3J build hook remains present but no longer mutates presentation sou
 });
 
 test('Coach Events schedule intelligence is calendar-first and source-owned', () => {
-  const calendarIndex = dashboards.indexOf('<CoachEventsMonthCalendar');
-  const decisionIndex = dashboards.indexOf('<CoachRoutePerformanceStage', calendarIndex);
+  const calendarIndex = eventsDashboard.indexOf('<CoachEventsMonthCalendar');
+  const decisionIndex = eventsDashboard.indexOf('<CoachRoutePerformanceStage', calendarIndex);
+  assert.ok(eventsStart >= 0 && eventsEnd > eventsStart);
   assert.ok(calendarIndex > 0 && decisionIndex > calendarIndex);
-  assert.match(dashboards, /rows=\{rows\}/);
+  assert.match(eventsDashboard, /rows=\{rows\}/);
   assert.match(calendar, /data-testid="coach-events-month-calendar"/);
   assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
-  assert.doesNotMatch(dashboards, /briefing\.insights\.map/);
+  assert.doesNotMatch(eventsDashboard, /briefing\.insights\.map/);
 });
 
 test('calendar keeps month navigation, readable event marks, and mobile touch geometry', () => {
@@ -43,11 +47,11 @@ test('calendar keeps month navigation, readable event marks, and mobile touch ge
 
 test('Phase 3J preserves event creation, drill-down, RSVP briefing, and status actions', () => {
   for (const marker of ['onCreateEvent','onOpenEvent','onStatusChange','Create Event','buildCoachEventActionBriefing']) {
-    assert.ok(dashboards.includes(marker), `missing preserved event capability marker: ${marker}`);
+    assert.ok(eventsDashboard.includes(marker), `missing preserved event capability marker: ${marker}`);
   }
   assert.match(calendar, /onOpenEvent\?\.\(/);
-  assert.match(dashboards, /briefing\.responseRate/);
-  assert.match(dashboards, /briefing\.missing/);
+  assert.match(eventsDashboard, /briefing\.responseRate/);
+  assert.match(eventsDashboard, /briefing\.missing/);
 });
 
 test('obsolete Phase 3J stylesheet is no longer an active visual authority', () => {
