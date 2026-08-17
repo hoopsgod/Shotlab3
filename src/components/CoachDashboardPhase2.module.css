@@ -177,7 +177,6 @@
 :global([data-testid="coach-event-intelligence-drawer"] aside) { color: #f7fafb; }
 
 @media (max-width: 620px) {
-  .drawerActions { grid-template-columns: 1fr; }
   .compactMetricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .phasePanel { margin: 0 var(--layout-gutter, 16px) 24px; }
   .phasePanel > [class*="insightGrid"] { grid-template-columns: 1fr; }
