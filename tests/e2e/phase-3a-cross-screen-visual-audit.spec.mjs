@@ -1,43 +1,50 @@
-import { expect, test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
 
-const OUTPUT_DIR = "artifacts/phase-3a-cross-screen-visual-audit";
+const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/phase-3a-cross-screen-visual-audit");
+const MOBILE_VIEWPORTS = [
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 393, height: 852 },
+  { width: 402, height: 874 },
+  { width: 430, height: 932 },
+];
+
+fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+test.use({ viewport: { width: 390, height: 844 } });
 
 async function installSafeRoutes(page) {
-  await page.route("**/*", async (route) => {
-    const request = route.request();
-    const url = request.url();
-    if (url.includes("supabase.co") || url.includes("api.cloudinary.com")) {
-      await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
-      return;
-    }
-    await route.continue();
+  await page.route("**/v1/season-archives", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) });
+  });
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
   });
 }
 
 async function suppressMotion(page) {
-  await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}" });
+  await page.addStyleTag({ content: `
+    *, *::before, *::after {
+      animation-duration: 0s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0s !important;
+      caret-color: transparent !important;
+    }
+    html, body { scrollbar-width: none !important; }
+    ::-webkit-scrollbar { display: none !important; }
+  ` });
 }
 
-async function enterDemo(page, role) {
-  await installSafeRoutes(page);
-  await page.goto("/");
-  await suppressMotion(page);
-  await page.getByRole("button", { name: role === "coach" ? /Coach demo/i : /Player demo/i }).click();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
-}
-
-async function navigateByKey(page, key) {
-  const nav = page.getByTestId("mobile-navigation-dock");
-  const button = nav.locator(`[data-nav-key="${key}"]`);
-  await expect(button).toBeVisible({ timeout: 10_000 });
-  await button.click();
-  await page.waitForTimeout(250);
-}
-
-async function capture(page, fileName, { authenticated = true } = {}) {
-  if (authenticated) await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 10_000 });
-  await expectNoHorizontalOverflow(page);
-  await page.screenshot({ path: `${OUTPUT_DIR}/${fileName}`, fullPage: true });
+async function stabilize(page) {
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
+    document.querySelector(".coach-scroll-container")?.scrollTo(0, 0);
+  });
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(300);
 }
 
 async function expectNoHorizontalOverflow(page) {
@@ -108,43 +115,129 @@ async function expectProgressStoryCommandSurface(page) {
 
 async function expectReadablePlayerMetrics(page, testId) {
   const workspace = page.getByTestId(testId);
-  await expect(workspace).toBeVisible({ timeout: 10_000 });
-  const metrics = workspace.locator('[data-layout-role="metric-strip"]');
-  if (!(await metrics.count())) return;
-  const geometry = await metrics.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, width: rect.width, viewportWidth: window.innerWidth };
+  await expect(workspace).toBeVisible();
+  const contrastRatios = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
+    const metricNodes = [...container.querySelectorAll('[data-metric-role="value"], [data-metric-role="label"], [data-metric-role="detail"]')];
+    const parse = (value) => {
+      const numbers = (value.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      return { rgb: numbers.slice(0, 3), alpha: numbers.length > 3 ? numbers[3] : 1 };
+    };
+    const visibleBackground = (element) => {
+      let node = element;
+      while (node) {
+        const parsed = parse(getComputedStyle(node).backgroundColor);
+        if (parsed.rgb.length === 3 && parsed.alpha > 0.01) return parsed.rgb;
+        node = node.parentElement;
+      }
+      return [255, 255, 255];
+    };
+    const luminance = (rgb) => {
+      const channel = (value) => {
+        const s = value / 255;
+        return s <= .04045 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4;
+      };
+      return .2126 * channel(rgb[0]) + .7152 * channel(rgb[1]) + .0722 * channel(rgb[2]);
+    };
+    const contrast = (a, b) => {
+      const l1 = luminance(a);
+      const l2 = luminance(b);
+      return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05);
+    };
+    return metricNodes.map((element) => {
+      const foreground = parse(getComputedStyle(element).color).rgb;
+      const background = visibleBackground(element);
+      return contrast(foreground, background);
+    });
   });
-  expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
+  expect(contrastRatios.length).toBeGreaterThan(0);
+  for (const ratio of contrastRatios) expect(ratio).toBeGreaterThanOrEqual(4.5);
 }
 
 async function expectPersistentFeedbackRestored(page) {
-  const layer = page.getByTestId("app-feedback-layer");
-  if (!(await layer.count())) return;
-  await expect(layer).toHaveAttribute("data-persistent-ready", "true");
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent("shotlab:feedback", { detail: {
+      key: "phase-5-connectivity",
+      tone: "warning",
+      title: "Working offline",
+      message: "Training data remains safely on this device.",
+      persistent: true,
+    } }));
+    window.dispatchEvent(new CustomEvent("shotlab:feedback", { detail: {
+      tone: "success",
+      title: "Team identity saved",
+      message: "Your branding update is ready.",
+      duration: 80,
+    } }));
+  });
+  await expect(page.getByText("Team identity saved", { exact: true })).toBeVisible();
+  await expect(page.getByText("Working offline", { exact: true })).toBeVisible({ timeout: 1_000 });
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent("shotlab:feedback", { detail: { action: "clear", key: "phase-5-connectivity" } }));
+  });
+  await expect(page.getByText("Working offline", { exact: true })).toHaveCount(0);
+}
+
+async function capture(page, fileName, { authenticated = true } = {}) {
+  await stabilize(page);
+  await expectNoHorizontalOverflow(page);
+  if (authenticated) await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+  if (authenticated) await expectPlayerIdentityInsideViewport(page);
+  const outputPath = path.join(OUTPUT_DIR, fileName);
+  await page.screenshot({ path: outputPath, animations: "disabled" });
+  expect(fs.statSync(outputPath).size).toBeGreaterThan(20_000);
+}
+
+async function resetToAuth(page) {
+  await page.goto("/");
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+  await page.reload();
+  await suppressMotion(page);
+  await expect(page.getByRole("button", { name: /Coach demo/i })).toBeVisible({ timeout: 20_000 });
+}
+
+async function enterDemo(page, role) {
+  await installSafeRoutes(page);
+  await page.goto("/");
+  await suppressMotion(page);
+  const label = role === "coach" ? /Coach demo/i : /Player demo/i;
+  const button = page.getByRole("button", { name: label });
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function navigateByKey(page, key) {
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const direct = dock.locator(`[data-nav-key="${key}"]`);
+  if (await direct.count()) {
+    await direct.click();
+  } else {
+    await page.getByTestId("mobile-navigation-more").click();
+    const sheet = page.getByTestId("mobile-navigation-sheet");
+    await expect(sheet).toBeVisible();
+    const item = sheet.locator(`[data-nav-key="${key}"]`);
+    await expect(item).toBeVisible();
+    await item.click();
+    await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  }
+  await page.waitForTimeout(250);
 }
 
 async function openFirstCoachPlayerDetail(page) {
-  const row = page.locator('[data-testid="coach-players-interactive-dashboard"] button').filter({ hasText: /Open|View|Review/ }).first();
-  if (await row.count()) {
-    await row.click();
-    await page.waitForTimeout(250);
-    return;
-  }
-  const fallback = page.locator('[data-testid="coach-players-interactive-dashboard"] button').last();
-  if (await fallback.count()) {
-    await fallback.click();
-    await page.waitForTimeout(250);
-  }
-}
-
-async function validateResponsivePage(page, role, navKey, width) {
-  await page.setViewportSize({ width, height: 844 });
-  await enterDemo(page, role);
-  if (navKey) await navigateByKey(page, navKey);
-  await expectNoHorizontalOverflow(page);
-  if (role === "player") await expectPlayerIdentityInsideViewport(page);
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const rows = roster.locator('> .fade-up > [role="button"]');
+  expect(await rows.count()).toBeGreaterThanOrEqual(1);
+  const firstRow = rows.first();
+  const rowName = (await firstRow.locator("span").first().textContent())?.trim() || "Player";
+  await firstRow.click({ position: { x: 18, y: 18 } });
+  const drawer = page.getByRole("dialog", { name: rowName });
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
+  await drawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
+  await expect(page.getByTestId("coach-player-detail-workspace")).toBeVisible({ timeout: 10_000 });
 }
 
 test("Phase 3A captures auth and the complete Coach mobile hierarchy at iPhone width", async ({ page }) => {
@@ -242,12 +335,36 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
 test("Phase 3A validates first-impression geometry at 375, 390, 393, 402, and 430px", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
+  await installSafeRoutes(page);
 
-  for (const width of [375, 390, 393, 402, 430]) {
-    await validateResponsivePage(page, "coach", "players", width);
-    await capture(page, `responsive-coach-players-${width}.png`);
-    await validateResponsivePage(page, "player", "leaderboards", width);
-    await capture(page, `responsive-player-rankings-${width}.png`);
+  for (const viewport of MOBILE_VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await resetToAuth(page);
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole("button", { name: /Coach demo/i }).click();
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+    await navigateByKey(page, "players");
+    await stabilize(page);
+    await expectCompactFunctionalIntro(page);
+    await expectNoHorizontalOverflow(page);
+    if (viewport.width === 375 || viewport.width === 430) {
+      await page.screenshot({ path: path.join(OUTPUT_DIR, `responsive-coach-players-${viewport.width}.png`), animations: "disabled" });
+    }
+
+    await resetToAuth(page);
+    await page.getByRole("button", { name: /Player demo/i }).click();
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+    await stabilize(page);
+    await expectPlayerIdentityInsideViewport(page);
+    await expectNoHorizontalOverflow(page);
+    await navigateByKey(page, "leaderboards");
+    await stabilize(page);
+    await expectCompactFunctionalIntro(page);
+    await expectNoHorizontalOverflow(page);
+    if (viewport.width === 375 || viewport.width === 430) {
+      await page.screenshot({ path: path.join(OUTPUT_DIR, `responsive-player-rankings-${viewport.width}.png`), animations: "disabled" });
+    }
   }
 
   expect(pageErrors).toEqual([]);
