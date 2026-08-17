@@ -112,7 +112,6 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   ];
   const showingPast = status === "past";
   const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
-  const showPremiumEmptyState = !showingPast && briefing.upcoming === 0;
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
@@ -123,7 +122,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
         testId="coach-events-command-bar"
       />
-      <CoachEventsMonthCalendar rows={rows} activeType={type} onOpenEvent={onOpenEvent} onCreateEvent={onCreateEvent} />
+      <CoachEventsMonthCalendar rows={rows} onOpenEvent={onOpenEvent} />
       <CoachRoutePerformanceStage
         kind="schedule"
         eyebrow="NEXT TEAM MOMENT"
@@ -161,14 +160,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
           />
         </div>
       </SecondaryPageToolbar>
-      <div hidden data-testid="coach-events-supporting-intelligence"><div data-testid="coach-events-insight-grid" /></div>
       <div className="coachEventsMobileListHeading" data-testid="coach-events-mobile-list-heading">{listHeading}</div>
-      {showPremiumEmptyState ? (
-        <section className="coachEventsPremiumEmptyState" data-testid="coach-events-premium-empty-state" aria-labelledby="coach-events-empty-title">
-          <h2 id="coach-events-empty-title">Nothing scheduled yet</h2>
-          <p>Your next practice, game or team event will appear here.</p>
-        </section>
-      ) : null}
     </SecondaryPageShell>
   );
 }
