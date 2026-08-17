@@ -110,6 +110,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   const showingPast = status === "past";
   const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
   const showPremiumEmptyState = !showingPast && briefing.upcoming === 0;
+  const eventsFilterTokens = { "--sl-line-strong": "transparent", "--radius-md": "0px" };
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
@@ -133,33 +134,35 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         testId="coach-events-decision-brief"
       />
       <SecondaryPageToolbar testId="coach-events-toolbar">
-        <DashboardFilterRail
-          surface="light"
-          searchValue={query}
-          onSearchChange={onQueryChange}
-          searchPlaceholder="Search events"
-          filters={[
-            { key: "all", label: "All" },
-            { key: "run", label: "Practice" },
-            { key: "game", label: "Game" },
-            { key: "clinic", label: "Camp" },
-            { key: "recovery", label: "Meeting" },
-          ]}
-          activeFilter={type}
-          onFilterChange={onTypeChange}
-          trailing={typeof onStatusChange === "function" ? (
-            <button
-              type="button"
-              className="coachEventsHistoryAction"
-              onClick={() => onStatusChange(showingPast ? "upcoming" : "past")}
-              aria-pressed={showingPast}
-            >
-              <span>{showingPast ? "Upcoming" : "Past Events"}</span>
-              <span aria-hidden="true">→</span>
-            </button>
-          ) : null}
-          testId="coach-events-filter-rail"
-        />
+        <div className="coachEventsFilterShell" style={eventsFilterTokens}>
+          <DashboardFilterRail
+            surface="light"
+            searchValue={query}
+            onSearchChange={onQueryChange}
+            searchPlaceholder="Search events"
+            filters={[
+              { key: "all", label: "All" },
+              { key: "run", label: "Practice" },
+              { key: "game", label: "Game" },
+              { key: "clinic", label: "Camp" },
+              { key: "recovery", label: "Meeting" },
+            ]}
+            activeFilter={type}
+            onFilterChange={onTypeChange}
+            trailing={typeof onStatusChange === "function" ? (
+              <button
+                type="button"
+                className="coachEventsHistoryAction"
+                onClick={() => onStatusChange(showingPast ? "upcoming" : "past")}
+                aria-pressed={showingPast}
+              >
+                <span>{showingPast ? "Upcoming" : "Past Events"}</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            ) : null}
+            testId="coach-events-filter-rail"
+          />
+        </div>
       </SecondaryPageToolbar>
       <div className="coachEventsSupportingInsights">
         <SecondaryPageDisclosure
