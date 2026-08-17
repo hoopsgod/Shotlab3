@@ -29,8 +29,11 @@ test("feedback styling uses restrained motion mobile safe areas and touch-safe d
   assert.match(css, /width:\s*44px/);
   assert.match(css, /height:\s*44px/);
   assert.match(css, /touch-action:\s*manipulation/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /focus-visible/);
+  assert.ok(
+    /prefers-reduced-motion: reduce/.test(css) || !/(?:animation|transition)\s*:/.test(css),
+    "feedback must either honor reduced motion or avoid animated/transitional motion entirely",
+  );
   assert.ok(
     !/backdrop-filter/.test(css) || /prefers-reduced-transparency: reduce/.test(css),
     "translucent feedback must either avoid backdrop blur or provide reduced-transparency handling",
