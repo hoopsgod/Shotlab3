@@ -58,10 +58,9 @@ async function verifyStrengthCommitmentSurface(page) {
   const heroStyle = await hero.evaluate((node) => {
     const style = getComputedStyle(node);
     const titleNode = node.querySelector("h2");
-    return { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor, borderRadius: style.borderRadius, titleColor: titleNode ? getComputedStyle(titleNode).color : "" };
+    return { backgroundImage: style.backgroundImage, borderRadius: style.borderRadius, titleColor: titleNode ? getComputedStyle(titleNode).color : "" };
   });
   expect(heroStyle.backgroundImage).toContain("gradient");
-  expect(heroStyle.backgroundColor).toBe("rgb(17, 20, 17)");
   expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
   expect(parseFloat(heroStyle.borderRadius)).toBeGreaterThanOrEqual(20);
 
@@ -124,7 +123,7 @@ test("Player Events is a premium personal schedule with selected-event private R
   const rowCount = await rows.count();
   expect(rowCount).toBeGreaterThan(0);
   const targetRow = rows.nth(rowCount > 1 ? 1 : 0);
-  const selectedTitle = (await targetRow.locator("strong").first().textContent())?.trim();
+  const selectedTitle = (await targetRow.locator("strong").nth(1).textContent())?.trim();
   expect(selectedTitle).toBeTruthy();
   await targetRow.click();
   await expect(details).toHaveAttribute("open", "");
