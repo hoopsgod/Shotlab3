@@ -89,10 +89,20 @@ test("Phase 5 feedback and reduced-motion contracts respect mobile navigation an
 });
 
 test("Phase 5 precision remains inside certified visual owners instead of adding a new cascade authority", async () => {
-  const main = await read("src/main.jsx");
+  const [main, authenticatedAuthority] = await Promise.all([
+    read("src/main.jsx"),
+    read("src/styles/AuthenticatedVisualAuthority2026.css"),
+  ]);
+  const appIndex = main.indexOf("await import('./App.jsx')");
+  const authorityIndex = main.indexOf("await import('./styles/AuthenticatedVisualAuthority2026.css')");
+  const cascadeLockIndex = authenticatedAuthority.indexOf("MissionControlCascadeLock2026.css");
+  const phase3Index = authenticatedAuthority.indexOf("Phase3SurfaceContracts.css");
+
   assert.match(main, /ExpertVisualPolish\.css/);
-  assert.match(main, /Phase3SurfaceContracts\.css/);
+  assert.ok(appIndex >= 0 && authorityIndex > appIndex, "authenticated visual authority must load after the application module");
+  assert.ok(cascadeLockIndex >= 0 && phase3Index > cascadeLockIndex, "Phase 3 surfaces must remain inside the certified authenticated cascade after the cascade lock");
   assert.doesNotMatch(main, /Phase5Precision\.css/);
+  assert.doesNotMatch(authenticatedAuthority, /Phase5Precision\.css/);
 });
 
 test("Target Court visual and spoken locked terminology stay aligned", async () => {
