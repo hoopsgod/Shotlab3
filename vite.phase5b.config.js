@@ -7,6 +7,7 @@ const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";
 const COACH_COMMAND_CENTER_SUFFIX = '/src/components/CoachCommandCenter.jsx'
 const COACH_MISSION_CONTROL_V2_SUFFIX = '/src/components/CoachMissionControlV2.css'
 const SHARED_SECONDARY_PAGE_FRAGMENT = '/src/components/SecondaryPageSystem'
+const SHARED_PREMIUM_WORKSPACE_STYLE = '/src/styles/PremiumWorkspace.css'
 const RETAINED_MISSION_CONTROL_MODULE = '\0shotlab-retained-mission-control-legacy.css'
 const RETIRED_MISSION_CONTROL_MODULE = '\0shotlab-retired-mission-control-css.css'
 const RETAINED_MISSION_CONTROL_CSS = `.mcRafters{position:absolute;z-index:1;inset:0 0 46% 43%;overflow:hidden}.mcRafters span{position:absolute;background:linear-gradient(90deg,#0000,#fff1,#0000)}.mcRafters span:nth-child(-n+2){left:-10%;right:-8%;height:1px}.mcRafters span:first-child{top:18%;transform:rotate(-8deg)}.mcRafters span:nth-child(2){top:43%;transform:rotate(7deg)}.mcRafters span:nth-child(3){left:23%;top:-15%;bottom:-12%;width:1px;transform:rotate(13deg)}.mcRafters span:nth-child(4){left:58%;top:-18%;bottom:-8%;width:1px;transform:rotate(-11deg)}.mcRailBrand{width:96px;margin:10px auto 5px;padding:7px 4px;border:0;display:grid;place-items:center;background:0 0}.mcRailBrand .mcRailLogo{width:86px;height:86px;margin:0}.mcDrawerBrand .mcDrawerLogo{width:60px;height:60px;padding:0;border:0;background:0 0}.mcDrawerLogo img{width:60px;height:60px}`
@@ -119,7 +120,8 @@ export default defineConfig(async (environment) => {
         output: {
           ...baseOutput,
           manualChunks(id, api) {
-            if (normalizeModuleId(id).includes(SHARED_SECONDARY_PAGE_FRAGMENT)) return 'AuthenticatedUi'
+            const moduleId = normalizeModuleId(id)
+            if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
           },
         },
