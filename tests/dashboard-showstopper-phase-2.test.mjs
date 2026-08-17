@@ -7,7 +7,7 @@ const cases = [
   { value: 0, target: 100, state: "zero", targetPercent: 0, aboveTarget: 0, aria: "100 to target" },
   { value: 25, target: 100, state: "partial", targetPercent: 25, aboveTarget: 0, aria: "75 to target" },
   { value: 85, target: 100, state: "near", targetPercent: 85, aboveTarget: 0, aria: "15 to target" },
-  { value: 100, target: 100, state: "complete", targetPercent: 100, aboveTarget: 0, aria: "Target complete" },
+  { value: 100, target: 100, state: "complete", targetPercent: 100, aboveTarget: 0, aria: "Target locked" },
   { value: 125, target: 100, state: "above", targetPercent: 100, aboveTarget: 25, overflowPercent: 25, aria: "25 above target" },
 ];
 

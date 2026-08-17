@@ -3,6 +3,7 @@
 }
 
 .performance-workspace [data-testid="player-completion-cue"] button {
+  pointer-events: auto;
   touch-action: manipulation;
   transition: transform 140ms ease;
 }
@@ -18,6 +19,21 @@
 @keyframes shotlab-completion-cue-enter {
   from { opacity: 0; transform: translate3d(0, -5px, 0) scale(.992); }
   to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 760px) {
+  .performance-shell.is-mobile [data-testid="player-completion-cue"] {
+    position: fixed !important;
+    top: auto !important;
+    right: max(12px, env(safe-area-inset-right, 0px)) !important;
+    bottom: calc(var(--bottom-nav-content-padding, 82px) + env(safe-area-inset-bottom, 0px) + 10px) !important;
+    left: max(12px, env(safe-area-inset-left, 0px)) !important;
+    z-index: 23 !important;
+    width: auto !important;
+    max-width: 406px;
+    margin: 0 auto !important;
+    pointer-events: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

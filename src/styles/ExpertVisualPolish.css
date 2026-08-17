@@ -33,7 +33,7 @@ button[data-visual-role="utility"]:focus-visible {
 
 button[data-visual-role="demo-destructive"] {
   width: auto !important;
-  min-height: 38px !important;
+  min-height: 44px !important;
   padding-inline: 13px !important;
   color: #ffc2c2 !important;
   background: transparent !important;
@@ -92,6 +92,35 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
   text-transform: uppercase;
 }
 
+/* Phase 5: keep live gym score entry native-feeling without creating another visual authority. */
+.performance-shell .player-training-score-zone input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  font-size: 50px !important;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.performance-shell .player-training-score-zone input[type="number"]::-webkit-inner-spin-button,
+.performance-shell .player-training-score-zone input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.performance-shell .player-training-score-zone input[type="number"]:focus-visible {
+  outline: 3px solid var(--semantic-brand) !important;
+  outline-offset: 3px !important;
+}
+
+.performance-shell [data-testid="player-training-log-score"] {
+  min-height: 52px !important;
+  touch-action: manipulation;
+}
+
+@media (max-width: 430px) {
+  .performance-shell .pageHeaderPill { min-height: 46px !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  button[data-visual-role] { transition: none !important; }
+  button[data-visual-role],
+  .performance-shell [data-testid="player-training-log-score"] { transition: none !important; }
 }

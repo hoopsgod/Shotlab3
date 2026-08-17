@@ -30,7 +30,7 @@ export function deriveShotLabPerformanceVisual({ value = 0, target = 0 } = {}) {
   let accessibleLabel = `${roundedMade} makes today. No daily target set.`;
   if (hasTarget) {
     if (state === "above") accessibleLabel = `${roundedMade} makes today. Target ${roundedGoal}. ${roundedAbove} above target.`;
-    else if (state === "complete") accessibleLabel = `${roundedMade} makes today. Target ${roundedGoal}. Target complete.`;
+    else if (state === "complete") accessibleLabel = `${roundedMade} makes today. Target ${roundedGoal}. Target locked.`;
     else accessibleLabel = `${roundedMade} makes today. Target ${roundedGoal}. ${remaining} to target.`;
   }
 
