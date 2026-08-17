@@ -6,7 +6,6 @@ const enhancer = readFileSync("scripts/apply-phase3n-player-commitments.mjs", "u
 const component = readFileSync("src/components/PlayerCommitmentCenter.jsx", "utf8");
 const css = readFileSync("src/components/PlayerCommitmentCenter.module.css", "utf8");
 const sharedCss = readFileSync("src/components/EventsMobileSystem.css", "utf8");
-const authority = readFileSync("public/shotlab-phase3n-player-commitments.css", "utf8");
 const primitives = readFileSync("src/components/EventsMobilePrimitives.jsx", "utf8");
 const html = readFileSync("index.html", "utf8");
 const screenshots = readFileSync("tests/e2e/phase-3n-player-commitments-screenshots.spec.mjs", "utf8");
@@ -100,10 +99,12 @@ test("Events visual system is week-first, editorial, safe-area aware, and not ca
   assert.match(css, /prefers-reduced-motion:reduce/);
 });
 
-test("legacy late authority remains constrained to the S&C commitment hero and cannot repaint the new Events hero", () => {
-  assert.match(html, /shotlab-phase3m-player-team-store-retail\.css[\s\S]*shotlab-phase3n-player-commitments\.css/);
-  assert.match(authority, /player-commitment-hero-strength/);
-  assert.doesNotMatch(authority, /player-events-next-up/);
+test("Player commitment styling is source-owned and no retired late authority can repaint Events", () => {
+  assert.doesNotMatch(html, /shotlab-phase3n-player-commitments\.css/);
+  assert.match(css, /\.hero\s*\{[\s\S]*linear-gradient/s);
+  assert.match(css, /\.heroCopy h2[\s\S]*color:#f8faf5/s);
+  assert.match(css, /\.primaryAction[\s\S]*background:var\(--accent,#c8ff1a\)/s);
+  assert.match(sharedCss, /\.eventsNext[\s\S]*background:linear-gradient/s);
 });
 
 test("fresh iPhone evidence configuration covers the source-owned Events route and S&C route", () => {
