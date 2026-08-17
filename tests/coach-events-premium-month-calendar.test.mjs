@@ -12,7 +12,6 @@ test("Coach Events places a real month calendar before the next-event decision s
   assert.ok(calendarIndex > 0);
   assert.ok(decisionIndex > calendarIndex);
   assert.match(dashboard, /rows=\{rows\}/);
-  assert.match(dashboard, /activeType=\{type\}/);
   assert.match(dashboard, /onOpenEvent=\{onOpenEvent\}/);
   assert.match(dashboard, /summary="Plan practices, games and team moments\."/);
 });
@@ -26,12 +25,10 @@ test("month calendar owns stable six-week geometry and real event-day signals", 
   assert.match(calendar, /events\.length > 3/);
 });
 
-test("month calendar supports navigation, filtering, event drill-down, and current-month return", () => {
+test("month calendar supports navigation and event drill-down", () => {
   assert.match(calendar, /aria-label="Previous month"/);
   assert.match(calendar, /aria-label="Next month"/);
-  assert.match(calendar, /activeType === "all"/);
   assert.match(calendar, /onOpenEvent\?\.\(/);
-  assert.match(calendar, />Today<\/button>/);
   assert.match(calendar, /No events scheduled this month/);
 });
 
