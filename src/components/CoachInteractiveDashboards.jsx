@@ -17,6 +17,7 @@ import {
   buildCoachPlayerActionBriefing,
   formatCoachScheduleDate,
 } from "../lib/coachActionBriefings.js";
+import "./CoachEventsPremium.css";
 
 const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   if (!action) return undefined;
@@ -31,6 +32,21 @@ const resolveEventAction = (action, { onStatusChange, onCreateEvent, onOpenEvent
   if (action.kind === "status-filter" && typeof onStatusChange === "function") return { label: action.label, onClick: () => onStatusChange(action.value) };
   if (action.kind === "open-event" && typeof onOpenEvent === "function" && action.id != null) return { label: action.label, onClick: () => onOpenEvent(action.id) };
   return undefined;
+};
+
+const safeCount = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+};
+
+const eventTypeLabel = (value = "") => {
+  const type = String(value || "").toLowerCase();
+  if (type === "run") return "Practice";
+  if (type === "game") return "Game";
+  if (type === "clinic") return "Camp";
+  if (type === "recovery") return "Meeting";
+  if (type === "challenge") return "Challenge";
+  return "Team event";
 };
 
 export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
@@ -76,47 +92,89 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
 export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], status, type, query, onStatusChange, onTypeChange, onQueryChange, onCreateEvent, onOpenEvent }) {
   const briefing = buildCoachEventActionBriefing({ metrics, rows });
   const next = briefing.next;
+  const nextEvent = next?.event || next;
+  const nextResponded = safeCount(next?.responded ?? next?.rsvpConfirmed ?? next?.confirmed);
+  const nextAwaiting = safeCount(next?.awaitingResponse ?? next?.missing);
+  const nextRoster = safeCount(next?.rosterCount || (nextResponded + nextAwaiting));
+  const nextMomentDetail = next
+    ? `${eventTypeLabel(next.type || nextEvent?.type)} · ${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"} · ${next.location || "Location TBD"} · ${nextResponded} / ${nextRoster || nextResponded} responded`
+    : "Create the next team event to begin RSVP tracking and player communication.";
+  const nextMomentAction = next
+    ? (typeof onOpenEvent === "function" && nextEvent?.id != null ? { label: "View Event", onClick: () => onOpenEvent(nextEvent.id) } : undefined)
+    : (typeof onCreateEvent === "function" ? { label: "Create Event", onClick: onCreateEvent } : undefined);
   const metricItems = [
-    { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next: ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
-    { key: "gaps", label: "Missing RSVPs", displayLabel: "RSVP Gaps", value: briefing.missing, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },
-    { key: "all", label: "Response Rate", displayLabel: "Response", value: `${briefing.responseRate}%`, detail: `${briefing.confirmed} confirmations`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
-    { key: "past", label: "Completed", displayLabel: "Completed", value: briefing.past, detail: `${briefing.total} total events` },
+    { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
+    { key: "gaps", label: "Missing RSVPs", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
+    { key: "all", label: "Response Rate", displayLabel: "Response", value: next ? `${briefing.responseRate}%` : "—", detail: next ? `${briefing.confirmed} responses recorded` : "No RSVP signal", tone: !next ? "info" : briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
   ];
+  const showingPast = status === "past";
 
   return (
-    <SecondaryPageShell testId="coach-events-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />
+    <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
+      <SecondaryPageIntro
+        eyebrow="Schedule"
+        title="Events"
+        summary="Plan practices, games and team moments."
+        actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
+        testId="coach-events-command-bar"
+      />
       <CoachRoutePerformanceStage
         kind="schedule"
         eyebrow="Next team moment"
-        title={briefing.decision.title}
-        detail={briefing.decision.detail}
-        tone={briefing.decision.tone}
-        action={resolveEventAction(briefing.decision.action, { onStatusChange, onCreateEvent, onOpenEvent })}
+        title={next ? next.title || "Next team event" : "Calendar is open"}
+        detail={nextMomentDetail}
+        tone={!next ? "info" : nextAwaiting ? "attention" : "positive"}
+        action={nextMomentAction}
         metrics={metricItems}
         activeMetric={status}
         onMetricSelect={onStatusChange}
         testId="coach-events-decision-brief"
-      >
-        <DashboardProgress value={briefing.responseRate} max={100} label="Upcoming RSVP completion" detail={`${briefing.confirmed} confirmed`} />
-      </CoachRoutePerformanceStage>
+      />
       <SecondaryPageToolbar testId="coach-events-toolbar">
-        <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search title, location, or type" filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]} activeFilter={type} onFilterChange={onTypeChange} testId="coach-events-filter-rail" />
+        <DashboardFilterRail
+          surface="light"
+          searchValue={query}
+          onSearchChange={onQueryChange}
+          searchPlaceholder="Search events"
+          filters={[
+            { key: "all", label: "All" },
+            { key: "run", label: "Practice" },
+            { key: "game", label: "Game" },
+            { key: "clinic", label: "Camp" },
+            { key: "recovery", label: "Meeting" },
+          ]}
+          activeFilter={type}
+          onFilterChange={onTypeChange}
+          trailing={typeof onStatusChange === "function" ? (
+            <button
+              type="button"
+              className="coachEventsHistoryAction"
+              onClick={() => onStatusChange(showingPast ? "upcoming" : "past")}
+              aria-pressed={showingPast}
+            >
+              <span>{showingPast ? "Upcoming" : "Past Events"}</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          ) : null}
+          testId="coach-events-filter-rail"
+        />
       </SecondaryPageToolbar>
-      <SecondaryPageDisclosure
-        title="Schedule insights"
-        summary={`${briefing.responseRate}% response · ${briefing.missing} missing`}
-        defaultOpen={typeof window !== "undefined" && window.innerWidth > 760}
-        testId="coach-events-supporting-intelligence"
-      >
-        <SecondaryPageEvidence testId="coach-events-insight-grid">
-          {briefing.insights.map((insight) => (
-            <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
-              {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
-            </DashboardInsightCard>
-          ))}
-        </SecondaryPageEvidence>
-      </SecondaryPageDisclosure>
+      <div className="coachEventsSupportingInsights">
+        <SecondaryPageDisclosure
+          title="Schedule insights"
+          summary={`${briefing.responseRate}% response · ${briefing.missing} missing`}
+          defaultOpen={typeof window !== "undefined" && window.innerWidth > 760}
+          testId="coach-events-supporting-intelligence"
+        >
+          <SecondaryPageEvidence testId="coach-events-insight-grid">
+            {briefing.insights.map((insight) => (
+              <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
+                {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
+              </DashboardInsightCard>
+            ))}
+          </SecondaryPageEvidence>
+        </SecondaryPageDisclosure>
+      </div>
     </SecondaryPageShell>
   );
 }
