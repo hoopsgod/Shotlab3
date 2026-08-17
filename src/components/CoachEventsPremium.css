@@ -48,7 +48,8 @@
   outline-offset: 3px;
 }
 
-.coachEventsMobileListHeading {
+.coachEventsMobileListHeading,
+.coachEventsPremiumEmptyState {
   display: none;
 }
 
@@ -276,51 +277,32 @@
     text-transform: uppercase;
   }
 
+  .coachEventsPremiumEmptyState {
+    display: block;
+    padding: 0 0 28px;
+    text-align: left;
+  }
+
+  .coachEventsPremiumEmptyState h2 {
+    margin: 0;
+    color: #1b211d;
+    font: 780 22px/1.05 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    letter-spacing: -0.035em;
+  }
+
+  .coachEventsPremiumEmptyState p {
+    max-width: 34ch;
+    margin: 8px 0 0;
+    color: #667069;
+    font: 500 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  }
+
   [data-testid="coach-events-mobile-page"] {
     padding: 0 !important;
   }
 
   [data-testid="coach-events-mobile-empty-state"] {
-    min-height: 0 !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    text-align: left !important;
-    padding: 16px 0 30px !important;
-  }
-
-  [data-testid="coach-events-mobile-empty-state"] > div:first-child,
-  [data-testid="coach-events-mobile-empty-state"] > button,
-  [data-testid="coach-events-mobile-empty-state"] > div:last-child {
     display: none !important;
-  }
-
-  [data-testid="coach-events-mobile-empty-state"] > div:nth-child(2) {
-    width: 100%;
-    color: #1b211d !important;
-    font-size: 0 !important;
-    letter-spacing: 0 !important;
-    line-height: 1 !important;
-  }
-
-  [data-testid="coach-events-mobile-empty-state"] > div:nth-child(2)::after {
-    content: "Nothing scheduled yet";
-    display: block;
-    font: 780 22px/1.05 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-    letter-spacing: -0.035em;
-  }
-
-  [data-testid="coach-events-mobile-empty-state"] > p {
-    max-width: 34ch !important;
-    margin: 8px 0 0 !important;
-    color: #667069 !important;
-    font-size: 0 !important;
-    line-height: 1.5 !important;
-  }
-
-  [data-testid="coach-events-mobile-empty-state"] > p::after {
-    content: "Your next practice, game or team event will appear here.";
-    display: block;
-    font: 500 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   }
 
   [data-testid="coach-events-mobile-page"] > div[style*="display: grid"] {
