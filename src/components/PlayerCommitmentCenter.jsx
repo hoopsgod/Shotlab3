@@ -1,10 +1,20 @@
 import { useMemo, useRef, useState } from "react";
+import {
+  EventTimeLocation,
+  EventTypeBadge,
+  EventsMonthPanel,
+  EventsSectionHeader,
+  EventsTitleStage,
+  EventsWeekRail,
+  formatEventDayStamp,
+  formatMonthLabel,
+} from "./EventsMobilePrimitives.jsx";
 import styles from "./PlayerCommitmentCenter.module.css";
 
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const clean = (value) => String(value ?? "").trim();
 const normalize = (value) => clean(value).toLowerCase();
-const RUNWAY_SLOTS = 3;
+const RUNWAY_SLOTS = 4;
 
 function rowDate(row = {}) {
   return clean(row?.date || row?.session_date || row?.created_at).slice(0, 10);
@@ -83,19 +93,110 @@ function QueueRow({ item, mode, confirmed }) {
   );
 }
 
-function QueuePlaceholder({ mode, index }) {
+function PlayerEventRow({ item, confirmed, onOpen }) {
+  const stamp = formatEventDayStamp(rowDate(item));
   return (
-    <div className={`${styles.queueRow} ${styles.queuePlaceholder || ""}`} data-empty-slot="true">
-      <div className={styles.queueDate} aria-hidden="true">
-        <strong>—</strong>
-        <span>OPEN</span>
+    <button type="button" className={styles.eventRow} onClick={onOpen} data-response-state={confirmed ? "going" : "needed"}>
+      <div className={styles.eventRowDate}>
+        <strong>{stamp.day}</strong>
+        <span>{stamp.weekday}</span>
       </div>
-      <div className={styles.queueCopy}>
-        <strong>{mode === "strength" ? "Development slot open" : "Schedule slot open"}</strong>
-        <span>{index === 0 ? "Your next published commitment will appear here." : "No additional commitment is scheduled in this slot."}</span>
+      <div className={styles.eventRowCopy}>
+        <div className={styles.eventRowTitleLine}>
+          <strong>{itemTitle(item)}</strong>
+          <EventTypeBadge type={item?.type} />
+        </div>
+        <EventTimeLocation time={item?.time} location={itemLocation(item)} compact />
+        <span className={styles.eventRowStatus}>{confirmed ? "✓ GOING" : "RSVP NEEDED →"}</span>
       </div>
-      <span className={`${styles.queueStatus} ${styles.confirmed}`}>CLEAR</span>
-    </div>
+    </button>
+  );
+}
+
+function PlayerEventsExperience({ state, model, today, detailsOpen, setDetailsOpen, detailsRef, onAction, children, selectedDate, setSelectedDate }) {
+  const focus = state.upcoming[0] || null;
+  const focusConfirmed = Boolean(focus && state.responseIds.has(clean(focus?.id)));
+  const focusNeedsResponse = Boolean(focus && !focusConfirmed);
+  const focusStamp = formatEventDayStamp(rowDate(focus));
+  const runwayItems = state.upcoming.slice(0, RUNWAY_SLOTS);
+
+  const revealDetails = ({ runPrimaryAction = false } = {}) => {
+    setDetailsOpen(true);
+    requestAnimationFrame(() => {
+      detailsRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      if (runPrimaryAction && model?.primaryAction) window.setTimeout(() => onAction?.(model.primaryAction), 140);
+    });
+  };
+
+  const activeDate = selectedDate || rowDate(focus) || today;
+  const selectDate = (date) => {
+    setSelectedDate(date);
+    if (state.upcoming.some((item) => rowDate(item) === date)) revealDetails();
+  };
+
+  return (
+    <section className={`${styles.root} ${styles.eventsRoot}`} data-testid="player-commitment-center-events" data-mode="events">
+      <EventsTitleStage role="player" month={formatMonthLabel(rowDate(focus) || activeDate)} />
+
+      <section className={styles.eventsHero} data-testid="player-events-next-up" data-response-state={focusNeedsResponse ? "needed" : focus ? "going" : "clear"}>
+        <div className={styles.eventsHeroTopline}>
+          <span>NEXT UP{focus ? ` · ${focusStamp.weekday} ${focusStamp.day}` : ""}</span>
+          {focus ? <EventTypeBadge type={focus?.type} /> : null}
+        </div>
+        {focus ? (
+          <>
+            <h2>{itemTitle(focus)}</h2>
+            <EventTimeLocation time={focus?.time} location={itemLocation(focus)} />
+            <div className={styles.eventsHeroAction}>
+              <div>
+                <strong>{focusNeedsResponse ? "RSVP REQUIRED" : "✓ GOING"}</strong>
+                <small>{focusNeedsResponse ? "Your response is still open." : "Your attendance response is set."}</small>
+              </div>
+              <button type="button" onClick={() => revealDetails({ runPrimaryAction: focusNeedsResponse })}>
+                {focusNeedsResponse ? "Respond" : "Change response"} <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className={styles.eventsEmptyHero}>
+            <h2>You’re clear for now.</h2>
+            <p>No upcoming team event is scheduled. Your next commitment will appear here when it is published.</p>
+          </div>
+        )}
+      </section>
+
+      <EventsWeekRail rows={state.upcoming} anchorDate={rowDate(focus) || activeDate} selectedDate={activeDate} onSelectDate={selectDate} />
+
+      <section className={styles.eventSchedule} data-testid="player-events-upcoming-list">
+        <EventsSectionHeader eyebrow="MY SCHEDULE" title="Upcoming" meta={`${state.upcoming.length} event${state.upcoming.length === 1 ? "" : "s"}`} />
+        <div className={styles.eventRows}>
+          {runwayItems.length ? runwayItems.map((item) => (
+            <PlayerEventRow
+              key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item)}`}
+              item={item}
+              confirmed={state.responseIds.has(clean(item?.id))}
+              onOpen={() => revealDetails({ runPrimaryAction: !state.responseIds.has(clean(item?.id)) })}
+            />
+          )) : <div className={styles.eventsEmptyRow}>No upcoming events. You’re clear for now.</div>}
+        </div>
+      </section>
+
+      <EventsMonthPanel rows={state.upcoming} anchorDate={rowDate(focus) || activeDate} selectedDate={activeDate} onSelectDate={setSelectedDate} />
+
+      <details
+        ref={detailsRef}
+        className={`${styles.details} ${styles.eventDetails}`}
+        open={detailsOpen}
+        onToggle={(event) => setDetailsOpen(event.currentTarget.open)}
+        data-testid="player-commitment-details-events"
+      >
+        <summary>
+          <div><span>EVENT DETAILS</span><strong>Schedule & RSVP</strong><small>Open notes, attendance response, and past events.</small></div>
+          <i aria-hidden="true">+</i>
+        </summary>
+        <div className={styles.detailBody}>{children}</div>
+      </details>
+    </section>
   );
 }
 
@@ -111,6 +212,7 @@ export default function PlayerCommitmentCenter({
   children,
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
   const detailsRef = useRef(null);
   const isStrength = mode === "strength";
   const teamId = clean(user?.teamId || user?.team_id);
@@ -125,9 +227,27 @@ export default function PlayerCommitmentCenter({
     const unresolved = upcoming.filter((item) => !responseIds.has(clean(item?.id)));
     const confirmed = upcoming.filter((item) => responseIds.has(clean(item?.id)));
     const myLogs = safeArray(logs).filter((row) => identityMatches(row, userEmail) && teamMatches(row, teamId));
-    const focus = unresolved[0] || upcoming[0] || null;
-    return { upcoming, unresolved, confirmed, myLogs, focus };
+    const focus = upcoming[0] || null;
+    return { upcoming, unresolved, confirmed, myLogs, focus, responseIds };
   }, [items, responses, logs, teamId, userEmail, today, mode]);
+
+  if (!isStrength) {
+    return (
+      <PlayerEventsExperience
+        state={state}
+        model={model}
+        today={today}
+        detailsOpen={detailsOpen}
+        setDetailsOpen={setDetailsOpen}
+        detailsRef={detailsRef}
+        onAction={onAction}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      >
+        {children}
+      </PlayerEventsExperience>
+    );
+  }
 
   const requiresResponse = state.unresolved.length > 0;
   const focusDate = formatDateParts(rowDate(state.focus));
@@ -138,24 +258,11 @@ export default function PlayerCommitmentCenter({
     : statusLabel;
   const routeSubtitle = requiresResponse
     ? `${state.unresolved.length} upcoming commitment${state.unresolved.length === 1 ? "" : "s"} ${state.unresolved.length === 1 ? "needs" : "need"} your response.`
-    : model?.subtitle || (isStrength ? "Keep every physical-development commitment clear." : "Keep every team commitment clear.");
-  const eyebrow = requiresResponse
-    ? (isStrength ? "SESSION RESPONSE NEEDED" : "RESPONSE NEEDED")
-    : (isStrength ? "NEXT DEVELOPMENT BLOCK" : "NEXT TEAM COMMITMENT");
-  const emptyTitle = isStrength ? "No strength session scheduled" : "No upcoming team event";
-  const detailTitle = isStrength ? "Session details & training log" : "Schedule & attendance details";
-  const detailSummary = isStrength ? "Open full S&C schedule, RSVP controls, and logging." : "Open the full team schedule and RSVP controls.";
-  const actionLabel = requiresResponse
-    ? "Respond now"
-    : isStrength && state.focus
-      ? "Open session"
-      : state.focus
-        ? "View schedule"
-        : isStrength
-          ? "Open S&C workspace"
-          : "Open schedule";
-  const runwayItems = state.upcoming.slice(0, RUNWAY_SLOTS);
-  const runwayPlaceholders = Math.max(0, RUNWAY_SLOTS - runwayItems.length);
+    : model?.subtitle || "Keep every physical-development commitment clear.";
+  const eyebrow = requiresResponse ? "SESSION RESPONSE NEEDED" : "NEXT DEVELOPMENT BLOCK";
+  const emptyTitle = "No strength session scheduled";
+  const runwayItems = state.upcoming.slice(0, 3);
+  const runwayPlaceholders = Math.max(0, 3 - runwayItems.length);
 
   const revealDetails = () => {
     setDetailsOpen(true);
@@ -166,21 +273,17 @@ export default function PlayerCommitmentCenter({
   };
 
   return (
-    <section
-      className={styles.root}
-      data-testid={`player-commitment-center-${mode}`}
-      data-mode={mode}
-    >
-      <header className={styles.routeHeader} data-testid={`player-commitment-route-header-${mode}`}>
-        <div className={styles.routeEyebrow}>{model?.eyebrow || (isStrength ? "Physical development" : "Team commitments")}</div>
+    <section className={styles.root} data-testid="player-commitment-center-strength" data-mode="strength">
+      <header className={styles.routeHeader} data-testid="player-commitment-route-header-strength">
+        <div className={styles.routeEyebrow}>{model?.eyebrow || "Physical development"}</div>
         <div className={styles.routeTitleRow}>
-          <h1>{model?.title || (isStrength ? "Strength & Conditioning" : "Events & Attendance")}</h1>
+          <h1>{model?.title || "Strength & Conditioning"}</h1>
           <span>{routeStatus}</span>
         </div>
         <p>{routeSubtitle}</p>
       </header>
 
-      <div className={styles.hero} data-testid={`player-commitment-hero-${mode}`}>
+      <div className={styles.hero} data-testid="player-commitment-hero-strength">
         <div className={styles.heroTopline}>
           <span className={styles.eyebrow}>{eyebrow}</span>
           <span className={`${styles.status} ${requiresResponse ? styles.statusOpen : styles.statusSet}`}>
@@ -204,7 +307,7 @@ export default function PlayerCommitmentCenter({
                 </div>
               </div>
               <button type="button" className={styles.primaryAction} onClick={revealDetails}>
-                {actionLabel} <span aria-hidden="true">→</span>
+                {requiresResponse ? "Respond now" : "Open session"} <span aria-hidden="true">→</span>
               </button>
             </div>
           </div>
@@ -213,23 +316,23 @@ export default function PlayerCommitmentCenter({
             <span className={styles.icon}><CommitmentIcon mode={mode} /></span>
             <div>
               <h2>{emptyTitle}</h2>
-              <p>{isStrength ? "Your next physical-development block will appear here when it is published." : "Your next program event will appear here when your coach adds it."}</p>
+              <p>Your next physical-development block will appear here when it is published.</p>
             </div>
-            <button type="button" className={styles.secondaryAction} onClick={revealDetails}>{actionLabel} →</button>
+            <button type="button" className={styles.secondaryAction} onClick={revealDetails}>Open S&C workspace →</button>
           </div>
         )}
 
-        <div className={styles.signalStrip} aria-label={`${isStrength ? "Strength" : "Event"} commitment signals`}>
+        <div className={styles.signalStrip} aria-label="Strength commitment signals">
           <span><strong>{state.upcoming.length}</strong><small>Upcoming</small></span>
           <span><strong>{state.unresolved.length}</strong><small>Need response</small></span>
-          <span><strong>{isStrength ? state.myLogs.length : state.confirmed.length}</strong><small>{isStrength ? "Work logged" : "Confirmed"}</small></span>
+          <span><strong>{state.myLogs.length}</strong><small>Work logged</small></span>
         </div>
       </div>
 
-      <div className={styles.queue} data-testid={`player-commitment-queue-${mode}`} data-runway-slots={RUNWAY_SLOTS}>
+      <div className={styles.queue} data-testid="player-commitment-queue-strength" data-runway-slots="3">
         <div className={styles.queueHeading}>
-          <div><span>COMING UP</span><strong>{isStrength ? "Development runway" : "Team runway"}</strong></div>
-          <small>{Math.min(RUNWAY_SLOTS, state.upcoming.length)} of {state.upcoming.length}</small>
+          <div><span>COMING UP</span><strong>Development runway</strong></div>
+          <small>{Math.min(3, state.upcoming.length)} of {state.upcoming.length}</small>
         </div>
         <div className={styles.queueList}>
           {runwayItems.map((item) => (
@@ -241,7 +344,11 @@ export default function PlayerCommitmentCenter({
             />
           ))}
           {Array.from({ length: runwayPlaceholders }, (_, index) => (
-            <QueuePlaceholder key={`empty-runway-${index}`} mode={mode} index={index} />
+            <div className={`${styles.queueRow} ${styles.queuePlaceholder}`} data-empty-slot="true" key={`empty-runway-${index}`}>
+              <div className={styles.queueDate}><strong>—</strong><span>OPEN</span></div>
+              <div className={styles.queueCopy}><strong>Development slot open</strong><span>No additional commitment is scheduled in this slot.</span></div>
+              <span className={`${styles.queueStatus} ${styles.confirmed}`}>CLEAR</span>
+            </div>
           ))}
         </div>
       </div>
@@ -251,10 +358,10 @@ export default function PlayerCommitmentCenter({
         className={styles.details}
         open={detailsOpen}
         onToggle={(event) => setDetailsOpen(event.currentTarget.open)}
-        data-testid={`player-commitment-details-${mode}`}
+        data-testid="player-commitment-details-strength"
       >
         <summary>
-          <div><span>FULL WORKSPACE</span><strong>{detailTitle}</strong><small>{detailSummary}</small></div>
+          <div><span>FULL WORKSPACE</span><strong>Session details & training log</strong><small>Open full S&C schedule, RSVP controls, and logging.</small></div>
           <i aria-hidden="true">+</i>
         </summary>
         <div className={styles.detailBody}>{children}</div>
