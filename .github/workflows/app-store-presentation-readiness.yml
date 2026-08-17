@@ -16,120 +16,6 @@ on:
   pull_request:
     branches:
       - march-3-reset-85393dd
-      - agent/phase-3-secondary-cohesion
-      - agent/phase-3b-interaction-polish
-      - agent/phase-3c-native-route-framing
-      - agent/phase-3d-player-analytics-unification
-      - agent/phase-3e-profile-information-hierarchy
-      - agent/phase-3f-native-analytics-controls
-      - agent/phase-3g-coach-drills-hierarchy
-      - agent/phase-3h-coach-players-hierarchy
-      - agent/phase-3i-team-store-immersive
-      - agent/phase-3j-coach-events-hierarchy
-      - agent/phase-3k-coach-strength-hierarchy
-      - agent/phase-3l-coach-leaderboard-current
-      - agent/phase-3m-player-team-store-retail
-    paths:
-      - "native/app-store-listing.json"
-      - "docs/app-store-presentation-package.md"
-      - "docs/phase-4-workspace-recovery.md"
-      - "playwright.screenshots.config.mjs"
-      - "tests/e2e/app-store-screenshots.spec.mjs"
-      - "tests/e2e/auth-landing-regression.spec.mjs"
-      - "tests/e2e/design-system-screenshots.spec.mjs"
-      - "tests/e2e/phase-3k-coach-strength-screenshots.spec.mjs"
-      - "tests/e2e/phase-3l-coach-leaderboard-screenshots.spec.mjs"
-      - "tests/e2e/phase-3m-player-team-store-retail-screenshots.spec.mjs"
-      - "tests/e2e/phase-3n-player-commitments-screenshots.spec.mjs"
-      - "tests/e2e/phase-3v-final-closure-screenshots.spec.mjs"
-      - "tests/e2e/visual-foundation-2026.spec.mjs"
-      - "tests/e2e/native-app-shell-2026.spec.mjs"
-      - "tests/e2e/phase-2-command-hierarchy.spec.mjs"
-      - "tests/e2e/mission-control-hierarchy-2026.spec.mjs"
-      - "tests/app-store-presentation-readiness.test.mjs"
-      - "tests/design-system-completion.test.mjs"
-      - "tests/demo-data-currentness.test.mjs"
-      - "tests/visual-foundation-2026.test.mjs"
-      - "tests/native-identity-shell.test.mjs"
-      - "tests/mobile-navigation-contract.test.mjs"
-      - "tests/phase-2-command-hierarchy.test.mjs"
-      - "tests/phase-3-secondary-cohesion.test.mjs"
-      - "tests/phase-3b-interaction-polish.test.mjs"
-      - "tests/phase-3c-native-route-framing.test.mjs"
-      - "tests/phase-3d-player-analytics-unification.test.mjs"
-      - "tests/phase-3e-profile-information-hierarchy.test.mjs"
-      - "tests/phase-3f-profile-intelligence.test.mjs"
-      - "tests/phase-3g-coach-drills-hierarchy.test.mjs"
-      - "tests/phase-3h-coach-players-hierarchy.test.mjs"
-      - "tests/phase-3i-team-store-immersive.test.mjs"
-      - "tests/phase-3j-coach-events-hierarchy.test.mjs"
-      - "tests/phase-3k-coach-strength-hierarchy.test.mjs"
-      - "tests/phase-3l-coach-leaderboard-hierarchy.test.mjs"
-      - "tests/phase-3m-player-team-store-retail.test.mjs"
-      - "tests/phase-3n-player-commitments.test.mjs"
-      - "tests/mission-control-hierarchy-2026.test.mjs"
-      - "tests/workspace-recovery.test.mjs"
-      - "scripts/apply-expert-app-review-v2.mjs"
-      - "scripts/apply-phase3f-profile-intelligence.mjs"
-      - "scripts/apply-phase3g-coach-drills-hierarchy.mjs"
-      - "scripts/apply-phase3h-coach-players-hierarchy.mjs"
-      - "scripts/apply-phase3i-team-store-immersive.mjs"
-      - "scripts/apply-phase3j-coach-events-hierarchy.mjs"
-      - "scripts/apply-phase3k-coach-strength-hierarchy.mjs"
-      - "scripts/apply-phase3l-coach-leaderboard-hierarchy.mjs"
-      - "scripts/apply-phase3m-player-team-store-retail.mjs"
-      - "scripts/apply-phase3n-player-commitments.mjs"
-      - "scripts/validate-app-store-screenshots.mjs"
-      - "scripts/minify-visual-authority-css.mjs"
-      - "public/shotlab-*.css"
-      - "src/main.jsx"
-      - "src/lib/demoData.js"
-      - "src/lib/demoMode.js"
-      - "src/lib/workspaceRecovery.js"
-      - "src/components/AppHeader.jsx"
-      - "src/components/AuthWorkspace.jsx"
-      - "src/components/CoachCommandCenter.jsx"
-      - "src/components/CoachInteractiveDashboards.jsx"
-      - "src/components/CoachDashboardPhase2.jsx"
-      - "src/components/CoachDashboardPrimitives.jsx"
-      - "src/components/CoachDashboardPrimitives.module.css"
-      - "src/components/CoachDashboardHeader.jsx"
-      - "src/components/PlayerDashboardHeader.jsx"
-      - "src/components/DashboardIdentityHeader.module.css"
-      - "src/components/CoachMiniHeader.jsx"
-      - "src/components/PlayerDailyCommandCenter.jsx"
-      - "src/components/PlayerDailyCommandCenter.module.css"
-      - "src/components/PlayerDailyPrimitives.jsx"
-      - "src/components/PlayerDailyPrimitives.module.css"
-      - "src/components/PlayerCareerHistory.jsx"
-      - "src/components/PlayerCareerHistory.module.css"
-      - "src/components/PlayerCommitmentCenter.jsx"
-      - "src/components/PlayerCommitmentCenter.module.css"
-      - "src/components/ShotLabIcon.jsx"
-      - "src/components/SecondaryPageSystem.jsx"
-      - "src/components/SecondaryPageSystem.css"
-      - "src/components/MobileNavigation.jsx"
-      - "src/components/MobileNavigation.module.css"
-      - "src/components/MobileNavigationArchitecture.css"
-      - "src/components/CompactLeaderboardPreviewCard.jsx"
-      - "src/components/WorkspaceRecoveryBoundary.jsx"
-      - "src/components/WorkspaceRecoveryBoundary.module.css"
-      - "src/components/DeferredCoachDashboardPhase2.jsx"
-      - "src/components/DeferredCoachInteractiveDashboards.jsx"
-      - "src/components/DeferredPlayerCareerHistory.jsx"
-      - "src/components/DeferredPlayerDailyCommandCenter.jsx"
-      - "src/components/DeferredPlayerDashboardHeader.jsx"
-      - "src/components/DeferredPlayerOperationalWorkspace.jsx"
-      - "src/components/TeamStore/**"
-      - "src/components/TeamStorePortal.jsx"
-      - "src/components/TeamStorePortal.css"
-      - "src/components/TeamStoreIndustrial.css"
-      - "src/styles/**"
-      - "src/theme/appTokens.js"
-      - "src/theme/semanticColors.js"
-      - "package.json"
-      - "index.html"
-      - ".github/workflows/app-store-presentation-readiness.yml"
   workflow_dispatch:
 
 permissions:
@@ -149,6 +35,11 @@ jobs:
     steps:
       - name: Check out exact PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Record exact candidate SHA
+        run: git rev-parse HEAD
 
       - name: Set up Node
         uses: actions/setup-node@v4
