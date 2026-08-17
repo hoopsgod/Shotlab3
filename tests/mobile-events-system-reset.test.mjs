@@ -15,11 +15,14 @@ test("Coach and Player use one Events design grammar with role-specific title be
   assert.match(coach, /onCreate=\{onCreateEvent\}/);
   assert.match(player, /<EventsTitleStage role="player"/);
   assert.doesNotMatch(player, /onCreate=\{onCreateEvent\}/);
+  assert.match(coach, /<NextEventSurface/);
+  assert.match(player, /<NextEventSurface/);
   assert.match(coach, /<EventsWeekRail/);
   assert.match(player, /<EventsWeekRail/);
   assert.match(coach, /<EventsMonthPanel/);
   assert.match(player, /<EventsMonthPanel/);
   assert.match(primitives, /export function EventsTitleStage/);
+  assert.match(primitives, /export function NextEventSurface/);
 });
 
 test("Player Events makes personal RSVP state first-class without exposing Coach response intelligence", () => {
@@ -36,7 +39,7 @@ test("Player Events makes personal RSVP state first-class without exposing Coach
 test("Coach Events keeps management intelligence Coach-only and preserves the existing open-event action path", () => {
   assert.match(coach, /RSVP GAP/);
   assert.match(coach, /TEAM RESPONSE COMPLETE/);
-  assert.match(coach, /onOpenEvent\?\.\(nextEvent\.id\)/);
+  assert.match(coach, /event\?\.id != null \? onOpenEvent\?\.\(event\.id\)/);
   assert.match(coach, /onOpenEvent\?\.\(id\)/);
 });
 
