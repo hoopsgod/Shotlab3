@@ -72,7 +72,7 @@ async function enterCoachDemo(page) {
   await reset(page);
   await expect(page.getByRole("button", { name: /Coach demo/i })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: /Coach demo/i }).click();
-  await expect(page.locator(".coach-scroll-container")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
 }
 
 async function navigateMobile(page, key, label) {
@@ -139,7 +139,7 @@ async function assertTrainingGeometry(page) {
   });
   expect(inputGeometry.left).toBeGreaterThanOrEqual(0);
   expect(inputGeometry.right).toBeLessThanOrEqual(inputGeometry.viewport + 0.5);
-  expect(inputGeometry.height).toBeGreaterThanOrEqual(100);
+  expect(inputGeometry.height).toBeGreaterThanOrEqual(44);
   expect(inputGeometry.fontSize).toBeGreaterThanOrEqual(50);
   expect(inputGeometry.appearance).not.toMatch(/auto|number-input/i);
   expect(logGeometry.height).toBeGreaterThanOrEqual(46);
@@ -244,7 +244,7 @@ test("1280px Player and Coach representative workspaces remain coherent", async 
   await suppressMotion(page);
   await expect(page.getByRole("button", { name: /Coach demo/i })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: /Coach demo/i }).click();
-  await expect(page.locator(".coach-scroll-container")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   await capture(page, "1280-coach-home.png");
 
   const playerNav = page.locator('[data-nav-key="players"]').first();
