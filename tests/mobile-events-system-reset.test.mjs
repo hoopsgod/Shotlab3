@@ -5,6 +5,7 @@ import test from "node:test";
 const coach = readFileSync(new URL("../src/components/CoachInteractiveDashboards.jsx", import.meta.url), "utf8");
 const player = readFileSync(new URL("../src/components/PlayerCommitmentCenter.jsx", import.meta.url), "utf8");
 const primitives = readFileSync(new URL("../src/components/EventsMobilePrimitives.jsx", import.meta.url), "utf8");
+const sharedCss = readFileSync(new URL("../src/components/EventsMobileSystem.css", import.meta.url), "utf8");
 const playerCss = readFileSync(new URL("../src/components/PlayerCommitmentCenter.module.css", import.meta.url), "utf8");
 const coachCss = readFileSync(new URL("../src/components/CoachEventsPremiumV2.css", import.meta.url), "utf8");
 const app = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
@@ -18,6 +19,7 @@ test("Coach and Player use one Events design grammar with role-specific title be
   assert.match(player, /<EventsWeekRail/);
   assert.match(coach, /<EventsMonthPanel/);
   assert.match(player, /<EventsMonthPanel/);
+  assert.match(primitives, /export function EventsTitleStage/);
 });
 
 test("Player Events makes personal RSVP state first-class without exposing Coach response intelligence", () => {
@@ -50,5 +52,5 @@ test("mobile density and safe-area rules explicitly cover both roles", () => {
   assert.match(playerCss, /\.eventRow\s*\{[\s\S]*min-height:\s*78px[\s\S]*border-radius:\s*0/s);
   assert.match(playerCss, /safe-area-inset-bottom/);
   assert.match(coachCss, /coach-events-mobile-page[\s\S]*safe-area-inset-bottom/s);
-  assert.match(primitives, /grid-template-columns/); // JSX imports the shared CSS that owns the seven-column rail.
+  assert.match(sharedCss, /\.eventsWeekRail__days\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,\s*minmax\(0,\s*1fr\)\)/s);
 });
