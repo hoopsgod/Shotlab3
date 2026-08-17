@@ -58,12 +58,7 @@ async function verifyStrengthCommitmentSurface(page) {
   const heroStyle = await hero.evaluate((node) => {
     const style = getComputedStyle(node);
     const titleNode = node.querySelector("h2");
-    return {
-      backgroundImage: style.backgroundImage,
-      backgroundColor: style.backgroundColor,
-      borderRadius: style.borderRadius,
-      titleColor: titleNode ? getComputedStyle(titleNode).color : "",
-    };
+    return { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor, borderRadius: style.borderRadius, titleColor: titleNode ? getComputedStyle(titleNode).color : "" };
   });
   expect(heroStyle.backgroundImage).toContain("gradient");
   expect(heroStyle.backgroundColor).toBe("rgb(17, 20, 17)");
@@ -71,7 +66,6 @@ async function verifyStrengthCommitmentSurface(page) {
   expect(parseFloat(heroStyle.borderRadius)).toBeGreaterThanOrEqual(20);
 
   await capture(page, "04o-player-strength-commitment");
-
   const action = hero.getByRole("button").first();
   await expect(action).toBeVisible();
   await action.click();
@@ -80,7 +74,7 @@ async function verifyStrengthCommitmentSurface(page) {
   await noOverflow(page);
 }
 
-test("Player Events is a premium personal schedule while preserving the full RSVP workspace", async ({ page }) => {
+test("Player Events is a premium personal schedule with selected-event private RSVP detail", async ({ page }) => {
   await enterPlayerDemo(page);
   await openSecondaryRoute(page, "program");
 
@@ -91,33 +85,25 @@ test("Player Events is a premium personal schedule while preserving the full RSV
   const month = center.getByTestId("events-month-panel");
   const list = page.getByTestId("player-events-upcoming-list");
   const details = page.getByTestId("player-commitment-details-events");
-  const legacy = page.getByTestId("player-events-operational-list");
 
   await expect(center).toBeVisible({ timeout: 20_000 });
   await expect(title.getByText("SCHEDULE", { exact: true })).toBeVisible();
   await expect(title.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
   await expect(hero).toBeVisible();
   await expect(hero.getByText(/^(?:RSVP REQUIRED|✓ GOING)$/, { exact: false })).toBeVisible();
-  await expect(week).toBeVisible();
   await expect(week.getByRole("button")).toHaveCount(7);
   await expect(list).toBeVisible();
   await expect(month).toBeVisible();
   await expect(month).not.toHaveAttribute("open", "");
   await expect(details).not.toHaveAttribute("open", "");
-  await expect(legacy).toBeHidden();
 
   const geometry = await page.evaluate(() => {
-    const hero = document.querySelector('[data-testid="player-events-next-up"]');
-    const week = document.querySelector('[data-testid="player-commitment-center-events"] [data-testid="events-week-rail"]');
-    if (!hero || !week) throw new Error("Missing Events first-view geometry targets");
-    const heroBox = hero.getBoundingClientRect();
-    const weekBox = week.getBoundingClientRect();
-    return {
-      heroY: heroBox.y,
-      weekBottom: weekBox.bottom,
-      viewport: window.innerHeight,
-      overflow: document.documentElement.scrollWidth - window.innerWidth,
-    };
+    const heroNode = document.querySelector('[data-testid="player-events-next-up"]');
+    const weekNode = document.querySelector('[data-testid="player-commitment-center-events"] [data-testid="events-week-rail"]');
+    if (!heroNode || !weekNode) throw new Error("Missing Events first-view geometry targets");
+    const heroBox = heroNode.getBoundingClientRect();
+    const weekBox = weekNode.getBoundingClientRect();
+    return { heroY: heroBox.y, weekBottom: weekBox.bottom, viewport: window.innerHeight, overflow: document.documentElement.scrollWidth - window.innerWidth };
   });
   expect(geometry.heroY).toBeLessThan(geometry.viewport * 0.42);
   expect(geometry.weekBottom).toBeLessThan(geometry.viewport * 1.08);
@@ -126,11 +112,7 @@ test("Player Events is a premium personal schedule while preserving the full RSV
   const heroStyle = await hero.evaluate((node) => {
     const style = getComputedStyle(node);
     const heading = node.querySelector("h2");
-    return {
-      backgroundImage: style.backgroundImage,
-      radius: parseFloat(style.borderRadius),
-      headingColor: heading ? getComputedStyle(heading).color : "",
-    };
+    return { backgroundImage: style.backgroundImage, radius: parseFloat(style.borderRadius), headingColor: heading ? getComputedStyle(heading).color : "" };
   });
   expect(heroStyle.backgroundImage).toContain("gradient");
   expect(heroStyle.radius).toBeGreaterThanOrEqual(18);
@@ -138,9 +120,18 @@ test("Player Events is a premium personal schedule while preserving the full RSV
 
   await capture(page, "04n-player-events-commitment");
 
-  await hero.getByRole("button").click();
+  const rows = list.locator("button");
+  const rowCount = await rows.count();
+  expect(rowCount).toBeGreaterThan(0);
+  const targetRow = rows.nth(rowCount > 1 ? 1 : 0);
+  const selectedTitle = (await targetRow.locator("strong").first().textContent())?.trim();
+  expect(selectedTitle).toBeTruthy();
+  await targetRow.click();
   await expect(details).toHaveAttribute("open", "");
-  await expect(legacy).toBeVisible({ timeout: 10_000 });
+  const eventDetail = page.getByTestId("player-event-detail");
+  await expect(eventDetail).toBeVisible({ timeout: 10_000 });
+  await expect(eventDetail.getByRole("heading", { name: selectedTitle, exact: true })).toBeVisible();
+  await expect(eventDetail.getByText("MY RESPONSE", { exact: true })).toBeVisible();
   await noOverflow(page);
 });
 
