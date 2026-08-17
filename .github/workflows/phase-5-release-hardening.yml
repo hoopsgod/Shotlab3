@@ -9,7 +9,7 @@ permissions:
 
 env:
   VITE_ENABLE_PRODUCTION_DEMOS: true
-  PHASE5_BASELINE_SHA: 7ef019cfe76f9b6026c0691821be1464eddb73de
+  PHASE5_BASELINE_SHA: 34b489a49fed96e448e41992c10773617e1ba9ea
 
 concurrency:
   group: phase-5-release-hardening-${{ github.event.pull_request.head.sha || github.sha }}
@@ -46,10 +46,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Phase 5 reliability and privacy contracts
+      - name: Run Phase 5 reliability, privacy, and mobile precision contracts
         run: >-
           node --test
           tests/phase-5-release-hardening.test.mjs
+          tests/phase-5-mobile-precision.test.mjs
           tests/coach-follow-up-integrity.test.mjs
           tests/coach-player-response-loop.test.mjs
           tests/coach-player-invitation-contract.test.mjs
@@ -87,6 +88,11 @@ jobs:
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/phase-5-release-hardening.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture exact Phase 5 mobile precision, Target Court, feedback, and 1280 evidence
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-5-mobile-precision-evidence.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Retain Phase 4 Player Intelligence, overlay, form, navigation, and reduced-motion contracts
         env:
@@ -154,6 +160,7 @@ jobs:
           name: phase-5-release-hardening-evidence
           path: |
             artifacts/phase-5-release-hardening/
+            artifacts/phase-5-mobile-precision-evidence/
             artifacts/phase-4-product-reset-interaction/
             artifacts/phase-3a-cross-screen-visual-audit/
             artifacts/phase-3-release-certification/
