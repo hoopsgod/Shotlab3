@@ -33,8 +33,14 @@ withSurface('canResetSandbox', () => {
 // Coach Events now owns a deliberate short empty state and natural schedule length.
 // Demo and registered coaches share the same component/data path, so padding either
 // state with fabricated runway cards is no longer necessary for parity and actively
-// harms the premium mobile hierarchy.
+// harms the premium mobile hierarchy. The legacy mobile empty-state body stays in the
+// source as a fallback contract, but must never compete visually with the premium state.
 withSurface('coach-events-mobile-empty-state', () => {
+  replaceRequired(
+    `{events.length===0?<section data-testid="coach-events-mobile-empty-state" style={{minHeight:"calc(100dvh - 330px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"44px 20px 54px"}}>`,
+    `{events.length===0?<section data-testid="coach-events-mobile-empty-state" aria-hidden="true" style={{display:"none"}}>`,
+    'legacy Coach Events empty state visibility',
+  )
   if (source.includes('data-parity-empty-slot="true"') || source.includes('data-coach-event-placeholder="true"')) {
     throw new Error('Legacy Coach Events parity runway must not be present before the premium Events build.')
   }
