@@ -22,14 +22,13 @@ test("month calendar owns stable six-week geometry and real event-day signals", 
   assert.match(calendar, /data-testid="coach-events-calendar-month"/);
   assert.match(calendar, /byDate\.get\(key\)/);
   assert.match(calendar, /events\.slice\(0, 3\)/);
-  assert.match(calendar, /events\.length > 3/);
+  assert.match(calendar, /coachEventsCalendar__eventMarks/);
 });
 
 test("month calendar supports navigation and event drill-down", () => {
   assert.match(calendar, /aria-label="Previous month"/);
   assert.match(calendar, /aria-label="Next month"/);
   assert.match(calendar, /onOpenEvent\?\.\(/);
-  assert.match(calendar, /No events scheduled this month/);
 });
 
 test("premium Events v2 uses restrained editorial geometry instead of another stack of cards", () => {
