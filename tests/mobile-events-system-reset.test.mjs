@@ -54,11 +54,16 @@ test("Coach Events keeps management intelligence Coach-only and preserves the ex
 });
 
 test("the stable RSVP persistence path remains in App instead of being reimplemented in presentation components", () => {
-  assert.match(app, /deleteEventRsvp/);
-  assert.match(app, /saveEventRsvp/);
-  assert.match(app, /onToggleRSVP=\{toggleRsvp\}/);
-  assert.doesNotMatch(player, /saveEventRsvp/);
-  assert.doesNotMatch(player, /deleteEventRsvp/);
+  assert.match(app, /const toggleRsvp=async\(eid\)=>/);
+  assert.match(app, /P\("sl:rsvps"/);
+  assert.match(app, /toggleRsvp=\{toggleRsvp\}/);
+  assert.doesNotMatch(player, /P\("sl:rsvps"|supabase|localStorage/);
+});
+
+test("Coach event management continues the premium hierarchy below Next Up instead of reverting to card stacks", () => {
+  assert.match(coachCss, /coach-event-intelligence-drawer[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/s);
+  assert.match(coachCss, /coach-event-intelligence-drawer[\s\S]*button:first-child[\s\S]*min-height:50px[\s\S]*background:var\(--accent,#c8ff1a\)/s);
+  assert.match(coachCss, /coach-event-intelligence-drawer[\s\S]*personRow[\s\S]*border-radius:0[\s\S]*background:transparent/s);
 });
 
 test("mobile density and safe-area rules explicitly cover both roles", () => {
