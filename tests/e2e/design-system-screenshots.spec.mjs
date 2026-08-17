@@ -154,10 +154,11 @@ test("Coach visual system remains integrated across command and management pages
   await capture(page, "06c-coach-team-account");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
-  const eventInsights = page.getByTestId("coach-events-supporting-intelligence");
-  await expect(eventInsights).toHaveCount(1);
-  await expect(eventInsights).toBeHidden();
-  await expect(page.getByTestId("coach-events-insight-grid")).toBeHidden();
+  const calendar = page.getByTestId("coach-events-month-calendar");
+  await expect(calendar).toBeVisible({ timeout: 20_000 });
+  await expect(calendar.getByTestId("coach-events-calendar-month")).toBeVisible();
+  await expect(calendar.getByRole("button", { name: "Previous month" })).toBeVisible();
+  await expect(calendar.getByRole("button", { name: "Next month" })).toBeVisible();
   await expect(page.getByRole("button", { name: /MANAGE/ }).first()).toBeVisible();
   await capture(page, "07-coach-events");
 
