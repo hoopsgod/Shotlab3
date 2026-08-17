@@ -202,7 +202,7 @@ test("Coach Events keeps the zero-event mobile page short and overflow-safe on n
 
   const commandBar = page.getByTestId("coach-events-command-bar");
   const decisionBrief = page.getByTestId("coach-events-decision-brief");
-  const emptyState = page.getByTestId("coach-events-mobile-empty-state");
+  const emptyState = page.getByTestId("coach-events-premium-empty-state");
   await expect(decisionBrief.getByText("Calendar is open", { exact: true })).toBeVisible();
   await expect(commandBar.getByRole("button", { name: /Create Event/i })).toHaveCount(1);
   await expect(emptyState.getByText("Nothing scheduled yet", { exact: true })).toBeVisible();
