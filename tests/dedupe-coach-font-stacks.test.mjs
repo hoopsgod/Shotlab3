@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import test from 'node:test'
 import { dedupeCoachFontStacks } from '../scripts/dedupe-coach-font-stacks.mjs'
 import { dedupeAuthenticatedFontStacks } from '../scripts/dedupe-authenticated-font-stacks.mjs'
@@ -56,4 +57,13 @@ test('authenticated font dedupe leaves unrelated declarations untouched', () => 
   assert.equal(result.css, source)
   assert.equal(result.replacements, 0)
   assert.equal(result.rawBytesSaved, 0)
+})
+
+test('authenticated visual authority keeps all imports before token declarations', () => {
+  const source = fs.readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8')
+  const rootIndex = source.indexOf(':root')
+  assert.ok(rootIndex > 0, 'authenticated font tokens must remain present')
+  const importIndexes = [...source.matchAll(/@import\s+"[^"]+";/g)].map((match) => match.index)
+  assert.equal(importIndexes.length, 5)
+  assert.ok(importIndexes.every((index) => index < rootIndex), 'CSS @import rules must precede token declarations so visual authority layers are not dropped')
 })
