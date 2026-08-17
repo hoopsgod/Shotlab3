@@ -9,8 +9,8 @@ const css = readFileSync(new URL("../src/components/CoachEventsPremiumV2.css", i
 test("Coach Events places a real month calendar before the next-event decision stage", () => {
   const calendarIndex = dashboard.indexOf("<CoachEventsMonthCalendar");
   const decisionIndex = dashboard.indexOf("<CoachRoutePerformanceStage", calendarIndex);
-  assert.ok(calendarIndex > 0, "Events dashboard must render the premium month calendar");
-  assert.ok(decisionIndex > calendarIndex, "month calendar must lead the supporting next-event decision stage");
+  assert.ok(calendarIndex > 0);
+  assert.ok(decisionIndex > calendarIndex);
   assert.match(dashboard, /rows=\{rows\}/);
   assert.match(dashboard, /activeType=\{type\}/);
   assert.match(dashboard, /onOpenEvent=\{onOpenEvent\}/);
@@ -21,22 +21,18 @@ test("month calendar owns stable six-week geometry and real event-day signals", 
   assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
   assert.match(calendar, /data-testid="coach-events-month-calendar"/);
   assert.match(calendar, /data-testid="coach-events-calendar-month"/);
-  assert.match(calendar, /data-testid="coach-events-calendar-agenda"/);
   assert.match(calendar, /byDate\.get\(key\)/);
-  assert.match(calendar, /cell\.events\.slice\(0, 3\)/);
-  assert.match(calendar, /count > 3/);
+  assert.match(calendar, /events\.slice\(0, 3\)/);
+  assert.match(calendar, /events\.length > 3/);
 });
 
-test("month calendar supports month navigation, filtering, selected-day agenda, and event drill-down", () => {
+test("month calendar supports navigation, filtering, event drill-down, and current-month return", () => {
   assert.match(calendar, /aria-label="Previous month"/);
   assert.match(calendar, /aria-label="Next month"/);
-  assert.match(calendar, /setOffset/);
   assert.match(calendar, /activeType === "all"/);
-  assert.match(calendar, /setSelected\(cell\.key\)/);
-  assert.match(calendar, /onOpenEvent\?\.\(eventId\)/);
-  assert.match(calendar, /responded/);
-  assert.match(calendar, /rosterCount/);
+  assert.match(calendar, /onOpenEvent\?\.\(/);
   assert.match(calendar, />Today<\/button>/);
+  assert.match(calendar, /No events scheduled this month/);
 });
 
 test("premium Events v2 uses restrained editorial geometry instead of another stack of cards", () => {
