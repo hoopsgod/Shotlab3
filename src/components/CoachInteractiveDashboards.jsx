@@ -17,7 +17,6 @@ import {
   buildCoachPlayerActionBriefing,
   formatCoachScheduleDate,
 } from "../lib/coachActionBriefings.js";
-import "./CoachEventsPremium.css";
 
 const normalizeEventsSearchSurface = (node) => {
   const input = node?.querySelector?.('input[type="search"]');
@@ -33,252 +32,221 @@ const normalizeEventsSearchSurface = (node) => {
 
 const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   if (!action) return undefined;
-  if (action.kind === "add-player" && typeof onAddPlayer === "function") return { label: action.label, onClick: onAddPlayer };
-  if (action.kind === "filter" && typeof onFilterChange === "function") return { label: action.label, onClick: () => onFilterChange(action.value) };
+  if (action.key === "invite") return { label: "Invite player", onClick: onAddPlayer };
+  if (action.key === "review-no-team") return { label: "Review roster", onClick: () => onFilterChange?.("unassigned") };
+  if (action.key === "review-risk") return { label: "Review risk", onClick: () => onFilterChange?.("risk") };
+  if (action.key === "review-inactive") return { label: "Review inactive", onClick: () => onFilterChange?.("inactive") };
   return undefined;
 };
 
-const resolveEventAction = (action, { onStatusChange, onCreateEvent, onOpenEvent }) => {
-  if (!action) return undefined;
-  if (action.kind === "create-event" && typeof onCreateEvent === "function") return { label: action.label, onClick: onCreateEvent };
-  if (action.kind === "status-filter" && typeof onStatusChange === "function") return { label: action.label, onClick: () => onStatusChange(action.value) };
-  if (action.kind === "open-event" && typeof onOpenEvent === "function" && action.id != null) return { label: action.label, onClick: () => onOpenEvent(action.id) };
-  return undefined;
-};
+const hasIdentity = (value) => Boolean(String(value || "").trim());
 
-const safeCount = (value) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
-};
+function CoachDashboardNoResults({ children }) {
+  return <div className="coachDashboardNoResults">{children}</div>;
+}
 
-const eventTypeLabel = (value = "") => {
-  const type = String(value || "").toLowerCase();
-  if (type === "run" || type === "practice") return "Practice";
-  if (type === "game" || type === "games") return "Game";
-  if (type === "clinic" || type === "camp") return "Camp";
-  if (type === "recovery" || type === "meeting" || type === "film") return "Meeting";
-  if (type === "challenge") return "Challenge";
-  return "Team event";
-};
-
-export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
-  const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
-  const metricItems = [
-    { key: "all", label: "Roster", displayLabel: "Roster", value: briefing.total, detail: "Active team players", evidence: rows.slice(0, 8).map((row) => row.engagementScore || 0), evidenceLabel: "Roster engagement distribution" },
-    { key: "active", label: "Active This Week", displayLabel: "Active", value: briefing.active, detail: `${briefing.activeRate}% of roster`, tone: "positive", evidence: rows.slice(0, 8).map((row) => row.statusKey === "active" ? 100 : row.statusKey === "attention" ? 45 : 8), evidenceLabel: "Current activity distribution" },
-    { key: "attention", label: "Needs Attention", displayLabel: "Attention", value: briefing.attentionRows.length, detail: briefing.noActivityRows.length ? `${briefing.noActivityRows.length} with no activity` : "No current-week activity", tone: "attention", evidence: rows.slice(0, 8).map((row) => row.statusKey === "new" ? 100 : row.statusKey === "attention" ? 65 : 10), evidenceLabel: "Attention-risk distribution" },
-    { key: "leaders", label: "Weekly Makes", displayLabel: "Weekly Makes", value: Number(metrics.weeklyMakes) || 0, detail: `${Number(metrics.weeklyActions) || 0} logged actions`, tone: "info", evidence: rows.slice(0, 8).map((row) => row.weeklyMakes || 0), evidenceLabel: "Weekly makes distribution" },
+export function CoachPlayersInteractiveDashboard({
+  metrics = [],
+  rows = [],
+  searchValue = "",
+  onSearchChange,
+  activeFilter = "all",
+  onFilterChange,
+  actionBriefing,
+  onAddPlayer,
+  onOpenPlayer,
+}) {
+  const filters = [
+    { key: "all", label: "All", count: rows.length },
+    { key: "risk", label: "At risk", count: rows.filter((row) => row.status === "risk").length },
+    { key: "inactive", label: "Inactive", count: rows.filter((row) => row.status === "inactive").length },
+    { key: "unassigned", label: "No team", count: rows.filter((row) => row.status === "unassigned").length },
   ];
+  const action = resolvePlayerAction(actionBriefing, { onFilterChange, onAddPlayer });
 
   return (
-    <SecondaryPageShell testId="coach-players-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
+    <SecondaryPageShell accent="players" testId="coach-players-interactive-dashboard">
+      <SecondaryPageIntro
+        icon="team"
+        eyebrow="PLAYER DEVELOPMENT"
+        title="Players"
+        summary="Roster health, activity, and development signals in one decision-ready view."
+        actions={onAddPlayer ? [{ label: "+ Add Player", onClick: onAddPlayer, primary: true }] : []}
+        testId="coach-players-command-bar"
+      />
       <CoachRoutePerformanceStage
         kind="players"
-        eyebrow="Decision brief"
-        title={briefing.decision.title}
-        detail={briefing.decision.detail}
-        tone={briefing.decision.tone}
-        action={resolvePlayerAction(briefing.decision.action, { onFilterChange, onAddPlayer })}
-        metrics={metricItems}
-        activeMetric={filter}
-        onMetricSelect={onFilterChange}
+        eyebrow="TEAM STATUS"
+        title={actionBriefing?.title || "Roster intelligence"}
+        detail={actionBriefing?.detail || "See who needs attention and open the player behind the signal."}
+        tone={actionBriefing?.tone || "info"}
+        action={action}
+        metrics={metrics}
         testId="coach-players-decision-brief"
       >
-        <ExperienceSparkline values={briefing.engagementDistribution} label="Engagement spread" tone={briefing.decision.tone} testId="coach-players-engagement-sparkline" />
+        <ExperienceSparkline values={rows.slice(0, 7).map((row) => Number(row.weeklyMakes) || 0)} accent="var(--team-brand-secondary, var(--accent))" />
       </CoachRoutePerformanceStage>
       <SecondaryPageToolbar testId="coach-players-toolbar">
-        <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
+        <DashboardFilterRail
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
+          searchPlaceholder="Search players"
+          filters={filters}
+          activeFilter={activeFilter}
+          onFilterChange={onFilterChange}
+          testId="coach-players-filter-rail"
+        />
       </SecondaryPageToolbar>
-      <SecondaryPageEvidence testId="coach-players-insight-grid">
-        {briefing.insights.map((insight) => (
-          <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolvePlayerAction(insight.action, { onFilterChange, onAddPlayer })}>
-            {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
-          </DashboardInsightCard>
-        ))}
-      </SecondaryPageEvidence>
+      <div className="coachDashboardOperationalContent">
+        {rows.length ? (
+          <div className="coachPlayerDecisionList" data-testid="coach-players-decision-list">
+            {rows.map((row) => {
+              const canOpen = hasIdentity(row.playerKey) || hasIdentity(row.id) || hasIdentity(row.email);
+              const Row = canOpen && onOpenPlayer ? "button" : "div";
+              return (
+                <Row
+                  key={row.playerKey || row.id || row.email || row.name}
+                  type={Row === "button" ? "button" : undefined}
+                  className="coachPlayerDecisionRow"
+                  data-status={row.status}
+                  onClick={Row === "button" ? () => onOpenPlayer(row) : undefined}
+                >
+                  <div className="coachPlayerDecisionIdentity">
+                    <span className="coachPlayerDecisionAvatar" aria-hidden="true">{String(row.name || "?").slice(0, 1).toUpperCase()}</span>
+                    <span><strong>{row.name}</strong><small>{row.statusLabel || "Current player"}</small></span>
+                  </div>
+                  <div className="coachPlayerDecisionSignal"><strong>{row.weeklyMakes || 0}</strong><small>weekly makes</small></div>
+                  <div className="coachPlayerDecisionSignal"><strong>{row.daysSinceActivity ?? "—"}</strong><small>days since activity</small></div>
+                </Row>
+              );
+            })}
+          </div>
+        ) : <CoachDashboardNoResults>No players match this view.</CoachDashboardNoResults>}
+      </div>
     </SecondaryPageShell>
   );
 }
 
-export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], status, type, query, onStatusChange, onTypeChange, onQueryChange, onCreateEvent, onOpenEvent }) {
-  const briefing = buildCoachEventActionBriefing({ metrics, rows });
-  const next = briefing.next;
-  const nextEvent = next?.event || next;
-  const nextResponded = safeCount(next?.responded ?? next?.rsvpConfirmed ?? next?.confirmed);
-  const nextAwaiting = safeCount(next?.awaitingResponse ?? next?.missing);
-  const nextRoster = safeCount(next?.rosterCount || (nextResponded + nextAwaiting));
-  const nextMomentDetail = next
-    ? `${eventTypeLabel(next.type || nextEvent?.type)} · ${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"} · ${next.location || "Location TBD"} · ${nextResponded} / ${nextRoster || nextResponded} responded`
-    : "Create the next team event to begin RSVP tracking and player communication.";
-  const nextMomentAction = next && typeof onOpenEvent === "function" && nextEvent?.id != null
-    ? { label: "View Event", onClick: () => onOpenEvent(nextEvent.id) }
-    : undefined;
-  const metricItems = [
-    { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
-    { key: "gaps", label: "Awaiting RSVP", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
-    { key: "all", label: "Response Rate", displayLabel: "Response", value: next ? `${briefing.responseRate}%` : "—", detail: next ? `${briefing.responded} responses recorded` : "No RSVP signal", tone: !next ? "info" : briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
+export function CoachEventsInteractiveDashboard({
+  metrics = [],
+  rows = [],
+  searchValue = "",
+  onSearchChange,
+  activeFilter = "upcoming",
+  onFilterChange,
+  onCreateEvent,
+  onOpenEvent,
+}) {
+  const next = rows[0];
+  const filters = [
+    { key: "upcoming", label: "Upcoming", count: rows.filter((row) => row.bucket === "upcoming").length },
+    { key: "needs-rsvp", label: "Needs RSVP", count: rows.filter((row) => row.awaiting > 0).length },
+    { key: "past", label: "Past", count: rows.filter((row) => row.bucket === "past").length },
   ];
-  const showingPast = status === "past";
-  const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
-  const showPremiumEmptyState = !showingPast && briefing.upcoming === 0;
+  const actionBriefing = buildCoachEventActionBriefing(rows);
 
   return (
-    <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
+    <SecondaryPageShell accent="events" className="coachEventsPremiumWorkspace" testId="coach-events-interactive-dashboard">
       <SecondaryPageIntro
-        eyebrow="SCHEDULE"
-        title="Events"
-        summary="Plan practices, games and team moments."
-        actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
+        icon="calendar"
+        eyebrow="PROGRAM SCHEDULE"
+        title="Schedule"
+        summary="Run the week from one board — practices, games, attendance, and what needs a response."
+        actions={onCreateEvent ? [{ label: "+ Create Event", onClick: onCreateEvent, primary: true }] : []}
         testId="coach-events-command-bar"
       />
       <CoachRoutePerformanceStage
         kind="schedule"
-        eyebrow="NEXT TEAM MOMENT"
-        title={next ? next.title || "Next team event" : "Calendar is open"}
-        detail={nextMomentDetail}
-        tone={!next ? "info" : nextAwaiting ? "attention" : "positive"}
-        action={nextMomentAction}
-        metrics={metricItems}
-        activeMetric={status}
-        onMetricSelect={onStatusChange}
+        eyebrow="NEXT UP"
+        title={actionBriefing?.title || "Schedule intelligence"}
+        detail={actionBriefing?.detail || "Know what is next and where attendance needs attention."}
+        tone={actionBriefing?.tone || "info"}
+        action={next && onOpenEvent && hasIdentity(next.id) ? { label: "View Event", onClick: () => onOpenEvent(next) } : null}
+        metrics={metrics}
         testId="coach-events-decision-brief"
-      />
-      <SecondaryPageToolbar testId="coach-events-toolbar">
-        <div className="coachEventsFilterShell" ref={normalizeEventsSearchSurface}>
+      >
+        <ExperienceSparkline values={rows.slice(0, 7).map((row) => Number(row.confirmed) || 0)} accent="var(--semantic-info)" />
+      </CoachRoutePerformanceStage>
+      {rows.length ? (
+        <SecondaryPageToolbar testId="coach-events-toolbar">
           <DashboardFilterRail
-            surface="light"
-            searchValue={query}
-            onSearchChange={onQueryChange}
-            searchPlaceholder="Search events"
-            filters={[
-              { key: "all", label: "All" },
-              { key: "run", label: "Practice" },
-              { key: "game", label: "Game" },
-              { key: "clinic", label: "Camp" },
-              { key: "recovery", label: "Meeting" },
-            ]}
-            activeFilter={type}
-            onFilterChange={onTypeChange}
-            trailing={typeof onStatusChange === "function" ? (
-              <button
-                type="button"
-                className="coachEventsHistoryAction"
-                onClick={() => onStatusChange(showingPast ? "upcoming" : "past")}
-                aria-pressed={showingPast}
-              >
-                <span>{showingPast ? "Upcoming" : "Past Events"}</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            ) : null}
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            searchPlaceholder="Search schedule"
+            filters={filters}
+            activeFilter={activeFilter}
+            onFilterChange={onFilterChange}
             testId="coach-events-filter-rail"
           />
-        </div>
-      </SecondaryPageToolbar>
-      <div className="coachEventsSupportingInsights">
-        <SecondaryPageDisclosure
-          title="Schedule insights"
-          summary={`${briefing.responseRate}% response · ${briefing.missing} missing`}
-          defaultOpen={typeof window !== "undefined" && window.innerWidth > 760}
-          testId="coach-events-supporting-intelligence"
-        >
-          <SecondaryPageEvidence testId="coach-events-insight-grid">
-            {briefing.insights.map((insight) => (
-              <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
-                {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
-              </DashboardInsightCard>
-            ))}
-          </SecondaryPageEvidence>
-        </SecondaryPageDisclosure>
-      </div>
-      <div className="coachEventsMobileListHeading" data-testid="coach-events-mobile-list-heading">{listHeading}</div>
-      {showPremiumEmptyState ? (
-        <section className="coachEventsPremiumEmptyState" data-testid="coach-events-premium-empty-state" aria-labelledby="coach-events-empty-title">
-          <h2 id="coach-events-empty-title">Nothing scheduled yet</h2>
-          <p>Your next practice, game or team event will appear here.</p>
-        </section>
+        </SecondaryPageToolbar>
       ) : null}
+      <div className="coachDashboardOperationalContent">
+        {rows.length ? (
+          <div className="coachEventDecisionList" data-testid="coach-events-decision-list">
+            {rows.map((row) => {
+              const canOpen = hasIdentity(row.id);
+              const Row = canOpen && onOpenEvent ? "button" : "div";
+              return (
+                <Row
+                  key={row.id || `${row.title}-${row.date}`}
+                  type={Row === "button" ? "button" : undefined}
+                  className="coachEventDecisionRow"
+                  onClick={Row === "button" ? () => onOpenEvent(row) : undefined}
+                >
+                  <div className="coachEventDecisionDate"><strong>{formatCoachScheduleDate(row.date)}</strong><small>{row.time || "Time TBD"}</small></div>
+                  <div className="coachEventDecisionIdentity"><strong>{row.title}</strong><small>{row.location || "Location TBD"}</small></div>
+                  <div className="coachEventDecisionSignal"><strong>{row.confirmed || 0}</strong><small>confirmed</small></div>
+                  <div className="coachEventDecisionSignal"><strong>{row.awaiting || 0}</strong><small>awaiting</small></div>
+                </Row>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="coachEventsPremiumEmptyState">
+            <h2>No events on the board</h2>
+            <p>Create the first program event to start building this week’s schedule.</p>
+          </div>
+        )}
+      </div>
     </SecondaryPageShell>
   );
 }
 
-const operationalPageConfig = {
-  "coach-page-dashboard-drills": {
-    eyebrow: "Programming decision",
-    decisionEyebrow: "Training brief",
-    emptyTitle: "Build the next training priority",
-    emptyDetail: "Add or select a drill so the team has one clear training focus before the library expands.",
-  },
-  "coach-page-dashboard-strength": {
-    eyebrow: "Availability decision",
-    decisionEyebrow: "Session brief",
-    emptyTitle: "Set the next strength session",
-    emptyDetail: "Create the next session and make athlete commitments visible before adding more programming.",
-  },
-  "coach-page-dashboard-leaderboards": {
-    eyebrow: "COMPETE",
-    decisionEyebrow: "TEAM STANDARD",
-    emptyTitle: "Recognition begins with activity",
-    emptyDetail: "Player results will create a meaningful recognition surface after the first verified activity is logged.",
-  },
-};
-
-const readableMetricValue = (metric) => {
-  const value = metric?.value;
-  if (value === null || value === undefined || value === "") return "No current signal";
-  return String(value);
-};
-
-function buildOperationalPageModel({ title, summary, metrics = [], testId }) {
-  const config = operationalPageConfig[testId] || {
-    eyebrow: "Operational decision",
-    decisionEyebrow: "Decision brief",
-    emptyTitle: `Set the next ${String(title || "team").toLowerCase()} priority`,
-    emptyDetail: summary || "Use the available evidence to choose one clear next action.",
-  };
+export function CoachPageDashboardHeader({
+  eyebrow,
+  title,
+  summary,
+  status,
+  metrics = [],
+  activeMetric,
+  onMetricSelect,
+  testId,
+}) {
   const isLeaderboardsPage = testId === "coach-page-dashboard-leaderboards";
-  const allMeaningful = metrics.filter((metric) => metric && metric.value !== undefined && metric.value !== null && metric.value !== "");
-  const meaningful = isLeaderboardsPage
-    ? allMeaningful.filter((metric) => ["ranked", "leader", "archives"].includes(metric.key))
-    : allMeaningful;
-  const leaderMetric = isLeaderboardsPage ? allMeaningful.find((metric) => metric.key === "leader") : null;
-  const hasLeader = Boolean(leaderMetric && Number(leaderMetric.value) > 0 && leaderMetric.detail && leaderMetric.detail !== "No leader yet");
-  const primary = isLeaderboardsPage ? (hasLeader ? leaderMetric : meaningful[0]) : meaningful[0];
-  return {
-    ...config,
-    decisionTitle: isLeaderboardsPage
-      ? (hasLeader ? `${leaderMetric.detail} sets the standard` : config.emptyTitle)
-      : primary ? `${primary.label}: ${readableMetricValue(primary)}` : config.emptyTitle,
-    decisionDetail: isLeaderboardsPage
-      ? (hasLeader ? `${readableMetricValue(leaderMetric)} verified makes lead the current team ranking.` : config.emptyDetail)
-      : primary?.detail || config.emptyDetail,
-    decisionTone: isLeaderboardsPage ? (hasLeader ? "positive" : "info") : primary?.tone || "info",
-    primary,
-    meaningful,
-    isLeaderboardsPage,
-  };
-}
-
-export function CoachPageDashboardHeader({ eyebrow, title, summary, status, actions = [], metrics = [], activeMetric, onMetricSelect, testId }) {
-  const model = buildOperationalPageModel({ title, summary, metrics, testId });
-  const decisionAction = model.primary?.key && onMetricSelect
-    ? { label: model.isLeaderboardsPage ? "Review rankings" : `Review ${model.primary.label}`, onClick: () => onMetricSelect(model.primary.key) }
-    : actions[0];
-  const displayEyebrow = model.isLeaderboardsPage ? model.eyebrow : eyebrow || model.eyebrow;
-  const displayTitle = model.isLeaderboardsPage ? "Leaderboards" : title;
-  const displaySummary = model.isLeaderboardsPage ? "Recognize the standard. See who is leading and who is rising." : summary;
+  const displayTitle = isLeaderboardsPage ? "Leaderboards" : title;
+  const displaySummary = isLeaderboardsPage ? "Recognize the standard. See who is leading and who is rising." : summary;
+  const visibleMetrics = isLeaderboardsPage ? metrics.filter((metric) => ["ranked", "leader", "archives"].includes(metric.key)) : metrics;
+  const leaderMetric = isLeaderboardsPage ? visibleMetrics.find((metric) => metric.key === "leader") : null;
+  const hasLeader = Boolean(leaderMetric && leaderMetric.value !== "—" && leaderMetric.value !== "0");
 
   return (
-    <SecondaryPageShell testId={testId} className="secondaryPageShell--embeddedHeader">
-      <SecondaryPageIntro eyebrow={displayEyebrow} title={displayTitle} summary={displaySummary} status={status} actions={actions} />
+    <SecondaryPageShell accent={isLeaderboardsPage ? "leaderboards" : "default"} testId={testId}>
+      <SecondaryPageIntro
+        icon={isLeaderboardsPage ? "trophy" : "target"}
+        eyebrow={isLeaderboardsPage ? "COMPETE" : eyebrow}
+        title={displayTitle}
+        summary={displaySummary}
+        status={status}
+        testId={`${testId}-command-bar`}
+      />
       <CoachRoutePerformanceStage
-        kind={model.isLeaderboardsPage ? "leaderboards" : undefined}
-        eyebrow={model.decisionEyebrow}
-        title={model.decisionTitle}
-        detail={model.decisionDetail}
-        tone={model.decisionTone}
-        action={decisionAction}
-        metrics={model.meaningful}
+        kind={isLeaderboardsPage ? "leaderboards" : undefined}
+        eyebrow={isLeaderboardsPage ? "TEAM STANDARD" : eyebrow}
+        title={isLeaderboardsPage ? (hasLeader ? `${leaderMetric.detail} sets the standard` : "Recognition begins with activity") : title}
+        detail={isLeaderboardsPage ? (hasLeader ? `${leaderMetric.value} verified makes lead the current team ranking.` : "Verified team activity will establish the current ranking standard.") : summary}
+        tone={isLeaderboardsPage && hasLeader ? "positive" : "info"}
+        action={onMetricSelect ? { label: isLeaderboardsPage ? "Review rankings" : `Review ${visibleMetrics[0]?.label || "details"}`, onClick: () => onMetricSelect(visibleMetrics[0]?.key) } : null}
+        metrics={visibleMetrics}
         activeMetric={activeMetric}
         onMetricSelect={onMetricSelect}
         testId={`${testId}-decision-brief`}
