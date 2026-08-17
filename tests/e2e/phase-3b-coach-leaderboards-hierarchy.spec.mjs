@@ -80,6 +80,9 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const shell = page.getByTestId("coach-page-dashboard-leaderboards");
   const title = shell.locator(".secondaryPageIntro__title");
   const summary = shell.locator(".secondaryPageIntro__summary");
+  await expect(title).toHaveText("Leaderboards");
+  await expect(summary).toContainText("Recognize the standard");
+
   const decision = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
   await expect(decision).toHaveAttribute("data-surface", "dark");
   await expect(decision).toHaveAttribute("data-route-kind", "leaderboards");
@@ -87,9 +90,17 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const decisionDetail = decision.locator("[data-route-stage-detail]");
   const metricRail = decision.locator('[data-visual-role="performance-evidence"]');
   const metrics = metricRail.locator("[data-route-stage-metric]");
-  await expect(metrics).toHaveCount(4);
+  await expect(metrics).toHaveCount(3);
+  await expect(metricRail.getByRole("button", { name: /^Ranked Players:/ })).toBeVisible();
+  await expect(metricRail.getByRole("button", { name: /^Current Leader:/ })).toBeVisible();
+  await expect(metricRail.getByRole("button", { name: /^Archived Seasons:/ })).toBeVisible();
   const titleContrast = await expectReadableContrast(decisionTitle, 4.5);
   const detailContrast = await expectReadableContrast(decisionDetail, 4.5);
+
+  const pulse = page.getByTestId("coach-leaderboard-pulse");
+  await expect(pulse).toBeVisible();
+  await expect(pulse).toContainText("This week");
+  await expect(pulse).not.toContainText("Open rank");
 
   const outputPath = path.join(OUTPUT_DIR, "coach-leaderboards-390x844.png");
   await page.screenshot({ path: outputPath, animations: "disabled" });
@@ -112,11 +123,13 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
     const pulseCopyNode = pulseNode?.querySelector(".coachLeaderboardPulseCopy");
     const pulseMetricsNode = pulseNode?.querySelector(".coachLeaderboardPulseMetrics");
     const pulseCards = [...(pulseMetricsNode?.querySelectorAll(":scope > div") || [])];
+    const operationalRows = [...document.querySelectorAll('[data-testid="coach-leaderboard-operational-results"] .coachLeaderboardRow')];
     if (!pageSurfaceNode || !titleNode || !summaryNode || !decisionNode || !metricRailNode || !metricValueNode || !metricLabelNode || !pulseNode || !pulseCopyNode || !pulseMetricsNode) {
       throw new Error("Missing Coach Leaderboards visual-contract target");
     }
     const copyStyle = getComputedStyle(pulseCopyNode);
     const metricsStyle = getComputedStyle(pulseMetricsNode);
+    const pulseStyle = getComputedStyle(pulseNode);
     return {
       pageBackground: getComputedStyle(pageSurfaceNode).backgroundColor,
       titleFill: getComputedStyle(titleNode).webkitTextFillColor,
@@ -135,6 +148,9 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
       pulseMetricsGeometry: rectOf(pulseMetricsNode),
       pulseCopyStyle: { position: copyStyle.position, display: copyStyle.display, gridArea: copyStyle.gridArea, transform: copyStyle.transform, marginTop: copyStyle.marginTop, marginBottom: copyStyle.marginBottom, top: copyStyle.top, bottom: copyStyle.bottom },
       pulseMetricsStyle: { position: metricsStyle.position, display: metricsStyle.display, gridArea: metricsStyle.gridArea, transform: metricsStyle.transform, marginTop: metricsStyle.marginTop, marginBottom: metricsStyle.marginBottom, top: metricsStyle.top, bottom: metricsStyle.bottom },
+      pulseStyle: { borderRadius: pulseStyle.borderRadius, boxShadow: pulseStyle.boxShadow, backgroundColor: pulseStyle.backgroundColor },
+      placeholderCount: document.querySelectorAll('[data-leaderboard-placeholder="true"]').length,
+      operationalRowCount: operationalRows.length,
       overflow: document.documentElement.scrollWidth - window.innerWidth,
     };
   });
@@ -147,25 +163,28 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const backgroundChannels = visualState.decisionBackgroundColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
   expect(Math.max(...backgroundChannels)).toBeLessThan(45);
 
-  expect(visualState.metricCount).toBe(4);
+  expect(visualState.metricCount).toBe(3);
   expect(visualState.metricDisplay).toBe("grid");
-  expect(visualState.metricOverflowX).toBe("auto");
+  expect(visualState.metricOverflowX).toBe("hidden");
   for (const [index, box] of visualState.metricGeometry.entries()) {
-    expect(box.width, `metric ${index + 1} width`).toBeGreaterThanOrEqual(118);
+    expect(box.width, `metric ${index + 1} useful width`).toBeGreaterThanOrEqual(95);
     expect(box.height, `metric ${index + 1} height`).toBeGreaterThanOrEqual(44);
   }
 
-  const [pulse, ...pulseCards] = visualState.pulseGeometry;
-  expect(pulse.width).toBeLessThanOrEqual(330);
+  const [pulseBox, ...pulseCards] = visualState.pulseGeometry;
+  expect(pulseBox.width).toBeLessThanOrEqual(330);
   expect(pulseCards).toHaveLength(2);
+  expect(parseFloat(visualState.pulseStyle.borderRadius)).toBeLessThanOrEqual(1);
+  expect(visualState.pulseStyle.boxShadow).toBe("none");
   for (const [index, box] of pulseCards.entries()) {
-    expect(box.left, `pulse card ${index + 1} left containment`).toBeGreaterThanOrEqual(pulse.left - 1);
-    expect(box.right, `pulse card ${index + 1} right containment`).toBeLessThanOrEqual(pulse.right + 1);
-    expect(box.width, `pulse card ${index + 1} useful width`).toBeGreaterThanOrEqual(120);
+    expect(box.left, `pulse metric ${index + 1} left containment`).toBeGreaterThanOrEqual(pulseBox.left - 1);
+    expect(box.right, `pulse metric ${index + 1} right containment`).toBeLessThanOrEqual(pulseBox.right + 1);
+    expect(box.width, `pulse metric ${index + 1} useful width`).toBeGreaterThanOrEqual(120);
   }
   expect(pulseCards[1].left).toBeGreaterThanOrEqual(pulseCards[0].right - 1);
   expect(Math.abs(pulseCards[1].top - pulseCards[0].top)).toBeLessThanOrEqual(2);
-  expect(visualState.pulseCopyGeometry.bottom + 6, `pulse copy must clear metric cards; copy=${JSON.stringify(visualState.pulseCopyGeometry)} metrics=${JSON.stringify(visualState.pulseMetricsGeometry)} styles=${JSON.stringify({ copy: visualState.pulseCopyStyle, metrics: visualState.pulseMetricsStyle })}`).toBeLessThanOrEqual(visualState.pulseMetricsGeometry.top);
+  expect(visualState.pulseCopyGeometry.bottom + 6, `pulse copy must clear metrics; copy=${JSON.stringify(visualState.pulseCopyGeometry)} metrics=${JSON.stringify(visualState.pulseMetricsGeometry)} styles=${JSON.stringify({ copy: visualState.pulseCopyStyle, metrics: visualState.pulseMetricsStyle })}`).toBeLessThanOrEqual(visualState.pulseMetricsGeometry.top);
+  expect(visualState.placeholderCount).toBe(0);
 
   expect(visualState.overflow).toBeLessThanOrEqual(1);
   expect(pageErrors).toEqual([]);
