@@ -153,17 +153,17 @@ export function EventsMonthPanel({ rows = [], anchorDate, selectedDate, onSelect
     <details className="eventsMonthPanel" data-testid="events-month-panel" data-layout-role="quiet-secondary">
       <summary>
         <div><span>MONTH</span><strong>{formatMonthLabel(month)}</strong></div>
-        <span className="eventsMonthPanel__control">View month <b aria-hidden="true">+</b></span>
+        <span className="eventsMonth__control">View month <b aria-hidden="true">+</b></span>
       </summary>
-      <div className="eventsMonthPanel__body">
-        <div className="eventsMonthPanel__weekdays" aria-hidden="true">{DAYS.map((label) => <span key={label}>{label[0]}</span>)}</div>
-        <div className="eventsMonthPanel__grid">
+      <div className="eventsMonth__body">
+        <div className="eventsMonth__weekdays" aria-hidden="true">{DAYS.map((label) => <span key={label}>{label[0]}</span>)}</div>
+        <div className="eventsMonth__grid">
           {Array.from({ length: 42 }, (_, index) => {
             const date = addDays(gridStart, index);
             const key = keyOf(date);
             const selected = key === selectedDate;
             return (
-              <button key={key} type="button" className="eventsMonthPanel__day" data-selected={selected} data-has-event={eventDates.has(key)} onClick={() => onSelectDate?.(key)} disabled={date.getMonth() !== month.getMonth()} aria-pressed={selected}>
+              <button key={key} type="button" className="eventsMonth__day" data-selected={selected} data-has-event={eventDates.has(key)} onClick={() => onSelectDate?.(key)} disabled={date.getMonth() !== month.getMonth()} aria-pressed={selected}>
                 <span>{date.getDate()}</span><i aria-hidden="true" />
               </button>
             );
