@@ -149,6 +149,11 @@ jobs:
     steps:
       - name: Check out exact PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Record exact candidate SHA
+        run: git rev-parse HEAD
 
       - name: Set up Node
         uses: actions/setup-node@v4

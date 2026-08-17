@@ -5,37 +5,37 @@
   padding: 18px;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 28px;
-  background:
-    radial-gradient(circle at 100% 0%, rgba(200,255,26,.14), transparent 34%),
-    linear-gradient(155deg,#20231f 0%,#121512 58%,#0b0d0b 100%);
+  background: radial-gradient(circle at 100% 0%, rgba(200,255,26,.10), transparent 34%), #111713;
   box-shadow: 0 22px 44px rgba(21,26,22,.17);
   color: #f8faf5;
 }
 
 .topline,
 .hero,
-.targetRow {
+.targetSignal {
   display: flex;
   align-items: center;
 }
 
-.topline {
-  gap: 10px;
-}
+.topline { gap: 10px; }
 
 .back {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
   flex: 0 0 auto;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 14px;
   background: rgba(255,255,255,.045);
   color: #f8faf5;
   font: 700 17px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
   cursor: pointer;
+  touch-action: manipulation;
 }
+
+.back:active { transform: scale(.97); }
+.back:focus-visible { outline: 2px solid var(--accent,#c8ff1a); outline-offset: 2px; }
 
 .mode {
   color: var(--accent,#c8ff1a);
@@ -46,8 +46,9 @@
 .step {
   margin-left: auto;
   color: rgba(246,249,242,.52);
-  font: 700 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  letter-spacing: .05em;
+  font: 760 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing: .08em;
+  white-space: nowrap;
 }
 
 .hero {
@@ -58,18 +59,18 @@
 .mark {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   flex: 0 0 auto;
-  border: 1px solid rgba(200,255,26,.2);
-  border-radius: 17px;
-  background: rgba(200,255,26,.07);
+  border: 1px solid rgba(200,255,26,.18);
+  border-radius: 16px;
+  background: rgba(200,255,26,.065);
   color: var(--accent,#c8ff1a);
 }
 
 .mark svg {
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -77,104 +78,97 @@
   stroke-linejoin: round;
 }
 
-.copy {
-  min-width: 0;
-}
+.copy { min-width: 0; }
 
 .eyebrow,
-.targetRow span {
+.planSignal span,
+.targetCopy span {
   color: rgba(242,246,238,.45);
   font: 800 8px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  letter-spacing: .11em;
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
 
 .copy h1 {
   margin: 6px 0 0;
   color: #f8faf5;
-  font: 790 clamp(29px,7.6vw,38px)/.96 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
-  letter-spacing: -.05em;
+  font: 400 clamp(30px,7.8vw,40px)/.94 "Bebas Neue", Impact, sans-serif;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .copy p {
+  max-width: 520px;
   margin: 8px 0 0;
-  color: rgba(242,246,238,.56);
-  font: 570 12px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  color: rgba(242,246,238,.60);
+  font: 600 12px/1.45 "Barlow Condensed", "Arial Narrow", sans-serif;
 }
 
-.targetRow {
-  justify-content: space-between;
+.performanceBand {
+  display: grid;
+  grid-template-columns: minmax(82px,.65fr) minmax(0,1.55fr);
   gap: 14px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255,255,255,.08);
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,.09);
 }
 
-.targetRow > div {
+.planSignal,
+.targetCopy {
+  min-width: 0;
   display: grid;
   gap: 4px;
 }
 
-.targetRow strong {
+.planSignal strong,
+.targetCopy strong {
   color: #f8faf5;
-  font: 760 16px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  font: 850 15px/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: .015em;
 }
 
-.liveScore {
-  text-align: right;
+.planSignal small,
+.targetCopy small {
+  color: rgba(242,246,238,.48);
+  font: 650 10px/1.25 "Barlow Condensed", "Arial Narrow", sans-serif;
 }
 
-.liveScore strong {
-  color: var(--accent,#c8ff1a);
-  font-size: 24px;
+.targetSignal {
+  min-width: 0;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.liveScore small {
-  color: rgba(242,246,238,.45);
-  font-size: 12px;
+.targetCopy { text-align: right; }
+.targetCopy strong { color: var(--accent,#c8ff1a); overflow-wrap: anywhere; }
+
+.baselineMark {
+  width: 104px;
+  flex: 0 0 104px;
+  color: rgba(200,255,26,.76);
 }
 
-.progressTrack,
-.scoreProgress {
-  overflow: hidden;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.08);
-}
-
-.progressTrack i,
-.scoreProgress span {
+.baselineMark svg {
   display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent,#c8ff1a);
-  transition: width .18s ease;
-}
-
-.scoreProgress {
-  height: 3px;
-  margin-top: -9px;
-  background: rgba(200,255,26,.07);
+  width: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 @media (max-width: 390px) {
-  .root {
-    padding: 16px;
-    border-radius: 24px;
-  }
-
-  .copy h1 {
-    font-size: 28px;
-  }
-
-  .mark {
-    width: 46px;
-    height: 46px;
-    border-radius: 15px;
-  }
+  .root { padding: 16px; border-radius: 24px; }
+  .copy h1 { font-size: 29px; }
+  .mark { width: 46px; height: 46px; border-radius: 15px; }
+  .performanceBand { grid-template-columns: minmax(74px,.6fr) minmax(0,1.6fr); gap: 8px; }
+  .targetSignal { gap: 4px; }
+  .targetCopy strong { font-size: 14px; }
+  .targetCopy small { font-size: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progressTrack i,
-  .scoreProgress span {
-    transition: none;
-  }
+  .back { transition: none; }
 }

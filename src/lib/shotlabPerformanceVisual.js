@@ -41,6 +41,7 @@ export function deriveShotLabPerformanceVisual({ value = 0, target = 0 } = {}) {
     state,
     targetRatio,
     targetPercent: Math.round(targetRatio * 1000) / 10,
+    remaining,
     aboveTarget,
     overflowRatio,
     overflowPercent: Math.round(overflowRatio * 1000) / 10,

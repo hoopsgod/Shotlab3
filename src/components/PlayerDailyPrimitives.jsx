@@ -15,8 +15,25 @@ const signalIcon = (tone, eyebrow = "") => {
 const TARGET_PATH = "M22 104V92C22 45 47 23 80 23S138 45 138 92V104";
 const OVERFLOW_PATH = "M14 104V89C14 34 44 14 80 14S146 34 146 89V104";
 
-export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId }) {
-  const visual = deriveShotLabPerformanceVisual({ value, target: max });
+const contextualCourtLabel = (visual, value, max, contextLabel) => {
+  const context = String(contextLabel || "").trim();
+  if (!context) return visual.accessibleLabel;
+  const amount = Math.max(0, Number(value) || 0);
+  const target = Math.max(1, Number(max) || 1);
+  if (visual.state === "above") return `${amount} ${context}. Target ${target}. ${Math.round(visual.aboveTarget)} above target.`;
+  if (visual.state === "complete") return `${amount} ${context}. Target ${target}. Target complete.`;
+  return `${amount} ${context}. Target ${target}. ${Math.round(visual.remaining)} to target.`;
+};
+
+export function getShotLabTargetVisual(value = 0, max = 100, contextLabel = "") {
+  const derivedVisual = deriveShotLabPerformanceVisual({ value, target: max });
+  return contextLabel
+    ? { ...derivedVisual, accessibleLabel: contextualCourtLabel(derivedVisual, value, max, contextLabel) }
+    : derivedVisual;
+}
+
+export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, size = 92, testId, contextLabel = "" }) {
+  const visual = getShotLabTargetVisual(value, max, contextLabel);
   const width = Math.max(116, Math.round(Number(size || 92) * 1.52));
   const targetDash = visual.targetPercent >= 100 ? "100 0" : `${visual.targetPercent} ${100 - visual.targetPercent}`;
   const overflowDash = visual.overflowPercent >= 100 ? "100 0" : `${visual.overflowPercent} ${100 - visual.overflowPercent}`;
@@ -41,15 +58,12 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
         <path className={styles.courtBackboard} d="M67 78H93" />
         <ellipse className={styles.courtRim} cx="80" cy="82" rx="9" ry="2.6" />
         <path className={styles.courtNet} d="M73 84l4 10h6l4-10M76 88h8" />
-
         <path d={TARGET_PATH} pathLength="100" className={styles.courtTargetTrack} />
         <path d={TARGET_PATH} pathLength="100" className={styles.courtTargetValue} strokeDasharray={targetDash} />
-
         {visual.state === "above" ? <>
           <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowTrack} data-performance-layer="above-target-track" />
           <path d={OVERFLOW_PATH} pathLength="100" className={styles.courtOverflowValue} strokeDasharray={overflowDash} data-performance-layer="above-target-value" />
         </> : null}
-
         <g className={styles.courtTargetLock} data-performance-layer="target-lock">
           <circle cx="80" cy="23" r="5" />
           <path d="M77.5 23l1.7 1.8 3.7-4" />
@@ -63,8 +77,6 @@ export function ShotLabPerformanceCourt({ value = 0, max = 100, label, detail, s
   );
 }
 
-// Compatibility wrapper retained for older isolated Player contracts. Player Home
-// imports ShotLabPerformanceCourt directly so the Phase 2 visual is explicit.
 export function ExperienceProgressRing(props) {
   return <ShotLabPerformanceCourt {...props} />;
 }

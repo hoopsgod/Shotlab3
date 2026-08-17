@@ -3,6 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 
 const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
+const BOUNDED_DRILL = {
+  id: "phase-4-target-court-50",
+  name: "TARGET COURT 50",
+  desc: "Make 50 shots at game pace.",
+  max: 50,
+  icon: "mr",
+  instructions: "Complete the reps and log the result.",
+  slug: "phase-4-target-court-50",
+  mode: "home",
+};
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -17,6 +27,14 @@ async function noOverflow(page) {
 
 async function enterPlayerDemo(page) {
   await installRoutes(page);
+  await page.addInitScript((boundedDrill) => {
+    const key = "sl:drills";
+    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+    localStorage.setItem(key, JSON.stringify([
+      boundedDrill,
+      ...existing.filter((item) => item?.id !== boundedDrill.id),
+    ]));
+  }, BOUNDED_DRILL);
   await page.goto("/");
   await page.getByRole("button", { name: /Player demo/i }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
@@ -27,12 +45,12 @@ async function captureViewport(page, name) {
   await page.screenshot({ path: path.join(outputDir, name), fullPage: false, animations: "disabled" });
 }
 
-test("Player Train opens a focused drill session with live score feedback", async ({ page }) => {
+test("Player Train opens a focused drill session with live Target Court feedback", async ({ page }) => {
   await enterPlayerDemo(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
 
-  const drill = page.getByRole("button", { name: /CALIPARI SHOOTING/i });
+  const drill = page.getByRole("button", { name: /TARGET COURT 50/i });
   await expect(drill).toBeVisible();
   await drill.click();
 
@@ -42,9 +60,15 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   await expect(header).toBeVisible();
   await expect(header.getByText("AT HOME SESSION", { exact: true })).toBeVisible();
   await expect(header.getByText("CURRENT WORK", { exact: true })).toBeVisible();
-  await expect(header.getByText("SESSION TARGET", { exact: true })).toBeVisible();
-  await expect(header.getByText("LIVE SCORE", { exact: true })).toBeVisible();
+  await expect(header.getByText("SESSION PATH", { exact: true })).toBeVisible();
+  await expect(header.getByText("DRILL TARGET", { exact: true })).toBeVisible();
   await expect(header.getByRole("button", { name: "Back to training plan" })).toBeVisible();
+
+  const liveTarget = header.getByTestId("player-training-live-target");
+  await expect(liveTarget).toBeVisible({ timeout: 10_000 });
+  await expect(liveTarget).toHaveAttribute("data-performance-visual", "shotlab-target-court");
+  await expect(liveTarget).toHaveAttribute("data-performance-state", "zero");
+  await expect(liveTarget).toHaveAttribute("aria-label", "0 on this drill. Target 50. 50 to target.");
 
   const heroBox = await header.boundingBox();
   const viewportHeight = await page.evaluate(() => window.innerHeight);
@@ -76,7 +100,9 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   await expect(scoreZone.getByText("LOG YOUR RESULT", { exact: true })).toBeVisible();
   await expect(scoreInput).toBeVisible();
   await scoreInput.fill("20");
-  await expect(header.getByText("20", { exact: true })).toBeVisible();
+  await expect(header.getByText("20 / 50", { exact: true })).toBeVisible();
+  await expect(liveTarget).toHaveAttribute("data-performance-state", "partial");
+  await expect(liveTarget).toHaveAttribute("aria-label", "20 on this drill. Target 50. 30 to target.");
   await expect(logScore).toBeVisible();
   await expect(logScore).toBeEnabled();
 
@@ -92,9 +118,6 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   }));
   expect(zoneStyle.backgroundColor).toBe("rgba(255, 255, 255, 0.96)");
   expect(parseFloat(zoneStyle.borderRadius)).toBeGreaterThanOrEqual(20);
-
-  const liveProgress = page.getByTestId("player-training-live-progress");
-  if (await liveProgress.count()) await expect(liveProgress).toBeVisible();
 
   await noOverflow(page);
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
