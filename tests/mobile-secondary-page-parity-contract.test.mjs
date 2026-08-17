@@ -80,10 +80,12 @@ test("Coach leaderboards cap the live ranking at three without fabricating ranki
   assert.match(coachParityEnhancer, /truthful natural-length ranking geometry/);
   assert.match(coachParityEnhancer, /rows\.slice\(0,\s*3\)/);
   assert.match(coachParityEnhancer, /No leaderboard players match the selected view/);
+  assert.match(coachParityEnhancer, /Coach leaderboard parity must not fabricate ranking positions/);
   assert.doesNotMatch(coachParityEnhancer, /Math\.max\(0,\s*3\s*-\s*rows\.length\)/);
   assert.doesNotMatch(coachParityEnhancer, /data-leaderboard-placeholder=\"true\"/);
   assert.doesNotMatch(coachParityEnhancer, /data-parity-empty-slot=\"true\"/);
-  assert.doesNotMatch(coachParityEnhancer, /Open rank/);
+  assert.doesNotMatch(coachParityEnhancer, /coach-open-rank/);
+  assert.doesNotMatch(coachParityEnhancer, /Player activity will fill this ranking position/);
   assert.doesNotMatch(coachParityEnhancer, /leaderboardPhase3LBefore/);
 });
 
