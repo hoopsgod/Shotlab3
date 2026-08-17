@@ -19,6 +19,20 @@ import {
 } from "../lib/coachActionBriefings.js";
 import "./CoachEventsPremium.css";
 
+const EVENTS_FILTER_RUNTIME_CSS = `
+@media (max-width: 760px) {
+  .coachEventsFilterShell input[type="search"] {
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+}
+`;
+
 const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   if (!action) return undefined;
   if (action.kind === "add-player" && typeof onAddPlayer === "function") return { label: action.label, onClick: onAddPlayer };
@@ -114,6 +128,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
+      <style>{EVENTS_FILTER_RUNTIME_CSS}</style>
       <SecondaryPageIntro
         eyebrow="SCHEDULE"
         title="Events"
