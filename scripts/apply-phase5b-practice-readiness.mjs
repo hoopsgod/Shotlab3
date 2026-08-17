@@ -16,8 +16,9 @@ update("src/components/CoachInteractiveDashboards.jsx", (source) => {
   if (source.includes('className="coachEventsPremiumWorkspace"')) {
     for (const expected of [
       '<EventsTitleStage role="coach"',
-      'const nextAwaiting = safeCount(',
-      'RSVP GAP${nextAwaiting === 1 ? "" : "S"}',
+      'const awaiting = safeCount(',
+      'RSVP GAP${awaiting === 1 ? "" : "S"}',
+      '<NextEventSurface',
       '<EventsWeekRail',
       '<EventsMonthPanel',
     ]) {
