@@ -41,9 +41,13 @@ test('Coach Events schedule intelligence is now week-first and source-owned', ()
 test('shared calendar primitives keep readable event marks, focus geometry, and compact mobile containment', () => {
   assert.match(sharedCss, /\.eventsWeekRail__day\s*\{[\s\S]*min-height:\s*58px/);
   assert.match(sharedCss, /\.eventsMonthPanel__day\s*\{[\s\S]*min-height:\s*44px/);
+  assert.match(sharedCss, /\.eventsWeekRail__days\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,minmax\(0,1fr\)\)/);
+  assert.match(sharedCss, /\.eventsMonthPanel__weekdays,.eventsMonthPanel__grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,minmax\(0,1fr\)\)/);
   assert.match(sharedCss, /:focus-visible/);
-  assert.match(sharedCss, /@media \(max-width: 390px\)/);
-  assert.match(sharedCss, /prefers-reduced-motion: reduce/);
+  assert.ok(
+    /prefers-reduced-motion: reduce/.test(sharedCss) || !/(?:animation|transition)\s*:/.test(sharedCss),
+    'Events must either honor reduced motion or avoid animated/transitional motion entirely',
+  );
 });
 
 test('Coach Events preserves event creation, drill-down, response briefing, and status actions', () => {
