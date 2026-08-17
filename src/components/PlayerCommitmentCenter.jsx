@@ -273,8 +273,12 @@ export default function PlayerCommitmentCenter({
   };
 
   return (
-    <section className={styles.root} data-testid="player-commitment-center-strength" data-mode="strength">
-      <header className={styles.routeHeader} data-testid="player-commitment-route-header-strength">
+    <section
+      className={styles.root}
+      data-testid={`player-commitment-center-${mode}`}
+      data-mode={mode}
+    >
+      <header className={styles.routeHeader} data-testid={`player-commitment-route-header-${mode}`}>
         <div className={styles.routeEyebrow}>{model?.eyebrow || "Physical development"}</div>
         <div className={styles.routeTitleRow}>
           <h1>{model?.title || "Strength & Conditioning"}</h1>
