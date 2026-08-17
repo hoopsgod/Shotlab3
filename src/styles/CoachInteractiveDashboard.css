@@ -10,6 +10,12 @@
   width: 100%;
 }
 
+/* Events has a source-owned month calendar. Older shared route ordering gives the
+   command bar order 1 and decision stage order 2; keep the calendar between them. */
+.performance-shell--coach [data-testid="coach-events-interactive-dashboard"] > .coachEventsCalendar {
+  order: 2 !important;
+}
+
 /* Canonical coach metric selection: no neon rail or glow. This stylesheet is imported
    after the CSS module that defines InteractiveMetricStrip, so it owns the final state. */
 .performance-shell--coach [data-testid="coach-players-metric-strip"] button::after,
