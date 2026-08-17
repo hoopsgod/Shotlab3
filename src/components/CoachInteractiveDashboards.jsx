@@ -41,10 +41,10 @@ const safeCount = (value) => {
 
 const eventTypeLabel = (value = "") => {
   const type = String(value || "").toLowerCase();
-  if (type === "run") return "Practice";
-  if (type === "game") return "Game";
-  if (type === "clinic") return "Camp";
-  if (type === "recovery") return "Meeting";
+  if (type === "run" || type === "practice") return "Practice";
+  if (type === "game" || type === "games") return "Game";
+  if (type === "clinic" || type === "camp") return "Camp";
+  if (type === "recovery" || type === "meeting" || type === "film") return "Meeting";
   if (type === "challenge") return "Challenge";
   return "Team event";
 };
@@ -114,7 +114,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
       <SecondaryPageIntro
-        eyebrow="Schedule"
+        eyebrow="SCHEDULE"
         title="Events"
         summary="Plan practices, games and team moments."
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
@@ -122,7 +122,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
       />
       <CoachRoutePerformanceStage
         kind="schedule"
-        eyebrow="Next team moment"
+        eyebrow="NEXT TEAM MOMENT"
         title={next ? next.title || "Next team event" : "Calendar is open"}
         detail={nextMomentDetail}
         tone={!next ? "info" : nextAwaiting ? "attention" : "positive"}
