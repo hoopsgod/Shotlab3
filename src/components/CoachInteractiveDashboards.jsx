@@ -99,15 +99,16 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   const nextMomentDetail = next
     ? `${eventTypeLabel(next.type || nextEvent?.type)} · ${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"} · ${next.location || "Location TBD"} · ${nextResponded} / ${nextRoster || nextResponded} responded`
     : "Create the next team event to begin RSVP tracking and player communication.";
-  const nextMomentAction = next
-    ? (typeof onOpenEvent === "function" && nextEvent?.id != null ? { label: "View Event", onClick: () => onOpenEvent(nextEvent.id) } : undefined)
-    : (typeof onCreateEvent === "function" ? { label: "Create Event", onClick: onCreateEvent } : undefined);
+  const nextMomentAction = next && typeof onOpenEvent === "function" && nextEvent?.id != null
+    ? { label: "View Event", onClick: () => onOpenEvent(nextEvent.id) }
+    : undefined;
   const metricItems = [
     { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
-    { key: "gaps", label: "Missing RSVPs", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
+    { key: "gaps", label: "Awaiting RSVP", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
     { key: "all", label: "Response Rate", displayLabel: "Response", value: next ? `${briefing.responseRate}%` : "—", detail: next ? `${briefing.confirmed} responses recorded` : "No RSVP signal", tone: !next ? "info" : briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
   ];
   const showingPast = status === "past";
+  const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
@@ -175,6 +176,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
           </SecondaryPageEvidence>
         </SecondaryPageDisclosure>
       </div>
+      <div className="coachEventsMobileListHeading" data-testid="coach-events-mobile-list-heading">{listHeading}</div>
     </SecondaryPageShell>
   );
 }
