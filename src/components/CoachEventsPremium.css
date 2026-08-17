@@ -288,6 +288,10 @@
     display: none;
   }
 
+  .coachEventsPremiumWorkspace:has(.coachEventsPremiumEmptyState) .secondaryPageToolbar {
+    display: none;
+  }
+
   .coachEventsMobileListHeading {
     order: 40 !important;
     display: flex;
