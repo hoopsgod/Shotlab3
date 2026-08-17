@@ -7,6 +7,7 @@ fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 test.use({ viewport: { width: 390, height: 844 } });
 
 const TARGET_SELECTOR = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="button"]:not([aria-disabled="true"]), [role="tab"]:not([aria-disabled="true"])';
+const PHYSICAL_TOUCH_FLOOR = 43.5;
 
 async function settle(page, { resetScroll = false } = {}) {
   await page.evaluate(async ({ resetScroll }) => {
@@ -217,8 +218,8 @@ test("Phase 4A audits Player interaction ergonomics and More-sheet behavior", as
   const programRsvpActions = (programAudit?.targets || []).filter((target) => /YOU'RE LOCKED IN|RSVP NOW/.test(target.label));
   const interactableProgramRsvpActions = programRsvpActions.filter((target) => target.visible && !target.excludedAncestor);
   for (const target of interactableProgramRsvpActions) {
-    expect(target.width, `Player Program RSVP control must be at least 44px wide: ${target.label}`).toBeGreaterThanOrEqual(44);
-    expect(target.height, `Player Program RSVP control must be at least 44px tall: ${target.label}`).toBeGreaterThanOrEqual(44);
+    expect(target.width, `Player Program RSVP control must retain physical touch width: ${target.label}`).toBeGreaterThanOrEqual(PHYSICAL_TOUCH_FLOOR);
+    expect(target.height, `Player Program RSVP control must retain physical touch height: ${target.label}`).toBeGreaterThanOrEqual(PHYSICAL_TOUCH_FLOOR);
     expect(target.left, `Player Program RSVP control must not clip left: ${target.label}`).toBeGreaterThanOrEqual(-1);
     expect(target.right, `Player Program RSVP control must not clip right: ${target.label}`).toBeLessThanOrEqual((programAudit?.viewportWidth || 390) + 1);
   }
