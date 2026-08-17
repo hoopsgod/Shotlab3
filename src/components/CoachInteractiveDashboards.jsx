@@ -19,19 +19,17 @@ import {
 } from "../lib/coachActionBriefings.js";
 import "./CoachEventsPremium.css";
 
-const EVENTS_FILTER_RUNTIME_CSS = `
-@media (max-width: 760px) {
-  .coachEventsFilterShell input[type="search"] {
-    border: 0 !important;
-    border-radius: 0 !important;
-    outline: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-  }
-}
-`;
+const normalizeEventsSearchSurface = (node) => {
+  const input = node?.querySelector?.('input[type="search"]');
+  if (!input) return;
+  input.style.setProperty("border", "0", "important");
+  input.style.setProperty("border-radius", "0", "important");
+  input.style.setProperty("outline", "0", "important");
+  input.style.setProperty("background", "transparent", "important");
+  input.style.setProperty("box-shadow", "none", "important");
+  input.style.setProperty("-webkit-appearance", "none", "important");
+  input.style.setProperty("appearance", "none", "important");
+};
 
 const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   if (!action) return undefined;
@@ -124,11 +122,9 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   const showingPast = status === "past";
   const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
   const showPremiumEmptyState = !showingPast && briefing.upcoming === 0;
-  const eventsFilterTokens = { "--sl-line-strong": "transparent", "--radius-md": "0px" };
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
-      <style>{EVENTS_FILTER_RUNTIME_CSS}</style>
       <SecondaryPageIntro
         eyebrow="SCHEDULE"
         title="Events"
@@ -149,7 +145,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         testId="coach-events-decision-brief"
       />
       <SecondaryPageToolbar testId="coach-events-toolbar">
-        <div className="coachEventsFilterShell" style={eventsFilterTokens}>
+        <div className="coachEventsFilterShell" ref={normalizeEventsSearchSurface}>
           <DashboardFilterRail
             surface="light"
             searchValue={query}
