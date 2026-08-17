@@ -3,6 +3,7 @@
 }
 
 .performance-workspace [data-testid="player-completion-cue"] button {
+  pointer-events: auto;
   touch-action: manipulation;
   transition: transform 140ms ease;
 }
