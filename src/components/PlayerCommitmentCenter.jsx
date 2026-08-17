@@ -6,6 +6,7 @@ import {
   EventsSectionHeader,
   EventsTitleStage,
   EventsWeekRail,
+  NextEventSurface,
   formatEventDayStamp,
   formatMonthLabel,
 } from "./EventsMobilePrimitives.jsx";
@@ -115,58 +116,37 @@ function PlayerEventRow({ item, confirmed, onOpen }) {
 
 function PlayerEventsExperience({ state, model, today, detailsOpen, setDetailsOpen, detailsRef, onAction, children, selectedDate, setSelectedDate }) {
   const focus = state.upcoming[0] || null;
-  const focusConfirmed = Boolean(focus && state.responseIds.has(clean(focus?.id)));
-  const focusNeedsResponse = Boolean(focus && !focusConfirmed);
-  const focusStamp = formatEventDayStamp(rowDate(focus));
+  const confirmed = Boolean(focus && state.responseIds.has(clean(focus?.id)));
+  const stamp = formatEventDayStamp(rowDate(focus));
   const runwayItems = state.upcoming.slice(0, RUNWAY_SLOTS);
-
-  const revealDetails = ({ runPrimaryAction = false } = {}) => {
+  const revealDetails = (runAction = false) => {
     setDetailsOpen(true);
     requestAnimationFrame(() => {
       detailsRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
-      if (runPrimaryAction && model?.primaryAction) window.setTimeout(() => onAction?.(model.primaryAction), 140);
+      if (runAction && model?.primaryAction) window.setTimeout(() => onAction?.(model.primaryAction), 140);
     });
   };
-
   const activeDate = selectedDate || rowDate(focus) || today;
-  const selectDate = (date) => {
-    setSelectedDate(date);
-    if (state.upcoming.some((item) => rowDate(item) === date)) revealDetails();
-  };
 
   return (
     <section className={`${styles.root} ${styles.eventsRoot}`} data-testid="player-commitment-center-events" data-mode="events">
       <EventsTitleStage role="player" month={formatMonthLabel(rowDate(focus) || activeDate)} />
-
-      <section className={styles.eventsHero} data-testid="player-events-next-up" data-response-state={focusNeedsResponse ? "needed" : focus ? "going" : "clear"}>
-        <div className={styles.eventsHeroTopline}>
-          <span>NEXT UP{focus ? ` · ${focusStamp.weekday} ${focusStamp.day}` : ""}</span>
-          {focus ? <EventTypeBadge type={focus?.type} /> : null}
-        </div>
-        {focus ? (
-          <>
-            <h2>{itemTitle(focus)}</h2>
-            <EventTimeLocation time={focus?.time} location={itemLocation(focus)} />
-            <div className={styles.eventsHeroAction}>
-              <div>
-                <strong>{focusNeedsResponse ? "RSVP REQUIRED" : "✓ GOING"}</strong>
-                <small>{focusNeedsResponse ? "Your response is still open." : "Your attendance response is set."}</small>
-              </div>
-              <button type="button" onClick={() => revealDetails({ runPrimaryAction: focusNeedsResponse })}>
-                {focusNeedsResponse ? "Respond" : "Change response"} <span aria-hidden="true">→</span>
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className={styles.eventsEmptyHero}>
-            <h2>You’re clear for now.</h2>
-            <p>No upcoming team event is scheduled. Your next commitment will appear here when it is published.</p>
-          </div>
-        )}
-      </section>
-
-      <EventsWeekRail rows={state.upcoming} anchorDate={rowDate(focus) || activeDate} selectedDate={activeDate} onSelectDate={selectDate} />
-
+      <NextEventSurface
+        testId="player-events-next-up"
+        stamp={focus ? `${stamp.weekday} ${stamp.day}` : ""}
+        title={focus ? itemTitle(focus) : ""}
+        type={focus?.type}
+        time={focus?.time}
+        location={itemLocation(focus || {})}
+        status={confirmed ? "✓ GOING" : "RSVP REQUIRED"}
+        detail={confirmed ? "Your attendance response is set." : "Your response is still open."}
+        action={confirmed ? "Change response" : "Respond"}
+        onAction={() => revealDetails(!confirmed)}
+        calm={confirmed}
+        emptyTitle="You’re clear for now."
+        emptyCopy="No upcoming team event is scheduled. Your next commitment will appear here when it is published."
+      />
+      <EventsWeekRail rows={state.upcoming} anchorDate={rowDate(focus) || activeDate} selectedDate={activeDate} onSelectDate={setSelectedDate} />
       <section className={styles.eventSchedule} data-testid="player-events-upcoming-list">
         <EventsSectionHeader eyebrow="MY SCHEDULE" title="Upcoming" meta={`${state.upcoming.length} event${state.upcoming.length === 1 ? "" : "s"}`} />
         <div className={styles.eventRows}>
@@ -175,25 +155,14 @@ function PlayerEventsExperience({ state, model, today, detailsOpen, setDetailsOp
               key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item)}`}
               item={item}
               confirmed={state.responseIds.has(clean(item?.id))}
-              onOpen={() => revealDetails()}
+              onOpen={() => { setSelectedDate(rowDate(item)); revealDetails(); }}
             />
           )) : <div className={styles.eventsEmptyRow}>No upcoming events. You’re clear for now.</div>}
         </div>
       </section>
-
       <EventsMonthPanel rows={state.upcoming} anchorDate={rowDate(focus) || activeDate} selectedDate={activeDate} onSelectDate={setSelectedDate} />
-
-      <details
-        ref={detailsRef}
-        className={`${styles.details} ${styles.eventDetails}`}
-        open={detailsOpen}
-        onToggle={(event) => setDetailsOpen(event.currentTarget.open)}
-        data-testid="player-commitment-details-events"
-      >
-        <summary>
-          <div><span>EVENT DETAILS</span><strong>Schedule & RSVP</strong><small>Open notes, attendance response, and past events.</small></div>
-          <i aria-hidden="true">+</i>
-        </summary>
+      <details ref={detailsRef} className={`${styles.details} ${styles.eventDetails}`} open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)} data-testid="player-commitment-details-events">
+        <summary><div><span>EVENT DETAILS</span><strong>Schedule & RSVP</strong><small>Open notes, attendance response, and past events.</small></div><i aria-hidden="true">+</i></summary>
         <div className={styles.detailBody}>{children}</div>
       </details>
     </section>
@@ -273,11 +242,7 @@ export default function PlayerCommitmentCenter({
   };
 
   return (
-    <section
-      className={styles.root}
-      data-testid={`player-commitment-center-${mode}`}
-      data-mode={mode}
-    >
+    <section className={styles.root} data-testid={`player-commitment-center-${mode}`} data-mode={mode}>
       <header className={styles.routeHeader} data-testid={`player-commitment-route-header-${mode}`}>
         <div className={styles.routeEyebrow}>{model?.eyebrow || "Physical development"}</div>
         <div className={styles.routeTitleRow}>
@@ -290,42 +255,19 @@ export default function PlayerCommitmentCenter({
       <div className={styles.hero} data-testid="player-commitment-hero-strength">
         <div className={styles.heroTopline}>
           <span className={styles.eyebrow}>{eyebrow}</span>
-          <span className={`${styles.status} ${requiresResponse ? styles.statusOpen : styles.statusSet}`}>
-            <i aria-hidden="true" /> {statusLabel}
-          </span>
+          <span className={`${styles.status} ${requiresResponse ? styles.statusOpen : styles.statusSet}`}><i aria-hidden="true" /> {statusLabel}</span>
         </div>
-
         {state.focus ? (
           <div className={styles.heroBody}>
-            <div className={styles.dateTile} aria-label={`${focusDate.month} ${focusDate.day}`}>
-              <span>{focusDate.month}</span>
-              <strong>{focusDate.day}</strong>
-              <small>{focusDate.weekday}</small>
-            </div>
+            <div className={styles.dateTile} aria-label={`${focusDate.month} ${focusDate.day}`}><span>{focusDate.month}</span><strong>{focusDate.day}</strong><small>{focusDate.weekday}</small></div>
             <div className={styles.heroCopy}>
-              <div className={styles.iconTitle}>
-                <span className={styles.icon}><CommitmentIcon mode={mode} /></span>
-                <div>
-                  <h2>{itemTitle(state.focus, mode)}</h2>
-                  <p>{clean(state.focus?.time) || "Time TBD"} · {itemLocation(state.focus, mode)}</p>
-                </div>
-              </div>
-              <button type="button" className={styles.primaryAction} onClick={revealDetails}>
-                {requiresResponse ? "Respond now" : "Open session"} <span aria-hidden="true">→</span>
-              </button>
+              <div className={styles.iconTitle}><span className={styles.icon}><CommitmentIcon mode={mode} /></span><div><h2>{itemTitle(state.focus, mode)}</h2><p>{clean(state.focus?.time) || "Time TBD"} · {itemLocation(state.focus, mode)}</p></div></div>
+              <button type="button" className={styles.primaryAction} onClick={revealDetails}>{requiresResponse ? "Respond now" : "Open session"} <span aria-hidden="true">→</span></button>
             </div>
           </div>
         ) : (
-          <div className={styles.emptyHero}>
-            <span className={styles.icon}><CommitmentIcon mode={mode} /></span>
-            <div>
-              <h2>{emptyTitle}</h2>
-              <p>Your next physical-development block will appear here when it is published.</p>
-            </div>
-            <button type="button" className={styles.secondaryAction} onClick={revealDetails}>Open S&C workspace →</button>
-          </div>
+          <div className={styles.emptyHero}><span className={styles.icon}><CommitmentIcon mode={mode} /></span><div><h2>{emptyTitle}</h2><p>Your next physical-development block will appear here when it is published.</p></div><button type="button" className={styles.secondaryAction} onClick={revealDetails}>Open S&C workspace →</button></div>
         )}
-
         <div className={styles.signalStrip} aria-label="Strength commitment signals">
           <span><strong>{state.upcoming.length}</strong><small>Upcoming</small></span>
           <span><strong>{state.unresolved.length}</strong><small>Need response</small></span>
@@ -334,19 +276,9 @@ export default function PlayerCommitmentCenter({
       </div>
 
       <div className={styles.queue} data-testid="player-commitment-queue-strength" data-runway-slots="3">
-        <div className={styles.queueHeading}>
-          <div><span>COMING UP</span><strong>Development runway</strong></div>
-          <small>{Math.min(3, state.upcoming.length)} of {state.upcoming.length}</small>
-        </div>
+        <div className={styles.queueHeading}><div><span>COMING UP</span><strong>Development runway</strong></div><small>{Math.min(3, state.upcoming.length)} of {state.upcoming.length}</small></div>
         <div className={styles.queueList}>
-          {runwayItems.map((item) => (
-            <QueueRow
-              key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item, mode)}`}
-              item={item}
-              mode={mode}
-              confirmed={state.confirmed.some((confirmedItem) => clean(confirmedItem?.id) === clean(item?.id))}
-            />
-          ))}
+          {runwayItems.map((item) => <QueueRow key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item, mode)}`} item={item} mode={mode} confirmed={state.confirmed.some((confirmedItem) => clean(confirmedItem?.id) === clean(item?.id))} />)}
           {Array.from({ length: runwayPlaceholders }, (_, index) => (
             <div className={`${styles.queueRow} ${styles.queuePlaceholder}`} data-empty-slot="true" key={`empty-runway-${index}`}>
               <div className={styles.queueDate}><strong>—</strong><span>OPEN</span></div>
@@ -357,17 +289,8 @@ export default function PlayerCommitmentCenter({
         </div>
       </div>
 
-      <details
-        ref={detailsRef}
-        className={styles.details}
-        open={detailsOpen}
-        onToggle={(event) => setDetailsOpen(event.currentTarget.open)}
-        data-testid="player-commitment-details-strength"
-      >
-        <summary>
-          <div><span>FULL WORKSPACE</span><strong>Session details & training log</strong><small>Open full S&C schedule, RSVP controls, and logging.</small></div>
-          <i aria-hidden="true">+</i>
-        </summary>
+      <details ref={detailsRef} className={styles.details} open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)} data-testid="player-commitment-details-strength">
+        <summary><div><span>FULL WORKSPACE</span><strong>Session details & training log</strong><small>Open full S&C schedule, RSVP controls, and logging.</small></div><i aria-hidden="true">+</i></summary>
         <div className={styles.detailBody}>{children}</div>
       </details>
     </section>
