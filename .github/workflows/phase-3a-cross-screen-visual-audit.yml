@@ -30,8 +30,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Phase 5 reconciliation and premium mobile contracts
-        run: node --test tests/phase-5-cross-screen-reconciliation.test.mjs tests/app-feedback-system.test.mjs tests/mobile-premium-visual-system-2026.test.mjs tests/mobile-premium-first-impression-regression.test.mjs tests/mobile-secondary-page-parity-contract.test.mjs tests/mobile-events-system-reset.test.mjs
+      - name: Verify Phase 5 reconciliation contracts
+        run: node --test tests/phase-5-cross-screen-reconciliation.test.mjs
+
+      - name: Verify app feedback contracts
+        run: node --test tests/app-feedback-system.test.mjs
+
+      - name: Verify premium mobile visual contracts
+        run: node --test tests/mobile-premium-visual-system-2026.test.mjs
+
+      - name: Verify first-impression regression contracts
+        run: node --test tests/mobile-premium-first-impression-regression.test.mjs
+
+      - name: Verify secondary-page parity contracts
+        run: node --test tests/mobile-secondary-page-parity-contract.test.mjs
+
+      - name: Verify mobile Events contracts
+        run: node --test tests/mobile-events-system-reset.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
