@@ -40,9 +40,10 @@ test('Coach Events schedule intelligence is now week-first and source-owned', ()
 
 test('shared calendar primitives keep readable event marks, focus geometry, and compact mobile containment', () => {
   assert.match(sharedCss, /\.eventsWeekRail__day\s*\{[\s\S]*min-height:\s*58px/);
-  assert.match(sharedCss, /\.eventsMonthPanel__day\s*\{[\s\S]*min-height:\s*44px/);
+  assert.match(sharedCss, /#root \.eventsMonthPanel__day\s*\{[\s\S]*min-height:\s*44px/);
   assert.match(sharedCss, /\.eventsWeekRail__days\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,minmax\(0,1fr\)\)/);
-  assert.match(sharedCss, /\.eventsMonthPanel__weekdays,.eventsMonthPanel__grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,minmax\(0,1fr\)\)/);
+  assert.match(sharedCss, /#root \.eventsMonthPanel__weekdays,#root \.eventsMonthPanel__grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,minmax\(0,1fr\)\)/);
+  assert.match(sharedCss, /#root \.eventsMonthPanel\{all:unset;display:block/);
   assert.match(sharedCss, /:focus-visible/);
   assert.ok(
     /prefers-reduced-motion: reduce/.test(sharedCss) || !/(?:animation|transition)\s*:/.test(sharedCss),
