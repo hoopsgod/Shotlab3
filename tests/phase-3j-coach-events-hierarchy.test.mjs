@@ -40,7 +40,7 @@ test('Coach Events schedule intelligence is now week-first and source-owned', ()
 
 test('shared calendar primitives keep readable event marks, focus geometry, and compact mobile containment', () => {
   assert.match(sharedCss, /\.eventsWeekRail__day\s*\{[\s\S]*min-height:\s*58px/);
-  assert.match(sharedCss, /\.eventsMonthPanel__day\s*\{[\s\S]*min-height:\s*40px/);
+  assert.match(sharedCss, /\.eventsMonthPanel__day\s*\{[\s\S]*min-height:\s*44px/);
   assert.match(sharedCss, /:focus-visible/);
   assert.match(sharedCss, /@media \(max-width: 390px\)/);
   assert.match(sharedCss, /prefers-reduced-motion: reduce/);
