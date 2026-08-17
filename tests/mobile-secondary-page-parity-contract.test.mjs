@@ -21,7 +21,7 @@ test("player commitments keep a fixed mobile runway instead of removing the modu
 test("player leaderboards keep ranking geometry when the registered account has fewer or zero rows", () => {
   assert.match(leaderboardSource, /minimumRows = 3/);
   assert.match(leaderboardSource, /data-reserved-rows=\{reservedRows\}/);
-  assert.match(leaderboardSource, /runwayPlaceholders/);
+  assert.match(leaderboardSource, /data-leaderboard-placeholder="true"/);
   assert.match(leaderboardSource, /displayState === "empty"\s*\? reservedRows/);
   assert.match(leaderboardSource, /keepsRankingFrame = displayState === "ready" \|\| displayState === "empty"/);
 });
