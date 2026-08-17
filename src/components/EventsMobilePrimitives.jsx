@@ -1,4 +1,5 @@
 import "./EventsMobileSystem.css";
+import "./EventsMobileCompatibility.css";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
