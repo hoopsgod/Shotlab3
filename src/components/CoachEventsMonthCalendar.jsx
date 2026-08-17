@@ -52,20 +52,28 @@ const formatSelectedDate = (key = "") => {
   return date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 };
 
+const monthDistance = (fromDate, toDate) => (
+  (toDate.getFullYear() - fromDate.getFullYear()) * 12 + (toDate.getMonth() - fromDate.getMonth())
+);
+
 export default function CoachEventsMonthCalendar({ rows = [], activeType = "all", onOpenEvent, onCreateEvent }) {
   const validRows = useMemo(() => rows.filter((row) => parseDateKey(row?.date)), [rows]);
   const typeRows = useMemo(() => validRows.filter((row) => sameEventType(row, activeType)), [validRows, activeType]);
   const nextRow = useMemo(() => validRows.find((row) => row.statusKey === "upcoming") || validRows[0] || null, [validRows]);
   const anchorDate = parseDateKey(nextRow?.date) || new Date();
+  const anchorYear = anchorDate.getFullYear();
+  const anchorMonth = anchorDate.getMonth();
   const [monthOffset, setMonthOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState("");
 
   const visibleMonth = useMemo(
-    () => new Date(anchorDate.getFullYear(), anchorDate.getMonth() + monthOffset, 1),
-    [anchorDate.getFullYear(), anchorDate.getMonth(), monthOffset],
+    () => new Date(anchorYear, anchorMonth + monthOffset, 1),
+    [anchorYear, anchorMonth, monthOffset],
   );
   const visibleMonthKey = monthKey(visibleMonth);
-  const todayKey = dateKey(new Date());
+  const currentDate = new Date();
+  const todayKey = dateKey(currentDate);
+  const currentMonthKey = monthKey(currentDate);
 
   const rowsByDate = useMemo(() => {
     const map = new Map();
@@ -104,17 +112,16 @@ export default function CoachEventsMonthCalendar({ rows = [], activeType = "all"
   }, [visibleMonth, rowsByDate]);
 
   const monthLabel = visibleMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" });
-  const currentAnchorMonth = monthKey(anchorDate);
-  const isAnchorMonth = visibleMonthKey === currentAnchorMonth;
+  const isCurrentMonth = visibleMonthKey === currentMonthKey;
 
   const shiftMonth = (direction) => {
     setMonthOffset((value) => value + direction);
     setSelectedDate("");
   };
 
-  const resetMonth = () => {
-    setMonthOffset(0);
-    setSelectedDate(nextRow?.date || "");
+  const goToToday = () => {
+    setMonthOffset(monthDistance(anchorDate, currentDate));
+    setSelectedDate(todayKey);
   };
 
   return (
@@ -126,7 +133,7 @@ export default function CoachEventsMonthCalendar({ rows = [], activeType = "all"
           <p>{monthRows.length} {monthRows.length === 1 ? "event" : "events"} this month</p>
         </div>
         <div className="coachEventsCalendar__nav" aria-label="Calendar month navigation">
-          {!isAnchorMonth ? <button type="button" className="coachEventsCalendar__today" onClick={resetMonth}>Today</button> : null}
+          {!isCurrentMonth ? <button type="button" className="coachEventsCalendar__today" onClick={goToToday}>Today</button> : null}
           <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)}>‹</button>
           <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)}>›</button>
         </div>
