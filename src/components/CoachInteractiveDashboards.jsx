@@ -105,10 +105,11 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   const metricItems = [
     { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
     { key: "gaps", label: "Awaiting RSVP", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
-    { key: "all", label: "Response Rate", displayLabel: "Response", value: next ? `${briefing.responseRate}%` : "—", detail: next ? `${briefing.confirmed} responses recorded` : "No RSVP signal", tone: !next ? "info" : briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
+    { key: "all", label: "Response Rate", displayLabel: "Response", value: next ? `${briefing.responseRate}%` : "—", detail: next ? `${briefing.responded} responses recorded` : "No RSVP signal", tone: !next ? "info" : briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
   ];
   const showingPast = status === "past";
   const listHeading = showingPast ? "Past Events" : status === "gaps" ? "RSVP Gaps" : status === "all" ? "Events" : "Upcoming";
+  const showPremiumEmptyState = !showingPast && briefing.upcoming === 0;
 
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard" className="coachEventsPremiumWorkspace">
@@ -177,6 +178,12 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         </SecondaryPageDisclosure>
       </div>
       <div className="coachEventsMobileListHeading" data-testid="coach-events-mobile-list-heading">{listHeading}</div>
+      {showPremiumEmptyState ? (
+        <section className="coachEventsPremiumEmptyState" data-testid="coach-events-premium-empty-state" aria-labelledby="coach-events-empty-title">
+          <h2 id="coach-events-empty-title">Nothing scheduled yet</h2>
+          <p>Your next practice, game or team event will appear here.</p>
+        </section>
+      ) : null}
     </SecondaryPageShell>
   );
 }
