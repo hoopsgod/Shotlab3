@@ -6,6 +6,7 @@ const previewSource = readFileSync(new URL("../src/components/CompactLeaderboard
 const hubSource = readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx", import.meta.url), "utf8");
 const dashboardSource = readFileSync(new URL("../src/components/CoachInteractiveDashboards.jsx", import.meta.url), "utf8");
 const enhancerSource = readFileSync(new URL("../scripts/apply-phase3l-coach-leaderboard-hierarchy.mjs", import.meta.url), "utf8");
+const parityEnhancerSource = readFileSync(new URL("../scripts/apply-mobile-coach-intelligence-parity.mjs", import.meta.url), "utf8");
 const hierarchyCss = readFileSync(new URL("../public/shotlab-phase3l-coach-leaderboard-hierarchy.css", import.meta.url), "utf8");
 
 test("coach leaderboard previews never fabricate open ranking slots", () => {
@@ -36,6 +37,14 @@ test("production Coach leaderboard pulse is weekly-specific, truthful, and never
   assert.match(enhancerSource, /rows\.slice\(0,3\)\.map/);
   assert.doesNotMatch(enhancerSource, /Open rank/);
   assert.doesNotMatch(enhancerSource, /data-leaderboard-placeholder/);
+});
+
+test("late Coach mobile parity preserves truthful natural-length Leaderboards", () => {
+  assert.match(parityEnhancerSource, /Coach Leaderboards now owns truthful natural-length ranking geometry/);
+  assert.match(parityEnhancerSource, /rows\.slice\(0,\s*3\)/);
+  assert.match(parityEnhancerSource, /Coach leaderboard parity must not fabricate ranking positions/);
+  assert.doesNotMatch(parityEnhancerSource, /coach-open-rank/);
+  assert.doesNotMatch(parityEnhancerSource, /Player activity will fill this ranking position/);
 });
 
 test("mobile Coach Leaderboards fits three signals in-view and flattens the lower pulse hierarchy", () => {
