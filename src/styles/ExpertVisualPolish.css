@@ -96,6 +96,7 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
 .performance-shell .player-training-score-zone input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
+  font-size: 50px !important;
   font-variant-numeric: tabular-nums lining-nums;
 }
 
