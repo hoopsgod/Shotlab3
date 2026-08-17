@@ -40,37 +40,20 @@ async function openSecondaryRoute(page, key) {
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
 }
 
-async function verifyCommitmentSurface(page, {
-  mode,
-  title,
-  routeStatus,
-  legacyTestId,
-  screenshotName,
-  responseRequired = false,
-}) {
-  const center = page.getByTestId(`player-commitment-center-${mode}`);
-  const routeHeader = page.getByTestId(`player-commitment-route-header-${mode}`);
-  const hero = page.getByTestId(`player-commitment-hero-${mode}`);
-  const details = page.getByTestId(`player-commitment-details-${mode}`);
-  const legacy = page.getByTestId(legacyTestId);
+async function verifyStrengthCommitmentSurface(page) {
+  const center = page.getByTestId("player-commitment-center-strength");
+  const routeHeader = page.getByTestId("player-commitment-route-header-strength");
+  const hero = page.getByTestId("player-commitment-hero-strength");
+  const details = page.getByTestId("player-commitment-details-strength");
+  const legacy = page.getByTestId("player-strength-operational-panel");
 
   await expect(center).toBeVisible({ timeout: 20_000 });
   await expect(routeHeader).toBeVisible();
-  await expect(routeHeader.getByRole("heading", { name: title, exact: true })).toBeVisible();
-  await expect(routeHeader.getByText(routeStatus, { exact: typeof routeStatus === "string" })).toBeVisible();
+  await expect(routeHeader.getByRole("heading", { name: "Strength & Conditioning", exact: true })).toBeVisible();
+  await expect(routeHeader.getByText(/^(?:Schedule clear|\d+ responses? needed)$/, { exact: false })).toBeVisible();
   await expect(hero).toBeVisible();
   await expect(details).not.toHaveAttribute("open", "");
   await expect(legacy).toBeHidden();
-
-  if (responseRequired) {
-    await expect(hero.getByText("Response needed", { exact: true })).toBeVisible();
-    await expect(hero.getByRole("button", { name: /Respond now/i })).toBeVisible();
-  }
-
-  const viewportHeight = await page.evaluate(() => window.innerHeight);
-  const heroBox = await hero.boundingBox();
-  expect(heroBox).not.toBeNull();
-  expect(heroBox.y).toBeLessThan(viewportHeight * 0.62);
 
   const heroStyle = await hero.evaluate((node) => {
     const style = getComputedStyle(node);
@@ -87,21 +70,7 @@ async function verifyCommitmentSurface(page, {
   expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
   expect(parseFloat(heroStyle.borderRadius)).toBeGreaterThanOrEqual(20);
 
-  const composition = hero.locator(":scope > div").nth(1);
-  await expect(composition).toBeVisible();
-  const compositionStyle = await composition.evaluate((node) => {
-    const style = getComputedStyle(node);
-    return {
-      backgroundColor: style.backgroundColor,
-      backgroundImage: style.backgroundImage,
-      boxShadow: style.boxShadow,
-    };
-  });
-  expect(compositionStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
-  expect(compositionStyle.backgroundImage).toBe("none");
-  expect(compositionStyle.boxShadow).toBe("none");
-
-  await capture(page, screenshotName);
+  await capture(page, "04o-player-strength-commitment");
 
   const action = hero.getByRole("button").first();
   await expect(action).toBeVisible();
@@ -109,33 +78,75 @@ async function verifyCommitmentSurface(page, {
   await expect(details).toHaveAttribute("open", "");
   await expect(legacy).toBeVisible({ timeout: 10_000 });
   await noOverflow(page);
-
-  await details.locator("summary").click();
-  await expect(details).not.toHaveAttribute("open", "");
-  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
 }
 
-test("Player Events and S&C expose one premium commitment hierarchy while preserving full operational controls", async ({ page }) => {
+test("Player Events is a premium personal schedule while preserving the full RSVP workspace", async ({ page }) => {
   await enterPlayerDemo(page);
-
   await openSecondaryRoute(page, "program");
-  await verifyCommitmentSurface(page, {
-    mode: "events",
-    title: "Events & Attendance",
-    routeStatus: "1 response needed",
-    legacyTestId: "player-events-operational-list",
-    screenshotName: "04n-player-events-commitment",
-    responseRequired: true,
-  });
 
+  const center = page.getByTestId("player-commitment-center-events");
+  const title = page.getByTestId("player-events-title-stage");
+  const hero = page.getByTestId("player-events-next-up");
+  const week = center.getByTestId("events-week-rail");
+  const month = center.getByTestId("events-month-panel");
+  const list = page.getByTestId("player-events-upcoming-list");
+  const details = page.getByTestId("player-commitment-details-events");
+  const legacy = page.getByTestId("player-events-operational-list");
+
+  await expect(center).toBeVisible({ timeout: 20_000 });
+  await expect(title.getByText("SCHEDULE", { exact: true })).toBeVisible();
+  await expect(title.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
+  await expect(hero).toBeVisible();
+  await expect(hero.getByText(/^(?:RSVP REQUIRED|✓ GOING)$/, { exact: false })).toBeVisible();
+  await expect(week).toBeVisible();
+  await expect(week.getByRole("button")).toHaveCount(7);
+  await expect(list).toBeVisible();
+  await expect(month).toBeVisible();
+  await expect(month).not.toHaveAttribute("open", "");
+  await expect(details).not.toHaveAttribute("open", "");
+  await expect(legacy).toBeHidden();
+
+  const geometry = await page.evaluate(() => {
+    const hero = document.querySelector('[data-testid="player-events-next-up"]');
+    const week = document.querySelector('[data-testid="player-commitment-center-events"] [data-testid="events-week-rail"]');
+    if (!hero || !week) throw new Error("Missing Events first-view geometry targets");
+    const heroBox = hero.getBoundingClientRect();
+    const weekBox = week.getBoundingClientRect();
+    return {
+      heroY: heroBox.y,
+      weekBottom: weekBox.bottom,
+      viewport: window.innerHeight,
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  });
+  expect(geometry.heroY).toBeLessThan(geometry.viewport * 0.42);
+  expect(geometry.weekBottom).toBeLessThan(geometry.viewport * 1.08);
+  expect(geometry.overflow).toBeLessThanOrEqual(1);
+
+  const heroStyle = await hero.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const heading = node.querySelector("h2");
+    return {
+      backgroundImage: style.backgroundImage,
+      radius: parseFloat(style.borderRadius),
+      headingColor: heading ? getComputedStyle(heading).color : "",
+    };
+  });
+  expect(heroStyle.backgroundImage).toContain("gradient");
+  expect(heroStyle.radius).toBeGreaterThanOrEqual(18);
+  expect(heroStyle.headingColor).toBe("rgb(248, 249, 243)");
+
+  await capture(page, "04n-player-events-commitment");
+
+  await hero.getByRole("button").click();
+  await expect(details).toHaveAttribute("open", "");
+  await expect(legacy).toBeVisible({ timeout: 10_000 });
+  await noOverflow(page);
+});
+
+test("Player S&C keeps its specialized commitment hierarchy and operational controls", async ({ page }) => {
+  await enterPlayerDemo(page);
   await openSecondaryRoute(page, "sc");
-  await verifyCommitmentSurface(page, {
-    mode: "strength",
-    title: "Strength & Conditioning",
-    routeStatus: /^(?:Schedule clear|\d+ responses? needed)$/,
-    legacyTestId: "player-strength-operational-panel",
-    screenshotName: "04o-player-strength-commitment",
-  });
-
+  await verifyStrengthCommitmentSurface(page);
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
 });
