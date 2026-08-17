@@ -39,7 +39,7 @@ export function EventsTitleStage({ month, onCreate, role = "player" }) {
       <div className="eventsTitleStage__eyebrow">SCHEDULE</div>
       <div className="eventsTitleStage__main">
         <h1>Events</h1>
-        {onCreate ? <button type="button" className="eventsTitleStage__action" onClick={onCreate}>+ New</button> : null}
+        {onCreate ? <button type="button" className="eventsTitleStage__action" aria-label="Create new event" onClick={onCreate}>+ New</button> : null}
       </div>
       <div className="eventsTitleStage__month">{month || "Schedule"}</div>
     </header>
