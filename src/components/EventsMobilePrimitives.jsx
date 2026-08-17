@@ -150,7 +150,7 @@ export function EventsMonthPanel({ rows = [], anchorDate, selectedDate, onSelect
   gridStart.setDate(1 - ((month.getDay() + 6) % 7));
 
   return (
-    <details className="eventsMonthPanel" data-testid="events-month-panel">
+    <details className="eventsMonthPanel" data-testid="events-month-panel" data-layout-role="quiet-secondary">
       <summary>
         <div><span>MONTH</span><strong>{formatMonthLabel(month)}</strong></div>
         <span className="eventsMonthPanel__control">View month <b aria-hidden="true">+</b></span>
