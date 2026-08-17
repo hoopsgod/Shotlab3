@@ -307,6 +307,10 @@
     overscroll-behavior-inline: auto;
   }
 
+  .stage[data-route-kind="leaderboards"] .metricDetail {
+    display: none;
+  }
+
   .stage .metric {
     min-height: 86px;
     padding: 12px 14px;
