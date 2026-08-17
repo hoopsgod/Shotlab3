@@ -43,7 +43,7 @@ test("Player Train opens a focused drill session with live Target Court feedback
   await expect(header.getByText("AT HOME SESSION", { exact: true })).toBeVisible();
   await expect(header.getByText("CURRENT WORK", { exact: true })).toBeVisible();
   await expect(header.getByText("SESSION PATH", { exact: true })).toBeVisible();
-  await expect(header.getByText("DRILL TARGET", { exact: true })).toBeVisible();
+  await expect(header.getByText("DRILL STANDARD", { exact: true })).toBeVisible();
   await expect(header.getByRole("button", { name: "Back to training plan" })).toBeVisible();
 
   const liveTarget = header.getByTestId("player-training-live-target");
