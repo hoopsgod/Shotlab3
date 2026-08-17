@@ -1,0 +1,350 @@
+/* ShotLab mobile Events system — shared Coach + Player grammar. */
+:root {
+  --events-paper: #f4f0e4;
+  --events-paper-strong: #fbf9f2;
+  --events-ink: #151916;
+  --events-muted: #69716b;
+  --events-line: rgba(21, 25, 22, .11);
+  --events-deep: #07100f;
+  --events-deep-2: #121916;
+  --events-lime: var(--accent, #c8ff1a);
+}
+
+.eventsTitleStage {
+  width: 100%;
+  min-width: 0;
+  padding: 3px 1px 1px;
+  color: var(--events-ink);
+}
+
+.eventsTitleStage__eyebrow,
+.eventsSectionKicker,
+.eventsSectionHeader > div > span,
+.eventsMonthPanel summary > div > span {
+  color: #667a18;
+  font: 820 9px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.eventsTitleStage__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 3px;
+}
+
+.eventsTitleStage h1 {
+  min-width: 0;
+  margin: 0;
+  color: var(--events-ink);
+  font: 790 clamp(36px, 10vw, 44px)/.94 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.058em;
+}
+
+.eventsTitleStage__month {
+  margin-top: 5px;
+  color: #69716b;
+  font: 630 12px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+}
+
+.eventsTitleStage__action {
+  min-width: 66px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid color-mix(in srgb, var(--events-lime) 62%, #1b211d);
+  border-radius: 12px;
+  background: var(--events-deep);
+  color: #f7f8f2;
+  box-shadow: none;
+  font: 780 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.005em;
+  cursor: pointer;
+}
+
+.eventsTitleStage__action:focus-visible,
+.eventsWeekRail__day:focus-visible,
+.eventsMonthPanel summary:focus-visible,
+.eventsMonthPanel__day:focus-visible,
+.eventsSectionHeader button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--events-lime) 32%, transparent);
+  outline-offset: 2px;
+}
+
+.eventsWeekRail {
+  min-width: 0;
+}
+
+.eventsSectionKicker {
+  margin: 0 0 8px 1px;
+  color: #59655d;
+}
+
+.eventsWeekRail__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  min-width: 0;
+  padding: 0;
+}
+
+.eventsWeekRail__day {
+  position: relative;
+  min-width: 0;
+  min-height: 58px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 6px 1px 5px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--events-ink);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.eventsWeekRail__day > span {
+  color: #828983;
+  font: 760 7px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .055em;
+}
+
+.eventsWeekRail__day > strong {
+  font: 760 17px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.03em;
+}
+
+.eventsWeekRail__day > i {
+  width: 13px;
+  height: 2px;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.eventsWeekRail__day[data-has-event="true"] > i { background: #7a827c; }
+.eventsWeekRail__day[data-has-event="true"] > i[data-event-tone="practice"] { background: #779116; }
+.eventsWeekRail__day[data-has-event="true"] > i[data-event-tone="game"] { background: #c36123; }
+.eventsWeekRail__day[data-has-event="true"] > i[data-event-tone="workout"] { background: #536a14; }
+.eventsWeekRail__day[data-has-event="true"] > i[data-event-tone="shooting"] { background: #2b6f63; }
+.eventsWeekRail__day[data-has-event="true"] > i[data-event-tone="camp"] { background: #256f83; }
+.eventsWeekRail__day[data-has-event="true"] > i[data-event-tone="meeting"] { background: #737a74; }
+
+.eventsWeekRail__day[data-today="true"] {
+  border-color: rgba(21, 25, 22, .10);
+}
+
+.eventsWeekRail__day[data-selected="true"] {
+  border-color: var(--events-deep);
+  background: var(--events-deep);
+  color: #f7f8f2;
+}
+
+.eventsWeekRail__day[data-selected="true"] > span { color: rgba(247, 248, 242, .60); }
+.eventsWeekRail__day[data-selected="true"] > i { background: var(--events-lime) !important; }
+
+.eventsTypeBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 7px;
+  border: 1px solid rgba(21, 25, 22, .11);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .48);
+  color: #5f6761;
+  font: 800 7.5px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.eventsTypeBadge[data-event-tone="practice"] { border-color: rgba(104, 129, 21, .21); color: #627719; }
+.eventsTypeBadge[data-event-tone="game"] { border-color: rgba(177, 84, 26, .21); color: #9d4f1f; }
+.eventsTypeBadge[data-event-tone="workout"] { border-color: rgba(83, 106, 20, .18); color: #536a14; }
+.eventsTypeBadge[data-event-tone="shooting"] { border-color: rgba(43, 111, 99, .20); color: #2b6f63; }
+.eventsTypeBadge[data-event-tone="camp"] { border-color: rgba(37, 111, 131, .20); color: #256f83; }
+
+.eventsTimeLocation {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 12px;
+  color: rgba(242, 246, 238, .64);
+  font: 590 11px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.eventsTimeLocation > span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.eventsTimeLocation svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .72;
+}
+
+.eventsTimeLocation--compact {
+  gap: 4px 8px;
+  color: #747c76;
+  font-size: 10px;
+}
+
+.eventsMonthPanel {
+  min-width: 0;
+  border-top: 1px solid var(--events-line);
+  border-bottom: 1px solid var(--events-line);
+  background: transparent;
+}
+
+.eventsMonthPanel > summary {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 1px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.eventsMonthPanel > summary::-webkit-details-marker { display: none; }
+.eventsMonthPanel summary > div { display: grid; gap: 4px; }
+.eventsMonthPanel summary > div > span { color: #707970; }
+.eventsMonthPanel summary > div > strong {
+  color: var(--events-ink);
+  font: 750 15px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.025em;
+}
+
+.eventsMonthPanel__control {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #5d665f;
+  font: 720 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.eventsMonthPanel__control svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.eventsMonthPanel__control b {
+  font: 500 18px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: transform .18s ease;
+}
+.eventsMonthPanel[open] .eventsMonthPanel__control b { transform: rotate(45deg); }
+
+.eventsMonthPanel__body {
+  padding: 7px 0 14px;
+}
+
+.eventsMonthPanel__weekdays,
+.eventsMonthPanel__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.eventsMonthPanel__weekdays { padding: 0 2px 6px; }
+.eventsMonthPanel__weekdays span {
+  text-align: center;
+  color: #929892;
+  font: 760 7px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.eventsMonthPanel__grid { gap: 2px; }
+
+.eventsMonthPanel__day {
+  position: relative;
+  min-width: 0;
+  min-height: 40px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #323833;
+  box-shadow: none;
+  cursor: pointer;
+}
+.eventsMonthPanel__day:disabled { opacity: .18; cursor: default; }
+.eventsMonthPanel__day > span { font: 690 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; }
+.eventsMonthPanel__day > i { width: 4px; height: 4px; border-radius: 50%; background: transparent; }
+.eventsMonthPanel__day[data-has-event="true"] > i { background: #6f776f; }
+.eventsMonthPanel__day[data-has-event="true"] > i[data-event-tone="practice"] { background: #779116; }
+.eventsMonthPanel__day[data-has-event="true"] > i[data-event-tone="game"] { background: #c36123; }
+.eventsMonthPanel__day[data-has-event="true"] > i[data-event-tone="workout"] { background: #536a14; }
+.eventsMonthPanel__day[data-has-event="true"] > i[data-event-tone="shooting"] { background: #2b6f63; }
+.eventsMonthPanel__day[data-selected="true"] { border-color: var(--events-deep); background: var(--events-deep); color: #f7f8f2; }
+.eventsMonthPanel__day[data-selected="true"] > i { background: var(--events-lime) !important; }
+.eventsMonthPanel__day[data-today="true"]:not([data-selected="true"]) { border-color: rgba(21, 25, 22, .14); }
+
+.eventsSectionHeader {
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+.eventsSectionHeader > div { min-width: 0; display: grid; gap: 4px; }
+.eventsSectionHeader > div > span { color: #707970; }
+.eventsSectionHeader > div > strong {
+  color: var(--events-ink);
+  font: 770 20px/1.05 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.035em;
+}
+.eventsSectionHeader > small {
+  color: #8a918b;
+  font: 660 9px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.eventsSectionHeader > button {
+  min-height: 38px;
+  padding: 0 1px;
+  border: 0;
+  background: transparent;
+  color: #556712;
+  font: 740 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+@media (max-width: 390px) {
+  .eventsTitleStage h1 { font-size: 36px; }
+  .eventsTitleStage__action { min-width: 62px; min-height: 40px; padding-inline: 11px; }
+  .eventsWeekRail__days { gap: 1px; }
+  .eventsWeekRail__day { min-height: 56px; border-radius: 9px; }
+  .eventsWeekRail__day > span { font-size: 6.5px; }
+  .eventsWeekRail__day > strong { font-size: 16px; }
+}
+
+@media (min-width: 760px) {
+  .eventsTitleStage,
+  .eventsWeekRail,
+  .eventsMonthPanel,
+  .eventsSectionHeader { max-width: 760px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eventsMonthPanel__control b { transition: none; }
+}
