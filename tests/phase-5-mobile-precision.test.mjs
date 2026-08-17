@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import { deriveShotLabPerformanceVisual } from "../src/lib/shotlabPerformanceVisual.js";
+import { validateProgramDrillScore } from "../src/lib/programDrillScoring.js";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -37,6 +38,25 @@ test("Target Court normalizes invalid and negative values without fabricating pr
     assert.equal(visual.targetPercent, 0);
     assert.equal(visual.aboveTarget, 0);
   }
+});
+
+test("bounded training score validation handles empty, zero, digit ranges, max, and invalid overflow", () => {
+  const standard = { max: 125 };
+  const zeroAllowed = { max: 125, allowZeroScore: true };
+
+  assert.deepEqual(validateProgramDrillScore("", standard), { ok: false, error: "Score is required." });
+  assert.deepEqual(validateProgramDrillScore("0", standard), { ok: false, error: "Score must be greater than 0." });
+  assert.deepEqual(validateProgramDrillScore("0", zeroAllowed), { ok: true, score: 0 });
+
+  for (const value of ["7", "42", "125"]) {
+    const result = validateProgramDrillScore(value, standard);
+    assert.equal(result.ok, true);
+    assert.equal(result.score, Number(value));
+  }
+
+  assert.deepEqual(validateProgramDrillScore("126", standard), { ok: false, error: "Score cannot exceed 125." });
+  assert.deepEqual(validateProgramDrillScore("-1", standard), { ok: false, error: "Score cannot be negative." });
+  assert.equal(validateProgramDrillScore("not-a-number", standard).ok, false);
 });
 
 test("Phase 5 mobile touch geometry keeps the accessibility floor as a minimum, not an exact implementation", async () => {
