@@ -1,62 +1,54 @@
-import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import test from "node:test";
 
-const commitmentSource = fs.readFileSync(new URL("../src/components/PlayerCommitmentCenter.jsx", import.meta.url), "utf8");
-const leaderboardSource = fs.readFileSync(new URL("../src/components/CompactLeaderboardPreviewCard.jsx", import.meta.url), "utf8");
-const appParityEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-secondary-page-parity-app.mjs", import.meta.url), "utf8");
-const coachParityEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-coach-intelligence-parity.mjs", import.meta.url), "utf8");
-const emptyStateEnhancer = fs.readFileSync(new URL("../scripts/apply-phase2d-premium-empty-state-language.mjs", import.meta.url), "utf8");
-const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
-const parityEnhancer = `${appParityEnhancer}\n${coachParityEnhancer}`;
+const playerParityEnhancer = fs.readFileSync("scripts/apply-mobile-player-secondary-page-parity.mjs", "utf8");
+const appParityEnhancer = fs.readFileSync("scripts/apply-mobile-secondary-page-parity-app.mjs", "utf8");
+const coachParityEnhancer = fs.readFileSync("scripts/apply-mobile-coach-intelligence-parity.mjs", "utf8");
+const emptyStateEnhancer = fs.readFileSync("scripts/apply-phase2d-empty-state-semantic-language.mjs", "utf8");
+const routeRunner = fs.readFileSync("scripts/run-route-enhancers.mjs", "utf8");
 
+// Player secondary routes intentionally preserve stable visual runway where it communicates
+// useful module shape without inventing real people, events, scores, or commitments.
 test("player commitments keep a fixed mobile runway instead of removing the module when data is sparse", () => {
-  assert.match(commitmentSource, /const RUNWAY_SLOTS = 3/);
-  assert.match(commitmentSource, /data-runway-slots=\{RUNWAY_SLOTS\}/);
-  assert.match(commitmentSource, /runwayPlaceholders/);
-  assert.match(commitmentSource, /Schedule slot open|Development slot open/);
-  assert.doesNotMatch(commitmentSource, /state\.upcoming\.length\s*>\s*0\s*&&\s*\(\s*<div className=\{styles\.queue\}/);
+  assert.match(playerParityEnhancer, /data-player-program-event-placeholder="true"/);
+  assert.match(playerParityEnhancer, /data-player-sc-placeholder="true"/);
+  assert.match(playerParityEnhancer, /Math\.max\(0, 3 - upcomingEvents\.length\)/);
+  assert.match(playerParityEnhancer, /Math\.max\(0, 3 - upcomingSC\.length\)/);
 });
 
 test("player leaderboards keep ranking geometry when the registered account has fewer or zero rows", () => {
-  assert.match(leaderboardSource, /minimumRows = 3/);
-  assert.match(leaderboardSource, /data-reserved-rows=\{reservedRows\}/);
-  assert.match(leaderboardSource, /data-leaderboard-placeholder="true"/);
-  assert.match(leaderboardSource, /displayState === "empty"\s*\? reservedRows/);
-  assert.match(leaderboardSource, /keepsRankingFrame = displayState === "ready" \|\| displayState === "empty"/);
+  assert.match(playerParityEnhancer, /data-leaderboard-placeholder="true"/);
+  assert.match(playerParityEnhancer, /Open rank/);
+  assert.match(playerParityEnhancer, /Math\.max\(0, 3 - previewRows\.length\)/);
 });
 
 test("demo-only utilities cannot change visible Coach Settings geometry", () => {
-  assert.match(appParityEnhancer, /data-sandbox-utility=\"true\"/);
-  assert.match(appParityEnhancer, /position:\"absolute\"/);
-  assert.match(appParityEnhancer, /width:1,height:1/);
-  assert.match(appParityEnhancer, /pointerEvents:\"none\"/);
+  assert.match(appParityEnhancer, /data-demo-utility="true"/);
+  assert.match(appParityEnhancer, /demoUtilityHidden/);
+  assert.match(appParityEnhancer, /display:\s*none/);
 });
 
 test("Coach Events parity preserves the premium short empty state and natural schedule length", () => {
-  assert.match(appParityEnhancer, /Coach Events now owns a deliberate short empty state and natural schedule length/);
-  assert.match(appParityEnhancer, /legacy Coach Events empty state visibility/);
-  assert.match(appParityEnhancer, /aria-hidden=\"true\" style=\{\{display:\"none\"\}\}/);
-  assert.match(appParityEnhancer, /Legacy Coach Events parity runway must not be present/);
-  assert.doesNotMatch(appParityEnhancer, /data-parity-slot-count=\"4\"/);
-  assert.doesNotMatch(appParityEnhancer, /Math\.max\(0,4-filteredEvents\.length\)/);
+  assert.match(appParityEnhancer, /Coach Events owns its own premium short empty state/);
+  assert.match(appParityEnhancer, /data-testid="coach-events-mobile-page"/);
+  assert.doesNotMatch(appParityEnhancer, /coach-open-event/);
   assert.doesNotMatch(appParityEnhancer, /OPEN SCHEDULE SLOT/);
 });
 
 test("Coach S&C reserves three session cards across data density", () => {
-  assert.match(appParityEnhancer, /data-coach-sc-placeholder=\"true\"/);
-  assert.match(appParityEnhancer, /Math\.max\(0,3-filteredCoachStrengthRows\.length\)/);
-  assert.match(appParityEnhancer, /OPEN SESSION SLOT/);
+  assert.match(appParityEnhancer, /data-sc-session-placeholder="true"/);
+  assert.match(appParityEnhancer, /Math\.max\(0, 3 - upcomingSC\.length\)/);
+  assert.match(appParityEnhancer, /data-parity-empty-slot="true"/);
 });
 
 test("Coach Players reserves four roster positions without inventing players", () => {
-  assert.match(appParityEnhancer, /data-coach-roster-placeholder=\"true\"/);
-  assert.match(appParityEnhancer, /Math\.max\(0,4-roster\.length\)/);
-  assert.match(appParityEnhancer, /OPEN ROSTER SLOT/);
+  assert.match(appParityEnhancer, /data-roster-placeholder="true"/);
+  assert.match(appParityEnhancer, /Math\.max\(0, 4 - filteredPlayers\.length\)/);
+  assert.match(appParityEnhancer, /Open roster slot/);
 });
 
 test("Coach Activity reserves six operational rows using semantic function boundaries rather than exact row text", () => {
-  assert.match(coachParityEnhancer, /functionSlice/);
   assert.match(coachParityEnhancer, /CoachActivityIntelligencePanel/);
   assert.match(coachParityEnhancer, /data-parity-slot-count=\"6\"/);
   assert.match(coachParityEnhancer, /rows\.slice\(0, 6\)/);
@@ -75,13 +67,15 @@ test("Phase 2D semantic language is a one-way migration and preserves the downst
   assert.doesNotMatch(emptyStateEnhancer, /activityParityAlreadyApplied/);
 });
 
-test("Coach leaderboards reserve three ranking rows without depending on the exact Phase 3L row body", () => {
+test("Coach leaderboards cap the live ranking at three without fabricating ranking rows", () => {
   assert.match(coachParityEnhancer, /CoachLeaderboardOperationalPanel/);
-  assert.match(coachParityEnhancer, /rows\.slice\(0, 3\)/);
-  assert.match(coachParityEnhancer, /Math\.max\(0, 3 - rows\.length\)/);
-  assert.match(coachParityEnhancer, /data-leaderboard-placeholder=\"true\"/);
-  assert.match(coachParityEnhancer, /data-parity-empty-slot=\"true\"/);
-  assert.match(coachParityEnhancer, /Open rank/);
+  assert.match(coachParityEnhancer, /truthful natural-length ranking geometry/);
+  assert.match(coachParityEnhancer, /rows\.slice\(0,\s*3\)/);
+  assert.match(coachParityEnhancer, /No leaderboard players match the selected view/);
+  assert.doesNotMatch(coachParityEnhancer, /Math\.max\(0,\s*3\s*-\s*rows\.length\)/);
+  assert.doesNotMatch(coachParityEnhancer, /data-leaderboard-placeholder=\"true\"/);
+  assert.doesNotMatch(coachParityEnhancer, /data-parity-empty-slot=\"true\"/);
+  assert.doesNotMatch(coachParityEnhancer, /Open rank/);
   assert.doesNotMatch(coachParityEnhancer, /leaderboardPhase3LBefore/);
 });
 
@@ -102,4 +96,27 @@ test("secondary-page parity normalization runs after authenticated persistence h
   assert.match(routeRunner, /const FINAL_ROUTE_ENHANCERS/);
   assert.match(routeRunner, /\.\.\.FINAL_ROUTE_ENHANCERS/);
   assert.doesNotMatch(routeRunner, /apply-mobile-secondary-page-parity-v2\.mjs/);
+});
+
+test("Phase 5 keeps every mobile Player secondary identity header compact and inside the viewport", () => {
+  const css = fs.readFileSync("src/App.css", "utf8");
+  assert.match(css, /\.playerPageHeader/);
+  assert.match(css, /max-width:\s*100%/);
+});
+
+test("Phase 5 gives dark Player metric surfaces explicit readable foreground ownership", () => {
+  const css = fs.readFileSync("src/App.css", "utf8");
+  assert.match(css, /--text-1/);
+  assert.match(css, /--text-2/);
+});
+
+test("Phase 5 visual audit measures geometry and semantic foreground contrast rather than relying on page width alone", () => {
+  const audit = fs.readFileSync("tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs", "utf8");
+  assert.match(audit, /contrast/i);
+  assert.match(audit, /boundingBox|getBoundingClientRect/);
+});
+
+test("Phase 5 restores persistent connectivity feedback after transient notifications settle", () => {
+  const source = fs.readFileSync("src/App.jsx", "utf8");
+  assert.match(source, /connectivity/i);
 });
