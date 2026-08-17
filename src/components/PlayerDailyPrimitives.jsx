@@ -21,7 +21,7 @@ const contextualCourtLabel = (visual, value, max, contextLabel) => {
   const amount = Math.max(0, Number(value) || 0);
   const target = Math.max(1, Number(max) || 1);
   if (visual.state === "above") return `${amount} ${context}. Target ${target}. ${Math.round(visual.aboveTarget)} above target.`;
-  if (visual.state === "complete") return `${amount} ${context}. Target ${target}. Target complete.`;
+  if (visual.state === "complete") return `${amount} ${context}. Target ${target}. Target locked.`;
   return `${amount} ${context}. Target ${target}. ${Math.round(visual.remaining)} to target.`;
 };
 
