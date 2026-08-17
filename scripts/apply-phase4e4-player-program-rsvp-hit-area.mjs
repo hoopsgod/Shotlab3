@@ -23,9 +23,26 @@ if (!source.includes(marker)) {
 }
 
 const authorityMarker = 'Phase 4E.4 Player Program RSVP physical target';
+const legacyTarget = `.performance-shell[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}`;
+const safeTarget = `.performance-shell[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
+  min-height: 45px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}`;
+
 if (!authority.includes(authorityMarker)) {
-  authority += `\n\n/* ${authorityMarker}. Verified in the user-reachable expanded Program workspace. */\n.performance-shell[data-workspace-tab="program"] button[data-player-program-rsvp-action] {\n  min-height: 44px !important;\n  box-sizing: border-box !important;\n  touch-action: manipulation !important;\n}\n`;
+  authority += `\n\n/* ${authorityMarker}. Verified in the user-reachable expanded Program workspace with a 1px rounding safety margin. */\n${safeTarget}\n`;
   writeFileSync(authorityPath, authority);
+} else if (authority.includes(legacyTarget)) {
+  authority = authority.replace(legacyTarget, safeTarget);
+  writeFileSync(authorityPath, authority);
+  console.log('Phase 4E.4 upgraded Player Program RSVP target with subpixel rounding safety margin.');
+} else if (!authority.includes(safeTarget)) {
+  throw new Error('Phase 4E.4 RSVP marker exists but the physical target contract is unrecognized.');
 } else {
   console.log('Phase 4E.4 final Player Program RSVP authority already applied.');
 }
