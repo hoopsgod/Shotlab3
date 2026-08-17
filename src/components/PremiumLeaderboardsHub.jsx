@@ -343,16 +343,17 @@ export default function PremiumLeaderboardsHub({
     ? 'No qualifying archived or current training results are available yet.'
     : 'Archive a completed season to begin building all-time rankings.';
   const homeEmptyMessage = isAllTime ? allTimeEmptyMessage : (viewerRole === 'coach' ? CURRENT_TEAM_EMPTY : CURRENT_PLAYER_EMPTY);
+  const isCoachView = viewerRole === 'coach';
 
-  return <div data-testid={testId}>
-    <header style={{ padding: '4px 0 12px', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
+  return <div data-testid={testId} data-viewer-role={viewerRole}>
+    {!isCoachView ? <header style={{ padding: '4px 0 12px', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
       <div style={{ fontFamily: FALLBACK_FONT, color: VOLT, fontSize: 10, letterSpacing: '0.13em', fontWeight: 800, textTransform: 'uppercase' }}>COMPETITION HUB</div>
       <div style={{ fontFamily: FALLBACK_FONT, color: LIGHT, fontSize: 28, letterSpacing: '0.04em', marginTop: 3, lineHeight: 1, textTransform: 'uppercase', fontWeight: 800 }}>LEADERBOARDS</div>
       <div style={{ fontFamily: 'var(--font-body, Inter)', color: SUB, fontSize: 12, lineHeight: 1.45, marginTop: 5 }}>Compare the team’s most important training results.</div>
       <div data-testid="leaderboard-status-line" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 9, fontFamily: FALLBACK_FONT, color: SUB, fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
         <span>{scopeLabel}</span><span aria-hidden="true">·</span><span>{activeCategoryLabel}</span><span aria-hidden="true">·</span><span>{activeRankedCount} ranked</span>
       </div>
-    </header>
+    </header> : null}
 
     <section aria-label="Leaderboard time scope" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', borderBottom: '1px solid var(--stroke-1)', marginBottom: 3 }}>
       {TIME_SCOPE_ITEMS.map((item) => {
