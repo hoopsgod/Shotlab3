@@ -33,11 +33,12 @@ test("demo-only utilities cannot change visible Coach Settings geometry", () => 
   assert.match(appParityEnhancer, /pointerEvents:\"none\"/);
 });
 
-test("Coach Events reserves four schedule slots across empty, sparse, and populated data", () => {
-  assert.match(appParityEnhancer, /data-parity-slot-count=\"4\"/);
-  assert.match(appParityEnhancer, /data-coach-event-placeholder=\"true\"/);
-  assert.match(appParityEnhancer, /Math\.max\(0,4-filteredEvents\.length\)/);
-  assert.match(appParityEnhancer, /OPEN SCHEDULE SLOT/);
+test("Coach Events parity preserves the premium short empty state and natural schedule length", () => {
+  assert.match(appParityEnhancer, /Coach Events now owns a deliberate short empty state and natural schedule length/);
+  assert.match(appParityEnhancer, /Legacy Coach Events parity runway must not be present/);
+  assert.doesNotMatch(appParityEnhancer, /data-parity-slot-count=\"4\"/);
+  assert.doesNotMatch(appParityEnhancer, /Math\.max\(0,4-filteredEvents\.length\)/);
+  assert.doesNotMatch(appParityEnhancer, /OPEN SCHEDULE SLOT/);
 });
 
 test("Coach S&C reserves three session cards across data density", () => {
