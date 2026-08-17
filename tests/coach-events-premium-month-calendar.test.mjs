@@ -20,7 +20,7 @@ test("month calendar owns stable six-week geometry and real event-day signals", 
   assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
   assert.match(calendar, /data-testid="coach-events-month-calendar"/);
   assert.match(calendar, /data-testid="coach-events-calendar-month"/);
-  assert.match(calendar, /byDate\.get\(key\)/);
+  assert.match(calendar, /rows\.filter\(\(row\) => row\.date === key\)/);
   assert.match(calendar, /events\.slice\(0, 3\)/);
   assert.match(calendar, /coachEventsCalendar__eventMarks/);
 });
