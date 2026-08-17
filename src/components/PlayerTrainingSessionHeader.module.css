@@ -22,8 +22,8 @@
 .back {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   flex: 0 0 auto;
   border: 1px solid rgba(255,255,255,.11);
   border-radius: 14px;
