@@ -6,6 +6,51 @@ const requireOne = (source, anchor, label) => {
   if (count !== 1) fail(`${label}: expected exactly one anchor, found ${count}`);
 };
 
+const stripNamedFunction = (input, signature) => {
+  const start = input.indexOf(signature);
+  if (start < 0) return input;
+  const open = input.indexOf('{', start + signature.length);
+  if (open < 0) fail(`could not locate opening brace for ${signature}`);
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+  for (let index = open; index < input.length; index += 1) {
+    const char = input[index];
+    const next = input[index + 1];
+    if (lineComment) {
+      if (char === '\n') lineComment = false;
+      continue;
+    }
+    if (blockComment) {
+      if (char === '*' && next === '/') { blockComment = false; index += 1; }
+      continue;
+    }
+    if (quote) {
+      if (escaped) { escaped = false; continue; }
+      if (char === '\\') { escaped = true; continue; }
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '/' && next === '/') { lineComment = true; index += 1; continue; }
+    if (char === '/' && next === '*') { blockComment = true; index += 1; continue; }
+    if (char === '"' || char === "'" || char === '`') { quote = char; continue; }
+    if (char === '{') depth += 1;
+    if (char === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        const sectionStart = input.lastIndexOf('// ═══════════════════════════════════════', start);
+        const removeStart = sectionStart >= 0 ? sectionStart : start;
+        let end = index + 1;
+        while (end < input.length && /[\r\n]/.test(input[end])) end += 1;
+        return `${input.slice(0, removeStart)}${input.slice(end)}`;
+      }
+    }
+  }
+  fail(`could not locate closing brace for ${signature}`);
+};
+
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = 'PlayerCommitmentCenter mode="events"';
@@ -17,15 +62,7 @@ const promoteSourceOwnedEvents = (input) => {
   if (next.includes(legacyRoute)) next = next.replace(legacyRoute, promotedEvents);
   else if (!next.includes(promotedEvents)) fail('source-owned Player Events route contract was not found');
 
-  const panelStart = next.indexOf('function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){');
-  if (panelStart >= 0) {
-    const strengthStart = next.indexOf('function SCPanel(', panelStart);
-    if (strengthStart < 0) fail('could not locate SCPanel boundary after retired EventsPanel');
-    const eventsSectionStart = next.lastIndexOf('// ═══════════════════════════════════════', panelStart);
-    const strengthSectionStart = next.lastIndexOf('// ═══════════════════════════════════════', strengthStart);
-    if (eventsSectionStart < 0 || strengthSectionStart <= eventsSectionStart) fail('could not locate stable Player panel section boundaries');
-    next = `${next.slice(0, eventsSectionStart)}${next.slice(strengthSectionStart)}`;
-  }
+  next = stripNamedFunction(next, 'function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue})');
   return next;
 };
 
