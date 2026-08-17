@@ -1,0 +1,203 @@
+/*
+ * ShotLab Mobile Product Reset — Phase 5
+ * Precision-only interaction layer. This file intentionally does not redefine
+ * the Phase 1–4 visual system; it resolves touch geometry, training entry,
+ * transient feedback placement, focus/disabled states, and mobile safe areas.
+ */
+
+:root {
+  --phase5-touch-floor: 44px;
+  --phase5-touch-primary: 50px;
+  --phase5-focus: color-mix(in srgb, var(--accent, #c8ff1a) 56%, white 8%);
+  --phase5-nav-clearance: var(--bottom-nav-content-padding, 82px);
+}
+
+/* Interactive confidence: preserve component shape while making mobile hit areas reliable. */
+@media (max-width: 760px) {
+  :where(.performance-shell, .premium-screen) button:not([hidden]),
+  :where(.performance-shell, .premium-screen) [role="button"]:not([aria-hidden="true"]) {
+    min-height: var(--phase5-touch-floor);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(.performance-shell, .premium-screen) button[aria-label]:not([hidden]) {
+    min-width: var(--phase5-touch-floor);
+  }
+
+  .performance-shell .pageHeaderPill,
+  .premium-screen .pageHeaderPill {
+    min-height: 46px !important;
+  }
+}
+
+:where(.performance-shell, .premium-screen) button:focus-visible,
+:where(.performance-shell, .premium-screen) [role="button"]:focus-visible,
+:where(.performance-shell, .premium-screen) a[href]:focus-visible {
+  outline: 3px solid var(--phase5-focus) !important;
+  outline-offset: 2px !important;
+}
+
+:where(.performance-shell, .premium-screen) button:disabled,
+:where(.performance-shell, .premium-screen) button[aria-disabled="true"],
+:where(.performance-shell, .premium-screen) [role="button"][aria-disabled="true"] {
+  opacity: .46 !important;
+  cursor: not-allowed !important;
+  filter: saturate(.52) brightness(.92);
+  box-shadow: none !important;
+}
+
+:where(.performance-shell, .premium-screen) button:not(:disabled):active,
+:where(.performance-shell, .premium-screen) [role="button"]:not([aria-disabled="true"]):active {
+  filter: brightness(.96);
+}
+
+:where(.performance-shell, .premium-screen) [aria-busy="true"] {
+  cursor: progress !important;
+}
+
+:where(.performance-shell, .premium-screen) :is(input, textarea, select)[aria-invalid="true"] {
+  border-color: var(--semantic-danger, #ff6b6b) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--semantic-danger, #ff6b6b) 14%, transparent) !important;
+}
+
+/* Performance entry: remove browser-number-field affordances and optimize for gym use. */
+.performance-shell .player-training-score-zone {
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.performance-shell .player-training-score-zone-label {
+  margin-bottom: 10px;
+  color: color-mix(in srgb, var(--accent, #c8ff1a) 76%, #eef4ef 24%);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.performance-shell .player-training-score-zone > .player-training-score-zone-label + div {
+  width: 100%;
+  margin-bottom: 28px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+.performance-shell .player-training-score-zone input[type="number"] {
+  width: clamp(136px, 42vw, 172px) !important;
+  min-width: 0;
+  min-height: 112px !important;
+  padding: 18px 12px !important;
+  border-radius: 22px !important;
+  font-size: clamp(56px, 15vw, 72px) !important;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: .92 !important;
+  letter-spacing: .01em !important;
+  caret-color: var(--accent, #c8ff1a);
+  appearance: textfield;
+  -moz-appearance: textfield;
+  touch-action: manipulation;
+}
+
+.performance-shell .player-training-score-zone input[type="number"]::-webkit-inner-spin-button,
+.performance-shell .player-training-score-zone input[type="number"]::-webkit-outer-spin-button,
+.performance-shell input[type="number"]::-webkit-inner-spin-button,
+.performance-shell input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.performance-shell .player-training-score-zone input[type="number"]:focus {
+  outline: none !important;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent, #c8ff1a) 15%, transparent),
+    0 14px 34px rgba(0, 0, 0, .22) !important;
+}
+
+.performance-shell [data-testid="player-training-log-score"] {
+  min-height: 52px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  letter-spacing: .09em !important;
+}
+
+.performance-shell [data-testid="player-training-log-score"]:not(:disabled):active {
+  transform: scale(.988) !important;
+}
+
+.performance-shell input[type="number"] {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Completion confirmation belongs above the mobile dock, not over the title stage. */
+.performance-shell.is-mobile [data-testid="player-completion-cue"] {
+  position: fixed !important;
+  top: auto !important;
+  right: max(12px, env(safe-area-inset-right, 0px)) !important;
+  bottom: calc(var(--phase5-nav-clearance) + env(safe-area-inset-bottom, 0px) + 10px) !important;
+  left: max(12px, env(safe-area-inset-left, 0px)) !important;
+  z-index: 23 !important;
+  width: auto !important;
+  max-width: 406px;
+  margin: 0 auto !important;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Safe-area and keyboard resilience for the player work surface. */
+@media (max-width: 760px) {
+  .performance-shell.is-mobile .performance-workspace {
+    scroll-padding-bottom: calc(var(--phase5-nav-clearance) + env(safe-area-inset-bottom, 0px) + 18px);
+  }
+
+  .performance-shell.is-mobile :is(input, select, textarea) {
+    scroll-margin-bottom: calc(var(--phase5-nav-clearance) + env(safe-area-inset-bottom, 0px) + 20px);
+  }
+
+  .performance-shell.is-mobile .appHeaderTitle,
+  .premium-screen .appHeaderTitle {
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+}
+
+/* Dense small-phone guardrails: keep three-digit entry and adjacent max readable. */
+@media (max-width: 390px) {
+  .performance-shell .player-training-score-zone input[type="number"] {
+    width: min(44vw, 154px) !important;
+    min-height: 106px !important;
+    font-size: clamp(52px, 15vw, 64px) !important;
+  }
+
+  .performance-shell .player-training-score-zone > .player-training-score-zone-label + div {
+    gap: 7px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .performance-shell .player-training-score-zone input[type="number"] {
+    width: min(43vw, 148px) !important;
+    padding-inline: 8px !important;
+  }
+}
+
+/* Reduced motion means reduced motion, including legacy reveal/press transitions. */
+@media (prefers-reduced-motion: reduce) {
+  :where(.performance-shell, .premium-screen),
+  :where(.performance-shell, .premium-screen) *,
+  :where(.performance-shell, .premium-screen) *::before,
+  :where(.performance-shell, .premium-screen) *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  :where(.performance-shell, .premium-screen) button:active,
+  .performance-shell [data-testid="player-training-log-score"]:active {
+    transform: none !important;
+  }
+}
