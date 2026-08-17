@@ -37,20 +37,8 @@ const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   return undefined;
 };
 
-const safeCount = (value) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
-};
-
-const eventTypeLabel = (value = "") => {
-  const type = String(value || "").toLowerCase();
-  if (type === "run" || type === "practice") return "Practice";
-  if (type === "game" || type === "games") return "Game";
-  if (type === "clinic" || type === "camp") return "Camp";
-  if (type === "recovery" || type === "meeting" || type === "film") return "Meeting";
-  if (type === "challenge") return "Challenge";
-  return "Team event";
-};
+const safeCount = (value) => Math.max(0, Number(value) || 0);
+const eventTypeLabel = (value) => ({ run: "Practice", game: "Game", clinic: "Camp", recovery: "Meeting", challenge: "Challenge" }[value] || "Team event");
 
 export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
