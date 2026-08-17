@@ -94,6 +94,9 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   await expect(metricRail.getByRole("button", { name: /^Ranked Players:/ })).toBeVisible();
   await expect(metricRail.getByRole("button", { name: /^Current Leader:/ })).toBeVisible();
   await expect(metricRail.getByRole("button", { name: /^Archived Seasons:/ })).toBeVisible();
+  await expect(metrics.nth(0).locator("[data-route-stage-metric-label]")).toHaveText("Ranked");
+  await expect(metrics.nth(1).locator("[data-route-stage-metric-label]")).toHaveText("Leader");
+  await expect(metrics.nth(2).locator("[data-route-stage-metric-label]")).toHaveText("Archives");
   const titleContrast = await expectReadableContrast(decisionTitle, 4.5);
   const detailContrast = await expectReadableContrast(decisionDetail, 4.5);
 
@@ -142,6 +145,8 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
       metricCount: metricNodes.length,
       metricDisplay: getComputedStyle(metricRailNode).display,
       metricOverflowX: getComputedStyle(metricRailNode).overflowX,
+      metricScrollWidth: metricRailNode.scrollWidth,
+      metricClientWidth: metricRailNode.clientWidth,
       metricGeometry: metricNodes.map(rectOf),
       pulseGeometry: [pulseNode, ...pulseCards].map(rectOf),
       pulseCopyGeometry: rectOf(pulseCopyNode),
@@ -165,7 +170,7 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
 
   expect(visualState.metricCount).toBe(3);
   expect(visualState.metricDisplay).toBe("grid");
-  expect(visualState.metricOverflowX).toBe("hidden");
+  expect(visualState.metricScrollWidth - visualState.metricClientWidth, `metric rail must fit without hidden horizontal content; overflow-x=${visualState.metricOverflowX}`).toBeLessThanOrEqual(1);
   for (const [index, box] of visualState.metricGeometry.entries()) {
     expect(box.width, `metric ${index + 1} useful width`).toBeGreaterThanOrEqual(95);
     expect(box.height, `metric ${index + 1} height`).toBeGreaterThanOrEqual(44);
