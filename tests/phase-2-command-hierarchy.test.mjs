@@ -2,10 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),"utf8");
-const main=read("../src/main.jsx"),player=read("../src/components/PlayerDailyCommandCenter.jsx"),playerCss=read("../src/components/PlayerDailyCommandCenter.module.css"),narrative=read("../src/lib/playerPerformanceNarrative.js"),hierarchy=read("../src/styles/CommandHierarchy2026.css"),rail=read("../src/components/OperationalInsightRail.jsx"),railCss=read("../src/components/OperationalInsightRail.module.css"),railModel=read("../src/lib/operationalInsightRails.js"),coach=read("../src/components/CoachCommandCenter.jsx"),session=read("../public/shotlab-v15-session-integrity.css");
+const main=read("../src/main.jsx"),authenticatedAuthority=read("../src/styles/AuthenticatedVisualAuthority2026.css"),player=read("../src/components/PlayerDailyCommandCenter.jsx"),playerCss=read("../src/components/PlayerDailyCommandCenter.module.css"),narrative=read("../src/lib/playerPerformanceNarrative.js"),hierarchy=read("../src/styles/CommandHierarchy2026.css"),rail=read("../src/components/OperationalInsightRail.jsx"),railCss=read("../src/components/OperationalInsightRail.module.css"),railModel=read("../src/lib/operationalInsightRails.js"),coach=read("../src/components/CoachCommandCenter.jsx"),session=read("../public/shotlab-v15-session-integrity.css");
 
 test("Phase 2 hierarchy contracts remain intact beneath the Dashboard Showstopper successor",()=>{
- const foundation=main.indexOf("await import('./styles/VisualFoundation2026.css')"),command=main.indexOf("await import('./styles/CommandHierarchy2026.css')");
+ const app=main.indexOf("await import('./App.jsx')"),authority=main.indexOf("await import('./styles/AuthenticatedVisualAuthority2026.css')"),foundation=authenticatedAuthority.indexOf("./VisualFoundation2026.css"),command=authenticatedAuthority.indexOf("./CommandHierarchy2026.css");
+ assert.ok(app>=0&&authority>app);
  assert.ok(foundation>=0&&command>foundation);
  const order=['data-command-role="primary"','data-testid="player-command-evidence"','data-command-role="coach-priority"','data-command-role="next-actions"','data-command-role="progress-details"'].map(v=>player.indexOf(v));
  assert.ok(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])));
