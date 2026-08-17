@@ -120,8 +120,13 @@
 
 @media (max-width: 640px) {
   .app-feedback-region {
-    inset: auto 12px calc(82px + env(safe-area-inset-bottom)) 12px;
+    top: auto;
+    right: max(12px, env(safe-area-inset-right, 0px));
+    bottom: calc(var(--bottom-nav-content-padding, 82px) + env(safe-area-inset-bottom, 0px) + 10px);
+    left: max(12px, env(safe-area-inset-left, 0px));
     width: auto;
+    max-width: 406px;
+    margin-inline: auto;
   }
 
   .app-feedback {
