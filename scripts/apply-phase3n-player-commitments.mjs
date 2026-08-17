@@ -9,46 +9,40 @@ const requireOne = (source, anchor, label) => {
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = 'PlayerCommitmentCenter mode="events"';
+const promotedEvents = '<PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction} toggleRsvp={toggleRsvp} onCompletionCue={pushCompletionCue}/>';
 
-const stripRetiredEventsPresentation = (input) => {
-  const panelStart = input.indexOf('function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){');
-  if (panelStart < 0) return input;
+const promoteSourceOwnedEvents = (input) => {
   let next = input;
-  const presentationStart = next.indexOf('\n<div className="accent-card"', panelStart);
-  const upcomingStart = presentationStart >= 0 ? next.indexOf('{/* Upcoming */}', presentationStart) : -1;
-  if (presentationStart >= 0 && upcomingStart > presentationStart) {
-    next = `${next.slice(0, presentationStart)}\n${next.slice(upcomingStart)}`;
+  const legacyRoute = '<PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter>';
+  if (next.includes(legacyRoute)) next = next.replace(legacyRoute, promotedEvents);
+  else if (!next.includes(promotedEvents)) fail('source-owned Player Events route contract was not found');
+
+  const panelStart = next.indexOf('function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){');
+  if (panelStart >= 0) {
+    const strengthMarker = '// STRENGTH & CONDITIONING PANEL';
+    const strengthStart = next.indexOf(strengthMarker, panelStart);
+    if (strengthStart < 0) fail('could not locate S&C boundary after retired EventsPanel');
+    const sectionStart = next.lastIndexOf('// ═══════════════════════════════════════', strengthStart);
+    if (sectionStart <= panelStart) fail('could not locate retired EventsPanel section boundary');
+    next = `${next.slice(0, panelStart)}${next.slice(sectionStart)}`;
   }
-  next = next.replace(
-    'const[expanded,setExpanded]=useState(null),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);',
-    'const[expanded,setExpanded]=useState(null);',
-  );
-  next = next.replace('const nextEvent=upcoming[0]||null;\n', '');
-  next = next.replace(/const myRsvps=rsvps\.filter\(r=>r\.email===user\.email\)\.length,myTier=getTier\(myRsvps\);useEffect\(\(\)=>\{if\(lastRank===null\)\{setLastRank\(myTier\.name\);return;\}if\(lastRank!==myTier\.name\)\{setRankFx\(true\);setLastRank\(myTier\.name\);const t=setTimeout\(\(\)=>setRankFx\(false\),650\);return \(\)=>clearTimeout\(t\);\}\},\[myTier\.name,lastRank\]\);\n/, '');
-  next = next.replace(/<div style=\{\{width:50,height:50,borderRadius:14,background:BG,border:`1px solid \$\{BORDER_CLR\}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0\}\}><EventIcon type=\{ev\.type\} size=\{24\} color=\{going\?CYAN:MUTED\}\/><\/div>/g, '');
-  next = next.replace(/\{index===0&&<span style=\{\{fontFamily:FB,fontSize:8,padding:"2px 7px",borderRadius:999,color:"#0b0d10",background:VOLT,fontWeight:700,letterSpacing:"0\.07em"\}\}>UP NEXT<\/span>\}/g, '');
-  next = next.replace(/\{going\?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke=\{VOLT\} strokeWidth="2\.5" fill="none" strokeLinecap="round" strokeLinejoin="round"\/><\/svg>YOU'RE LOCKED IN<\/>:"RSVP NOW →"\}/g, '{going?"GOING":"RSVP →"}');
   return next;
 };
 
 if (source.includes(marker)) {
-  source = stripRetiredEventsPresentation(source);
+  source = promoteSourceOwnedEvents(source);
   for (const preserved of [
     'PlayerCommitmentCenter mode="strength"',
-    'data-testid="player-events-operational-list"',
     'data-testid="player-strength-operational-panel"',
-    '<EventsPanel events={events}',
     '<SCPanel sessions={scSessions}',
     'toggleRsvp={toggleRsvp}',
+    'onCompletionCue={pushCompletionCue}',
     'toggleScRsvp={toggleScRsvp}',
     'addScLog={addScLog}',
-    '{/* Upcoming */}',
-    'handleEventRsvp',
-  ]) {
-    if (!source.includes(preserved)) fail(`transformed Player Commitments source is missing ${preserved}`);
-  }
+  ]) if (!source.includes(preserved)) fail(`transformed Player Commitments source is missing ${preserved}`);
+  if (source.includes('function EventsPanel(') || source.includes('player-events-operational-list')) fail('retired duplicate Player Events presentation remains');
   writeFileSync(path, source);
-  console.log('Phase 3N Player Commitments hierarchy already applied; retired duplicate Events presentation removed from the production candidate.');
+  console.log('Phase 3N Player Commitments hierarchy already applied; premium Player Events now owns schedule, detail, and RSVP presentation.');
   process.exit(0);
 }
 
@@ -58,20 +52,19 @@ source = source.replace(importAnchor, `${importAnchor}\nimport PlayerCommitmentC
 
 const oldEvents = `  {tab==="program"&&<div className={slideClass} key="program"><PlayerWorkspaceCommandBar model={eventsWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-events-operational-list]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-events-workspace"/><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></div>}`;
 requireOne(source, oldEvents, 'Player Events route');
-const newEvents = `  {tab==="program"&&<div className={slideClass} key="program"><PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}`;
-source = source.replace(oldEvents, newEvents);
+source = source.replace(oldEvents, `  {tab==="program"&&<div className={slideClass} key="program">${promotedEvents}</div>}`);
 
 const oldStrength = `  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerWorkspaceCommandBar model={strengthWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-strength-operational-panel]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-strength-workspace"/><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></div>}`;
 requireOne(source, oldStrength, 'Player Strength route');
 const newStrength = `  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerCommitmentCenter mode="strength" model={strengthWorkspaceModel} items={scSessions} responses={scRsvps} logs={scLogs} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}`;
 source = source.replace(oldStrength, newStrength);
-source = stripRetiredEventsPresentation(source);
+source = promoteSourceOwnedEvents(source);
 
-for (const preserved of ['toggleRsvp={toggleRsvp}','toggleScRsvp={toggleScRsvp}','addScLog={addScLog}','onCompletionCue={pushCompletionCue}','data-testid="player-events-operational-list"','data-testid="player-strength-operational-panel"']) {
+for (const preserved of ['toggleRsvp={toggleRsvp}','onCompletionCue={pushCompletionCue}','toggleScRsvp={toggleScRsvp}','addScLog={addScLog}','data-testid="player-strength-operational-panel"']) {
   if (!source.includes(preserved)) fail(`Player commitment capability removed: ${preserved}`);
 }
-for (const retired of ['PlayerWorkspaceCommandBar model={eventsWorkspaceModel}','PlayerWorkspaceCommandBar model={strengthWorkspaceModel}']) {
-  if (source.includes(retired)) fail(`specialized commitment route still contains retired generic command bar: ${retired}`);
+for (const retired of ['PlayerWorkspaceCommandBar model={eventsWorkspaceModel}','PlayerWorkspaceCommandBar model={strengthWorkspaceModel}','function EventsPanel(','player-events-operational-list']) {
+  if (source.includes(retired)) fail(`retired Player commitment presentation remains: ${retired}`);
 }
 writeFileSync(path, source);
-console.log('Applied Phase 3N Player Commitments hierarchy.');
+console.log('Applied Phase 3N Player Commitments hierarchy with source-owned Player Events.');
