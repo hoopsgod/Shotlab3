@@ -1,6 +1,5 @@
 import "./EventsMobileSystem.css";
 
-const DAY_MS = 86400000;
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export const cleanEventValue = (value) => String(value ?? "").trim();
@@ -41,6 +40,12 @@ const dateKey = (date) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+const addCalendarDays = (date, amount) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + amount);
+  return result;
 };
 
 export const formatMonthLabel = (value) => {
@@ -136,7 +141,7 @@ export function EventsWeekRail({ rows = [], anchorDate, selectedDate, onSelectDa
       <div className="eventsSectionKicker">{label}</div>
       <div className="eventsWeekRail__days" role="group" aria-label="Select schedule date">
         {DAY_LABELS.map((weekday, index) => {
-          const date = new Date(monday.getTime() + index * DAY_MS);
+          const date = addCalendarDays(monday, index);
           const key = dateKey(date);
           const tones = eventDates.get(key) || [];
           const selected = key === selectedDate;
@@ -193,7 +198,7 @@ export function EventsMonthPanel({ rows = [], anchorDate, selectedDate, onSelect
         </div>
         <div className="eventsMonthPanel__grid">
           {Array.from({ length: 42 }, (_, index) => {
-            const date = new Date(gridStart.getTime() + index * DAY_MS);
+            const date = addCalendarDays(gridStart, index);
             const key = dateKey(date);
             const events = byDate.get(key) || [];
             const inMonth = date.getMonth() === month.getMonth();
