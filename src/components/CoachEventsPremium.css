@@ -25,6 +25,8 @@
 [data-testid="coach-events-filter-rail"] {
   min-width: 0;
   max-width: 100%;
+  --sl-line-strong: transparent;
+  --radius-md: 0px;
 }
 
 .coachEventsHistoryAction {
