@@ -59,36 +59,40 @@ test("bounded training score validation handles empty, zero, digit ranges, max, 
   assert.equal(validateProgramDrillScore("not-a-number", standard).ok, false);
 });
 
-test("Phase 5 mobile touch geometry keeps the accessibility floor as a minimum, not an exact implementation", async () => {
-  const css = await read("src/styles/Phase5Precision.css");
-  const floor = Number(css.match(/--phase5-touch-floor:\s*(\d+)px/)?.[1]);
-  const primary = Number(css.match(/--phase5-touch-primary:\s*(\d+)px/)?.[1]);
-  const logScoreMin = Number(css.match(/\[data-testid="player-training-log-score"\]\s*\{[\s\S]*?min-height:\s*(\d+)px/)?.[1]);
+test("Phase 5 mobile touch geometry validates minimums through existing product owners", async () => {
+  const [surfaceCss, polishCss] = await Promise.all([
+    read("src/styles/Phase3SurfaceContracts.css"),
+    read("src/styles/ExpertVisualPolish.css"),
+  ]);
+  const floor = Number(surfaceCss.match(/--sl-phase3-touch-target:\s*(\d+)px/)?.[1]);
+  const logScoreMin = Number(polishCss.match(/\[data-testid="player-training-log-score"\][\s\S]*?min-height:\s*(\d+)px/)?.[1]);
+  const pageHeaderMin = Number(polishCss.match(/\.pageHeaderPill\s*\{\s*min-height:\s*(\d+)px/)?.[1]);
 
   assert.ok(Number.isFinite(floor) && floor >= 44, `touch floor must be at least 44px, got ${floor}`);
-  assert.ok(Number.isFinite(primary) && primary >= 46, `primary touch target should be at least 46px, got ${primary}`);
   assert.ok(Number.isFinite(logScoreMin) && logScoreMin >= 46, `score logging action should be comfortably thumb-sized, got ${logScoreMin}px`);
-  assert.match(css, /player-training-score-zone input\[type="number"\][\s\S]*appearance:\s*textfield/);
+  assert.ok(Number.isFinite(pageHeaderMin) && pageHeaderMin >= 44, `page header action must remain touch-safe, got ${pageHeaderMin}px`);
+  assert.match(polishCss, /player-training-score-zone input\[type="number"\][\s\S]*appearance:\s*textfield/);
+  assert.match(polishCss, /player-training-score-zone input\[type="number"\]:focus-visible/);
 });
 
 test("Phase 5 feedback and reduced-motion contracts respect mobile navigation and safe areas", async () => {
-  const [precisionCss, feedbackCss] = await Promise.all([
-    read("src/styles/Phase5Precision.css"),
+  const [motionCss, feedbackCss] = await Promise.all([
+    read("src/styles/PremiumMotion2026.css"),
     read("src/components/AppFeedbackLayer.css"),
   ]);
 
-  assert.match(precisionCss, /player-completion-cue[\s\S]*bottom:\s*calc\(var\(--phase5-nav-clearance\)/);
-  assert.match(precisionCss, /env\(safe-area-inset-bottom/);
-  assert.match(precisionCss, /prefers-reduced-motion:\s*reduce/);
+  assert.match(motionCss, /player-completion-cue[\s\S]*bottom:\s*calc\(var\(--bottom-nav-content-padding, 82px\)/);
+  assert.match(motionCss, /env\(safe-area-inset-bottom/);
+  assert.match(motionCss, /prefers-reduced-motion:\s*reduce/);
   assert.match(feedbackCss, /bottom:\s*calc\(var\(--bottom-nav-content-padding, 82px\)/);
   assert.match(feedbackCss, /safe-area-inset-(left|right)/);
 });
 
-test("Phase 5 precision CSS loads after the certified surface layers", async () => {
+test("Phase 5 precision remains inside certified visual owners instead of adding a new cascade authority", async () => {
   const main = await read("src/main.jsx");
-  const phase3 = main.indexOf("Phase3SurfaceContracts.css");
-  const phase5 = main.indexOf("Phase5Precision.css");
-  assert.ok(phase3 >= 0 && phase5 > phase3, "Phase 5 precision layer must load after Phase 3 surface contracts");
+  assert.match(main, /ExpertVisualPolish\.css/);
+  assert.match(main, /Phase3SurfaceContracts\.css/);
+  assert.doesNotMatch(main, /Phase5Precision\.css/);
 });
 
 test("Target Court visual and spoken locked terminology stay aligned", async () => {
