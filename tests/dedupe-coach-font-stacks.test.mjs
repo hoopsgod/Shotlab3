@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import test from 'node:test'
 import { dedupeCoachFontStacks } from '../scripts/dedupe-coach-font-stacks.mjs'
-import { dedupeAuthenticatedFontStacks } from '../scripts/dedupe-authenticated-font-stacks.mjs'
+import { dedupeAuthenticatedFontStacks, dedupeAuthorityFontStacks } from '../scripts/dedupe-authenticated-font-stacks.mjs'
 
 const SYSTEM = 'system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif'
 const TEXT = '-apple-system,BlinkMacSystemFont,SF Pro Text,Segoe UI,sans-serif'
@@ -57,6 +57,17 @@ test('authenticated font dedupe leaves unrelated declarations untouched', () => 
   assert.equal(result.css, source)
   assert.equal(result.replacements, 0)
   assert.equal(result.rawBytesSaved, 0)
+})
+
+test('authority font dedupe keeps token definitions literal while reusing them elsewhere', () => {
+  const source = `:root{--sl-font-system:${SYSTEM};--sl-font-text:${TEXT};--sl-font-display:${DISPLAY}}.a{font-family:${TEXT}}.b{font-family:${DISPLAY}}`
+  const result = dedupeAuthorityFontStacks(source)
+  assert.match(result.css, new RegExp(`--sl-font-text:${TEXT.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`))
+  assert.match(result.css, new RegExp(`--sl-font-display:${DISPLAY.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`))
+  assert.match(result.css, /\.a\{font-family:var\(--sl-font-text\)\}/)
+  assert.match(result.css, /\.b\{font-family:var\(--sl-font-display\)\}/)
+  assert.doesNotMatch(result.css, /--sl-font-text:var\(--sl-font-text\)/)
+  assert.ok(result.rawBytesSaved > 0)
 })
 
 test('authenticated visual authority keeps all imports before token declarations', () => {
