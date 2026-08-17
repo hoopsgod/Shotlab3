@@ -54,12 +54,16 @@ export default function CompactLeaderboardPreviewCard({
     : displayState === "error"
       ? "Rankings need a retry"
       : isCoachMode ? "Recognition starts with activity" : "Your ranking starts with a result";
-  const reservedRows = Math.max(previewRows.length, Math.min(Math.max(1, minimumRows), Math.max(1, limit)));
-  const openRowCount = displayState === "ready"
-    ? Math.max(0, reservedRows - previewRows.length)
-    : displayState === "empty"
-      ? reservedRows
-      : 0;
+  const reservedRows = isCoachMode
+    ? previewRows.length
+    : Math.max(previewRows.length, Math.min(Math.max(1, minimumRows), Math.max(1, limit)));
+  const openRowCount = isCoachMode
+    ? 0
+    : displayState === "ready"
+      ? Math.max(0, reservedRows - previewRows.length)
+      : displayState === "empty"
+        ? reservedRows
+        : 0;
   const keepsRankingFrame = displayState === "ready" || displayState === "empty";
 
   return (
@@ -68,6 +72,7 @@ export default function CompactLeaderboardPreviewCard({
       aria-live="polite"
       aria-busy={displayState === "loading"}
       data-testid="compact-leaderboard-preview"
+      data-viewer-role={mode}
       data-data-state={displayState}
       data-reserved-rows={reservedRows}
     >
