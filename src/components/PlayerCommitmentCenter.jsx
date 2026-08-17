@@ -175,7 +175,7 @@ function PlayerEventsExperience({ state, model, today, detailsOpen, setDetailsOp
               key={clean(item?.id) || `${rowDate(item)}-${itemTitle(item)}`}
               item={item}
               confirmed={state.responseIds.has(clean(item?.id))}
-              onOpen={() => revealDetails({ runPrimaryAction: !state.responseIds.has(clean(item?.id)) })}
+              onOpen={() => revealDetails()}
             />
           )) : <div className={styles.eventsEmptyRow}>No upcoming events. You’re clear for now.</div>}
         </div>
