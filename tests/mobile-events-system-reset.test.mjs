@@ -25,6 +25,16 @@ test("Coach and Player use one Events design grammar with role-specific title be
   assert.match(primitives, /export function NextEventSurface/);
 });
 
+test("Next Up owns the first-view date and one visually dominant unresolved action", () => {
+  assert.match(primitives, /className="eventsNext__identity"/);
+  assert.match(primitives, /className="eventsNext__date"/);
+  assert.match(primitives, /className="eventsNext__primaryAction"/);
+  assert.match(sharedCss, /\.eventsNext__identity\s*\{[\s\S]*grid-template-columns:\s*56px\s+minmax\(0,\s*1fr\)/s);
+  assert.match(sharedCss, /\.eventsNext__date\s*\{[\s\S]*min-height:\s*64px/s);
+  assert.match(sharedCss, /\.eventsNext__primaryAction\s*\{[\s\S]*min-height:\s*46px[\s\S]*background:\s*var\(--events-lime\)/s);
+  assert.match(sharedCss, /\.eventsNext\[data-state="calm"\] \.eventsNext__primaryAction\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*\.05\)/s);
+});
+
 test("Player Events makes personal RSVP state first-class without exposing Coach response intelligence", () => {
   assert.match(player, /RSVP REQUIRED/);
   assert.match(player, /✓ GOING/);
