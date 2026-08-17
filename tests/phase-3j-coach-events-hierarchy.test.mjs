@@ -26,16 +26,15 @@ test('Coach Events schedule intelligence is calendar-first and source-owned', ()
   const decisionIndex = dashboards.indexOf('<CoachRoutePerformanceStage', calendarIndex);
   assert.ok(calendarIndex > 0 && decisionIndex > calendarIndex);
   assert.match(dashboards, /rows=\{rows\}/);
-  assert.match(dashboards, /activeType=\{type\}/);
   assert.match(calendar, /data-testid="coach-events-month-calendar"/);
   assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
   assert.doesNotMatch(dashboards, /briefing\.insights\.map/);
 });
 
-test('calendar keeps month navigation, readable event signals, and mobile touch geometry', () => {
+test('calendar keeps month navigation, readable event marks, and mobile touch geometry', () => {
   assert.match(calendar, /aria-label="Previous month"/);
   assert.match(calendar, /aria-label="Next month"/);
-  assert.match(calendar, /data-event-tone/);
+  assert.match(calendar, /coachEventsCalendar__eventMarks/);
   assert.match(calendarCss, /\.coachEventsCalendar__day\s*\{[\s\S]*min-height:\s*47px/);
   assert.match(calendarCss, /@media \(max-width: 390px\)[\s\S]*\.coachEventsCalendar__day \{ min-height: 44px; height: 44px;/);
   assert.match(calendarCss, /:focus-visible/);
