@@ -8,12 +8,14 @@ const STARTUP_ASSET = /^index-.*\.css$/
 const FONT_STACKS = [
   {
     variable: '--sl-font-system',
+    canonical: 'system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif',
     variants: [
       'system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif',
     ],
   },
   {
     variable: '--sl-font-text',
+    canonical: '-apple-system,BlinkMacSystemFont,SF Pro Text,Segoe UI,sans-serif',
     variants: [
       '-apple-system,BlinkMacSystemFont,SF Pro Text,Segoe UI,sans-serif',
       '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif',
@@ -21,6 +23,7 @@ const FONT_STACKS = [
   },
   {
     variable: '--sl-font-display',
+    canonical: '-apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif',
     variants: [
       '-apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif',
       '-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif',
@@ -57,18 +60,34 @@ export function dedupeAuthenticatedFontStacks(source) {
   }
 }
 
+export function dedupeAuthorityFontStacks(source) {
+  let protectedCss = source
+  const placeholders = []
+  for (const [index, stack] of FONT_STACKS.entries()) {
+    const definition = `${stack.variable}:${stack.canonical}`
+    if (!protectedCss.includes(definition)) {
+      throw new Error(`Authenticated visual authority is missing required font token definition ${stack.variable}`)
+    }
+    const placeholder = `__SL_AUTH_FONT_${index}__`
+    protectedCss = protectedCss.replace(definition, `${stack.variable}:${placeholder}`)
+    placeholders.push([placeholder, stack.canonical])
+  }
+
+  const result = dedupeAuthenticatedFontStacks(protectedCss)
+  let css = result.css
+  for (const [placeholder, canonical] of placeholders) css = css.replace(placeholder, canonical)
+  return {
+    css,
+    replacements: result.replacements,
+    rawBytesSaved: Buffer.byteLength(source) - Buffer.byteLength(css),
+  }
+}
+
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
   const cssNames = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.css')).map((entry) => entry.name)
   const authorityName = cssNames.find((name) => AUTHORITY_ASSET.test(name))
   if (!authorityName) throw new Error('Authenticated visual authority CSS asset not found; font tokens cannot be guaranteed.')
-
-  const authoritySource = await readFile(path.join(DIST_ASSETS, authorityName), 'utf8')
-  for (const { variable } of FONT_STACKS) {
-    if (!authoritySource.includes(`${variable}:`)) {
-      throw new Error(`Authenticated visual authority is missing required font token ${variable}`)
-    }
-  }
 
   let replacements = 0
   let rawBytesSaved = 0
@@ -76,11 +95,13 @@ async function main() {
 
   for (const name of cssNames) {
     // The startup stylesheet is available before the authenticated visual authority.
-    // Keep its literal stacks self-contained. The authority asset owns the token definitions.
-    if (STARTUP_ASSET.test(name) || AUTHORITY_ASSET.test(name)) continue
+    // Keep its literal stacks self-contained. Every other authenticated asset can use the shared tokens.
+    if (STARTUP_ASSET.test(name)) continue
     const file = path.join(DIST_ASSETS, name)
     const source = await readFile(file, 'utf8')
-    const result = dedupeAuthenticatedFontStacks(source)
+    const result = AUTHORITY_ASSET.test(name)
+      ? dedupeAuthorityFontStacks(source)
+      : dedupeAuthenticatedFontStacks(source)
     if (result.css === source) continue
     await writeFile(file, result.css)
     replacements += result.replacements
