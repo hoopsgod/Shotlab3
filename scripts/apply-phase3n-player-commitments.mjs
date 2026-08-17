@@ -19,12 +19,12 @@ const promoteSourceOwnedEvents = (input) => {
 
   const panelStart = next.indexOf('function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){');
   if (panelStart >= 0) {
-    const strengthMarker = '// STRENGTH & CONDITIONING PANEL';
-    const strengthStart = next.indexOf(strengthMarker, panelStart);
-    if (strengthStart < 0) fail('could not locate S&C boundary after retired EventsPanel');
-    const sectionStart = next.lastIndexOf('// ═══════════════════════════════════════', strengthStart);
-    if (sectionStart <= panelStart) fail('could not locate retired EventsPanel section boundary');
-    next = `${next.slice(0, panelStart)}${next.slice(sectionStart)}`;
+    const strengthStart = next.indexOf('function SCPanel(', panelStart);
+    if (strengthStart < 0) fail('could not locate SCPanel boundary after retired EventsPanel');
+    const eventsSectionStart = next.lastIndexOf('// ═══════════════════════════════════════', panelStart);
+    const strengthSectionStart = next.lastIndexOf('// ═══════════════════════════════════════', strengthStart);
+    if (eventsSectionStart < 0 || strengthSectionStart <= eventsSectionStart) fail('could not locate stable Player panel section boundaries');
+    next = `${next.slice(0, eventsSectionStart)}${next.slice(strengthSectionStart)}`;
   }
   return next;
 };
