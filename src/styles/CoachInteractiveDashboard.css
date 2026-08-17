@@ -10,6 +10,12 @@
   width: 100%;
 }
 
+/* Events has a source-owned month calendar. Older shared route ordering gives the
+   command bar order 1 and decision stage order 2; keep the calendar between them. */
+.performance-shell--coach [data-testid="coach-events-interactive-dashboard"] > .coachEventsCalendar {
+  order: 2 !important;
+}
+
 /* Canonical coach metric selection: no neon rail or glow. This stylesheet is imported
    after the CSS module that defines InteractiveMetricStrip, so it owns the final state. */
 .performance-shell--coach [data-testid="coach-players-metric-strip"] button::after,
@@ -142,6 +148,55 @@
   .performance-shell--coach [data-testid="coach-events-interactive-dashboard"],
   .performance-shell--coach [data-testid^="coach-page-dashboard-"] {
     margin-top: 2px;
+  }
+
+  /* Events opens like an editorial schedule, not another floating dashboard card. */
+  .performance-shell--coach [data-testid="coach-events-command-bar"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 5px 0 3px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageIntro__icon {
+    display: none !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageIntro__copy {
+    max-width: 100% !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageIntro__title {
+    font-size: clamp(42px, 12vw, 50px) !important;
+    line-height: .92 !important;
+    letter-spacing: -.06em !important;
+    text-align: left !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageIntro__summary {
+    max-width: 31ch !important;
+    margin-top: 8px !important;
+    text-align: left !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageIntro__actions {
+    grid-column: 1 !important;
+    width: auto !important;
+    justify-items: start !important;
+    margin-top: 2px !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageIntro__buttonRow {
+    width: auto !important;
+    justify-content: flex-start !important;
+  }
+
+  .performance-shell--coach [data-testid="coach-events-command-bar"] .secondaryPageAction {
+    flex: 0 0 auto !important;
   }
 
   .performance-shell--coach .coachDashboardNoResults {

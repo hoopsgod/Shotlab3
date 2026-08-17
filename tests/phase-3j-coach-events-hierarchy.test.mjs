@@ -4,72 +4,62 @@ import { readFileSync } from 'node:fs';
 
 const enhancer = readFileSync('scripts/apply-phase3j-coach-events-hierarchy.mjs', 'utf8');
 const dashboards = readFileSync('src/components/CoachInteractiveDashboards.jsx', 'utf8');
-const disclosure = readFileSync('src/components/SecondaryPageDisclosure.jsx', 'utf8');
-const disclosureCss = readFileSync('src/components/SecondaryPageDisclosure.module.css', 'utf8');
+const calendar = readFileSync('src/components/CoachEventsMonthCalendar.jsx', 'utf8');
+const calendarCss = readFileSync('src/components/CoachEventsPremiumV2.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
+const eventsStart = dashboards.indexOf('export function CoachEventsInteractiveDashboard');
+const eventsEnd = dashboards.indexOf('\nconst operationalPageConfig', eventsStart);
+const eventsDashboard = dashboards.slice(eventsStart, eventsEnd);
 
 test('Phase 3J build hook remains present but no longer mutates presentation source', () => {
   assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
   assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
   assert.match(routeEnhancers, /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3j-coach-events-hierarchy\.mjs/);
   assert.match(enhancer, /legacy mutation retired/);
-  assert.match(enhancer, /SecondaryPageDisclosure/);
+  assert.match(enhancer, /CoachEventsMonthCalendar/);
   assert.doesNotMatch(enhancer, /writeFileSync|source\.replace/);
 });
 
-test('supporting RSVP intelligence is source-owned without deleting insight data', () => {
-  assert.match(dashboards, /<SecondaryPageDisclosure/);
-  assert.match(dashboards, /title="Schedule insights"/);
-  assert.match(dashboards, /summary=\{`\$\{briefing\.responseRate\}% response · \$\{briefing\.missing\} missing`\}/);
-  assert.match(dashboards, /testId="coach-events-supporting-intelligence"/);
-  assert.match(dashboards, /testId="coach-events-insight-grid"/);
-  assert.match(dashboards, /briefing\.insights\.map/);
-  assert.match(dashboards, /DashboardProgress/);
+test('Coach Events schedule intelligence is calendar-first and source-owned', () => {
+  const calendarIndex = eventsDashboard.indexOf('<CoachEventsMonthCalendar');
+  const decisionIndex = eventsDashboard.indexOf('<CoachRoutePerformanceStage', calendarIndex);
+  assert.ok(eventsStart >= 0 && eventsEnd > eventsStart);
+  assert.ok(calendarIndex > 0 && decisionIndex > calendarIndex);
+  assert.match(eventsDashboard, /rows=\{rows\}/);
+  assert.match(calendar, /data-testid="coach-events-month-calendar"/);
+  assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
+  assert.doesNotMatch(eventsDashboard, /briefing\.insights\.map/);
 });
 
-test('desktop preserves expanded intelligence while iPhone defaults it closed', () => {
-  assert.match(dashboards, /defaultOpen=\{typeof window !== "undefined" && window\.innerWidth > 760\}/);
-  assert.match(disclosureCss, /@media \(min-width: 761px\)/);
-  assert.match(disclosureCss, /\.summary \{ display: none; \}/);
-  assert.doesNotMatch(dashboards, /defaultOpen=\{true\}/);
+test('calendar keeps month navigation, readable event marks, and mobile touch geometry', () => {
+  assert.match(calendar, /aria-label="Previous month"/);
+  assert.match(calendar, /aria-label="Next month"/);
+  assert.match(calendar, /coachEventsCalendar__eventMarks/);
+  assert.match(calendarCss, /\.coachEventsCalendar__day\s*\{[\s\S]*min-height:\s*47px/);
+  assert.match(calendarCss, /@media \(max-width: 390px\)[\s\S]*\.coachEventsCalendar__day \{ min-height: 44px; height: 44px;/);
+  assert.match(calendarCss, /:focus-visible/);
+  assert.match(calendarCss, /prefers-reduced-motion:\s*reduce/);
 });
 
-test('mobile Schedule insights is a readable two-line touch-safe disclosure', () => {
-  assert.match(disclosure, /data-visual-role="progressive-disclosure"/);
-  assert.match(disclosure, /data-visual-role="disclosure-title"/);
-  assert.match(disclosure, /data-visual-role="disclosure-meta"/);
-  const minHeight = Number(disclosureCss.match(/\.summary \{[\s\S]*?min-height:\s*(\d+)px/)?.[1]);
-  assert.ok(minHeight >= 44, `Schedule insights summary must remain touch-safe; got ${minHeight}px`);
-  assert.match(disclosureCss, /\.copy \{[\s\S]*?display:\s*grid;[\s\S]*?gap:\s*4px/);
-  assert.match(disclosureCss, /touch-action:\s*manipulation/);
-  assert.match(disclosureCss, /:focus-visible/);
-  assert.match(disclosureCss, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(disclosureCss, /!important/);
-});
-
-test('Phase 3J preserves existing event action wiring and insight actions', () => {
-  for (const marker of ['onCreateEvent','onOpenEvent','onStatusChange','resolveEventAction','Create Event']) {
-    assert.ok(dashboards.includes(marker), `missing preserved event capability marker: ${marker}`);
+test('Phase 3J preserves event creation, drill-down, RSVP briefing, and status actions', () => {
+  for (const marker of ['onCreateEvent','onOpenEvent','onStatusChange','Create Event','buildCoachEventActionBriefing']) {
+    assert.ok(eventsDashboard.includes(marker), `missing preserved event capability marker: ${marker}`);
   }
-  assert.match(dashboards, /buildCoachEventActionBriefing/);
-  assert.match(dashboards, /resolveEventAction\(insight\.action/);
+  assert.match(calendar, /onOpenEvent\?\.\(/);
+  assert.match(eventsDashboard, /briefing\.responseRate/);
+  assert.match(eventsDashboard, /briefing\.missing/);
 });
 
 test('obsolete Phase 3J stylesheet is no longer an active visual authority', () => {
   assert.doesNotMatch(html, /shotlab-phase3j-coach-events-hierarchy\.css/);
 });
 
-test('rendered iPhone evidence covers the approved compact Coach Events state', () => {
-  assert.match(screenshots, /coach-events-supporting-intelligence/);
-  assert.match(screenshots, /coach-events-insight-grid/);
+test('rendered iPhone evidence continues to capture Coach Events', () => {
   assert.match(screenshots, /07-coach-events/);
-  assert.match(screenshots, /expect\(eventInsights\)\.toHaveCount\(1\)/);
-  assert.match(screenshots, /expect\(eventInsights\)\.toBeHidden\(\)/);
-  assert.doesNotMatch(screenshots, /07b-coach-events-insights-expanded/);
   assert.match(screenshots, /getByRole\(\"button\", \{ name: \/MANAGE\//);
 });
 

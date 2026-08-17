@@ -1,13 +1,16 @@
 import { readFileSync } from 'node:fs';
 
-const appPath = 'src/components/CoachInteractiveDashboards.jsx';
-const source = readFileSync(appPath, 'utf8');
+const dashboardPath = 'src/components/CoachInteractiveDashboards.jsx';
+const calendarPath = 'src/components/CoachEventsMonthCalendar.jsx';
+const dashboard = readFileSync(dashboardPath, 'utf8');
+const calendar = readFileSync(calendarPath, 'utf8');
 
-const marker = 'testId="coach-events-supporting-intelligence"';
-const semanticOwner = 'SecondaryPageDisclosure';
-
-if (!source.includes(marker) || !source.includes(semanticOwner)) {
-  throw new Error('Phase 3J retirement requires the direct semantic Coach Events disclosure owner.');
+if (!dashboard.includes('CoachEventsMonthCalendar') || !calendar.includes('data-testid="coach-events-month-calendar"')) {
+  throw new Error('Phase 3J retirement requires the source-owned Coach Events month calendar.');
 }
 
-console.log('Phase 3J legacy mutation retired; Coach Events disclosure is source-owned.');
+for (const marker of ['onCreateEvent', 'onOpenEvent', 'onStatusChange', 'buildCoachEventActionBriefing']) {
+  if (!dashboard.includes(marker)) throw new Error(`Phase 3J calendar migration lost Events capability: ${marker}`);
+}
+
+console.log('Phase 3J legacy mutation retired; Coach Events calendar is source-owned.');

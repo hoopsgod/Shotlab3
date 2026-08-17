@@ -162,14 +162,25 @@ test("Coach Events exposes one premium schedule hierarchy, creation entry point,
 
   const scheduleResults = page.getByTestId("coach-events-mobile-page");
   const commandBar = page.getByTestId("coach-events-command-bar");
+  const calendar = page.getByTestId("coach-events-month-calendar");
   const decisionBrief = page.getByTestId("coach-events-decision-brief");
   const performanceRail = await currentPerformanceRail(page);
   await expect(page.getByTestId("coach-events-filter-rail")).toBeVisible();
   await expect(commandBar.getByText("SCHEDULE", { exact: true })).toBeVisible();
   await expect(commandBar.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
+  await expect(calendar).toBeVisible();
+  await expect(calendar.getByTestId("coach-events-calendar-month")).toBeVisible();
   await expect(decisionBrief.getByText("NEXT TEAM MOMENT", { exact: true })).toBeVisible();
   await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
   await expect(performanceRail.getByRole("button")).toHaveCount(3);
+  const hierarchy = await page.evaluate(() => {
+    const intro = document.querySelector('[data-testid="coach-events-command-bar"]')?.getBoundingClientRect();
+    const month = document.querySelector('[data-testid="coach-events-month-calendar"]')?.getBoundingClientRect();
+    const decision = document.querySelector('[data-testid="coach-events-decision-brief"]')?.getBoundingClientRect();
+    return { introBottom: intro?.bottom || 0, monthTop: month?.top || 0, monthBottom: month?.bottom || 0, decisionTop: decision?.top || 0 };
+  });
+  expect(hierarchy.monthTop).toBeGreaterThanOrEqual(hierarchy.introBottom - 2);
+  expect(hierarchy.decisionTop).toBeGreaterThanOrEqual(hierarchy.monthBottom - 2);
   await expectNoHorizontalOverflow(page);
   await captureEventsPage(page, "events-populated-390");
 
@@ -201,17 +212,20 @@ test("Coach Events keeps the zero-event mobile page short and overflow-safe on n
   await openSchedule(page);
 
   const commandBar = page.getByTestId("coach-events-command-bar");
+  const calendar = page.getByTestId("coach-events-month-calendar");
   const decisionBrief = page.getByTestId("coach-events-decision-brief");
-  const emptyState = page.getByTestId("coach-events-premium-empty-state");
+  await expect(calendar).toBeVisible();
+  await expect(calendar.getByTestId("coach-events-calendar-month")).toBeVisible();
+  await expect(calendar.locator(".coachEventsCalendar__eventMarks")).toHaveCount(0);
   await expect(decisionBrief.getByText("Calendar is open", { exact: true })).toBeVisible();
   await expect(commandBar.getByRole("button", { name: /Create Event/i })).toHaveCount(1);
-  await expect(emptyState.getByText("Nothing scheduled yet", { exact: true })).toBeVisible();
   await expect(page.getByText("OPEN SCHEDULE SLOT", { exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
   await captureEventsPage(page, "events-empty-375");
 
   await page.setViewportSize({ width: 320, height: 740 });
   await expect(commandBar).toBeVisible();
+  await expect(calendar).toBeVisible();
   await expect(decisionBrief).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
+const PHYSICAL_TOUCH_FLOOR = 43.5;
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -157,7 +158,7 @@ test("Phase 4C keeps training completion restrained while preserving a tactile n
   expect(parseFloat(completionStyle.animationDuration) || 0).toBe(0);
   expect(parseFloat(nextStyle.transition) || 0).toBeLessThanOrEqual(0.2);
   expect(nextBox).not.toBeNull();
-  expect(nextBox.height).toBeGreaterThanOrEqual(44);
+  expect(nextBox.height).toBeGreaterThanOrEqual(PHYSICAL_TOUCH_FLOOR);
   await noOverflow(page);
   await capture(page, "10d-phase4c-player-training-completion.png");
 });

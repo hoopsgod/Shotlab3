@@ -5,6 +5,7 @@ import fs from "node:fs";
 const appSource = fs.readFileSync("src/App.jsx", "utf8");
 const primitivesSource = fs.readFileSync("src/components/CoachDashboardPrimitives.jsx", "utf8");
 const dashboardSource = fs.readFileSync("src/components/CoachInteractiveDashboards.jsx", "utf8");
+const calendarSource = fs.readFileSync("src/components/CoachEventsMonthCalendar.jsx", "utf8");
 const pageSystemSource = fs.readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
 const pageSystemCss = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
 const dashboardCss = fs.readFileSync("src/components/CoachDashboardPrimitives.module.css", "utf8");
@@ -41,7 +42,7 @@ test("canonical secondary page system defines one page, toolbar, decision, and e
   assert.match(pageSystemCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
-test("players and events share the canonical page composition without losing selectors", () => {
+test("players and events share the canonical page composition while Events owns its month calendar", () => {
   assert.match(dashboardSource, /export function CoachPlayersInteractiveDashboard/);
   assert.match(dashboardSource, /SecondaryPageShell testId="coach-players-interactive-dashboard"/);
   assert.match(dashboardSource, /coach-players-command-bar/);
@@ -53,7 +54,10 @@ test("players and events share the canonical page composition without losing sel
   assert.match(dashboardSource, /coach-events-command-bar/);
   assert.match(dashboardSource, /coach-events-toolbar/);
   assert.match(dashboardSource, /coach-events-decision-brief/);
-  assert.match(dashboardSource, /coach-events-insight-grid/);
+  assert.match(dashboardSource, /CoachEventsMonthCalendar/);
+  assert.match(calendarSource, /data-testid="coach-events-month-calendar"/);
+  assert.match(calendarSource, /data-testid="coach-events-calendar-month"/);
+  assert.doesNotMatch(dashboardSource, /coach-events-insight-grid/);
 });
 
 test("App wires dashboard selectors and compositions into live coach routes", () => {
@@ -82,7 +86,7 @@ test("remaining coach pages retain the current control layer for incremental mig
 });
 
 test("cohesion pass introduces no schema, auth, persistence, or network writes", () => {
-  for (const source of [pageSystemSource, pageSystemCss, dashboardSource, integrationCss]) {
+  for (const source of [pageSystemSource, pageSystemCss, dashboardSource, calendarSource, integrationCss]) {
     assert.doesNotMatch(source, /supabase|auth\.|create table|alter table|fetch\(|XMLHttpRequest|localStorage|sessionStorage/i);
   }
 });
