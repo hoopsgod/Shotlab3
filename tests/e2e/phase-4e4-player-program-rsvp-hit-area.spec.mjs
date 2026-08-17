@@ -41,7 +41,7 @@ async function enterExpandedProgram(page) {
   }
   await settle(page);
 
-  const fullWorkspace = page.locator("details:not([open]) > summary:visible").filter({ hasText: /FULL WORKSPACE|Schedule & attendance details/i }).first();
+  const fullWorkspace = page.locator("details:not([open]) > summary:visible").filter({ hasText: /FULL WORKSPACE|Schedule & attendance details|Schedule & RSVP/i }).first();
   await expect(fullWorkspace).toBeVisible({ timeout: 20_000 });
   await fullWorkspace.click();
   await settle(page);
