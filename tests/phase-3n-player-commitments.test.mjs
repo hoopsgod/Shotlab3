@@ -24,6 +24,14 @@ test("Phase 3N runs after accepted Phase 3M with a guarded idempotent route tran
   assert.match(enhancer, /promoteSourceOwnedEvents/);
 });
 
+test("retired Player Events markup is removed by owned section boundary rather than brittle JSX character parsing", () => {
+  assert.match(enhancer, /const SECTION_RULE = '\/\/ ═+/);
+  assert.match(enhancer, /stripSectionContainingFunction/);
+  assert.match(enhancer, /input\.indexOf\(SECTION_RULE, functionStart \+ signature\.length\)/);
+  assert.match(enhancer, /section boundary did not contain/);
+  assert.doesNotMatch(enhancer, /let quote = null|lineComment = false|blockComment = false/);
+});
+
 test("Events and S&C keep intentional role-specific commitment integrations without duplicate Player Events presentation", () => {
   for (const seam of [
     'PlayerCommitmentCenter mode="events"',
