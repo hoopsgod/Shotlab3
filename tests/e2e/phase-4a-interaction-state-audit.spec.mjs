@@ -214,8 +214,14 @@ test("Phase 4A audits Player interaction ergonomics and More-sheet behavior", as
   expect(pageErrors).toEqual([]);
 
   const programAudit = audits.find((audit) => audit.key === "program");
-  const excludedProgramRsvpActions = (programAudit?.excludedAncestorClipped || []).filter((target) => /YOU'RE LOCKED IN|RSVP NOW/.test(target.label));
-  expect(excludedProgramRsvpActions.length, "collapsed Player Program RSVP controls must not be counted as visible interaction debt").toBeGreaterThanOrEqual(4);
+  const programRsvpActions = (programAudit?.targets || []).filter((target) => /YOU'RE LOCKED IN|RSVP NOW/.test(target.label));
+  const interactableProgramRsvpActions = programRsvpActions.filter((target) => target.visible && !target.excludedAncestor);
+  for (const target of interactableProgramRsvpActions) {
+    expect(target.width, `Player Program RSVP control must be at least 44px wide: ${target.label}`).toBeGreaterThanOrEqual(44);
+    expect(target.height, `Player Program RSVP control must be at least 44px tall: ${target.label}`).toBeGreaterThanOrEqual(44);
+    expect(target.left, `Player Program RSVP control must not clip left: ${target.label}`).toBeGreaterThanOrEqual(-1);
+    expect(target.right, `Player Program RSVP control must not clip right: ${target.label}`).toBeLessThanOrEqual((programAudit?.viewportWidth || 390) + 1);
+  }
 
   writeAndGateSummary("player", audits);
 });
