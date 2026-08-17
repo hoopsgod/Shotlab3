@@ -25,11 +25,7 @@ async function settle(page) {
 }
 
 async function noOverflow(page, label) {
-  const geometry = await page.evaluate(() => ({
-    viewport: window.innerWidth,
-    documentWidth: document.documentElement.scrollWidth,
-    bodyWidth: document.body.scrollWidth,
-  }));
+  const geometry = await page.evaluate(() => ({ viewport: window.innerWidth, documentWidth: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth }));
   expect(geometry.documentWidth - geometry.viewport, `${label} document overflow`).toBeLessThanOrEqual(1);
   expect(geometry.bodyWidth - geometry.viewport, `${label} body overflow`).toBeLessThanOrEqual(1);
 }
@@ -52,11 +48,9 @@ async function enterDemo(page, role) {
 async function openRoute(page, key, visibleLabel) {
   const dock = page.getByTestId("mobile-navigation-dock");
   const direct = dock.locator(`[data-nav-key="${key}"]`);
-  if (await direct.count()) {
-    await direct.click();
-  } else if (visibleLabel && await dock.getByRole("button", { name: visibleLabel, exact: true }).count()) {
-    await dock.getByRole("button", { name: visibleLabel, exact: true }).click();
-  } else {
+  if (await direct.count()) await direct.click();
+  else if (visibleLabel && await dock.getByRole("button", { name: visibleLabel, exact: true }).count()) await dock.getByRole("button", { name: visibleLabel, exact: true }).click();
+  else {
     await page.getByTestId("mobile-navigation-more").click();
     const sheet = page.getByTestId("mobile-navigation-sheet");
     await expect(sheet).toBeVisible();
@@ -80,13 +74,9 @@ async function auditWidths(page, rootTestId, label) {
     await settle(page);
     await expect(page.getByTestId(rootTestId)).toBeVisible();
     await noOverflow(page, `${label}-${width}`);
-
     const rail = page.getByTestId(rootTestId).getByTestId("events-week-rail");
     await expect(rail.getByRole("button")).toHaveCount(7);
-    const railGeometry = await rail.evaluate((node) => {
-      const rect = node.getBoundingClientRect();
-      return { left: rect.left, right: rect.right, viewport: window.innerWidth };
-    });
+    const railGeometry = await rail.evaluate((node) => { const rect = node.getBoundingClientRect(); return { left: rect.left, right: rect.right, viewport: window.innerWidth }; });
     expect(railGeometry.left, `${label} ${width}px rail left`).toBeGreaterThanOrEqual(-1);
     expect(railGeometry.right, `${label} ${width}px rail right`).toBeLessThanOrEqual(railGeometry.viewport + 1);
   }
@@ -140,7 +130,7 @@ test("Coach Events reset renders top, editorial list, secondary month, and manag
   expect(pageErrors).toEqual([]);
 });
 
-test("Player Events reset renders personal RSVP, editorial list, secondary month, and RSVP detail", async ({ page }) => {
+test("Player Events reset renders personal RSVP, editorial list, secondary month, and private RSVP detail", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await enterDemo(page, "player");
@@ -180,12 +170,18 @@ test("Player Events reset renders personal RSVP, editorial list, secondary month
   const responseBefore = await hero.getAttribute("data-state");
   await hero.getByRole("button").click();
   await expect(details).toHaveAttribute("open", "");
-  await expect(page.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 10_000 });
+  const eventDetail = page.getByTestId("player-event-detail");
+  await expect(eventDetail).toBeVisible({ timeout: 10_000 });
+  await expect(eventDetail.getByText("MY RESPONSE", { exact: true })).toBeVisible();
+  await expect(eventDetail.getByText(/^(?:NO RESPONSE|✓ GOING)$/, { exact: false })).toBeVisible();
   await capture(page, "player-d-event-detail-rsvp");
 
   if (responseBefore === "action") {
-    await resetScroll(page);
+    const confirm = eventDetail.getByRole("button", { name: /Confirm going/i });
+    await expect(confirm).toBeVisible();
+    await confirm.click();
     await settle(page);
+    await resetScroll(page);
     await expect(hero).toHaveAttribute("data-state", "calm");
     await expect(hero.getByText("✓ GOING", { exact: true })).toBeVisible();
     await capture(page, "player-e-rsvp-completed");
