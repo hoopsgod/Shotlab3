@@ -87,13 +87,23 @@ function injectCommitmentRuntimeStyle() {
 
   const constantAnchor = source.includes('const RUNWAY_SLOTS = 4;') ? 'const RUNWAY_SLOTS = 4;' : 'const RUNWAY_SLOTS = 3;'
   const headerAnchor = '      <header className={styles.routeHeader}'
-  if (!source.includes(constantAnchor) || !source.includes(headerAnchor)) {
-    throw new Error('[mobile-player-composition] commitment runtime style anchor missing')
-  }
+  if (!source.includes(constantAnchor) || !source.includes(headerAnchor)) throw new Error('[mobile-player-composition] commitment runtime style anchor missing')
   const runtimeCss = 'const MOBILE_COMMITMENT_COMPOSITION_CSS = `@media(max-width:759px){[data-testid^="player-commitment-route-header-"]{text-align:center}[data-testid^="player-commitment-route-header-"]>div:nth-of-type(2){align-items:center}}`;'
   let next = source.replace(constantAnchor, `${constantAnchor}\n${runtimeCss}`)
   next = next.replace(headerAnchor, `      <style>{MOBILE_COMMITMENT_COMPOSITION_CSS}</style>\n${headerAnchor}`)
   writeFileSync(target, next)
+  return true
+}
+
+function retireLegacyPlayerEventsPanel() {
+  const target = path.resolve(ROOT, 'src/App.jsx')
+  const source = readFileSync(target, 'utf8')
+  const promoted = '<PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction} toggleRsvp={toggleRsvp} onCompletionCue={pushCompletionCue}/>'
+  if (source.includes(promoted)) return false
+  const legacy = '<PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter>'
+  if (!source.includes(legacy)) throw new Error('[mobile-player-composition] legacy Player Events panel route was not found')
+  writeFileSync(target, source.replace(legacy, promoted))
+  console.log('[mobile-player-composition] Retired duplicate Player Events panel; premium Events owns detail and RSVP presentation.')
   return true
 }
 
@@ -103,9 +113,7 @@ function trimLegacyCoachEmptyStateTooltip() {
   const legacyConstant = '  const legacyCoachEmptyStateCopy = "No activity yet — invite players or have them log their first workout.";\n'
   const legacyTitle = ' title={legacyCoachEmptyStateCopy}'
   if (!source.includes(legacyConstant) && !source.includes(legacyTitle)) return false
-  if (!source.includes(legacyConstant) || !source.includes(legacyTitle)) {
-    throw new Error('[mobile-player-composition] legacy Coach empty-state tooltip contract is partially applied')
-  }
+  if (!source.includes(legacyConstant) || !source.includes(legacyTitle)) throw new Error('[mobile-player-composition] legacy Coach empty-state tooltip contract is partially applied')
   writeFileSync(target, source.replace(legacyConstant, '').replace(legacyTitle, ''))
   return true
 }
@@ -136,6 +144,7 @@ export function applyMobilePlayerCompositionReconciliation() {
     appendOwnedBlock('src/components/PlayerOperationalWorkspace.module.css', workspaceCss),
     trimRetiredPlayerEventsPayload(),
     injectCommitmentRuntimeStyle(),
+    retireLegacyPlayerEventsPanel(),
     trimLegacyCoachEmptyStateTooltip(),
     appendOwnedBlock('src/styles/CommandHierarchy2026.css', hierarchyCss),
   ].filter(Boolean).length
