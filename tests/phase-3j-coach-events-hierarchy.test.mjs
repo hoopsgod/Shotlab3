@@ -63,11 +63,13 @@ test('obsolete Phase 3J stylesheet is no longer an active visual authority', () 
   assert.doesNotMatch(html, /shotlab-phase3j-coach-events-hierarchy\.css/);
 });
 
-test('rendered iPhone evidence still covers compact and expanded Coach Events states', () => {
+test('rendered iPhone evidence covers the approved compact Coach Events state', () => {
   assert.match(screenshots, /coach-events-supporting-intelligence/);
   assert.match(screenshots, /coach-events-insight-grid/);
   assert.match(screenshots, /07-coach-events/);
-  assert.match(screenshots, /07b-coach-events-insights-expanded/);
+  assert.match(screenshots, /expect\(eventInsights\)\.toHaveCount\(1\)/);
+  assert.match(screenshots, /expect\(eventInsights\)\.toBeHidden\(\)/);
+  assert.doesNotMatch(screenshots, /07b-coach-events-insights-expanded/);
   assert.match(screenshots, /getByRole\(\"button\", \{ name: \/MANAGE\//);
 });
 

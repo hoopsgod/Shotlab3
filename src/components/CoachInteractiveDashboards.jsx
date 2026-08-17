@@ -17,7 +17,6 @@ import {
   buildCoachPlayerActionBriefing,
   formatCoachScheduleDate,
 } from "../lib/coachActionBriefings.js";
-import "./CoachEventsPremium.css";
 
 const normalizeEventsSearchSurface = (node) => {
   const input = node?.querySelector?.('input[type="search"]');
@@ -216,8 +215,8 @@ const operationalPageConfig = {
     emptyDetail: "Create the next session and make athlete commitments visible before adding more programming.",
   },
   "coach-page-dashboard-leaderboards": {
-    eyebrow: "Recognition decision",
-    decisionEyebrow: "Performance brief",
+    eyebrow: "COMPETE",
+    decisionEyebrow: "TEAM STANDARD",
     emptyTitle: "Recognition begins with activity",
     emptyDetail: "Player results will create a meaningful recognition surface after the first verified activity is logged.",
   },
@@ -236,28 +235,43 @@ function buildOperationalPageModel({ title, summary, metrics = [], testId }) {
     emptyTitle: `Set the next ${String(title || "team").toLowerCase()} priority`,
     emptyDetail: summary || "Use the available evidence to choose one clear next action.",
   };
-  const meaningful = metrics.filter((metric) => metric && metric.value !== undefined && metric.value !== null && metric.value !== "");
-  const primary = meaningful[0];
+  const isLeaderboardsPage = testId === "coach-page-dashboard-leaderboards";
+  const allMeaningful = metrics.filter((metric) => metric && metric.value !== undefined && metric.value !== null && metric.value !== "");
+  const meaningful = isLeaderboardsPage
+    ? allMeaningful.filter((metric) => ["ranked", "leader", "archives"].includes(metric.key))
+    : allMeaningful;
+  const leaderMetric = isLeaderboardsPage ? allMeaningful.find((metric) => metric.key === "leader") : null;
+  const hasLeader = Boolean(leaderMetric && Number(leaderMetric.value) > 0 && leaderMetric.detail && leaderMetric.detail !== "No leader yet");
+  const primary = isLeaderboardsPage ? (hasLeader ? leaderMetric : meaningful[0]) : meaningful[0];
   return {
     ...config,
-    decisionTitle: primary ? `${primary.label}: ${readableMetricValue(primary)}` : config.emptyTitle,
-    decisionDetail: primary?.detail || config.emptyDetail,
-    decisionTone: primary?.tone || "info",
+    decisionTitle: isLeaderboardsPage
+      ? (hasLeader ? `${leaderMetric.detail} sets the standard` : config.emptyTitle)
+      : primary ? `${primary.label}: ${readableMetricValue(primary)}` : config.emptyTitle,
+    decisionDetail: isLeaderboardsPage
+      ? (hasLeader ? `${readableMetricValue(leaderMetric)} verified makes lead the current team ranking.` : config.emptyDetail)
+      : primary?.detail || config.emptyDetail,
+    decisionTone: isLeaderboardsPage ? (hasLeader ? "positive" : "info") : primary?.tone || "info",
     primary,
     meaningful,
+    isLeaderboardsPage,
   };
 }
 
 export function CoachPageDashboardHeader({ eyebrow, title, summary, status, actions = [], metrics = [], activeMetric, onMetricSelect, testId }) {
   const model = buildOperationalPageModel({ title, summary, metrics, testId });
   const decisionAction = model.primary?.key && onMetricSelect
-    ? { label: `Review ${model.primary.label}`, onClick: () => onMetricSelect(model.primary.key) }
+    ? { label: model.isLeaderboardsPage ? "Review rankings" : `Review ${model.primary.label}`, onClick: () => onMetricSelect(model.primary.key) }
     : actions[0];
+  const displayEyebrow = model.isLeaderboardsPage ? model.eyebrow : eyebrow || model.eyebrow;
+  const displayTitle = model.isLeaderboardsPage ? "Leaderboards" : title;
+  const displaySummary = model.isLeaderboardsPage ? "Recognize the standard. See who is leading and who is rising." : summary;
 
   return (
     <SecondaryPageShell testId={testId} className="secondaryPageShell--embeddedHeader">
-      <SecondaryPageIntro eyebrow={eyebrow || model.eyebrow} title={title} summary={summary} status={status} actions={actions} />
+      <SecondaryPageIntro eyebrow={displayEyebrow} title={displayTitle} summary={displaySummary} status={status} actions={actions} />
       <CoachRoutePerformanceStage
+        kind={model.isLeaderboardsPage ? "leaderboards" : undefined}
         eyebrow={model.decisionEyebrow}
         title={model.decisionTitle}
         detail={model.decisionDetail}

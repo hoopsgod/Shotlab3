@@ -23,10 +23,15 @@ for (const required of [
 for (const required of [
   'testId={`${testId}-decision-brief`}',
   'className="secondaryPageShell--embeddedHeader"',
-  'label: `Review ${model.primary.label}`',
   '<CoachRoutePerformanceStage',
 ]) {
   if (!dashboard.includes(required)) throw new Error(`Phase 4E.11 Coach dashboard contract missing: ${required}`);
+}
+
+const genericReviewAction = 'label: `Review ${model.primary.label}`';
+const premiumLeaderboardReviewAction = 'model.isLeaderboardsPage ? "Review rankings" : `Review ${model.primary.label}`';
+if (!dashboard.includes(genericReviewAction) && !dashboard.includes(premiumLeaderboardReviewAction)) {
+  throw new Error('Phase 4E.11 Coach dashboard contract missing a touch-safe operational review action.');
 }
 
 const compactAuthority = authority.replace(/\s+/g, '');

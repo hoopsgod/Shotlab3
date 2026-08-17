@@ -1,6 +1,7 @@
 import ShotLabIcon from "./ShotLabIcon.jsx";
 import styles from "./CoachRoutePerformanceStage.module.css";
 import "./CoachInteractiveDashboards.css";
+import "../styles/CoachInteractiveDashboard.css";
 
 const ROUTE_ICONS = {
   players: "team",
@@ -11,6 +12,12 @@ const ROUTE_ICONS = {
   leaderboards: "trophy",
   settings: "settings",
   default: "target",
+};
+
+const LEADERBOARD_METRIC_LABELS = {
+  ranked: "Ranked",
+  leader: "Leader",
+  archives: "Archives",
 };
 
 const cx = (...values) => values.filter(Boolean).join(" ");
@@ -38,7 +45,7 @@ const readableMetricValue = (metric) => {
   return String(value);
 };
 
-function StageMetric({ metric, active, onSelect }) {
+function StageMetric({ metric, active, onSelect, routeKind }) {
   const interactive = Boolean(onSelect && metric?.key);
   const Component = interactive ? "button" : "div";
   const props = interactive
@@ -49,6 +56,7 @@ function StageMetric({ metric, active, onSelect }) {
         "aria-label": `${metric.label}: ${readableMetricValue(metric)}${metric.detail ? ` · ${metric.detail}` : ""}`,
       }
     : {};
+  const routeDisplayLabel = routeKind === "leaderboards" ? LEADERBOARD_METRIC_LABELS[metric?.key] : "";
 
   return (
     <Component
@@ -56,7 +64,7 @@ function StageMetric({ metric, active, onSelect }) {
       className={cx(styles.metric, active && styles.metricActive)}
       data-route-stage-metric
     >
-      <span className={styles.metricLabel} data-route-stage-metric-label>{metric.displayLabel || metric.label}</span>
+      <span className={styles.metricLabel} data-route-stage-metric-label>{routeDisplayLabel || metric.displayLabel || metric.label}</span>
       <span className={styles.metricValue} data-route-stage-metric-value>{readableMetricValue(metric)}</span>
       {metric.detail ? <span className={styles.metricDetail} data-route-stage-metric-detail>{metric.detail}</span> : null}
     </Component>
@@ -121,6 +129,7 @@ export default function CoachRoutePerformanceStage({
               metric={metric}
               active={metric.key === activeMetric}
               onSelect={onMetricSelect}
+              routeKind={routeKind}
             />
           ))}
         </div>

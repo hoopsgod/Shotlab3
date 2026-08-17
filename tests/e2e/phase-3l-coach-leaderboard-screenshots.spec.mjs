@@ -52,9 +52,9 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   await expect(decisionBrief).toBeVisible();
   const performanceRail = decisionBrief.locator('[data-visual-role="performance-evidence"]');
   await expect(performanceRail).toBeVisible();
+  await expect(performanceRail.getByRole("button", { name: /^Ranked Players:/ })).toBeVisible();
   await expect(performanceRail.getByRole("button", { name: /^Current Leader:/ })).toBeVisible();
   await expect(performanceRail.getByRole("button", { name: /^Archived Seasons:/ })).toBeVisible();
-  await expect(performanceRail.getByRole("button", { name: /^View:/ })).toBeVisible();
 
   const routeKind = await decisionBrief.getAttribute("data-route-kind");
   expect(routeKind).toBe("leaderboards");

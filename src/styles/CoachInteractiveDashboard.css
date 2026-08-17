@@ -1,3 +1,5 @@
+@import "../components/CoachEventsPremium.css";
+
 .performance-shell--coach .dashboardLegacyHeader {
   display: none !important;
 }

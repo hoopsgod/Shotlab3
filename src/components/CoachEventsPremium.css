@@ -268,9 +268,9 @@
   }
 
   [data-testid="coach-events-filter-rail"] > div[role="group"] button {
-    min-height: 38px;
+    min-height: 44px;
     padding-inline: 12px;
-    border-radius: 11px;
+    border-radius: 19px;
     box-shadow: none;
   }
 

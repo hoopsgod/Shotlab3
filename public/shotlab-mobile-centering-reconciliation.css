@@ -10,6 +10,18 @@
     max-width: 100%;
   }
 
+  /* Schedule is an informational operational surface. Preserve the semantic-info
+   * token at the final mobile cascade so later brand-lime presentation layers
+   * cannot overwrite its route-owned accent contract. */
+  html body #root .performance-shell.performance-shell--coach .pageShell[data-accent="events"] {
+    --pageAccent: #176b87 !important;
+    --pageAccentGlow: rgba(23, 107, 135, 0.34) !important;
+    --pageAccentBg: rgba(23, 107, 135, 0.10) !important;
+    --page-accent: #176b87 !important;
+    --page-accent-soft: rgba(23, 107, 135, 0.10) !important;
+    --page-accent-border: rgba(23, 107, 135, 0.34) !important;
+  }
+
   html body #root [data-visual-role="secondary-page"] {
     max-width: 100%;
     margin-left: auto !important;

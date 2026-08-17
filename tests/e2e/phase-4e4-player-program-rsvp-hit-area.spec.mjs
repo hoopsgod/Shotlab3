@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/phase-4e4-player-program-rsvp-hit-area");
-const MIN_TOUCH_TARGET = 43.5;
+const MIN_TOUCH_TARGET = 45;
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 test.use({ viewport: { width: 390, height: 844 } });
@@ -91,7 +91,7 @@ test("Phase 4E.4 keeps reachable Program RSVP/status actions touch-safe", async 
 
     expect(box?.height || 0, `${presentation.label} physical height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
     expect(box?.width || 0, `${presentation.label} physical width`).toBeGreaterThanOrEqual(44);
-    expect(presentation.minHeight, `${presentation.label} CSS minimum`).toBeGreaterThanOrEqual(44);
+    expect(presentation.minHeight, `${presentation.label} CSS minimum`).toBeGreaterThanOrEqual(46);
     expect(presentation.height, `${presentation.label} computed height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
     expect(presentation.fontSize, `${presentation.label} typography`).toBe(12);
     expect(presentation.borderRadius, `${presentation.label} radius`).toBe(12);

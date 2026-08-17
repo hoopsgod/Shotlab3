@@ -192,7 +192,9 @@ test("event intelligence drawer identifies missing responses and returns to atte
   await enterSeededDemoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
 
-  await page.getByTestId("coach-events-decision-brief").getByRole("button", { name: "Resolve RSVPs", exact: true }).click();
+  const decisionBrief = page.getByTestId("coach-events-decision-brief");
+  await expect(decisionBrief).toBeVisible({ timeout: 20_000 });
+  await decisionBrief.getByRole("button", { name: "View Event", exact: true }).click();
   const drawer = page.getByTestId("coach-event-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 20_000 });
   await expect(drawer.getByRole("heading", { name: "Team Practice", exact: true })).toBeVisible();

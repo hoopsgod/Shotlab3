@@ -18,46 +18,26 @@ function replaceFunction(name, transform) {
   source = `${source.slice(0, block.start)}${next}${source.slice(block.end)}`
 }
 
-const populatedLeaderboardPlaceholders = `          {Array.from({ length: Math.max(0, 3 - rows.length) }, (_, index) => (
-            <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-live-" + index}>
-              <span className="coachLeaderboardRank" aria-hidden="true">—</span>
-              <div className="coachLeaderboardRowCopy"><strong>Open rank</strong><span>Player activity will fill this ranking position.</span></div>
-              <span className="coachLeaderboardWeek"><small>This week</small><strong>—</strong><em className={styles.deltaNeutral}>—</em></span>
-            </div>
-          ))}`
-
-const emptyLeaderboardNode = `(
-        <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results" data-parity-empty-slot="true">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div className={styles.operationalRow + " coachLeaderboardRow"} data-leaderboard-placeholder="true" key={"coach-open-rank-" + index}>
-              <span className="coachLeaderboardRank" aria-hidden="true">—</span>
-              <div className="coachLeaderboardRowCopy"><strong>Open rank</strong><span>Player activity will fill this ranking position.</span></div>
-              <span className="coachLeaderboardWeek"><small>This week</small><strong>—</strong><em className={styles.deltaNeutral}>—</em></span>
-            </div>
-          ))}
-        </div>
-      )`
-
+// Coach Leaderboards now owns truthful natural-length ranking geometry. Preserve the
+// top-three mobile ranking cut without fabricating visual parity rows or empty slots.
 replaceFunction('CoachLeaderboardOperationalPanel', (block) => {
   let next = block
   if (!next.includes('data-testid="coach-leaderboard-operational-results"')) {
     throw new Error('Could not locate Coach leaderboard result surface.')
   }
 
-  if (!next.includes('coach-open-rank-live-')) {
-    const mapPattern = /\{rows\.map\(\(row\)\s*=>\s*\(/
-    if (!mapPattern.test(next)) throw new Error('Could not locate Coach leaderboard row map.')
-    next = next.replace(mapPattern, '{rows.slice(0, 3).map((row) => (')
-
-    const populatedClosePattern = /(\s*\)\)\}\s*\n)(\s*<\/div>\s*\n\s*\)\s*:)/
-    if (!populatedClosePattern.test(next)) throw new Error('Could not locate Coach leaderboard populated-list close boundary.')
-    next = next.replace(populatedClosePattern, `$1${populatedLeaderboardPlaceholders}\n$2`)
+  if (/\{rows\.map\(\(row\)\s*=>\s*\(/.test(next)) {
+    next = next.replace(/\{rows\.map\(\(row\)\s*=>\s*\(/, '{rows.slice(0,3).map((row) => (')
   }
 
-  if (!next.includes('data-parity-empty-slot="true"')) {
-    const emptyPattern = /<EmptyState(?:\s+[^>]*)?>No leaderboard players match the selected view\.<\/EmptyState>/
-    if (!emptyPattern.test(next)) throw new Error('Could not locate Coach leaderboard empty state.')
-    next = next.replace(emptyPattern, emptyLeaderboardNode)
+  if (!/rows\.slice\(0,\s*3\)\.map\(\(row\)/.test(next)) {
+    throw new Error('Coach leaderboard must retain the source-owned top-three ranking cut.')
+  }
+  if (/Open rank|data-leaderboard-placeholder|data-parity-empty-slot/.test(next)) {
+    throw new Error('Coach leaderboard parity must not fabricate ranking positions.')
+  }
+  if (!/No leaderboard players match the selected view\./.test(next)) {
+    throw new Error('Coach leaderboard must retain its semantic empty state.')
   }
 
   return next
@@ -107,4 +87,4 @@ replaceFunction('CoachActivityIntelligencePanel', (block) => {
 })
 
 fs.writeFileSync(coachPanelPath, source)
-console.log('Applied robust Coach leaderboard and activity mobile parity geometry.')
+console.log('Applied truthful Coach leaderboard geometry and retained activity mobile parity slots.')

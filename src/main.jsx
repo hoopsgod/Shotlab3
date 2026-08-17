@@ -163,11 +163,7 @@ window.addEventListener('shotlab:app-ready', () => {
     const { installIndustrialDesignFoundation } = await import('./lib/industrialDesignFoundation.js')
     installIndustrialDesignFoundation()
     const { default: App } = await import('./App.jsx')
-    await import('./styles/VisualFoundation2026.css')
-    await import('./styles/CommandHierarchy2026.css')
-    await import('./styles/MissionControlHierarchy2026.css')
-    await import('./styles/MissionControlCascadeLock2026.css')
-    await import('./styles/Phase3SurfaceContracts.css')
+    await import('./styles/AuthenticatedVisualAuthority2026.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 

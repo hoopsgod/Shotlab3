@@ -21,7 +21,7 @@ async function expectNoHorizontalOverflow(page) {
   expect(overflow).toBeLessThanOrEqual(1);
 }
 async function expectThreeMetrics(locator) { await expect(locator).toBeVisible(); await expect(locator.locator(":scope > *")).toHaveCount(3); }
-function visibleCreateEventButton(page) { return page.getByRole("button", { name: "Create Event", exact: true }); }
+function visibleCreateEventButton(page) { return page.getByRole("button", { name: /^\+?\s*Create Event$/i }); }
 function futureDateInput(daysAhead = 7) { return new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000).toISOString().slice(0, 10); }
 
 test.beforeEach(async ({ page }) => { await installRoutes(page); await startClean(page); });
