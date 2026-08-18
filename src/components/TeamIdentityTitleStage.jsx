@@ -109,7 +109,7 @@ export default function TeamIdentityTitleStage({
 
   return <>
     <style>{TEAM_IDENTITY_STAGE_CSS}</style>
-    <header className={stageClass} style={stageStyle} data-testid={testId} data-team-identity-stage={variant} data-layout-role="editorial-header" data-page-kind={iconName} data-surface={surface}>
+    <header className={stageClass} style={stageStyle} data-testid={testId} data-team-identity-stage={variant} data-layout-role="editorial-header" data-visual-role="page-intro" data-page-kind={iconName} data-surface={surface}>
       {backAction ? <button type="button" className="teamIdentityStage__back" onClick={backAction.onClick} aria-label={backAction.ariaLabel || backAction.label || "Back"}><ShotLabIcon name="arrow" size={18}/><span>{backAction.label || "Back"}</span></button> : null}
       <div className="teamIdentityStage__crest">
         {hasLogo ? <img src={logoSrc} alt={`${teamName} team crest`} onError={() => setFailed(true)} draggable="false"/> : <div className="teamIdentityStage__fallback" role="img" aria-label={`${teamName} team mark`}>{initialsFor(teamName)}</div>}
