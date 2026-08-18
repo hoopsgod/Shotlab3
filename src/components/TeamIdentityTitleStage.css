@@ -184,7 +184,7 @@
   .teamIdentityTitleStage { --identity-crest: 96px; --identity-title: 42px; }
   .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
   .teamIdentityTitleStage__inner { gap: 14px; }
-  .teamIdentityTitleStage__identityLine { font-size: 10.5px; }
+  .teamIdentityTitleStage__identityLine { font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
