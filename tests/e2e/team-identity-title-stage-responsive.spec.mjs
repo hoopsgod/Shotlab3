@@ -35,12 +35,14 @@ async function enterDemo(page, role) {
 
 async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userName }) {
   await page.evaluate(({ teamName: nextTeamName, branding: nextBranding, userName: nextUserName }) => {
-    const parse = (key, fallback) => {
-      try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+    const parseFrom = (storage, key, fallback) => {
+      try { return JSON.parse(storage.getItem(key) || JSON.stringify(fallback)); }
       catch { return fallback; }
     };
-    const teams = parse("sl:teams", []);
-    const session = parse("sl:session", null);
+    const teams = parseFrom(localStorage, "sl:teams", []);
+    const localSession = parseFrom(localStorage, "sl:session", null);
+    const tabSession = parseFrom(sessionStorage, "sl:session", null);
+    const session = tabSession || localSession;
     const activeTeamId = session?.teamId || session?.team_id || teams.find((team) => /demo/i.test(String(team?.id || "")))?.id;
     const nextTeams = teams.map((team) => {
       if (String(team?.id || "") !== String(activeTeamId || "")) return team;
@@ -55,7 +57,11 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
       };
     });
     localStorage.setItem("sl:teams", JSON.stringify(nextTeams));
-    if (session && nextUserName) localStorage.setItem("sl:session", JSON.stringify({ ...session, name: nextUserName }));
+    if (session && nextUserName) {
+      const nextSession = { ...session, name: nextUserName };
+      if (localSession) localStorage.setItem("sl:session", JSON.stringify(nextSession));
+      if (tabSession) sessionStorage.setItem("sl:session", JSON.stringify(nextSession));
+    }
   }, { teamName, branding, userName });
   await page.goto("/?demo=1");
   await suppressMotion(page);
