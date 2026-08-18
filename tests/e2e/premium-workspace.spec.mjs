@@ -52,21 +52,30 @@ async function expectDockTouchTargets(page) {
 }
 
 async function expectPremiumHeader(page) {
-  const header = page.locator(".appHeader").first();
+  const header = page.locator('.appHeader[data-team-identity-stage="true"]').first();
   await expect(header).toBeVisible({ timeout: 20_000 });
+  await expect(header).toHaveAttribute("data-team-identity-stage", "true");
   const visual = await header.evaluate((node) => {
     const style = getComputedStyle(node);
+    const crest = node.querySelector('[data-identity-role="brand-panel"]');
+    const title = node.querySelector("h1");
+    const crestBox = crest?.getBoundingClientRect();
+    const titleStyle = title ? getComputedStyle(title) : null;
     return {
-      radius: Number.parseFloat(style.borderRadius),
+      radius: Number.parseFloat(style.borderRadius) || 0,
       borderStyle: style.borderTopStyle,
-      backgroundImage: style.backgroundImage,
       shadow: style.boxShadow,
+      crestWidth: crestBox?.width || 0,
+      crestHeight: crestBox?.height || 0,
+      titleSize: Number.parseFloat(titleStyle?.fontSize || "0") || 0,
     };
   });
-  expect(visual.radius).toBeGreaterThanOrEqual(18);
-  expect(visual.borderStyle).not.toBe("none");
-  expect(visual.backgroundImage).not.toBe("none");
-  expect(visual.shadow).not.toBe("none");
+  expect(visual.radius).toBeLessThanOrEqual(1);
+  expect(visual.borderStyle).toBe("none");
+  expect(visual.shadow).toBe("none");
+  expect(visual.crestWidth).toBeGreaterThanOrEqual(80);
+  expect(visual.crestHeight).toBeGreaterThanOrEqual(80);
+  expect(visual.titleSize).toBeGreaterThanOrEqual(36);
 }
 
 async function expectCoachPerformanceRail(page) {
