@@ -16,6 +16,11 @@ async function listCssFiles(directory) {
   return files;
 }
 
+async function builtCss() {
+  const files = await listCssFiles(path.join(root, "dist"));
+  return (await Promise.all(files.map((file) => readFile(file, "utf8")))).join("\n");
+}
+
 test("production pruning preserves generated CSS-module selectors", async () => {
   const pruneScript = await readFile(path.join(root, "scripts/prune-unreachable-global-selectors.mjs"), "utf8");
   assert.match(pruneScript, /GENERATED_CSS_MODULE_CLASS/);
@@ -38,8 +43,7 @@ test("built Player workspace CSS remains substantive after production optimizati
 });
 
 test("built production CSS retains the team identity runtime title variants", async () => {
-  const files = await listCssFiles(path.join(root, "dist"));
-  const css = (await Promise.all(files.map((file) => readFile(file, "utf8")))).join("\n");
+  const css = await builtCss();
   for (const selector of [
     ".teamIdentityTitleStage--hero",
     ".teamIdentityTitleStage--dark",
@@ -47,4 +51,23 @@ test("built production CSS retains the team identity runtime title variants", as
   ]) {
     assert.ok(css.includes(selector), `Production CSS lost runtime title selector ${selector}`);
   }
+});
+
+test("built production CSS keeps the compact mobile title authority and 96px crest floor", async () => {
+  const css = await builtCss();
+  assert.match(
+    css,
+    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage=(?:true|"true")\][^{]*\{[^}]*display:block!important[^}]*min-height:var\(--identity-crest\)!important/s,
+    "Production CSS lost the compact secondary team-title display override",
+  );
+  assert.match(
+    css,
+    /--identity-crest:clamp\(96px,25vw,108px\)/,
+    "Production CSS lost the 96px standard team-crest floor",
+  );
+  assert.match(
+    css,
+    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage \.teamIdentityTitleStage__copy\{[^}]*grid-area:auto!important/s,
+    "Production CSS lost the legacy named-grid reset that prevents oversized title runways",
+  );
 });
