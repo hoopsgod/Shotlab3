@@ -6,6 +6,7 @@ const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 
 const secondaryJsx = read("../src/components/SecondaryPageSystem.jsx");
 const secondaryCss = read("../src/components/SecondaryPageSystem.css");
+const titleStageCss = read("../src/components/TeamIdentityTitleStage.css");
 const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
 const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
 const coachRouteStage = read("../src/components/CoachRoutePerformanceStage.jsx");
@@ -78,7 +79,7 @@ test("Player Home and disclosure support copy publish stable semantic roles", ()
 });
 
 test("active consolidated visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, teamStoreImmersiveCss, strengthHierarchyCss, finalClosureCss, industrial, visualReboot]) {
+  for (const authority of [secondaryCss, titleStageCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, teamStoreImmersiveCss, strengthHierarchyCss, finalClosureCss, industrial, visualReboot]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
@@ -145,13 +146,15 @@ test("Team Store mobile portal owns the viewport and light empty-state foregroun
   assert.match(teamStoreImmersiveCss, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:\s*#273129\s*!important/);
 });
 
-test("Phase 3 mobile contract protects 390px geometry, touch targets and iPhone safe areas", () => {
+test("Phase 3 mobile contract protects responsive geometry, touch targets and iPhone safe areas", () => {
   assert.match(surfaceCss, /--sl-phase3-touch-target:\s*44px/);
   assert.match(surfaceCss, /padding-bottom:\s*calc\(96px \+ env\(safe-area-inset-bottom,\s*0px\)\)/);
   assert.match(surfaceCss, /@media \(max-width:\s*430px\)/);
   assert.match(surfaceCss, /safe-area-inset-left/);
   assert.match(surfaceCss, /safe-area-inset-right/);
-  assert.match(secondaryCss, /@media \(max-width:\s*390px\)/);
+  assert.match(secondaryCss, /@media \(max-width:\s*760px\)/);
+  assert.match(titleStageCss, /@media \(max-width:\s*390px\)/);
+  assert.match(titleStageCss, /\.teamIdentityTitleStage--hero \{ --identity-crest: 104px; --identity-title: 46px; \}/);
   assert.match(surfaceCss, /overflow-wrap:\s*anywhere/);
 });
 
