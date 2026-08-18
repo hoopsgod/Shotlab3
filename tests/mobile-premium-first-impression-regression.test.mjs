@@ -6,6 +6,7 @@ const finalMobileCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corr
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
+const secondaryPageCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
 const titleStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
 const titleStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
 const playerOperationalWorkspace = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
@@ -24,8 +25,10 @@ test("secondary routes use one explicit TeamIdentityTitleStage owner instead of 
   assert.match(secondaryPageSystem, /dataMobileStage="team-identity"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css|secondaryPageIntro appHeader|appHeaderTitle/);
+  assert.equal(fs.existsSync(new URL("../src/components/SecondaryPageFirstViewport.css", import.meta.url)), false);
   assert.doesNotMatch(routeRunner, /apply-mobile-centered-route-stage\.mjs|apply-mobile-route-signature-promotion\.mjs/);
   assert.doesNotMatch(enhancer, /secondaryPageIntro__title|secondaryPageIntro__icon|secondaryPageIntro__summary|secondaryPageIntro__eyebrow/);
+  assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
 test("team branding is prominent once per secondary-page identity hierarchy", () => {
@@ -46,24 +49,24 @@ test("mobile secondary title stages keep editorial hierarchy without legacy sele
   assert.match(secondaryPageSystem, /TITLE_LABELS=new Map/);
   assert.match(secondaryPageSystem, /\["Drills Dashboard","Drills"\]/);
   assert.match(secondaryPageSystem, /\["Strength & Conditioning Dashboard","S&C"\]/);
+  assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b|\.secondaryPageAction\b/);
   assert.doesNotMatch(enhancer, /Drills Dashboard|Strength & Conditioning Dashboard|Leaderboards Dashboard|Activity Dashboard/);
   assert.doesNotMatch(enhancer, /TeamIdentityTitleStage|teamIdentityTitleStage/);
 });
 
-test("primary decision moment is a full-bleed dark performance stage rather than another floating card", () => {
-  assert.match(enhancer, /\.secondaryPageDecision \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\);/);
-  assert.match(enhancer, /\.secondaryPageDecision \{[\s\S]*border-radius: 0;/);
-  assert.match(enhancer, /linear-gradient\(128deg, #071a22 0%, #0a222b 58%, #102e35 100%\)/);
-  assert.match(enhancer, /\.secondaryPageDecision h2 \{[\s\S]*font-size: clamp\(26px, 7\.3vw, 31px\)/);
-  assert.match(enhancer, /\.secondaryPageDecision button \{[\s\S]*min-height: 44px;[\s\S]*background: #c8ff1a;/);
-  assert.match(enhancer, /Performance band: one edge-to-edge decisive moment, not a floating dashboard card/);
+test("primary decision moment remains a full-bleed dark performance stage in owned component CSS", () => {
+  assert.match(secondaryPageCss, /\.secondaryPageDecision \{[\s\S]*border-radius: var\(--radius-xl, 24px\)/);
+  assert.match(secondaryPageCss, /linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryPageCss, /@media \(max-width: 760px\)[\s\S]*\.secondaryPageDecision \{[\s\S]*grid-template-columns: 40px minmax\(0, 1fr\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision h2 \{[\s\S]*font: 770 clamp\(27px, 5vw, 38px\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*min-height: var\(--touch-target, 44px\)/);
 });
 
 test("first-impression controls and labels respect the product readability floor", () => {
   assert.match(titleStageCss, /teamIdentityTitleStage__action \{[\s\S]*min-height: 44px;[\s\S]*font: 720 13px/);
   assert.match(titleStageCss, /teamIdentityTitleStage__identityLine \{[\s\S]*font: 780 11px/);
-  assert.match(enhancer, /\.secondaryPageAction \{[\s\S]*min-height: 44px;[\s\S]*font-size: 12px;/);
-  assert.match(enhancer, /\.secondaryPageDecision__eyebrow \{[\s\S]*font-size: 11px/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision__eyebrow \{[\s\S]*font: 760 var\(--type-micro, 11px\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*font: 720 13px/);
   assert.doesNotMatch(titleStageCss, /font-size:\s*(?:8|9|10)(?:\.\d+)?px\b/);
 });
 
