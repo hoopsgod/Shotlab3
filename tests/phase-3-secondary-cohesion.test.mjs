@@ -47,7 +47,9 @@ test('Player secondary identity remains unmistakably team-owned after leaving Ho
   assert.match(playerWorkspace, /dataMobileStage="team-identity"/);
   assert.match(teamStage, /data-identity-role="team-name"/);
   assert.match(teamStage, /data-identity-role="brand-mark"/);
-  assert.match(teamStageCss, /--identity-crest:\s*clamp\(88px,\s*24vw,\s*104px\)/);
+  assert.match(teamStageCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(teamStageCss, /teamIdentityTitleStage\[data-team-identity-stage="true"\] \.teamIdentityTitleStage__crest/);
+  assert.match(teamStageCss, /max-height:\s*100%\s*!important/);
   assert.match(teamStageCss, /object-fit:\s*contain/);
   assert.doesNotMatch(teamStageCss, /object-fit:\s*cover/);
 });
