@@ -12,7 +12,10 @@ function registeredSeed(role) {
   const current = REGISTERED_IDENTITIES[role];
   const coach = { ...REGISTERED_IDENTITIES.coach, teamId: TEAM_ID, hideFromLeaderboards: true, createdAt: 1_780_000_000_000 };
   const player = { ...REGISTERED_IDENTITIES.player, teamId: TEAM_ID, hideFromLeaderboards: false, createdAt: 1_780_000_000_001 };
-  const nowSeconds = Math.floor(Date.now() / 1000);
+  const now = Date.now();
+  const nowSeconds = Math.floor(now / 1000);
+  const today = new Date(now).toISOString().slice(0, 10);
+  const tomorrow = new Date(now + 86_400_000).toISOString().slice(0, 10);
   return {
     user: { id: current.id, email: current.email, aud: 'authenticated', role: 'authenticated' },
     storage: {
@@ -30,11 +33,11 @@ function registeredSeed(role) {
       'sl:players': [coach, player],
       'sl:player-profiles': [{ id: 'profile-registered-player', userId: player.email, teamId: TEAM_ID, firstName: 'Registered', lastName: 'Player', jerseyNumber: '12' }],
       'sl:scores': [
-        { id: 'score-registered-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, drillId: 'form-shooting', score: 18, makes: 18, date: '2026-08-09', src: 'home' },
+        { id: 'score-registered-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, drillId: 'form-shooting', score: 18, makes: 18, date: today, src: 'home' },
       ],
       'sl:program-scores': [],
-      'sl:shotlogs': [{ id: 'shot-registered-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, made: 75, date: '2026-08-09' }],
-      'sl:events': [{ id: 'event-registered-1', teamId: TEAM_ID, title: 'Team Practice', date: '2026-08-10', time: '6:00 PM', location: 'Main Gym', type: 'practice' }],
+      'sl:shotlogs': [{ id: 'shot-registered-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, made: 75, date: today }],
+      'sl:events': [{ id: 'event-registered-1', teamId: TEAM_ID, title: 'Team Practice', date: tomorrow, time: '6:00 PM', location: 'Main Gym', type: 'practice' }],
       'sl:rsvps': [],
       'sl:sc-sessions': [],
       'sl:sc-rsvps': [],
