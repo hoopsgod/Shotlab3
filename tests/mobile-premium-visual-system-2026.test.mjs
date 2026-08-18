@@ -85,7 +85,8 @@ test("Player event and lifting commitment headers retain their editorial action 
   assert.match(enhancer, /data-page-hierarchy="editorial"/);
   assert.match(enhancer, /data-layout-role="editorial-header" data-visual-role="page-intro"/);
   assert.match(enhancer, /Premium Level B commitment header/);
-  assert.match(enhancer, /font-size:clamp\(31px,8\.8vw,36px\)!important/);
+  assert.match(enhancer, /font-size:clamp\(38px,9\.4vw,44px\)!important/);
+  assert.doesNotMatch(enhancer, /font-size:clamp\(31px,8\.8vw,36px\)!important/);
   assert.match(enhancer, /\.routeHeader>p\{display:none\}/);
 });
 
