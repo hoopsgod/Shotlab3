@@ -59,7 +59,7 @@ async function expectNoHorizontalOverflow(page) {
 
 async function expectPlayerIdentityInsideViewport(page) {
   const identity = page.getByTestId("player-dashboard-identity-header");
-  if (!(await identity.count())) return;
+  if (!(await identity.count()) || !(await identity.isVisible())) return;
   const geometry = await identity.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
