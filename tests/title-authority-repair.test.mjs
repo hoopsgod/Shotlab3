@@ -11,16 +11,19 @@ const coachHeader = read('src/components/CoachDashboardHeader.jsx');
 const playerHeader = read('src/components/PlayerDashboardHeader.jsx');
 const secondary = read('src/components/SecondaryPageSystem.jsx');
 const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
+const playerCommitment = read('src/components/PlayerCommitmentCenter.jsx');
 const progress = read('src/components/PlayerProgressStory.jsx');
 const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs');
+const secondaryEnhancer = read('scripts/apply-mobile-premium-secondary-page-system.mjs');
 
-test('one shared semantic title primitive owns Coach, Player, secondary, progress and branding preview surfaces', () => {
+test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
-  for (const source of [coachHeader, playerHeader, secondary, playerWorkspace, progress, brandingPreview]) {
+  for (const source of [coachHeader, playerHeader, secondary, playerWorkspace, playerCommitment, progress, brandingPreview]) {
     assert.match(source, /TeamIdentityTitleStage/);
   }
   assert.doesNotMatch(stage, /appHeaderTitle|secondaryPageIntro|coach-dashboard-identity-header\s+appHeader/);
+  assert.doesNotMatch(playerCommitment, /className=\{styles\.routeHeader\}/);
 });
 
 test('Coach Home source owns one integrated Mission Control identity and no title enhancer restores it', () => {
@@ -33,7 +36,15 @@ test('Coach Home source owns one integrated Mission Control identity and no titl
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
 
-test('title-only mutation scripts and emergency late authority are absent', () => {
+test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {
+  assert.match(secondaryEnhancer, /Verified source-owned secondary title architecture/);
+  assert.doesNotMatch(secondaryEnhancer, /writeFileSync\(.*SecondaryPageSystem\.css/);
+  assert.doesNotMatch(secondaryEnhancer, /writeFileSync\(.*App\.jsx/);
+  assert.doesNotMatch(secondaryEnhancer, /writeFileSync\(.*PlayerCommitmentCenter\.jsx/);
+  assert.doesNotMatch(secondaryEnhancer, /secondaryPageIntro__title|routeTitleRow h1|Drills Dashboard.*replace/);
+});
+
+test('title-only mutation scripts, temporary migrations and emergency late authority are absent', () => {
   const all = [...DEV_ROUTE_ENHANCERS, ...BUILD_ROUTE_ENHANCERS].join('\n');
   assert.doesNotMatch(all, /apply-mobile-route-signature-promotion\.mjs/);
   assert.doesNotMatch(all, /apply-mobile-centered-route-stage\.mjs/);
@@ -41,6 +52,8 @@ test('title-only mutation scripts and emergency late authority are absent', () =
   assert.equal(existsSync('scripts/apply-mobile-route-signature-promotion.mjs'), false);
   assert.equal(existsSync('scripts/apply-mobile-centered-route-stage.mjs'), false);
   assert.equal(existsSync('scripts/apply-team-identity-coach-hero-mark.mjs'), false);
+  assert.equal(existsSync('scripts/title-authority-secondary-source-migration.mjs'), false);
+  assert.equal(existsSync('.github/workflows/title-authority-secondary-source-migration.yml'), false);
   assert.equal(existsSync('public/shotlab-team-identity-title-authority.css'), false);
 });
 
