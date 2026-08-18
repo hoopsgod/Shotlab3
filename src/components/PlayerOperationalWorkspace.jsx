@@ -1,9 +1,10 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
-const MOBILE_OPERATIONAL_COMPOSITION_CSS = `@media(max-width:700px){[data-player-workspace-title-row="true"]{align-items:center;justify-content:center}[data-player-workspace-filter-rail="true"]{justify-content:center}[data-metric-priority]{text-align:center}}`;
+const MOBILE_OPERATIONAL_COMPOSITION_CSS = `@media(max-width:700px){[data-player-workspace-filter-rail="true"]{justify-content:center}[data-metric-priority]{text-align:center}.performance-shell--player.is-mobile [data-testid^="player-workspace-"]{padding-top:0!important}}`;
 
 function MetricContent({ metric }) {
   return (
@@ -36,26 +37,28 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   };
   const metrics = model.metrics || [];
   const subtitle = resolveWorkspaceSubtitle(model);
+  const primaryAction = model.primaryAction
+    ? [{ key: model.primaryAction.id || "primary", label: model.primaryAction.label, onClick: () => runAction(model.primaryAction) }]
+    : [];
+  const titleVariant = model.id === "profile" ? "hero" : "standard";
 
   return (
     <>
       <style>{MOBILE_OPERATIONAL_COMPOSITION_CSS}</style>
       <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial">
-        <header className={styles.commandBar} data-layout-role="editorial-header">
-          <div className={styles.copy}>
-            <div className={styles.eyebrow}>{model.eyebrow}</div>
-            <div className={styles.titleRow} data-player-workspace-title-row="true">
-              <h1 className={styles.title}>{model.title}</h1>
-              <span className={styles.status}>{model.status}</span>
-            </div>
-            <p className={styles.subtitle}>{subtitle}</p>
-          </div>
-          {model.primaryAction && (
-            <button type="button" className={styles.primaryAction} onClick={() => runAction(model.primaryAction)}>
-              {model.primaryAction.label} →
-            </button>
-          )}
-        </header>
+        <TeamIdentityTitleStage
+          className={styles.commandBar}
+          variant={titleVariant}
+          surface="light"
+          role="PLAYER"
+          eyebrow={model.eyebrow}
+          title={model.title}
+          summary={subtitle}
+          status={model.status}
+          actions={primaryAction}
+          showTonalCrest
+          testId={`${testId || `player-workspace-${model.id}`}-title-stage`}
+        />
         <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
           {metrics.map((metric, index) => {
             const interactive = Boolean(metric?.filter || metric?.action);
