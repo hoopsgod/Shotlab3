@@ -1,0 +1,143 @@
+/* Team Store participates in the same team-owned 2026 identity grammar without changing store behavior. */
+.ts-header {
+  isolation: isolate;
+  min-height: 174px;
+  overflow: hidden;
+  padding: 24px 74px 22px 178px !important;
+  background:
+    radial-gradient(circle at 96% -18%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 15%, transparent), transparent 40%),
+    linear-gradient(126deg, rgba(6, 25, 35, .98), rgba(8, 36, 48, .97) 58%, rgba(10, 41, 51, .98)) !important;
+}
+
+.ts-header::before,
+.ts-header::after {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  background-image: var(--team-brand-logo-image, none);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.ts-header::before {
+  content: var(--team-brand-logo-fallback, "TM");
+  left: 24px;
+  top: 20px;
+  z-index: 1;
+  display: grid;
+  width: 138px;
+  height: 138px;
+  place-items: center;
+  color: var(--team-brand-logo-fallback-color, #e5e7eb);
+  font: 900 38px/.9 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.07em;
+  text-align: center;
+  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, .32));
+}
+
+.ts-header::after {
+  content: "";
+  top: -54px;
+  right: -42px;
+  z-index: 0;
+  width: 236px;
+  height: 236px;
+  opacity: .085;
+  filter: grayscale(.55) brightness(1.25) contrast(1.05);
+}
+
+.ts-header-copy,
+.ts-close {
+  position: relative;
+  z-index: 2;
+}
+
+.ts-header-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-header p {
+  order: -3;
+  max-width: 28ch;
+  margin: 0 !important;
+  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 54%, #f4f7e9) !important;
+  font-size: 12px !important;
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: .085em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.ts-header .ts-eyebrow {
+  order: -2;
+  margin-top: 9px;
+  color: #b4c1c6 !important;
+  letter-spacing: .11em;
+}
+
+.ts-header h2 {
+  order: -1;
+  max-width: 10ch;
+  margin: 7px 0 0 !important;
+  color: #f8fbfc !important;
+  font-size: clamp(42px, 6vw, 54px) !important;
+  font-weight: 830;
+  line-height: .92 !important;
+  letter-spacing: -.062em !important;
+  text-wrap: balance;
+}
+
+.ts-header::marker { display: none; }
+
+@media (max-width: 700px) {
+  .ts-panel { border-radius: 24px 24px 0 0; }
+  .ts-header {
+    min-height: 174px;
+    padding: max(18px, env(safe-area-inset-top)) 54px 18px 142px !important;
+  }
+  .ts-header::before {
+    left: 10px;
+    top: max(18px, env(safe-area-inset-top));
+    width: clamp(120px, 31vw, 136px);
+    height: clamp(120px, 31vw, 136px);
+    font-size: 34px;
+  }
+  .ts-header::after {
+    top: -48px;
+    right: -62px;
+    width: 212px;
+    height: 212px;
+  }
+  .ts-header h2 {
+    max-width: 8ch;
+    font-size: clamp(40px, 11.2vw, 48px) !important;
+  }
+  .ts-header p {
+    max-width: 19ch;
+    font-size: 11px !important;
+  }
+  .ts-close {
+    width: 46px !important;
+    height: 46px !important;
+    flex-basis: 46px !important;
+    margin-top: -3px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ts-header {
+    min-height: 168px;
+    padding-left: 134px !important;
+    padding-right: 50px !important;
+  }
+  .ts-header::before {
+    left: 8px;
+    width: 116px;
+    height: 116px;
+  }
+  .ts-header h2 { font-size: 40px !important; }
+}

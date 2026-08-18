@@ -33,9 +33,9 @@ export default function TeamIdentityTitleStage({
   dataPageKind,
   dataMobileStage,
 }) {
-  const { branding } = useTeamBranding();
+  const { branding, hasCustomLogo = false } = useTeamBranding();
   const teamName = tidy(branding?.teamName || branding?.name || "Your Team");
-  const rawLogo = branding?.logoUrl || branding?.logoMarkUrl || "";
+  const rawLogo = hasCustomLogo ? (branding?.logoUrl || branding?.logoMarkUrl || "") : "";
   const logoSrc = useCleanTeamLogo(rawLogo);
   const [failed, setFailed] = useState(false);
 
