@@ -27,6 +27,12 @@ function replaceOnce(source, before, after, label) {
     'demoTeam={id:genId("team"),name:"Demo Titans",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:{...DEFAULT_BRANDING,teamName:"Demo Titans",logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"}};',
     "explicit Demo Titans team seed"
   );
+  source = replaceOnce(
+    source,
+    'nts=[...nts,demoTeam];\nawait saveTeams();\n}',
+    'nts=[...nts,demoTeam];\nawait saveTeams();\n}\nconst demoIdentityBranding={...DEFAULT_BRANDING,...(demoTeam.branding||{}),teamName:"Demo Titans",logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"};\nif(demoTeam.name!=="Demo Titans"||demoTeam.branding?.teamName!=="Demo Titans"||!demoTeam.branding?.logoUrl){demoTeam={...demoTeam,name:"Demo Titans",branding:demoIdentityBranding,updatedAt:Date.now()};nts=nts.map(t=>t.id===demoTeam.id?demoTeam:t);await saveTeams();}',
+    "stale Demo identity migration"
+  );
   write(file, source);
 }
 
@@ -125,4 +131,4 @@ function replaceOnce(source, before, after, label) {
   write(file, source);
 }
 
-console.log("Applied team-owned branding boundary, Demo identity seed, Coach Hero identity, and final rendered title authority.");
+console.log("Applied team-owned branding boundary, Demo identity migration, Coach Hero identity, and final rendered title authority.");
