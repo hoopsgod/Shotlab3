@@ -2,16 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
-const read = (path) => fs.readFileSync(path, "utf8");
-
+const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const html = read("index.html");
 const stage = read("src/components/TeamIdentityTitleStage.jsx");
 const css = read("src/components/TeamIdentityTitleStage.css");
+const renderedAuthority = read("public/shotlab-team-identity-title-authority.css");
 const secondary = read("src/components/SecondaryPageSystem.jsx");
+const secondaryCss = read("src/components/SecondaryPageSystem.css");
 const playerHeader = read("src/components/PlayerDashboardHeader.jsx");
+const coachHeader = read("src/components/CoachDashboardHeader.jsx");
 const playerWorkspace = read("src/components/PlayerOperationalWorkspace.jsx");
-const coachCommand = read("src/components/CoachCommandCenter.jsx");
-const coachHero = read("src/components/CoachPrimaryObjective.jsx");
-const coachCss = read("src/components/CoachMissionControlV2.css");
 const progressStory = read("src/components/PlayerProgressStory.jsx");
 const trainingHeader = read("src/components/PlayerTrainingSessionHeader.jsx");
 const brandingPreview = read("src/components/team/TeamBrandingPreview.jsx");
@@ -20,71 +20,73 @@ const brandingScreenCss = read("src/screens/CoachTeamBrandingScreen.css");
 const brandingDefaults = read("src/theme/brandingDefaults.js");
 const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs");
 const routeEnhancers = read("scripts/run-route-enhancers.mjs");
-const demoData = read("src/lib/demoData.js");
-const renderedAuthority = read("public/shotlab-rendered-visual-authority.css");
 
 test("team identity title stage is the shared Coach and Player title primitive", () => {
+  assert.match(stage, /data-team-identity-stage="true"/);
+  assert.match(stage, /useCleanTeamLogo/);
+  assert.match(stage, /teamIdentityTitleStage__tonalCrest/);
+  assert.match(stage, /aria-hidden="true"/);
+  assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
   assert.match(secondary, /TeamIdentityTitleStage/);
   assert.match(playerHeader, /TeamIdentityTitleStage/);
+  assert.match(coachHeader, /TeamIdentityTitleStage/);
   assert.match(playerWorkspace, /TeamIdentityTitleStage/);
-  assert.match(stage, /useTeamBranding/);
-  assert.match(stage, /useCleanTeamLogo/);
-  assert.match(stage, /data-team-identity-stage="true"/);
-  assert.match(stage, /data-identity-role="team-name"/);
-  assert.match(stage, /data-identity-role="brand-mark"/);
+  assert.match(progressStory, /TeamIdentityTitleStage/);
 });
 
 test("finite title variants are literal source classes so production pruning cannot erase them", () => {
-  for (const marker of [
-    "teamIdentityTitleStage--hero",
-    "teamIdentityTitleStage--standard",
-    "teamIdentityTitleStage--dark",
-    "teamIdentityTitleStage--light",
-  ]) assert.match(stage, new RegExp(marker));
-  assert.doesNotMatch(stage, /teamIdentityTitleStage--\$\{/);
+  assert.match(stage, /variant === "hero" \? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard"/);
+  assert.match(stage, /surface === "dark" \? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light"/);
+  assert.doesNotMatch(stage, /`teamIdentityTitleStage--\$\{variant\}`/);
+  assert.doesNotMatch(stage, /`teamIdentityTitleStage--\$\{surface\}`/);
 });
 
 test("mobile crest geometry is materially larger without destructive cropping", () => {
-  assert.match(css, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
-  assert.match(css, /--identity-crest:\s*clamp\(104px, 29vw, 120px\)/);
+  assert.match(css, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(css, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
   assert.match(css, /object-fit:\s*contain/);
-  assert.match(css, /drop-shadow/);
-  assert.doesNotMatch(css, /clip-path/);
-  assert.doesNotMatch(css, /border-radius:\s*50%/);
+  assert.doesNotMatch(css, /object-fit:\s*cover/);
+  assert.match(css, /--identity-tonal:\s*clamp/);
+  assert.match(trainingHeader, /teamCrest/);
 });
 
 test("team crest and Player Home hero are isolated from legacy secondary-route authority", () => {
-  assert.match(css, /position:\s*relative !important/);
-  assert.match(css, /isolation:\s*isolate/);
-  assert.match(css, /overflow:\s*hidden !important/);
-  assert.match(css, /\.teamIdentityTitleStage--dark/);
-  assert.match(css, /Player Home is the only place where the immersive Player credential remains visible/i);
+  assert.match(stage, /className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel"/);
+  assert.doesNotMatch(stage, /teamIdentityTitleStage__crestSlot secondaryPageIntro__icon/);
+  assert.match(css, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)[\s\S]*player-dashboard-identity-header/);
+  assert.match(css, /player-dashboard-identity-header[^\{]*\{\s*display:\s*none\s*!important/);
 });
 
 test("late title authority owns mobile secondary geometry after legacy appHeader rules", () => {
-  assert.match(css, /#root \[data-team-identity-stage="true"\] h1\.appHeaderTitle/);
-  assert.match(css, /font-size:\s*var\(--identity-title\) !important/);
-  assert.match(css, /letter-spacing:\s*-\.064em !important/);
+  assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
+  assert.match(renderedAuthority, /display:\s*block\s*!important/);
+  assert.match(renderedAuthority, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s*var\(--identity-crest\)\s*!important/);
+  assert.match(renderedAuthority, /min-width:\s*var\(--identity-crest\)\s*!important/);
 });
 
 test("one last public presentation layer remains mounted as the supplemental final authority", () => {
-  assert.match(brandingBoundary, /shotlab-team-identity-title-authority\.css/);
-  assert.match(routeEnhancers, /apply-team-identity-branding-boundary\.mjs/);
+  const centeringAt = html.indexOf('id="shotlab-mobile-centering-reconciliation"');
+  const authorityAt = html.indexOf('id="shotlab-team-identity-title-authority"');
+  assert.ok(centeringAt >= 0, "mobile centering reconciliation must remain mounted");
+  assert.ok(authorityAt > centeringAt, "team identity authority must load after mobile centering reconciliation");
+  assert.match(html, /href="\/shotlab-team-identity-title-authority\.css\?v=20260818"/);
+  assert.doesNotMatch(stage, /TeamIdentityTitleStageAuthority\.css/);
+  assert.match(renderedAuthority, /final rendered authority/i);
+  assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
+  assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)\s*!important/);
+  assert.match(renderedAuthority, /font-size:\s*var\(--identity-title\)\s*!important/);
+  assert.match(renderedAuthority, /object-fit:\s*contain\s*!important/);
+  assert.match(brandingBoundary, /ensureFinalTeamIdentityAuthority/);
+  assert.match(brandingBoundary, /shotlab-team-identity-title-authority/);
 });
 
 test("team colors remain decorative while semantic status stays protected", () => {
-  assert.match(css, /color-mix\(in srgb, var\(--team-brand-primary/);
-  assert.match(css, /\.teamIdentityTitleStage__status/);
-  assert.doesNotMatch(css, /--status-(?:success|error|warning):\s*var\(--team/);
-});
-
-test("Coach Home integrates program identity into Mission Control rather than stacking a second hero", () => {
-  assert.doesNotMatch(coachCommand, /TeamIdentityTitleStage/);
-  assert.match(coachHero, /programName/);
-  assert.match(coachHero, /teamLogo/);
-  assert.match(coachHero, /\.mcProgramIdentity/);
-  assert.match(coachHero, /\.mcHeroTeamMark/);
-  assert.match(coachCss, /\.mcHeroTeamMark/);
+  assert.match(css, /--team-brand-primary/);
+  const statusRule = secondaryCss.match(/\.secondaryPageIntro__status\s*\{[^}]*\}/)?.[0] || "";
+  assert.match(statusRule, /color:\s*#536057/);
+  assert.match(statusRule, /background:\s*transparent/);
+  assert.doesNotMatch(statusRule, /--team-brand-/);
+  assert.doesNotMatch(css, /background:\s*var\(--team-brand-primary[^\n]*!important;\s*\/\*\s*status/i);
 });
 
 test("Player operational routes preserve their meanings inside team-owned title stages", () => {
@@ -117,5 +119,17 @@ test("Program Branding previews production titles and has a neutral no-logo stat
 test("global defaults are neutral and Demo identity is explicit team data", () => {
   assert.match(brandingDefaults, /logoUrl:\s*""/);
   assert.match(brandingDefaults, /logoMarkUrl:\s*""/);
-  assert.match(demoData, /name:\s*"Demo Titans"/);
+  assert.doesNotMatch(brandingDefaults, /titans/i);
+  assert.match(brandingBoundary, /teamName:myTeam\?\.branding\?\.teamName\|\|myTeam\?\.name\|\|"Your Team"/);
+  assert.match(brandingBoundary, /name:\?"Demo Titans"|name:"Demo Titans"|name: "Demo Titans"/);
+  assert.match(brandingBoundary, /logoUrl:\?"\/branding\/titans-exact-logo\.png\.PNG"|logoUrl:"\/branding\/titans-exact-logo\.png\.PNG"|logoUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
+  assert.match(routeEnhancers, /scripts\/apply-team-identity-branding-boundary\.mjs/);
+});
+
+test("Coach Home integrates program identity into Mission Control rather than stacking a second hero", () => {
+  assert.match(brandingBoundary, /mcProgramIdentity/);
+  assert.match(brandingBoundary, /mcTeamFallback/);
+  assert.match(renderedAuthority, /Coach Home — the existing Mission Control decision surface becomes the immersive team Hero variant/);
+  assert.match(renderedAuthority, /coach-dashboard-identity-header[\s\S]*display:\s*none\s*!important/);
+  assert.match(renderedAuthority, /mcHeroTeamMark[\s\S]*clamp\(112px,\s*30vw,\s*128px\)/);
 });
