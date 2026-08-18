@@ -3,15 +3,22 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const app = readFileSync("src/App.jsx", "utf8");
+const component = readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
 const css = readFileSync("src/components/SecondaryPageSystem.css", "utf8");
+const titleCss = readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
 const phase2Css = readFileSync("src/components/CoachDashboardPhase2.module.css", "utf8");
 const reboot = readFileSync("src/lib/visualSystemReboot.js", "utf8");
 const releaseFixes = readFileSync("src/lib/visualSystemRebootReleaseFixes.js", "utf8");
 const playersEnhancer = readFileSync("scripts/apply-phase3h-coach-players-hierarchy.mjs", "utf8");
 
-test("Coach secondary pages use editorial opening, one performance decision surface, and flat evidence", () => {
-  assert.match(css, /\.secondaryPageIntro\s*\{[\s\S]*?background:\s*transparent;/);
-  assert.match(css, /\.secondaryPageToolbar \[class\*="metricStrip"\][\s\S]*?gap:\s*0 !important/);
+test("Coach secondary pages use the shared editorial title stage, one performance decision surface, and flat evidence", () => {
+  assert.match(component, /function SecondaryPageIntro/);
+  assert.match(component, /return <TeamIdentityTitleStage/);
+  assert.match(component, /variant="standard"/);
+  assert.match(component, /surface="light"/);
+  assert.match(titleCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.doesNotMatch(css, /\.secondaryPageIntro\b/);
+  assert.match(css, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\][\s\S]*?gap:\s*0 !important/);
   assert.match(css, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
   assert.match(css, /\.secondaryPageDecision__visual\s*\{[\s\S]*?display:\s*block/);
   assert.match(css, /\.secondaryPageEvidence > \*[\s\S]*?border-radius:\s*0 !important/);
