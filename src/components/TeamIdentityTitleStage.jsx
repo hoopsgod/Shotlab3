@@ -44,10 +44,10 @@ const TEAM_IDENTITY_STAGE_CSS = `
 .teamIdentityStage__back{position:absolute;z-index:5;top:12px;right:12px;width:46px;padding:0;border-radius:14px}
 .teamIdentityStage__back span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:760px){
- .teamIdentityStage{grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center;padding:10px 0 14px;--team-stage-crest:96px;--team-stage-tonal:204px}
- .teamIdentityStage--compact{grid-template-columns:78px minmax(0,1fr);--team-stage-crest:78px;--team-stage-tonal:168px}
- .teamIdentityStage--hero{grid-template-columns:112px minmax(0,1fr);--team-stage-crest:112px;--team-stage-tonal:230px;padding-block:14px 16px}
- .teamIdentityStage--dark{padding:max(13px,env(safe-area-inset-top)) 16px 16px;grid-template-columns:112px minmax(0,1fr)}
+ .teamIdentityStage{grid-template-columns:var(--team-stage-crest) minmax(0,1fr);gap:14px;align-items:center;padding:10px 0 14px;--team-stage-crest:96px;--team-stage-tonal:204px}
+ .teamIdentityStage--compact{--team-stage-crest:78px;--team-stage-tonal:168px}
+ .teamIdentityStage--hero{--team-stage-crest:112px;--team-stage-tonal:230px;padding-block:14px 16px}
+ .teamIdentityStage--dark{padding:max(13px,env(safe-area-inset-top)) 16px 16px}
  .teamIdentityStage__aside{grid-column:1/-1;width:100%;min-width:0;justify-items:start;align-self:auto;padding-left:calc(var(--team-stage-crest) + 14px);margin-top:-6px}
  .teamIdentityStage__status{text-align:left}
  .teamIdentityStage__actions{justify-content:flex-start}
@@ -57,9 +57,9 @@ const TEAM_IDENTITY_STAGE_CSS = `
  .teamIdentityStage__teamLine{font-size:11.5px;letter-spacing:.075em}
 }
 @media(max-width:389px){
- .teamIdentityStage{grid-template-columns:88px minmax(0,1fr);--team-stage-crest:88px;gap:12px}
- .teamIdentityStage--hero{grid-template-columns:104px minmax(0,1fr);--team-stage-crest:104px}
- .teamIdentityStage--compact{grid-template-columns:72px minmax(0,1fr);--team-stage-crest:72px}
+ .teamIdentityStage{--team-stage-crest:88px;gap:12px}
+ .teamIdentityStage--hero{--team-stage-crest:104px}
+ .teamIdentityStage--compact{--team-stage-crest:72px}
  .teamIdentityStage__aside{padding-left:calc(var(--team-stage-crest) + 12px)}
  .teamIdentityStage__title{font-size:clamp(38px,11vw,46px)}
 }
