@@ -12,6 +12,7 @@ const playerHeader = read('src/components/PlayerDashboardHeader.jsx');
 const secondary = read('src/components/SecondaryPageSystem.jsx');
 const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
 const playerCommitment = read('src/components/PlayerCommitmentCenter.jsx');
+const playerCommitmentCss = read('src/components/PlayerCommitmentCenter.module.css');
 const progress = read('src/components/PlayerProgressStory.jsx');
 const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs');
@@ -24,6 +25,12 @@ test('one shared semantic title primitive owns Coach, Player, secondary, commitm
   }
   assert.doesNotMatch(stage, /appHeaderTitle|secondaryPageIntro|coach-dashboard-identity-header\s+appHeader/);
   assert.doesNotMatch(playerCommitment, /className=\{styles\.routeHeader\}/);
+});
+
+test('obsolete Player commitment title CSS is deleted rather than left as dormant parallel authority', () => {
+  assert.doesNotMatch(playerCommitmentCss, /\.routeHeader\b/);
+  assert.doesNotMatch(playerCommitmentCss, /\.routeEyebrow\b/);
+  assert.doesNotMatch(playerCommitmentCss, /\.routeTitleRow\b/);
 });
 
 test('Coach Home source owns one integrated Mission Control identity and no title enhancer restores it', () => {
@@ -54,6 +61,7 @@ test('title-only mutation scripts, temporary migrations and emergency late autho
   assert.equal(existsSync('scripts/apply-team-identity-coach-hero-mark.mjs'), false);
   assert.equal(existsSync('scripts/title-authority-secondary-source-migration.mjs'), false);
   assert.equal(existsSync('.github/workflows/title-authority-secondary-source-migration.yml'), false);
+  assert.equal(existsSync('.github/workflows/final-title-css-cleanup-v2-once.yml'), false);
   assert.equal(existsSync('public/shotlab-team-identity-title-authority.css'), false);
 });
 
