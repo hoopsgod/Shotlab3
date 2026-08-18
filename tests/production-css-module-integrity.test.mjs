@@ -29,10 +29,14 @@ async function builtJs() {
   return builtText(".js");
 }
 
+function compact(value) {
+  return value.replace(/\s+/g, "");
+}
+
 function hasRule(css, predicate) {
   for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const [, selector, declarations] = match;
-    if (predicate(selector, declarations)) return true;
+    if (predicate(compact(selector), compact(declarations))) return true;
   }
   return false;
 }
@@ -76,31 +80,35 @@ test("built production assets retain rendered team identity variants and their s
   }
 });
 
-test("built production CSS keeps the final mobile title authority and standard crest floor", async () => {
+test("built production CSS keeps canonical mobile title geometry after authority deduplication", async () => {
   const css = await builtCss();
-  const standardSelector = (selector) => selector.includes(".teamIdentityTitleStage--standard") && selector.includes("data-team-identity-stage");
-  const standardInnerSelector = (selector) => selector.includes(".teamIdentityTitleStage--standard") && selector.includes(".teamIdentityTitleStage__inner");
 
   assert.ok(
-    hasRule(css, (selector, declarations) => standardSelector(selector) && declarations.includes("--identity-crest:clamp(96px,25vw,108px)!important")),
-    "Production CSS lost the canonical 96px standard team-title crest authority",
+    hasRule(css, (selector, declarations) => selector.includes(".teamIdentityTitleStage")
+      && declarations.includes("--identity-crest:clamp(96px,25vw,108px)")),
+    "Production CSS lost the canonical 96px standard team-crest floor",
   );
   assert.ok(
-    hasRule(css, (selector, declarations) => standardSelector(selector) && declarations.includes("display:block!important")),
-    "Production CSS lost final standard title display ownership",
+    hasRule(css, (selector, declarations) => selector.includes(".teamIdentityTitleStage__inner")
+      && declarations.includes("grid-template-columns:minmax(0,1fr)var(--identity-crest)!important")
+      && declarations.includes("min-height:var(--identity-crest)")),
+    "Production CSS lost the shared two-column title geometry",
   );
   assert.ok(
-    hasRule(css, (selector, declarations) => standardInnerSelector(selector) && declarations.includes("grid-template-columns:minmax(0,1fr) var(--identity-crest)!important")),
-    "Production CSS lost final title two-column identity geometry",
+    hasRule(css, (selector, declarations) => selector.includes(".teamIdentityTitleStage__crestSlot")
+      && declarations.includes("width:var(--identity-crest)!important")
+      && declarations.includes("height:var(--identity-crest)!important")),
+    "Production CSS lost crest-slot ownership",
   );
   assert.ok(
-    hasRule(css, (selector, declarations) => standardInnerSelector(selector) && declarations.includes("min-height:var(--identity-crest)!important")),
-    "Production CSS lost final title crest-height ownership",
-  );
-  assert.match(
-    css,
-    /--identity-crest:\s*clamp\(\s*96px\s*,\s*25vw\s*,\s*108px\s*\)/,
-    "Production CSS lost the 96px standard team-crest floor",
+    hasRule(css, (selector, declarations) => selector.includes(".teamIdentityTitleStage")
+      && selector.includes(".teamIdentityTitleStage__crest")
+      && declarations.includes("width:100%!important")
+      && declarations.includes("height:100%!important")
+      && declarations.includes("max-width:none!important")
+      && declarations.includes("max-height:none!important")
+      && declarations.includes("object-fit:contain")),
+    "Production CSS lost full-size contained crest rendering or legacy-cap protection",
   );
 });
 
