@@ -8,6 +8,7 @@ const secondaryPageSystem = fs.readFileSync(new URL("../src/components/Secondary
 const secondaryPageCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
 const teamStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
 const teamStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const renderedTitleAuthority = fs.readFileSync(new URL("../public/shotlab-team-identity-title-authority.css", import.meta.url), "utf8");
 const playerOperationalWorkspace = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
@@ -25,9 +26,9 @@ test("secondary routes use one explicit team-title owner and protect it from lat
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
   assert.match(teamStage, /import "\.\/TeamIdentityTitleStage\.css"/);
   assert.doesNotMatch(teamStage, /TeamIdentityTitleStageAuthority\.css/);
-  assert.match(teamStageCss, /Production-safe mobile reconciliation/);
-  assert.match(teamStageCss, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
-  assert.match(teamStageCss, /grid-area: auto !important/);
+  assert.match(renderedTitleAuthority, /final rendered authority/i);
+  assert.match(renderedTitleAuthority, /secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
+  assert.match(renderedTitleAuthority, /grid-template-columns:\s*minmax\(0,1fr\)\s*var\(--identity-crest\)\s*!important/);
 });
 
 test("team branding is a dominant but controlled part of every migrated title hierarchy", () => {
@@ -48,9 +49,9 @@ test("mobile route mastheads keep strong team identity without swallowing the fi
   assert.match(teamStageCss, /--identity-title: clamp\(42px, 11vw, 54px\)/);
   assert.match(teamStageCss, /--identity-tonal: clamp\(178px, 52vw, 226px\)/);
   assert.match(teamStageCss, /teamIdentityTitleStage--longTitle[\s\S]*clamp\(39px, 10\.2vw, 48px\)/);
-  assert.match(teamStageCss, /@media \(max-width: 760px\)/);
-  assert.match(teamStageCss, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage[\s\S]*display: block !important/);
-  assert.match(teamStageCss, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage[\s\S]*height: auto !important/);
+  assert.match(renderedTitleAuthority, /@media \(max-width: 760px\)/);
+  assert.match(renderedTitleAuthority, /secondaryPageIntro\.teamIdentityTitleStage[\s\S]*display: block !important/);
+  assert.match(renderedTitleAuthority, /secondaryPageIntro\.teamIdentityTitleStage[\s\S]*height: auto !important/);
 });
 
 test("primary decision moment remains a full-bleed dark performance stage rather than another floating card", () => {
@@ -112,7 +113,7 @@ test("legacy final-mobile rules cannot be treated as the desired first-impressio
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
   assert.doesNotMatch(teamStage, /TeamIdentityTitleStageAuthority\.css/);
   assert.match(teamStageCss, /width: var\(--identity-crest\) !important/);
-  assert.match(teamStageCss, /display: block !important/);
+  assert.match(renderedTitleAuthority, /display: block !important/);
 });
 
 test("Program Branding previews the real Coach and Player title architecture", () => {
