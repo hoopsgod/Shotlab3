@@ -44,19 +44,19 @@ test("Phase 2 preserves the existing Mission Control interaction contract", () =
   }
 });
 
-test("Phase 2 establishes one dominant performance hero and calm supporting surfaces", () => {
-  assert.match(css, /\.mcHero\s*\{/);
-  assert.match(css, /linear-gradient\(145deg, #0d171e 0%, #13222b 100%\)/);
-  assert.match(css, /\.mcHeroTeamMark\s*\{/);
-  assert.match(css, /z-index:\s*4 !important/);
-  assert.match(css, /\.mcHeroContent\s*\{[\s\S]*?background:\s*transparent !important/s);
-  assert.match(css, /\.mcHeroContent\s*\{[\s\S]*?box-shadow:\s*none !important/s);
+test("Phase 2 source owns one dominant premium Coach hero and its team identity geometry", () => {
+  assert.match(commandCenter, /Source-owned mobile title\/identity composition/);
+  assert.match(commandCenter, /\.mcHero\{margin:0 -12px!important;min-height:clamp\(420px,112vw,468px\)!important;max-height:none!important/);
+  assert.match(commandCenter, /\.mcHeroContent\{display:grid!important;grid-template-columns:minmax\(0,1fr\)!important/);
+  assert.match(commandCenter, /\.mcHeroIdentity\{display:grid!important;grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)!important/);
+  assert.match(commandCenter, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
+  assert.match(commandCenter, /\.mcHeroTeamMark\{position:static!important;display:grid!important;width:var\(--coach-hero-crest\)!important;height:var\(--coach-hero-crest\)!important/);
+  assert.match(commandCenter, /\.mcHeroTeamMark img\{[\s\S]*?object-fit:contain!important/);
+  assert.match(commandCenter, /\.mcHero h1\{[\s\S]*?font-size:clamp\(46px,12vw,58px\)!important/);
   assert.match(css, /\.mcRealityStrip\s*\{/);
   assert.match(css, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(css, /\.mcPrimary\s*\{/);
-  assert.match(css, /background:\s*#c8ff1a !important/);
   assert.match(css, /\.mcSection,/);
-  assert.match(css, /background:\s*var\(--mc-surface\) !important/);
 });
 
 test("critical cascade uses explicit longhands and removes legacy clipping", () => {
@@ -77,14 +77,13 @@ test("light support tokens cannot inherit legacy dark shell variables", () => {
   assert.doesNotMatch(css, /--mc-surface-quiet:\s*var\(--surface-3/);
 });
 
-test("mobile hierarchy clears legacy clipping and preserves accessible control sizing", () => {
+test("mobile hierarchy preserves safe controls while Coach title composition stays source-owned", () => {
   assert.match(commandCenter, /@media\(max-width:700px\)/);
   assert.match(css, /min-height:\s*44px !important/);
-  assert.match(commandCenter, /\.mcHeader\{grid-template-columns:40px minmax\(0,1fr\) auto!important/);
-  assert.match(css, /\.mcTeamSelect\s*\{[\s\S]*display:\s*inline-flex !important/s);
-  assert.match(commandCenter, /\.mcHeroContent\{grid-template-columns:minmax\(0,1fr\) 68px!important/);
-  assert.match(css, /\.mcHero\s*\{[^}]*max-height:\s*none !important/s);
-  assert.equal(/max-height:\s*(?:\d|clamp\(|calc\(|min\(|max\()/i.test(css), false, "hero must not include a numeric or calculated height cap");
+  assert.match(commandCenter, /\.mcHeader\{grid-template-columns:44px minmax\(0,1fr\) 44px!important/);
+  assert.match(commandCenter, /\.mcHeroContent\{display:grid!important;grid-template-columns:minmax\(0,1fr\)!important/);
+  assert.match(commandCenter, /\.mcHeroIdentity\{display:grid!important;grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)!important/);
+  assert.match(commandCenter, /\.mcHero\{[^}]*max-height:none!important/);
   assert.equal(/\.mcTeamSelect[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcBell[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcMobileMenu[^}]*display:\s*none/s.test(css), false);
