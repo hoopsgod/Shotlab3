@@ -1,0 +1,52 @@
+name: Final obsolete title CSS cleanup v2
+
+on:
+  pull_request:
+    branches: [march-3-reset-85393dd]
+    types: [reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.head_ref == 'agent/title-authority-repair-2026'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/title-authority-repair-2026
+          fetch-depth: 0
+      - name: Delete unused Player commitment title selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('src/components/PlayerCommitmentCenter.module.css')
+          css = p.read_text()
+          selectors = sorted([
+            '.routeTitleRow > span', '.routeTitleRow h1', '.routeHeader > p',
+            '.routeTitleRow', '.routeEyebrow', '.routeHeader'
+          ], key=len, reverse=True)
+          for s in selectors:
+            css = re.sub(r'(?m)^\s*' + re.escape(s) + r'\s*\{[^{}]*\}\s*', '', css)
+          for legacy in ('.routeHeader', '.routeEyebrow', '.routeTitleRow'):
+            if legacy in css:
+              raise SystemExit(f'obsolete selector still present: {legacy}')
+          p.write_text(re.sub(r'\n{3,}', '\n\n', css))
+          PY
+          git diff --check
+          ! grep -E '\.route(Header|Eyebrow|TitleRow)' src/components/PlayerCommitmentCenter.module.css
+      - name: Commit cleanup and self-delete
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/final-title-css-cleanup-v2-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/components/PlayerCommitmentCenter.module.css
+          git commit -m 'Delete obsolete Player commitment title CSS'
+          git push origin HEAD:agent/title-authority-repair-2026
