@@ -14,13 +14,15 @@ const coachHierarchy = readFileSync('src/styles/MissionControlHierarchy2026.css'
 const playerDailyCss = readFileSync('src/components/PlayerDailyCommandCenter.module.css', 'utf8');
 const auth = readFileSync('src/components/AuthWorkspace.jsx', 'utf8');
 
-test('signature promotions run after canonical owners and auth remains the final presentation mutation', () => {
+test('signature promotions run after canonical owners and team identity remains the final presentation authority', () => {
   assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-route-signature-promotion\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
-  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs/);
+  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs[\s\S]*apply-team-identity-branding-boundary\.mjs/);
   const finalEnhancers = routePipeline.slice(routePipeline.indexOf('const FINAL_ROUTE_ENHANCERS'), routePipeline.indexOf('const RELEASE_AUTH_RECOVERY_MARKER'));
   const authEntry = "'scripts/apply-mobile-auth-signature-stage.mjs'";
+  const identityEntry = "'scripts/apply-team-identity-branding-boundary.mjs'";
   assert.equal(finalEnhancers.split(authEntry).length - 1, 1, 'auth signature promotion must appear exactly once in FINAL_ROUTE_ENHANCERS');
-  assert.match(finalEnhancers, /'scripts\/apply-mobile-auth-signature-stage\.mjs',?\s*\]\)/, 'auth signature promotion must be the final route enhancer');
+  assert.equal(finalEnhancers.split(identityEntry).length - 1, 1, 'team identity boundary must appear exactly once in FINAL_ROUTE_ENHANCERS');
+  assert.match(finalEnhancers, /'scripts\/apply-mobile-auth-signature-stage\.mjs',[\s\S]*'scripts\/apply-team-identity-branding-boundary\.mjs',?\s*\]\)/, 'team identity boundary must be the final route enhancer after auth presentation');
 });
 
 test('Coach Home promotion creates one strong first-impression hierarchy', () => {
@@ -32,6 +34,24 @@ test('Coach Home promotion creates one strong first-impression hierarchy', () =>
   assert.match(finalCss, /min-height: 350px !important;\n    border-radius: 0 !important/);
   assert.match(hierarchy, /background: rgba\(255,255,255,\.055\) !important;/);
   assert.match(hierarchy, /border-top: 1px solid var\(--mc-line\) !important;[\s\S]*background: transparent !important;[\s\S]*box-shadow: none !important;/);
+});
+
+test('Coach tactical signature is idempotent after the final team branding boundary', () => {
+  const once = promoteCoachCommandCenter(coachCommand);
+  const postBranding = once
+    .replace(
+      'function CourtArtwork({ logoUrl }) {\n  const mark = logoUrl || FALLBACK_LOGO;',
+      'function CourtArtwork({ logoUrl, teamName }) {\n  const mark = logoUrl || "";',
+    )
+    .replace(
+      '        <image href={mark} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" />',
+      '        {mark ? <image href={mark} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" /> : <text x="252" y="169" textAnchor="middle" fill="rgba(245,248,249,.11)" fontSize="28" fontWeight="900">{initials(teamName)}</text>}',
+    );
+  assert.match(postBranding, /function CourtArtwork\(\{ logoUrl, teamName \}\)/);
+  assert.match(postBranding, /id="mcTacticalWash"/);
+  assert.match(postBranding, /\{initials\(teamName\)\}<\/text>/);
+  assert.doesNotThrow(() => promoteCoachCommandCenter(postBranding));
+  assert.equal(promoteCoachCommandCenter(postBranding), postBranding);
 });
 
 test('Player Coach Assignment uses the ShotLab primary signature rather than a blue article callout', () => {
