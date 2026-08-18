@@ -9,12 +9,14 @@ on:
       - 'scripts/restructure-production-css.mjs'
       - 'scripts/prune-overridden-coach-declarations.mjs'
       - 'scripts/prune-overridden-authority-bundles.mjs'
+      - 'scripts/rebalance-authority-bundles.mjs'
       - 'scripts/dedupe-coach-font-stacks.mjs'
       - 'scripts/prune-unreachable-global-selectors.mjs'
       - 'scripts/verify-performance-budget.mjs'
       - 'scripts/verify-phase5c-css-headroom.mjs'
       - 'tests/prune-overridden-coach-declarations.test.mjs'
       - 'tests/prune-overridden-authority-bundles.test.mjs'
+      - 'tests/rebalance-authority-bundles.test.mjs'
       - 'tests/dedupe-coach-font-stacks.test.mjs'
       - '.github/workflows/phase-5c-css-headroom.yml'
   workflow_dispatch:
@@ -31,7 +33,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Verify CSS optimizer safety contracts
-        run: node --test tests/prune-overridden-coach-declarations.test.mjs tests/prune-overridden-authority-bundles.test.mjs tests/dedupe-coach-font-stacks.test.mjs
+        run: node --test tests/prune-overridden-coach-declarations.test.mjs tests/prune-overridden-authority-bundles.test.mjs tests/rebalance-authority-bundles.test.mjs tests/dedupe-coach-font-stacks.test.mjs
       - name: Build exact production candidate
         run: npm run build
       - name: Keep fixed production budgets green
