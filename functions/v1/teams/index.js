@@ -5,6 +5,9 @@ import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 
 const DEMO_IDENTITIES = new Set(["coach.demo@shotlab.app", "demo@shotlab.app"]);
 const MAX_TEAMS_PER_REQUEST = 100;
+const MAX_LOGO_SOURCE_LENGTH = 1_500_000;
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const TEXT_SCALES = new Set(["standard", "large", "xl"]);
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value, max = 500) => String(value ?? "").trim().slice(0, max);
@@ -12,6 +15,50 @@ const finiteNumber = (value) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 };
+
+function normalizeLogoSource(value) {
+  const raw = String(value || "").trim();
+  if (!raw || raw.length > MAX_LOGO_SOURCE_LENGTH) return "";
+  if (/^https:\/\//i.test(raw)) return raw;
+  if (/^\/[^/]/.test(raw)) return raw;
+  if (/^data:image\/(?:png|jpeg|webp|svg\+xml);base64,/i.test(raw)) return raw;
+  return "";
+}
+
+function sanitizeBranding(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const branding = {};
+  const teamName = cleanText(value.teamName || value.name, 240);
+  if (teamName) branding.teamName = teamName;
+  for (const key of ["primaryColor", "secondaryColor", "accentColor", "textOnPrimary"]) {
+    const color = cleanText(value[key], 7);
+    if (HEX_COLOR.test(color)) branding[key] = color.toUpperCase();
+  }
+  const logoUrl = normalizeLogoSource(value.logoUrl);
+  const logoMarkUrl = normalizeLogoSource(value.logoMarkUrl);
+  if (logoUrl) branding.logoUrl = logoUrl;
+  if (logoMarkUrl) branding.logoMarkUrl = logoMarkUrl;
+  const textScale = cleanText(value.textScale, 20);
+  if (TEXT_SCALES.has(textScale)) branding.textScale = textScale;
+  const updatedAt = finiteNumber(value.updatedAt);
+  if (updatedAt != null) branding.updatedAt = updatedAt;
+  const updatedBy = normalizeIdentity(value.updatedBy);
+  if (updatedBy) branding.updatedBy = updatedBy;
+  const version = Math.max(1, Math.floor(Number(value.version) || 1));
+  branding.version = version;
+  return branding;
+}
+
+function validateBrandingPayload(value) {
+  if (value == null) return null;
+  if (typeof value !== "object" || Array.isArray(value)) return "branding_invalid";
+  for (const key of ["logoUrl", "logoMarkUrl"]) {
+    const raw = String(value[key] || "").trim();
+    if (raw.length > MAX_LOGO_SOURCE_LENGTH) return "branding_logo_too_large";
+    if (raw && !normalizeLogoSource(raw)) return "branding_logo_source_invalid";
+  }
+  return null;
+}
 
 export function sanitizeTeamRow(value = {}) {
   return {
@@ -24,6 +71,8 @@ export function sanitizeTeamRow(value = {}) {
     coachUserId: cleanText(value?.coach_user_id || value?.coachUserId, 80),
     school: cleanText(value?.school, 240),
     level: cleanText(value?.level, 120),
+    branding: sanitizeBranding(value?.branding),
+    brandingProvided: Object.prototype.hasOwnProperty.call(value || {}, "branding"),
   };
 }
 
@@ -38,6 +87,7 @@ function toDatabase(row) {
     coach_user_id: row.coachUserId || null,
     school: row.school || null,
     level: row.level || null,
+    branding: row.branding || {},
   };
 }
 
@@ -53,6 +103,7 @@ function toResponse(value = {}) {
     coach_user_id: row.coachUserId || null,
     school: row.school,
     level: row.level,
+    branding: row.branding || {},
   };
 }
 
@@ -64,7 +115,7 @@ async function readTeam(env, teamId) {
   const rows = await selectRows(
     env,
     "teams",
-    `select=id,name,owner_coach_id,join_code,created_at,updated_at,coach_user_id,school,level&id=eq.${encodeURIComponent(teamId)}&limit=1`,
+    `select=id,name,owner_coach_id,join_code,created_at,updated_at,coach_user_id,school,level,branding&id=eq.${encodeURIComponent(teamId)}&limit=1`,
   );
   return Array.isArray(rows) ? rows[0] || null : null;
 }
@@ -124,6 +175,11 @@ export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
   const inputRows = Array.isArray(body?.teams) ? body.teams : [];
   if (inputRows.length > MAX_TEAMS_PER_REQUEST) return Response.json({ error: "too_many_teams" }, { status: 400 });
+  for (const inputRow of inputRows) {
+    if (!Object.prototype.hasOwnProperty.call(inputRow || {}, "branding")) continue;
+    const brandingError = validateBrandingPayload(inputRow?.branding);
+    if (brandingError) return Response.json({ error: brandingError }, { status: brandingError === "branding_logo_too_large" ? 413 : 400 });
+  }
   const rows = inputRows.map(sanitizeTeamRow);
   if (rows.some((row) => !row.id)) return Response.json({ error: "team_id_required" }, { status: 400 });
   if (new Set(rows.map((row) => row.id)).size !== rows.length) return Response.json({ error: "duplicate_team_id" }, { status: 400 });
@@ -155,6 +211,7 @@ export async function onRequestPost({ request, env }) {
         joinCode: row.joinCode || prior.joinCode,
         school: row.school,
         level: row.level,
+        branding: row.brandingProvided ? row.branding : prior.branding,
         updatedAt: Date.now(),
       }));
     }
