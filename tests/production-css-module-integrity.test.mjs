@@ -29,6 +29,14 @@ async function builtJs() {
   return builtText(".js");
 }
 
+function findRuleDeclarations(css, predicate) {
+  for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const [, selector, declarations] = match;
+    if (predicate(selector, declarations)) return declarations;
+  }
+  return null;
+}
+
 test("production pruning preserves generated CSS-module selectors", async () => {
   const pruneScript = await readFile(path.join(root, "scripts/prune-unreachable-global-selectors.mjs"), "utf8");
   assert.match(pruneScript, /GENERATED_CSS_MODULE_CLASS/);
@@ -70,9 +78,13 @@ test("built production assets retain rendered team identity variants and their s
 
 test("built production CSS keeps the final mobile title authority and standard crest floor", async () => {
   const css = await builtCss();
-  const authorityRule = css.match(
-    /\.teamIdentityTitleStage--standard(?:\[data-team-identity-stage=(?:true|"true")\])?[^\{]*\{([^}]*)\}/s,
-  )?.[1];
+  const authorityRule = findRuleDeclarations(
+    css,
+    (selector, declarations) => selector.includes(".teamIdentityTitleStage--standard")
+      && selector.includes("data-team-identity-stage")
+      && declarations.includes("--identity-crest:clamp(96px,25vw,108px)!important")
+      && declarations.includes("display:block!important"),
+  );
 
   assert.ok(authorityRule, "Production CSS lost the canonical standard team-title authority rule");
   assert.match(authorityRule, /display:block!important/, "Production CSS lost final title display ownership");
@@ -88,9 +100,13 @@ test("built production CSS keeps the final mobile title authority and standard c
     "Production CSS lost the 96px standard team-crest floor",
   );
 
-  const innerRule = css.match(
-    /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner[^\{]*\{([^}]*)\}/s,
-  )?.[1];
+  const innerRule = findRuleDeclarations(
+    css,
+    (selector, declarations) => selector.includes(".teamIdentityTitleStage--standard")
+      && selector.includes(".teamIdentityTitleStage__inner")
+      && declarations.includes("grid-template-columns:minmax(0,1fr) var(--identity-crest)!important")
+      && declarations.includes("min-height:var(--identity-crest)!important"),
+  );
   assert.ok(innerRule, "Production CSS lost the canonical standard title inner geometry rule");
   assert.match(
     innerRule,
