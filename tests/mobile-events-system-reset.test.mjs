@@ -1,0 +1,74 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+
+const coach = readFileSync(new URL("../src/components/CoachInteractiveDashboards.jsx", import.meta.url), "utf8");
+const player = readFileSync(new URL("../src/components/PlayerCommitmentCenter.jsx", import.meta.url), "utf8");
+const primitives = readFileSync(new URL("../src/components/EventsMobilePrimitives.jsx", import.meta.url), "utf8");
+const sharedCss = readFileSync(new URL("../src/components/EventsMobileSystem.css", import.meta.url), "utf8");
+const playerCss = readFileSync(new URL("../src/components/PlayerCommitmentCenter.module.css", import.meta.url), "utf8");
+const coachCss = readFileSync(new URL("../src/components/CoachEventsPremiumV2.css", import.meta.url), "utf8");
+const app = readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
+
+test("Coach and Player use one Events design grammar with role-specific title behavior", () => {
+  assert.match(coach, /<EventsTitleStage role="coach"/);
+  assert.match(coach, /onCreate=\{onCreateEvent\}/);
+  assert.match(player, /<EventsTitleStage role="player"/);
+  assert.doesNotMatch(player, /onCreate=\{onCreateEvent\}/);
+  assert.match(coach, /<NextEventSurface/);
+  assert.match(player, /<NextEventSurface/);
+  assert.match(coach, /<EventsWeekRail/);
+  assert.match(player, /<EventsWeekRail/);
+  assert.match(coach, /<EventsMonthPanel/);
+  assert.match(player, /<EventsMonthPanel/);
+  assert.match(primitives, /export function EventsTitleStage/);
+  assert.match(primitives, /export function NextEventSurface/);
+});
+
+test("Next Up owns the first-view date and one visually dominant unresolved action", () => {
+  assert.match(primitives, /className="eventsNext__identity"/);
+  assert.match(primitives, /className="eventsNext__date"/);
+  assert.match(primitives, /className="eventsNext__primaryAction"/);
+  assert.match(sharedCss, /\.eventsNext__identity\s*\{[\s\S]*grid-template-columns:\s*56px\s+minmax\(0,\s*1fr\)/s);
+  assert.match(sharedCss, /\.eventsNext__date\s*\{[\s\S]*min-height:\s*64px/s);
+  assert.match(sharedCss, /\.eventsNext__primaryAction\s*\{[\s\S]*min-height:\s*46px[\s\S]*background:\s*var\(--events-lime\)/s);
+  assert.match(sharedCss, /\.eventsNext\[data-state="calm"\] \.eventsNext__primaryAction\s*\{[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*\.05\)/s);
+});
+
+test("Player Events makes personal RSVP state first-class without exposing Coach response intelligence", () => {
+  assert.match(player, /RSVP REQUIRED/);
+  assert.match(player, /✓ GOING/);
+  assert.match(player, /RSVP NEEDED →/);
+  assert.match(player, /identityMatches\(row, userEmail\)/);
+  assert.match(player, /teamMatches\(row, teamId\)/);
+  assert.doesNotMatch(player, /RSVP GAP/);
+  assert.doesNotMatch(player, /TEAM RESPONSE COMPLETE/);
+  assert.doesNotMatch(player, /Manage event/);
+});
+
+test("Coach Events keeps management intelligence Coach-only and preserves the existing open-event action path", () => {
+  assert.match(coach, /RSVP GAP/);
+  assert.match(coach, /TEAM RESPONSE COMPLETE/);
+  assert.match(coach, /event\?\.id != null \? onOpenEvent\?\.\(event\.id\)/);
+  assert.match(coach, /onOpenEvent\?\.\(id\)/);
+});
+
+test("the stable RSVP persistence path remains in App instead of being reimplemented in presentation components", () => {
+  assert.match(app, /const toggleRsvp=async\(eid\)=>/);
+  assert.match(app, /P\("sl:rsvps"/);
+  assert.match(app, /toggleRsvp=\{toggleRsvp\}/);
+  assert.doesNotMatch(player, /P\("sl:rsvps"|supabase|localStorage/);
+});
+
+test("Coach event management continues the premium hierarchy below Next Up instead of reverting to card stacks", () => {
+  assert.match(coachCss, /coach-event-intelligence-drawer[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/s);
+  assert.match(coachCss, /coach-event-intelligence-drawer[\s\S]*button:first-child[\s\S]*min-height:50px[\s\S]*background:var\(--accent,#c8ff1a\)/s);
+  assert.match(coachCss, /coach-event-intelligence-drawer[\s\S]*personRow[\s\S]*border-radius:0[\s\S]*background:transparent/s);
+});
+
+test("mobile density and safe-area rules explicitly cover both roles", () => {
+  assert.match(playerCss, /\.eventRow\s*\{[\s\S]*min-height:\s*78px[\s\S]*border-radius:\s*0/s);
+  assert.match(playerCss, /safe-area-inset-bottom/);
+  assert.match(coachCss, /coach-events-mobile-page[\s\S]*safe-area-inset-bottom/s);
+  assert.match(sharedCss, /\.eventsWeekRail__days\s*\{[\s\S]*grid-template-columns:\s*repeat\(7,\s*minmax\(0,\s*1fr\)\)/s);
+});

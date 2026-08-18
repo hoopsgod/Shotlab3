@@ -77,8 +77,13 @@ async function verifyFilterFamily(page, surface, expectedCount) {
     expect(box?.height || 0, `${surface}/${computed.label} physical height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
     expect(computed.minHeight, `${surface}/${computed.label} CSS minimum`).toBeGreaterThanOrEqual(44);
     expect(computed.height, `${surface}/${computed.label} computed height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
-    expect(computed.borderRadius, `${surface}/${computed.label} pill radius`).toBeGreaterThanOrEqual(18);
-    expect(computed.fontSize, `${surface}/${computed.label} typography`).toBeGreaterThanOrEqual(10);
+    if (surface === "events") {
+      expect(computed.borderRadius, `${surface}/${computed.label} editorial tab radius`).toBeLessThanOrEqual(1);
+      expect(computed.fontSize, `${surface}/${computed.label} editorial typography`).toBeGreaterThanOrEqual(9);
+    } else {
+      expect(computed.borderRadius, `${surface}/${computed.label} pill radius`).toBeGreaterThanOrEqual(18);
+      expect(computed.fontSize, `${surface}/${computed.label} typography`).toBeGreaterThanOrEqual(10);
+    }
     expect(computed.touchAction).toBe("manipulation");
     expect(computed.boxSizing).toBe("border-box");
     evidence.push({ box, computed });
@@ -110,7 +115,7 @@ async function verifyFilterFamily(page, surface, expectedCount) {
   fs.writeFileSync(path.join(OUTPUT_DIR, `coach-${surface}.json`), JSON.stringify({ surface, expectedCount, viewport, evidence }, null, 2));
 }
 
-test("Phase 4E.1 keeps shared Coach filter chips touch-safe and visually bounded", async ({ page }) => {
+test("Phase 4E.1 keeps shared Coach filters touch-safe and visually bounded", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await enterCoachDemo(page);

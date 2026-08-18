@@ -1,0 +1,17 @@
+/*
+ * Mobile Events compatibility guardrails.
+ * Visual density must not regress the established touch-safety contracts that
+ * protect Coach MANAGE and Player RSVP controls at iPhone widths.
+ */
+html body #root [data-testid="coach-events-mobile-page"] button.coach-event-manage-action {
+  min-height: 44px !important;
+}
+
+html body #root .performance-shell.performance-shell--player[data-workspace-tab="program"]
+[data-testid="player-commitment-details-events"] button[data-player-program-rsvp-action] {
+  min-height: 46px !important;
+  height: 46px !important;
+  border-radius: 12px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}

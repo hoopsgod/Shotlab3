@@ -1,22 +1,25 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const appPath = 'src/App.jsx';
+const playerPath = 'src/components/PlayerCommitmentCenter.jsx';
 const authorityPath = 'public/shotlab-v3-mobile-corrections.css';
 let source = readFileSync(appPath, 'utf8');
+let player = readFileSync(playerPath, 'utf8');
 let authority = readFileSync(authorityPath, 'utf8');
 
 const marker = 'data-player-program-rsvp-action';
-const anchor = '<button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%"';
+const playerAnchor = '<button type="button" onClick={onToggle}>';
+const legacyAnchor = '<button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%"';
 
-if (!source.includes(marker)) {
-  const firstIndex = source.indexOf(anchor);
-  if (firstIndex < 0 || source.indexOf(anchor, firstIndex + anchor.length) >= 0) {
-    throw new Error('Phase 4E.4 expected exactly one Player Program inline quick-RSVP button template.');
+if (!player.includes(marker) && player.includes(playerAnchor)) {
+  player = player.replace(playerAnchor, '<button type="button" data-player-program-rsvp-action onClick={onToggle}>');
+  writeFileSync(playerPath, player);
+} else if (!player.includes(marker) && !source.includes(marker)) {
+  const firstIndex = source.indexOf(legacyAnchor);
+  if (firstIndex < 0 || source.indexOf(legacyAnchor, firstIndex + legacyAnchor.length) >= 0) {
+    throw new Error('Phase 4E.4 expected one source-owned or legacy Player Program RSVP action.');
   }
-  source = source.replace(
-    anchor,
-    '<button data-player-program-rsvp-action onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%"',
-  );
+  source = source.replace(legacyAnchor, '<button data-player-program-rsvp-action onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%"');
   writeFileSync(appPath, source);
 } else {
   console.log('Phase 4E.4 Player Program RSVP hook already applied.');

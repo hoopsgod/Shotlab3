@@ -30,8 +30,38 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Phase 5 reconciliation and premium mobile contracts
-        run: node --test tests/phase-5-cross-screen-reconciliation.test.mjs tests/app-feedback-system.test.mjs tests/mobile-premium-visual-system-2026.test.mjs tests/mobile-premium-first-impression-regression.test.mjs tests/mobile-secondary-page-parity-contract.test.mjs
+      - name: Verify Phase 5 reconciliation contracts
+        run: node --test tests/phase-5-cross-screen-reconciliation.test.mjs
+
+      - name: Verify app feedback contracts
+        run: node --test tests/app-feedback-system.test.mjs
+
+      - name: Verify premium mobile visual contracts
+        run: node --test tests/mobile-premium-visual-system-2026.test.mjs
+
+      - name: Verify first-impression regression contracts
+        run: node --test tests/mobile-premium-first-impression-regression.test.mjs
+
+      - name: Verify secondary-page parity contracts
+        run: node --test tests/mobile-secondary-page-parity-contract.test.mjs
+
+      - name: Verify Events shared grammar
+        run: node --test --test-name-pattern="Coach and Player use one Events design grammar" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Events Next Up hierarchy
+        run: node --test --test-name-pattern="Next Up owns the first-view date" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Player Events privacy
+        run: node --test --test-name-pattern="Player Events makes personal RSVP state" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Coach Events management intelligence
+        run: node --test --test-name-pattern="Coach Events keeps management intelligence" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Events RSVP persistence
+        run: node --test --test-name-pattern="stable RSVP persistence path" tests/mobile-events-system-reset.test.mjs
+
+      - name: Verify Events mobile density
+        run: node --test --test-name-pattern="mobile density and safe-area rules" tests/mobile-events-system-reset.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -55,17 +85,19 @@ jobs:
           cat /tmp/phase-3a-preview.log
           exit 1
 
-      - name: Capture Phase 3A production visual audit
+      - name: Capture Phase 3A and Events production visual audit
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
-        run: npx playwright test tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+        run: npx playwright test tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs tests/e2e/mobile-events-system-reset-screenshots.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
-      - name: Upload Phase 3A visual evidence
+      - name: Upload production visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: phase-3a-cross-screen-visual-audit
-          path: artifacts/phase-3a-cross-screen-visual-audit/
+          path: |
+            artifacts/phase-3a-cross-screen-visual-audit/
+            artifacts/design-audit/mobile-events-reset/
           if-no-files-found: warn
           retention-days: 14
 

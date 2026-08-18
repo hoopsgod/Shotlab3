@@ -19,11 +19,73 @@ function hasDashboardShowstopperHome() {
   return readFileSync(target, 'utf8').includes('data-phase="dashboard-showstopper-phase-')
 }
 
+function trimRetiredPlayerEventsPayload() {
+  const componentPath = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.jsx')
+  const cssPath = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.module.css')
+  let component = readFileSync(componentPath, 'utf8')
+  let css = readFileSync(cssPath, 'utf8')
+  let changed = false
+
+  const deadIcon = `function CommitmentIcon({ mode }) {
+  if (mode === "strength") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6.5 7h-2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2M17.5 7h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+      <path d="M8 13h3v3H8z" />
+    </svg>
+  );
+}`
+  const strengthIcon = `function CommitmentIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h-2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2M17.5 7h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5" /></svg>;
+}`
+  if (component.includes(deadIcon)) {
+    component = component.replace(deadIcon, strengthIcon).replaceAll('<CommitmentIcon mode={mode} />', '<CommitmentIcon />')
+    changed = true
+  }
+
+  for (const retiredCss of [
+    '.eventDetails .detailBody>:global(.fade-up)>:global(.accent-card):first-child{display:none!important}',
+    '.eventDetails .detailBody :global(.ch)>div:first-child{gap:10px!important}',
+    '.eventDetails .detailBody :global(.ch)>div:first-child>div:first-child{width:36px!important;height:36px!important;border-radius:9px!important;background:rgba(255,255,255,.04)!important}',
+  ]) {
+    if (css.includes(retiredCss)) {
+      css = css.replace(retiredCss, '')
+      changed = true
+    }
+  }
+
+  if (changed) {
+    writeFileSync(componentPath, component)
+    writeFileSync(cssPath, css)
+  }
+  return changed
+}
+
 function injectCommitmentRuntimeStyle() {
   const target = path.resolve(ROOT, 'src/components/PlayerCommitmentCenter.jsx')
   const source = readFileSync(target, 'utf8')
   if (source.includes(COMMITMENT_RUNTIME_MARKER)) return false
-  const constantAnchor = 'const RUNWAY_SLOTS = 3;'
+
+  const eventsSystemIsSourceOwned = [
+    '<EventsTitleStage role="player"',
+    'testId="player-events-next-up"',
+    '<EventsWeekRail',
+    '<EventsMonthPanel',
+    'data-testid="player-commitment-details-events"',
+  ].every((marker) => source.includes(marker))
+
+  if (eventsSystemIsSourceOwned) {
+    console.log('[mobile-player-composition] Player Events composition is source-owned; legacy commitment runtime style injection retired.')
+    return false
+  }
+
+  const constantAnchor = source.includes('const RUNWAY_SLOTS = 4;') ? 'const RUNWAY_SLOTS = 4;' : 'const RUNWAY_SLOTS = 3;'
   const headerAnchor = '      <header className={styles.routeHeader}'
   if (!source.includes(constantAnchor) || !source.includes(headerAnchor)) {
     throw new Error('[mobile-player-composition] commitment runtime style anchor missing')
@@ -72,6 +134,7 @@ export function applyMobilePlayerCompositionReconciliation() {
   const changed = [
     hasDashboardShowstopperHome() ? false : appendOwnedBlock('src/components/PlayerDailyCommandCenter.module.css', legacyHomeCss),
     appendOwnedBlock('src/components/PlayerOperationalWorkspace.module.css', workspaceCss),
+    trimRetiredPlayerEventsPayload(),
     injectCommitmentRuntimeStyle(),
     trimLegacyCoachEmptyStateTooltip(),
     appendOwnedBlock('src/styles/CommandHierarchy2026.css', hierarchyCss),

@@ -15,10 +15,12 @@ const replaceRequired = (source, from, to, label) => {
 update("src/components/CoachInteractiveDashboards.jsx", (source) => {
   if (source.includes('className="coachEventsPremiumWorkspace"')) {
     for (const expected of [
-      'label: "Awaiting RSVP"',
-      'displayLabel: "RSVP Gaps"',
-      'displayLabel: "Response"',
-      'summary="Plan practices, games and team moments."',
+      '<EventsTitleStage role="coach"',
+      'const awaiting = safeCount(',
+      'RSVP GAP${awaiting === 1 ? "" : "S"}',
+      '<NextEventSurface',
+      '<EventsWeekRail',
+      '<EventsMonthPanel',
     ]) {
       if (!source.includes(expected)) throw new Error(`[phase5b-practice-readiness] premium Events contract missing: ${expected}`);
     }

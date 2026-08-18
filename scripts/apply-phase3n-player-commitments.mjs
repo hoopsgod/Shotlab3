@@ -6,61 +6,74 @@ const requireOne = (source, anchor, label) => {
   if (count !== 1) fail(`${label}: expected exactly one anchor, found ${count}`);
 };
 
+const SECTION_RULE = '// ═══════════════════════════════════════';
+const stripSectionContainingFunction = (input, signature) => {
+  const functionStart = input.indexOf(signature);
+  if (functionStart < 0) return input;
+
+  const sectionStart = input.lastIndexOf(SECTION_RULE, functionStart);
+  if (sectionStart < 0) fail(`could not locate section start for ${signature}`);
+
+  const nextSection = input.indexOf(SECTION_RULE, functionStart + signature.length);
+  if (nextSection < 0) fail(`could not locate section boundary after ${signature}`);
+  if (nextSection <= sectionStart) fail(`invalid section boundaries for ${signature}`);
+
+  const removed = input.slice(sectionStart, nextSection);
+  if (!removed.includes(signature)) fail(`section boundary did not contain ${signature}`);
+  return `${input.slice(0, sectionStart)}${input.slice(nextSection)}`;
+};
+
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = 'PlayerCommitmentCenter mode="events"';
+const promotedEvents = '<PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction} toggleRsvp={toggleRsvp} onCompletionCue={pushCompletionCue}/>';
+
+const promoteSourceOwnedEvents = (input) => {
+  let next = input;
+  const legacyRoute = '<PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter>';
+  if (next.includes(legacyRoute)) next = next.replace(legacyRoute, promotedEvents);
+  else if (!next.includes(promotedEvents)) fail('source-owned Player Events route contract was not found');
+
+  next = stripSectionContainingFunction(next, 'function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue})');
+  return next;
+};
 
 if (source.includes(marker)) {
+  source = promoteSourceOwnedEvents(source);
   for (const preserved of [
     'PlayerCommitmentCenter mode="strength"',
-    'data-testid="player-events-operational-list"',
     'data-testid="player-strength-operational-panel"',
-    '<EventsPanel events={events}',
     '<SCPanel sessions={scSessions}',
     'toggleRsvp={toggleRsvp}',
+    'onCompletionCue={pushCompletionCue}',
     'toggleScRsvp={toggleScRsvp}',
     'addScLog={addScLog}',
-  ]) {
-    if (!source.includes(preserved)) fail(`transformed Player Commitments source is missing ${preserved}`);
-  }
-  console.log('Phase 3N Player Commitments hierarchy already applied.');
+  ]) if (!source.includes(preserved)) fail(`transformed Player Commitments source is missing ${preserved}`);
+  if (source.includes('function EventsPanel(') || source.includes('player-events-operational-list')) fail('retired duplicate Player Events presentation remains');
+  writeFileSync(path, source);
+  console.log('Phase 3N Player Commitments hierarchy already applied; premium Player Events now owns schedule, detail, and RSVP presentation.');
   process.exit(0);
 }
 
 const importAnchor = 'import { PlayerWorkspaceCommandBar, PlayerWorkspaceEmptyState, PlayerWorkspaceFilterRail } from "./components/PlayerOperationalWorkspace.jsx";';
 requireOne(source, importAnchor, 'PlayerOperationalWorkspace import');
-source = source.replace(
-  importAnchor,
-  `${importAnchor}\nimport PlayerCommitmentCenter from "./components/PlayerCommitmentCenter.jsx";`,
-);
+source = source.replace(importAnchor, `${importAnchor}\nimport PlayerCommitmentCenter from "./components/PlayerCommitmentCenter.jsx";`);
 
 const oldEvents = `  {tab==="program"&&<div className={slideClass} key="program"><PlayerWorkspaceCommandBar model={eventsWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-events-operational-list]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-events-workspace"/><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></div>}`;
 requireOne(source, oldEvents, 'Player Events route');
-const newEvents = `  {tab==="program"&&<div className={slideClass} key="program"><PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}`;
-source = source.replace(oldEvents, newEvents);
+source = source.replace(oldEvents, `  {tab==="program"&&<div className={slideClass} key="program">${promotedEvents}</div>}`);
 
 const oldStrength = `  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerWorkspaceCommandBar model={strengthWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-strength-operational-panel]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-strength-workspace"/><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></div>}`;
 requireOne(source, oldStrength, 'Player Strength route');
 const newStrength = `  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerCommitmentCenter mode="strength" model={strengthWorkspaceModel} items={scSessions} responses={scRsvps} logs={scLogs} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}`;
 source = source.replace(oldStrength, newStrength);
+source = promoteSourceOwnedEvents(source);
 
-for (const preserved of [
-  'toggleRsvp={toggleRsvp}',
-  'toggleScRsvp={toggleScRsvp}',
-  'addScLog={addScLog}',
-  'onCompletionCue={pushCompletionCue}',
-  'data-testid="player-events-operational-list"',
-  'data-testid="player-strength-operational-panel"',
-]) {
+for (const preserved of ['toggleRsvp={toggleRsvp}','onCompletionCue={pushCompletionCue}','toggleScRsvp={toggleScRsvp}','addScLog={addScLog}','data-testid="player-strength-operational-panel"']) {
   if (!source.includes(preserved)) fail(`Player commitment capability removed: ${preserved}`);
 }
-
-for (const retired of [
-  'PlayerWorkspaceCommandBar model={eventsWorkspaceModel}',
-  'PlayerWorkspaceCommandBar model={strengthWorkspaceModel}',
-]) {
-  if (source.includes(retired)) fail(`specialized commitment route still contains retired generic command bar: ${retired}`);
+for (const retired of ['PlayerWorkspaceCommandBar model={eventsWorkspaceModel}','PlayerWorkspaceCommandBar model={strengthWorkspaceModel}','function EventsPanel(','player-events-operational-list']) {
+  if (source.includes(retired)) fail(`retired Player commitment presentation remains: ${retired}`);
 }
-
 writeFileSync(path, source);
-console.log('Applied Phase 3N Player Commitments hierarchy.');
+console.log('Applied Phase 3N Player Commitments hierarchy with source-owned Player Events.');

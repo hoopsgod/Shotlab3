@@ -272,24 +272,33 @@ if (!metricCss.includes(metricHoverMarker)) {
 fs.writeFileSync(metricCssPath, metricCss)
 
 let commitmentSource = fs.readFileSync(commitmentPath, 'utf8')
-const legacyCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}`
-const premiumCommitmentRoot = `      data-testid={\`player-commitment-center-\${mode}\`}\n      data-mode={mode}\n      data-page-hierarchy="editorial"`
-if (commitmentSource.includes(premiumCommitmentRoot)) {
-  // Already upgraded. The premium root contains the legacy prefix, so check it first.
-} else if (commitmentSource.includes(legacyCommitmentRoot)) {
-  commitmentSource = commitmentSource.replace(legacyCommitmentRoot, premiumCommitmentRoot)
-} else {
-  throw new Error('Could not locate Player commitment center hierarchy root.')
+const commitmentRootMarker = 'data-testid={`player-commitment-center-${mode}`}'
+const commitmentHierarchyAttr = 'data-page-hierarchy="editorial"'
+const commitmentRootStart = commitmentSource.indexOf(commitmentRootMarker)
+if (commitmentRootStart < 0) {
+  throw new Error('Could not locate Player S&C commitment center hierarchy root.')
+}
+const commitmentRootEnd = commitmentSource.indexOf('>', commitmentRootStart)
+if (commitmentRootEnd < 0) {
+  throw new Error('Could not locate Player S&C commitment center hierarchy root boundary.')
+}
+const commitmentRootTag = commitmentSource.slice(commitmentRootStart, commitmentRootEnd)
+if (!commitmentRootTag.includes(commitmentHierarchyAttr)) {
+  commitmentSource = `${commitmentSource.slice(0, commitmentRootEnd)} ${commitmentHierarchyAttr}${commitmentSource.slice(commitmentRootEnd)}`
 }
 
-const legacyCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`}>`
-const premiumCommitmentHeader = `<header className={styles.routeHeader} data-testid={\`player-commitment-route-header-\${mode}\`} data-layout-role="editorial-header" data-visual-role="page-intro">`
-if (commitmentSource.includes(premiumCommitmentHeader)) {
-  // Already upgraded.
-} else if (commitmentSource.includes(legacyCommitmentHeader)) {
-  commitmentSource = commitmentSource.replace(legacyCommitmentHeader, premiumCommitmentHeader)
-} else {
-  throw new Error('Could not locate Player commitment center route header.')
+const commitmentHeaderMarker = 'data-testid={`player-commitment-route-header-${mode}`}'
+const commitmentHeaderStart = commitmentSource.indexOf(commitmentHeaderMarker)
+if (commitmentHeaderStart < 0) {
+  throw new Error('Could not locate Player S&C commitment center route header.')
+}
+const commitmentHeaderEnd = commitmentSource.indexOf('>', commitmentHeaderStart)
+if (commitmentHeaderEnd < 0) {
+  throw new Error('Could not locate Player S&C commitment center route header boundary.')
+}
+const commitmentHeaderTag = commitmentSource.slice(commitmentHeaderStart, commitmentHeaderEnd)
+if (!commitmentHeaderTag.includes('data-layout-role="editorial-header"')) {
+  commitmentSource = `${commitmentSource.slice(0, commitmentHeaderEnd)} data-layout-role="editorial-header" data-visual-role="page-intro"${commitmentSource.slice(commitmentHeaderEnd)}`
 }
 fs.writeFileSync(commitmentPath, commitmentSource)
 

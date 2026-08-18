@@ -5,7 +5,8 @@ import fs from "node:fs";
 const appSource = fs.readFileSync("src/App.jsx", "utf8");
 const primitivesSource = fs.readFileSync("src/components/CoachDashboardPrimitives.jsx", "utf8");
 const dashboardSource = fs.readFileSync("src/components/CoachInteractiveDashboards.jsx", "utf8");
-const calendarSource = fs.readFileSync("src/components/CoachEventsMonthCalendar.jsx", "utf8");
+const eventsPrimitivesSource = fs.readFileSync("src/components/EventsMobilePrimitives.jsx", "utf8");
+const eventsSystemCss = fs.readFileSync("src/components/EventsMobileSystem.css", "utf8");
 const pageSystemSource = fs.readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
 const pageSystemCss = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
 const dashboardCss = fs.readFileSync("src/components/CoachDashboardPrimitives.module.css", "utf8");
@@ -42,22 +43,32 @@ test("canonical secondary page system defines one page, toolbar, decision, and e
   assert.match(pageSystemCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
-test("players and events share the canonical page composition while Events owns its month calendar", () => {
+test("players retain the canonical page system while Events owns the shared week-first schedule grammar", () => {
   assert.match(dashboardSource, /export function CoachPlayersInteractiveDashboard/);
   assert.match(dashboardSource, /SecondaryPageShell testId="coach-players-interactive-dashboard"/);
   assert.match(dashboardSource, /coach-players-command-bar/);
   assert.match(dashboardSource, /coach-players-toolbar/);
   assert.match(dashboardSource, /coach-players-decision-brief/);
   assert.match(dashboardSource, /coach-players-insight-grid/);
+
   assert.match(dashboardSource, /export function CoachEventsInteractiveDashboard/);
   assert.match(dashboardSource, /SecondaryPageShell testId="coach-events-interactive-dashboard"/);
-  assert.match(dashboardSource, /coach-events-command-bar/);
+  assert.match(dashboardSource, /<EventsTitleStage role="coach"/);
+  assert.match(dashboardSource, /testId="coach-events-next-team-moment"/);
+  assert.match(dashboardSource, /<EventsWeekRail/);
   assert.match(dashboardSource, /coach-events-toolbar/);
-  assert.match(dashboardSource, /coach-events-decision-brief/);
-  assert.match(dashboardSource, /CoachEventsMonthCalendar/);
-  assert.match(calendarSource, /data-testid="coach-events-month-calendar"/);
-  assert.match(calendarSource, /data-testid="coach-events-calendar-month"/);
-  assert.doesNotMatch(dashboardSource, /coach-events-insight-grid/);
+  assert.match(dashboardSource, /<EventsMonthPanel/);
+  assert.doesNotMatch(dashboardSource, /CoachEventsMonthCalendar/);
+  assert.doesNotMatch(dashboardSource, /coach-events-decision-brief/);
+
+  for (const component of ["EventsTitleStage", "NextEventSurface", "EventsWeekRail", "EventsMonthPanel", "EventsSectionHeader"]) {
+    assert.match(eventsPrimitivesSource, new RegExp(`export function ${component}`));
+  }
+  assert.match(eventsPrimitivesSource, /data-testid="events-week-rail"/);
+  assert.match(eventsPrimitivesSource, /data-testid="events-month-panel"/);
+  assert.match(eventsSystemCss, /\.eventsTitleStage/);
+  assert.match(eventsSystemCss, /\.eventsNext/);
+  assert.match(eventsSystemCss, /\.eventsWeekRail__days/);
 });
 
 test("App wires dashboard selectors and compositions into live coach routes", () => {
@@ -86,7 +97,7 @@ test("remaining coach pages retain the current control layer for incremental mig
 });
 
 test("cohesion pass introduces no schema, auth, persistence, or network writes", () => {
-  for (const source of [pageSystemSource, pageSystemCss, dashboardSource, calendarSource, integrationCss]) {
+  for (const source of [pageSystemSource, pageSystemCss, dashboardSource, eventsPrimitivesSource, eventsSystemCss, integrationCss]) {
     assert.doesNotMatch(source, /supabase|auth\.|create table|alter table|fetch\(|XMLHttpRequest|localStorage|sessionStorage/i);
   }
 });
