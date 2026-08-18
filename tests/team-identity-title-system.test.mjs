@@ -20,6 +20,7 @@ const brandingScreenCss = read("src/screens/CoachTeamBrandingScreen.css");
 const brandingDefaults = read("src/theme/brandingDefaults.js");
 const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs");
 const routeEnhancers = read("scripts/run-route-enhancers.mjs");
+const missionControlCascadeLock = read("src/styles/MissionControlCascadeLock2026.css");
 
 test("team identity title stage is the shared Coach and Player title primitive", () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -132,4 +133,6 @@ test("Coach Home integrates program identity into Mission Control rather than st
   assert.match(renderedAuthority, /Coach Home — the existing Mission Control decision surface becomes the immersive team Hero variant/);
   assert.match(renderedAuthority, /coach-dashboard-identity-header[\s\S]*display:\s*none\s*!important/);
   assert.match(renderedAuthority, /mcHeroTeamMark[\s\S]*clamp\(112px,\s*30vw,\s*128px\)/);
+  assert.match(renderedAuthority, /\.mcHeroTeamMark \.mcTeamFallback\{[^}]*width:100%!important;[^}]*height:100%!important/);
+  assert.doesNotMatch(missionControlCascadeLock, /\.mcHeroTeamMark\{display:none!important\}/);
 });
