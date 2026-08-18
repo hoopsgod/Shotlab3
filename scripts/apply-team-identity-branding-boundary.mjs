@@ -16,6 +16,21 @@ function replaceIfPresent(source, before, after) {
   return source.includes(before) ? source.replace(before, after) : source;
 }
 
+// Production and Playwright can invoke the route-enhancer pipeline more than once in
+// the same checkout. A later Demo-branding enhancer intentionally transforms one of
+// this script's App.jsx anchors, so a second pass must recognize the fully reconciled
+// state rather than treating that expected transformation as source drift.
+const reconciledApp = read("src/App.jsx");
+const teamIdentityAlreadyApplied =
+  reconciledApp.includes("demoCoachBrandingOverride=null") &&
+  reconciledApp.includes("const demoIdentityBranding=") &&
+  reconciledApp.includes("const incomingBranding=") &&
+  reconciledApp.includes("sl:demo-team-branding");
+if (teamIdentityAlreadyApplied) {
+  console.log("Team identity branding boundary already reconciled; skipping repeat enhancer pass.");
+  process.exit(0);
+}
+
 {
   const file = "src/App.jsx";
   let source = read(file);
