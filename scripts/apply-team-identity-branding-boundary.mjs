@@ -34,8 +34,39 @@ function replaceIfPresent(source, before, after) {
   source = replaceOnce(
     source,
     'nts=[...nts,demoTeam];\nawait saveTeams();\n}',
-    'nts=[...nts,demoTeam];\nawait saveTeams();\n}\nconst demoHasCustomLogo=Boolean((demoTeam.branding?.logoUrl&&demoTeam.branding.logoUrl!=="/branding/titans-exact-logo.png.PNG")||(demoTeam.branding?.logoMarkUrl&&demoTeam.branding.logoMarkUrl!=="/branding/titans-default-mark.svg"));\nconst demoIdentityBranding={...DEFAULT_BRANDING,...(demoTeam.branding||{}),teamName:"Demo Titans",...(demoHasCustomLogo?{}:{logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"})};\nif(demoTeam.name!=="Demo Titans"||demoTeam.branding?.teamName!=="Demo Titans"||(!demoTeam.branding?.logoUrl&&!demoTeam.branding?.logoMarkUrl)){demoTeam={...demoTeam,name:"Demo Titans",branding:demoIdentityBranding,updatedAt:Date.now()};nts=nts.map(t=>t.id===demoTeam.id?demoTeam:t);await saveTeams();}',
+    'nts=[...nts,demoTeam];\nawait saveTeams();\n}\nconst demoLegacyFullLogo="/branding/titans-exact-logo.png.PNG";\nconst demoLegacyMarkLogo="/branding/titans-default-mark.svg";\nconst demoRawFullLogo=demoTeam.branding?.logoUrl||"";\nconst demoRawMarkLogo=demoTeam.branding?.logoMarkUrl||"";\nconst demoHasCustomFullLogo=Boolean(demoRawFullLogo&&demoRawFullLogo!==demoLegacyFullLogo);\nconst demoHasCustomMarkLogo=Boolean(demoRawMarkLogo&&demoRawMarkLogo!==demoLegacyMarkLogo);\nconst demoSanitizedBranding={...(demoTeam.branding||{}),...(demoHasCustomFullLogo&&demoRawMarkLogo===demoLegacyMarkLogo?{logoMarkUrl:""}:{}),...(demoHasCustomMarkLogo&&demoRawFullLogo===demoLegacyFullLogo?{logoUrl:""}:{})};\nconst demoHasCustomLogo=demoHasCustomFullLogo||demoHasCustomMarkLogo;\nconst demoIdentityBranding={...DEFAULT_BRANDING,...demoSanitizedBranding,teamName:"Demo Titans",...(demoHasCustomLogo?{}:{logoUrl:demoLegacyFullLogo,logoMarkUrl:demoLegacyMarkLogo})};\nconst demoBrandingNeedsRepair=demoSanitizedBranding.logoUrl!==demoTeam.branding?.logoUrl||demoSanitizedBranding.logoMarkUrl!==demoTeam.branding?.logoMarkUrl;\nif(demoTeam.name!=="Demo Titans"||demoTeam.branding?.teamName!=="Demo Titans"||(!demoTeam.branding?.logoUrl&&!demoTeam.branding?.logoMarkUrl)||demoBrandingNeedsRepair){demoTeam={...demoTeam,name:"Demo Titans",branding:demoIdentityBranding,updatedAt:Date.now()};nts=nts.map(t=>t.id===demoTeam.id?demoTeam:t);await saveTeams();}',
     "stale Demo identity migration"
+  );
+  source = replaceOnce(
+    source,
+    `const saveTeamBranding=async(nextBranding)=>{
+if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
+const team=teams.find(t=>t.id===user.teamId);
+if(!team)return{ok:false,err:"Team not found"};
+const mergedBranding=resolveTeamBranding({
+...(team.branding||{}),
+...(nextBranding||{}),`,
+    `const saveTeamBranding=async(nextBranding)=>{
+if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
+const team=teams.find(t=>t.id===user.teamId);
+if(!team)return{ok:false,err:"Team not found"};
+const incomingBranding={...(nextBranding||{})};
+if(isDemoAccount(user)){
+const legacyDemoFull="/branding/titans-exact-logo.png.PNG";
+const legacyDemoMark="/branding/titans-default-mark.svg";
+const incomingFull=incomingBranding.logoUrl||"";
+const incomingMark=incomingBranding.logoMarkUrl||"";
+const effectiveFull=incomingFull||team.branding?.logoUrl||"";
+const effectiveMark=incomingMark||team.branding?.logoMarkUrl||"";
+const hasCustomFull=Boolean(incomingFull&&incomingFull!==legacyDemoFull);
+const hasCustomMark=Boolean(incomingMark&&incomingMark!==legacyDemoMark);
+if(hasCustomFull&&effectiveMark===legacyDemoMark)incomingBranding.logoMarkUrl="";
+if(hasCustomMark&&effectiveFull===legacyDemoFull)incomingBranding.logoUrl="";
+}
+const mergedBranding=resolveTeamBranding({
+...(team.branding||{}),
+...incomingBranding,`,
+    "Demo Coach branding save normalization"
   );
   write(file, source);
 }
@@ -160,4 +191,4 @@ function replaceIfPresent(source, before, after) {
   write(file, source);
 }
 
-console.log("Applied team-owned branding boundary, custom-logo precedence, Demo identity preservation, and structural Coach Home identity reconciliation.");
+console.log("Applied team-owned branding boundary, Demo custom-logo ownership, custom-logo precedence, Demo identity preservation, and structural Coach Home identity reconciliation.");
