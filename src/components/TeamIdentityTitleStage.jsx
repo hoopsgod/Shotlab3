@@ -44,11 +44,15 @@ export default function TeamIdentityTitleStage({
   const descriptor = tidy(role || eyebrow);
   const initials = useMemo(() => buildInitials(teamName), [teamName]);
   const titleText = tidy(title) || teamName;
-  const isLongTitle = titleText.length > 20;
+  const hasWideWord = titleText.split(/\s+/).some((word) => word.length >= 11);
+  const isLongTitle = titleText.length > 20 || hasWideWord;
   const hasLogo = Boolean(logoSrc && !failed);
   const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
   const variantClass = variant === "hero" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
+  const titleTextStyle = surface === "dark"
+    ? { color: "#f8fbfc", WebkitTextFillColor: "#f8fbfc", overflowWrap: "normal", wordBreak: "normal" }
+    : { overflowWrap: "normal", wordBreak: "normal" };
 
   return (
     <header
@@ -82,7 +86,7 @@ export default function TeamIdentityTitleStage({
             {descriptor ? <><span className="teamIdentityTitleStage__separator" aria-hidden="true">·</span><span className="teamIdentityTitleStage__descriptor" data-identity-role="badge">{descriptor}</span></> : null}
           </div>
 
-          <h1 className="teamIdentityTitleStage__title secondaryPageIntro__title appHeaderTitle" data-identity-role={role === "Player" && variant === "hero" && !personName ? "name" : "page-title"}>{titleText}</h1>
+          <h1 className="teamIdentityTitleStage__title secondaryPageIntro__title appHeaderTitle" data-identity-role={role === "Player" && variant === "hero" && !personName ? "name" : "page-title"}><span data-identity-role="title-text" style={titleTextStyle}>{titleText}</span></h1>
           {personName ? <div className="teamIdentityTitleStage__person" data-identity-role="name">{personName}</div> : null}
           {summary ? <p className="teamIdentityTitleStage__summary secondaryPageIntro__summary" data-identity-role="tagline">{summary}</p> : null}
 
