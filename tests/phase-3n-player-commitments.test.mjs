@@ -78,6 +78,7 @@ test("Phase 3N visual system keeps route-first hierarchy and iPhone containment"
   assert.match(css, /\.details\[open\]/);
   assert.match(css, /@media \(max-width: 759px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(authority, /player-commitment-route-header-events[\s\S]*player-commitment-route-header-strength[\s\S]*font-size:\s*clamp\(38px, 9\.4vw, 44px\)\s*!important/);
 });
 
 test("Phase 3N uses a stable late authority boundary so demo normalization cannot wash out the dark commitment hero", () => {
