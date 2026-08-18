@@ -35,12 +35,6 @@
   html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcRealityStrip,html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcPrimary{position:relative!important;z-index:4!important}
   html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcCourtArtwork{opacity:.5!important}
   html body.mission-control-active #root [data-testid="mission-control-team-header"] .mcHeaderTeamMark img{width:52px!important;height:52px!important;object-fit:contain!important}
-
-  /* Team Store — branded title stage, not a generic modal strip. */
-  html body .ts-header{min-height:174px!important;padding:max(18px,env(safe-area-inset-top)) 54px 18px 142px!important;overflow:hidden!important;background:radial-gradient(circle at 96% -18%,color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 15%,transparent),transparent 40%),linear-gradient(126deg,rgba(6,25,35,.98),rgba(8,36,48,.97) 58%,rgba(10,41,51,.98))!important}
-  html body .ts-header::before{left:10px!important;top:max(18px,env(safe-area-inset-top))!important;width:clamp(120px,31vw,136px)!important;height:clamp(120px,31vw,136px)!important}
-  html body .ts-header h2{max-width:8ch!important;color:#f8fbfc!important;font-size:clamp(40px,11.2vw,48px)!important;line-height:.92!important;letter-spacing:-.062em!important}
-  html body .ts-header p{max-width:19ch!important;color:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 54%,#f4f7e9)!important;font-size:11px!important}
 }
 @media (max-width:380px){
   html body #root .secondaryPageIntro.teamIdentityTitleStage[data-team-identity-stage="true"],html body #root .teamIdentityTitleStage--standard[data-team-identity-stage="true"]{--identity-crest:96px!important;--identity-title:clamp(38px,11.2vw,45px)!important}
