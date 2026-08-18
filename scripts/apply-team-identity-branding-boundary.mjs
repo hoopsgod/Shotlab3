@@ -12,10 +12,6 @@ function replaceOnce(source, before, after, label) {
   return source.replace(before, after);
 }
 
-function replaceIfPresent(source, before, after) {
-  return source.includes(before) ? source.replace(before, after) : source;
-}
-
 // Production and Playwright can invoke the route-enhancer pipeline more than once in
 // the same checkout. A later Demo-branding enhancer intentionally transforms one of
 // this script's App.jsx anchors, so a second pass must recognize the fully reconciled
@@ -183,13 +179,14 @@ const mergedBranding=resolveTeamBranding({
   source = replaceOnce(
     source,
     '<button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>',
-    '{/* Foreground team identity is owned by the Coach header; court artwork remains branding-driven. */}',
-    "Coach Home duplicate Hero logo removal"
+    '<button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{cleanMarkLogoUrl ? <img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /> : <span className="mcTeamFallback">{initials(teamName)}</span>}</button>',
+    "Coach Home immersive Hero logo"
   );
-  source = replaceIfPresent(
+  source = replaceOnce(
     source,
+    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
     '<span className="mcProgramIdentity">{teamName} · Coach</span><span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
-    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>'
+    "Coach Home program identity"
   );
   write(file, source);
 }
@@ -206,4 +203,4 @@ const mergedBranding=resolveTeamBranding({
   write(file, source);
 }
 
-console.log("Applied team-owned branding boundary, Demo custom-logo ownership, custom-logo precedence, Demo identity preservation, and structural Coach Home identity reconciliation.");
+console.log("Applied team-owned branding boundary, Demo custom-logo ownership, custom-logo precedence, Demo identity preservation, and immersive Coach Home identity reconciliation.");
