@@ -5,7 +5,7 @@
   padding: 18px;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 28px;
-  background: radial-gradient(circle at 100% 0%, rgba(200,255,26,.10), transparent 34%), #111713;
+  background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, transparent), transparent 34%), #111713;
   box-shadow: 0 22px 44px rgba(21,26,22,.17);
   color: #f8faf5;
 }
@@ -17,7 +17,7 @@
   align-items: center;
 }
 
-.topline { gap: 10px; }
+.topline { gap: 8px; min-width: 0; }
 
 .back {
   display: grid;
@@ -35,13 +35,25 @@
 }
 
 .back:active { transform: scale(.97); }
-.back:focus-visible { outline: 2px solid var(--accent,#c8ff1a); outline-offset: 2px; }
+.back:focus-visible { outline: 2px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 56%, #f6f9f2); outline-offset: 2px; }
 
+.teamName,
 .mode {
-  color: var(--accent,#c8ff1a);
+  min-width: 0;
   font: 820 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  letter-spacing: .12em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
+
+.teamName {
+  max-width: 28ch;
+  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 58%, #f2f6e8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mode { flex: 0 0 auto; color: rgba(246,249,242,.58); }
 
 .step {
   margin-left: auto;
@@ -52,25 +64,41 @@
 }
 
 .hero {
-  align-items: flex-start;
-  gap: 14px;
+  align-items: center;
+  gap: 15px;
 }
 
 .mark {
   display: grid;
   place-items: center;
-  width: 50px;
-  height: 50px;
+  width: 76px;
+  height: 76px;
   flex: 0 0 auto;
-  border: 1px solid rgba(200,255,26,.18);
-  border-radius: 16px;
-  background: rgba(200,255,26,.065);
-  color: var(--accent,#c8ff1a);
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 18%, rgba(255,255,255,.08));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 6%, transparent);
+  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 70%, #f4f7eb);
+}
+
+.markTeam {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.teamCrest {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 12px 17px rgba(0,0,0,.30));
 }
 
 .mark svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -161,8 +189,11 @@
 
 @media (max-width: 390px) {
   .root { padding: 16px; border-radius: 24px; }
+  .topline { gap: 6px; }
+  .teamName { max-width: 15ch; }
+  .mode { display: none; }
   .copy h1 { font-size: 29px; }
-  .mark { width: 46px; height: 46px; border-radius: 15px; }
+  .mark { width: 72px; height: 72px; border-radius: 18px; }
   .performanceBand { grid-template-columns: minmax(74px,.6fr) minmax(0,1.6fr); gap: 8px; }
   .targetSignal { gap: 4px; }
   .targetCopy strong { font-size: 14px; }
