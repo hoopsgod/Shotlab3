@@ -1,16 +1,16 @@
 name: Temporary Secondary Title Source Migration
 
 on:
-  push:
-    branches: [agent/title-authority-repair-2026]
-    paths:
-      - '.github/workflows/title-authority-secondary-source-migration.yml'
+  pull_request:
+    branches: [march-3-reset-85393dd]
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: write
 
 jobs:
   migrate:
+    if: github.head_ref == 'agent/title-authority-repair-2026'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
