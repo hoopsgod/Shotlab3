@@ -58,7 +58,7 @@ const TEAM_IDENTITY_STAGE_CSS = `
 }
 @media(max-width:389px){
  .teamIdentityStage{grid-template-columns:88px minmax(0,1fr);--team-stage-crest:88px;gap:12px}
- .teamIdentityStage--hero{grid-template-columns:100px minmax(0,1fr);--team-stage-crest:100px}
+ .teamIdentityStage--hero{grid-template-columns:104px minmax(0,1fr);--team-stage-crest:104px}
  .teamIdentityStage--compact{grid-template-columns:72px minmax(0,1fr);--team-stage-crest:72px}
  .teamIdentityStage__aside{padding-left:calc(var(--team-stage-crest) + 12px)}
  .teamIdentityStage__title{font-size:clamp(38px,11vw,46px)}
@@ -109,7 +109,7 @@ export default function TeamIdentityTitleStage({
 
   return <>
     <style>{TEAM_IDENTITY_STAGE_CSS}</style>
-    <header className={stageClass} style={stageStyle} data-testid={testId} data-team-identity-stage={variant} data-surface={surface}>
+    <header className={stageClass} style={stageStyle} data-testid={testId} data-team-identity-stage={variant} data-layout-role="editorial-header" data-page-kind={iconName} data-surface={surface}>
       {backAction ? <button type="button" className="teamIdentityStage__back" onClick={backAction.onClick} aria-label={backAction.ariaLabel || backAction.label || "Back"}><ShotLabIcon name="arrow" size={18}/><span>{backAction.label || "Back"}</span></button> : null}
       <div className="teamIdentityStage__crest">
         {hasLogo ? <img src={logoSrc} alt={`${teamName} team crest`} onError={() => setFailed(true)} draggable="false"/> : <div className="teamIdentityStage__fallback" role="img" aria-label={`${teamName} team mark`}>{initialsFor(teamName)}</div>}
