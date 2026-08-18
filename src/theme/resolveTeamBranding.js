@@ -1,10 +1,6 @@
 import { DEFAULT_BRANDING } from "./brandingDefaults";
 
 const HTTP_URL_RE = /^https?:\/\//i;
-const LEGACY_FULL_LOGO_PLACEHOLDERS = new Set([
-  "/branding/titans-default-mark.svg",
-  "/branding/titans-default-mark-free.svg",
-]);
 
 function resolveLegacyColor(value, fallback) {
   return typeof value === "string" && value.trim() ? value : fallback;
@@ -12,16 +8,6 @@ function resolveLegacyColor(value, fallback) {
 
 function resolveTextScale(value) {
   return ["standard", "large", "xl"].includes(value) ? value : DEFAULT_BRANDING.textScale;
-}
-
-function resolveFullLogoUrl(value) {
-  const normalized = typeof value === "string" ? value.trim() : "";
-  if (!normalized) return DEFAULT_BRANDING.logoUrl;
-
-  const pathOnly = normalized.split(/[?#]/, 1)[0];
-  if (LEGACY_FULL_LOGO_PLACEHOLDERS.has(pathOnly)) return DEFAULT_BRANDING.logoUrl;
-
-  return normalized;
 }
 
 function withBrandingCacheBust(url, branding) {
@@ -49,14 +35,17 @@ export default function resolveTeamBranding(teamBranding = {}) {
       DEFAULT_BRANDING.accentColor
     ),
     textOnPrimary: resolveLegacyColor(teamBranding?.textOnPrimary || legacyColors.primaryText, DEFAULT_BRANDING.textOnPrimary),
-    logoUrl: resolveFullLogoUrl(teamBranding?.logoUrl),
+    logoUrl: teamBranding?.logoUrl || DEFAULT_BRANDING.logoUrl,
     logoMarkUrl: teamBranding?.logoMarkUrl || DEFAULT_BRANDING.logoMarkUrl,
     textScale: resolveTextScale(teamBranding?.textScale),
   };
 
   return {
     ...merged,
-    logoUrl: withBrandingCacheBust(merged.logoUrl, merged),
+    logoUrl: withBrandingCacheBust(
+      merged.logoUrl?.includes("/branding/titans-default-mark") ? DEFAULT_BRANDING.logoUrl : merged.logoUrl,
+      merged
+    ),
     logoMarkUrl: withBrandingCacheBust(merged.logoMarkUrl, merged),
   };
 }
