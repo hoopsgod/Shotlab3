@@ -17,50 +17,17 @@ const replaceRequired = (source, pattern, replacement, label) => {
   return source.replace(pattern, replacement);
 };
 
-update("src/components/CoachCommandCenter.jsx", (source) => {
-  let next = source;
-
-  next = replaceRequired(
-    next,
-    "  const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;\n",
-    "  const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;\n  const unresolvedRsvps = Math.max(0, Number(eventReadiness?.missing) || 0);\n",
-    "RSVP decision evidence",
-  );
-
-  if (!next.includes('label: "Review RSVPs"')) {
-    const original = `  const primaryCommand = attentionCount > 0
-    ? { eyebrow: "Today at a glance", title: \`${"${attentionCount}"} decision${"${attentionCount === 1 ? \"\" : \"s\"}"} before practice\`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
-    : activationCommand || (hasScheduledSession
-      ? { eyebrow: "Practice ready", title: "Today is under control", detail: \`Your next team session is ${"${nextEventDateFormatted}"}.\`, label: "Open session", onClick: onNextEventClick, state: "ready" }
-      : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });`;
-
-    const replacement = `  const primaryCommand = attentionCount > 0
-    ? { eyebrow: "Today at a glance", title: \`${"${attentionCount}"} decision${"${attentionCount === 1 ? \"\" : \"s\"}"} before practice\`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
-    : unresolvedRsvps > 0
-      ? { eyebrow: "Today at a glance", title: "1 decision before practice", detail: unresolvedRsvps + " RSVP" + (unresolvedRsvps === 1 ? "" : "s") + " still open for " + (eventReadiness?.title || "the next session") + ".", label: "Review RSVPs", onClick: () => onEventReadinessClick?.(eventReadiness?.key), state: "attention" }
-      : activationCommand || (hasScheduledSession
-        ? { eyebrow: "Practice ready", title: "Today is under control", detail: \`Your next team session is ${"${nextEventDateFormatted}"}.\`, label: "Open session", onClick: onNextEventClick, state: "ready" }
-        : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });`;
-
-    if (!next.includes(original)) throw new Error("Phase 5A premium Coach hero target was not found.");
-    next = next.replace(original, replacement);
-  }
-
+// Coach Mission Control title, Hero composition, and RSVP decision content are source-owned.
+// Phase 5A may verify those contracts, but must never rewrite CoachCommandCenter.jsx.
+{
+  const coachSource = readFileSync("src/components/CoachCommandCenter.jsx", "utf8");
   for (const required of [
-    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
-    '<button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button>',
-    '<button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button>',
-    '<button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button>',
-    'function TeamActivityPanel(',
-    'const teamPanel = hasTeamActivity ? <TeamActivityPanel',
-  ]) if (!next.includes(required)) throw new Error(`Phase 5A must preserve accepted Phase 4 Coach presentation: ${required}`);
-
-  if (next.includes('aria-label="Coach daily brief"') || next.includes("<small>RSVP ready</small>") || next.includes("player follow-up\" +")) {
-    throw new Error("Phase 5A must not replace the accepted Coach hero with the rejected Daily Brief treatment.");
-  }
-
-  return next;
-});
+    'const unresolvedRsvps = Math.max(0, Number(eventReadiness?.missing) || 0);',
+    'label: "Review RSVPs"',
+    'data-team-identity-stage="coach-mission-control"',
+    'className="mcHeroIdentity"',
+  ]) if (!coachSource.includes(required)) throw new Error(`Phase 5A source-owned Coach contract missing: ${required}`);
+}
 
 update("src/lib/coachDashboardSelectors.js", (source) => {
   let next = source;
@@ -116,6 +83,6 @@ update("src/App.jsx", (source) => {
   return next;
 });
 
-console.log("Applied Phase 5A Coach decision intelligence and bounded auth bootstrap without changing the accepted Phase 4 visual language.");
+console.log("Verified source-owned Coach decision intelligence and applied Phase 5A data/auth reconciliation without mutating Coach title composition.");
 await import("./externalize-shotlab-brand-logo.mjs");
 await import("./apply-phase5b-practice-readiness.mjs");
