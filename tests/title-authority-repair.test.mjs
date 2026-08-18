@@ -10,6 +10,7 @@ const coach = read('src/components/CoachCommandCenter.jsx');
 const coachHeader = read('src/components/CoachDashboardHeader.jsx');
 const playerHeader = read('src/components/PlayerDashboardHeader.jsx');
 const secondary = read('src/components/SecondaryPageSystem.jsx');
+const secondaryCss = read('src/components/SecondaryPageSystem.css');
 const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
 const playerCommitment = read('src/components/PlayerCommitmentCenter.jsx');
 const playerCommitmentCss = read('src/components/PlayerCommitmentCenter.module.css');
@@ -35,6 +36,13 @@ test('one shared semantic title primitive owns Coach, Player, secondary, commitm
   }
   assert.doesNotMatch(stage, /appHeaderTitle|secondaryPageIntro|coach-dashboard-identity-header\s+appHeader/);
   assert.doesNotMatch(playerCommitment, /className=\{styles\.routeHeader\}/);
+});
+
+test('obsolete secondary intro and action CSS is deleted rather than kept as dormant title authority', () => {
+  assert.match(secondaryCss, /Secondary title presentation is owned exclusively by TeamIdentityTitleStage/);
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro__/);
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageAction\b/);
 });
 
 test('obsolete Player commitment title CSS is deleted rather than left as dormant parallel authority', () => {
