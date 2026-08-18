@@ -1,4 +1,4 @@
-/* Phase 3N — stable dark-surface authority for player commitment heroes.
+/* Phase 3N — stable commitment presentation authority.
    This late layer deliberately overrides broad demo/light-surface normalization
    without changing any other player or coach surface. */
 
@@ -86,4 +86,14 @@ html body #root [data-testid="player-commitment-hero-events"] button *,
 html body #root [data-testid="player-commitment-hero-strength"] button * {
   color: inherit !important;
   -webkit-text-fill-color: currentColor !important;
+}
+
+/* Specialized commitment routes intentionally keep their own hierarchy rather
+   than adopting the generic team-title stage, but they still meet the shared
+   premium mobile first-impression type floor. */
+@media (max-width: 759px) {
+  html body #root [data-testid="player-commitment-route-header-events"] h1,
+  html body #root [data-testid="player-commitment-route-header-strength"] h1 {
+    font-size: clamp(38px, 9.4vw, 44px) !important;
+  }
 }
