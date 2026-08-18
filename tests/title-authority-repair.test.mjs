@@ -43,6 +43,7 @@ test('obsolete secondary intro and action CSS is deleted rather than kept as dor
   assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
   assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro__/);
   assert.doesNotMatch(secondaryCss, /\.secondaryPageAction\b/);
+  assert.equal(existsSync('src/components/SecondaryPageFirstViewport.css'), false);
 });
 
 test('obsolete Player commitment title CSS is deleted rather than left as dormant parallel authority', () => {
