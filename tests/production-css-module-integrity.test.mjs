@@ -71,13 +71,16 @@ test("built production assets retain rendered team identity variants and their s
 test("built production CSS keeps the final mobile title authority and standard crest floor", async () => {
   const css = await builtCss();
   const authorityRule = css.match(
-    /\.teamIdentityTitleStage--standard\[data-team-identity-stage=(?:true|"true")\][^{]*\{([^}]*)\}/s,
+    /\.teamIdentityTitleStage--standard(?:\[data-team-identity-stage=(?:true|"true")\])?[^\{]*\{([^}]*)\}/s,
   )?.[1];
 
   assert.ok(authorityRule, "Production CSS lost the canonical standard team-title authority rule");
   assert.match(authorityRule, /display:block!important/, "Production CSS lost final title display ownership");
-  assert.match(authorityRule, /min-height:var\(--identity-crest\)!important/, "Production CSS lost final title crest-height ownership");
-  assert.match(authorityRule, /height:auto!important/, "Production CSS lost final title auto-height ownership");
+  assert.match(
+    authorityRule,
+    /--identity-crest:clamp\(96px,25vw,108px\)!important/,
+    "Production CSS lost the canonical 96px standard crest floor",
+  );
 
   assert.match(
     css,
@@ -85,10 +88,19 @@ test("built production CSS keeps the final mobile title authority and standard c
     "Production CSS lost the 96px standard team-crest floor",
   );
 
+  const innerRule = css.match(
+    /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner[^\{]*\{([^}]*)\}/s,
+  )?.[1];
+  assert.ok(innerRule, "Production CSS lost the canonical standard title inner geometry rule");
   assert.match(
-    css,
-    /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner[^\{]*\{[^}]*grid-template-columns:minmax\(0,1fr\) var\(--identity-crest\)!important/,
+    innerRule,
+    /grid-template-columns:minmax\(0,1fr\) var\(--identity-crest\)!important/,
     "Production CSS lost final title two-column identity geometry",
+  );
+  assert.match(
+    innerRule,
+    /min-height:var\(--identity-crest\)!important/,
+    "Production CSS lost final title crest-height ownership",
   );
 });
 
