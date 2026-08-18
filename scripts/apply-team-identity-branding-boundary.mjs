@@ -12,6 +12,10 @@ function replaceOnce(source, before, after, label) {
   return source.replace(before, after);
 }
 
+function replaceIfPresent(source, before, after) {
+  return source.includes(before) ? source.replace(before, after) : source;
+}
+
 {
   const file = "src/App.jsx";
   let source = read(file);
@@ -30,7 +34,7 @@ function replaceOnce(source, before, after, label) {
   source = replaceOnce(
     source,
     'nts=[...nts,demoTeam];\nawait saveTeams();\n}',
-    'nts=[...nts,demoTeam];\nawait saveTeams();\n}\nconst demoIdentityBranding={...DEFAULT_BRANDING,...(demoTeam.branding||{}),teamName:"Demo Titans",logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"};\nif(demoTeam.name!=="Demo Titans"||demoTeam.branding?.teamName!=="Demo Titans"||!demoTeam.branding?.logoUrl){demoTeam={...demoTeam,name:"Demo Titans",branding:demoIdentityBranding,updatedAt:Date.now()};nts=nts.map(t=>t.id===demoTeam.id?demoTeam:t);await saveTeams();}',
+    'nts=[...nts,demoTeam];\nawait saveTeams();\n}\nconst demoHasCustomLogo=Boolean((demoTeam.branding?.logoUrl&&demoTeam.branding.logoUrl!=="/branding/titans-exact-logo.png.PNG")||(demoTeam.branding?.logoMarkUrl&&demoTeam.branding.logoMarkUrl!=="/branding/titans-default-mark.svg"));\nconst demoIdentityBranding={...DEFAULT_BRANDING,...(demoTeam.branding||{}),teamName:"Demo Titans",...(demoHasCustomLogo?{}:{logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"})};\nif(demoTeam.name!=="Demo Titans"||demoTeam.branding?.teamName!=="Demo Titans"||(!demoTeam.branding?.logoUrl&&!demoTeam.branding?.logoMarkUrl)){demoTeam={...demoTeam,name:"Demo Titans",branding:demoIdentityBranding,updatedAt:Date.now()};nts=nts.map(t=>t.id===demoTeam.id?demoTeam:t);await saveTeams();}',
     "stale Demo identity migration"
   );
   write(file, source);
@@ -75,7 +79,7 @@ function replaceOnce(source, before, after, label) {
   source = replaceOnce(
     source,
     'const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";\nconst DEFAULT_MARK = "/branding/titans-default-mark.svg";',
-    'const FALLBACK_LOGO = "";\nconst DEFAULT_MARK = "";',
+    'const FALLBACK_LOGO = "";\nconst DEFAULT_MARK = "";\nconst LEGACY_DEMO_FULL = "/branding/titans-exact-logo.png.PNG";\nconst LEGACY_DEMO_MARK = "/branding/titans-default-mark.svg";',
     "neutral Coach Mission Control logo fallback"
   );
   source = replaceOnce(
@@ -83,6 +87,25 @@ function replaceOnce(source, before, after, label) {
     'const teamName = branding?.teamName || branding?.name || "Thomas Titans";',
     'const teamName = branding?.teamName || branding?.name || "Your Team";',
     "neutral Coach Mission Control team-name fallback"
+  );
+  source = replaceOnce(
+    source,
+    `  const fullLogoSource = branding?.logoUrl || FALLBACK_LOGO;
+  const markSource = branding?.logoMarkUrl && branding.logoMarkUrl !== DEFAULT_MARK ? branding.logoMarkUrl : fullLogoSource;
+  const cleanFullLogoUrl = useCleanTeamLogo(fullLogoSource);
+  const cleanMarkLogoUrl = useCleanTeamLogo(markSource);
+  const teamName = branding?.teamName || branding?.name || "Your Team";`,
+    `  const teamName = branding?.teamName || branding?.name || "Your Team";
+  const rawFullLogoSource = branding?.logoUrl || "";
+  const rawMarkLogoSource = branding?.logoMarkUrl || "";
+  const customFullLogoSource = rawFullLogoSource && rawFullLogoSource !== LEGACY_DEMO_FULL ? rawFullLogoSource : "";
+  const customMarkLogoSource = rawMarkLogoSource && rawMarkLogoSource !== LEGACY_DEMO_MARK ? rawMarkLogoSource : "";
+  const useDemoArtwork = teamName === "Demo Titans" && !customFullLogoSource && !customMarkLogoSource;
+  const fullLogoSource = customFullLogoSource || customMarkLogoSource || (useDemoArtwork ? (rawFullLogoSource || LEGACY_DEMO_FULL) : FALLBACK_LOGO);
+  const markSource = customMarkLogoSource || customFullLogoSource || (useDemoArtwork ? (rawMarkLogoSource || rawFullLogoSource || LEGACY_DEMO_MARK) : DEFAULT_MARK);
+  const cleanFullLogoUrl = useCleanTeamLogo(fullLogoSource);
+  const cleanMarkLogoUrl = useCleanTeamLogo(markSource);`,
+    "Coach custom logo precedence"
   );
   source = replaceOnce(
     source,
@@ -114,14 +137,13 @@ function replaceOnce(source, before, after, label) {
   source = replaceOnce(
     source,
     '<button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>',
-    '<button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{cleanMarkLogoUrl ? <img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /> : <span className="mcTeamFallback">{initials(teamName)}</span>}</button>',
-    "Coach Hero initials fallback"
+    '{/* Foreground team identity is owned by the Coach header; court artwork remains branding-driven. */}',
+    "Coach Home duplicate Hero logo removal"
   );
-  source = replaceOnce(
+  source = replaceIfPresent(
     source,
-    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
     '<span className="mcProgramIdentity">{teamName} · Coach</span><span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
-    "Coach Hero team-first identity line"
+    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>'
   );
   write(file, source);
 }
@@ -138,4 +160,4 @@ function replaceOnce(source, before, after, label) {
   write(file, source);
 }
 
-console.log("Applied team-owned branding boundary, Demo identity migration, post-legacy Coach Hero identity, and final rendered title authority.");
+console.log("Applied team-owned branding boundary, custom-logo precedence, Demo identity preservation, and structural Coach Home identity reconciliation.");
