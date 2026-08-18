@@ -1,4 +1,4 @@
-import { DEFAULT_BRANDING } from "./brandingDefaults";
+import { DEFAULT_BRANDING } from "./brandingDefaults.js";
 
 const HTTP_URL_RE = /^https?:\/\//i;
 
