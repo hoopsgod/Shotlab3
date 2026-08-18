@@ -62,9 +62,6 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
 
 const RELEASE_AUTH_RECOVERY_MARKER = 'const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;'
 const PHASE5A_COACH_INTELLIGENCE = 'scripts/apply-phase5a-coach-daily-intelligence.mjs'
-const MOBILE_COACH_SIGNATURE = 'scripts/apply-mobile-coach-signature-stage.mjs'
-const FINAL_TEAM_IDENTITY_COACH_MARKER = 'function CourtArtwork({ logoUrl, teamName }) {'
-const FINAL_TEAM_IDENTITY_TACTICAL_MARKER = 'id="mcTacticalWash"'
 
 export const DEV_ROUTE_ENHANCERS = Object.freeze([
   ...CORE_ROUTE_ENHANCERS,
@@ -93,26 +90,12 @@ function hasReleaseAuthRecovery(cwd) {
   }
 }
 
-function hasFinalTeamIdentityCoachStage(cwd) {
-  try {
-    const source = readFileSync(path.resolve(cwd, 'src/components/CoachCommandCenter.jsx'), 'utf8')
-    return source.includes(FINAL_TEAM_IDENTITY_COACH_MARKER) && source.includes(FINAL_TEAM_IDENTITY_TACTICAL_MARKER)
-  } catch {
-    return false
-  }
-}
-
 export function runRouteEnhancers(mode, { cwd = process.cwd(), env = process.env } = {}) {
   const enhancers = routeEnhancersFor(mode)
 
   for (const script of enhancers) {
     if (script === PHASE5A_COACH_INTELLIGENCE && hasReleaseAuthRecovery(cwd)) {
       console.log('Phase 5A Coach intelligence already satisfied before release auth recovery; skipping repeat mutation.')
-      continue
-    }
-
-    if (mode === 'dev' && script === MOBILE_COACH_SIGNATURE && hasFinalTeamIdentityCoachStage(cwd)) {
-      console.log('Mobile Coach signature already finalized by the team identity title authority; skipping repeat dev mutation.')
       continue
     }
 
