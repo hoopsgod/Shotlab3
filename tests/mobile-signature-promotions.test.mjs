@@ -8,6 +8,7 @@ import { promoteMobileRouteSignature } from '../scripts/apply-mobile-route-signa
 import { promotePlayerCoachSignal } from '../scripts/apply-mobile-player-coach-signal-signature.mjs';
 
 const routePipeline = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
+const demoBrandingRuntimeFix = readFileSync('scripts/apply-demo-coach-branding-runtime-fix.mjs', 'utf8');
 const coachCommand = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
 const coachFinal = readFileSync('src/components/CoachMissionControlFinal.css', 'utf8');
 const coachHierarchy = readFileSync('src/styles/MissionControlHierarchy2026.css', 'utf8');
@@ -16,13 +17,16 @@ const auth = readFileSync('src/components/AuthWorkspace.jsx', 'utf8');
 
 test('signature promotions run after canonical owners and team identity remains the final presentation authority', () => {
   assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-route-signature-promotion\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
-  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs[\s\S]*apply-team-identity-branding-boundary\.mjs/);
+  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs[\s\S]*apply-team-identity-branding-boundary\.mjs[\s\S]*apply-demo-coach-branding-runtime-fix\.mjs/);
   const finalEnhancers = routePipeline.slice(routePipeline.indexOf('const FINAL_ROUTE_ENHANCERS'), routePipeline.indexOf('const RELEASE_AUTH_RECOVERY_MARKER'));
   const authEntry = "'scripts/apply-mobile-auth-signature-stage.mjs'";
   const identityEntry = "'scripts/apply-team-identity-branding-boundary.mjs'";
+  const runtimeEntry = "'scripts/apply-demo-coach-branding-runtime-fix.mjs'";
   assert.equal(finalEnhancers.split(authEntry).length - 1, 1, 'auth signature promotion must appear exactly once in FINAL_ROUTE_ENHANCERS');
   assert.equal(finalEnhancers.split(identityEntry).length - 1, 1, 'team identity boundary must appear exactly once in FINAL_ROUTE_ENHANCERS');
-  assert.match(finalEnhancers, /'scripts\/apply-mobile-auth-signature-stage\.mjs',[\s\S]*'scripts\/apply-team-identity-branding-boundary\.mjs',?\s*\]\)/, 'team identity boundary must be the final route enhancer after auth presentation');
+  assert.equal(finalEnhancers.split(runtimeEntry).length - 1, 1, 'Demo branding state reconciliation must appear exactly once in FINAL_ROUTE_ENHANCERS');
+  assert.match(finalEnhancers, /'scripts\/apply-mobile-auth-signature-stage\.mjs',[\s\S]*'scripts\/apply-team-identity-branding-boundary\.mjs',[\s\S]*'scripts\/apply-demo-coach-branding-runtime-fix\.mjs',?\s*\]\)/, 'team identity presentation authority must run immediately before the narrow Demo state reconciliation');
+  assert.doesNotMatch(demoBrandingRuntimeFix, /\.css|style\.|className=|<style/i, 'Demo state reconciliation must not own presentation styling');
 });
 
 test('Coach Home promotion creates one strong first-impression hierarchy', () => {
