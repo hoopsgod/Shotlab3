@@ -35,7 +35,6 @@
   grid-template-columns: minmax(0, 1fr) var(--identity-crest) !important;
   align-items: end !important;
   gap: clamp(14px, 4vw, 22px) !important;
-  min-width: 0;
   min-height: var(--identity-crest);
   padding: 0 !important;
 }
@@ -102,7 +101,6 @@
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
-  color: #27312b;
 }
 
 .teamIdentityTitleStage__crest {
@@ -157,7 +155,6 @@
 }
 
 .teamIdentityTitleStage__support {
-  min-width: 0 !important;
   margin-top: 14px;
   display: flex !important;
   align-items: center;
