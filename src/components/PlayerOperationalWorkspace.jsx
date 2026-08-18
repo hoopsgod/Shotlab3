@@ -1,6 +1,6 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
-import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
+import TeamIdentityTitleStage, { TeamIdentitySupportRail } from "./TeamIdentityTitleStage.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
@@ -31,22 +31,23 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   const primaryAction = model.primaryAction ? [{ key: `workspace-${model.id}-primary`, label: model.primaryAction.label, onClick: () => runAction(model.primaryAction), ariaLabel: model.primaryAction.label }] : [];
 
   return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id}>
-    <TeamIdentityTitleStage
-      variant="standard"
-      surface="light"
-      role={resolveWorkspaceIdentityLabel(model)}
-      title={model.title}
-      summary={subtitle}
-      status={model.status}
-      actions={primaryAction}
-      testId={`${testId || `player-workspace-${model.id}`}-title-stage`}
-      className={styles.teamTitleStage || ""}
-      dataLayoutRole="editorial-header"
-      dataVisualRole="player-team-workspace-title"
-      dataPageKind={model.id}
-      dataMobileStage="team-identity"
-      ariaLabel={`${model.title} team identity and page title`}
-    />
+    <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
+      <TeamIdentityTitleStage
+        variant="standard"
+        surface="light"
+        role={resolveWorkspaceIdentityLabel(model)}
+        title={model.title}
+        summary={subtitle}
+        testId={`${testId || `player-workspace-${model.id}`}-title-stage`}
+        className={styles.teamTitleStage || ""}
+        dataLayoutRole="editorial-header"
+        dataVisualRole="player-team-workspace-title"
+        dataPageKind={model.id}
+        dataMobileStage="team-identity"
+        ariaLabel={`${model.title} team identity and page title`}
+      />
+      <TeamIdentitySupportRail status={model.status} actions={primaryAction} external ariaLabel={`${model.title} status and actions`} />
+    </div>
     <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
       {metrics.map((metric, index) => {
         const interactive = Boolean(metric?.filter || metric?.action);
