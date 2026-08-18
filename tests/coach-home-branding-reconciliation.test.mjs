@@ -27,9 +27,9 @@ test("registered team logos are branding-driven across shared product identity s
   assert.match(secondaryMark, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
   assert.match(brandingBoundary, /const FALLBACK_LOGO = ""/);
   assert.match(brandingBoundary, /const DEFAULT_MARK = ""/);
-  assert.match(brandingBoundary, /const fullLogoSource = branding\?\.logoUrl \|\| FALLBACK_LOGO/);
-  assert.match(brandingBoundary, /const markSource = branding\?\.logoMarkUrl/);
-  assert.match(brandingBoundary, /cleanMarkLogoUrl/);
+  assert.match(coach, /const fullLogoSource = branding\?\.logoUrl \|\| FALLBACK_LOGO/);
+  assert.match(coach, /const markSource = branding\?\.logoMarkUrl/);
+  assert.match(coach, /cleanMarkLogoUrl/);
   assert.match(storeEntry, /team\?\.branding/);
   assert.match(storeEntry, /TeamBrandingProvider branding=\{branding\}/);
 });
