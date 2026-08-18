@@ -79,10 +79,10 @@ function replaceOnce(source, before, after, label) {
       <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#050708", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={`${label} on dark background`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
+          <img src={src} alt={\`\${label} on dark background\`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
         </div>
         <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "linear-gradient(45deg,#e5e7eb 25%,#fff 25%,#fff 50%,#e5e7eb 50%,#e5e7eb 75%,#fff 75%) 0 0/18px 18px", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={`${label} transparency preview`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
+          <img src={src} alt={\`\${label} transparency preview\`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
         </div>
       </div>
     </div>
@@ -102,10 +102,10 @@ function replaceOnce(source, before, after, label) {
       <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#050708", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={`${label} on dark background`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
+          <img src={src} alt={\`\${label} on dark background\`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
         </div>
         <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "linear-gradient(45deg,#e5e7eb 25%,#fff 25%,#fff 50%,#e5e7eb 50%,#e5e7eb 75%,#fff 75%) 0 0/18px 18px", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={`${label} transparency preview`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
+          <img src={src} alt={\`\${label} transparency preview\`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
         </div>
       </div>
     </div>
