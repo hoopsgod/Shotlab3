@@ -119,6 +119,30 @@ async function expectCompactFunctionalIntro(page) {
   if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
 }
 
+async function expectCompactCommitmentIntro(page, mode) {
+  const intro = page.getByTestId(`player-commitment-route-header-${mode}`);
+  await expect(intro).toBeVisible();
+  const geometry = await intro.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const title = element.querySelector("h1");
+    return {
+      left: rect.left,
+      right: rect.right,
+      height: rect.height,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      viewportWidth: window.innerWidth,
+      hasEditorialOwner: Boolean(element.closest('[data-page-hierarchy="editorial"]')),
+    };
+  });
+  expect(geometry.hasEditorialOwner).toBe(true);
+  expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
+  expect(geometry.height).toBeLessThanOrEqual(220);
+  expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+  expect(geometry.titleSize).toBeLessThanOrEqual(55);
+  await expectNoHorizontalOverflow(page);
+}
+
 async function expectProgressStoryCommandSurface(page) {
   const story = page.locator('[data-page-hierarchy="command-story"]');
   await expect(story).toBeVisible();
@@ -341,11 +365,11 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
   await capture(page, "14-player-program-training.png");
 
   await navigateByKey(page, "program");
-  await expectCompactFunctionalIntro(page);
+  await expectCompactCommitmentIntro(page, "events");
   await capture(page, "15-player-events.png");
 
   await navigateByKey(page, "sc");
-  await expectCompactFunctionalIntro(page);
+  await expectCompactCommitmentIntro(page, "strength");
   await capture(page, "16-player-lifting.png");
 
   await navigateByKey(page, "leaderboards");
