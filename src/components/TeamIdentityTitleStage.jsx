@@ -15,6 +15,35 @@ const initialsFor = (value) => {
 };
 const isDefaultTitansLogo = (url = "") => DEFAULT_TITANS_LOGOS.some((candidate) => String(url).includes(candidate));
 
+export function TeamIdentitySupportRail({ status = null, actions = [], external = false, className = "", ariaLabel = "Page status and actions" }) {
+  const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
+  if (!status && !actionItems.length) return null;
+
+  return (
+    <div
+      className={[
+        "teamIdentityTitleStage__support",
+        external ? "teamIdentityTitleStage__support--external" : "",
+        className,
+      ].filter(Boolean).join(" ")}
+      data-identity-role={external ? "operational-rail" : "title-support"}
+      aria-label={external ? ariaLabel : undefined}
+    >
+      {status ? <div className="teamIdentityTitleStage__status" aria-live="polite">{status}</div> : null}
+      {actionItems.length ? <div className="teamIdentityTitleStage__actions">{actionItems.map((action, index) => (
+        <button
+          key={action.key || action.label}
+          type="button"
+          className={index === 0 ? "teamIdentityTitleStage__action teamIdentityTitleStage__action--primary" : "teamIdentityTitleStage__action"}
+          onClick={action.onClick}
+          disabled={action.disabled}
+          aria-label={action.ariaLabel || action.label}
+        >{action.label}</button>
+      ))}</div> : null}
+    </div>
+  );
+}
+
 export default function TeamIdentityTitleStage({
   variant = "standard",
   surface = "light",
@@ -73,21 +102,7 @@ export default function TeamIdentityTitleStage({
           <h1 className="teamIdentityTitleStage__title" data-identity-role="page-title">{displayTitle}</h1>
           {displayPerson && displayPerson !== displayTitle ? <div className="teamIdentityTitleStage__person" data-identity-role="person-name">{displayPerson}</div> : null}
           {summary ? <p className="teamIdentityTitleStage__summary">{summary}</p> : null}
-          {status || actions.length ? (
-            <div className="teamIdentityTitleStage__support">
-              {status ? <div className="teamIdentityTitleStage__status" aria-live="polite">{status}</div> : null}
-              {actions.length ? <div className="teamIdentityTitleStage__actions">{actions.map((action, index) => (
-                <button
-                  key={action.key || action.label}
-                  type="button"
-                  className={index === 0 ? "teamIdentityTitleStage__action teamIdentityTitleStage__action--primary" : "teamIdentityTitleStage__action"}
-                  onClick={action.onClick}
-                  disabled={action.disabled}
-                  aria-label={action.ariaLabel || action.label}
-                >{action.label}</button>
-              ))}</div> : null}
-            </div>
-          ) : null}
+          <TeamIdentitySupportRail status={status} actions={actions} />
         </div>
         <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
           {cleanedLogo && !logoFailed ? (
