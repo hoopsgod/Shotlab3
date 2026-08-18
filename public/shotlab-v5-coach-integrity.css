@@ -1,6 +1,6 @@
-/* ShotLab V5 coach integrity layer.
-   Phase 3 retires its former generic secondary-page authority: shared secondary
-   materials now belong to SecondaryPageSystem + explicit data-surface contracts. */
+/* ShotLab V5 coach integrity compatibility layer.
+   Title, Hero identity, crest, and page-purpose composition are source-owned and are
+   intentionally excluded from this historical public stylesheet. */
 :root{
   --v5-canvas:#f4f3ef;
   --v5-surface:#fffefa;
@@ -13,32 +13,7 @@
   --v5-dark:#151916;
 }
 
-/* Mission Control legacy integrity only. Secondary-page composition is no longer
-   inferred or overridden from this historical layer. */
-body.mission-control-active .mcHero,
-body.mission-control-active .mcHero *{
-  opacity:1!important;
-  filter:none!important;
-  mix-blend-mode:normal!important;
-}
-body.mission-control-active .mcHero h1,
-body.mission-control-active .mcHero strong,
-body.mission-control-active .mcHero .mcRealityStrip strong{
-  color:#fff!important;
-  -webkit-text-fill-color:#fff!important;
-}
-body.mission-control-active .mcHero p{
-  color:rgba(255,255,255,.78)!important;
-  -webkit-text-fill-color:rgba(255,255,255,.78)!important;
-}
-body.mission-control-active .mcHero .mcEyebrow{
-  color:#cbe765!important;
-  -webkit-text-fill-color:#cbe765!important;
-}
-body.mission-control-active .mcHero .mcRealityStrip small{
-  color:rgba(255,255,255,.68)!important;
-  -webkit-text-fill-color:rgba(255,255,255,.68)!important;
-}
+/* Non-title Mission Control compatibility only. */
 body.mission-control-active .mcPrimary{
   background:#f7f5ee!important;
   color:#121512!important;
