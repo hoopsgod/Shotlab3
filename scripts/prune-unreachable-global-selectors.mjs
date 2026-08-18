@@ -10,6 +10,7 @@ const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|va
 const BEM_MODIFIER_CLASS = /^(.+?)--[-_A-Za-z0-9]+$/;
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
+const PLAYER_SECONDARY_IDENTITY_PREFIX = /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab=(?:"home"|home)\]\)\s+\[data-testid=(?:"player-dashboard-identity-header"|player-dashboard-identity-header)\]/;
 
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -79,6 +80,15 @@ function classIsReachable(name, corpus) {
   return corpus.includes(name);
 }
 
+function armIsRetired(selector) {
+  // The shared TeamIdentityTitleStage now deliberately hides the Player Home
+  // credential on secondary routes and those routes render their own title
+  // stage. Retire only the pre-title-system rail styling. Preserve the new
+  // selector carrying data-team-identity-stage because it owns the hide.
+  return PLAYER_SECONDARY_IDENTITY_PREFIX.test(selector)
+    && !selector.includes("data-team-identity-stage");
+}
+
 function armIsReachable(selector, corpus) {
   if (COMPLEX_PSEUDO.test(selector)) return true;
   const classes = classNames(selector);
@@ -94,7 +104,7 @@ function pruneRules(css, corpus) {
     if (!selector || selector.startsWith("@")) return whole;
     const arms = splitSelectorList(selector);
     if (!arms.length) return whole;
-    const kept = arms.filter((arm) => armIsReachable(arm, corpus));
+    const kept = arms.filter((arm) => !armIsRetired(arm) && armIsReachable(arm, corpus));
     removedArms += arms.length - kept.length;
     if (!kept.length) {
       removedRules += 1;
@@ -126,7 +136,7 @@ async function main() {
     changedFiles += 1;
   }
 
-  console.log(`Pruned global selectors: ${removedArms} unreachable selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
+  console.log(`Pruned global selectors: ${removedArms} unreachable/retired selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
 }
 
 await main();
