@@ -1,10 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { promoteCoachCommandCenter, promoteCoachFinalCss } from '../scripts/apply-mobile-coach-signature-stage.mjs';
 import { reconcileCoachHierarchy } from '../scripts/apply-mobile-coach-cascade-reconciliation.mjs';
 import { promoteAuthSignature } from '../scripts/apply-mobile-auth-signature-stage.mjs';
-import { promoteMobileRouteSignature } from '../scripts/apply-mobile-route-signature-promotion.mjs';
 import { promotePlayerCoachSignal } from '../scripts/apply-mobile-player-coach-signal-signature.mjs';
 
 const routePipeline = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
@@ -13,25 +12,28 @@ const coachFinal = readFileSync('src/components/CoachMissionControlFinal.css', '
 const coachHierarchy = readFileSync('src/styles/MissionControlHierarchy2026.css', 'utf8');
 const playerDailyCss = readFileSync('src/components/PlayerDailyCommandCenter.module.css', 'utf8');
 const auth = readFileSync('src/components/AuthWorkspace.jsx', 'utf8');
+const secondary = readFileSync('src/components/SecondaryPageSystem.jsx', 'utf8');
+const titleStageCss = readFileSync('src/components/TeamIdentityTitleStage.css', 'utf8');
 
-test('signature promotions run after canonical owners and auth remains the final presentation mutation', () => {
-  assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-route-signature-promotion\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
-  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs/);
-  const finalEnhancers = routePipeline.slice(routePipeline.indexOf('const FINAL_ROUTE_ENHANCERS'), routePipeline.indexOf('const RELEASE_AUTH_RECOVERY_MARKER'));
-  const authEntry = "'scripts/apply-mobile-auth-signature-stage.mjs'";
-  assert.equal(finalEnhancers.split(authEntry).length - 1, 1, 'auth signature promotion must appear exactly once in FINAL_ROUTE_ENHANCERS');
-  assert.match(finalEnhancers, /'scripts\/apply-mobile-auth-signature-stage\.mjs',?\s*\]\)/, 'auth signature promotion must be the final route enhancer');
+test('final enhancer pipeline keeps title mutators retired and ends with canonical minification', () => {
+  assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
+  assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-player-composition-reconciliation\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs[\s\S]*minify-visual-authority-css\.mjs/);
+  assert.doesNotMatch(routePipeline, /apply-mobile-route-signature-promotion\.mjs|apply-mobile-centered-route-stage\.mjs|apply-team-identity-coach-hero-mark\.mjs/);
+  assert.equal(existsSync('scripts/apply-mobile-route-signature-promotion.mjs'), false);
+  assert.equal(existsSync('scripts/apply-mobile-centered-route-stage.mjs'), false);
+  assert.equal(existsSync('scripts/apply-team-identity-coach-hero-mark.mjs'), false);
 });
 
-test('Coach Home promotion creates one strong first-impression hierarchy', () => {
+test('Coach Home signature enhancer no longer redesigns source-owned title identity', () => {
   const command = promoteCoachCommandCenter(coachCommand);
   const finalCss = promoteCoachFinalCss(coachFinal);
   const hierarchy = reconcileCoachHierarchy(coachHierarchy);
-  assert.match(command, /font-size:clamp\(39px,11vw,45px\)!important/);
-  assert.match(command, /background:linear-gradient\(126deg,#061923,#0b2d37\)!important/);
-  assert.match(finalCss, /min-height: 350px !important;\n    border-radius: 0 !important/);
-  assert.match(hierarchy, /background: rgba\(255,255,255,\.055\) !important;/);
-  assert.match(hierarchy, /border-top: 1px solid var\(--mc-line\) !important;[\s\S]*background: transparent !important;[\s\S]*box-shadow: none !important;/);
+  assert.equal(command, coachCommand);
+  assert.equal(finalCss, coachFinal);
+  assert.doesNotMatch(hierarchy, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
+  assert.match(coachCommand, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
+  assert.match(coachCommand, /font-size:clamp\(46px,12vw,58px\)/);
+  assert.match(coachCommand, /object-fit:contain/);
 });
 
 test('Player Coach Assignment uses the ShotLab primary signature rather than a blue article callout', () => {
@@ -49,12 +51,9 @@ test('authentication loses the generic frosted card without changing its control
   assert.match(promoted, /fontSize:27,fontWeight:780,lineHeight:1\.02/);
 });
 
-test('route signature promotion raises masthead scale without adding a second stylesheet', () => {
-  const fixture = `grid-template-columns: 30px minmax(0, 1fr);\n    width: 30px;\n    height: 30px;\n    border-radius: 9px;\n.secondaryPageIntro__icon svg { width: 16px; height: 16px; stroke-width: 1.85; }\n    max-width: 11ch;\n    font-size: clamp(31px, 8.5vw, 34px) !important;\n    line-height: .94;\n  .secondaryPageDecision h2 { max-width: 17ch; font-size: clamp(26px, 7.3vw, 31px); line-height: .96; letter-spacing: -.052em; }\n  .secondaryPageIntro { grid-template-columns: 28px minmax(0, 1fr); column-gap: 9px; }\n  .secondaryPageIntro__icon { width: 28px; height: 28px; border-radius: 8px; }\n  .secondaryPageIntro__icon svg { width: 15px; height: 15px; }\n.performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle { font-size: 32px !important; }`;
-  const promoted = promoteMobileRouteSignature(fixture);
-  assert.match(promoted, /grid-template-columns: 46px minmax\(0, 1fr\)/);
-  assert.match(promoted, /font-size: clamp\(36px, 10vw, 42px\) !important/);
-  assert.match(promoted, /border-radius: 0/);
-  assert.match(promoted, /font-size: clamp\(28px, 7\.8vw, 34px\)/);
-  assert.match(promoted, /font-size: 36px !important/);
+test('secondary route title scale comes from the shared component instead of promotion transforms', () => {
+  assert.match(secondary, /<TeamIdentityTitleStage/);
+  assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
+  assert.match(titleStageCss, /teamIdentityTitleStage--longTitle[\s\S]*clamp\(40px, 9\.8vw, 44px\)/);
+  assert.doesNotMatch(secondary, /secondaryPageIntro__title|appHeaderTitle/);
 });
