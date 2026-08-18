@@ -91,6 +91,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Install isolated Playwright test runner
+        run: npm install --no-save --package-lock=false @playwright/test@1.51.1
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - name: Team identity responsive E2E
