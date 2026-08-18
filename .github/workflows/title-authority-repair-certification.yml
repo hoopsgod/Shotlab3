@@ -27,7 +27,22 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Focused title architecture contracts
-        run: node --test tests/title-authority-repair.test.mjs tests/mobile-coach-signature-stage.test.mjs tests/phase-5a-route-enhancer-orchestration.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/coach-command-center-10x.test.mjs
+        run: >-
+          node --test
+          tests/title-authority-repair.test.mjs
+          tests/mobile-coach-signature-stage.test.mjs
+          tests/phase-5a-route-enhancer-orchestration.test.mjs
+          tests/mission-control-hierarchy-2026.test.mjs
+          tests/coach-command-center-10x.test.mjs
+          tests/mobile-signature-promotions.test.mjs
+          tests/secondary-page-system-direct.test.mjs
+          tests/mobile-route-centering-regression.test.mjs
+          tests/phase-5b-coach-secondary-structure.test.mjs
+          tests/shotlab-color-system.test.mjs
+          tests/phase-5-card-density-retirement.test.mjs
+          tests/design-system-completion.test.mjs
+          tests/mobile-premium-visual-system-2026.test.mjs
+          tests/phase-3-visual-coherence-contract.test.mjs
       - name: Dev enhancer chain is idempotent
         shell: bash
         run: |
