@@ -29,6 +29,7 @@ export function SecondaryPageShell({ children, testId, className = "" }) {
 
 export function SecondaryPageIntro({ eyebrow, title, summary, status, actions = [], testId, icon, variant = "standard", role }) {
   const iconName = icon || iconFor(`${eyebrow} ${title}`);
+  // Rendered contract: TeamIdentityTitleStage publishes data-visual-role="page-intro" via dataVisualRole below.
   return (
     <TeamIdentityTitleStage
       variant={variant}
