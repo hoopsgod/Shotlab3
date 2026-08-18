@@ -1,22 +1,9 @@
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import styles from "./PlayerTrainingSessionHeader.module.css";
 
 const clean = (value) => String(value ?? "").trim();
-
-function SessionMark({ mode }) {
-  return mode === "program" ? (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 4v3M17 4v3M5 8h14M6 5h12a1 1 0 0 1 1 1v13H5V6a1 1 0 0 1 1-1Z" />
-      <path d="m9 14 2 2 4-5" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="8" />
-      <path d="M4.7 9.2c4.4.7 8.9 4.1 10.2 8.7M9 4.7c.7 4.4 4.1 8.9 8.7 10.2M5.6 16.9c4.1-3.4 8.3-6.8 12.8-9.8" />
-    </svg>
-  );
-}
 
 const targetStatus = (visual) => {
   if (!visual) return "QUALITY REPS";
@@ -51,22 +38,18 @@ export default function PlayerTrainingSessionHeader({
       data-mode={mode}
       data-performance-language="shotlab-target-court"
     >
-      <div className={styles.topline}>
-        <button type="button" className={styles.back} onClick={onBack} aria-label="Back to training plan">
-          <span aria-hidden="true">←</span>
-        </button>
-        <span className={styles.mode}>{isProgram ? "PROGRAM SESSION" : "AT HOME SESSION"}</span>
-        <span className={styles.step}>DRILL {boundedIndex} / {boundedTotal}</span>
-      </div>
-
-      <div className={styles.hero}>
-        <div className={styles.mark}><SessionMark mode={mode} /></div>
-        <div className={styles.copy}>
-          <span className={styles.eyebrow}>CURRENT WORK</span>
-          <h1>{clean(drill?.name) || "Training drill"}</h1>
-          <p>{clean(drill?.desc) || "Complete the drill with intent, then log the result."}</p>
-        </div>
-      </div>
+      <TeamIdentityTitleStage
+        variant="compact"
+        surface="light"
+        role={isProgram ? "PROGRAM" : "PLAYER"}
+        eyebrow={isProgram ? "PROGRAM SESSION" : "AT-HOME SESSION"}
+        title={clean(drill?.name) || "Training drill"}
+        summary={clean(drill?.desc) || "Complete the drill with intent, then log the result."}
+        status={`DRILL ${boundedIndex} / ${boundedTotal}`}
+        backAction={{ label: "Back to training plan", onClick: onBack }}
+        showTonalCrest={false}
+        testId="player-training-session-title-stage"
+      />
 
       <div className={styles.performanceBand} data-testid="player-training-performance-band">
         <div className={styles.planSignal}>
