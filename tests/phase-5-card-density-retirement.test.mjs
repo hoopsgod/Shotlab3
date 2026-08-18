@@ -8,6 +8,7 @@ const playerComponent = read("src/components/PlayerOperationalWorkspace.jsx");
 const playerCss = read("src/components/PlayerOperationalWorkspace.module.css");
 const secondaryComponent = read("src/components/SecondaryPageSystem.jsx");
 const secondaryCss = read("src/components/SecondaryPageSystem.css");
+const titleStageCss = read("src/components/TeamIdentityTitleStage.css");
 const coachDashboards = read("src/components/CoachInteractiveDashboards.jsx");
 
 test("Player workspaces encode an editorial opening and a single evidence ledger", () => {
@@ -37,10 +38,12 @@ test("Coach secondary pages expose the four-part decision hierarchy in DOM order
   assert.ok(component.indexOf("<SecondaryPageToolbar") < component.indexOf("<SecondaryPageEvidence"));
 });
 
-test("Coach hierarchy uses typography and dividers outside the intentional decision surface", () => {
-  assert.match(secondaryCss, /\.secondaryPageIntro__icon\s*\{[\s\S]*?border: 0;[\s\S]*?background: transparent;/);
-  assert.match(secondaryCss, /\.secondaryPageIntro__status\s*\{[\s\S]*?border: 0;[\s\S]*?background: transparent;/);
-  assert.match(secondaryCss, /\.secondaryPageToolbar \[class\*="metricStrip"\]\s*\{[\s\S]*?border-block: 1px solid[\s\S]*?border-radius: 0 !important;[\s\S]*?background: transparent !important;/);
+test("Coach hierarchy uses shared title typography and dividers outside the intentional decision surface", () => {
+  assert.match(secondaryComponent, /return <TeamIdentityTitleStage/);
+  assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
+  assert.match(secondaryCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*?border-block: 1px solid[\s\S]*?border-radius: 0 !important;[\s\S]*?background: transparent !important;/);
   assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
   assert.match(secondaryCss, /\.secondaryPageEvidence\s*\{[\s\S]*?gap: 0;[\s\S]*?border-block: 1px solid/);
 });
@@ -61,9 +64,9 @@ test("Retired authority files no longer recreate card-heavy shared primitives", 
   assert.doesNotMatch(legacy, /\[data-metric-priority\]/);
 });
 
-test("Leaderboard mobile CSS keeps the primary decision and editorial context visible", () => {
+test("Leaderboard mobile CSS keeps the primary decision and shared title context visible", () => {
   const leaderboardCss = read("public/shotlab-phase3l-coach-leaderboard-hierarchy.css");
   assert.doesNotMatch(leaderboardCss, /coach-page-dashboard-leaderboards-decision-brief"\][^\{]*\{\s*display:\s*none/i);
-  assert.doesNotMatch(leaderboardCss, /secondaryPageIntro__summary[^\{]*\{\s*display:\s*none/i);
-  assert.doesNotMatch(leaderboardCss, /secondaryPageIntro__eyebrow[^\{]*\{[\s\S]*?font-size:\s*9px/i);
+  assert.doesNotMatch(leaderboardCss, /teamIdentityTitleStage[^\{]*\{\s*display:\s*none/i);
+  assert.doesNotMatch(leaderboardCss, /\[data-identity-role="page-title"\][^\{]*\{[\s\S]*?font-size:\s*9px/i);
 });
