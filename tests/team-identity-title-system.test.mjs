@@ -48,6 +48,13 @@ test("mobile crest geometry is materially larger without destructive cropping", 
   assert.match(trainingHeader, /teamCrest/);
 });
 
+test("team crest and Player Home hero are isolated from legacy secondary-route authority", () => {
+  assert.match(stage, /className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel"/);
+  assert.doesNotMatch(stage, /teamIdentityTitleStage__crestSlot secondaryPageIntro__icon/);
+  assert.match(css, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)[\s\S]*player-dashboard-identity-header/);
+  assert.match(css, /player-dashboard-identity-header[^\{]*\{\s*display:\s*none\s*!important/);
+});
+
 test("compiled title CSS owns mobile secondary geometry before legacy appHeader rules can distort it", () => {
   assert.match(css, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
   assert.match(css, /display:\s*block\s*!important/);
