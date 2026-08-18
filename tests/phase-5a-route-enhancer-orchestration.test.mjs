@@ -28,6 +28,7 @@ const finalPresentationChain = [
   'scripts/apply-mobile-player-coach-signal-signature.mjs',
   'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
+  'scripts/minify-visual-authority-css.mjs',
 ]
 const registeredParityEnhancers = [
   'scripts/apply-legacy-signed-collection-reads.mjs',
@@ -42,18 +43,8 @@ function assertUnique(label, entries) {
 
 function performanceFixture() {
   return {
-    budget: {
-      maxLargestCssBytes: 128000,
-      maxTotalCssGzipBytes: 88000,
-    },
-    totals: {
-      javaScriptFiles: 8,
-      javaScriptBytes: 1320000,
-      javaScriptGzipBytes: 347000,
-      cssFiles: 12,
-      cssBytes: 534000,
-      cssGzipBytes: 90900,
-    },
+    budget: { maxLargestCssBytes: 128000, maxTotalCssGzipBytes: 88000 },
+    totals: { javaScriptFiles: 8, javaScriptBytes: 1320000, javaScriptGzipBytes: 347000, cssFiles: 12, cssBytes: 534000, cssGzipBytes: 90900 },
     startupAppJavaScript: { bytes: 471000, gzipBytes: 119000 },
     startupAppCss: { bytes: 0, gzipBytes: 0 },
     largestJavaScript: { bytes: 471000, gzipBytes: 119000 },
@@ -68,18 +59,19 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
   assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(0, 2), buildPrefix)
-  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-4), finalPresentationChain)
-  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-4), finalPresentationChain)
+  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-5), finalPresentationChain)
+  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-5), finalPresentationChain)
 
   const devMinifyIndex = DEV_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
   const buildMinifyIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
+  const devPhase5Index = DEV_ROUTE_ENHANCERS.indexOf('scripts/apply-phase5a-coach-daily-intelligence.mjs')
   const buildAlignmentIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/align-phase4f-browser-contracts.mjs')
   const buildPhase5Index = BUILD_ROUTE_ENHANCERS.indexOf('scripts/apply-phase5a-coach-daily-intelligence.mjs')
 
-  assert.ok(devMinifyIndex >= 0, 'dev manifest must include the canonical visual-authority minifier')
-  assert.equal(buildMinifyIndex, devMinifyIndex + buildPrefix.length)
-  assert.equal(buildAlignmentIndex, buildMinifyIndex + 1)
-  assert.equal(buildPhase5Index, buildAlignmentIndex + 1)
+  assert.equal(devMinifyIndex, DEV_ROUTE_ENHANCERS.length - 1, 'dev minification must happen after all source/style reconcilers')
+  assert.equal(buildMinifyIndex, BUILD_ROUTE_ENHANCERS.length - 1, 'build minification must happen after all source/style reconcilers')
+  assert.ok(devPhase5Index >= 0, 'dev manifest must retain Phase 5A data/auth reconciliation')
+  assert.equal(buildPhase5Index, buildAlignmentIndex + 1, 'build browser alignment must immediately precede final data/auth reconciliation')
 
   for (const manifest of [DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS]) {
     const registeredParityIndexes = registeredParityEnhancers.map((script) => manifest.indexOf(script))
@@ -92,9 +84,9 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
 
   const expectedBuildFromDev = [
     ...buildPrefix,
-    ...DEV_ROUTE_ENHANCERS.slice(0, devMinifyIndex + 1),
+    ...DEV_ROUTE_ENHANCERS.slice(0, devPhase5Index),
     'scripts/align-phase4f-browser-contracts.mjs',
-    ...DEV_ROUTE_ENHANCERS.slice(devMinifyIndex + 1),
+    ...DEV_ROUTE_ENHANCERS.slice(devPhase5Index),
   ]
   assert.deepEqual(BUILD_ROUTE_ENHANCERS, expectedBuildFromDev)
 })
@@ -105,14 +97,8 @@ test('every orchestrated route enhancer resolves to a repository file', async ()
 })
 
 test('package scripts delegate orchestration instead of duplicating the enhancer chain', () => {
-  assert.equal(
-    packageJson.scripts.dev,
-    'node scripts/run-route-enhancers.mjs dev && vite --host 0.0.0.0 --port 4173',
-  )
-  assert.equal(
-    packageJson.scripts['prepare:route-enhancers'],
-    'node scripts/run-route-enhancers.mjs build',
-  )
+  assert.equal(packageJson.scripts.dev, 'node scripts/run-route-enhancers.mjs dev && vite --host 0.0.0.0 --port 4173')
+  assert.equal(packageJson.scripts['prepare:route-enhancers'], 'node scripts/run-route-enhancers.mjs build')
   assert.doesNotMatch(packageJson.scripts.dev, /apply-phase/)
   assert.doesNotMatch(packageJson.scripts['prepare:route-enhancers'], /apply-phase/)
 })
@@ -121,6 +107,7 @@ test('Phase 5A prepared source includes both home and program scores in season c
   assert.match(phase5aEnhancer, /currentScores:\[\.\.\.safeScores,\.\.\.safeProgramScores\]/)
   assert.match(phase5aEnhancer, /\[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs/)
   assert.match(phase5aEnhancer, /season comparison must include both home and program score collections/)
+  assert.doesNotMatch(phase5aEnhancer, /update\("src\/components\/CoachCommandCenter\.jsx"/)
 })
 
 test('release auth recovery keeps the bounded bootstrap and restores an eventually valid Supabase session', () => {
@@ -145,12 +132,10 @@ test('build equivalence gate rejects candidate bundle regressions', () => {
   const base = performanceFixture()
   const equal = structuredClone(base)
   assert.deepEqual(findBuildRegressions(base, equal), [])
-
   const improved = structuredClone(base)
   improved.totals.javaScriptGzipBytes -= 100
   improved.totals.cssGzipBytes -= 100
   assert.deepEqual(findBuildRegressions(base, improved), [])
-
   const regressed = structuredClone(base)
   regressed.totals.cssGzipBytes += 1
   regressed.largestCss.bytes += 25

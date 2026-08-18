@@ -27,7 +27,6 @@ const CORE_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase4c-premium-interaction-material-motion.mjs',
   'scripts/apply-phase4d-premium-state-system.mjs',
   'scripts/apply-phase4e-final-polish.mjs',
-  'scripts/minify-visual-authority-css.mjs',
 ])
 
 const FINAL_ROUTE_ENHANCERS = Object.freeze([
@@ -55,6 +54,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-mobile-player-coach-signal-signature.mjs',
   'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
+  'scripts/minify-visual-authority-css.mjs',
 ])
 
 const RELEASE_AUTH_RECOVERY_MARKER = 'const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;'
@@ -84,7 +84,7 @@ export function runRouteEnhancers(mode, { cwd = process.cwd(), env = process.env
   const enhancers = routeEnhancersFor(mode)
   for (const script of enhancers) {
     if (script === PHASE5A_COACH_INTELLIGENCE && hasReleaseAuthRecovery(cwd)) {
-      console.log('Phase 5A Coach intelligence already satisfied before release auth recovery; skipping repeat mutation.')
+      console.log('Phase 5A data/auth reconciliation already present; skipping duplicate source processing.')
       continue
     }
     const result = spawnSync(process.execPath, [path.resolve(cwd, script)], { cwd, env, stdio: 'inherit' })
