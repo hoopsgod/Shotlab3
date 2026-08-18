@@ -5,7 +5,7 @@ import { pruneOverriddenCoachDeclarations } from './prune-overridden-coach-decla
 
 const DIST_DIR = path.resolve(process.cwd(), 'dist')
 const AUTHORITY_BUNDLE = /^shotlab-authority-(\d+)\.css$/
-const BOUNDARY = '\n/*__SHOTLAB_AUTHORITY_BUNDLE_BOUNDARY__*/\n'
+const BOUNDARY = '\n@__shotlab_bundle_boundary;\n'
 
 export function pruneOverriddenAuthorityBundles(sources) {
   if (!Array.isArray(sources) || sources.length < 2) {
@@ -22,6 +22,9 @@ export function pruneOverriddenAuthorityBundles(sources) {
   // are split only to stay below the per-file CSS ceiling. Recombine them only
   // for cascade analysis so an exact selector/property override that crosses
   // that artificial file boundary can be removed from the earlier bundle.
+  // A temporary semicolon-terminated at-rule marks the file boundary because
+  // the existing parser skips standalone at-rules without contaminating the
+  // following selector. The marker is split back out before any CSS is written.
   // The existing conservative declaration pruner preserves media/supports/
   // container context, !important behavior, and does not perform reachability
   // guesses or shorthand/property inference.
