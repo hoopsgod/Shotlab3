@@ -7,6 +7,7 @@ const stage = read("src/components/TeamIdentityTitleStage.jsx");
 const css = read("src/components/TeamIdentityTitleStage.css");
 const renderedAuthority = read("public/shotlab-team-identity-title-authority.css");
 const secondary = read("src/components/SecondaryPageSystem.jsx");
+const secondaryCss = read("src/components/SecondaryPageSystem.css");
 const playerHeader = read("src/components/PlayerDashboardHeader.jsx");
 const coachHeader = read("src/components/CoachDashboardHeader.jsx");
 const playerWorkspace = read("src/components/PlayerOperationalWorkspace.jsx");
@@ -61,7 +62,10 @@ test("one last public presentation layer prevents legacy CSS from collapsing tea
 test("team colors remain decorative while semantic status stays protected", () => {
   assert.match(css, /--team-brand-primary/);
   assert.match(css, /--team-brand-secondary/);
-  assert.match(css, /var\(--semantic-neutral/);
+  const statusRule = secondaryCss.match(/\.secondaryPageIntro__status\s*\{[^}]*\}/)?.[0] || "";
+  assert.match(statusRule, /color:\s*#536057/);
+  assert.match(statusRule, /background:\s*transparent/);
+  assert.doesNotMatch(statusRule, /--team-brand-/);
   assert.doesNotMatch(css, /background:\s*var\(--team-brand-primary[^\n]*!important;\s*\/\*\s*status/i);
 });
 
@@ -86,7 +90,7 @@ test("Program Branding previews production titles and has a neutral no-logo stat
   assert.match(brandingForm, /const FALLBACK_LOGO = ""/);
   assert.match(brandingForm, /const FALLBACK_MARK = ""/);
   assert.match(brandingForm, /No logo uploaded\. ShotLab will use the team initials in title stages\./);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(renderedAuthority, /prefers-reduced-motion:\s*reduce/);
 });
 
 test("global defaults are neutral and Demo identity is explicit team data", () => {
