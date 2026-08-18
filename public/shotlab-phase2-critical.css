@@ -1,19 +1,5 @@
-/* Phase 2 critical cascade lock. Loaded after legacy public authorities. */
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcHero,
-html body.mission-control-active #root .performance-workspace--coach [data-testid="coach-primary-objective"] {
-  height: auto !important;
-  max-height: none !important;
-  overflow: hidden !important;
-  background-color: #0d171e !important;
-  background-image: linear-gradient(145deg, #0d171e 0%, #13222b 100%) !important;
-}
-
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcHeroContent {
-  min-height: 0 !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
+/* Phase 2 critical cascade lock. Loaded after legacy public authorities.
+   Title/Hero composition is intentionally excluded and source-owned. */
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcRealityStrip,
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcPrimary {
   margin-right: 0 !important;
