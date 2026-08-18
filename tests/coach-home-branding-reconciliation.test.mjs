@@ -12,15 +12,17 @@ const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs
 const secondaryMark = read("src/components/SecondaryTeamBrandMark.jsx");
 const storeEntry = read("src/teamStoreEntry.jsx");
 
-test("Coach Home removes the duplicated foreground crest without depending on a fragile mobile cascade", () => {
+test("Coach Home keeps one integrated premium crest inside the Mission Control decision hero", () => {
   assert.doesNotMatch(stage, /CoachHomeIdentityReconciliation\.css/);
-  assert.match(authority, /coach-primary-objective/);
-  assert.match(authority, /\.mcProgramIdentity,[\s\S]*\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
-  assert.match(authority, /\.mcHeroContent\s*\{[\s\S]*padding:\s*28px 18px 24px\s*!important/);
-  assert.match(authority, /\.mcCourtArtwork\s*\{[\s\S]*opacity:\s*\.44\s*!important/);
-  assert.match(brandingBoundary, /Foreground team identity is owned by the Coach header/);
-  assert.match(brandingBoundary, /Coach Home duplicate Hero logo removal/);
-  assert.match(brandingBoundary, /replaceIfPresent[\s\S]*mcProgramIdentity/);
+  assert.match(authority, /existing Mission Control decision surface becomes the immersive team Hero variant/i);
+  assert.match(authority, /\.mcHeroTeamMark\{[\s\S]*display:grid!important[\s\S]*width:clamp\(112px,30vw,128px\)!important/);
+  assert.doesNotMatch(authority, /\.mcProgramIdentity,[\s\S]*\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
+  assert.match(authority, /\.mcHeroContent\{[\s\S]*padding:28px 18px 24px!important/);
+  assert.match(authority, /\.mcCourtArtwork\{opacity:\.5!important/);
+  assert.match(brandingBoundary, /Coach Home immersive Hero logo/);
+  assert.match(brandingBoundary, /Coach Home program identity/);
+  assert.match(brandingBoundary, /mcProgramIdentity/);
+  assert.doesNotMatch(brandingBoundary, /Coach Home duplicate Hero logo removal|Foreground team identity is owned by the Coach header/);
 });
 
 test("registered team logos are branding-driven across shared product identity surfaces", () => {
