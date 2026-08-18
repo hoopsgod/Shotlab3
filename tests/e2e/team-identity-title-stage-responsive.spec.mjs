@@ -57,7 +57,7 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
     localStorage.setItem("sl:teams", JSON.stringify(nextTeams));
     if (session && nextUserName) localStorage.setItem("sl:session", JSON.stringify({ ...session, name: nextUserName }));
   }, { teamName, branding, userName });
-  await page.reload();
+  await page.goto("/?demo=1");
   await suppressMotion(page);
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.evaluate(() => document.fonts?.ready);
