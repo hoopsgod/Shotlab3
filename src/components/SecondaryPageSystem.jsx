@@ -1,5 +1,5 @@
 import ShotLabIcon from "./ShotLabIcon";
-import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
+import TeamIdentityTitleStage, { TeamIdentitySupportRail } from "./TeamIdentityTitleStage.jsx";
 import "./SecondaryPageSystem.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
@@ -20,22 +20,23 @@ export function SecondaryPageShell({children,testId,className=""}){return <secti
 export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],testId,icon}){
   const displayTitle=normalizeTitle(title);
   const iconName=icon||iconFor(`${eyebrow} ${displayTitle}`);
-  return <TeamIdentityTitleStage
-    variant="standard"
-    surface="light"
-    role={eyebrow||"Team"}
-    title={displayTitle}
-    summary={summary}
-    status={status}
-    actions={actions}
-    testId={testId}
-    className="secondaryPageTitleStage"
-    dataLayoutRole="editorial-header"
-    dataVisualRole="page-intro"
-    dataPageKind={iconName}
-    dataMobileStage="team-identity"
-    ariaLabel={`${displayTitle} team identity and page title`}
-  />
+  return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
+    <TeamIdentityTitleStage
+      variant="standard"
+      surface="light"
+      role={eyebrow||"Team"}
+      title={displayTitle}
+      summary={summary}
+      testId={testId}
+      className="secondaryPageTitleStage"
+      dataLayoutRole="editorial-header"
+      dataVisualRole="page-intro"
+      dataPageKind={iconName}
+      dataMobileStage="team-identity"
+      ariaLabel={`${displayTitle} team identity and page title`}
+    />
+    <TeamIdentitySupportRail status={status} actions={actions} external ariaLabel={`${displayTitle} status and actions`} />
+  </div>
 }
 
 export function SecondaryPageToolbar({children,testId,label="Page tools"}){return <section className="secondaryPageToolbar" data-testid={testId} data-layout-role="evidence-tools" data-surface="light" data-visual-role="page-tools" aria-label={label}>{children}</section>}
