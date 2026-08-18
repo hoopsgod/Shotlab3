@@ -296,7 +296,7 @@ fs.writeFileSync(commitmentPath, commitmentSource)
 let commitmentCss = fs.readFileSync(commitmentCssPath, 'utf8')
 const commitmentMarker = '/* Premium Level B commitment header: concise orientation before the actionable commitment surface. */'
 if (!commitmentCss.includes(commitmentMarker)) {
-  commitmentCss += `\n${commitmentMarker}\n@media(max-width:759px){.routeHeader{padding-bottom:12px;border-bottom:1px solid rgba(23,26,24,.1)}.routeTitleRow{align-items:flex-start;flex-direction:column;gap:5px}.routeTitleRow h1{font-size:clamp(31px,8.8vw,36px)!important;line-height:.94!important;letter-spacing:-.05em!important}.routeHeader>p{display:none}}\n`
+  commitmentCss += `\n${commitmentMarker}\n@media(max-width:759px){.routeHeader{padding-bottom:12px;border-bottom:1px solid rgba(23,26,24,.1)}.routeTitleRow{align-items:flex-start;flex-direction:column;gap:5px}.routeTitleRow h1{font-size:clamp(38px,9.4vw,44px)!important;line-height:.94!important;letter-spacing:-.05em!important}.routeHeader>p{display:none}}\n`
 }
 fs.writeFileSync(commitmentCssPath, commitmentCss)
 
