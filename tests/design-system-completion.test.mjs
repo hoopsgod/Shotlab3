@@ -62,7 +62,7 @@ test("shared visual-system and title changes trigger rendered screenshot verific
   }
   assert.match(screenshotWorkflow, /Generate branded App Store screenshots/);
   assert.match(screenshotWorkflow, /Upload App Store presentation package/);
-  assert.match(titleCertification, /TeamIdentityTitleStage/);
+  assert.match(titleCertification, /src\/components\/\*\*/);
   assert.match(titleCertification, /phase-3a-cross-screen-visual-audit\.spec\.mjs/);
   assert.match(titleCertification, /title-authority-mobile-certification/);
 });
