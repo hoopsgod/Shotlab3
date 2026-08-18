@@ -79,7 +79,8 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
 
 /* First-paint logo safety — DashboardIdentityHeader is role-chunk styled. On a
    cold Player Demo launch the high-resolution team PNG could paint at its
-   natural dimensions before that CSS chunk arrived. */
+   natural dimensions before that CSS chunk arrived. Width/height provide the
+   fallback without max-size caps that would suppress the premium title stage. */
 [data-testid="player-dashboard-identity-header"],
 [data-testid="coach-dashboard-identity-header"]{
   overflow:hidden!important;
@@ -89,8 +90,6 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
   display:block!important;
   width:96px!important;
   height:92px!important;
-  max-width:96px!important;
-  max-height:92px!important;
   object-fit:contain!important;
   background:transparent!important;
 }
@@ -100,8 +99,6 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
   [data-testid="coach-dashboard-identity-header"] img{
     width:72px!important;
     height:70px!important;
-    max-width:72px!important;
-    max-height:70px!important;
   }
 
   /* Flagship entry composition: ShotLab brand/performance stage first, then a
