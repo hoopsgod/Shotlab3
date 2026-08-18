@@ -1,6 +1,6 @@
 .teamIdentityTitleStage {
   --identity-crest: clamp(96px, 25vw, 108px);
-  --identity-title: clamp(42px, 10.8vw, 54px);
+  --identity-title: clamp(42px, 10.2vw, 44px);
   --identity-tonal: clamp(170px, 48vw, 220px);
   position: relative;
   isolation: isolate;
@@ -51,7 +51,7 @@
 }
 .teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title {
   max-width: 15ch;
-  font-size: clamp(40px, 10vw, 48px);
+  font-size: clamp(40px, 9.8vw, 44px);
   line-height: .94;
 }
 .teamIdentityTitleStage__person {
