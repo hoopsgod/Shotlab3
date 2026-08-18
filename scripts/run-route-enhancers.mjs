@@ -34,8 +34,6 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase5a-coach-daily-intelligence.mjs',
   'scripts/apply-phase2d-premium-empty-state-language.mjs',
   'scripts/apply-mobile-premium-secondary-page-system.mjs',
-  'scripts/apply-mobile-route-signature-promotion.mjs',
-  'scripts/apply-mobile-centered-route-stage.mjs',
   'scripts/apply-mobile-coach-signature-stage.mjs',
   'scripts/apply-mobile-coach-cascade-reconciliation.mjs',
   'scripts/apply-phase4c-coach-event-manage-hit-area.mjs',
@@ -62,11 +60,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
 const RELEASE_AUTH_RECOVERY_MARKER = 'const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;'
 const PHASE5A_COACH_INTELLIGENCE = 'scripts/apply-phase5a-coach-daily-intelligence.mjs'
 
-export const DEV_ROUTE_ENHANCERS = Object.freeze([
-  ...CORE_ROUTE_ENHANCERS,
-  ...FINAL_ROUTE_ENHANCERS,
-])
-
+export const DEV_ROUTE_ENHANCERS = Object.freeze([...CORE_ROUTE_ENHANCERS, ...FINAL_ROUTE_ENHANCERS])
 export const BUILD_ROUTE_ENHANCERS = Object.freeze([
   'scripts/run-finish-v9-compatible.mjs',
   'scripts/align-v9-player-boundary-contract.mjs',
@@ -82,28 +76,18 @@ export function routeEnhancersFor(mode) {
 }
 
 function hasReleaseAuthRecovery(cwd) {
-  try {
-    return readFileSync(path.resolve(cwd, 'src/App.jsx'), 'utf8').includes(RELEASE_AUTH_RECOVERY_MARKER)
-  } catch {
-    return false
-  }
+  try { return readFileSync(path.resolve(cwd, 'src/App.jsx'), 'utf8').includes(RELEASE_AUTH_RECOVERY_MARKER) }
+  catch { return false }
 }
 
 export function runRouteEnhancers(mode, { cwd = process.cwd(), env = process.env } = {}) {
   const enhancers = routeEnhancersFor(mode)
-
   for (const script of enhancers) {
     if (script === PHASE5A_COACH_INTELLIGENCE && hasReleaseAuthRecovery(cwd)) {
       console.log('Phase 5A Coach intelligence already satisfied before release auth recovery; skipping repeat mutation.')
       continue
     }
-
-    const result = spawnSync(process.execPath, [path.resolve(cwd, script)], {
-      cwd,
-      env,
-      stdio: 'inherit',
-    })
-
+    const result = spawnSync(process.execPath, [path.resolve(cwd, script)], { cwd, env, stdio: 'inherit' })
     if (result.error) throw result.error
     if (result.status !== 0) {
       const suffix = result.signal ? ` (signal ${result.signal})` : ''
@@ -114,12 +98,7 @@ export function runRouteEnhancers(mode, { cwd = process.cwd(), env = process.env
 
 const currentFile = fileURLToPath(import.meta.url)
 const invokedFile = process.argv[1] ? path.resolve(process.argv[1]) : null
-
 if (invokedFile === currentFile) {
-  try {
-    runRouteEnhancers(process.argv[2])
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
-    process.exitCode = 1
-  }
+  try { runRouteEnhancers(process.argv[2]) }
+  catch (error) { console.error(error instanceof Error ? error.message : error); process.exitCode = 1 }
 }
