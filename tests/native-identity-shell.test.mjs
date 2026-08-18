@@ -6,6 +6,7 @@ const coach = fs.readFileSync("src/components/CoachDashboardHeader.jsx", "utf8")
 const player = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
 const identity = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
 const identityCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
+const secondaryPageCss = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
 const miniHeader = fs.readFileSync("src/components/CoachMiniHeader.jsx", "utf8");
 
 const forbiddenRuntimeBehavior = /supabase|auth\.|fetch\(|localStorage|sessionStorage|create table|alter table/i;
@@ -38,8 +39,9 @@ test("coach branding access remains visible and keyboard accessible", () => {
   assert.match(coach, /Team Branding/);
   assert.match(coach, /onClick: onOpenTeamBranding/);
   assert.match(coach, /ShotLabIcon name="settings" size=\{16\}/);
-  assert.match(identityCss, /teamIdentityTitleStage__action:focus-visible/);
-  assert.match(identityCss, /outline: 3px solid/);
+  assert.match(identity, /secondaryPageAction/);
+  assert.match(secondaryPageCss, /\.secondaryPageAction:focus-visible/);
+  assert.match(secondaryPageCss, /outline: 3px solid/);
 });
 
 test("scroll-state coach chrome uses restrained navigation glass rather than legacy dark styling", () => {
@@ -54,7 +56,7 @@ test("scroll-state coach chrome uses restrained navigation glass rather than leg
 });
 
 test("identity shell changes remain presentation-only", () => {
-  for (const source of [coach, player, identity, identityCss, miniHeader]) {
+  for (const source of [coach, player, identity, identityCss, secondaryPageCss, miniHeader]) {
     assert.doesNotMatch(source, forbiddenRuntimeBehavior);
   }
 });
