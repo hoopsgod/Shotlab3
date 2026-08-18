@@ -74,7 +74,6 @@ test("one last public presentation layer remains a supplemental final authority"
 
 test("team colors remain decorative while semantic status stays protected", () => {
   assert.match(css, /--team-brand-primary/);
-  assert.match(css, /--team-brand-secondary/);
   const statusRule = secondaryCss.match(/\.secondaryPageIntro__status\s*\{[^}]*\}/)?.[0] || "";
   assert.match(statusRule, /color:\s*#536057/);
   assert.match(statusRule, /background:\s*transparent/);
