@@ -16,6 +16,7 @@ const progressStory = read("src/components/PlayerProgressStory.jsx");
 const trainingHeader = read("src/components/PlayerTrainingSessionHeader.jsx");
 const brandingPreview = read("src/components/team/TeamBrandingPreview.jsx");
 const brandingForm = read("src/components/team/TeamBrandingForm.jsx");
+const brandingScreenCss = read("src/screens/CoachTeamBrandingScreen.css");
 const brandingDefaults = read("src/theme/brandingDefaults.js");
 const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs");
 const routeEnhancers = read("scripts/run-route-enhancers.mjs");
@@ -110,6 +111,10 @@ test("Program Branding previews production titles and has a neutral no-logo stat
   assert.match(brandingForm, /const FALLBACK_MARK = ""/);
   assert.match(brandingForm, /No logo uploaded\. ShotLab will use the team initials in title stages\./);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(brandingScreenCss, /aside\.branding-industrial__preview\[data-surface="dark"\]\s*>\s*header\.branding-industrial__panel-header/);
+  assert.match(brandingScreenCss, /background-color:transparent!important/);
+  assert.match(brandingScreenCss, /-webkit-text-fill-color:#f8faf6!important/);
+  assert.match(brandingScreenCss, /-webkit-text-fill-color:#c6d1cf!important/);
 });
 
 test("global defaults are neutral and Demo identity is explicit team data", () => {
