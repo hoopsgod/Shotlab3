@@ -7,16 +7,24 @@ import "../styles/Phase2PremiumRosterLayer.css";
 
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/strength|lifting|conditioning/,"strength"],[/activity|signal|feed/,"activity"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/program|brand|identity/,"program"],[/account|setting/,"settings"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";
+const TITLE_LABELS=new Map([
+  ["Drills Dashboard","Drills"],
+  ["Strength & Conditioning Dashboard","S&C"],
+  ["Activity Dashboard","Activity"],
+  ["Leaderboards Dashboard","Leaderboards"],
+]);
+const normalizeTitle=value=>TITLE_LABELS.get(String(value||""))||value;
 
 export function SecondaryPageShell({children,testId,className=""}){return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>}
 
 export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],testId,icon}){
-  const iconName=icon||iconFor(`${eyebrow} ${title}`);
+  const displayTitle=normalizeTitle(title);
+  const iconName=icon||iconFor(`${eyebrow} ${displayTitle}`);
   return <TeamIdentityTitleStage
     variant="standard"
     surface="light"
     role={eyebrow||"Team"}
-    title={title}
+    title={displayTitle}
     summary={summary}
     status={status}
     actions={actions}
@@ -26,7 +34,7 @@ export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],test
     dataVisualRole="page-intro"
     dataPageKind={iconName}
     dataMobileStage="team-identity"
-    ariaLabel={`${title} team identity and page title`}
+    ariaLabel={`${displayTitle} team identity and page title`}
   />
 }
 
