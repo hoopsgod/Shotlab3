@@ -6,6 +6,7 @@ const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8"
 const authenticatedAuthority = fs.readFileSync(new URL("../src/styles/AuthenticatedVisualAuthority2026.css", import.meta.url), "utf8");
 const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");
+const cascadeLock = fs.readFileSync(new URL("../src/styles/MissionControlCascadeLock2026.css", import.meta.url), "utf8");
 const criticalCss = fs.readFileSync(new URL("../public/shotlab-phase2-critical.css", import.meta.url), "utf8");
 const commandCenter = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 
@@ -59,13 +60,24 @@ test("Phase 2 source owns one dominant premium Coach hero and its team identity 
   assert.match(css, /\.mcSection,/);
 });
 
-test("critical cascade uses explicit longhands and removes legacy clipping", () => {
-  assert.match(criticalCss, /background-color:\s*#0d171e !important/);
-  assert.match(criticalCss, /background-image:\s*linear-gradient\(145deg, #0d171e 0%, #13222b 100%\) !important/);
-  assert.match(criticalCss, /\[data-testid="coach-primary-objective"\]/);
-  assert.match(criticalCss, /max-height:\s*none !important/);
+test("late hierarchy and critical layers cannot redesign or hide Coach title identity", () => {
+  for (const lateAuthority of [css, cascadeLock, criticalCss]) {
+    assert.doesNotMatch(lateAuthority, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
+    assert.doesNotMatch(lateAuthority, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
+    assert.doesNotMatch(lateAuthority, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
+    assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
+    assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*>\s*p\s*\{[^}]*max-width\s*:/s);
+  }
+  assert.doesNotMatch(criticalCss, /\[data-testid="coach-primary-objective"\]/);
+  assert.doesNotMatch(criticalCss, /\.mcHero\s*,|\.mcHeroContent\s*\{/);
+  assert.match(criticalCss, /Title\/Hero composition is intentionally excluded and source-owned/);
+  assert.match(cascadeLock, /Coach Hero identity, crest, title, summary and Hero geometry are source-owned/);
+});
+
+test("critical cascade remains narrowly scoped to commands and support rows", () => {
   assert.match(criticalCss, /\.mcPrimary\s*\{[\s\S]*display:\s*inline-flex !important/s);
   assert.match(criticalCss, /\.mcAttentionRow/);
+  assert.match(criticalCss, /mobile-navigation-sheet/);
 });
 
 test("light support tokens cannot inherit legacy dark shell variables", () => {
