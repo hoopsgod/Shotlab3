@@ -97,7 +97,12 @@ export function promoteCoachCommandCenter(source) {
     '<span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span>',
     'Coach mobile role copy',
   );
-  next = replaceOnce(next,
+  const postBrandingTacticalCourt =
+    next.includes('function CourtArtwork({ logoUrl, teamName }) {') &&
+    next.includes('id="mcTacticalWash"') &&
+    next.includes('{mark ? <image href={mark}') &&
+    next.includes('{initials(teamName)}</text>');
+  if (!postBrandingTacticalCourt) next = replaceOnce(next,
 `function CourtArtwork({ logoUrl }) {
   return (
     <div className="mcCourtArtwork" aria-hidden="true">
