@@ -14,6 +14,7 @@ const playerCommitmentCenter = fs.readFileSync(new URL("../src/components/Player
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const coachCommand = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
+const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
 const brandingCss = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
 const metricCss = fs.readFileSync(new URL("../src/components/Phase2PremiumMetricLayer.css", import.meta.url), "utf8");
@@ -27,7 +28,6 @@ test("secondary routes use one explicit TeamIdentityTitleStage owner instead of 
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css|secondaryPageIntro appHeader|appHeaderTitle/);
   assert.equal(fs.existsSync(new URL("../src/components/SecondaryPageFirstViewport.css", import.meta.url)), false);
   assert.doesNotMatch(routeRunner, /apply-mobile-centered-route-stage\.mjs|apply-mobile-route-signature-promotion\.mjs/);
-  assert.doesNotMatch(enhancer, /secondaryPageIntro__title|secondaryPageIntro__icon|secondaryPageIntro__summary|secondaryPageIntro__eyebrow/);
   assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
@@ -43,15 +43,15 @@ test("team branding is prominent once per secondary-page identity hierarchy", ()
   assert.doesNotMatch(playerOperationalWorkspace, /SecondaryTeamBrandMark/);
 });
 
-test("mobile secondary title stages keep editorial hierarchy without legacy selector competition", () => {
+test("mobile secondary title stages keep editorial hierarchy while the enhancer only verifies ownership", () => {
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /teamIdentityTitleStage--longTitle[\s\S]*clamp\(40px, 9\.8vw, 44px\)/);
   assert.match(secondaryPageSystem, /TITLE_LABELS=new Map/);
   assert.match(secondaryPageSystem, /\["Drills Dashboard","Drills"\]/);
   assert.match(secondaryPageSystem, /\["Strength & Conditioning Dashboard","S&C"\]/);
   assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b|\.secondaryPageAction\b/);
-  assert.doesNotMatch(enhancer, /Drills Dashboard|Strength & Conditioning Dashboard|Leaderboards Dashboard|Activity Dashboard/);
-  assert.doesNotMatch(enhancer, /TeamIdentityTitleStage|teamIdentityTitleStage/);
+  assert.match(enhancer, /Verified source-owned secondary title architecture/);
+  assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
 test("primary decision moment remains a full-bleed dark performance stage in owned component CSS", () => {
@@ -65,6 +65,7 @@ test("primary decision moment remains a full-bleed dark performance stage in own
 test("first-impression controls and labels respect the product readability floor", () => {
   assert.match(titleStageCss, /teamIdentityTitleStage__action \{[\s\S]*min-height: 44px;[\s\S]*font: 720 13px/);
   assert.match(titleStageCss, /teamIdentityTitleStage__identityLine \{[\s\S]*font: 780 11px/);
+  assert.match(titleStageCss, /@media \(max-width: 390px\)[\s\S]*teamIdentityTitleStage__identityLine \{ font-size: 11px; \}/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__eyebrow \{[\s\S]*font: 760 var\(--type-micro, 11px\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*font: 720 13px/);
   assert.doesNotMatch(titleStageCss, /font-size:\s*(?:8|9|10)(?:\.\d+)?px\b/);
@@ -97,15 +98,20 @@ test("Player Home is the immersive Hero variant while Coach Home integrates iden
   assert.match(coachHeader, /TeamIdentityTitleStage/);
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coachCommand, /mcHeroIdentity/);
-  assert.match(coachCommand, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
-  assert.match(coachCommand, /object-fit:contain/);
+  assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
+  assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(coachTitleCss, /font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(coachTitleCss, /object-fit:\s*contain/);
+  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
+  assert.doesNotMatch(coachTitleCss, /!important/);
   assert.doesNotMatch(playerHeader, /!important|data-mobile-chrome="native-identity"/);
 });
 
 test("legacy final-mobile compatibility cannot override title or team-identity composition", () => {
   assert.match(finalMobileCss, /Title and team-identity composition are intentionally excluded/);
   assert.doesNotMatch(finalMobileCss, /\.mcHero h1|\.secondaryPageIntro|player-dashboard-identity-header/);
-  assert.doesNotMatch(enhancer, /opacity:\s*\.17|mcHeroTeamMark|secondaryPageIntro/);
+  assert.doesNotMatch(enhancer, /opacity:\s*\.17|mcHeroTeamMark/);
 });
 
 test("Program Branding keeps intentional dark identity contrast against later global surface authorities", () => {
