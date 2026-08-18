@@ -84,7 +84,43 @@ async function expectNoHorizontalOverflow(page) {
 }
 
 async function expectTitleStageGeometry(page, { variant = "standard", teamName }) {
-  const stage = page.locator('[data-team-identity-stage="true"]').first();
+  const stage = page.locator('[data-team-identity-stage="true"]:visible').first();
+  if (!(await stage.count()) && variant === "hero") {
+    const coachHero = page.getByTestId("coach-primary-objective");
+    await expect(coachHero).toBeVisible();
+    const result = await coachHero.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const title = element.querySelector("h1");
+      const team = element.querySelector(".mcProgramIdentity");
+      const crest = element.querySelector(".mcHeroTeamMark img");
+      const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
+      const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
+      return {
+        left: rect.left,
+        right: rect.right,
+        height: rect.height,
+        viewport: innerWidth,
+        titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+        teamName: team?.textContent?.trim() || "",
+        crestWidth: crestRect?.width || 0,
+        crestHeight: crestRect?.height || 0,
+        objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
+      };
+    });
+    expect(result.left).toBeGreaterThanOrEqual(-1);
+    expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
+    expect(result.teamName.startsWith(teamName)).toBe(true);
+    expect(result.titleSize).toBeGreaterThanOrEqual(44);
+    expect(result.titleSize).toBeLessThanOrEqual(60);
+    expect(result.crestWidth).toBeGreaterThanOrEqual(104);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(104);
+    expect(result.height).toBeGreaterThanOrEqual(360);
+    expect(result.height).toBeLessThanOrEqual(500);
+    if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
+    await expectNoHorizontalOverflow(page);
+    return;
+  }
+
   await expect(stage).toBeVisible();
   const result = await stage.evaluate((element) => {
     const rect = element.getBoundingClientRect();
@@ -124,7 +160,8 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
 }
 
 async function expectReadableTeamIdentity(page) {
-  const label = page.locator('[data-team-identity-stage="true"] [data-identity-role="team-name"]').first();
+  let label = page.locator('[data-team-identity-stage="true"]:visible [data-identity-role="team-name"]').first();
+  if (!(await label.count())) label = page.getByTestId("coach-primary-objective").locator(".mcProgramIdentity");
   await expect(label).toBeVisible();
   const ratio = await label.evaluate((element) => {
     const parse = (value) => {
@@ -142,8 +179,8 @@ async function expectReadableTeamIdentity(page) {
     let node = element;
     let bg = [255, 255, 255];
     while (node) {
-      const candidate = parse(getComputedStyle(node).backgroundColor);
       const raw = getComputedStyle(node).backgroundColor;
+      const candidate = parse(raw);
       if (raw && !/rgba\([^)]*,\s*0\s*\)$/.test(raw) && raw !== "transparent") { bg = candidate; break; }
       node = node.parentElement;
     }
@@ -184,7 +221,7 @@ test("long names, no logo, hostile colors, and awkward logo shapes remain stable
     branding: { primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" },
   });
   await expectTitleStageGeometry(page, { variant: "hero", teamName: longTeamName });
-  await expect(page.locator('.teamIdentityTitleStage__fallbackCrest').first()).toBeVisible();
+  await expect(page.locator('.mcHeroTeamMark .mcTeamFallback')).toBeVisible();
   await expectReadableTeamIdentity(page);
   await navigate(page, "players");
   await expectTitleStageGeometry(page, { variant: "standard", teamName: longTeamName });
