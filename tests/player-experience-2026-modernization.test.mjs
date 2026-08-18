@@ -22,7 +22,9 @@ test("player identity uses the shared unboxed team-owned editorial stage", () =>
   assert.match(identityStage, /data-testid=\{testId\}/);
   assert.match(identityStage, /className="teamIdentityTitleStage__crest"/);
   assert.match(identityStage, /className="teamIdentityTitleStage__fallbackCrest"/);
-  assert.match(identityCss, /(?:header\.)?\.?(?:teamIdentityTitleStage)[^\{]*\{[\s\S]*?border: 0 !important;[\s\S]*?border-radius: 0 !important;[\s\S]*?background: transparent !important;[\s\S]*?box-shadow: none !important;/);
+  assert.match(identityCss, /(?:header\.)?\.?(?:teamIdentityTitleStage)[^\{]*\{[\s\S]*?border: 0 !important;[\s\S]*?border-radius: 0 !important;[\s\S]*?box-shadow: none !important;/);
+  const baseStageRule = identityCss.match(/header\.teamIdentityTitleStage\[data-team-identity-stage="true"\]\s*\{[^}]*\}/)?.[0] || "";
+  assert.doesNotMatch(baseStageRule, /background:\s*transparent\s*!important/);
   assert.match(identityCss, /\.teamIdentityTitleStage--hero \{[\s\S]*?--identity-crest: clamp\(104px, 29vw, 120px\);[\s\S]*?--identity-title: clamp\(45px, 12\.2vw, 58px\);/);
   assert.match(identityCss, /\.teamIdentityTitleStage--dark \{[\s\S]*?linear-gradient\(126deg, #061923 0%, #082430 58%, #0a2933 100%\) !important;/);
   assert.match(identityCss, /\.teamIdentityTitleStage__crest \{[\s\S]*?object-fit: contain;/);
