@@ -24,12 +24,12 @@ test('final enhancer pipeline keeps title mutators retired and ends with canonic
   assert.equal(existsSync('scripts/apply-team-identity-coach-hero-mark.mjs'), false);
 });
 
-test('Coach Home signature enhancer no longer redesigns source-owned title identity', () => {
+test('Coach Home signature enhancer leaves title identity source-owned while retaining non-title support reconciliation', () => {
   const command = promoteCoachCommandCenter(coachCommand);
   const finalCss = promoteCoachFinalCss(coachFinal);
   const hierarchy = reconcileCoachHierarchy(coachHierarchy);
   assert.equal(command, coachCommand);
-  assert.equal(finalCss, coachFinal);
+  assert.doesNotMatch(finalCss, /\.mcHeroTeamMark|\.mcHero\s+h1|\.mcProgramIdentity|\.mcHeroIdentity/);
   assert.doesNotMatch(hierarchy, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
   assert.match(coachCommand, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
   assert.match(coachCommand, /font-size:clamp\(46px,12vw,58px\)/);
