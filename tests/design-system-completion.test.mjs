@@ -6,7 +6,7 @@ const icon = fs.readFileSync("src/components/ShotLabIcon.jsx", "utf8");
 const playerPrimitives = fs.readFileSync("src/components/PlayerDailyPrimitives.jsx", "utf8");
 const playerStyles = fs.readFileSync("src/components/PlayerDailyPrimitives.module.css", "utf8");
 const secondary = fs.readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
-const secondaryStyles = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
+const teamStage = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
 const coach = fs.readFileSync("src/components/CoachCommandCenter.jsx", "utf8");
 const visualAuthority = fs.readFileSync("public/shotlab-v15-session-integrity.css", "utf8");
 const screenshotWorkflow = fs.readFileSync(".github/workflows/app-store-presentation-readiness.yml", "utf8");
@@ -27,12 +27,16 @@ test("Player intelligence primitives use the shared icon family", () => {
   assert.match(playerStyles, /grid-template-columns:42px minmax\(0,1fr\) auto/);
 });
 
-test("secondary page heroes and decision surfaces use signature icons", () => {
-  assert.match(secondary, /import ShotLabIcon/);
-  assert.match(secondary, /secondaryPageIntro__icon/);
+test("secondary page title stages are team-owned while decision surfaces retain signature icons", () => {
+  assert.match(secondary, /import TeamIdentityTitleStage/);
+  assert.match(secondary, /<TeamIdentityTitleStage/);
   assert.match(secondary, /secondaryPageDecision__icon/);
-  assert.match(secondaryStyles, /grid-template-columns:\s*48px minmax\(0, 1fr\) auto/);
-  assert.match(secondaryStyles, /overflow-wrap:\s*anywhere/);
+  assert.match(teamStage, /teamIdentityStage__crest/);
+  assert.match(teamStage, /object-fit:contain/);
+  assert.match(teamStage, /--team-stage-crest:96px/);
+  assert.match(teamStage, /teamIdentityStage__tonal/);
+  assert.match(teamStage, /aria-hidden="true"/);
+  assert.match(teamStage, /overflow-wrap:anywhere/);
 });
 
 test("Coach iconography remains custom SVG with the same precision language", () => {

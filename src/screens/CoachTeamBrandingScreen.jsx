@@ -41,11 +41,14 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
     <main className="team-brand premium-screen premium-screen--branding branding-industrial">
       <SecondaryPageShell className="brandingEditorialWorkspace" testId="coach-branding-workspace">
         <SecondaryPageIntro
-          eyebrow="Program identity"
+          variant="hero"
+          crestSize={136}
+          role="COACH"
+          eyebrow="PROGRAM IDENTITY"
           title="Program Branding"
           summary={`${teamName} should feel unmistakably yours across coach, player, training, event, leaderboard, and storefront experiences.`}
           status="Coach + Player"
-          actions={[{ key: "back", label: "Back to Coach", onClick: onBack }]}
+          backAction={{ label: "Back to Coach", onClick: onBack }}
           testId="coach-branding-header"
           icon="settings"
         />

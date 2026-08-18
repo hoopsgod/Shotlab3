@@ -23,36 +23,16 @@ test("Phase 3N runs after accepted Phase 3M with a guarded idempotent route tran
 });
 
 test("Events and S&C use one specialized player commitment hierarchy instead of duplicate generic command bars", () => {
-  for (const seam of [
-    'PlayerCommitmentCenter mode="events"',
-    'PlayerCommitmentCenter mode="strength"',
-    'data-testid="player-events-operational-list"',
-    'data-testid="player-strength-operational-panel"',
-  ]) assert.ok(enhancer.includes(seam), `missing specialized commitment seam: ${seam}`);
+  for (const seam of ['PlayerCommitmentCenter mode="events"','PlayerCommitmentCenter mode="strength"','data-testid="player-events-operational-list"','data-testid="player-strength-operational-panel"']) assert.ok(enhancer.includes(seam), `missing specialized commitment seam: ${seam}`);
   assert.match(enhancer, /specialized commitment route still contains retired generic command bar/);
 });
 
 test("Phase 3N preserves RSVP, S&C RSVP, logging, and completion capabilities", () => {
-  for (const preserved of [
-    "toggleRsvp={toggleRsvp}",
-    "toggleScRsvp={toggleScRsvp}",
-    "addScLog={addScLog}",
-    "onCompletionCue={pushCompletionCue}",
-    "<EventsPanel events={events}",
-    "<SCPanel sessions={scSessions}",
-  ]) assert.ok(enhancer.includes(preserved), `missing preserved player commitment capability: ${preserved}`);
+  for (const preserved of ["toggleRsvp={toggleRsvp}","toggleScRsvp={toggleScRsvp}","addScLog={addScLog}","onCompletionCue={pushCompletionCue}","<EventsPanel events={events}","<SCPanel sessions={scSessions}"]) assert.ok(enhancer.includes(preserved), `missing preserved player commitment capability: ${preserved}`);
 });
 
-test("PlayerCommitmentCenter exposes route identity, next action, runway, and progressive disclosure", () => {
-  for (const seam of [
-    "player-commitment-route-header-",
-    "player-commitment-hero-",
-    "player-commitment-queue-",
-    "player-commitment-details-",
-    "NEXT TEAM COMMITMENT",
-    "NEXT DEVELOPMENT BLOCK",
-    "FULL WORKSPACE",
-  ]) assert.ok(component.includes(seam), `missing player commitment UI seam: ${seam}`);
+test("PlayerCommitmentCenter exposes team-owned route identity, next action, runway, and progressive disclosure", () => {
+  for (const seam of ["player-commitment-route-header-","player-commitment-hero-","player-commitment-queue-","player-commitment-details-","NEXT TEAM COMMITMENT","NEXT DEVELOPMENT BLOCK","FULL WORKSPACE","<TeamIdentityTitleStage","TEAM SCHEDULE","PHYSICAL DEVELOPMENT"]) assert.ok(component.includes(seam), `missing player commitment UI seam: ${seam}`);
   assert.match(component, /<details/);
   assert.match(component, /onAction\?\.\(model\.primaryAction\)/);
 });
@@ -67,8 +47,8 @@ test("Player commitment hero prioritizes unresolved decisions over already-confi
 test("Route status and subtitle summarize the actionable commitment state rather than stale model copy", () => {
   assert.match(component, /const routeStatus = requiresResponse[\s\S]*response[\s\S]*needed/);
   assert.match(component, /const routeSubtitle = requiresResponse[\s\S]*upcoming commitment/);
-  assert.match(component, /<span>{routeStatus}<\/span>/);
-  assert.match(component, /<p>{routeSubtitle}<\/p>/);
+  assert.match(component, /status=\{routeStatus\}/);
+  assert.match(component, /summary=\{routeSubtitle\}/);
 });
 
 test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
@@ -96,10 +76,7 @@ test("fresh iPhone evidence covers both commitment routes and verifies legacy co
   assert.match(screenshots, /04n-player-events-commitment/);
   assert.match(screenshots, /04o-player-strength-commitment/);
   assert.match(screenshots, /routeStatus: "1 response needed"/);
-  assert.ok(
-    screenshots.includes('routeStatus: /^(?:Schedule clear|\\d+ responses? needed)$/'),
-    "S&C screenshot evidence must accept the truthful actionable status rather than stale fixed copy",
-  );
+  assert.ok(screenshots.includes('routeStatus: /^(?:Schedule clear|\\d+ responses? needed)$/'), "S&C screenshot evidence must accept the truthful actionable status rather than stale fixed copy");
   assert.match(screenshots, /compositionStyle\.backgroundColor/);
   assert.match(screenshots, /scrollWidth - window\.innerWidth/);
   assert.match(screenshots, /player-events-operational-list/);

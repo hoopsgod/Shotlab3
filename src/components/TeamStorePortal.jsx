@@ -21,6 +21,7 @@ import {
   TEAM_STORE_OPEN_EVENT,
   normalizeTeamStorePortalIdentity,
 } from "../lib/teamStorePortalBridge.js";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import "./TeamStorePortal.css";
 
 const STORAGE_SESSION = "sl:session";
@@ -321,14 +322,22 @@ export default function TeamStorePortal() {
     <button type="button" aria-label="Open team store" onClick={() => setOpen(true)} className="ts-launcher"><StoreIcon /></button>
     {open && <div role="dialog" aria-modal="true" aria-label="Team Store" className="ts-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) closePortal(); }}>
       <section className="ts-panel">
-        <header className="ts-header">
-          <div className="ts-header-copy">
-            <div className="ts-eyebrow">{activeIdentity.isCoach ? "COACH WORKSPACE" : "TEAM GEAR"}</div>
-            <h2>Team Store</h2>
-            <p>{activeIdentity.isCoach ? `Connect and manage ${activeIdentity.teamName}'s apparel store.` : activeIdentity.teamName}</p>
-          </div>
+        <div className="ts-header ts-header--team-identity">
+          <TeamIdentityTitleStage
+            variant="hero"
+            surface="light"
+            role={activeIdentity.isCoach ? "COACH" : "PLAYER"}
+            eyebrow="TEAM STORE"
+            title="Team Store"
+            summary={activeIdentity.isCoach ? `Connect and manage ${activeIdentity.teamName}'s apparel destination.` : `Gear and apparel published by ${activeIdentity.teamName}.`}
+            status={store ? "STORE LIVE" : activeIdentity.isCoach ? "SETUP READY" : "NOT YET PUBLISHED"}
+            crestSize={136}
+            iconName="store"
+            showTonalCrest
+            testId="team-store-identity-title-stage"
+          />
           <button type="button" onClick={closePortal} className="ts-close" aria-label="Close team store"><span aria-hidden="true">×</span></button>
-        </header>
+        </div>
 
         {activeIdentity.isCoach ? <div className="ts-coach-content">
           {isSetup ? <>
@@ -356,7 +365,7 @@ export default function TeamStorePortal() {
                   <label className="ts-field">
                     <span>Name players will see</span>
                     <input value={draft.storeName} placeholder={`${activeIdentity.teamName} Team Store`} onChange={(event) => updateDraft("storeName", event.target.value)} />
-                    <small>Keep it familiar, such as “Thomas Titans Team Store.”</small>
+                    <small>Keep it familiar, such as your program name plus “Team Store.”</small>
                   </label>
                   <label className="ts-field">
                     <span>Public store link</span>
@@ -434,7 +443,7 @@ export default function TeamStorePortal() {
             <div className="ts-player-intro"><span>OFFICIAL TEAM GEAR</span><h3>Rep your program.</h3><p>Shop apparel and fan gear selected by your coach.</p></div>
             <PlayerStorePreview teamName={activeIdentity.teamName} storeName={store.storeName} providerLabel={getProviderLabel(store.provider)} onOpen={() => openStore("player_portal")} live />
             <p className="ts-disclosure">{AFFILIATE_DISCLOSURE}</p>
-          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><h3>Your team store is not open yet</h3><p>Your coach has not published a store link. Check back after your program announces it.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
+          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><span className="ts-section-kicker">PROGRAM STOREFRONT</span><h3>Your team store is not open yet</h3><p>{activeIdentity.teamName} has not published a store destination yet. When your program opens one, it will appear here with the same team identity.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
         </div>}
       </section>
     </div>}

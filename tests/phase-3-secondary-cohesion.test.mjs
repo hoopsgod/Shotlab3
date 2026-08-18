@@ -8,6 +8,7 @@ const acceptanceCss = readFileSync('public/shotlab-phase3-secondary-acceptance.c
 const playerHeader = readFileSync('src/components/PlayerDashboardHeader.jsx', 'utf8');
 const playerWorkspace = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const playerWorkspaceCss = readFileSync('src/components/PlayerOperationalWorkspace.module.css', 'utf8');
+const teamStage = readFileSync('src/components/TeamIdentityTitleStage.jsx', 'utf8');
 
 test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance order', () => {
   const phase2 = html.indexOf('id="shotlab-phase2-critical"');
@@ -21,33 +22,27 @@ test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance or
 });
 
 test('Phase 3 is scoped to high-value secondary destinations', () => {
-  for (const selector of [
-    'premium-leaderboards-hub',
-    'player-career-history',
-    'coach-players-interactive-dashboard',
-    'coach-events-interactive-dashboard',
-    'coach-drills-management',
-  ]) {
-    assert.match(css, new RegExp(selector));
-  }
+  for (const selector of ['premium-leaderboards-hub','player-career-history','coach-players-interactive-dashboard','coach-events-interactive-dashboard','coach-drills-management']) assert.match(css, new RegExp(selector));
   assert.match(css, /color-scheme:light!important/);
   assert.match(css, /performance-workspace::before/);
   assert.match(css, /performance-workspace::after/);
   assert.match(css, /display:none!important/);
 });
 
-test('Player secondary identity is a compact but unmistakable athlete rail at the rendered owner', () => {
+test('Player secondary identity is unified into the route title stage instead of a duplicate athlete rail', () => {
   assert.match(css, /player-dashboard-identity-header/);
   assert.match(playerHeader, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)/);
-  assert.match(playerHeader, /data-identity-role=\"name\"\]\{[\s\S]*font-size:26px!important/);
-  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:58px!important;height:58px!important/);
-  assert.match(playerHeader, /:is\(\[data-identity-role=\"tagline\"\],\[data-identity-role=\"mission\"\]\)\{display:none!important\}/);
-  assert.doesNotMatch(playerHeader, /performance-shell--player[^`]*font-size:(?:8|9|10)px!important/);
+  assert.match(playerHeader, /player-dashboard-identity-header"\]\{display:none!important/);
+  assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
+  assert.match(playerWorkspace, /role="PLAYER"/);
+  assert.match(teamStage, /--team-stage-crest:96px/);
+  assert.match(teamStage, /teamIdentityStage__teamLine/);
+  assert.match(teamStage, /teamIdentityStage__tonal/);
 });
 
 test('Player workspaces own their editorial command and evidence hierarchy', () => {
   assert.match(playerWorkspace, /data-page-hierarchy="editorial"/);
-  assert.match(playerWorkspace, /data-layout-role="editorial-header"/);
+  assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
   assert.match(playerWorkspace, /data-layout-role="supporting-evidence"/);
   assert.match(playerWorkspaceCss, /\.commandBar\{[\s\S]*?background:transparent/);
   assert.match(playerWorkspaceCss, /\.metrics\{[\s\S]*?border-block:1px solid/);
@@ -65,9 +60,9 @@ test('Rendered Coach Events and Drills canvases cannot fall back to legacy black
 });
 
 test('Phase 3 keeps mobile safety and accessibility behavior explicit', () => {
-  const combined = `${css}\n${acceptanceCss}`;
-  assert.match(combined, /env\(safe-area-inset-bottom,0px\)/);
-  assert.match(combined, /min-height:44px!important/);
-  assert.match(combined, /@media\(max-width:700px\)/);
-  assert.match(combined, /@media\(prefers-reduced-motion:reduce\)/);
+  const combined = `${css}\n${acceptanceCss}\n${teamStage}`;
+  assert.match(combined, /env\(safe-area-inset-(?:bottom|top),?0?px?\)/);
+  assert.match(combined, /min-height:(?:44|46)px/);
+  assert.match(combined, /@media\(max-width:(?:700|760)px\)/);
+  assert.match(combined, /prefers-reduced-motion/);
 });

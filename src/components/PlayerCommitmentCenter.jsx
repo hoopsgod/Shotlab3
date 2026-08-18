@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import styles from "./PlayerCommitmentCenter.module.css";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const clean = (value) => String(value ?? "").trim();
@@ -171,14 +172,18 @@ export default function PlayerCommitmentCenter({
       data-testid={`player-commitment-center-${mode}`}
       data-mode={mode}
     >
-      <header className={styles.routeHeader} data-testid={`player-commitment-route-header-${mode}`}>
-        <div className={styles.routeEyebrow}>{model?.eyebrow || (isStrength ? "Physical development" : "Team commitments")}</div>
-        <div className={styles.routeTitleRow}>
-          <h1>{model?.title || (isStrength ? "Strength & Conditioning" : "Events & Attendance")}</h1>
-          <span>{routeStatus}</span>
-        </div>
-        <p>{routeSubtitle}</p>
-      </header>
+      <TeamIdentityTitleStage
+        className={styles.routeHeader}
+        variant="standard"
+        surface="light"
+        role="PLAYER"
+        eyebrow={isStrength ? "PHYSICAL DEVELOPMENT" : "TEAM SCHEDULE"}
+        title={model?.title || (isStrength ? "Strength & Conditioning" : "Events")}
+        summary={routeSubtitle}
+        status={routeStatus}
+        showTonalCrest
+        testId={`player-commitment-route-header-${mode}`}
+      />
 
       <div className={styles.hero} data-testid={`player-commitment-hero-${mode}`}>
         <div className={styles.heroTopline}>

@@ -18,6 +18,7 @@ if (source.includes(marker)) {
     'onOpen={() => openStore("player_portal")}',
     'AFFILIATE_DISCLOSURE',
     'Your team store is not open yet',
+    'team-store-identity-title-stage',
   ]) {
     if (!source.includes(preserved)) fail(`transformed Player Team Store source is missing ${preserved}`);
   }
@@ -31,7 +32,7 @@ const oldBlock = `        </div> : <div className="ts-player-content">
             <div className="ts-player-intro"><span>OFFICIAL TEAM GEAR</span><h3>Rep your program.</h3><p>Shop apparel and fan gear selected by your coach.</p></div>
             <PlayerStorePreview teamName={activeIdentity.teamName} storeName={store.storeName} providerLabel={getProviderLabel(store.provider)} onOpen={() => openStore("player_portal")} live />
             <p className="ts-disclosure">{AFFILIATE_DISCLOSURE}</p>
-          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><h3>Your team store is not open yet</h3><p>Your coach has not published a store link. Check back after your program announces it.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
+          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><span className="ts-section-kicker">PROGRAM STOREFRONT</span><h3>Your team store is not open yet</h3><p>{activeIdentity.teamName} has not published a store destination yet. When your program opens one, it will appear here with the same team identity.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
         </div>}`;
 
 requireOne(source, oldBlock, 'Player Team Store parity-safe experience');
@@ -53,7 +54,7 @@ const newBlock = `        </div> : <div className="ts-player-content" data-testi
             </section>
             <div className="ts-player-store-trust"><CheckIcon /><p><strong>Checkout stays with {getProviderLabel(store.provider)}.</strong><span>Your apparel partner handles payment, fulfillment, returns, and support.</span></p></div>
             <p className="ts-disclosure">{AFFILIATE_DISCLOSURE}</p>
-          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><h3>Your team store is not open yet</h3><p>Your coach has not published a store link. Check back after your program announces it.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
+          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><span className="ts-section-kicker">PROGRAM STOREFRONT</span><h3>Your team store is not open yet</h3><p>{activeIdentity.teamName} has not published a store destination yet. When your program opens one, it will appear here with the same team identity.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
         </div>}`;
 
 source = source.replace(oldBlock, newBlock);
@@ -66,6 +67,7 @@ for (const preserved of [
   'window.open(partnerUrl, "_blank", "noopener,noreferrer")',
   'PUBLISH STORE',
   'aria-label="Open team store"',
+  'team-store-identity-title-stage',
 ]) {
   if (!source.includes(preserved)) fail(`Team Store capability removed: ${preserved}`);
 }
