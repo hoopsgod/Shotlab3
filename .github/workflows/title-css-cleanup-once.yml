@@ -18,34 +18,31 @@ jobs:
         with:
           ref: agent/title-authority-repair-2026
           fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - name: Remove dead parallel Player title CSS
         shell: bash
         run: |
           set -euo pipefail
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync } from 'node:fs';
-          const path = 'src/components/PlayerCommitmentCenter.module.css';
-          let css = readFileSync(path, 'utf8');
-          const selectors = [
-            '.routeHeader',
-            '.routeEyebrow',
-            '.routeTitleRow',
-            '.routeTitleRow h1',
-            '.routeTitleRow > span',
-            '.routeHeader > p',
-          ];
-          for (const selector of selectors) {
-            const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            css = css.replace(new RegExp(`\\n?${escaped}\\s*\\{[^{}]*\\}\\s*`, 'g'), '\n');
-          }
-          for (const legacy of ['.routeHeader', '.routeEyebrow', '.routeTitleRow']) {
-            if (css.includes(legacy)) throw new Error(`Obsolete title selector remains: ${legacy}`);
-          }
-          writeFileSync(path, css.replace(/\n{3,}/g, '\n\n'));
-          NODE
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/components/PlayerCommitmentCenter.module.css')
+          css = path.read_text()
+          selectors = [
+              '.routeHeader',
+              '.routeEyebrow',
+              '.routeTitleRow',
+              '.routeTitleRow h1',
+              '.routeTitleRow > span',
+              '.routeHeader > p',
+          ]
+          for selector in sorted(selectors, key=len, reverse=True):
+              css = re.sub(r'\n?' + re.escape(selector) + r'\s*\{[^{}]*\}\s*', '\n', css)
+          for legacy in ('.routeHeader', '.routeEyebrow', '.routeTitleRow'):
+              if legacy in css:
+                  raise SystemExit(f'Obsolete title selector remains: {legacy}')
+          path.write_text(re.sub(r'\n{3,}', '\n\n', css))
+          PY
           git diff --check
       - name: Self-delete cleanup workflow and commit
         shell: bash
