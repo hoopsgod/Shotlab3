@@ -18,6 +18,9 @@ const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs');
 const secondaryEnhancer = read('scripts/apply-mobile-premium-secondary-page-system.mjs');
 const playerCompositionEnhancer = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
+const coach2026Css = read('src/components/CoachMissionControl2026.css');
+const coachShellCss = read('src/components/CoachMissionControlShell.css');
+const coachFinalCss = read('src/components/CoachMissionControlFinal.css');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -47,6 +50,19 @@ test('Coach Home source owns one integrated Mission Control identity and no titl
   assert.match(coach, /font-size:clamp\(46px,12vw,58px\)/);
   assert.match(coach, /object-fit:contain/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
+});
+
+test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or summary geometry', () => {
+  for (const legacyCss of [coach2026Css, coachShellCss, coachFinalCss]) {
+    assert.doesNotMatch(legacyCss, /\.mcHero\s*\{[^}]*min-height\s*:\s*(?:286|292|300|302|318|330)px/s);
+    assert.doesNotMatch(legacyCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:\s*(?:74|84|86|92|118)px/s);
+    assert.doesNotMatch(legacyCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:\s*(?:27|29|30|34|43)px/s);
+  }
+  assert.doesNotMatch(coachShellCss, /Rebalance the signature hero/);
+  assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
+  assert.match(coach2026Css, /Hero identity geometry is source-owned/);
+  assert.match(coachShellCss, /Mobile Hero identity\/title geometry is owned by CoachCommandCenter source/);
+  assert.match(coachFinalCss, /Mobile Hero identity\/title composition is owned by CoachCommandCenter source/);
 });
 
 test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {
