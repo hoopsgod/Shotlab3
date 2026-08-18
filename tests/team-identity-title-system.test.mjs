@@ -6,6 +6,7 @@ const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "
 const stage = read("src/components/TeamIdentityTitleStage.jsx");
 const css = read("src/components/TeamIdentityTitleStage.css");
 const authority = read("src/components/TeamIdentityTitleStageAuthority.css");
+const renderedAuthority = read("public/shotlab-team-identity-title-authority.css");
 const secondary = read("src/components/SecondaryPageSystem.jsx");
 const playerHeader = read("src/components/PlayerDashboardHeader.jsx");
 const coachHeader = read("src/components/CoachDashboardHeader.jsx");
@@ -13,6 +14,7 @@ const playerWorkspace = read("src/components/PlayerOperationalWorkspace.jsx");
 const progressStory = read("src/components/PlayerProgressStory.jsx");
 const trainingHeader = read("src/components/PlayerTrainingSessionHeader.jsx");
 const brandingPreview = read("src/components/team/TeamBrandingPreview.jsx");
+const brandingForm = read("src/components/team/TeamBrandingForm.jsx");
 const brandingDefaults = read("src/theme/brandingDefaults.js");
 const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs");
 const routeEnhancers = read("scripts/run-route-enhancers.mjs");
@@ -39,12 +41,15 @@ test("mobile crest geometry is materially larger without destructive cropping", 
   assert.match(trainingHeader, /teamCrest/);
 });
 
-test("late mobile route enhancers cannot collapse migrated team-title geometry", () => {
+test("the last public presentation layer prevents legacy CSS from collapsing team titles", () => {
   assert.match(stage, /TeamIdentityTitleStageAuthority\.css/);
   assert.match(authority, /secondaryPageIntro\.teamIdentityTitleStage/);
-  assert.match(authority, /width: var\(--identity-crest\) !important/);
-  assert.match(authority, /font-size: var\(--identity-title\) !important/);
-  assert.match(authority, /display: block !important/);
+  assert.match(renderedAuthority, /final rendered authority/i);
+  assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px, 29vw, 120px\) !important/);
+  assert.match(renderedAuthority, /--identity-crest:\s*clamp\(88px,24vw,104px\) !important/);
+  assert.match(renderedAuthority, /font-size: var\(--identity-title\) !important/);
+  assert.match(renderedAuthority, /object-fit: contain !important/);
+  assert.match(brandingBoundary, /shotlab-team-identity-title-authority/);
 });
 
 test("team colors remain decorative while semantic status stays protected", () => {
@@ -65,22 +70,33 @@ test("Player operational routes preserve their meanings inside team-owned title 
   ]) assert.ok(playerWorkspace.includes(marker), `missing ${marker}`);
   assert.match(playerWorkspace, /aria-label=\{`\$\{model\.title\} metrics`\}/);
   assert.match(playerWorkspace, /scheduleWorkspaceActionReveal/);
+  assert.match(renderedAuthority, /secondary Player routes own identity in their page title stage/i);
 });
 
-test("Program Branding previews the real production title component", () => {
+test("Program Branding previews production titles and has a neutral no-logo state", () => {
   const occurrences = (brandingPreview.match(/TeamIdentityTitleStage/g) || []).length;
   assert.ok(occurrences >= 3, "expected import plus Coach and Player title previews");
   assert.match(brandingPreview, /TeamBrandingProvider branding=\{branding\}/);
+  assert.match(brandingForm, /const FALLBACK_LOGO = ""/);
+  assert.match(brandingForm, /const FALLBACK_MARK = ""/);
+  assert.match(brandingForm, /No logo uploaded\. ShotLab will use the team initials in title stages\./);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
-test("global defaults are program-neutral and the authoritative team name is merged at runtime", () => {
+test("global defaults are neutral and Demo identity is explicit team data", () => {
   assert.match(brandingDefaults, /logoUrl:\s*""/);
   assert.match(brandingDefaults, /logoMarkUrl:\s*""/);
   assert.doesNotMatch(brandingDefaults, /titans/i);
   assert.match(brandingBoundary, /teamName:myTeam\?\.branding\?\.teamName\|\|myTeam\?\.name\|\|"Your Team"/);
-  assert.match(brandingBoundary, /name: "Demo Titans"/);
-  assert.match(brandingBoundary, /logoUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
-  assert.match(brandingBoundary, /No logo uploaded\. ShotLab will use the team initials in title stages\./);
+  assert.match(brandingBoundary, /name:\?"Demo Titans"|name:"Demo Titans"|name: "Demo Titans"/);
+  assert.match(brandingBoundary, /logoUrl:\?"\/branding\/titans-exact-logo\.png\.PNG"|logoUrl:"\/branding\/titans-exact-logo\.png\.PNG"|logoUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
   assert.match(routeEnhancers, /scripts\/apply-team-identity-branding-boundary\.mjs/);
+});
+
+test("Coach Home integrates program identity into Mission Control rather than stacking a second hero", () => {
+  assert.match(brandingBoundary, /mcProgramIdentity/);
+  assert.match(brandingBoundary, /mcTeamFallback/);
+  assert.match(renderedAuthority, /Coach Home — the existing Mission Control decision surface becomes the immersive team Hero variant/);
+  assert.match(renderedAuthority, /coach-dashboard-identity-header[\s\S]*display: none !important/);
+  assert.match(renderedAuthority, /mcHeroTeamMark[\s\S]*clamp\(112px,30vw,128px\)/);
 });
