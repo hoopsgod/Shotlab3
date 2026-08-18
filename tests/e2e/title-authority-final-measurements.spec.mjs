@@ -1,0 +1,163 @@
+import { test, expect } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const OUTPUT = path.resolve(process.cwd(), "artifacts/title-authority-final-measurements");
+fs.mkdirSync(OUTPUT, { recursive: true });
+
+async function installSafeRoutes(page) {
+  await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
+  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+}
+
+async function suppressMotion(page) {
+  await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });
+}
+
+async function enterCoachDemo(page) {
+  await installSafeRoutes(page);
+  await page.goto("/");
+  await suppressMotion(page);
+  await page.getByRole("button", { name: /Coach demo/i }).click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function applyDifficultBranding(page) {
+  const teamName = "Northwestern Metropolitan Preparatory Basketball";
+  const userName = "Coach Alexandra Montgomery-Washington";
+  const branding = { primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" };
+
+  await expect.poll(async () => page.evaluate(async () => {
+    const parseRaw = (raw) => {
+      try { return raw ? JSON.parse(raw) : null; }
+      catch { return null; }
+    };
+    const localSession = parseRaw(localStorage.getItem("sl:session"));
+    const tabSession = parseRaw(sessionStorage.getItem("sl:session"));
+    let bridgedSession = null;
+    try {
+      const result = await window.storage?.get?.("sl:session", true);
+      bridgedSession = parseRaw(typeof result === "string" ? result : result?.value);
+    } catch {}
+    return Boolean(localSession || tabSession || bridgedSession);
+  }), { timeout: 5_000, intervals: [50, 100, 200, 400] }).toBe(true);
+
+  const restoreProfile = await page.evaluate(async ({ nextTeamName, nextUserName, nextBranding }) => {
+    const parseRaw = (raw, fallback) => {
+      try { return raw ? JSON.parse(raw) : fallback; }
+      catch { return fallback; }
+    };
+    const readBridge = async (key, fallback) => {
+      try {
+        const result = await window.storage?.get?.(key, true);
+        return parseRaw(typeof result === "string" ? result : result?.value, fallback);
+      } catch { return fallback; }
+    };
+    const localTeams = parseRaw(localStorage.getItem("sl:teams"), []);
+    const bridgedTeams = await readBridge("sl:teams", []);
+    const teams = localTeams.length ? localTeams : bridgedTeams;
+    const localSession = parseRaw(localStorage.getItem("sl:session"), null);
+    const tabSession = parseRaw(sessionStorage.getItem("sl:session"), null);
+    const bridgedSession = await readBridge("sl:session", null);
+    const session = tabSession || localSession || bridgedSession;
+    const demoTeam = teams.find((team) => /demo/i.test(String(team?.id || team?.name || "")));
+    const activeTeamId = String(session?.teamId || session?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
+    let matchedTeam = false;
+    const nextTeams = teams.map((team) => {
+      if (String(team?.id || "") !== activeTeamId) return team;
+      matchedTeam = true;
+      return {
+        ...team,
+        id: activeTeamId,
+        name: nextTeamName,
+        ownerCoachId: team?.ownerCoachId || session?.email || null,
+        branding: { ...(team.branding || {}), ...nextBranding, teamName: "" },
+      };
+    });
+    if (!matchedTeam) {
+      nextTeams.push({
+        id: activeTeamId,
+        name: nextTeamName,
+        ownerCoachId: session?.email || null,
+        joinCode: "DEMO26",
+        branding: { ...nextBranding, teamName: "" },
+      });
+    }
+    const serializedTeams = JSON.stringify(nextTeams);
+    localStorage.setItem("sl:teams", serializedTeams);
+    try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
+
+    const nextSession = session ? { ...session, name: nextUserName, teamId: activeTeamId, team_id: activeTeamId } : session;
+    if (nextSession) {
+      const serializedSession = JSON.stringify(nextSession);
+      localStorage.setItem("sl:session", serializedSession);
+      sessionStorage.setItem("sl:session", serializedSession);
+      try { await window.storage?.set?.("sl:session", serializedSession, true); } catch {}
+    }
+    return {
+      email: String(nextSession?.email || "").trim(),
+      name: String(nextSession?.name || nextUserName),
+      role: "coach",
+      team_id: activeTeamId,
+      teamId: activeTeamId,
+    };
+  }, { nextTeamName: teamName, nextUserName: userName, nextBranding: branding });
+
+  await page.route("**/v1/legacy-auth/restore", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, profile: restoreProfile }),
+  }));
+  await page.goto("/?demo=1");
+  await suppressMotion(page);
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(450);
+  return teamName;
+}
+
+test("records exact formerly failing difficult-branding Coach Hero geometry", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 844 });
+  await enterCoachDemo(page);
+  const teamName = await applyDifficultBranding(page);
+  const hero = page.getByTestId("coach-primary-objective");
+  await expect(hero).toBeVisible();
+  await expect(hero.locator(".mcHeroTeamMark .mcTeamFallback")).toBeVisible();
+
+  const metrics = await hero.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const title = element.querySelector("h1");
+    const team = element.querySelector(".mcProgramIdentity");
+    const crest = element.querySelector(".mcHeroTeamMark img");
+    const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
+    const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      hero: { left: rect.left, right: rect.right, height: rect.height },
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      teamName: team?.textContent?.trim() || "",
+      crest: { width: crestRect?.width || 0, height: crestRect?.height || 0, objectFit: crest ? getComputedStyle(crest).objectFit : "fallback" },
+      overflow: {
+        document: document.documentElement.scrollWidth - innerWidth,
+        body: document.body.scrollWidth - innerWidth,
+      },
+    };
+  });
+
+  expect(metrics.teamName.startsWith(teamName)).toBe(true);
+  expect(metrics.hero.height).toBeGreaterThanOrEqual(360);
+  expect(metrics.hero.height).toBeLessThanOrEqual(500);
+  expect(metrics.titleSize).toBeGreaterThanOrEqual(44);
+  expect(metrics.titleSize).toBeLessThanOrEqual(60);
+  expect(metrics.crest.width).toBeGreaterThanOrEqual(104);
+  expect(metrics.crest.height).toBeGreaterThanOrEqual(104);
+  expect(metrics.hero.left).toBeGreaterThanOrEqual(-1);
+  expect(metrics.hero.right).toBeLessThanOrEqual(metrics.viewport.width + 1);
+  expect(metrics.overflow.document).toBeLessThanOrEqual(1);
+  expect(metrics.overflow.body).toBeLessThanOrEqual(1);
+
+  fs.writeFileSync(path.join(OUTPUT, "difficult-branding-coach-375x844.json"), `${JSON.stringify(metrics, null, 2)}\n`);
+  await page.screenshot({ path: path.join(OUTPUT, "difficult-branding-coach-375x844.png"), animations: "disabled", fullPage: false });
+});
