@@ -166,25 +166,11 @@ header.teamIdentityTitleStage[data-team-identity-stage="true"] {
 /* Player Home is the only place where the immersive Player credential remains visible. */
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"][data-team-identity-stage="true"] { display: none !important; }
 
-/*
- * Mobile title ownership must survive the historical authenticated appHeader cascade.
- * These selectors intentionally carry #root specificity: old generic .appHeaderTitle
- * rules are loaded later in some split bundles and also use !important.
- */
+/* The #root id keeps title sizing/spacing authoritative over late legacy appHeader rules. */
 @media (max-width: 760px) {
-  html body #root header.teamIdentityTitleStage[data-team-identity-stage="true"].teamIdentityTitleStage--hero h1.teamIdentityTitleStage__title.appHeaderTitle {
+  #root [data-team-identity-stage="true"] h1.appHeaderTitle {
     font-size: var(--identity-title) !important;
-    line-height: .92 !important;
     letter-spacing: -.064em !important;
-  }
-  html body #root header.teamIdentityTitleStage[data-team-identity-stage="true"].teamIdentityTitleStage--standard h1.teamIdentityTitleStage__title.appHeaderTitle {
-    font-size: var(--identity-title) !important;
-    line-height: .92 !important;
-    letter-spacing: -.064em !important;
-  }
-  html body #root header.teamIdentityTitleStage[data-team-identity-stage="true"].teamIdentityTitleStage--standard.teamIdentityTitleStage--longTitle h1.teamIdentityTitleStage__title.appHeaderTitle {
-    font-size: clamp(39px, 10.2vw, 48px) !important;
-    line-height: .94 !important;
   }
 }
 
