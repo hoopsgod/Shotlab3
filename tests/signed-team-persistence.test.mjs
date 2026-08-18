@@ -31,6 +31,20 @@ const TEAM_B = {
   coach_user_id: "22222222-2222-4222-8222-222222222222",
 };
 
+const CUSTOM_BRANDING = {
+  teamName: "Alpha",
+  primaryColor: "#123456",
+  secondaryColor: "#ABCDEF",
+  accentColor: "#22C55E",
+  textOnPrimary: "#FFFFFF",
+  logoUrl: "https://cdn.example.com/alpha-full.png",
+  logoMarkUrl: "https://cdn.example.com/alpha-mark.png",
+  textScale: "large",
+  updatedAt: 123456,
+  updatedBy: "coach@example.com",
+  version: 3,
+};
+
 function context({ method = "GET", path = "/v1/teams", body, headers = {}, host = "shotlab.test" } = {}) {
   return {
     request: new Request(`https://${host}${path}`, {
@@ -102,12 +116,14 @@ test("production email headers are not accepted as team identity proof", async (
   assert.equal(response.status, 401);
 });
 
-test("players read their team but cannot update team metadata", async () => {
-  const backend = installBackend({ requester: "player@example.com", role: "player" });
+test("players read their team branding but cannot update team metadata or branding", async () => {
+  const backend = installBackend({ requester: "player@example.com", role: "player", teams: [{ ...TEAM_A, branding: CUSTOM_BRANDING }, TEAM_B] });
   try {
     const read = await getTeams(context({ path: "/v1/teams?team_id=team-a", headers: { "x-user-id": "player@example.com" } }));
     assert.equal(read.status, 200);
-    assert.deepEqual((await read.json()).teams.map((row) => row.id), ["team-a"]);
+    const readRows = (await read.json()).teams;
+    assert.deepEqual(readRows.map((row) => row.id), ["team-a"]);
+    assert.equal(readRows[0].branding.logoUrl, CUSTOM_BRANDING.logoUrl);
 
     const crossTeam = await getTeams(context({ path: "/v1/teams?team_id=team-b", headers: { "x-user-id": "player@example.com" } }));
     assert.equal(crossTeam.status, 403);
@@ -115,15 +131,17 @@ test("players read their team but cannot update team metadata", async () => {
     const update = await syncTeams(context({
       method: "POST",
       headers: { "x-user-id": "player@example.com" },
-      body: { teams: [{ ...TEAM_A, name: "Player changed team" }] },
+      body: { teams: [{ ...TEAM_A, name: "Player changed team", branding: { ...CUSTOM_BRANDING, logoUrl: "https://evil.example/player.png" } }] },
     }));
     assert.equal(update.status, 200);
     assert.equal((await update.json()).ignored_count, 1);
-    assert.equal(backend.state.teams.find((row) => row.id === "team-a")?.name, "Alpha");
+    const stored = backend.state.teams.find((row) => row.id === "team-a");
+    assert.equal(stored.name, "Alpha");
+    assert.equal(stored.branding.logoUrl, CUSTOM_BRANDING.logoUrl);
   } finally { backend.restore(); }
 });
 
-test("coaches update only owned team metadata and immutable ownership stays intact", async () => {
+test("coaches update only owned team metadata and sanitized branding while immutable ownership stays intact", async () => {
   const backend = installBackend();
   try {
     const update = await syncTeams(context({
@@ -136,7 +154,7 @@ test("coaches update only owned team metadata and immutable ownership stays inta
           join_code: "NEW123",
           school: "Updated School",
           level: "JV",
-          branding: { unsupported: true },
+          branding: { ...CUSTOM_BRANDING, unsupported: true },
         }],
       },
     }));
@@ -149,7 +167,10 @@ test("coaches update only owned team metadata and immutable ownership stays inta
     assert.equal(stored.owner_coach_id, TEAM_A.owner_coach_id);
     assert.equal(stored.coach_user_id, TEAM_A.coach_user_id);
     assert.equal(stored.created_at, TEAM_A.created_at);
-    assert.equal(Object.hasOwn(stored, "branding"), false);
+    assert.equal(stored.branding.logoUrl, CUSTOM_BRANDING.logoUrl);
+    assert.equal(stored.branding.logoMarkUrl, CUSTOM_BRANDING.logoMarkUrl);
+    assert.equal(stored.branding.primaryColor, CUSTOM_BRANDING.primaryColor);
+    assert.equal(Object.hasOwn(stored.branding, "unsupported"), false);
 
     const ownerChange = await syncTeams(context({
       method: "POST",
@@ -162,11 +183,32 @@ test("coaches update only owned team metadata and immutable ownership stays inta
     const otherTeam = await syncTeams(context({
       method: "POST",
       headers: { "x-user-id": "coach@example.com" },
-      body: { teams: [{ ...TEAM_B, name: "Unauthorized" }] },
+      body: { teams: [{ ...TEAM_B, name: "Unauthorized", branding: CUSTOM_BRANDING }] },
     }));
     assert.equal(otherTeam.status, 200);
     assert.equal((await otherTeam.json()).ignored_count, 1);
     assert.equal(backend.state.teams.find((row) => row.id === "team-b")?.name, "Beta");
+  } finally { backend.restore(); }
+});
+
+test("branding API rejects unsupported and oversized logo sources", async () => {
+  const backend = installBackend();
+  try {
+    const invalid = await syncTeams(context({
+      method: "POST",
+      headers: { "x-user-id": "coach@example.com" },
+      body: { teams: [{ ...TEAM_A, branding: { logoUrl: "javascript:alert(1)" } }] },
+    }));
+    assert.equal(invalid.status, 400);
+    assert.equal((await invalid.json()).error, "branding_logo_source_invalid");
+
+    const tooLarge = await syncTeams(context({
+      method: "POST",
+      headers: { "x-user-id": "coach@example.com" },
+      body: { teams: [{ ...TEAM_A, branding: { logoUrl: `data:image/png;base64,${"A".repeat(1_500_001)}` } }] },
+    }));
+    assert.equal(tooLarge.status, 413);
+    assert.equal((await tooLarge.json()).error, "branding_logo_too_large");
   } finally { backend.restore(); }
 });
 
@@ -191,11 +233,12 @@ test("generic persistence cannot create teams or reuse another team's join code"
   } finally { backend.restore(); }
 });
 
-test("team cache is reduced to the active team and REST requests use the signed API", async () => {
+test("team cache is reduced to the active team, preserves pre-rollout branding, and REST requests use the signed API", async () => {
+  const locallyBrandedTeam = { ...TEAM_A, branding: CUSTOM_BRANDING };
   const storage = memoryStorage([
     ["sl:session", JSON.stringify({ email: "coach@example.com", teamId: "team-a", role: "coach" })],
     ["sl:players", JSON.stringify([{ id: "coach-row", email: "coach@example.com", teamId: "team-a", role: "coach" }])],
-    ["sl:teams", JSON.stringify([TEAM_A, TEAM_B])],
+    ["sl:teams", JSON.stringify([locallyBrandedTeam, TEAM_B])],
   ]);
   assert.deepEqual(bridgeUtils.pruneTeamCache(storage).map((row) => row.id), ["team-a"]);
 
@@ -208,7 +251,7 @@ test("team cache is reduced to the active team and REST requests use the signed 
       calls.push({ input: String(input), init });
       if (String(input).startsWith("/v1/teams")) {
         if (String(init.method || "GET").toUpperCase() === "POST") return Response.json({ ok: true, teams: JSON.parse(init.body).teams });
-        return Response.json({ ok: true, teams: [TEAM_A] });
+        return Response.json({ ok: true, teams: [{ ...TEAM_A, branding: {} }] });
       }
       return Response.json([{ passthrough: true }]);
     },
@@ -216,19 +259,28 @@ test("team cache is reduced to the active team and REST requests use the signed 
 
   installApiIdentityFetchBridge(target);
   const read = await target.fetch("https://example.supabase.co/rest/v1/teams?select=*");
-  assert.deepEqual((await read.json()).map((row) => row.id), ["team-a"]);
+  const rows = await read.json();
+  assert.deepEqual(rows.map((row) => row.id), ["team-a"]);
+  assert.equal(rows[0].branding.logoUrl, CUSTOM_BRANDING.logoUrl);
   assert.match(calls[0].input, /^\/v1\/teams\?team_id=team-a$/);
-  assert.deepEqual(JSON.parse(storage.snapshot("sl:teams")).map((row) => row.id), ["team-a"]);
+  const cached = JSON.parse(storage.snapshot("sl:teams"));
+  assert.deepEqual(cached.map((row) => row.id), ["team-a"]);
+  assert.equal(cached[0].branding.logoMarkUrl, CUSTOM_BRANDING.logoMarkUrl);
   assert.equal(calls.some((call) => call.input.includes("/rest/v1/teams")), false);
   assert.equal(bridgeUtils.signedTeamResourceFor("https://example.supabase.co/rest/v1/teams", target), true);
   assert.equal(bridgeUtils.signedTeamResourceFor("https://evil.example/rest/v1/teams", target), false);
 });
 
-test("migration removes direct browser access without deleting teams", () => {
-  const migration = fs.readFileSync(new URL("../migrations/047_teams_signed_api_boundary.sql", import.meta.url), "utf8");
-  assert.match(migration, /alter table public\.teams enable row level security/i);
-  assert.match(migration, /drop policy if exists "Allow all" on public\.teams/i);
-  assert.match(migration, /revoke all privileges on table public\.teams from public, anon, authenticated/i);
-  assert.match(migration, /grant select, insert, update, delete on table public\.teams to service_role/i);
-  assert.doesNotMatch(migration, /drop table|truncate table|delete from/i);
+test("team security boundary remains locked while branding persistence is additive", () => {
+  const lockdown = fs.readFileSync(new URL("../migrations/047_teams_signed_api_boundary.sql", import.meta.url), "utf8");
+  assert.match(lockdown, /alter table public\.teams enable row level security/i);
+  assert.match(lockdown, /drop policy if exists "Allow all" on public\.teams/i);
+  assert.match(lockdown, /revoke all privileges on table public\.teams from public, anon, authenticated/i);
+  assert.match(lockdown, /grant select, insert, update, delete on table public\.teams to service_role/i);
+  assert.doesNotMatch(lockdown, /drop table|truncate table|delete from/i);
+
+  const brandingMigration = fs.readFileSync(new URL("../migrations/055_team_branding_signed_persistence.sql", import.meta.url), "utf8");
+  assert.match(brandingMigration, /add column if not exists branding jsonb not null default '\{\}'::jsonb/i);
+  assert.match(brandingMigration, /jsonb_typeof\(branding\) = 'object'/i);
+  assert.doesNotMatch(brandingMigration, /grant .* anon|grant .* authenticated|disable row level security/i);
 });
