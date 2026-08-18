@@ -67,12 +67,17 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
     const tabSession = parseRaw(sessionStorage.getItem("sl:session"), null);
     const bridgedSession = await readBridge("sl:session", null);
     const session = tabSession || localSession || bridgedSession;
-    const activeTeamId = session?.teamId || session?.team_id || teams.find((team) => /demo/i.test(String(team?.id || "")))?.id;
+    const demoTeam = teams.find((team) => /demo/i.test(String(team?.id || team?.name || "")));
+    const activeTeamId = String(session?.teamId || session?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
+    let matchedTeam = false;
     const nextTeams = teams.map((team) => {
-      if (String(team?.id || "") !== String(activeTeamId || "")) return team;
+      if (String(team?.id || "") !== activeTeamId) return team;
+      matchedTeam = true;
       return {
         ...team,
-        name: nextTeamName || team.name,
+        id: activeTeamId,
+        name: nextTeamName || team.name || "Demo Titans",
+        ownerCoachId: team?.ownerCoachId || session?.email || null,
         branding: {
           ...(team.branding || {}),
           ...nextBranding,
@@ -80,26 +85,38 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         },
       };
     });
+    if (!matchedTeam) {
+      nextTeams.push({
+        id: activeTeamId,
+        name: nextTeamName || "Demo Titans",
+        ownerCoachId: session?.email || null,
+        joinCode: "DEMO26",
+        branding: { ...nextBranding, teamName: nextBranding.teamName ?? "" },
+      });
+    }
     const serializedTeams = JSON.stringify(nextTeams);
     localStorage.setItem("sl:teams", serializedTeams);
     try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
 
-    const nextSession = session && nextUserName ? { ...session, name: nextUserName } : session;
+    const nextSession = session ? {
+      ...session,
+      ...(nextUserName ? { name: nextUserName } : {}),
+      teamId: activeTeamId,
+      team_id: activeTeamId,
+    } : session;
     if (nextSession) {
       const serializedSession = JSON.stringify(nextSession);
-      if (localSession) localStorage.setItem("sl:session", serializedSession);
-      if (tabSession) sessionStorage.setItem("sl:session", serializedSession);
-      if (bridgedSession) {
-        try { await window.storage?.set?.("sl:session", serializedSession, true); } catch {}
-      }
+      localStorage.setItem("sl:session", serializedSession);
+      sessionStorage.setItem("sl:session", serializedSession);
+      try { await window.storage?.set?.("sl:session", serializedSession, true); } catch {}
     }
     const email = String(nextSession?.email || "").trim();
     return {
       email,
       name: String(nextSession?.name || nextUserName || "Demo Coach"),
       role: nextSession?.role === "player" ? "player" : "coach",
-      team_id: activeTeamId || null,
-      teamId: activeTeamId || null,
+      team_id: activeTeamId,
+      teamId: activeTeamId,
     };
   }, { teamName, branding, userName });
 
