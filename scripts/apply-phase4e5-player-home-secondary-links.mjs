@@ -5,6 +5,7 @@ const authorityPath = 'public/shotlab-v3-mobile-corrections.css';
 let source = readFileSync(appPath, 'utf8');
 let authority = readFileSync(authorityPath, 'utf8');
 
+const compactCss = (value) => String(value || '').replace(/\s+/g, '');
 const targets = [
   {
     marker: 'data-player-home-schedule-action',
@@ -37,11 +38,22 @@ for (const target of targets) {
 if (sourceChanged) writeFileSync(appPath, source);
 
 const authorityMarker = 'Phase 4E.5 Player Home expanded secondary-link physical targets';
-if (!authority.includes(authorityMarker)) {
-  authority += `\n\n/* ${authorityMarker}. Keep the accepted text-link hierarchy while making the reachable expanded actions touch-safe. */\n.performance-shell[data-workspace-tab="home"] button[data-player-home-schedule-action],\n.performance-shell[data-workspace-tab="home"] button[data-player-home-coach-guidance-action] {\n  min-height: 44px !important;\n  box-sizing: border-box !important;\n  touch-action: manipulation !important;\n}\n`;
-  writeFileSync(authorityPath, authority);
+const targetRule = `.performance-shell[data-workspace-tab="home"] button[data-player-home-schedule-action],
+.performance-shell[data-workspace-tab="home"] button[data-player-home-coach-guidance-action] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}`;
+const compactAuthority = compactCss(authority);
+const compactTarget = compactCss(targetRule);
+
+if (compactAuthority.includes(compactTarget)) {
+  console.log('Phase 4E.5 final Player Home secondary-link physical targets already applied.');
+} else if (authority.includes(authorityMarker)) {
+  throw new Error('Phase 4E.5 authority marker exists but the secondary-link physical target contract is malformed.');
 } else {
-  console.log('Phase 4E.5 final Player Home secondary-link authority already applied.');
+  authority += `\n\n/* ${authorityMarker}. Touch-safety contract only; Player title composition remains source-owned. */\n${targetRule}\n`;
+  writeFileSync(authorityPath, authority);
 }
 
 console.log('Applied Phase 4E.5 Player Home secondary-link hit-area correction.');
