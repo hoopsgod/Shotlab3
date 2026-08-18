@@ -44,7 +44,7 @@ const contrast = (a, b) => {
 
 test("secondary page materials are explicit instead of inferred from names", () => {
   assert.match(secondaryJsx, /data-visual-role="secondary-page"[^>]*data-surface="light"|data-surface="light"[^>]*data-visual-role="secondary-page"/);
-  assert.match(secondaryJsx, /data-visual-role="page-intro"/);
+  assert.match(secondaryJsx, /dataVisualRole="page-intro"/);
   assert.match(secondaryJsx, /data-surface="dark" data-visual-role="primary-decision"/);
   assert.match(secondaryJsx, /data-surface="light" data-visual-role="supporting-evidence"/);
 });
