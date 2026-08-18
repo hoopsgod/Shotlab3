@@ -68,9 +68,9 @@ test("cinematic hero preserves a visible source-owned coach logo and integrates 
   assert.match(source,/\.mcHeroTeamMark\{position:static!important;display:grid!important;width:var\(--coach-hero-crest\)!important;height:var\(--coach-hero-crest\)!important/);
   assert.match(source,/\.mcHeroTeamMark img\{[\s\S]*?object-fit:contain!important/);
   assert.match(premiumCss,/mix-blend-mode:screen/);
-  assert.match(premiumCss,/mask-image:radial-gradient/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
-  assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]{0,220}display:\s*none\s*!important/);
+  assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{/);
+  assert.doesNotMatch(finalCss,/\.mcHeroTeamMark\s*\{/);
 });
 
 test("custom team logos are cleaned, persisted, and previewed on light and dark surfaces",()=>{
@@ -153,12 +153,13 @@ test("responsive CSS creates a native-feeling mobile operating system with premi
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
-test("Mission Control uses the modern native visual system instead of tiny condensed dashboard UI",()=>{
+test("Mission Control uses the modern native support system while title geometry remains source-owned",()=>{
   assert.match(finalCss,/--mc-native:/);
-  assert.match(finalCss,/--mc-title-size:/);
-  assert.match(finalCss,/--mc-radius-hero:/);
+  assert.match(finalCss,/--mc-radius-card:/);
   assert.match(finalCss,/font-family:\s*var\(--mc-native\)/);
   assert.match(finalCss,/\.mcSectionHead h2\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
+  assert.doesNotMatch(finalCss,/--mc-title-size|--mc-radius-hero/);
+  assert.doesNotMatch(finalCss,/\.mcHero\s+h1\s*\{|\.mcHeroTeamMark\s*\{|\.mcHeroContent\s*>\s*p\s*\{/);
   assert.match(source,/\.mcHeader\{grid-template-columns:44px minmax\(0,1fr\) 44px!important/);
   assert.match(source,/\.mcHero h1\{[\s\S]*?font-size:clamp\(46px,12vw,58px\)!important/);
   assert.match(source,/\.mcHeroContent>p\{[\s\S]*?font-size:13px!important/);
