@@ -10,6 +10,12 @@
   color: #151918;
 }
 
+.teamIdentityTitleStageFrame {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
 .teamIdentityTitleStage__inner {
   position: relative;
   z-index: 2;
@@ -71,9 +77,22 @@
   gap: 10px;
   margin-top: 12px;
 }
+.teamIdentityTitleStage__support--external {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0 2px 2px;
+}
 .teamIdentityTitleStage__status {
   color: #58635c;
   font: 680 12px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.teamIdentityTitleStage__support--external .teamIdentityTitleStage__status {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .teamIdentityTitleStage__status::before {
   content: "";
@@ -86,6 +105,10 @@
   vertical-align: 1px;
 }
 .teamIdentityTitleStage__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
 .teamIdentityTitleStage__action {
   min-height: 44px;
   padding: 0 14px;
@@ -178,13 +201,28 @@
 @media (max-width: 760px) {
   [data-testid="coach-dashboard-identity-header"].coachDashboardIdentityStage { display: none; }
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action {
+    padding-inline: 8px;
+    font-size: 11px;
+    letter-spacing: -.01em;
+  }
 }
 
 @media (max-width: 390px) {
-  .teamIdentityTitleStage { --identity-crest: 96px; --identity-title: 42px; }
+  .teamIdentityTitleStage { --identity-crest: 84px; --identity-title: 40px; }
   .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
-  .teamIdentityTitleStage__inner { gap: 14px; }
-  .teamIdentityTitleStage__identityLine { font-size: 11px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 12px; padding: 10px 2px 12px; }
+  .teamIdentityTitleStage__identityLine { margin-bottom: 6px; font-size: 11px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary { margin-top: 8px; line-height: 1.4; }
+  .teamIdentityTitleStage__support--external { gap: 7px; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { gap: 6px; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__status { font-size: 11px; white-space: nowrap; }
+}
+
+@media (max-width: 350px) {
+  .teamIdentityTitleStage__support--external { align-items: stretch; flex-direction: column; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { width: 100%; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action { flex: 1 1 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
