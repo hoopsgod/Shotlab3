@@ -58,6 +58,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
   'scripts/apply-team-identity-branding-boundary.mjs',
+  'scripts/apply-demo-coach-branding-runtime-fix.mjs',
 ])
 
 const RELEASE_AUTH_RECOVERY_MARKER = 'const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;'
