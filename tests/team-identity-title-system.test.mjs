@@ -58,7 +58,7 @@ test("team crest and Player Home hero are isolated from legacy secondary-route a
 test("late title authority owns mobile secondary geometry after legacy appHeader rules", () => {
   assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
   assert.match(renderedAuthority, /display:\s*block\s*!important/);
-  assert.match(renderedAuthority, /grid-template-columns:\s*minmax\(0,1fr\)\s*var\(--identity-crest\)\s*!important/);
+  assert.match(renderedAuthority, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s*var\(--identity-crest\)\s*!important/);
   assert.match(renderedAuthority, /min-width:\s*var\(--identity-crest\)\s*!important/);
 });
 
@@ -66,9 +66,9 @@ test("one last public presentation layer remains a supplemental final authority"
   assert.doesNotMatch(stage, /TeamIdentityTitleStageAuthority\.css/);
   assert.match(renderedAuthority, /final rendered authority/i);
   assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
-  assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px, 29vw, 120px\) !important/);
-  assert.match(renderedAuthority, /font-size: var\(--identity-title\) !important/);
-  assert.match(renderedAuthority, /object-fit: contain !important/);
+  assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)\s*!important/);
+  assert.match(renderedAuthority, /font-size:\s*var\(--identity-title\)\s*!important/);
+  assert.match(renderedAuthority, /object-fit:\s*contain\s*!important/);
   assert.match(brandingBoundary, /shotlab-team-identity-title-authority/);
 });
 
@@ -120,6 +120,6 @@ test("Coach Home integrates program identity into Mission Control rather than st
   assert.match(brandingBoundary, /mcProgramIdentity/);
   assert.match(brandingBoundary, /mcTeamFallback/);
   assert.match(renderedAuthority, /Coach Home — the existing Mission Control decision surface becomes the immersive team Hero variant/);
-  assert.match(renderedAuthority, /coach-dashboard-identity-header[\s\S]*display: none !important/);
-  assert.match(renderedAuthority, /mcHeroTeamMark[\s\S]*clamp\(112px,30vw,128px\)/);
+  assert.match(renderedAuthority, /coach-dashboard-identity-header[\s\S]*display:\s*none\s*!important/);
+  assert.match(renderedAuthority, /mcHeroTeamMark[\s\S]*clamp\(112px,\s*30vw,\s*128px\)/);
 });
