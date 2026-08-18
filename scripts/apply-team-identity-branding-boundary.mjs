@@ -12,8 +12,6 @@ function replaceOnce(source, before, after, label) {
   return source.replace(before, after);
 }
 
-// The authoritative program name lives on the team record. Brand settings contain
-// visual overrides, so merge the real team name into the shared branding context.
 {
   const file = "src/App.jsx";
   let source = read(file);
@@ -21,13 +19,17 @@ function replaceOnce(source, before, after, label) {
     source,
     'const resolvedTeamBranding=resolveTeamBranding(myTeam?.branding||DEFAULT_BRANDING);',
     'const resolvedTeamBranding=resolveTeamBranding({...(myTeam?.branding||{}),teamName:myTeam?.branding?.teamName||myTeam?.name||"Your Team"});',
-    "Team identity App branding boundary"
+    "authoritative team-name branding boundary"
+  );
+  source = replaceOnce(
+    source,
+    'demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};',
+    'demoTeam={id:genId("team"),name:"Demo Titans",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:{...DEFAULT_BRANDING,teamName:"Demo Titans",logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"}};',
+    "explicit Demo Titans team seed"
   );
   write(file, source);
 }
 
-// Demo is a real program fixture, not a global product fallback. Give it explicit
-// program branding so Demo and registered teams travel through the same title system.
 {
   const file = "src/lib/demoData.js";
   let source = read(file);
@@ -57,100 +59,70 @@ function replaceOnce(source, before, after, label) {
     },
     updatedAt: Date.now(),
   };`;
-  source = replaceOnce(source, before, after, "Demo team explicit branding fixture");
+  source = replaceOnce(source, before, after, "standalone Demo team branding fixture");
   write(file, source);
 }
 
-// Program Branding must never preview or save another program's crest when no logo
-// exists. Empty logo state is deliberate; TeamIdentityTitleStage supplies initials.
 {
-  const file = "src/components/team/TeamBrandingForm.jsx";
+  const file = "src/components/CoachCommandCenter.jsx";
   let source = read(file);
   source = replaceOnce(
     source,
-    'const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";\nconst FALLBACK_MARK = "/branding/titans-default-mark.svg";',
-    'const FALLBACK_LOGO = "";\nconst FALLBACK_MARK = "";',
-    "Program Branding neutral logo fallback"
+    'const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";\nconst DEFAULT_MARK = "/branding/titans-default-mark.svg";',
+    'const FALLBACK_LOGO = "";\nconst DEFAULT_MARK = "";',
+    "neutral Coach Mission Control logo fallback"
   );
-
-  const beforePreview = `function LogoPreview({ src, label }) {
-  return (
-    <div style={{ display: "grid", gap: 7 }}>
-      <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#050708", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={\`\${label} on dark background\`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
-        </div>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "linear-gradient(45deg,#e5e7eb 25%,#fff 25%,#fff 50%,#e5e7eb 50%,#e5e7eb 75%,#fff 75%) 0 0/18px 18px", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={\`\${label} transparency preview\`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
-        </div>
-      </div>
-    </div>
+  source = replaceOnce(
+    source,
+    'const teamName = branding?.teamName || branding?.name || "Thomas Titans";',
+    'const teamName = branding?.teamName || branding?.name || "Your Team";',
+    "neutral Coach Mission Control team-name fallback"
   );
-}`;
-  const afterPreview = `function LogoPreview({ src, label }) {
-  if (!src) {
-    return (
-      <div style={{ display: "grid", gap: 7 }}>
-        <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px dashed rgba(255,255,255,0.18)", background: "#0c1118", display: "grid", placeItems: "center", padding: 14, color: "#929AA5", fontSize: 12, lineHeight: 1.45, textAlign: "center" }}>No logo uploaded. ShotLab will use the team initials in title stages.</div>
-      </div>
-    );
-  }
-  return (
-    <div style={{ display: "grid", gap: 7 }}>
-      <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#050708", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={\`\${label} on dark background\`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
-        </div>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "linear-gradient(45deg,#e5e7eb 25%,#fff 25%,#fff 50%,#e5e7eb 50%,#e5e7eb 75%,#fff 75%) 0 0/18px 18px", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={\`\${label} transparency preview\`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
-        </div>
-      </div>
-    </div>
+  source = replaceOnce(source, 'function CourtArtwork({ logoUrl }) {', 'function CourtArtwork({ logoUrl, teamName }) {', "Coach court artwork identity signature");
+  source = replaceOnce(
+    source,
+    '<div className="mcCourtFloor"><span className="mcSideline" /><span className="mcCenterLine" /><span className="mcKey" /><span className="mcThreePoint" /><img src={logoUrl || FALLBACK_LOGO} alt="" /></div>',
+    '<div className="mcCourtFloor"><span className="mcSideline" /><span className="mcCenterLine" /><span className="mcKey" /><span className="mcThreePoint" />{logoUrl ? <img src={logoUrl} alt="" /> : <span className="mcCourtFallback">{initials(teamName)}</span>}</div>',
+    "Coach court artwork initials fallback"
   );
-}`;
-  source = replaceOnce(source, beforePreview, afterPreview, "Program Branding empty logo preview");
-
-  const beforeCleaner = `  const cleanCurrentLogos = async () => {
-    try {
-      setCleaning(true);
-      const [full, mark] = await Promise.all([
-        cleanTeamLogoSource(values.logoUrl || FALLBACK_LOGO),
-        cleanTeamLogoSource(values.logoMarkUrl || FALLBACK_MARK),
-      ]);
-      setValues((previous) => ({ ...previous, logoUrl: full, logoMarkUrl: mark }));
-      setUploadError("");
-    } catch {
-      setUploadError("The current logo URL could not be cleaned. Uploading the file directly usually works better.");
-    } finally {
-      setCleaning(false);
-    }
-  };`;
-  const afterCleaner = `  const cleanCurrentLogos = async () => {
-    const fullSource = values.logoUrl || FALLBACK_LOGO;
-    const markSource = values.logoMarkUrl || FALLBACK_MARK;
-    if (!fullSource && !markSource) {
-      setUploadError("Add or upload a team logo before cleaning.");
-      return;
-    }
-    try {
-      setCleaning(true);
-      const [full, mark] = await Promise.all([
-        fullSource ? cleanTeamLogoSource(fullSource) : Promise.resolve(""),
-        markSource ? cleanTeamLogoSource(markSource) : Promise.resolve(""),
-      ]);
-      setValues((previous) => ({ ...previous, logoUrl: full, logoMarkUrl: mark }));
-      setUploadError("");
-    } catch {
-      setUploadError("The current logo URL could not be cleaned. Uploading the file directly usually works better.");
-    } finally {
-      setCleaning(false);
-    }
-  };`;
-  source = replaceOnce(source, beforeCleaner, afterCleaner, "Program Branding empty logo cleaning guard");
+  source = replaceOnce(source, '<CourtArtwork logoUrl={cleanMarkLogoUrl} />', '<CourtArtwork logoUrl={cleanMarkLogoUrl} teamName={teamName} />', "Coach Hero court identity input");
+  source = replaceOnce(
+    source,
+    '<img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} />',
+    '{cleanFullLogoUrl ? <img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} /> : <span className="mcTeamFallback">{initials(teamName)}</span>}',
+    "Coach rail initials fallback"
+  );
+  source = replaceOnce(
+    source,
+    '<img style={{width:48,height:48,display:"block",objectFit:"contain",filter:"drop-shadow(0 8px 16px rgba(7,28,40,.13))"}} src={cleanMarkLogoUrl} alt="" />',
+    '{cleanMarkLogoUrl ? <img style={{width:48,height:48,display:"block",objectFit:"contain",filter:"drop-shadow(0 8px 16px rgba(7,28,40,.13))"}} src={cleanMarkLogoUrl} alt="" /> : <span className="mcTeamFallback">{initials(teamName)}</span>}',
+    "Coach header initials fallback"
+  );
+  source = replaceOnce(
+    source,
+    '<button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>',
+    '<button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{cleanMarkLogoUrl ? <img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /> : <span className="mcTeamFallback">{initials(teamName)}</span>}</button>',
+    "Coach Hero initials fallback"
+  );
+  source = replaceOnce(
+    source,
+    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
+    '<span className="mcProgramIdentity">{teamName} · Coach</span><span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
+    "Coach Hero team-first identity line"
+  );
   write(file, source);
 }
 
-console.log("Applied team-owned branding boundary, explicit Demo program branding, and neutral missing-logo behavior.");
+{
+  const file = "index.html";
+  let source = read(file);
+  source = replaceOnce(
+    source,
+    '  <link id="shotlab-mobile-centering-reconciliation" rel="stylesheet" href="/shotlab-mobile-centering-reconciliation.css" />',
+    '  <link id="shotlab-mobile-centering-reconciliation" rel="stylesheet" href="/shotlab-mobile-centering-reconciliation.css" />\n  <link id="shotlab-team-identity-title-authority" rel="stylesheet" href="/shotlab-team-identity-title-authority.css?v=20260818" />',
+    "final team identity stylesheet mount"
+  );
+  write(file, source);
+}
+
+console.log("Applied team-owned branding boundary, Demo identity seed, Coach Hero identity, and final rendered title authority.");
