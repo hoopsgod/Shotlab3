@@ -5,6 +5,8 @@ on:
     branches: [march-3-reset-85393dd]
     paths:
       - 'src/components/**'
+      - 'src/styles/**'
+      - 'public/**'
       - 'scripts/**'
       - 'tests/**'
       - '.github/workflows/title-authority-repair-certification.yml'
@@ -25,7 +27,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Focused title architecture contracts
-        run: node --test tests/title-authority-repair.test.mjs tests/mobile-coach-signature-stage.test.mjs tests/phase-5a-route-enhancer-orchestration.test.mjs
+        run: node --test tests/title-authority-repair.test.mjs tests/mobile-coach-signature-stage.test.mjs tests/phase-5a-route-enhancer-orchestration.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/coach-command-center-10x.test.mjs
       - name: Dev enhancer chain is idempotent
         shell: bash
         run: |
@@ -77,7 +79,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - name: Team identity responsive E2E
-        run: npx playwright test tests/e2e/team-identity-title-stage-responsive.spec.mjs tests/e2e/team-identity-title-stage-intermediate-widths.spec.mjs --config=playwright.acceptance.config.mjs
+        run: npx playwright test tests/e2e/team-identity-title-stage-responsive.spec.mjs tests/e2e/team-identity-title-stage-intermediate-widths.spec.mjs tests/e2e/title-authority-final-measurements.spec.mjs --config=playwright.acceptance.config.mjs
       - name: Phase 3A cross-screen visual audit
         run: npx playwright test tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs --config=playwright.acceptance.config.mjs
       - name: Upload fresh title and cross-screen screenshots
@@ -88,6 +90,7 @@ jobs:
           path: |
             artifacts/team-identity-title-stage-responsive/*.png
             artifacts/team-identity-title-stage-intermediate-widths/*.png
+            artifacts/title-authority-final-measurements/*
             artifacts/phase-3a-cross-screen-visual-audit/*.png
           if-no-files-found: warn
           retention-days: 14
