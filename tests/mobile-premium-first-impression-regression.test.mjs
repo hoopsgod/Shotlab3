@@ -65,7 +65,7 @@ test("primary decision moment remains a full-bleed dark performance stage in own
 test("first-impression controls and labels respect the product readability floor", () => {
   assert.match(titleStageCss, /teamIdentityTitleStage__action \{[\s\S]*min-height: 44px;[\s\S]*font: 720 13px/);
   assert.match(titleStageCss, /teamIdentityTitleStage__identityLine \{[\s\S]*font: 780 11px/);
-  assert.match(titleStageCss, /@media \(max-width: 390px\)[\s\S]*teamIdentityTitleStage__identityLine \{ font-size: 11px; \}/);
+  assert.match(titleStageCss, /@media \(max-width: 390px\)[\s\S]*teamIdentityTitleStage__identityLine \{[^}]*font-size:\s*11px;[^}]*\}/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__eyebrow \{[\s\S]*font: 760 var\(--type-micro, 11px\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*font: 720 13px/);
   assert.doesNotMatch(titleStageCss, /font-size:\s*(?:8|9|10)(?:\.\d+)?px\b/);
