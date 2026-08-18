@@ -5,9 +5,12 @@ import fs from "node:fs";
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
+const teamStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
+const teamStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const teamStageAuthority = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStageAuthority.css", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
-const playerOperationalCss = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.module.css", import.meta.url), "utf8");
+const playerOperational = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const playerMetricHierarchyCss = fs.readFileSync(new URL("../src/components/PlayerMetricHierarchy.module.css", import.meta.url), "utf8");
 const secondaryCohesionCss = fs.readFileSync(new URL("../public/shotlab-phase3-secondary-cohesion.css", import.meta.url), "utf8");
 const mobileNav = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
@@ -21,6 +24,7 @@ test("premium mobile hierarchy is owner-level instead of a second additive visua
   assert.doesNotMatch(retiredAuthority, /\{[^}]*:[^}]*\}/);
   assert.match(secondaryPageSystem, /import "\.\/SecondaryPageSystem\.css"/);
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
+  assert.match(teamStage, /TeamIdentityTitleStageAuthority\.css/);
 });
 
 test("retired Coach dashboard authorities cannot override the current production visual system", () => {
@@ -31,17 +35,16 @@ test("retired Coach dashboard authorities cannot override the current production
   assert.match(indexHtml, /shotlab-phase3-secondary-cohesion\.css/);
 });
 
-test("secondary pages use compact ShotLab route stages instead of repeated icon-title cards or ghost artwork", () => {
-  assert.match(secondaryPageSystem, /data-page-kind=\{iconName\}/);
-  assert.match(secondaryPageSystem, /data-mobile-stage="editorial"/);
-  assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
-  assert.match(enhancer, /ShotLab route stage: compact mark \+ editorial type \+ one touch-safe action rail/);
-  assert.match(enhancer, /\.secondaryPageIntro \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 30px minmax\(0, 1fr\);[\s\S]*min-height: 0;/);
-  assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*position: static;[\s\S]*width: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
-  assert.match(enhancer, /font-size:\s*clamp\(31px, 8\.5vw, 34px\) !important/);
-  assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
-  assert.doesNotMatch(enhancer, /width: 74px/);
-  assert.doesNotMatch(enhancer, /opacity: \.13/);
+test("secondary pages use team-owned editorial stages instead of repeated icon-title cards", () => {
+  assert.match(secondaryPageSystem, /TeamIdentityTitleStage/);
+  assert.match(secondaryPageSystem, /dataPageKind=\{iconName\}/);
+  assert.match(secondaryPageSystem, /dataMobileStage="team-identity"/);
+  assert.match(teamStage, /data-team-identity-stage="true"/);
+  assert.match(teamStageCss, /--identity-crest: clamp\(88px, 24vw, 104px\)/);
+  assert.match(teamStageCss, /--identity-title: clamp\(42px, 11vw, 54px\)/);
+  assert.match(teamStageCss, /teamIdentityTitleStage__tonalCrest/);
+  assert.match(teamStageAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
+  assert.match(teamStageAuthority, /font-size: var\(--identity-title\) !important/);
 });
 
 test("primary decisions are edge-to-edge performance bands rather than floating rounded cards", () => {
@@ -62,18 +65,23 @@ test("mobile metrics use a signature hero score band followed by light supportin
   assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,#061923 0%,#082430 62%,#0b2d37 100%\)!important;[\s\S]*box-shadow:none!important/);
   assert.match(playerMetricHierarchyCss, /\.metricPrimary \[class\*="metricValue"\]\{[\s\S]*font-size:46px!important/);
   assert.match(playerMetricHierarchyCss, /\.metricSupporting\{[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
-  assert.match(playerMetricHierarchyCss, /\.metricSupporting \+ \.metricSupporting\{border-left:1px solid/);
 });
 
-test("specialized Player functional headers follow the same concise Level B discipline", () => {
-  assert.match(playerOperationalCss, /@media\(max-width:700px\)/);
-  assert.match(playerOperationalCss, /\.commandBar\{grid-template-columns:1fr;gap:12px;padding:4px 0 14px\}/);
-  assert.match(playerOperationalCss, /\.title\{font-size:clamp\(29px,8vw,32px\);line-height:1/);
-  assert.match(playerOperationalCss, /\.subtitle\{display:none\}/);
-  assert.match(playerOperationalCss, /\.primaryAction\{width:100%;min-height:44px;border-radius:12px\}/);
+test("specialized Player operational headers share the same team identity primitive", () => {
+  assert.match(playerOperational, /TeamIdentityTitleStage/);
+  for (const marker of [
+    '"at-home": "Player"',
+    'program: "Program"',
+    'events: "Schedule"',
+    'strength: "Physical Development"',
+    'leaderboards: "Compete"',
+    'profile: "Development"',
+  ]) assert.ok(playerOperational.includes(marker), `missing ${marker}`);
+  assert.match(playerOperational, /variant="standard"/);
+  assert.match(playerOperational, /dataMobileStage="team-identity"/);
 });
 
-test("Player event and lifting commitment headers join the stronger editorial title rhythm", () => {
+test("Player event and lifting commitment headers retain their editorial action hierarchy", () => {
   assert.match(enhancer, /data-page-hierarchy="editorial"/);
   assert.match(enhancer, /data-layout-role="editorial-header" data-visual-role="page-intro"/);
   assert.match(enhancer, /Premium Level B commitment header/);
@@ -94,22 +102,20 @@ test("Coach detail surfaces use the same edge performance language", () => {
   assert.match(enhancer, /\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2/);
 });
 
-test("persistent Player and Coach identity chrome uses compact signature stages without legacy white cards", () => {
-  assert.match(playerHeader, /data-mobile-chrome="native-identity"/);
-  assert.match(playerHeader, /grid-template-columns:56px minmax\(0,1fr\)!important/);
-  assert.match(playerHeader, /min-height:82px!important/);
-  assert.match(playerHeader, /linear-gradient\(126deg,#061923 0%,#082430 60%,#0a2933 100%\)!important/);
-  assert.match(playerHeader, /data-identity-role="badge"\]\{[\s\S]*color:#c8ff1a!important/);
-  assert.match(playerHeader, /data-identity-role="name"\]\{[\s\S]*font-size:23px!important/);
-  assert.match(playerHeader, /overflow-wrap:anywhere!important/);
-  assert.match(playerHeader, /data-identity-role="tagline"\],\[data-identity-role="mission"\]\)\{display:none!important/);
-  assert.match(coachHeader, /data-mobile-chrome="native-identity"/);
-  assert.match(coachHeader, /grid-template-columns:66px minmax\(0,1fr\)!important/);
-  assert.match(coachHeader, /min-height:102px!important/);
-  assert.match(coachHeader, /linear-gradient\(126deg,#061923 0%,#082430 58%,#0b2d37 100%\)!important/);
-  assert.match(coachHeader, /data-identity-role="badge"\]\{[\s\S]*color:#c8ff1a!important/);
-  assert.match(coachHeader, /data-identity-role="brand-button"\]\{[\s\S]*width:44px!important;[\s\S]*min-height:44px!important/);
-  assert.match(coachHeader, /aria-label="Team Branding Settings"/);
+test("persistent Player and Coach identity chrome uses one shared team-owned hero architecture", () => {
+  for (const header of [playerHeader, coachHeader]) {
+    assert.match(header, /TeamIdentityTitleStage/);
+    assert.match(header, /variant="hero"/);
+    assert.match(header, /surface="dark"/);
+  }
+  assert.match(playerHeader, /role="Player"/);
+  assert.match(coachHeader, /role="Coach"/);
+  assert.match(coachHeader, /Team Branding/);
+  assert.match(teamStageCss, /--identity-crest: clamp\(104px, 29vw, 120px\)/);
+  assert.match(teamStageCss, /object-fit: contain/);
+  assert.match(teamStageCss, /teamIdentityTitleStage__tonalCrest[\s\S]*opacity: \.055/);
+  assert.match(teamStageCss, /teamIdentityTitleStage--dark \.teamIdentityTitleStage__tonalCrest \{ opacity: \.085/);
+  assert.match(teamStageAuthority, /min-height: var\(--identity-crest\) !important/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
 
