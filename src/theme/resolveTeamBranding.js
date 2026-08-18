@@ -1,4 +1,4 @@
-import { DEFAULT_BRANDING } from "./brandingDefaults";
+import { DEFAULT_BRANDING } from "./brandingDefaults.js";
 
 const HTTP_URL_RE = /^https?:\/\//i;
 
@@ -42,7 +42,10 @@ export default function resolveTeamBranding(teamBranding = {}) {
 
   return {
     ...merged,
-    logoUrl: withBrandingCacheBust(merged.logoUrl, merged),
+    logoUrl: withBrandingCacheBust(
+      merged.logoUrl?.includes("/branding/titans-default-mark") ? DEFAULT_BRANDING.logoUrl : merged.logoUrl,
+      merged
+    ),
     logoMarkUrl: withBrandingCacheBust(merged.logoMarkUrl, merged),
   };
 }

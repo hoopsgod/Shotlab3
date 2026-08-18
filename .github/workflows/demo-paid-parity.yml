@@ -47,6 +47,7 @@ jobs:
         run: >-
           node --test
           tests/demo-visual-parity-contract.test.mjs
+          tests/team-branding-legacy-logo-repair.test.mjs
           tests/demo-capability-boundary.test.mjs
           tests/account-capabilities.test.mjs
           tests/demo-data-isolation.test.mjs
