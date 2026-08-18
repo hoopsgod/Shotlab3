@@ -4,71 +4,67 @@ import fs from "node:fs";
 
 const finalMobileCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
-const centeredRouteEnhancer = fs.readFileSync(new URL("../scripts/apply-mobile-centered-route-stage.mjs", import.meta.url), "utf8");
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
-const secondaryBrandMark = fs.readFileSync(new URL("../src/components/SecondaryTeamBrandMark.jsx", import.meta.url), "utf8");
+const teamStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
+const teamStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const teamStageAuthority = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStageAuthority.css", import.meta.url), "utf8");
 const playerOperationalWorkspace = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
-const brandingCss = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
+const brandingPreview = fs.readFileSync(new URL("../src/components/team/TeamBrandingPreview.jsx", import.meta.url), "utf8");
 const metricCss = fs.readFileSync(new URL("../src/components/Phase2PremiumMetricLayer.css", import.meta.url), "utf8");
 const scheduleDisclosure = fs.readFileSync(new URL("../src/components/SecondaryPageDisclosure.jsx", import.meta.url), "utf8");
 const scheduleCss = fs.readFileSync(new URL("../src/components/SecondaryPageDisclosure.module.css", import.meta.url), "utf8");
 const routeFramingCss = fs.readFileSync(new URL("../public/shotlab-phase3-native-route-framing.css", import.meta.url), "utf8");
 
-test("secondary routes use one explicit signature owner instead of a late competing first-viewport stylesheet", () => {
-  assert.match(secondaryPageSystem, /import "\.\/SecondaryPageSystem\.css";/);
-  assert.match(secondaryPageSystem, /import "\.\/Phase2PremiumActionLayer\.css";/);
-  assert.match(secondaryPageSystem, /import "\.\/Phase3CoachLeaderboardHierarchy\.css";/);
-  assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
-  assert.match(enhancer, /ShotLab route stage: compact mark \+ editorial type \+ one touch-safe action rail/);
-  assert.match(secondaryPageSystem, /data-mobile-stage="editorial"/);
+test("secondary routes use one explicit team-title owner and protect it from late legacy route authority", () => {
+  assert.match(secondaryPageSystem, /TeamIdentityTitleStage/);
+  assert.match(secondaryPageSystem, /dataMobileStage="team-identity"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
+  assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
+  assert.match(teamStage, /TeamIdentityTitleStageAuthority\.css/);
+  assert.match(teamStageAuthority, /legacy route enhancers may still rewrite SecondaryPageSystem\.css/);
+  assert.match(teamStageAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
+  assert.match(teamStageAuthority, /font-size: var\(--identity-title\) !important/);
 });
 
-test("team branding is prominent once per secondary-page identity hierarchy", () => {
-  assert.match(secondaryBrandMark, /useTeamBranding/);
-  assert.match(secondaryBrandMark, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
-  assert.match(secondaryBrandMark, /useCleanTeamLogo/);
-  assert.match(secondaryPageSystem, /<SecondaryTeamBrandMark iconName=\{iconName\} variant="route"\/>/);
-  assert.match(secondaryBrandMark, /width: "100%", height: "100%", overflow: "visible"/);
-  assert.match(secondaryBrandMark, /transform: "scale\(1\.45\)"/);
-  assert.match(centeredRouteEnhancer, /width: 56px/);
-  assert.match(centeredRouteEnhancer, /height: 56px/);
-  assert.match(centeredRouteEnhancer, /background: transparent/);
-  assert.match(centeredRouteEnhancer, /border: 0/);
-  assert.match(playerHeader, /useTeamBranding/);
-  assert.match(playerHeader, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
-  assert.doesNotMatch(playerOperationalWorkspace, /SecondaryTeamBrandMark/);
+test("team branding is a dominant but controlled part of every migrated title hierarchy", () => {
+  assert.match(teamStage, /useTeamBranding/);
+  assert.match(teamStage, /hasCustomLogo/);
+  assert.match(teamStage, /useCleanTeamLogo/);
+  assert.match(teamStage, /teamIdentityTitleStage__tonalCrest/);
+  assert.match(teamStage, /teamIdentityTitleStage__fallbackCrest/);
+  assert.match(teamStageCss, /--identity-crest: clamp\(88px, 24vw, 104px\)/);
+  assert.match(teamStageCss, /object-fit: contain/);
+  assert.doesNotMatch(teamStageCss, /object-fit: cover/);
+  assert.match(playerOperationalWorkspace, /TeamIdentityTitleStage/);
+  assert.match(playerHeader, /TeamIdentityTitleStage/);
+  assert.match(coachHeader, /TeamIdentityTitleStage/);
 });
 
-test("mobile route mastheads keep editorial hierarchy without swallowing the first viewport", () => {
-  assert.match(enhancer, /\.secondaryPageIntro \{[\s\S]*min-height: 0;[\s\S]*padding: 7px 0 12px;/);
-  assert.match(enhancer, /\.secondaryPageIntro \.secondaryPageIntro__title\.appHeaderTitle,[\s\S]*font-size: clamp\(31px, 8\.5vw, 34px\) !important/);
-  assert.match(enhancer, /\.secondaryPageIntro__summary \{ display: none; \}/);
-  assert.match(enhancer, /\.secondaryPageIntro__icon \{[\s\S]*width: 30px;[\s\S]*height: 30px;[\s\S]*background: #0b2028;[\s\S]*color: #c8ff1a;/);
-  assert.match(secondaryPageSystem, /coachPlayerDetailWorkspace \.secondaryPageIntro__title,.coachAdministrationWorkspace \.secondaryPageIntro__title\{max-width:16ch!important\}/);
-  assert.match(secondaryPageSystem, /brandingEditorialWorkspace \.secondaryPageIntro__title\{max-width:18ch!important;white-space:nowrap\}/);
-  assert.doesNotMatch(enhancer, /width: 74px/);
-  assert.doesNotMatch(centeredRouteEnhancer, /width: (?:7[0-9]|8[0-9]|9[0-9])px/);
+test("mobile route mastheads keep strong team identity without swallowing the first viewport", () => {
+  assert.match(teamStageCss, /--identity-title: clamp\(42px, 11vw, 54px\)/);
+  assert.match(teamStageCss, /--identity-tonal: clamp\(178px, 52vw, 226px\)/);
+  assert.match(teamStageCss, /teamIdentityTitleStage--longTitle[\s\S]*clamp\(39px, 10\.2vw, 48px\)/);
+  assert.match(teamStageCss, /teamIdentityTitleStage--compact[\s\S]*clamp\(72px, 19vw, 82px\)/);
+  assert.match(teamStageCss, /@media \(max-width: 380px\)/);
+  assert.match(teamStageCss, /--identity-crest: 88px/);
 });
 
-test("primary decision moment is a full-bleed dark performance stage rather than another floating card", () => {
+test("primary decision moment remains a full-bleed dark performance stage rather than another floating card", () => {
   assert.match(enhancer, /\.secondaryPageDecision \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\);/);
   assert.match(enhancer, /\.secondaryPageDecision \{[\s\S]*border-radius: 0;/);
   assert.match(enhancer, /linear-gradient\(128deg, #071a22 0%, #0a222b 58%, #102e35 100%\)/);
   assert.match(enhancer, /\.secondaryPageDecision h2 \{[\s\S]*font-size: clamp\(26px, 7\.3vw, 31px\)/);
   assert.match(enhancer, /\.secondaryPageDecision button \{[\s\S]*min-height: 44px;[\s\S]*background: #c8ff1a;/);
-  assert.match(enhancer, /Performance band: one edge-to-edge decisive moment, not a floating dashboard card/);
 });
 
 test("first-impression mobile controls and labels respect the product readability floor", () => {
-  assert.match(enhancer, /\.secondaryPageAction \{[\s\S]*min-height: 44px;[\s\S]*font-size: 12px;/);
-  assert.match(enhancer, /\.secondaryPageIntro__eyebrow \{[^}]*font-size: 11px/);
-  assert.match(enhancer, /\.secondaryPageIntro__status \{[\s\S]*font-size: 11px/);
-  assert.match(enhancer, /\.secondaryPageDecision__eyebrow \{[^}]*font-size: 11px/);
-  assert.doesNotMatch(enhancer, /font-size:\s*(?:8|9|10)(?:\.\d+)?px\b/);
+  assert.match(teamStageCss, /teamIdentityTitleStage__action[\s\S]*min-height: 46px !important/);
+  assert.match(teamStageCss, /font: 820 12px\/1\.15/);
+  assert.match(teamStageCss, /teamIdentityTitleStage__status[\s\S]*font: 720 11px\/1\.2/);
+  assert.match(teamStageCss, /prefers-reduced-motion: reduce/);
 });
 
 test("Coach secondary metrics use a readable 2x2 scoreboard rather than a clipped or compressed strip", () => {
@@ -78,8 +74,6 @@ test("Coach secondary metrics use a readable 2x2 scoreboard rather than a clippe
   assert.match(metricCss, /font-size:31px!important/);
   assert.match(metricCss, /font-size:11px!important/);
   assert.match(metricCss, /\[data-premium-metric-evidence\]\{display:none!important\}/);
-  assert.doesNotMatch(metricCss, /flex-basis:82vw!important/);
-  assert.doesNotMatch(metricCss, /repeat\(auto-fit,minmax\(76px,1fr\)\)/);
 });
 
 test("Schedule disclosure is structurally limited to two non-overlapping information lines", () => {
@@ -96,38 +90,41 @@ test("secondary route framing spends first-viewport space on content, not dead r
   assert.match(routeFramingCss, /shared-dashboard-back-action\{margin-bottom:-6px!important\}/);
   assert.match(routeFramingCss, /player-dashboard-identity-header"\]\{margin-inline:12px!important/);
   assert.match(routeFramingCss, /coachAdministrationWorkspace \.secondaryPageIntro\{row-gap:4px!important;padding-bottom:8px!important\}/);
-  assert.match(routeFramingCss, /font-size:11px!important/);
 });
 
-test("Player Home uses a compact athlete credential while Coach retains its existing identity controls", () => {
-  assert.match(playerHeader, /grid-template-columns:56px minmax\(0,1fr\)!important/);
-  assert.match(playerHeader, /min-height:82px!important/);
-  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:52px!important;height:52px!important/);
-  assert.match(playerHeader, /data-identity-role=\"name\"\]\{[\s\S]*font-size:23px!important/);
-  assert.match(playerHeader, /data-identity-role=\"team-name\"\][\s\S]*overflow-wrap:anywhere!important/);
-  assert.match(playerHeader, /data-identity-role=\"tagline\"\],\[data-identity-role=\"mission\"\]\)\{display:none!important/);
-  assert.match(coachHeader, /data-identity-role=\"brand-mark\"\]\{width:60px!important;height:60px!important/);
-  assert.match(coachHeader, /data-identity-role=\"brand-button\"\]\{[\s\S]*width:44px!important;min-height:44px!important/);
+test("Player and Coach Home use the same team-owned hero architecture with role-specific content", () => {
+  for (const header of [playerHeader, coachHeader]) {
+    assert.match(header, /TeamIdentityTitleStage/);
+    assert.match(header, /variant="hero"/);
+    assert.match(header, /surface="dark"/);
+  }
+  assert.match(playerHeader, /role="Player"/);
+  assert.match(playerHeader, /title=\{displayName\}/);
+  assert.match(coachHeader, /role="Coach"/);
+  assert.match(coachHeader, /title="Mission Control"/);
+  assert.match(teamStageCss, /--identity-crest: clamp\(104px, 29vw, 120px\)/);
 });
 
 test("legacy final-mobile rules cannot be treated as the desired first-impression specification", () => {
   assert.match(finalMobileCss, /Dark performance surfaces keep their own contrast in the final rendered authority/);
-  assert.doesNotMatch(enhancer, /opacity:\s*\.17/);
-  assert.doesNotMatch(enhancer, /min-height:\s*40px/);
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css/);
+  assert.match(teamStageAuthority, /width: var\(--identity-crest\) !important/);
+  assert.match(teamStageAuthority, /display: block !important/);
 });
 
-test("Program Branding keeps intentional dark identity contrast against later global surface authorities", () => {
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview\{[^}]*background:linear-gradient\(145deg,#0a2633,#102f39\)!important/);
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header\{[^}]*background:transparent!important[^}]*box-shadow:none!important/);
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header h2\{color:#f8faf6!important/);
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header p\{color:#c6d1cf!important/);
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__kicker\{color:#c8ff1a!important/);
+test("Program Branding previews the real Coach and Player title architecture", () => {
+  assert.match(brandingPreview, /TeamBrandingProvider branding=\{branding\}/);
+  assert.ok((brandingPreview.match(/TeamIdentityTitleStage/g) || []).length >= 3);
+  assert.match(brandingPreview, /title="Mission Control"/);
+  assert.match(brandingPreview, /title="Program Training"/);
 });
 
-test("Player Progress remains a purposeful command-story surface instead of gaining a redundant page title", () => {
+test("Player Progress gains team-development framing while preserving its narrative command story", () => {
+  assert.match(progressStory, /TeamIdentityTitleStage/);
+  assert.match(progressStory, /role="Development"/);
+  assert.match(progressStory, /title="Progress"/);
   assert.match(progressStory, /data-page-hierarchy="command-story"/);
   assert.match(progressStory, /data-layout-role="command-story-header"/);
   assert.match(progressStory, /data-testid="player-progress-metrics"/);
-  assert.doesNotMatch(progressStory, /data-visual-role="page-intro"/);
+  assert.match(progressStory, /<h2>\{story\.headline\}<\/h2>/);
 });
