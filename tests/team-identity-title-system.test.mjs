@@ -5,7 +5,6 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const stage = read("src/components/TeamIdentityTitleStage.jsx");
 const css = read("src/components/TeamIdentityTitleStage.css");
-const authority = read("src/components/TeamIdentityTitleStageAuthority.css");
 const renderedAuthority = read("public/shotlab-team-identity-title-authority.css");
 const secondary = read("src/components/SecondaryPageSystem.jsx");
 const playerHeader = read("src/components/PlayerDashboardHeader.jsx");
@@ -32,6 +31,13 @@ test("team identity title stage is the shared Coach and Player title primitive",
   assert.match(progressStory, /TeamIdentityTitleStage/);
 });
 
+test("finite title variants are literal source classes so production pruning cannot erase them", () => {
+  assert.match(stage, /variant === "hero" \? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard"/);
+  assert.match(stage, /surface === "dark" \? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light"/);
+  assert.doesNotMatch(stage, /`teamIdentityTitleStage--\$\{variant\}`/);
+  assert.doesNotMatch(stage, /`teamIdentityTitleStage--\$\{surface\}`/);
+});
+
 test("mobile crest geometry is materially larger without destructive cropping", () => {
   assert.match(css, /--identity-crest:\s*clamp\(88px,\s*24vw,\s*104px\)/);
   assert.match(css, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
@@ -41,10 +47,10 @@ test("mobile crest geometry is materially larger without destructive cropping", 
   assert.match(trainingHeader, /teamCrest/);
 });
 
-test("the last public presentation layer prevents legacy CSS from collapsing team titles", () => {
-  assert.match(stage, /TeamIdentityTitleStageAuthority\.css/);
-  assert.match(authority, /secondaryPageIntro\.teamIdentityTitleStage/);
+test("one last public presentation layer prevents legacy CSS from collapsing team titles", () => {
+  assert.doesNotMatch(stage, /TeamIdentityTitleStageAuthority\.css/);
   assert.match(renderedAuthority, /final rendered authority/i);
+  assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
   assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px, 29vw, 120px\) !important/);
   assert.match(renderedAuthority, /--identity-crest:\s*clamp\(88px,24vw,104px\) !important/);
   assert.match(renderedAuthority, /font-size: var\(--identity-title\) !important/);
