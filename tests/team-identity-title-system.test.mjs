@@ -55,11 +55,11 @@ test("team crest and Player Home hero are isolated from legacy secondary-route a
   assert.match(css, /player-dashboard-identity-header[^\{]*\{\s*display:\s*none\s*!important/);
 });
 
-test("compiled title CSS owns mobile secondary geometry before legacy appHeader rules can distort it", () => {
-  assert.match(css, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
-  assert.match(css, /display:\s*block\s*!important/);
-  assert.match(css, /grid-area:\s*auto\s*!important/);
-  assert.match(css, /min-width:\s*var\(--identity-crest\)\s*!important/);
+test("late title authority owns mobile secondary geometry after legacy appHeader rules", () => {
+  assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
+  assert.match(renderedAuthority, /display:\s*block\s*!important/);
+  assert.match(renderedAuthority, /grid-template-columns:\s*minmax\(0,1fr\)\s*var\(--identity-crest\)\s*!important/);
+  assert.match(renderedAuthority, /min-width:\s*var\(--identity-crest\)\s*!important/);
 });
 
 test("one last public presentation layer remains a supplemental final authority", () => {
