@@ -3,7 +3,7 @@ name: Final obsolete title CSS cleanup v2
 on:
   pull_request:
     branches: [march-3-reset-85393dd]
-    types: [reopened]
+    types: [reopened, synchronize]
 
 permissions:
   contents: write
