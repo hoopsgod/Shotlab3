@@ -172,6 +172,11 @@ header.teamIdentityTitleStage[data-team-identity-stage="true"] {
  * rules are loaded later in some split bundles and also use !important.
  */
 @media (max-width: 760px) {
+  html body #root header.teamIdentityTitleStage[data-team-identity-stage="true"].teamIdentityTitleStage--hero h1.teamIdentityTitleStage__title.appHeaderTitle {
+    font-size: var(--identity-title) !important;
+    line-height: .92 !important;
+    letter-spacing: -.064em !important;
+  }
   html body #root header.teamIdentityTitleStage[data-team-identity-stage="true"].teamIdentityTitleStage--standard h1.teamIdentityTitleStage__title.appHeaderTitle {
     font-size: var(--identity-title) !important;
     line-height: .92 !important;
