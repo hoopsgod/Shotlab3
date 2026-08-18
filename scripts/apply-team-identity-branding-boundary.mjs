@@ -84,12 +84,19 @@ function replaceOnce(source, before, after, label) {
     'const teamName = branding?.teamName || branding?.name || "Your Team";',
     "neutral Coach Mission Control team-name fallback"
   );
-  source = replaceOnce(source, 'function CourtArtwork({ logoUrl }) {', 'function CourtArtwork({ logoUrl, teamName }) {', "Coach court artwork identity signature");
   source = replaceOnce(
     source,
-    '<div className="mcCourtFloor"><span className="mcSideline" /><span className="mcCenterLine" /><span className="mcKey" /><span className="mcThreePoint" /><img src={logoUrl || FALLBACK_LOGO} alt="" /></div>',
-    '<div className="mcCourtFloor"><span className="mcSideline" /><span className="mcCenterLine" /><span className="mcKey" /><span className="mcThreePoint" />{logoUrl ? <img src={logoUrl} alt="" /> : <span className="mcCourtFallback">{initials(teamName)}</span>}</div>',
-    "Coach court artwork initials fallback"
+    `function CourtArtwork({ logoUrl }) {
+  const mark = logoUrl || FALLBACK_LOGO;`,
+    `function CourtArtwork({ logoUrl, teamName }) {
+  const mark = logoUrl || "";`,
+    "Coach tactical court identity signature"
+  );
+  source = replaceOnce(
+    source,
+    '        <image href={mark} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" />',
+    '        {mark ? <image href={mark} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" /> : <text x="252" y="169" textAnchor="middle" fill="rgba(245,248,249,.11)" fontSize="28" fontWeight="900">{initials(teamName)}</text>}',
+    "Coach tactical court initials fallback"
   );
   source = replaceOnce(source, '<CourtArtwork logoUrl={cleanMarkLogoUrl} />', '<CourtArtwork logoUrl={cleanMarkLogoUrl} teamName={teamName} />', "Coach Hero court identity input");
   source = replaceOnce(
@@ -131,4 +138,4 @@ function replaceOnce(source, before, after, label) {
   write(file, source);
 }
 
-console.log("Applied team-owned branding boundary, Demo identity migration, Coach Hero identity, and final rendered title authority.");
+console.log("Applied team-owned branding boundary, Demo identity migration, post-legacy Coach Hero identity, and final rendered title authority.");
