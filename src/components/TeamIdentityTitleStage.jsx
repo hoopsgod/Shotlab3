@@ -3,7 +3,6 @@ import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import ShotLabIcon from "./ShotLabIcon";
 import "./TeamIdentityTitleStage.css";
-import "./CoachHomeIdentityReconciliation.css";
 
 const tidy = (value) => String(value || "").trim();
 
