@@ -1,0 +1,92 @@
+name: Title Authority Repair Certification
+
+on:
+  pull_request:
+    branches: [march-3-reset-85393dd]
+    paths:
+      - 'src/components/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/title-authority-repair-certification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  architecture-and-idempotency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Focused title architecture contracts
+        run: node --test tests/title-authority-repair.test.mjs tests/mobile-coach-signature-stage.test.mjs tests/phase-5a-route-enhancer-orchestration.test.mjs
+      - name: Dev enhancer chain is idempotent
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-route-enhancers.mjs dev
+          git diff --binary -- . > /tmp/dev-first.diff
+          node scripts/run-route-enhancers.mjs dev
+          git diff --binary -- . > /tmp/dev-second.diff
+          diff -u /tmp/dev-first.diff /tmp/dev-second.diff
+      - name: Build enhancer chain is idempotent
+        shell: bash
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          node scripts/run-route-enhancers.mjs build
+          git diff --binary -- . > /tmp/build-first.diff
+          node scripts/run-route-enhancers.mjs build
+          git diff --binary -- . > /tmp/build-second.diff
+          diff -u /tmp/build-first.diff /tmp/build-second.diff
+      - name: Exact production build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          npm run build
+      - name: Production performance budget
+        run: npm run verify:performance-budget
+      - name: Production title CSS survives optimization
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R "teamIdentityTitleStage" dist/assets/*.css >/dev/null
+          grep -R "object-fit:contain" dist/assets/*.css >/dev/null
+          if grep -R "shotlab-team-identity-title-authority" dist index.html; then
+            echo "Emergency title authority leaked into production build" >&2
+            exit 1
+          fi
+
+  responsive-title-system:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Team identity responsive E2E
+        run: npx playwright test tests/e2e/team-identity-title-stage-responsive.spec.mjs --config=playwright.acceptance.config.mjs
+      - name: Phase 3A cross-screen visual audit
+        run: npx playwright test tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs --config=playwright.acceptance.config.mjs
+      - name: Upload fresh title and cross-screen screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: title-authority-mobile-certification
+          path: |
+            artifacts/team-identity-title-stage-responsive/*.png
+            artifacts/phase-3a-cross-screen-visual-audit/*.png
+          if-no-files-found: warn
+          retention-days: 14
