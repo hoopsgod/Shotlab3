@@ -5,6 +5,7 @@ import fs from "node:fs";
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
 const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
+const secondaryPageCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
 const titleStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
 const titleStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
@@ -25,6 +26,7 @@ test("premium mobile hierarchy is source-owned instead of a second additive titl
   assert.match(secondaryPageSystem, /TeamIdentityTitleStage/);
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css|secondaryPageIntro appHeader|appHeaderTitle/);
   assert.doesNotMatch(enhancer, /teamIdentityTitleStage|secondaryPageIntro__title|secondaryPageIntro__icon/);
+  assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
 test("retired Coach dashboard authorities cannot override the current production visual system", () => {
@@ -46,21 +48,19 @@ test("secondary pages use the shared premium team-identity stage with compact st
   assert.doesNotMatch(enhancer, /secondaryPageIntro|Drills Dashboard|Leaderboards Dashboard/);
 });
 
-test("primary decisions are edge-to-edge performance bands rather than floating rounded cards", () => {
-  assert.match(enhancer, /Performance band: one edge-to-edge decisive moment, not a floating dashboard card/);
-  assert.match(enhancer, /\.secondaryPageDecision \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\);[\s\S]*border-radius: 0;[\s\S]*box-shadow: none;/);
-  assert.match(enhancer, /linear-gradient\(128deg, #071a22 0%, #0a222b 58%, #102e35 100%\)/);
-  assert.match(enhancer, /\.secondaryPageDecision__icon \{[\s\S]*position: absolute;[\s\S]*display: grid;/);
-  assert.match(enhancer, /\.secondaryPageDecision__visual \{ display: none; \}/);
-  assert.match(enhancer, /font-size:\s*clamp\(26px, 7\.3vw, 31px\)/);
-  assert.match(enhancer, /background: #c8ff1a;/);
+test("primary decisions are dark performance bands owned by SecondaryPageSystem CSS", () => {
+  assert.match(secondaryPageCss, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns: 44px minmax\(0, 1fr\) minmax\(180px, 30%\)/);
+  assert.match(secondaryPageCss, /linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision__icon\s*\{[\s\S]*display: grid/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision__visual\s*\{[\s\S]*display: block/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision h2\s*\{[\s\S]*font: 770 clamp\(27px, 5vw, 38px\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision button\s*\{[\s\S]*min-height: var\(--touch-target, 44px\)/);
 });
 
-test("mobile metrics use a signature hero score band followed by light supporting evidence", () => {
-  assert.match(enhancer, /Score strips are allowed to reach the viewport rhythm instead of becoming more cards/);
-  assert.match(enhancer, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\] \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\) !important/);
-  assert.match(enhancer, /Supporting evidence reads as a ledger beneath the performance band/);
-  assert.match(enhancer, /\.secondaryPageEvidence > \* \{ padding: 14px 0 !important; \}/);
+test("mobile metrics and supporting evidence use flat ledger geometry rather than card stacking", () => {
+  assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*border-block: 1px solid/);
+  assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\] > button\s*\{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important/);
+  assert.match(secondaryPageCss, /\.secondaryPageEvidence > \*\s*\{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important/);
   assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,#061923 0%,#082430 62%,#0b2d37 100%\)!important;[\s\S]*box-shadow:none!important/);
   assert.match(playerMetricHierarchyCss, /\.metricPrimary \[class\*="metricValue"\]\{[\s\S]*font-size:46px!important/);
   assert.match(playerMetricHierarchyCss, /\.metricSupporting\{[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
@@ -75,17 +75,16 @@ test("Player event and lifting routes use the same semantic title primitive", ()
   assert.doesNotMatch(enhancer, /Premium Level B commitment header|routeHeader>p|PlayerCommitmentCenter/);
 });
 
-test("mobile metric feedback cannot pull one item out of its score row", () => {
-  assert.match(enhancer, /Premium mobile metrics keep a stable row while feedback remains tonal/);
-  assert.match(enhancer, /@media \(max-width: 760px\), \(hover: none\)/);
-  assert.match(enhancer, /\.metric:hover,[\s\S]*\.metric:focus-visible \{ transform: none; \}/);
+test("mobile metric interactions stay stable and reduced-motion safe", () => {
+  assert.match(secondaryPageCss, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision button:active:not\(:disabled\) \{ transform: none; \}/);
 });
 
-test("Coach detail surfaces use the same edge performance language", () => {
-  assert.match(enhancer, /\.coachPlayerDetailWorkspace \{ gap: 14px/);
-  assert.match(enhancer, /\.coachPlayerProfileHero \{[\s\S]*margin-inline: calc\(var\(--layout-gutter, 16px\) \* -1\);[\s\S]*border-radius: 0;[\s\S]*box-shadow: none;/);
-  assert.match(enhancer, /\.coachPlayerProfileHero h2 \{ font-size: 29px/);
-  assert.match(enhancer, /\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2/);
+test("Coach detail surfaces retain the same dark performance language below the shared title", () => {
+  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryPageCss, /\.coachPlayerProfileHero h2\s*\{[\s\S]*font: 780 clamp\(28px, 5vw, 40px\)/);
+  assert.match(secondaryPageCss, /\.coachPlayerProfileMetrics\s*\{[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(secondaryPageCss, /@media \(max-width: 760px\)[\s\S]*\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
 });
 
 test("Player and Coach Home identity use intentional shared/source-owned variants instead of legacy native chrome", () => {
