@@ -116,7 +116,7 @@ test("persistent Player and Coach identity chrome uses one shared team-owned her
   assert.match(teamStageCss, /--identity-crest: clamp\(104px, 29vw, 120px\)/);
   assert.match(teamStageCss, /object-fit: contain/);
   assert.match(teamStageCss, /teamIdentityTitleStage__tonalCrest[\s\S]*opacity: \.055/);
-  assert.match(teamStageCss, /teamIdentityTitleStage--dark \.teamIdentityTitleStage__tonalCrest \{ opacity: \.085/);
+  assert.match(renderedTitleAuthority, /player-dashboard-identity-header[\s\S]*teamIdentityTitleStage__tonalCrest\{[^}]*opacity:\s*\.085\s*!important/);
   assert.match(renderedTitleAuthority, /min-height:\s*var\(--identity-crest\)\s*!important/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
