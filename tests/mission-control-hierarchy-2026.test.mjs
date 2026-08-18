@@ -9,6 +9,8 @@ const css = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.c
 const cascadeLock = fs.readFileSync(new URL("../src/styles/MissionControlCascadeLock2026.css", import.meta.url), "utf8");
 const criticalCss = fs.readFileSync(new URL("../public/shotlab-phase2-critical.css", import.meta.url), "utf8");
 const commandCenter = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
+const titleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
+const headerCss = fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css", import.meta.url), "utf8");
 
 const indexOfOrFail = (source, value) => {
   const position = source.indexOf(value);
@@ -46,14 +48,19 @@ test("Phase 2 preserves the existing Mission Control interaction contract", () =
 });
 
 test("Phase 2 source owns one dominant premium Coach hero and its team identity geometry", () => {
-  assert.match(commandCenter, /Source-owned mobile title\/identity composition/);
-  assert.match(commandCenter, /\.mcHero\{margin:0 -12px!important;min-height:clamp\(420px,112vw,468px\)!important;max-height:none!important/);
-  assert.match(commandCenter, /\.mcHeroContent\{display:grid!important;grid-template-columns:minmax\(0,1fr\)!important/);
-  assert.match(commandCenter, /\.mcHeroIdentity\{display:grid!important;grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)!important/);
-  assert.match(commandCenter, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
-  assert.match(commandCenter, /\.mcHeroTeamMark\{position:static!important;display:grid!important;width:var\(--coach-hero-crest\)!important;height:var\(--coach-hero-crest\)!important/);
-  assert.match(commandCenter, /\.mcHeroTeamMark img\{[\s\S]*?object-fit:contain!important/);
-  assert.match(commandCenter, /\.mcHero h1\{[\s\S]*?font-size:clamp\(46px,12vw,58px\)!important/);
+  assert.match(commandCenter, /import "\.\/CoachMissionControlTitleStage\.css"/);
+  assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
+  assert.match(commandCenter, /mcHeroIdentity/);
+  assert.doesNotMatch(commandCenter, /MOBILE_PRODUCT_RESET_CSS|<style>/);
+  assert.match(titleCss, /Coach Home title authority/);
+  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*clamp\(420px,\s*112vw,\s*468px\)/);
+  assert.match(titleCss, /\.mcHeroContent[\s\S]*width:\s*100%[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
+  assert.match(titleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(titleCss, /\.mcHeroTeamMark[\s\S]*width:\s*var\(--coach-hero-crest\)[\s\S]*height:\s*var\(--coach-hero-crest\)/);
+  assert.match(titleCss, /\.mcHeroTeamMark img[\s\S]*object-fit:\s*contain/);
+  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.doesNotMatch(titleCss, /!important|html\s+body\s+#root/);
   assert.match(css, /\.mcRealityStrip\s*\{/);
   assert.match(css, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(css, /\.mcPrimary\s*\{/);
@@ -90,12 +97,12 @@ test("light support tokens cannot inherit legacy dark shell variables", () => {
 });
 
 test("mobile hierarchy preserves safe controls while Coach title composition stays source-owned", () => {
-  assert.match(commandCenter, /@media\(max-width:700px\)/);
+  assert.match(titleCss, /@media \(max-width:\s*700px\)/);
   assert.match(css, /min-height:\s*44px !important/);
-  assert.match(commandCenter, /\.mcHeader\{grid-template-columns:44px minmax\(0,1fr\) 44px!important/);
-  assert.match(commandCenter, /\.mcHeroContent\{display:grid!important;grid-template-columns:minmax\(0,1fr\)!important/);
-  assert.match(commandCenter, /\.mcHeroIdentity\{display:grid!important;grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)!important/);
-  assert.match(commandCenter, /\.mcHero\{[^}]*max-height:none!important/);
+  assert.match(headerCss, /@media\(max-width:700px\)[\s\S]*\.mcHeader\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) 44px/);
+  assert.match(titleCss, /\.mcHeroContent[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
+  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*max-height:\s*none/);
   assert.equal(/\.mcTeamSelect[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcBell[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcMobileMenu[^}]*display:\s*none/s.test(css), false);
