@@ -62,12 +62,35 @@ async function expectPlayerIdentityInsideViewport(page) {
   if (!(await identity.count())) return;
   const geometry = await identity.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, width: rect.width, height: rect.height, viewportWidth: window.innerWidth };
+    const title = element.querySelector("h1");
+    const crest = element.querySelector('[data-identity-role="brand-mark"]');
+    const fallback = element.querySelector('[data-identity-role="brand-fallback"]');
+    const crestRect = (crest || fallback)?.getBoundingClientRect();
+    return {
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      height: rect.height,
+      viewportWidth: window.innerWidth,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      crestWidth: crestRect?.width || 0,
+      crestHeight: crestRect?.height || 0,
+      objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
+      variant: element.getAttribute("data-variant"),
+    };
   });
   expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
   expect(geometry.width).toBeGreaterThan(300);
-  expect(geometry.height).toBeLessThanOrEqual(100);
+  if (geometry.variant === "hero") {
+    expect(geometry.height).toBeGreaterThanOrEqual(180);
+    expect(geometry.height).toBeLessThanOrEqual(300);
+    expect(geometry.titleSize).toBeGreaterThanOrEqual(44);
+    expect(geometry.titleSize).toBeLessThanOrEqual(60);
+    expect(geometry.crestWidth).toBeGreaterThanOrEqual(104);
+    expect(geometry.crestHeight).toBeGreaterThanOrEqual(104);
+    if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
+  }
 }
 
 async function expectCompactFunctionalIntro(page) {
