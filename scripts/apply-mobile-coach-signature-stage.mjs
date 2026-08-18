@@ -3,11 +3,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const fail = (message) => { throw new Error(`[mobile-coach-signature-stage] ${message}`); };
+const countOccurrences = (source, needle) => source.split(needle).length - 1;
 const replaceOnce = (source, from, to, label) => {
-  if (source.includes(to)) return source;
-  const count = source.split(from).length - 1;
-  if (count !== 1) fail(`${label}: expected one source anchor, found ${count}`);
-  return source.replace(from, to);
+  const legacyCount = countOccurrences(source, from);
+  const finalCount = countOccurrences(source, to);
+  if (legacyCount === 1 && finalCount === 0) return source.replace(from, to);
+  if (legacyCount === 0 && finalCount === 1) return source;
+  const state = legacyCount > 0 && finalCount > 0 ? 'mixed legacy/final state' : 'unexpected or duplicated state';
+  fail(`${label}: expected exactly one legacy anchor or one final anchor; found legacy ${legacyCount}, final ${finalCount} (${state})`);
 };
 
 // Coach title/hero identity is source-owned in CoachCommandCenter.jsx.
