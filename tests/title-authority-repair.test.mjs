@@ -17,6 +17,7 @@ const progress = read('src/components/PlayerProgressStory.jsx');
 const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs');
 const secondaryEnhancer = read('scripts/apply-mobile-premium-secondary-page-system.mjs');
+const playerCompositionEnhancer = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -31,6 +32,11 @@ test('obsolete Player commitment title CSS is deleted rather than left as dorman
   assert.doesNotMatch(playerCommitmentCss, /\.routeHeader\b/);
   assert.doesNotMatch(playerCommitmentCss, /\.routeEyebrow\b/);
   assert.doesNotMatch(playerCommitmentCss, /\.routeTitleRow\b/);
+});
+
+test('Player optical reconciliation cannot mutate the shared commitment title surface', () => {
+  assert.doesNotMatch(playerCompositionEnhancer, /PlayerCommitmentCenter/);
+  assert.doesNotMatch(playerCompositionEnhancer, /MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
 test('Coach Home source owns one integrated Mission Control identity and no title enhancer restores it', () => {
