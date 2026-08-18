@@ -12,6 +12,18 @@ function replaceOnce(source, before, after, label) {
   return source.replace(before, after);
 }
 
+function ensureFinalTeamIdentityAuthority() {
+  const file = "index.html";
+  let source = read(file);
+  source = replaceOnce(
+    source,
+    '  <link id="shotlab-mobile-centering-reconciliation" rel="stylesheet" href="/shotlab-mobile-centering-reconciliation.css" />',
+    '  <link id="shotlab-mobile-centering-reconciliation" rel="stylesheet" href="/shotlab-mobile-centering-reconciliation.css" />\n  <link id="shotlab-team-identity-title-authority" rel="stylesheet" href="/shotlab-team-identity-title-authority.css?v=20260818" />',
+    "final team identity stylesheet mount"
+  );
+  write(file, source);
+}
+
 // Production and Playwright can invoke the route-enhancer pipeline more than once in
 // the same checkout. A later Demo-branding enhancer intentionally transforms one of
 // this script's App.jsx anchors, so a second pass must recognize the fully reconciled
@@ -23,7 +35,8 @@ const teamIdentityAlreadyApplied =
   reconciledApp.includes("const incomingBranding=") &&
   reconciledApp.includes("sl:demo-team-branding");
 if (teamIdentityAlreadyApplied) {
-  console.log("Team identity branding boundary already reconciled; skipping repeat enhancer pass.");
+  ensureFinalTeamIdentityAuthority();
+  console.log("Team identity branding boundary already reconciled; final title authority mount verified.");
   process.exit(0);
 }
 
@@ -191,16 +204,6 @@ const mergedBranding=resolveTeamBranding({
   write(file, source);
 }
 
-{
-  const file = "index.html";
-  let source = read(file);
-  source = replaceOnce(
-    source,
-    '  <link id="shotlab-mobile-centering-reconciliation" rel="stylesheet" href="/shotlab-mobile-centering-reconciliation.css" />',
-    '  <link id="shotlab-mobile-centering-reconciliation" rel="stylesheet" href="/shotlab-mobile-centering-reconciliation.css" />\n  <link id="shotlab-team-identity-title-authority" rel="stylesheet" href="/shotlab-team-identity-title-authority.css?v=20260818" />',
-    "final team identity stylesheet mount"
-  );
-  write(file, source);
-}
+ensureFinalTeamIdentityAuthority();
 
 console.log("Applied team-owned branding boundary, Demo custom-logo ownership, custom-logo precedence, Demo identity preservation, and immersive Coach Home identity reconciliation.");
