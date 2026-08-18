@@ -109,7 +109,7 @@ test("Program Branding previews production titles and has a neutral no-logo stat
   assert.match(brandingForm, /const FALLBACK_MARK = ""/);
   assert.match(brandingForm, /No logo uploaded\. ShotLab will use the team initials in title stages\./);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(brandingScreenCss, /html body #root \.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header/);
+  assert.match(brandingScreenCss, /#root \.branding-industrial__preview \.branding-industrial__panel-header/);
   assert.match(brandingScreenCss, /background:transparent!important/);
   assert.match(brandingScreenCss, /border-radius:0!important/);
 });
