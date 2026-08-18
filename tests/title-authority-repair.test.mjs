@@ -7,6 +7,7 @@ const read = (path) => readFileSync(path, 'utf8');
 const stage = read('src/components/TeamIdentityTitleStage.jsx');
 const stageCss = read('src/components/TeamIdentityTitleStage.css');
 const coach = read('src/components/CoachCommandCenter.jsx');
+const coachTitleCss = read('src/components/CoachMissionControlTitleStage.css');
 const coachHeader = read('src/components/CoachDashboardHeader.jsx');
 const playerHeader = read('src/components/PlayerDashboardHeader.jsx');
 const secondary = read('src/components/SecondaryPageSystem.jsx');
@@ -57,13 +58,17 @@ test('Player optical reconciliation cannot mutate the shared commitment title su
   assert.doesNotMatch(playerCompositionEnhancer, /MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home source owns one integrated Mission Control identity and no title enhancer restores it', () => {
+test('Coach Home markup and owned component CSS form one integrated Mission Control title authority', () => {
+  assert.match(coach, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
-  assert.match(coach, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
-  assert.match(coach, /font-size:clamp\(46px,12vw,58px\)/);
-  assert.match(coach, /object-fit:contain/);
+  assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(coachTitleCss, /font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
+  assert.match(coachTitleCss, /object-fit:\s*contain/);
+  assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
 
@@ -78,24 +83,15 @@ test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or su
   assert.doesNotMatch(coachPolishCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
   assert.doesNotMatch(coachShellCss, /Rebalance the signature hero/);
   assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
-  assert.match(coachV2Css, /Mobile identity\/title geometry is source-owned/);
-  assert.match(coach2026Css, /Hero identity geometry is source-owned/);
-  assert.match(coachShellCss, /Mobile Hero identity\/title geometry is owned by CoachCommandCenter source/);
-  assert.match(coachFinalCss, /Mobile Hero identity\/title composition is owned by CoachCommandCenter source/);
-  assert.match(coachHeaderCss, /never sizes Hero identity/);
-  assert.match(coachPolishCss, /Mobile Hero identity\/title geometry is source-owned/);
 });
 
-test('late central Coach cascade layers cannot hide or redesign the source-owned title stage', () => {
+test('late central Coach cascade layers cannot hide or redesign the owned title stage', () => {
   for (const lateCss of [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss]) {
     assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
     assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
     assert.doesNotMatch(lateCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
     assert.doesNotMatch(lateCss, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
   }
-  assert.match(coachHierarchyCss, /Coach Hero identity\/title composition is owned by CoachCommandCenter source/);
-  assert.match(coachCascadeLockCss, /Coach Hero identity, crest, title, summary and Hero geometry are source-owned/);
-  assert.match(coachCriticalCss, /Title\/Hero composition is intentionally excluded and source-owned/);
 });
 
 test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {
