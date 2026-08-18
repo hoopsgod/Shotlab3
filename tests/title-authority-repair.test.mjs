@@ -18,9 +18,15 @@ const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs');
 const secondaryEnhancer = read('scripts/apply-mobile-premium-secondary-page-system.mjs');
 const playerCompositionEnhancer = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
+const coachV2Css = read('src/components/CoachMissionControlV2.css');
+const coachHeaderCss = read('src/components/CoachMissionControlHeader.css');
+const coachPolishCss = read('src/components/CoachMissionControlPolish.css');
 const coach2026Css = read('src/components/CoachMissionControl2026.css');
 const coachShellCss = read('src/components/CoachMissionControlShell.css');
 const coachFinalCss = read('src/components/CoachMissionControlFinal.css');
+const coachHierarchyCss = read('src/styles/MissionControlHierarchy2026.css');
+const coachCascadeLockCss = read('src/styles/MissionControlCascadeLock2026.css');
+const coachCriticalCss = read('public/shotlab-phase2-critical.css');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -53,16 +59,34 @@ test('Coach Home source owns one integrated Mission Control identity and no titl
 });
 
 test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or summary geometry', () => {
-  for (const legacyCss of [coach2026Css, coachShellCss, coachFinalCss]) {
-    assert.doesNotMatch(legacyCss, /\.mcHero\s*\{[^}]*min-height\s*:\s*(?:286|292|300|302|318|330)px/s);
-    assert.doesNotMatch(legacyCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:\s*(?:74|84|86|92|118)px/s);
-    assert.doesNotMatch(legacyCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:\s*(?:27|29|30|34|43)px/s);
+  const legacyLayers = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
+  for (const legacyCss of legacyLayers) {
+    assert.doesNotMatch(legacyCss, /\.mcHero\s*\{[^}]*min-height\s*:\s*(?:286|292|300|302|304|306|318|322|330|370|382)px/s);
+    assert.doesNotMatch(legacyCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:\s*(?:74|80|82|84|86|88|92|118)px/s);
+    assert.doesNotMatch(legacyCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:\s*(?:27|28|29|30|31|33|34|36|43)px/s);
   }
+  assert.doesNotMatch(coachHeaderCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
+  assert.doesNotMatch(coachPolishCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
   assert.doesNotMatch(coachShellCss, /Rebalance the signature hero/);
   assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
+  assert.match(coachV2Css, /Mobile identity\/title geometry is source-owned/);
   assert.match(coach2026Css, /Hero identity geometry is source-owned/);
   assert.match(coachShellCss, /Mobile Hero identity\/title geometry is owned by CoachCommandCenter source/);
   assert.match(coachFinalCss, /Mobile Hero identity\/title composition is owned by CoachCommandCenter source/);
+  assert.match(coachHeaderCss, /never sizes Hero identity/);
+  assert.match(coachPolishCss, /Mobile Hero identity\/title geometry is source-owned/);
+});
+
+test('late central Coach cascade layers cannot hide or redesign the source-owned title stage', () => {
+  for (const lateCss of [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss]) {
+    assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
+    assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
+    assert.doesNotMatch(lateCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
+    assert.doesNotMatch(lateCss, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
+  }
+  assert.match(coachHierarchyCss, /Coach Hero identity\/title composition is owned by CoachCommandCenter source/);
+  assert.match(coachCascadeLockCss, /Coach Hero identity, crest, title, summary and Hero geometry are source-owned/);
+  assert.match(coachCriticalCss, /Title\/Hero composition is intentionally excluded and source-owned/);
 });
 
 test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {
