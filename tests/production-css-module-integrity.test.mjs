@@ -91,3 +91,12 @@ test("built production CSS keeps the compact mobile title authority and 96px cre
   assert.ok(copyRule, "Production CSS lost the compact title copy rule");
   assert.match(copyRule, /grid-area:auto!important/, "Production CSS lost the legacy named-grid reset that prevents oversized title runways");
 });
+
+test("optimized production CSS keeps the Player Home identity hero off secondary routes", async () => {
+  const css = await builtCss();
+  assert.match(
+    css,
+    /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab=(?:home|"home")\]\) \[data-testid=(?:player-dashboard-identity-header|"player-dashboard-identity-header")\]\[data-team-identity-stage=(?:true|"true")\]\{[^}]*display:none!important/,
+    "Production optimization lost the home-only Player identity boundary",
+  );
+});
