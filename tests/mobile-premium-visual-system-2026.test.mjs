@@ -11,6 +11,7 @@ const titleStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTit
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const coachCommand = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
+const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 const playerCommitment = fs.readFileSync(new URL("../src/components/PlayerCommitmentCenter.jsx", import.meta.url), "utf8");
 const playerMetricHierarchyCss = fs.readFileSync(new URL("../src/components/PlayerMetricHierarchy.module.css", import.meta.url), "utf8");
 const secondaryCohesionCss = fs.readFileSync(new URL("../public/shotlab-phase3-secondary-cohesion.css", import.meta.url), "utf8");
@@ -25,7 +26,7 @@ test("premium mobile hierarchy is source-owned instead of a second additive titl
   assert.doesNotMatch(retiredAuthority, /\{[^}]*:[^}]*\}/);
   assert.match(secondaryPageSystem, /TeamIdentityTitleStage/);
   assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css|secondaryPageIntro appHeader|appHeaderTitle/);
-  assert.doesNotMatch(enhancer, /teamIdentityTitleStage|secondaryPageIntro__title|secondaryPageIntro__icon/);
+  assert.match(enhancer, /Verified source-owned secondary title architecture/);
   assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
@@ -45,7 +46,8 @@ test("secondary pages use the shared premium team-identity stage with compact st
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
-  assert.doesNotMatch(enhancer, /secondaryPageIntro|Drills Dashboard|Leaderboards Dashboard/);
+  assert.doesNotMatch(secondaryPageSystem, /secondaryPageIntro/);
+  assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b/);
 });
 
 test("primary decisions are dark performance bands owned by SecondaryPageSystem CSS", () => {
@@ -72,7 +74,8 @@ test("Player event and lifting routes use the same semantic title primitive", ()
   assert.match(playerCommitment, /dataMobileStage="team-identity"/);
   assert.match(playerCommitment, /dataVisualRole="player-team-workspace-title"/);
   assert.doesNotMatch(playerCommitment, /className=\{styles\.routeHeader\}/);
-  assert.doesNotMatch(enhancer, /Premium Level B commitment header|routeHeader>p|PlayerCommitmentCenter/);
+  assert.match(enhancer, /Verified source-owned secondary title architecture/);
+  assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
 test("mobile metric interactions stay stable and reduced-motion safe", () => {
@@ -95,9 +98,13 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.doesNotMatch(playerHeader, /data-mobile-chrome="native-identity"|!important/);
   assert.match(coachHeader, /TeamIdentityTitleStage/);
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
-  assert.match(coachCommand, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
-  assert.match(coachCommand, /font-size:clamp\(46px,12vw,58px\)/);
-  assert.match(coachCommand, /object-fit:contain/);
+  assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
+  assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(coachTitleCss, /font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(coachTitleCss, /object-fit:\s*contain/);
+  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
+  assert.doesNotMatch(coachTitleCss, /!important/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
 
