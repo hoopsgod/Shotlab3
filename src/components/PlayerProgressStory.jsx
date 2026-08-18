@@ -4,6 +4,7 @@ import { derivePlayerProgressStory } from "../lib/playerProgressStory.js";
 import styles from "./PlayerProgressStory.module.css";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 
 function SignalCard({ eyebrow, title, detail, testId }) {
   return (
@@ -49,6 +50,18 @@ export default function PlayerProgressStory({
 
   return (
     <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend} data-page-hierarchy="command-story">
+      <TeamIdentityTitleStage
+        variant="standard"
+        surface="light"
+        role="PLAYER"
+        eyebrow="TEAM DEVELOPMENT"
+        title="Progress"
+        summary="Your development story, current standard, and next useful training move."
+        status={`${trendWord} · LAST 14 DAYS`}
+        showTonalCrest
+        testId="player-progress-title-stage"
+      />
+
       <div className={styles.hero} data-testid="player-progress-story-hero" data-layout-role="command-story-header">
         <div className={styles.heroTopline} data-testid="player-progress-story-topline">
           <span>DEVELOPMENT STORY</span>
