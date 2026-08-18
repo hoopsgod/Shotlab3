@@ -1,11 +1,10 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
 const secondarySystemPath = path.join(root, "src/components/SecondaryPageSystem.jsx");
 const playerCommitmentPath = path.join(root, "src/components/PlayerCommitmentCenter.jsx");
 const appPath = path.join(root, "src/App.jsx");
-const metricCssPath = path.join(root, "src/components/MetricStrip.module.css");
 
 const secondarySystem = readFileSync(secondarySystemPath, "utf8");
 const playerCommitment = readFileSync(playerCommitmentPath, "utf8");
@@ -47,20 +46,4 @@ for (const obsolete of [
   }
 }
 
-// This is the only retained mutation: a non-title interaction safeguard that is
-// explicitly idempotent and unrelated to product composition.
-let metricCss = readFileSync(metricCssPath, "utf8");
-const metricMarker = "/* Premium mobile metrics keep a stable row while feedback remains tonal. */";
-const metricRule = `@media (max-width: 760px), (hover: none) {
-  .metric:hover,
-  .metric:focus-visible { transform: none; }
-}`;
-if (!metricCss.includes(metricRule)) {
-  if (metricCss.includes(metricMarker)) {
-    throw new Error("Metric stability marker exists without its expected interaction contract.");
-  }
-  metricCss = `${metricCss.trim()}\n\n${metricMarker}\n${metricRule}\n`;
-  writeFileSync(metricCssPath, metricCss);
-}
-
-console.log("Verified source-owned secondary title architecture; retained only non-title metric interaction reconciliation.");
+console.log("Verified source-owned secondary title architecture; no product composition mutation performed.");
