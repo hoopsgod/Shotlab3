@@ -1,6 +1,6 @@
 /* ShotLab 2026 team-owned mobile title architecture. Team colors are decorative only. */
 .teamIdentityTitleStage {
-  --identity-crest: clamp(88px, 24vw, 104px);
+  --identity-crest: clamp(96px, 25vw, 108px);
   --identity-tonal: clamp(178px, 52vw, 226px);
   --identity-title: clamp(42px, 11vw, 54px);
   position: relative !important;
@@ -174,39 +174,6 @@
   letter-spacing: .035em;
 }
 
-.teamIdentityTitleStage__actions {
-  display: flex !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-  flex-wrap: wrap;
-}
-
-.teamIdentityTitleStage__action {
-  min-height: 46px !important;
-  padding: 0 14px !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(23, 26, 24, .13) !important;
-  border-radius: 13px !important;
-  background: transparent !important;
-  color: #243029 !important;
-  box-shadow: none !important;
-  font: 760 12px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
-}
-
-.teamIdentityTitleStage__action:first-child {
-  border-color: color-mix(in srgb, var(--team-brand-primary, #71851f) 34%, rgba(23, 26, 24, .13)) !important;
-  background: color-mix(in srgb, var(--team-brand-primary, #71851f) 8%, #f7f5ed) !important;
-}
-
-.teamIdentityTitleStage__action:disabled { opacity: .5; }
-.teamIdentityTitleStage__action:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #71851f) 25%, transparent);
-  outline-offset: 2px;
-}
-
 .teamIdentityTitleStage--hero {
   --identity-crest: clamp(104px, 29vw, 120px);
   --identity-tonal: clamp(205px, 61vw, 250px);
@@ -239,12 +206,45 @@
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalCrest { opacity: .085; filter: grayscale(.55) brightness(1.28) contrast(1.05); }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalFallback { color: #f7fafb; opacity: .045; }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__fallbackCrest { border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.055); color: #f7fafb; box-shadow: none; }
-.teamIdentityTitleStage--dark .teamIdentityTitleStage__action {
-  border-color: rgba(235,244,247,.18) !important;
-  background: rgba(255,255,255,.055) !important;
-  color: #eef4f5 !important;
+
+/* Production-safe mobile reconciliation. SecondaryPageIntro still carries the
+ * historical appHeader contract, so the shared team title must explicitly own
+ * its outer display and reset named grid areas inside the title component. */
+@media (max-width: 760px) {
+  .secondaryPageIntro.appHeader.teamIdentityTitleStage[data-team-identity-stage="true"] {
+    display: block !important;
+    min-height: var(--identity-crest) !important;
+    height: auto !important;
+    padding: 14px 2px 16px !important;
+    overflow: hidden !important;
+  }
+
+  .secondaryPageIntro.appHeader.teamIdentityTitleStage .teamIdentityTitleStage__inner {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) var(--identity-crest) !important;
+    align-items: end !important;
+    gap: clamp(14px, 4vw, 22px) !important;
+    min-height: var(--identity-crest) !important;
+    padding: 0 !important;
+  }
+
+  .secondaryPageIntro.appHeader.teamIdentityTitleStage .teamIdentityTitleStage__copy {
+    grid-area: auto !important;
+    align-self: end !important;
+  }
+
+  .secondaryPageIntro.appHeader.teamIdentityTitleStage .teamIdentityTitleStage__crestSlot {
+    grid-area: auto !important;
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    align-self: center !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
 }
-.teamIdentityTitleStage--dark .teamIdentityTitleStage__action:first-child { border-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 28%, rgba(235,244,247,.2)) !important; background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 9%, rgba(255,255,255,.045)) !important; }
 
 @media (max-width: 380px) {
   .teamIdentityTitleStage__teamName { max-width: 20ch; }
@@ -253,4 +253,9 @@
 
 @media (min-width: 701px) {
   .teamIdentityTitleStage--hero { border-radius: 24px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teamIdentityTitleStage,
+  .teamIdentityTitleStage * { transition: none !important; animation: none !important; }
 }
