@@ -103,16 +103,18 @@
   background: transparent !important;
 }
 
-.teamIdentityTitleStage__crest {
-  width: 100%;
-  height: 100%;
+.teamIdentityTitleStage[data-team-identity-stage="true"] .teamIdentityTitleStage__crest {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
   object-fit: contain;
   filter: drop-shadow(0 13px 18px rgba(7, 28, 40, .17));
 }
 
 .teamIdentityTitleStage__tonalCrest {
-  position: absolute;
-  z-index: 0;
+  position: absolute !important;
+  z-index: 0 !important;
   top: calc(var(--identity-tonal) * -.26);
   right: calc(var(--identity-tonal) * -.22);
   width: var(--identity-tonal);
@@ -124,8 +126,8 @@
 }
 
 .teamIdentityTitleStage__tonalFallback {
-  position: absolute;
-  z-index: 0;
+  position: absolute !important;
+  z-index: 0 !important;
   top: -28px;
   right: -18px;
   color: #17201e;
