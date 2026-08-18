@@ -18,6 +18,7 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'))
 const phase5aEnhancer = await readFile(path.join(rootDir, 'scripts/apply-phase5a-coach-daily-intelligence.mjs'), 'utf8')
 const releaseAuthRecoveryEnhancer = await readFile(path.join(rootDir, 'scripts/apply-release-auth-session-recovery.mjs'), 'utf8')
+const demoBrandingRuntimeFix = await readFile(path.join(rootDir, 'scripts/apply-demo-coach-branding-runtime-fix.mjs'), 'utf8')
 
 const buildPrefix = [
   'scripts/run-finish-v9-compatible.mjs',
@@ -29,6 +30,7 @@ const finalPresentationChain = [
   'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
   'scripts/apply-team-identity-branding-boundary.mjs',
+  'scripts/apply-demo-coach-branding-runtime-fix.mjs',
 ]
 const registeredParityEnhancers = [
   'scripts/apply-legacy-signed-collection-reads.mjs',
@@ -71,6 +73,7 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
   assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(0, 2), buildPrefix)
   assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-finalPresentationChain.length), finalPresentationChain)
   assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-finalPresentationChain.length), finalPresentationChain)
+  assert.doesNotMatch(demoBrandingRuntimeFix, /\.css|style\.|className=|<style/i, 'the post-presentation Demo branding reconciler must remain state-only')
 
   const devMinifyIndex = DEV_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
   const buildMinifyIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
