@@ -5,6 +5,7 @@ const ROOT = process.cwd()
 const DIST_ASSETS = path.resolve(ROOT, 'dist', 'assets')
 const SRC_DIR = path.resolve(ROOT, 'src')
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/
+const AUTHENTICATED_UI_ASSET = /^AuthenticatedUi-.*\.css$/
 const COACH_COMMAND_CENTER = path.resolve(SRC_DIR, 'components', 'CoachCommandCenter.jsx')
 const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx'])
 const MISSION_CONTROL_BODY_SCOPE = 'body.mission-control-active .mcShellV3'
@@ -340,23 +341,42 @@ async function collectExclusiveMissionControlClasses() {
   )
 }
 
+async function pruneExactAsset(name, label) {
+  if (!name) return { removedDeclarations: 0, rawBytesRemoved: 0 }
+  const file = path.join(DIST_ASSETS, name)
+  const source = await readFile(file, 'utf8')
+  const result = pruneOverriddenCoachDeclarations(source)
+  if (result.css !== source) await writeFile(file, result.css)
+  console.log(`Pruned ${result.removedDeclarations} exact overridden ${label} declarations; saved ${(result.rawBytesRemoved / 1024).toFixed(1)} KiB raw before final selector pruning.`)
+  return result
+}
+
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
-  const name = entries.find((entry) => entry.isFile() && COACH_WORKSPACE_ASSET.test(entry.name))?.name
-  if (!name) {
-    console.log('CoachWorkspaces CSS asset not found; no overridden declarations pruned.')
+  const coachName = entries.find((entry) => entry.isFile() && COACH_WORKSPACE_ASSET.test(entry.name))?.name
+  const authenticatedName = entries.find((entry) => entry.isFile() && AUTHENTICATED_UI_ASSET.test(entry.name))?.name
+
+  if (!coachName && !authenticatedName) {
+    console.log('CoachWorkspaces and AuthenticatedUi CSS assets not found; no overridden declarations pruned.')
+    return
+  }
+
+  await pruneExactAsset(authenticatedName, 'AuthenticatedUi')
+
+  if (!coachName) {
+    console.log('CoachWorkspaces CSS asset not found; skipped Mission Control scope pruning.')
     return
   }
 
   const exclusiveMissionControlClasses = await collectExclusiveMissionControlClasses()
-  const file = path.join(DIST_ASSETS, name)
-  const source = await readFile(file, 'utf8')
-  const result = pruneOverriddenCoachDeclarations(source, {
+  const coachFile = path.join(DIST_ASSETS, coachName)
+  const coachSource = await readFile(coachFile, 'utf8')
+  const coachResult = pruneOverriddenCoachDeclarations(coachSource, {
     allowMissionControlScope: true,
     exclusiveMissionControlClasses,
   })
-  if (result.css !== source) await writeFile(file, result.css)
-  console.log(`Pruned ${result.removedDeclarations} overridden Coach declarations (${result.scopedDeclarationsRemoved} scoped Mission Control); saved ${(result.rawBytesRemoved / 1024).toFixed(1)} KiB raw before final selector pruning.`)
+  if (coachResult.css !== coachSource) await writeFile(coachFile, coachResult.css)
+  console.log(`Pruned ${coachResult.removedDeclarations} overridden Coach declarations (${coachResult.scopedDeclarationsRemoved} scoped Mission Control); saved ${(coachResult.rawBytesRemoved / 1024).toFixed(1)} KiB raw before final selector pruning.`)
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
