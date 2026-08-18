@@ -71,10 +71,10 @@ test("built production assets retain rendered team identity variants and their s
 test("built production CSS keeps the final mobile title authority and standard crest floor", async () => {
   const css = await builtCss();
   const authorityRule = css.match(
-    /\.secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage=(?:true|"true")\][^{]*\{([^}]*)\}/s,
+    /\.teamIdentityTitleStage--standard\[data-team-identity-stage=(?:true|"true")\][^{]*\{([^}]*)\}/s,
   )?.[1];
 
-  assert.ok(authorityRule, "Production CSS lost the final secondary team-title authority rule");
+  assert.ok(authorityRule, "Production CSS lost the canonical standard team-title authority rule");
   assert.match(authorityRule, /display:block!important/, "Production CSS lost final title display ownership");
   assert.match(authorityRule, /min-height:var\(--identity-crest\)!important/, "Production CSS lost final title crest-height ownership");
   assert.match(authorityRule, /height:auto!important/, "Production CSS lost final title auto-height ownership");
@@ -87,7 +87,7 @@ test("built production CSS keeps the final mobile title authority and standard c
 
   assert.match(
     css,
-    /\.secondaryPageIntro\.teamIdentityTitleStage \.teamIdentityTitleStage__inner[^\{]*\{[^}]*grid-template-columns:minmax\(0,1fr\) var\(--identity-crest\)!important/,
+    /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner[^\{]*\{[^}]*grid-template-columns:minmax\(0,1fr\) var\(--identity-crest\)!important/,
     "Production CSS lost final title two-column identity geometry",
   );
 });
