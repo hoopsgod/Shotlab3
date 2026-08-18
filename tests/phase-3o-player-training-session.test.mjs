@@ -48,25 +48,29 @@ test("Phase 3O unifies score entry and LOG SCORE into one safe-area-aware comple
   assert.match(authority, /\[data-testid="player-training-log-score"\][\s\S]*background-color: #c8ff1a !important/);
 });
 
-test("training-session header exposes mode, drill identity, plan position, target, and live score", () => {
+test("training-session header exposes team identity, mode, drill identity, plan position, target, and live score", () => {
   for (const seam of [
     "player-training-session-header",
     "AT HOME SESSION",
     "PROGRAM SESSION",
     "CURRENT WORK",
-    "SESSION TARGET",
-    "LIVE SCORE",
-    "player-training-live-progress",
+    "SESSION PATH",
+    "DRILL TARGET",
+    "player-training-live-target",
     "Back to training plan",
+    "useTeamBranding",
+    "useCleanTeamLogo",
+    "teamCrest",
   ]) assert.ok(component.includes(seam), `missing training header seam: ${seam}`);
 });
 
-test("training-session visual system is compact, premium, responsive, and reduced-motion safe", () => {
-  assert.match(css, /linear-gradient\(155deg,#20231f/);
+test("training-session visual system is compact, team-owned, responsive, and reduced-motion safe", () => {
+  assert.match(css, /radial-gradient\(circle at 100% 0%/);
   assert.match(css, /border-radius: 28px/);
   assert.match(css, /\.copy h1[\s\S]*clamp\(/);
-  assert.match(css, /\.targetRow[\s\S]*border-top/);
-  assert.match(css, /\.progressTrack/);
+  assert.match(css, /\.performanceBand[\s\S]*border-top/);
+  assert.match(css, /\.teamCrest[\s\S]*object-fit: contain/);
+  assert.match(css, /\.mark \{[\s\S]*width: 76px;[\s\S]*height: 76px/);
   assert.match(css, /@media \(max-width: 390px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
@@ -79,10 +83,9 @@ test("Phase 3O uses a stable late authority boundary for the dark drill identity
   assert.match(authority, /\[data-testid="player-training-session"\] input\[type="number"\][\s\S]*#c8ff1a !important/);
 });
 
-test("Phase 3O iPhone evidence uses faithful top and bottom viewport captures", () => {
+test("Phase 3O iPhone evidence remains wired for top and bottom viewport captures", () => {
   assert.match(screenshotConfig, /phase-3o-player-training-session-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /player-training-session-header/);
-  assert.match(screenshotSpec, /player-training-live-progress/);
   assert.match(screenshotSpec, /player-training-score-zone/);
   assert.match(screenshotSpec, /player-training-log-score/);
   assert.match(screenshotSpec, /04p-player-training-session\.png/);
