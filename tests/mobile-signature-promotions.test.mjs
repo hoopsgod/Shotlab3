@@ -56,8 +56,8 @@ test('Coach tactical signature is idempotent after the final team branding bound
 
 test('Player Coach Assignment uses the ShotLab primary signature rather than a blue article callout', () => {
   const promoted = promotePlayerCoachSignal(playerDailyCss);
-  assert.match(promoted, /\.coachSignal::before\s*\{[^}]*background:\s*var\(--coach-signal-accent,var\(--team-brand-primary,var\(--accent\)\)\);/);
-  assert.match(promoted, /color:\s*color-mix\(in srgb,var\(--coach-signal-accent,var\(--team-brand-primary,var\(--accent\)\)\) 66%,#354039\);/);
+  assert.match(promoted, /\.coachSignal::before\s*\{[^}]*background:\s*var\(--team-brand-primary,var\(--accent\)\);/);
+  assert.match(promoted, /color:\s*color-mix\(in srgb,var\(--team-brand-primary,var\(--accent\)\) 66%,#354039\);/);
   assert.match(promoted, /font-size:\s*clamp\(21px,4\.8vw,29px\);\s*font-weight:\s*760;\s*line-height:\s*1\.04;/);
 });
 
