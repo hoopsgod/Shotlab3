@@ -76,9 +76,19 @@
   text-wrap: balance;
 }
 
+/* This component is the final owner of team-title scale. An ID-scoped rule is
+ * intentionally narrow enough to beat historical appHeader font caps that are
+ * compiled later into the production bundle without broadening global scope. */
+#root .teamIdentityTitleStage[data-team-identity-stage="true"] .teamIdentityTitleStage__title {
+  font-size: var(--identity-title) !important;
+}
+
+.teamIdentityTitleStage--longTitle {
+  --identity-title: clamp(39px, 10.2vw, 48px);
+}
+
 .teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title {
   max-width: 15ch !important;
-  font-size: clamp(39px, 10.2vw, 48px) !important;
   line-height: .94 !important;
 }
 
