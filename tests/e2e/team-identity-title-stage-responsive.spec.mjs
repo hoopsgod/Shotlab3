@@ -49,7 +49,7 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
     return Boolean(localSession || tabSession || bridgedSession);
   }), { timeout: 5_000, intervals: [50, 100, 200, 400] }).toBe(true);
 
-  await page.evaluate(async ({ teamName: nextTeamName, branding: nextBranding, userName: nextUserName }) => {
+  const restoreProfile = await page.evaluate(async ({ teamName: nextTeamName, branding: nextBranding, userName: nextUserName }) => {
     const parseRaw = (raw, fallback) => {
       try { return raw ? JSON.parse(raw) : fallback; }
       catch { return fallback; }
@@ -84,8 +84,8 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
     localStorage.setItem("sl:teams", serializedTeams);
     try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
 
-    if (session && nextUserName) {
-      const nextSession = { ...session, name: nextUserName };
+    const nextSession = session && nextUserName ? { ...session, name: nextUserName } : session;
+    if (nextSession) {
       const serializedSession = JSON.stringify(nextSession);
       if (localSession) localStorage.setItem("sl:session", serializedSession);
       if (tabSession) sessionStorage.setItem("sl:session", serializedSession);
@@ -93,7 +93,21 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         try { await window.storage?.set?.("sl:session", serializedSession, true); } catch {}
       }
     }
+    const email = String(nextSession?.email || "").trim();
+    return {
+      email,
+      name: String(nextSession?.name || nextUserName || "Demo Coach"),
+      role: nextSession?.role === "player" ? "player" : "coach",
+      team_id: activeTeamId || null,
+      teamId: activeTeamId || null,
+    };
   }, { teamName, branding, userName });
+
+  await page.route("**/v1/legacy-auth/restore", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, profile: restoreProfile }),
+  }));
   await page.goto("/?demo=1");
   await suppressMotion(page);
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
