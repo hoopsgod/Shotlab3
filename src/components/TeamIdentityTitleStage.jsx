@@ -116,7 +116,7 @@ export default function TeamIdentityTitleStage({
           ) : null}
         </div>
 
-        <div className="teamIdentityTitleStage__crestSlot secondaryPageIntro__icon secondaryPageIntro__brandSlot" data-identity-role="brand-panel">
+        <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel">
           {hasLogo ? (
             <img
               className="teamIdentityTitleStage__crest"
