@@ -25,6 +25,21 @@ function readContext(storage = globalThis?.localStorage) {
   };
 }
 
+function hasBranding(value) {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length);
+}
+
+function mergeCachedBranding(rows = [], storage = globalThis?.localStorage) {
+  const cached = parseStored(storage, "sl:teams", []);
+  if (!Array.isArray(rows) || !rows.length || !Array.isArray(cached) || !cached.length) return Array.isArray(rows) ? rows : [];
+  const cachedById = new Map(cached.map((row) => [clean(row?.id || row?.teamId || row?.team_id), row]).filter(([id]) => id));
+  return rows.map((row) => {
+    if (hasBranding(row?.branding)) return row;
+    const local = cachedById.get(clean(row?.id || row?.teamId || row?.team_id));
+    return hasBranding(local?.branding) ? { ...row, branding: local.branding } : row;
+  });
+}
+
 async function readJson(response) {
   try { return await response.json(); } catch { return {}; }
 }
@@ -54,10 +69,11 @@ export function createTeamPersistenceService({
     const response = await fetchImpl(`/v1/teams${query}`, { method: "GET", headers: headers() });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, "team_load_failed");
+    const remoteRows = Array.isArray(body?.teams) ? body.teams : [];
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
-      rows: Array.isArray(body?.teams) ? body.teams : [],
+      rows: mergeCachedBranding(remoteRows, storage),
     };
   };
 
@@ -81,4 +97,4 @@ export function createTeamPersistenceService({
   return { loadTeams, syncTeams, readContext: () => readContext(storage) };
 }
 
-export const __testUtils = { readContext };
+export const __testUtils = { readContext, mergeCachedBranding, hasBranding };
