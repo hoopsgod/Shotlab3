@@ -34,15 +34,39 @@ async function enterDemo(page, role) {
 }
 
 async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userName }) {
-  await page.evaluate(({ teamName: nextTeamName, branding: nextBranding, userName: nextUserName }) => {
-    const parseFrom = (storage, key, fallback) => {
-      try { return JSON.parse(storage.getItem(key) || JSON.stringify(fallback)); }
+  await expect.poll(async () => page.evaluate(async () => {
+    const parseRaw = (raw) => {
+      try { return raw ? JSON.parse(raw) : null; }
+      catch { return null; }
+    };
+    const localSession = parseRaw(localStorage.getItem("sl:session"));
+    const tabSession = parseRaw(sessionStorage.getItem("sl:session"));
+    let bridgedSession = null;
+    try {
+      const result = await window.storage?.get?.("sl:session", true);
+      bridgedSession = parseRaw(typeof result === "string" ? result : result?.value);
+    } catch {}
+    return Boolean(localSession || tabSession || bridgedSession);
+  }), { timeout: 5_000, intervals: [50, 100, 200, 400] }).toBe(true);
+
+  await page.evaluate(async ({ teamName: nextTeamName, branding: nextBranding, userName: nextUserName }) => {
+    const parseRaw = (raw, fallback) => {
+      try { return raw ? JSON.parse(raw) : fallback; }
       catch { return fallback; }
     };
-    const teams = parseFrom(localStorage, "sl:teams", []);
-    const localSession = parseFrom(localStorage, "sl:session", null);
-    const tabSession = parseFrom(sessionStorage, "sl:session", null);
-    const session = tabSession || localSession;
+    const readBridge = async (key, fallback) => {
+      try {
+        const result = await window.storage?.get?.(key, true);
+        return parseRaw(typeof result === "string" ? result : result?.value, fallback);
+      } catch { return fallback; }
+    };
+    const localTeams = parseRaw(localStorage.getItem("sl:teams"), []);
+    const bridgedTeams = await readBridge("sl:teams", []);
+    const teams = localTeams.length ? localTeams : bridgedTeams;
+    const localSession = parseRaw(localStorage.getItem("sl:session"), null);
+    const tabSession = parseRaw(sessionStorage.getItem("sl:session"), null);
+    const bridgedSession = await readBridge("sl:session", null);
+    const session = tabSession || localSession || bridgedSession;
     const activeTeamId = session?.teamId || session?.team_id || teams.find((team) => /demo/i.test(String(team?.id || "")))?.id;
     const nextTeams = teams.map((team) => {
       if (String(team?.id || "") !== String(activeTeamId || "")) return team;
@@ -56,11 +80,18 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         },
       };
     });
-    localStorage.setItem("sl:teams", JSON.stringify(nextTeams));
+    const serializedTeams = JSON.stringify(nextTeams);
+    localStorage.setItem("sl:teams", serializedTeams);
+    try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
+
     if (session && nextUserName) {
       const nextSession = { ...session, name: nextUserName };
-      if (localSession) localStorage.setItem("sl:session", JSON.stringify(nextSession));
-      if (tabSession) sessionStorage.setItem("sl:session", JSON.stringify(nextSession));
+      const serializedSession = JSON.stringify(nextSession);
+      if (localSession) localStorage.setItem("sl:session", serializedSession);
+      if (tabSession) sessionStorage.setItem("sl:session", serializedSession);
+      if (bridgedSession) {
+        try { await window.storage?.set?.("sl:session", serializedSession, true); } catch {}
+      }
     }
   }, { teamName, branding, userName });
   await page.goto("/?demo=1");
