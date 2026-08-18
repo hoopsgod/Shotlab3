@@ -7,6 +7,7 @@ const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs"
 const secondaryPageSystem = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.jsx", import.meta.url), "utf8");
 const teamStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
 const teamStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const renderedTitleAuthority = fs.readFileSync(new URL("../public/shotlab-team-identity-title-authority.css", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const playerOperational = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
@@ -43,8 +44,8 @@ test("secondary pages use team-owned editorial stages instead of repeated icon-t
   assert.match(teamStageCss, /--identity-crest: clamp\(96px, 25vw, 108px\)/);
   assert.match(teamStageCss, /--identity-title: clamp\(42px, 11vw, 54px\)/);
   assert.match(teamStageCss, /teamIdentityTitleStage__tonalCrest/);
-  assert.match(teamStageCss, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
-  assert.match(teamStageCss, /grid-area: auto !important/);
+  assert.match(renderedTitleAuthority, /secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
+  assert.match(renderedTitleAuthority, /grid-template-columns:\s*minmax\(0,1fr\)\s*var\(--identity-crest\)\s*!important/);
 });
 
 test("primary decisions are edge-to-edge performance bands rather than floating rounded cards", () => {
@@ -116,7 +117,7 @@ test("persistent Player and Coach identity chrome uses one shared team-owned her
   assert.match(teamStageCss, /object-fit: contain/);
   assert.match(teamStageCss, /teamIdentityTitleStage__tonalCrest[\s\S]*opacity: \.055/);
   assert.match(teamStageCss, /teamIdentityTitleStage--dark \.teamIdentityTitleStage__tonalCrest \{ opacity: \.085/);
-  assert.match(teamStageCss, /min-height: var\(--identity-crest\) !important/);
+  assert.match(renderedTitleAuthority, /min-height:\s*var\(--identity-crest\)\s*!important/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
 
