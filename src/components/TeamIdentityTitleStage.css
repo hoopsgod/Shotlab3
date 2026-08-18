@@ -219,6 +219,13 @@
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalFallback { color: #f7fafb; opacity: .045; }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__fallbackCrest { border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.055); color: #f7fafb; box-shadow: none; }
 
+/* The Player Home credential is a home-only hero. Keeping this rule in the
+ * compiled component owner prevents pruned public authority CSS from allowing
+ * a duplicate hero to survive above secondary Player route titles. */
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"][data-team-identity-stage="true"] {
+  display: none !important;
+}
+
 /* Production-safe mobile reconciliation. SecondaryPageIntro still carries the
  * historical appHeader contract, so the shared team title must explicitly own
  * its outer display and reset named grid areas inside the title component. */
