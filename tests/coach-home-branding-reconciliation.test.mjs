@@ -12,14 +12,15 @@ const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs
 const secondaryMark = read("src/components/SecondaryTeamBrandMark.jsx");
 const storeEntry = read("src/teamStoreEntry.jsx");
 
-test("Coach Home removes the duplicated foreground crest on mobile without removing team identity", () => {
+test("Coach Home removes the duplicated foreground crest without depending on a fragile mobile cascade", () => {
   assert.doesNotMatch(stage, /CoachHomeIdentityReconciliation\.css/);
   assert.match(authority, /coach-primary-objective/);
   assert.match(authority, /\.mcProgramIdentity,[\s\S]*\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
   assert.match(authority, /\.mcHeroContent\s*\{[\s\S]*padding:\s*28px 18px 24px\s*!important/);
   assert.match(authority, /\.mcCourtArtwork\s*\{[\s\S]*opacity:\s*\.44\s*!important/);
-  assert.match(coach, /<CourtArtwork logoUrl=\{cleanMarkLogoUrl\}/);
-  assert.match(coach, /mcHeaderTeamMark[\s\S]*cleanMarkLogoUrl/);
+  assert.match(brandingBoundary, /Foreground team identity is owned by the Coach header/);
+  assert.match(brandingBoundary, /Coach Home duplicate Hero logo removal/);
+  assert.match(brandingBoundary, /replaceIfPresent[\s\S]*mcProgramIdentity/);
 });
 
 test("registered team logos are branding-driven across shared product identity surfaces", () => {
@@ -28,11 +29,32 @@ test("registered team logos are branding-driven across shared product identity s
   assert.match(secondaryMark, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
   assert.match(brandingBoundary, /const FALLBACK_LOGO = ""/);
   assert.match(brandingBoundary, /const DEFAULT_MARK = ""/);
-  assert.match(coach, /const fullLogoSource = branding\?\.logoUrl \|\| FALLBACK_LOGO/);
-  assert.match(coach, /const markSource = branding\?\.logoMarkUrl/);
+  assert.match(brandingBoundary, /customFullLogoSource/);
+  assert.match(brandingBoundary, /customMarkLogoSource/);
+  assert.match(brandingBoundary, /const fullLogoSource = customFullLogoSource \|\| customMarkLogoSource/);
+  assert.match(brandingBoundary, /const markSource = customMarkLogoSource \|\| customFullLogoSource/);
+  assert.match(brandingBoundary, /LEGACY_DEMO_FULL/);
+  assert.match(brandingBoundary, /LEGACY_DEMO_MARK/);
   assert.match(coach, /cleanMarkLogoUrl/);
   assert.match(storeEntry, /team\?\.branding/);
   assert.match(storeEntry, /TeamBrandingProvider branding=\{branding\}/);
+});
+
+test("a custom full logo outranks a stale Demo mark on Coach Home", () => {
+  const fullPrecedence = brandingBoundary.indexOf("const fullLogoSource = customFullLogoSource || customMarkLogoSource");
+  const markPrecedence = brandingBoundary.indexOf("const markSource = customMarkLogoSource || customFullLogoSource");
+  const demoFallback = brandingBoundary.indexOf("useDemoArtwork ?");
+  assert.ok(fullPrecedence >= 0, "Expected full-logo custom precedence in the Coach branding boundary");
+  assert.ok(markPrecedence >= 0, "Expected mark-logo custom precedence in the Coach branding boundary");
+  assert.ok(demoFallback >= 0, "Expected explicit Demo-only artwork fallback");
+  assert.match(brandingBoundary, /rawFullLogoSource !== LEGACY_DEMO_FULL/);
+  assert.match(brandingBoundary, /rawMarkLogoSource !== LEGACY_DEMO_MARK/);
+});
+
+test("Demo hydration preserves coach-supplied logo assets instead of reseeding Titans artwork", () => {
+  assert.match(brandingBoundary, /demoHasCustomLogo/);
+  assert.match(brandingBoundary, /demoHasCustomLogo\?\{\}:\{logoUrl:/);
+  assert.match(brandingBoundary, /!demoTeam\.branding\?\.logoUrl&&!demoTeam\.branding\?\.logoMarkUrl/);
 });
 
 test("branding saves update the team record that feeds the shared provider", () => {
@@ -43,7 +65,7 @@ test("branding saves update the team record that feeds the shared provider", () 
   assert.match(app, /<TeamBrandingProvider branding=\{resolvedTeamBranding\}>/);
 });
 
-test("Titans artwork remains demo seed data, not a registered-team fallback", () => {
+test("Titans artwork remains Demo seed data, not a registered-team fallback", () => {
   assert.match(brandingBoundary, /Demo Titans/);
   assert.match(brandingBoundary, /neutral Coach Mission Control logo fallback/);
   assert.doesNotMatch(authority, /titans-exact-logo|titans-default-mark/i);
