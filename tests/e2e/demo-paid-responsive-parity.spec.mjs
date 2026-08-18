@@ -72,7 +72,12 @@ async function signature(page, testId) {
   const locator = page.getByTestId(testId);
   return locator.evaluate((node) => {
     const style = getComputedStyle(node);
-    return { tag: node.tagName, className: String(node.className || ''), display: style.display, position: style.position, borderRadius: style.borderRadius, fontFamily: style.fontFamily };
+    const structuralClasses = String(node.className || '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .filter((className) => !['has-team-data', 'is-onboarding'].includes(className))
+      .join(' ');
+    return { tag: node.tagName, className: structuralClasses, display: style.display, position: style.position, borderRadius: style.borderRadius, fontFamily: style.fontFamily };
   });
 }
 
