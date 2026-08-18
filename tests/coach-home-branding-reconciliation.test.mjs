@@ -5,7 +5,7 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const app = read("src/App.jsx");
 const stage = read("src/components/TeamIdentityTitleStage.jsx");
-const reconciliation = read("src/components/CoachHomeIdentityReconciliation.css");
+const authority = read("public/shotlab-team-identity-title-authority.css");
 const coach = read("src/components/CoachCommandCenter.jsx");
 const brandingContext = read("src/context/TeamBrandingContext.jsx");
 const brandingBoundary = read("scripts/apply-team-identity-branding-boundary.mjs");
@@ -13,11 +13,11 @@ const secondaryMark = read("src/components/SecondaryTeamBrandMark.jsx");
 const storeEntry = read("src/teamStoreEntry.jsx");
 
 test("Coach Home removes the duplicated foreground crest on mobile without removing team identity", () => {
-  assert.match(stage, /CoachHomeIdentityReconciliation\.css/);
-  assert.match(reconciliation, /coach-primary-objective/);
-  assert.match(reconciliation, /\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
-  assert.match(reconciliation, /\.mcProgramIdentity\s*\{[\s\S]*display:\s*none\s*!important/);
-  assert.match(reconciliation, /\.mcHeroContent\s*\{[\s\S]*padding:\s*28px 18px 24px\s*!important/);
+  assert.doesNotMatch(stage, /CoachHomeIdentityReconciliation\.css/);
+  assert.match(authority, /coach-primary-objective/);
+  assert.match(authority, /\.mcProgramIdentity,[\s\S]*\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
+  assert.match(authority, /\.mcHeroContent\s*\{[\s\S]*padding:\s*28px 18px 24px\s*!important/);
+  assert.match(authority, /\.mcCourtArtwork\s*\{[\s\S]*opacity:\s*\.44\s*!important/);
   assert.match(coach, /<CourtArtwork logoUrl=\{cleanMarkLogoUrl\}/);
   assert.match(coach, /mcHeaderTeamMark[\s\S]*cleanMarkLogoUrl/);
 });
@@ -46,5 +46,5 @@ test("branding saves update the team record that feeds the shared provider", () 
 test("Titans artwork remains demo seed data, not a registered-team fallback", () => {
   assert.match(brandingBoundary, /Demo Titans/);
   assert.match(brandingBoundary, /neutral Coach Mission Control logo fallback/);
-  assert.doesNotMatch(reconciliation, /titans-exact-logo|titans-default-mark/i);
+  assert.doesNotMatch(authority, /titans-exact-logo|titans-default-mark/i);
 });
