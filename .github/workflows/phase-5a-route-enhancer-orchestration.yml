@@ -40,6 +40,7 @@ jobs:
       - name: Verify source-stage promotion contracts
         run: |
           mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          set -o pipefail
           node --test \
             tests/phase-5a-route-enhancer-orchestration.test.mjs \
             tests/mobile-signature-promotions.test.mjs \
@@ -54,6 +55,7 @@ jobs:
           npm run build 2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/candidate-build.log
       - name: Verify built production CSS integrity
         run: |
+          set -o pipefail
           node --test tests/production-css-module-integrity.test.mjs \
             2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/built-css-integrity.log
       - name: Capture candidate performance metrics
