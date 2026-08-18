@@ -51,10 +51,24 @@ test("a custom full logo outranks a stale Demo mark on Coach Home", () => {
   assert.match(brandingBoundary, /rawMarkLogoSource !== LEGACY_DEMO_MARK/);
 });
 
-test("Demo hydration preserves coach-supplied logo assets instead of reseeding Titans artwork", () => {
-  assert.match(brandingBoundary, /demoHasCustomLogo/);
-  assert.match(brandingBoundary, /demoHasCustomLogo\?\{\}:\{logoUrl:/);
-  assert.match(brandingBoundary, /!demoTeam\.branding\?\.logoUrl&&!demoTeam\.branding\?\.logoMarkUrl/);
+test("Demo hydration preserves custom artwork and removes the stale Titans counterpart", () => {
+  assert.match(brandingBoundary, /demoHasCustomFullLogo/);
+  assert.match(brandingBoundary, /demoHasCustomMarkLogo/);
+  assert.match(brandingBoundary, /demoSanitizedBranding/);
+  assert.match(brandingBoundary, /demoHasCustomFullLogo&&demoRawMarkLogo===demoLegacyMarkLogo\?\{logoMarkUrl:""\}/);
+  assert.match(brandingBoundary, /demoHasCustomMarkLogo&&demoRawFullLogo===demoLegacyFullLogo\?\{logoUrl:""\}/);
+  assert.match(brandingBoundary, /demoBrandingNeedsRepair/);
+  assert.match(brandingBoundary, /demoHasCustomLogo\?\{\}:\{logoUrl:demoLegacyFullLogo,logoMarkUrl:demoLegacyMarkLogo\}/);
+});
+
+test("Demo Coach branding saves replace legacy Titans artwork instead of carrying it into Home", () => {
+  assert.match(brandingBoundary, /Demo Coach branding save normalization/);
+  assert.match(brandingBoundary, /if\(isDemoAccount\(user\)\)/);
+  assert.match(brandingBoundary, /const hasCustomFull=Boolean\(incomingFull&&incomingFull!==legacyDemoFull\)/);
+  assert.match(brandingBoundary, /const hasCustomMark=Boolean\(incomingMark&&incomingMark!==legacyDemoMark\)/);
+  assert.match(brandingBoundary, /if\(hasCustomFull&&effectiveMark===legacyDemoMark\)incomingBranding\.logoMarkUrl=""/);
+  assert.match(brandingBoundary, /if\(hasCustomMark&&effectiveFull===legacyDemoFull\)incomingBranding\.logoUrl=""/);
+  assert.match(brandingBoundary, /\.\.\.incomingBranding/);
 });
 
 test("branding saves update the team record that feeds the shared provider", () => {
