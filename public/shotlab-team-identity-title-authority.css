@@ -1,0 +1,387 @@
+/* ShotLab 2026 Mobile Team Identity Title System — final rendered authority.
+ * Loads after all historical public presentation layers. Scope stays narrow:
+ * migrated team title stages, Coach Mission Control identity, and Team Store identity. */
+
+@media (max-width: 760px) {
+  /* Player Home — immersive Hero variant. */
+  html body #root [data-testid="player-dashboard-identity-header"][data-team-identity-stage="true"] {
+    --identity-crest: clamp(104px, 29vw, 120px) !important;
+    --identity-title: clamp(44px, 12.1vw, 54px) !important;
+    position: relative !important;
+    display: block !important;
+    min-height: 164px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: max(18px, env(safe-area-inset-top)) 18px 19px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(200,255,26,.14) !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 96% -26%, color-mix(in srgb, var(--team-brand-primary,#c8ff1a) 16%, transparent), transparent 42%),
+      linear-gradient(126deg,#061923 0%,#082430 58%,#0a2933 100%) !important;
+    box-shadow: none !important;
+    color: #f6fafb !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] .teamIdentityTitleStage__inner {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) var(--identity-crest) !important;
+    align-items: end !important;
+    gap: clamp(14px,4vw,22px) !important;
+    min-height: var(--identity-crest) !important;
+    padding: 0 !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] [data-identity-role="team-name"] {
+    display: inline !important;
+    max-width: 22ch !important;
+    color: color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 58%,#f4f8e9) !important;
+    -webkit-text-fill-color: color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 58%,#f4f8e9) !important;
+    font-size: 12px !important;
+    font-weight: 820 !important;
+    line-height: 1.15 !important;
+    letter-spacing: .085em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] [data-identity-role="badge"] {
+    color: #b7c4c9 !important;
+    -webkit-text-fill-color: #b7c4c9 !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] h1.teamIdentityTitleStage__title,
+  html body #root [data-testid="player-dashboard-identity-header"] [data-identity-role="name"] {
+    max-width: 12ch !important;
+    margin: 0 !important;
+    color: #f8fbfc !important;
+    -webkit-text-fill-color: #f8fbfc !important;
+    font-size: var(--identity-title) !important;
+    font-weight: 830 !important;
+    line-height: .92 !important;
+    letter-spacing: -.064em !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    text-shadow: 0 8px 24px rgba(0,0,0,.16) !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] .teamIdentityTitleStage__summary {
+    display: block !important;
+    max-width: 30ch !important;
+    margin-top: 10px !important;
+    color: #afbdc2 !important;
+    -webkit-text-fill-color: #afbdc2 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] .teamIdentityTitleStage__crestSlot {
+    position: static !important;
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] img.teamIdentityTitleStage__crest {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 16px 22px rgba(0,0,0,.32)) !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] .teamIdentityTitleStage__fallbackCrest {
+    width: 92% !important;
+    height: 92% !important;
+    border-color: rgba(255,255,255,.16) !important;
+    background: rgba(255,255,255,.055) !important;
+    color: #f7fafb !important;
+  }
+
+  html body #root [data-testid="player-dashboard-identity-header"] .teamIdentityTitleStage__tonalCrest {
+    width: clamp(205px,61vw,250px) !important;
+    height: clamp(205px,61vw,250px) !important;
+    opacity: .085 !important;
+  }
+
+  /* Secondary Player routes own identity in their page title stage; suppress the obsolete duplicate Home credential. */
+  html body #root .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] {
+    display: none !important;
+  }
+
+  /* Shared Standard variant — team → page purpose. */
+  html body #root .secondaryPageIntro.teamIdentityTitleStage[data-team-identity-stage="true"],
+  html body #root .teamIdentityTitleStage--standard[data-team-identity-stage="true"] {
+    --identity-crest: clamp(88px,24vw,104px) !important;
+    --identity-title: clamp(42px,11vw,54px) !important;
+    position: relative !important;
+    display: block !important;
+    min-height: var(--identity-crest) !important;
+    height: auto !important;
+    padding: 14px 2px 16px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__inner,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) var(--identity-crest) !important;
+    align-items: end !important;
+    gap: clamp(14px,4vw,22px) !important;
+    min-height: var(--identity-crest) !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__crestSlot,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot {
+    position: static !important;
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage img.teamIdentityTitleStage__crest,
+  html body #root .teamIdentityTitleStage--standard img.teamIdentityTitleStage__crest {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
+    object-fit: contain !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage h1.teamIdentityTitleStage__title,
+  html body #root .teamIdentityTitleStage--standard h1.teamIdentityTitleStage__title {
+    max-width: 13ch !important;
+    color: #151918 !important;
+    -webkit-text-fill-color: #151918 !important;
+    font-size: var(--identity-title) !important;
+    font-weight: 830 !important;
+    line-height: .92 !important;
+    letter-spacing: -.064em !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    white-space: normal !important;
+  }
+
+  html body #root .teamIdentityTitleStage--standard.teamIdentityTitleStage--longTitle h1.teamIdentityTitleStage__title,
+  html body #root .secondaryPageIntro.teamIdentityTitleStage.teamIdentityTitleStage--longTitle h1.teamIdentityTitleStage__title {
+    max-width: 15ch !important;
+    font-size: clamp(39px,10.2vw,48px) !important;
+    line-height: .94 !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__summary,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary {
+    display: block !important;
+    max-width: 46ch !important;
+    color: #69716c !important;
+    -webkit-text-fill-color: #69716c !important;
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__identityLine,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine {
+    color: #52604f !important;
+    font-size: 12px !important;
+    line-height: 1.15 !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__support,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__support,
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__actions,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__actions {
+    width: auto !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+  }
+
+  html body #root .secondaryPageIntro.teamIdentityTitleStage .teamIdentityTitleStage__action,
+  html body #root .teamIdentityTitleStage--standard .teamIdentityTitleStage__action {
+    width: auto !important;
+    min-height: 46px !important;
+    padding: 0 14px !important;
+    white-space: normal !important;
+  }
+
+  /* Coach Home — the existing Mission Control decision surface becomes the immersive team Hero variant. */
+  html body.mission-control-active #root [data-testid="coach-dashboard-identity-header"] {
+    display: none !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] {
+    min-height: 400px !important;
+    max-height: none !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcHeroContent {
+    grid-template-columns: minmax(0,1fr) !important;
+    min-height: 400px !important;
+    padding: 28px 138px 24px 18px !important;
+    align-content: center !important;
+    gap: 8px !important;
+    background: transparent !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcProgramIdentity {
+    display: block !important;
+    max-width: 24ch !important;
+    margin-bottom: 2px !important;
+    color: color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 62%,#f4f8e9) !important;
+    -webkit-text-fill-color: color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 62%,#f4f8e9) !important;
+    font: 830 12px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif !important;
+    letter-spacing: .085em !important;
+    text-transform: uppercase !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcEyebrow {
+    color: #b9c6ca !important;
+    -webkit-text-fill-color: #b9c6ca !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] h1 {
+    max-width: 9ch !important;
+    color: #f8fbfc !important;
+    -webkit-text-fill-color: #f8fbfc !important;
+    font-size: clamp(46px,12.2vw,58px) !important;
+    font-weight: 830 !important;
+    line-height: .90 !important;
+    letter-spacing: -.064em !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcHeroTeamMark {
+    top: 82px !important;
+    right: 16px !important;
+    width: clamp(112px,30vw,128px) !important;
+    height: clamp(112px,30vw,128px) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcHeroTeamMark img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 18px 24px rgba(0,0,0,.30)) !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcHeroTeamMark .mcTeamFallback {
+    width: 104px !important;
+    height: 104px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(255,255,255,.16) !important;
+    border-radius: 24px !important;
+    background: rgba(255,255,255,.055) !important;
+    color: #f8fbfc !important;
+    font: 900 32px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif !important;
+    letter-spacing: -.06em !important;
+  }
+
+  html body.mission-control-active #root [data-testid="mission-control-team-header"] .mcHeaderTeamMark img {
+    width: 52px !important;
+    height: 52px !important;
+    max-width: 52px !important;
+    max-height: 52px !important;
+    object-fit: contain !important;
+  }
+
+  html body.mission-control-active #root [data-testid="mission-control-team-header"] .mcTeamFallback {
+    width: 44px !important;
+    height: 44px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(255,255,255,.13) !important;
+    border-radius: 13px !important;
+    color: #f5f8f9 !important;
+    font: 850 15px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif !important;
+  }
+
+  /* Team Store — store header is a branded title stage, not a generic modal strip. */
+  html body .ts-header {
+    isolation: isolate !important;
+    min-height: 174px !important;
+    padding: max(18px,env(safe-area-inset-top)) 54px 18px 142px !important;
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 96% -18%, color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 15%,transparent), transparent 40%),
+      linear-gradient(126deg,rgba(6,25,35,.98),rgba(8,36,48,.97) 58%,rgba(10,41,51,.98)) !important;
+  }
+
+  html body .ts-header::before {
+    left: 10px !important;
+    top: max(18px,env(safe-area-inset-top)) !important;
+    width: clamp(120px,31vw,136px) !important;
+    height: clamp(120px,31vw,136px) !important;
+  }
+
+  html body .ts-header h2 {
+    max-width: 8ch !important;
+    margin-top: 7px !important;
+    color: #f8fbfc !important;
+    -webkit-text-fill-color: #f8fbfc !important;
+    font-size: clamp(40px,11.2vw,48px) !important;
+    font-weight: 830 !important;
+    line-height: .92 !important;
+    letter-spacing: -.062em !important;
+  }
+
+  html body .ts-header p {
+    max-width: 19ch !important;
+    color: color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 54%,#f4f7e9) !important;
+    -webkit-text-fill-color: color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 54%,#f4f7e9) !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  html body #root .secondaryPageIntro.teamIdentityTitleStage[data-team-identity-stage="true"],
+  html body #root .teamIdentityTitleStage--standard[data-team-identity-stage="true"] {
+    --identity-crest: 88px !important;
+    --identity-title: clamp(38px,11.2vw,45px) !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcHeroContent {
+    padding-right: 128px !important;
+  }
+
+  html body.mission-control-active #root [data-testid="coach-primary-objective"] .mcHeroTeamMark {
+    width: 112px !important;
+    height: 112px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-team-identity-stage="true"] *,
+  [data-testid="coach-primary-objective"] * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
