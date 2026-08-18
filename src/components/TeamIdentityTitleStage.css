@@ -219,50 +219,9 @@
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalFallback { color: #f7fafb; opacity: .045; }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__fallbackCrest { border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.055); color: #f7fafb; box-shadow: none; }
 
-/* The Player Home credential is a home-only hero. Keeping this rule in the
- * compiled component owner prevents pruned public authority CSS from allowing
- * a duplicate hero to survive above secondary Player route titles. */
+/* Player Home is the only place where the immersive Player credential remains visible. */
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"][data-team-identity-stage="true"] {
   display: none !important;
-}
-
-/* Production-safe mobile reconciliation. SecondaryPageIntro still carries the
- * historical appHeader contract, so the shared team title must explicitly own
- * its outer display and reset named grid areas inside the title component. */
-@media (max-width: 760px) {
-  .secondaryPageIntro.appHeader.teamIdentityTitleStage[data-team-identity-stage="true"] {
-    display: block !important;
-    min-height: var(--identity-crest) !important;
-    height: auto !important;
-    padding: 14px 2px 16px !important;
-    overflow: hidden !important;
-  }
-
-  .secondaryPageIntro.appHeader.teamIdentityTitleStage .teamIdentityTitleStage__inner {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) var(--identity-crest) !important;
-    align-items: end !important;
-    gap: clamp(14px, 4vw, 22px) !important;
-    min-height: var(--identity-crest) !important;
-    padding: 0 !important;
-  }
-
-  .secondaryPageIntro.appHeader.teamIdentityTitleStage .teamIdentityTitleStage__copy {
-    grid-area: auto !important;
-    align-self: end !important;
-  }
-
-  .secondaryPageIntro.appHeader.teamIdentityTitleStage .teamIdentityTitleStage__crestSlot {
-    grid-area: auto !important;
-    width: var(--identity-crest) !important;
-    height: var(--identity-crest) !important;
-    min-width: var(--identity-crest) !important;
-    min-height: var(--identity-crest) !important;
-    align-self: center !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
 }
 
 @media (max-width: 380px) {
