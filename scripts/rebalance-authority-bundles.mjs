@@ -11,7 +11,7 @@ function gzipBytes(source) {
   return gzipSync(Buffer.from(source), { level: 9 }).byteLength
 }
 
-function safeTopLevelBoundaries(source) {
+export function safeTopLevelBoundaries(source) {
   const boundaries = new Set()
   let quote = ''
   let comment = false
