@@ -14,7 +14,6 @@
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  color: #171a18;
 }
 
 .teamIdentityTitleStage::after {
@@ -178,7 +177,6 @@
   color: #65706a !important;
   font: 720 11px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
   letter-spacing: .035em;
-  text-align: left !important;
 }
 
 .teamIdentityTitleStage__actions {
@@ -201,7 +199,6 @@
   color: #243029 !important;
   box-shadow: none !important;
   font: 760 12px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
-  cursor: pointer;
 }
 
 .teamIdentityTitleStage__action:first-child {
@@ -209,7 +206,7 @@
   background: color-mix(in srgb, var(--team-brand-primary, #71851f) 8%, #f7f5ed) !important;
 }
 
-.teamIdentityTitleStage__action:disabled { opacity: .5; cursor: not-allowed; }
+.teamIdentityTitleStage__action:disabled { opacity: .5; }
 .teamIdentityTitleStage__action:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #71851f) 25%, transparent);
   outline-offset: 2px;
