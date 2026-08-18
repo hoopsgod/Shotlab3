@@ -1,5 +1,11 @@
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage";
 
+const PLAYER_HOME_IDENTITY_CSS = `
+@media(max-width:700px){
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{display:none!important}
+}
+`;
+
 export default function PlayerDashboardHeader({
   userName,
   subtitle = "Train. Track. Improve.",
@@ -7,7 +13,8 @@ export default function PlayerDashboardHeader({
 }) {
   const displayName = String(userName || "Player").trim();
 
-  return (
+  return <>
+    <style>{PLAYER_HOME_IDENTITY_CSS}</style>
     <TeamIdentityTitleStage
       variant="hero"
       surface="dark"
@@ -19,5 +26,5 @@ export default function PlayerDashboardHeader({
       testId="player-dashboard-identity-header"
       showTonalCrest
     />
-  );
+  </>;
 }
