@@ -50,7 +50,7 @@ test("attention rows explain the issue instead of using unresolved placeholder c
   assert.doesNotMatch(source,/Inactive or unresolved player items/);
 });
 
-test("cinematic hero preserves a visible coach-controlled logo and integrates it into the gym",()=>{
+test("cinematic hero preserves a visible source-owned coach logo and integrates it into the gym",()=>{
   assert.match(source,/useTeamBranding/);
   assert.match(source,/useCleanTeamLogo/);
   assert.match(source,/cleanFullLogoUrl/);
@@ -63,13 +63,13 @@ test("cinematic hero preserves a visible coach-controlled logo and integrates it
   assert.match(source,/mcHeroTeamMark/);
   assert.match(source,/aria-label=\{`Customize \$\{teamName\} team identity`\}/);
   assert.match(source,/data-testid="mission-control-team-header"/);
+  assert.match(source,/Source-owned mobile title\/identity composition/);
+  assert.match(source,/--coach-hero-crest:clamp\(108px,30vw,124px\)/);
+  assert.match(source,/\.mcHeroTeamMark\{position:static!important;display:grid!important;width:var\(--coach-hero-crest\)!important;height:var\(--coach-hero-crest\)!important/);
+  assert.match(source,/\.mcHeroTeamMark img\{[\s\S]*?object-fit:contain!important/);
   assert.match(premiumCss,/mix-blend-mode:screen/);
   assert.match(premiumCss,/mask-image:radial-gradient/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
-  assert.match(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]*display:\s*grid\s*!important/);
-  assert.match(finalCss,/width:\s*84px\s*!important/);
-  assert.match(finalCss,/@keyframes mcFinalArenaPulse/);
-  assert.match(finalCss,/\.mcRealityStrip\s*\{[\s\S]*border:\s*0/);
   assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]{0,220}display:\s*none\s*!important/);
 });
 
@@ -127,7 +127,7 @@ test("Mission Control keeps Players and Analytics as distinct destinations",()=>
   assert.doesNotMatch(source,/label: "Analytics", icon: "chart", onClick: onActiveTodayClick/);
 });
 
-test("responsive CSS creates a compact native-feeling mobile operating system",()=>{
+test("responsive CSS creates a native-feeling mobile operating system with premium source-owned hero geometry",()=>{
   assert.match(css,/grid-template-columns:112px minmax\(0,1fr\)/);
   assert.match(css,/@media\(max-width:980px\)/);
   assert.match(css,/@media\(max-width:700px\)/);
@@ -135,7 +135,9 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(finalCss,/min-height:\s*286px\s*!important/);
+  assert.match(source,/\.mcHero\{margin:0 -12px!important;min-height:clamp\(420px,112vw,468px\)!important;max-height:none!important/);
+  assert.match(source,/\.mcHero h1\{[\s\S]*?font-size:clamp\(46px,12vw,58px\)!important/);
+  assert.match(source,/--coach-hero-crest:clamp\(108px,30vw,124px\)/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(navigationCss,/--mobile-tab-bar-height:\s*56px/);
@@ -156,10 +158,9 @@ test("Mission Control uses the modern native visual system instead of tiny conde
   assert.match(finalCss,/--mc-title-size:/);
   assert.match(finalCss,/--mc-radius-hero:/);
   assert.match(finalCss,/font-family:\s*var\(--mc-native\)/);
-  assert.match(finalCss,/\.mcHero h1\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
   assert.match(finalCss,/\.mcSectionHead h2\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
-  assert.match(finalCss,/\.mcHeader\s*\{[\s\S]*backdrop-filter:\s*blur\(24px\)/);
+  assert.match(source,/\.mcHeader\{grid-template-columns:44px minmax\(0,1fr\) 44px!important/);
+  assert.match(source,/\.mcHero h1\{[\s\S]*?font-size:clamp\(46px,12vw,58px\)!important/);
+  assert.match(source,/\.mcHeroContent>p\{[\s\S]*?font-size:13px!important/);
   assert.match(finalCss,/\.mcSection\s*\{[\s\S]*border-radius:\s*var\(--mc-radius-card\)/);
-  assert.match(finalCss,/@media \(max-width: 700px\)\s*\{[\s\S]*font-size:\s*34px\s*!important/);
-  assert.match(finalCss,/@media \(max-width: 700px\)\s*\{[\s\S]*font-size:\s*13px\s*!important/);
 });
