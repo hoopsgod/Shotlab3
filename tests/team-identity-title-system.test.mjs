@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const html = read("index.html");
 const stage = read("src/components/TeamIdentityTitleStage.jsx");
 const css = read("src/components/TeamIdentityTitleStage.css");
 const renderedAuthority = read("public/shotlab-team-identity-title-authority.css");
@@ -62,13 +63,19 @@ test("late title authority owns mobile secondary geometry after legacy appHeader
   assert.match(renderedAuthority, /min-width:\s*var\(--identity-crest\)\s*!important/);
 });
 
-test("one last public presentation layer remains a supplemental final authority", () => {
+test("one last public presentation layer remains mounted as the supplemental final authority", () => {
+  const centeringAt = html.indexOf('id="shotlab-mobile-centering-reconciliation"');
+  const authorityAt = html.indexOf('id="shotlab-team-identity-title-authority"');
+  assert.ok(centeringAt >= 0, "mobile centering reconciliation must remain mounted");
+  assert.ok(authorityAt > centeringAt, "team identity authority must load after mobile centering reconciliation");
+  assert.match(html, /href="\/shotlab-team-identity-title-authority\.css\?v=20260818"/);
   assert.doesNotMatch(stage, /TeamIdentityTitleStageAuthority\.css/);
   assert.match(renderedAuthority, /final rendered authority/i);
   assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
   assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)\s*!important/);
   assert.match(renderedAuthority, /font-size:\s*var\(--identity-title\)\s*!important/);
   assert.match(renderedAuthority, /object-fit:\s*contain\s*!important/);
+  assert.match(brandingBoundary, /ensureFinalTeamIdentityAuthority/);
   assert.match(brandingBoundary, /shotlab-team-identity-title-authority/);
 });
 
