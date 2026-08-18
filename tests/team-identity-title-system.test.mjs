@@ -40,7 +40,7 @@ test("finite title variants are literal source classes so production pruning can
 });
 
 test("mobile crest geometry is materially larger without destructive cropping", () => {
-  assert.match(css, /--identity-crest:\s*clamp\(88px,\s*24vw,\s*104px\)/);
+  assert.match(css, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
   assert.match(css, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
   assert.match(css, /object-fit:\s*contain/);
   assert.doesNotMatch(css, /object-fit:\s*cover/);
@@ -48,12 +48,18 @@ test("mobile crest geometry is materially larger without destructive cropping", 
   assert.match(trainingHeader, /teamCrest/);
 });
 
-test("one last public presentation layer prevents legacy CSS from collapsing team titles", () => {
+test("compiled title CSS owns mobile secondary geometry before legacy appHeader rules can distort it", () => {
+  assert.match(css, /secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage="true"\]/);
+  assert.match(css, /display:\s*block\s*!important/);
+  assert.match(css, /grid-area:\s*auto\s*!important/);
+  assert.match(css, /min-width:\s*var\(--identity-crest\)\s*!important/);
+});
+
+test("one last public presentation layer remains a supplemental final authority", () => {
   assert.doesNotMatch(stage, /TeamIdentityTitleStageAuthority\.css/);
   assert.match(renderedAuthority, /final rendered authority/i);
   assert.match(renderedAuthority, /secondaryPageIntro\.teamIdentityTitleStage/);
   assert.match(renderedAuthority, /--identity-crest:\s*clamp\(104px, 29vw, 120px\) !important/);
-  assert.match(renderedAuthority, /--identity-crest:\s*clamp\(88px,24vw,104px\) !important/);
   assert.match(renderedAuthority, /font-size: var\(--identity-title\) !important/);
   assert.match(renderedAuthority, /object-fit: contain !important/);
   assert.match(brandingBoundary, /shotlab-team-identity-title-authority/);
@@ -90,7 +96,7 @@ test("Program Branding previews production titles and has a neutral no-logo stat
   assert.match(brandingForm, /const FALLBACK_LOGO = ""/);
   assert.match(brandingForm, /const FALLBACK_MARK = ""/);
   assert.match(brandingForm, /No logo uploaded\. ShotLab will use the team initials in title stages\./);
-  assert.match(renderedAuthority, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
 test("global defaults are neutral and Demo identity is explicit team data", () => {
