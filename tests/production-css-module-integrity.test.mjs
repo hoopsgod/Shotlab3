@@ -5,20 +5,28 @@ import path from "node:path";
 
 const root = process.cwd();
 
-async function listCssFiles(directory) {
+async function listBuiltFiles(directory, extension) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const fullPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await listCssFiles(fullPath));
-    else if (entry.isFile() && entry.name.endsWith(".css")) files.push(fullPath);
+    if (entry.isDirectory()) files.push(...await listBuiltFiles(fullPath, extension));
+    else if (entry.isFile() && entry.name.endsWith(extension)) files.push(fullPath);
   }
   return files;
 }
 
-async function builtCss() {
-  const files = await listCssFiles(path.join(root, "dist"));
+async function builtText(extension) {
+  const files = await listBuiltFiles(path.join(root, "dist"), extension);
   return (await Promise.all(files.map((file) => readFile(file, "utf8")))).join("\n");
+}
+
+async function builtCss() {
+  return builtText(".css");
+}
+
+async function builtJs() {
+  return builtText(".js");
 }
 
 test("production pruning preserves generated CSS-module selectors", async () => {
@@ -42,32 +50,44 @@ test("built Player workspace CSS remains substantive after production optimizati
   assert.ok(info.size >= 20_000, `PlayerWorkspaces CSS was stripped to ${info.size} bytes`);
 });
 
-test("built production CSS retains the team identity runtime title variants", async () => {
-  const css = await builtCss();
+test("built production assets retain rendered team identity variants and their styled modifiers", async () => {
+  const [css, js] = await Promise.all([builtCss(), builtJs()]);
+
   for (const selector of [
     ".teamIdentityTitleStage--hero",
     ".teamIdentityTitleStage--dark",
-    ".teamIdentityTitleStage--standard",
   ]) {
-    assert.ok(css.includes(selector), `Production CSS lost runtime title selector ${selector}`);
+    assert.ok(css.includes(selector), `Production CSS lost styled runtime title selector ${selector}`);
+  }
+
+  for (const runtimeClass of [
+    "teamIdentityTitleStage--standard",
+    "teamIdentityTitleStage--light",
+  ]) {
+    assert.ok(js.includes(runtimeClass), `Production JS lost rendered title class ${runtimeClass}`);
   }
 });
 
 test("built production CSS keeps the compact mobile title authority and 96px crest floor", async () => {
   const css = await builtCss();
+  const compactRule = css.match(
+    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage=(?:true|"true")\]\{([^}]*)\}/s,
+  )?.[1];
+
+  assert.ok(compactRule, "Production CSS lost the compact secondary team-title rule");
+  assert.match(compactRule, /display:block!important/, "Production CSS lost the compact title display override");
+  assert.match(compactRule, /min-height:var\(--identity-crest\)!important/, "Production CSS lost compact title crest-height ownership");
+  assert.match(compactRule, /height:auto!important/, "Production CSS lost compact title auto-height ownership");
+
   assert.match(
     css,
-    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage=(?:true|"true")\][^{]*\{[^}]*display:block!important[^}]*min-height:var\(--identity-crest\)!important/s,
-    "Production CSS lost the compact secondary team-title display override",
-  );
-  assert.match(
-    css,
-    /--identity-crest:clamp\(96px,25vw,108px\)/,
+    /--identity-crest:\s*clamp\(\s*96px\s*,\s*25vw\s*,\s*108px\s*\)/,
     "Production CSS lost the 96px standard team-crest floor",
   );
-  assert.match(
-    css,
-    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage \.teamIdentityTitleStage__copy\{[^}]*grid-area:auto!important/s,
-    "Production CSS lost the legacy named-grid reset that prevents oversized title runways",
-  );
+
+  const copyRule = css.match(
+    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage \.teamIdentityTitleStage__copy\{([^}]*)\}/s,
+  )?.[1];
+  assert.ok(copyRule, "Production CSS lost the compact title copy rule");
+  assert.match(copyRule, /grid-area:auto!important/, "Production CSS lost the legacy named-grid reset that prevents oversized title runways");
 });
