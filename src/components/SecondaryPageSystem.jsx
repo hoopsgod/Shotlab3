@@ -1,15 +1,60 @@
 import ShotLabIcon from "./ShotLabIcon";
-import SecondaryTeamBrandMark from "./SecondaryTeamBrandMark";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage";
 import "./SecondaryPageSystem.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
 import "../styles/Phase2PremiumRosterLayer.css";
+
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/strength|lifting|conditioning/,"strength"],[/activity|signal|feed/,"activity"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/program|brand|identity/,"program"],[/account|setting/,"settings"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";
-const actionClassName=(index,action)=>["secondaryPageAction",index?"secondaryPageAction--secondary":"secondaryPageAction--primary",action.className].filter(Boolean).join(" ");
-const TITLE_OVERRIDES=`@media(max-width:760px){.coachPlayerDetailWorkspace .secondaryPageIntro__title,.coachAdministrationWorkspace .secondaryPageIntro__title{max-width:16ch!important}.brandingEditorialWorkspace .secondaryPageIntro__title{max-width:18ch!important;white-space:nowrap}}`;
-export function SecondaryPageShell({children,testId,className=""}){return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>}
-export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],testId,icon}){const iconName=icon||iconFor(`${eyebrow} ${title}`);return <><style>{TITLE_OVERRIDES}</style><header className="secondaryPageIntro appHeader" data-testid={testId} data-layout-role="editorial-header" data-surface="light" data-visual-role="page-intro" data-page-kind={iconName} data-mobile-stage="editorial"><span className="secondaryPageIntro__icon secondaryPageIntro__brandSlot"><SecondaryTeamBrandMark iconName={iconName} variant="route"/></span><div className="secondaryPageIntro__copy">{eyebrow?<div className="secondaryPageIntro__eyebrow">{eyebrow}</div>:null}<h1 className="secondaryPageIntro__title appHeaderTitle">{title}</h1>{summary?<p className="secondaryPageIntro__summary">{summary}</p>:null}</div>{status||actions.length?<div className="secondaryPageIntro__actions">{status?<div className="secondaryPageIntro__status" aria-live="polite">{status}</div>:null}<div className="secondaryPageIntro__buttonRow">{actions.map((action,index)=><button key={action.key||action.label} type="button" className={actionClassName(index,action)} onClick={action.onClick} disabled={action.disabled} aria-label={action.ariaLabel||action.label}><span>{action.label}</span>{action.icon?<span className="secondaryPageAction__icon" aria-hidden="true">{action.icon}</span>:index===0?<ShotLabIcon name="arrow" size={16}/>:null}</button>)}</div></div>:null}</header></>}
-export function SecondaryPageToolbar({children,testId,label="Page tools"}){return <section className="secondaryPageToolbar" data-testid={testId} data-layout-role="evidence-tools" data-surface="light" data-visual-role="page-tools" aria-label={label}>{children}</section>}
-export function SecondaryPageDecision({eyebrow,title,detail,tone="neutral",action,children,testId,icon}){const iconName=icon||iconFor(`${eyebrow} ${title}`);return <section className="secondaryPageDecision" data-tone={tone} data-testid={testId} data-layout-role="primary-decision" data-surface="dark" data-visual-role="primary-decision" data-page-kind={iconName} data-mobile-stage="performance"><span className="secondaryPageDecision__icon" aria-hidden="true"><ShotLabIcon name={iconName} size={23}/></span><div className="secondaryPageDecision__copy">{eyebrow?<div className="secondaryPageDecision__eyebrow">{eyebrow}</div>:null}<h2>{title}</h2>{detail?<p>{detail}</p>:null}{action?<button type="button" onClick={action.onClick} disabled={action.disabled}><span>{action.label}</span><ShotLabIcon name="arrow" size={16}/></button>:null}</div>{children?<div className="secondaryPageDecision__visual">{children}</div>:null}</section>}
-export function SecondaryPageEvidence({children,testId,label="Supporting evidence"}){return <section className="secondaryPageEvidence" data-testid={testId} data-layout-role="supporting-evidence" data-surface="light" data-visual-role="supporting-evidence" aria-label={label}>{children}</section>}
+const TITLE_OVERRIDES=`@media(max-width:760px){.coachPlayerDetailWorkspace .teamIdentityStage__title,.coachAdministrationWorkspace .teamIdentityStage__title{max-width:16ch!important}.brandingEditorialWorkspace .teamIdentityStage__title{max-width:18ch!important}}`;
+
+export function SecondaryPageShell({children,testId,className=""}){
+  return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>;
+}
+
+export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],testId,icon,variant="standard",role,userName,backAction,showTonalCrest=true,crestSize}){
+  const iconName=icon||iconFor(`${eyebrow} ${title}`);
+  return <>
+    <style>{TITLE_OVERRIDES}</style>
+    <TeamIdentityTitleStage
+      className="secondaryPageIntro appHeader"
+      variant={variant}
+      surface="light"
+      role={role}
+      eyebrow={eyebrow}
+      title={title}
+      userName={userName}
+      summary={summary}
+      status={status}
+      actions={actions}
+      backAction={backAction}
+      iconName={iconName}
+      showTonalCrest={showTonalCrest}
+      crestSize={crestSize}
+      testId={testId}
+    />
+  </>;
+}
+
+export function SecondaryPageToolbar({children,testId,label="Page tools"}){
+  return <section className="secondaryPageToolbar" data-testid={testId} data-layout-role="evidence-tools" data-surface="light" data-visual-role="page-tools" aria-label={label}>{children}</section>;
+}
+
+export function SecondaryPageDecision({eyebrow,title,detail,tone="neutral",action,children,testId,icon}){
+  const iconName=icon||iconFor(`${eyebrow} ${title}`);
+  return <section className="secondaryPageDecision" data-tone={tone} data-testid={testId} data-layout-role="primary-decision" data-surface="dark" data-visual-role="primary-decision" data-page-kind={iconName} data-mobile-stage="performance">
+    <span className="secondaryPageDecision__icon" aria-hidden="true"><ShotLabIcon name={iconName} size={23}/></span>
+    <div className="secondaryPageDecision__copy">
+      {eyebrow?<div className="secondaryPageDecision__eyebrow">{eyebrow}</div>:null}
+      <h2>{title}</h2>
+      {detail?<p>{detail}</p>:null}
+      {action?<button type="button" onClick={action.onClick} disabled={action.disabled}><span>{action.label}</span><ShotLabIcon name="arrow" size={16}/></button>:null}
+    </div>
+    {children?<div className="secondaryPageDecision__visual">{children}</div>:null}
+  </section>;
+}
+
+export function SecondaryPageEvidence({children,testId,label="Supporting evidence"}){
+  return <section className="secondaryPageEvidence" data-testid={testId} data-layout-role="supporting-evidence" data-surface="light" data-visual-role="supporting-evidence" aria-label={label}>{children}</section>;
+}
