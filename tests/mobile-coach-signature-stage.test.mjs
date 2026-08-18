@@ -37,3 +37,12 @@ test('supporting Coach reconciliation remains idempotent and does not touch titl
   assert.match(promotedCss, /\.mcSection \{\n    overflow: visible;\n    border: 0;\n    border-top: 1px solid var\(--mc-hairline-modern\);/);
   assert.match(promotedCss, /\.mcTodayPlan > button \{[\s\S]*min-height: 44px;/);
 });
+
+test('supporting Coach reconciliation rejects mixed legacy and final anchors', () => {
+  const legacyMetricLedger = '    border-radius: 16px !important;\n    background: rgba(4, 8, 10, .5) !important;';
+  const malformed = `${promotedCss}\n${legacyMetricLedger}\n`;
+  assert.throws(
+    () => promoteCoachFinalCss(malformed),
+    /Coach final metric ledger: expected exactly one legacy anchor or one final anchor; found legacy 1, final 1 \(mixed legacy\/final state\)/,
+  );
+});
