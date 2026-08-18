@@ -6,15 +6,26 @@ import resolveTeamBranding from "../theme/resolveTeamBranding";
 
 const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
 
+const isCustomLogoUrl = (url) => Boolean(
+  url
+  && url !== DEFAULT_BRANDING.logoUrl
+  && url !== DEFAULT_BRANDING.logoMarkUrl
+);
+
 const TeamBrandingContext = createContext({
   branding: DEFAULT_BRANDING,
   theme: defaultTheme,
   tokens: defaultTheme,
+  hasCustomLogo: false,
 });
 
 export function TeamBrandingProvider({ branding, children }) {
   const safeBranding = useMemo(() => resolveTeamBranding(branding || DEFAULT_BRANDING), [branding]);
   const theme = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
+  const hasCustomLogo = useMemo(
+    () => [safeBranding?.logoUrl, safeBranding?.logoMarkUrl].some(isCustomLogoUrl),
+    [safeBranding?.logoUrl, safeBranding?.logoMarkUrl]
+  );
 
   useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);
 
@@ -41,8 +52,8 @@ export function TeamBrandingProvider({ branding, children }) {
   }, [safeBranding?.textScale]);
 
   const value = useMemo(
-    () => ({ branding: safeBranding, theme, tokens: theme }),
-    [safeBranding, theme]
+    () => ({ branding: safeBranding, theme, tokens: theme, hasCustomLogo }),
+    [safeBranding, theme, hasCustomLogo]
   );
 
   return <TeamBrandingContext.Provider value={value}>{children}</TeamBrandingContext.Provider>;

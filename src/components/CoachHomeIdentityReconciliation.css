@@ -1,0 +1,36 @@
+/* Coach Home mobile reconciliation.
+ * The native team credential already owns the foreground crest. The decision hero keeps
+ * team identity as a subtle, branding-driven court signature instead of repeating a
+ * second oversized logo tile and team-name label. */
+@media (max-width: 760px) {
+  html body.mission-control-active #root .mcShell[data-testid="coach-command-center-full"] [data-testid="coach-primary-objective"] .mcHeroContent {
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 400px !important;
+    padding: 28px 18px 24px !important;
+    align-content: center !important;
+    gap: 8px !important;
+  }
+
+  html body.mission-control-active #root .mcShell[data-testid="coach-command-center-full"] [data-testid="coach-primary-objective"] .mcHeroTeamMark {
+    display: none !important;
+  }
+
+  html body.mission-control-active #root .mcShell[data-testid="coach-command-center-full"] [data-testid="coach-primary-objective"] .mcProgramIdentity {
+    display: none !important;
+  }
+
+  html body.mission-control-active #root .mcShell[data-testid="coach-command-center-full"] [data-testid="coach-primary-objective"] h1 {
+    max-width: 10.5ch !important;
+  }
+
+  html body.mission-control-active #root .mcShell[data-testid="coach-command-center-full"] [data-testid="coach-primary-objective"] .mcCourtArtwork {
+    opacity: .44 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  html body.mission-control-active #root .mcShell[data-testid="coach-command-center-full"] [data-testid="coach-primary-objective"] .mcHeroContent {
+    padding-right: 16px !important;
+    padding-left: 16px !important;
+  }
+}

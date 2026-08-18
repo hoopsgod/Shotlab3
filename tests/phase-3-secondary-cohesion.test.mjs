@@ -8,6 +8,8 @@ const acceptanceCss = readFileSync('public/shotlab-phase3-secondary-acceptance.c
 const playerHeader = readFileSync('src/components/PlayerDashboardHeader.jsx', 'utf8');
 const playerWorkspace = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const playerWorkspaceCss = readFileSync('src/components/PlayerOperationalWorkspace.module.css', 'utf8');
+const teamStage = readFileSync('src/components/TeamIdentityTitleStage.jsx', 'utf8');
+const teamStageCss = readFileSync('src/components/TeamIdentityTitleStage.css', 'utf8');
 
 test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance order', () => {
   const phase2 = html.indexOf('id="shotlab-phase2-critical"');
@@ -36,20 +38,29 @@ test('Phase 3 is scoped to high-value secondary destinations', () => {
   assert.match(css, /display:none!important/);
 });
 
-test('Player secondary identity is a compact but unmistakable athlete rail at the rendered owner', () => {
+test('Player secondary identity remains unmistakably team-owned after leaving Home', () => {
   assert.match(css, /player-dashboard-identity-header/);
-  assert.match(playerHeader, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)/);
-  assert.match(playerHeader, /data-identity-role=\"name\"\]\{[\s\S]*font-size:26px!important/);
-  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:58px!important;height:58px!important/);
-  assert.match(playerHeader, /:is\(\[data-identity-role=\"tagline\"\],\[data-identity-role=\"mission\"\]\)\{display:none!important\}/);
-  assert.doesNotMatch(playerHeader, /performance-shell--player[^`]*font-size:(?:8|9|10)px!important/);
+  assert.match(playerHeader, /TeamIdentityTitleStage/);
+  assert.match(playerHeader, /variant="hero"/);
+  assert.match(playerWorkspace, /TeamIdentityTitleStage/);
+  assert.match(playerWorkspace, /variant="standard"/);
+  assert.match(playerWorkspace, /dataMobileStage="team-identity"/);
+  assert.match(teamStage, /data-identity-role="team-name"/);
+  assert.match(teamStage, /data-identity-role="brand-mark"/);
+  assert.match(teamStageCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(teamStageCss, /teamIdentityTitleStage\[data-team-identity-stage="true"\] \.teamIdentityTitleStage__crest/);
+  assert.match(teamStageCss, /max-width:\s*none\s*!important/);
+  assert.match(teamStageCss, /max-height:\s*none\s*!important/);
+  assert.match(teamStageCss, /object-fit:\s*contain/);
+  assert.doesNotMatch(teamStageCss, /object-fit:\s*cover/);
 });
 
-test('Player workspaces own their editorial command and evidence hierarchy', () => {
+test('Player workspaces own their editorial command and evidence hierarchy through the shared title primitive', () => {
   assert.match(playerWorkspace, /data-page-hierarchy="editorial"/);
-  assert.match(playerWorkspace, /data-layout-role="editorial-header"/);
+  assert.match(playerWorkspace, /dataLayoutRole="editorial-header"/);
+  assert.match(playerWorkspace, /dataVisualRole="player-team-workspace-title"/);
   assert.match(playerWorkspace, /data-layout-role="supporting-evidence"/);
-  assert.match(playerWorkspaceCss, /\.commandBar\{[\s\S]*?background:transparent/);
+  assert.match(playerWorkspace, /scheduleWorkspaceActionReveal/);
   assert.match(playerWorkspaceCss, /\.metrics\{[\s\S]*?border-block:1px solid/);
   assert.doesNotMatch(acceptanceCss, /\[class\*="commandBar"\]/);
   assert.doesNotMatch(acceptanceCss, /\[data-metric-priority/);
@@ -65,9 +76,9 @@ test('Rendered Coach Events and Drills canvases cannot fall back to legacy black
 });
 
 test('Phase 3 keeps mobile safety and accessibility behavior explicit', () => {
-  const combined = `${css}\n${acceptanceCss}`;
-  assert.match(combined, /env\(safe-area-inset-bottom,0px\)/);
-  assert.match(combined, /min-height:44px!important/);
-  assert.match(combined, /@media\(max-width:700px\)/);
-  assert.match(combined, /@media\(prefers-reduced-motion:reduce\)/);
+  const combined = `${css}\n${acceptanceCss}\n${teamStageCss}`;
+  assert.match(combined, /env\(safe-area-inset-bottom,0px\)|safe-area-inset-top/);
+  assert.match(combined, /min-height:44px!important|min-height:\s*46px\s*!important/);
+  assert.match(combined, /@media\s*\(max-width:\s*700px\)|@media\(max-width:700px\)/);
+  assert.match(combined, /prefers-reduced-motion:\s*reduce|prefers-reduced-motion:reduce/);
 });

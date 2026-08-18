@@ -7,8 +7,10 @@ const DIST_DIR = path.resolve(ROOT_DIR, "dist");
 const SOURCE_DIR = path.resolve(ROOT_DIR, "src");
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
 const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|variant)(?:-|_|$)|^(?:active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger)$/i;
+const BEM_MODIFIER_CLASS = /^(.+?)--[-_A-Za-z0-9]+$/;
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
+const PLAYER_SECONDARY_IDENTITY_PREFIX = /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab=(?:"home"|home)\]\)\s+\[data-testid=(?:"player-dashboard-identity-header"|player-dashboard-identity-header)\]/;
 
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -66,7 +68,25 @@ function classIsReachable(name, corpus) {
   // Player workspace stylesheet from production while dev remained correct.
   if (GENERATED_CSS_MODULE_CLASS.test(name)) return true;
   if (DYNAMIC_CLASS.test(name)) return true;
+
+  // Component variants commonly use BEM modifiers assembled at runtime, e.g.
+  // `teamIdentityTitleStage--${variant}`. The concrete modifier therefore does
+  // not exist in source text even though its base component class does. If the
+  // BEM block is reachable, preserve its modifier rules instead of creating a
+  // production-only visual regression by pruning them.
+  const bemModifier = name.match(BEM_MODIFIER_CLASS);
+  if (bemModifier && corpus.includes(bemModifier[1])) return true;
+
   return corpus.includes(name);
+}
+
+function armIsRetired(selector) {
+  // The shared TeamIdentityTitleStage now deliberately hides the Player Home
+  // credential on secondary routes and those routes render their own title
+  // stage. Retire only the pre-title-system rail styling. Preserve the new
+  // selector carrying data-team-identity-stage because it owns the hide.
+  return PLAYER_SECONDARY_IDENTITY_PREFIX.test(selector)
+    && !selector.includes("data-team-identity-stage");
 }
 
 function armIsReachable(selector, corpus) {
@@ -84,7 +104,7 @@ function pruneRules(css, corpus) {
     if (!selector || selector.startsWith("@")) return whole;
     const arms = splitSelectorList(selector);
     if (!arms.length) return whole;
-    const kept = arms.filter((arm) => armIsReachable(arm, corpus));
+    const kept = arms.filter((arm) => !armIsRetired(arm) && armIsReachable(arm, corpus));
     removedArms += arms.length - kept.length;
     if (!kept.length) {
       removedRules += 1;
@@ -116,7 +136,7 @@ async function main() {
     changedFiles += 1;
   }
 
-  console.log(`Pruned global selectors: ${removedArms} unreachable selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
+  console.log(`Pruned global selectors: ${removedArms} unreachable/retired selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
 }
 
 await main();

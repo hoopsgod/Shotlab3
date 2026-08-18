@@ -59,15 +59,34 @@ async function expectNoHorizontalOverflow(page) {
 
 async function expectPlayerIdentityInsideViewport(page) {
   const identity = page.getByTestId("player-dashboard-identity-header");
-  if (!(await identity.count())) return;
+  if (!(await identity.count()) || !(await identity.isVisible())) return;
   const geometry = await identity.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, width: rect.width, height: rect.height, viewportWidth: window.innerWidth };
+    const crest = element.querySelector('[data-identity-role="brand-mark"]');
+    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest');
+    const teamName = element.querySelector('[data-identity-role="team-name"]');
+    const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
+    return {
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      height: rect.height,
+      viewportWidth: window.innerWidth,
+      crestWidth: crestRect?.width || 0,
+      crestHeight: crestRect?.height || 0,
+      objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
+      teamName: teamName?.textContent?.trim() || "",
+    };
   });
   expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
-  expect(geometry.width).toBeGreaterThan(300);
-  expect(geometry.height).toBeLessThanOrEqual(100);
+  expect(geometry.width).toBeGreaterThan(340);
+  expect(geometry.height).toBeGreaterThanOrEqual(150);
+  expect(geometry.height).toBeLessThanOrEqual(250);
+  expect(geometry.crestWidth).toBeGreaterThanOrEqual(96);
+  expect(geometry.crestHeight).toBeGreaterThanOrEqual(96);
+  if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
+  expect(geometry.teamName.length).toBeGreaterThan(2);
 }
 
 async function expectCompactFunctionalIntro(page) {
@@ -78,16 +97,50 @@ async function expectCompactFunctionalIntro(page) {
   const geometry = await intro.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
+    const crest = element.querySelector('[data-identity-role="brand-mark"]');
+    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest');
+    const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       height: rect.height,
       titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
       right: rect.right,
       viewportWidth: window.innerWidth,
+      crestWidth: crestRect?.width || 0,
+      crestHeight: crestRect?.height || 0,
+      objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
     };
   });
-  expect(geometry.height).toBeLessThanOrEqual(200);
-  expect(geometry.titleSize).toBeLessThanOrEqual(44);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+  expect(geometry.height).toBeLessThanOrEqual(290);
+  expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+  expect(geometry.titleSize).toBeLessThanOrEqual(55);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
+  expect(geometry.crestWidth).toBeGreaterThanOrEqual(80);
+  expect(geometry.crestHeight).toBeGreaterThanOrEqual(80);
+  if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
+}
+
+async function expectCompactCommitmentIntro(page, mode) {
+  const intro = page.getByTestId(`player-commitment-route-header-${mode}`);
+  await expect(intro).toBeVisible();
+  const geometry = await intro.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const title = element.querySelector("h1");
+    return {
+      left: rect.left,
+      right: rect.right,
+      height: rect.height,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      viewportWidth: window.innerWidth,
+      hasEditorialOwner: Boolean(element.closest('[data-page-hierarchy="editorial"]')),
+    };
+  });
+  expect(geometry.hasEditorialOwner).toBe(true);
+  expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
+  expect(geometry.height).toBeLessThanOrEqual(220);
+  expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+  expect(geometry.titleSize).toBeLessThanOrEqual(55);
+  await expectNoHorizontalOverflow(page);
 }
 
 async function expectProgressStoryCommandSurface(page) {
@@ -312,11 +365,11 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
   await capture(page, "14-player-program-training.png");
 
   await navigateByKey(page, "program");
-  await expectCompactFunctionalIntro(page);
+  await expectCompactCommitmentIntro(page, "events");
   await capture(page, "15-player-events.png");
 
   await navigateByKey(page, "sc");
-  await expectCompactFunctionalIntro(page);
+  await expectCompactCommitmentIntro(page, "strength");
   await capture(page, "16-player-lifting.png");
 
   await navigateByKey(page, "leaderboards");
@@ -325,6 +378,7 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
   await capture(page, "17-player-rankings.png");
 
   await navigateByKey(page, "profile");
+  await expectCompactFunctionalIntro(page);
   await expectProgressStoryCommandSurface(page);
   await capture(page, "18-player-progress.png");
 

@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import { deriveShotLabPerformanceVisual } from "../lib/shotlabPerformanceVisual.js";
+import { useTeamBranding } from "../context/TeamBrandingContext.jsx";
+import useCleanTeamLogo from "./useCleanTeamLogo.js";
 import styles from "./PlayerTrainingSessionHeader.module.css";
 
 const clean = (value) => String(value ?? "").trim();
@@ -34,6 +37,13 @@ export default function PlayerTrainingSessionHeader({
   score = "",
   onBack,
 }) {
+  const { branding, hasCustomLogo = false } = useTeamBranding();
+  const teamName = clean(branding?.teamName || branding?.name || "Your Team");
+  const rawLogo = hasCustomLogo ? (branding?.logoUrl || branding?.logoMarkUrl || "") : "";
+  const logoSrc = useCleanTeamLogo(rawLogo);
+  const [logoFailed, setLogoFailed] = useState(false);
+  useEffect(() => setLogoFailed(false), [logoSrc]);
+
   const isProgram = mode === "program";
   const max = Number(drill?.max);
   const hasMax = Number.isFinite(max) && max > 0;
@@ -43,6 +53,7 @@ export default function PlayerTrainingSessionHeader({
   const visual = hasMax ? deriveShotLabPerformanceVisual({ value: liveValue, target: max }) : null;
   const boundedIndex = Math.max(1, Number(currentIndex) || 1);
   const boundedTotal = Math.max(boundedIndex, Number(total) || 1);
+  const showTeamCrest = Boolean(logoSrc && !logoFailed);
 
   return (
     <section
@@ -50,17 +61,21 @@ export default function PlayerTrainingSessionHeader({
       data-testid="player-training-session-header"
       data-mode={mode}
       data-performance-language="shotlab-target-court"
+      data-team-identity-stage="session"
     >
       <div className={styles.topline}>
         <button type="button" className={styles.back} onClick={onBack} aria-label="Back to training plan">
           <span aria-hidden="true">←</span>
         </button>
+        <span className={styles.teamName}>{teamName}</span>
         <span className={styles.mode}>{isProgram ? "PROGRAM SESSION" : "AT HOME SESSION"}</span>
         <span className={styles.step}>DRILL {boundedIndex} / {boundedTotal}</span>
       </div>
 
       <div className={styles.hero}>
-        <div className={styles.mark}><SessionMark mode={mode} /></div>
+        <div className={`${styles.mark} ${showTeamCrest ? styles.markTeam : ""}`}>
+          {showTeamCrest ? <img className={styles.teamCrest} src={logoSrc} alt={`${teamName} team crest`} draggable="false" onError={() => setLogoFailed(true)} /> : <SessionMark mode={mode} />}
+        </div>
         <div className={styles.copy}>
           <span className={styles.eyebrow}>CURRENT WORK</span>
           <h1>{clean(drill?.name) || "Training drill"}</h1>

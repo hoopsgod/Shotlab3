@@ -5,7 +5,8 @@ import fs from 'node:fs';
 const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const playerHeaderSource = fs.readFileSync(new URL('../src/components/PlayerDashboardHeader.jsx', import.meta.url), 'utf8');
 const coachHeaderSource = fs.readFileSync(new URL('../src/components/CoachDashboardHeader.jsx', import.meta.url), 'utf8');
-const headerCss = fs.readFileSync(new URL('../src/components/DashboardIdentityHeader.module.css', import.meta.url), 'utf8');
+const sharedStageSource = fs.readFileSync(new URL('../src/components/TeamIdentityTitleStage.jsx', import.meta.url), 'utf8');
+const sharedStageCss = fs.readFileSync(new URL('../src/components/TeamIdentityTitleStage.css', import.meta.url), 'utf8');
 
 const playerHeaderStart = appSource.indexOf('<PlayerDashboardHeader');
 const playerHeaderEnd = playerHeaderStart >= 0 ? appSource.indexOf('\n/>', playerHeaderStart) : -1;
@@ -24,15 +25,16 @@ const criticalPlayerBehaviorHandlers = [
   'refreshHomeShotsLeaderboard',
 ];
 
-test('player dashboard heading renders player identity through premium header system', () => {
+test('player dashboard heading renders player identity through shared team-owned title system', () => {
   assert.match(appSource, /import PlayerDashboardHeader from "\.\/components\/PlayerDashboardHeader";/);
   assert.match(appSource, /<PlayerDashboardHeader[\s\S]*userName=\{u\.name\}/);
   assert.match(playerHeaderSource, /Demo Player/);
-  assert.match(playerHeaderSource, /Player Mode/);
-  assert.match(playerHeaderSource, /data-dashboard-header="player-premium"/);
-  assert.match(playerHeaderSource, /DashboardIdentityHeader\.module\.css/);
-  assert.match(headerCss, /\.player\{/);
-  assert.doesNotMatch(headerCss, /font-size:clamp\(24px,8vw,34px\)/);
+  assert.match(playerHeaderSource, /TeamIdentityTitleStage/);
+  assert.match(playerHeaderSource, /role="Player"/);
+  assert.match(playerHeaderSource, /variant="hero"/);
+  assert.match(playerHeaderSource, /testId="player-dashboard-identity-header"/);
+  assert.match(sharedStageSource, /data-team-identity-stage="true"/);
+  assert.match(sharedStageCss, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
 });
 
 test('player heading keeps coach-only controls out of the player header', () => {
@@ -42,7 +44,7 @@ test('player heading keeps coach-only controls out of the player header', () => 
 
 test('coach dashboard header remains present and wired to coach dashboard behavior', () => {
   assert.match(coachHeaderSource, /export default function CoachDashboardHeader/);
-  assert.match(coachHeaderSource, /Team Branding Settings/);
+  assert.match(coachHeaderSource, /Team Branding/);
   assert.match(appSource, /<CoachDashboardHeader[\s\S]*onOpenTeamBranding=\{openTeamBranding\}/);
 });
 
@@ -67,23 +69,21 @@ test('player quick actions do not render Theme or wire setTheme', () => {
   assert.doesNotMatch(playerFunctionSignature, /setTheme/);
 });
 
-test('player dashboard header keeps a shared premium hero with large brand mark', () => {
-  assert.match(playerHeaderSource, /useTeamBranding/);
-  assert.match(playerHeaderSource, /className=\{`\$\{styles\.header\} \$\{styles\.player\}`\}/);
-  assert.match(playerHeaderSource, /<div className=\{styles\.inner\}>/);
-  assert.match(playerHeaderSource, /<div className=\{styles\.identity\}>/);
-  assert.match(playerHeaderSource, /<span className=\{styles\.badge\}>Player Mode<\/span>/);
-  assert.match(playerHeaderSource, /<span className=\{styles\.teamName\}>\{teamName\}<\/span>/);
-  assert.match(playerHeaderSource, /<h1 className=\{styles\.name\}>/);
-  assert.match(playerHeaderSource, /<p className=\{styles\.tagline\}>\{subtitle\}<\/p>/);
-  assert.match(playerHeaderSource, /<div className=\{styles\.mission\}>/);
-  assert.match(playerHeaderSource, /<img className=\{styles\.brandMark\}/);
-  assert.match(headerCss, /\.brandMark\{[^}]*width:96px/);
+test('player dashboard header keeps a shared premium hero with materially larger contained crest', () => {
+  assert.match(playerHeaderSource, /TeamIdentityTitleStage/);
+  assert.match(playerHeaderSource, /surface="dark"/);
+  assert.match(playerHeaderSource, /title=\{displayName\}/);
+  assert.match(playerHeaderSource, /summary=\{subtitle\}/);
+  assert.match(playerHeaderSource, /status=\{mission\}/);
+  assert.match(sharedStageSource, /useTeamBranding/);
+  assert.match(sharedStageSource, /useCleanTeamLogo/);
+  assert.match(sharedStageSource, /teamIdentityTitleStage__tonalCrest/);
+  assert.match(sharedStageCss, /object-fit:\s*contain/);
+  assert.doesNotMatch(sharedStageCss, /object-fit:\s*cover/);
 });
 
 test('player dashboard header does not include compact avatar or action cluster structure', () => {
-  assert.doesNotMatch(playerHeaderSource, /avatarButton|playerActions|wordmarkPanel|profileInitial|iconActions|actions/);
-  assert.doesNotMatch(playerHeaderSource, /<button/);
+  assert.doesNotMatch(playerHeaderSource, /avatarButton|playerActions|wordmarkPanel|profileInitial|iconActions|actions=/);
   assert.doesNotMatch(playerHeaderInvocation, /wordmark=|onOpenProfile=|profileInitial=|actions=/);
 });
 
@@ -93,7 +93,7 @@ test('player quick actions live outside the PlayerDashboardHeader hero', () => {
 });
 
 test('coach remains the only branding and theme-control surface', () => {
-  assert.match(coachHeaderSource, /Team Branding Settings/);
+  assert.match(coachHeaderSource, /Team Branding/);
   assert.match(appSource, /<CoachDashboardHeader[\s\S]*onOpenTeamBranding=\{openTeamBranding\}/);
   assert.match(appSource, /view==="coach-branding"[\s\S]*<CoachTeamBrandingScreen/);
   assert.match(appSource, /Today's Focus Theme/);

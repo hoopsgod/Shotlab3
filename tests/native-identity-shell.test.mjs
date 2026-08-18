@@ -4,40 +4,44 @@ import fs from "node:fs";
 
 const coach = fs.readFileSync("src/components/CoachDashboardHeader.jsx", "utf8");
 const player = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
-const identityCss = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
+const identity = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
+const identityCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
+const secondaryPageCss = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
 const miniHeader = fs.readFileSync("src/components/CoachMiniHeader.jsx", "utf8");
 
 const forbiddenRuntimeBehavior = /supabase|auth\.|fetch\(|localStorage|sessionStorage|create table|alter table/i;
-const legacyCondensedFont = /'Bebas Neue'|'Barlow Condensed'/;
 
-test("coach and player identity headers share one light native surface language", () => {
-  assert.match(coach, /DashboardIdentityHeader\.module\.css/);
-  assert.match(player, /DashboardIdentityHeader\.module\.css/);
-  assert.match(identityCss, /border-radius:22px/);
-  assert.match(identityCss, /background:var\(--surface-1,#fff\)/);
-  assert.match(identityCss, /box-shadow:var\(--shadow-1/);
-  assert.match(identityCss, /min-height:142px/);
-  assert.match(identityCss, /font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display'/);
+test("coach and player identity headers share one team-owned premium surface language", () => {
+  assert.match(coach, /TeamIdentityTitleStage/);
+  assert.match(player, /TeamIdentityTitleStage/);
+  assert.match(coach, /variant="hero"/);
+  assert.match(player, /variant="hero"/);
+  assert.match(coach, /surface="dark"/);
+  assert.match(player, /surface="dark"/);
+  assert.match(identityCss, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
+  assert.match(identityCss, /font: 830 var\(--identity-title\)/);
   assert.doesNotMatch(identityCss, /backdrop-filter/);
-  assert.doesNotMatch(identityCss, legacyCondensedFont);
 });
 
 test("both roles preserve team identity and prominent custom logos", () => {
-  assert.match(coach, /branding\?\.teamName \|\| branding\?\.name/);
-  assert.match(player, /branding\?\.teamName \|\| branding\?\.name/);
-  assert.match(coach, /data-testid="coach-dashboard-identity-header"/);
-  assert.match(player, /data-testid="player-dashboard-identity-header"/);
-  assert.match(coach, /alt=\{`\$\{teamName\} logo`\}/);
-  assert.match(player, /<img className=\{styles\.brandMark\}/);
-  assert.match(identityCss, /\.brandMark\{[^}]*width:96px/);
+  assert.match(identity, /useTeamBranding/);
+  assert.match(identity, /hasCustomLogo/);
+  assert.match(identity, /useCleanTeamLogo/);
+  assert.match(coach, /testId="coach-dashboard-identity-header"/);
+  assert.match(player, /testId="player-dashboard-identity-header"/);
+  assert.match(identity, /alt=\{logoAlt \|\| `\$\{teamName\} team crest`\}/);
+  assert.match(identityCss, /object-fit:\s*contain/);
+  assert.match(identityCss, /teamIdentityTitleStage__tonalCrest/);
+  assert.match(identity, /teamIdentityTitleStage__fallbackCrest/);
 });
 
 test("coach branding access remains visible and keyboard accessible", () => {
-  assert.match(coach, /Team Branding Settings/);
-  assert.match(coach, /onClick=\{onOpenTeamBranding\}/);
-  assert.match(coach, /<ShotLabIcon name="settings" size=\{17\} \/>/);
-  assert.match(identityCss, /\.brandBtn:focus-visible/);
-  assert.match(identityCss, /outline:3px solid/);
+  assert.match(coach, /Team Branding/);
+  assert.match(coach, /onClick: onOpenTeamBranding/);
+  assert.match(coach, /ShotLabIcon name="settings" size=\{16\}/);
+  assert.match(identity, /secondaryPageAction/);
+  assert.match(secondaryPageCss, /\.secondaryPageAction:focus-visible/);
+  assert.match(secondaryPageCss, /outline: 3px solid/);
 });
 
 test("scroll-state coach chrome uses restrained navigation glass rather than legacy dark styling", () => {
@@ -49,11 +53,10 @@ test("scroll-state coach chrome uses restrained navigation glass rather than leg
   assert.match(miniHeader, /aria-label="Log out"/);
   assert.match(miniHeader, /<ShotLabIcon name="logout" size=\{17\} \/>/);
   assert.doesNotMatch(miniHeader, /rgba\(10, 10, 10/);
-  assert.doesNotMatch(miniHeader, legacyCondensedFont);
 });
 
 test("identity shell changes remain presentation-only", () => {
-  for (const source of [coach, player, identityCss, miniHeader]) {
+  for (const source of [coach, player, identity, identityCss, secondaryPageCss, miniHeader]) {
     assert.doesNotMatch(source, forbiddenRuntimeBehavior);
   }
 });

@@ -7,6 +7,8 @@ const playerPrimitives = fs.readFileSync("src/components/PlayerDailyPrimitives.j
 const playerStyles = fs.readFileSync("src/components/PlayerDailyPrimitives.module.css", "utf8");
 const secondary = fs.readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
 const secondaryStyles = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
+const teamStage = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
+const teamStageCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
 const coach = fs.readFileSync("src/components/CoachCommandCenter.jsx", "utf8");
 const visualAuthority = fs.readFileSync("public/shotlab-v15-session-integrity.css", "utf8");
 const screenshotWorkflow = fs.readFileSync(".github/workflows/app-store-presentation-readiness.yml", "utf8");
@@ -27,11 +29,17 @@ test("Player intelligence primitives use the shared icon family", () => {
   assert.match(playerStyles, /grid-template-columns:42px minmax\(0,1fr\) auto/);
 });
 
-test("secondary page heroes and decision surfaces use signature icons", () => {
+test("secondary page heroes and decision surfaces preserve signature icon language inside team-owned titles", () => {
   assert.match(secondary, /import ShotLabIcon/);
-  assert.match(secondary, /secondaryPageIntro__icon/);
+  assert.match(secondary, /import TeamIdentityTitleStage/);
+  assert.match(secondary, /iconName=\{iconName\}/);
   assert.match(secondary, /secondaryPageDecision__icon/);
-  assert.match(secondaryStyles, /grid-template-columns:\s*48px minmax\(0, 1fr\) auto/);
+  assert.match(secondary, /<ShotLabIcon name=\{iconName\} size=\{23\}/);
+  assert.match(teamStage, /className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel"/);
+  assert.doesNotMatch(teamStage, /teamIdentityTitleStage__crestSlot secondaryPageIntro__icon/);
+  assert.match(teamStage, /<ShotLabIcon name=\{iconName\} size=\{18\}/);
+  assert.match(teamStageCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(teamStageCss, /overflow-wrap:\s*anywhere/);
   assert.match(secondaryStyles, /overflow-wrap:\s*anywhere/);
 });
 

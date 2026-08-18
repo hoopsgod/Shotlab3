@@ -3,6 +3,20 @@ import DEFAULT_BRANDING from "./brandingDefaults";
 import { balanceBrandColor, mixHex, normalizeHexColor, resolveOnColor, rgba } from "./brandColorUtils";
 import { SEMANTIC_COLORS, SEMANTIC_TONES } from "./semanticColors";
 
+const isCustomLogoUrl = (url) => Boolean(
+  url
+  && url !== DEFAULT_BRANDING.logoUrl
+  && url !== DEFAULT_BRANDING.logoMarkUrl
+);
+
+const cssEscape = (value) => String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/[\r\n]+/g, " ");
+const teamInitials = (value) => {
+  const words = String(value || "Team").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "TM";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return `${words[0][0] || ""}${words[words.length - 1][0] || ""}`.toUpperCase();
+};
+
 export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
   const textScale = branding.textScale || DEFAULT_BRANDING.textScale;
@@ -33,6 +47,11 @@ export default function buildThemeTokens(teamBranding = {}) {
   const brandIconAccent = mixHex(brandSecondary, brandPrimary, 0.6);
   const brandActionBg = rgba(brandPrimary, 0.18);
   const brandActionBgHover = rgba(brandPrimary, 0.28);
+  const customLogoUrl = [branding.logoUrl, branding.logoMarkUrl].find(isCustomLogoUrl) || "";
+  const brandLabel = branding.teamName || branding.name || "Team";
+  const logoImage = customLogoUrl ? `url("${cssEscape(customLogoUrl)}")` : "none";
+  const logoFallback = `"${cssEscape(teamInitials(brandLabel))}"`;
+  const logoFallbackColor = customLogoUrl ? "transparent" : neutralText;
 
   return {
     branding: {
@@ -96,6 +115,9 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--team-brand-action-bg": brandActionBg,
       "--team-brand-action-bg-hover": brandActionBgHover,
       "--team-brand-action-text": brandAccentText,
+      "--team-brand-logo-image": logoImage,
+      "--team-brand-logo-fallback": logoFallback,
+      "--team-brand-logo-fallback-color": logoFallbackColor,
       "--accent": brandAccentText,
       "--accent-soft": brandPrimarySoft,
       "--team-brand-accent-soft": brandPrimarySoft,

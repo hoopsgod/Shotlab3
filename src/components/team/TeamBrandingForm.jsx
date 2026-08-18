@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_BRANDING } from "../../theme/brandingDefaults";
 import useCleanTeamLogo, { cleanTeamLogoSource } from "../useCleanTeamLogo";
 
-const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
-const FALLBACK_MARK = "/branding/titans-default-mark.svg";
+const FALLBACK_LOGO = "";
+const FALLBACK_MARK = "";
 
 const APPROVED_BRAND_PALETTES = [
   { key: "blue", label: "Blue", primaryColor: "#3B82F6", secondaryColor: "#93C5FD", accentColor: "#2563EB", textOnPrimary: "#EAF2FF" },
@@ -49,6 +49,14 @@ function Field({ field, value, onChange }) {
 }
 
 function LogoPreview({ src, label }) {
+  if (!src) {
+    return (
+      <div style={{ display: "grid", gap: 7 }}>
+        <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
+        <div style={{ minHeight: 82, borderRadius: 12, border: "1px dashed rgba(255,255,255,0.18)", background: "#0c1118", display: "grid", placeItems: "center", padding: 14, color: "#929AA5", fontSize: 12, lineHeight: 1.45, textAlign: "center" }}>No logo uploaded. ShotLab will use the team initials in title stages.</div>
+      </div>
+    );
+  }
   return (
     <div style={{ display: "grid", gap: 7 }}>
       <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
@@ -120,11 +128,17 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
   };
 
   const cleanCurrentLogos = async () => {
+    const fullSource = values.logoUrl || FALLBACK_LOGO;
+    const markSource = values.logoMarkUrl || FALLBACK_MARK;
+    if (!fullSource && !markSource) {
+      setUploadError("Add or upload a team logo before cleaning.");
+      return;
+    }
     try {
       setCleaning(true);
       const [full, mark] = await Promise.all([
-        cleanTeamLogoSource(values.logoUrl || FALLBACK_LOGO),
-        cleanTeamLogoSource(values.logoMarkUrl || FALLBACK_MARK),
+        fullSource ? cleanTeamLogoSource(fullSource) : Promise.resolve(""),
+        markSource ? cleanTeamLogoSource(markSource) : Promise.resolve(""),
       ]);
       setValues((previous) => ({ ...previous, logoUrl: full, logoMarkUrl: mark }));
       setUploadError("");
