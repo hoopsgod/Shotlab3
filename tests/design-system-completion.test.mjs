@@ -35,7 +35,8 @@ test("secondary page heroes and decision surfaces preserve signature icon langua
   assert.match(secondary, /iconName=\{iconName\}/);
   assert.match(secondary, /secondaryPageDecision__icon/);
   assert.match(secondary, /<ShotLabIcon name=\{iconName\} size=\{23\}/);
-  assert.match(teamStage, /teamIdentityTitleStage__crestSlot secondaryPageIntro__icon secondaryPageIntro__brandSlot/);
+  assert.match(teamStage, /className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel"/);
+  assert.doesNotMatch(teamStage, /teamIdentityTitleStage__crestSlot secondaryPageIntro__icon/);
   assert.match(teamStage, /<ShotLabIcon name=\{iconName\} size=\{18\}/);
   assert.match(teamStageCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
   assert.match(teamStageCss, /overflow-wrap:\s*anywhere/);
