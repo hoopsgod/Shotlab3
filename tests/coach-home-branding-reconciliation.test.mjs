@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const app = read("src/App.jsx");
 const stage = read("src/components/TeamIdentityTitleStage.jsx");
 const reconciliation = read("src/components/CoachHomeIdentityReconciliation.css");
 const coach = read("src/components/CoachCommandCenter.jsx");
@@ -32,6 +33,14 @@ test("registered team logos are branding-driven across shared product identity s
   assert.match(coach, /cleanMarkLogoUrl/);
   assert.match(storeEntry, /team\?\.branding/);
   assert.match(storeEntry, /TeamBrandingProvider branding=\{branding\}/);
+});
+
+test("branding saves update the team record that feeds the shared provider", () => {
+  assert.match(app, /const saveTeamBranding=async\(nextBranding\)=>/);
+  assert.match(app, /\.\.\.\(nextBranding\|\|\{\}\)/);
+  assert.match(app, /const nextTeams=teams\.map\(t=>t\.id===team\.id\?\{\.\.\.t,branding:mergedBranding\}:t\)/);
+  assert.match(app, /await P\("sl:teams",nextTeams,setTeams\)/);
+  assert.match(app, /<TeamBrandingProvider branding=\{resolvedTeamBranding\}>/);
 });
 
 test("Titans artwork remains demo seed data, not a registered-team fallback", () => {
