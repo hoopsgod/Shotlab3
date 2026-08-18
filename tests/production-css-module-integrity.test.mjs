@@ -68,16 +68,16 @@ test("built production assets retain rendered team identity variants and their s
   }
 });
 
-test("built production CSS keeps the compact mobile title authority and 96px crest floor", async () => {
+test("built production CSS keeps the final mobile title authority and standard crest floor", async () => {
   const css = await builtCss();
-  const compactRule = css.match(
-    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage\[data-team-identity-stage=(?:true|"true")\]\{([^}]*)\}/s,
+  const authorityRule = css.match(
+    /\.secondaryPageIntro\.teamIdentityTitleStage\[data-team-identity-stage=(?:true|"true")\][^{]*\{([^}]*)\}/s,
   )?.[1];
 
-  assert.ok(compactRule, "Production CSS lost the compact secondary team-title rule");
-  assert.match(compactRule, /display:block!important/, "Production CSS lost the compact title display override");
-  assert.match(compactRule, /min-height:var\(--identity-crest\)!important/, "Production CSS lost compact title crest-height ownership");
-  assert.match(compactRule, /height:auto!important/, "Production CSS lost compact title auto-height ownership");
+  assert.ok(authorityRule, "Production CSS lost the final secondary team-title authority rule");
+  assert.match(authorityRule, /display:block!important/, "Production CSS lost final title display ownership");
+  assert.match(authorityRule, /min-height:var\(--identity-crest\)!important/, "Production CSS lost final title crest-height ownership");
+  assert.match(authorityRule, /height:auto!important/, "Production CSS lost final title auto-height ownership");
 
   assert.match(
     css,
@@ -85,11 +85,11 @@ test("built production CSS keeps the compact mobile title authority and 96px cre
     "Production CSS lost the 96px standard team-crest floor",
   );
 
-  const copyRule = css.match(
-    /\.secondaryPageIntro\.appHeader\.teamIdentityTitleStage \.teamIdentityTitleStage__copy\{([^}]*)\}/s,
-  )?.[1];
-  assert.ok(copyRule, "Production CSS lost the compact title copy rule");
-  assert.match(copyRule, /grid-area:auto!important/, "Production CSS lost the legacy named-grid reset that prevents oversized title runways");
+  assert.match(
+    css,
+    /\.secondaryPageIntro\.teamIdentityTitleStage \.teamIdentityTitleStage__inner[^\{]*\{[^}]*grid-template-columns:minmax\(0,1fr\) var\(--identity-crest\)!important/,
+    "Production CSS lost final title two-column identity geometry",
+  );
 });
 
 test("optimized production CSS keeps the Player Home identity hero off secondary routes", async () => {
