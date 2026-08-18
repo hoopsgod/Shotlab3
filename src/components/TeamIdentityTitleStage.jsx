@@ -3,7 +3,6 @@ import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import ShotLabIcon from "./ShotLabIcon";
 import "./TeamIdentityTitleStage.css";
-import "./TeamIdentityTitleStageAuthority.css";
 
 const tidy = (value) => String(value || "").trim();
 
@@ -48,13 +47,15 @@ export default function TeamIdentityTitleStage({
   const isLongTitle = titleText.length > 20;
   const hasLogo = Boolean(logoSrc && !failed);
   const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
+  const variantClass = variant === "hero" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
+  const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
 
   return (
     <header
       className={[
         "teamIdentityTitleStage",
-        `teamIdentityTitleStage--${variant}`,
-        `teamIdentityTitleStage--${surface}`,
+        variantClass,
+        surfaceClass,
         isLongTitle ? "teamIdentityTitleStage--longTitle" : "",
         className,
       ].filter(Boolean).join(" ")}
