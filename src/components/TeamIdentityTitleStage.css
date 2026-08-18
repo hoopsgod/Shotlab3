@@ -1,5 +1,5 @@
 /* ShotLab 2026 team-owned title architecture. Team colors are decorative only. */
-.teamIdentityTitleStage {
+header.teamIdentityTitleStage[data-team-identity-stage="true"] {
   --identity-crest: clamp(96px, 25vw, 108px);
   --identity-tonal: clamp(178px, 52vw, 226px);
   --identity-title: clamp(42px, 11vw, 54px);
