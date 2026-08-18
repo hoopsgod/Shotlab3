@@ -8,6 +8,8 @@ const acceptanceCss = readFileSync('public/shotlab-phase3-secondary-acceptance.c
 const playerHeader = readFileSync('src/components/PlayerDashboardHeader.jsx', 'utf8');
 const playerWorkspace = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const playerWorkspaceCss = readFileSync('src/components/PlayerOperationalWorkspace.module.css', 'utf8');
+const titleStage = readFileSync('src/components/TeamIdentityTitleStage.jsx', 'utf8');
+const titleCss = readFileSync('src/components/TeamIdentityTitleStage.css', 'utf8');
 
 test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance order', () => {
   const phase2 = html.indexOf('id="shotlab-phase2-critical"');
@@ -36,13 +38,19 @@ test('Phase 3 is scoped to high-value secondary destinations', () => {
   assert.match(css, /display:none!important/);
 });
 
-test('Player secondary identity is a compact but unmistakable athlete rail at the rendered owner', () => {
-  assert.match(css, /player-dashboard-identity-header/);
-  assert.match(playerHeader, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)/);
-  assert.match(playerHeader, /data-identity-role=\"name\"\]\{[\s\S]*font-size:26px!important/);
-  assert.match(playerHeader, /data-identity-role=\"brand-mark\"\]\{width:58px!important;height:58px!important/);
-  assert.match(playerHeader, /:is\(\[data-identity-role=\"tagline\"\],\[data-identity-role=\"mission\"\]\)\{display:none!important\}/);
-  assert.doesNotMatch(playerHeader, /performance-shell--player[^`]*font-size:(?:8|9|10)px!important/);
+test('Player Home is immersive while secondary Player routes use the shared premium Standard title stage', () => {
+  assert.match(playerHeader, /<TeamIdentityTitleStage/);
+  assert.match(playerHeader, /variant="hero"/);
+  assert.match(playerHeader, /surface="dark"/);
+  assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
+  assert.match(playerWorkspace, /variant="standard"/);
+  assert.match(titleStage, /data-identity-role="team-name"/);
+  assert.match(titleStage, /data-identity-role="page-title"/);
+  assert.match(titleStage, /data-identity-role="brand-mark"/);
+  assert.match(titleCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.match(titleCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
+  assert.match(titleCss, /object-fit:\s*contain/);
+  assert.doesNotMatch(playerHeader, /width:58px!important|font-size:26px!important/);
 });
 
 test('Player workspaces own their editorial command and evidence hierarchy', () => {
