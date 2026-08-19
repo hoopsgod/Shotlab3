@@ -26,7 +26,7 @@ test("Coach secondary pages use the shared editorial title stage, one performanc
 });
 
 test("historical runtime visual layers cannot override the canonical secondary-page component stylesheet", () => {
-  assert.match(reboot, /Secondary pages and empty states use their component\/semantic contracts/);
+  assert.match(reboot, /owns Mission Control support surfaces only/);
   assert.doesNotMatch(reboot, /secondaryStart|secondaryEnd|\.secondaryPageIntro/);
   assert.doesNotMatch(releaseFixes, /\.secondaryPageIntro/);
 });
