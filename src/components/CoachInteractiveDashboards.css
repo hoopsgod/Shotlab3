@@ -21,4 +21,11 @@
     width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2));
     margin-inline: var(--shotlab-mobile-content-rail, 20px);
   }
+
+  /* The build-time Phase 4D enhancer assigns this stable class to the shared
+     Dashboard return control. Pull the real sibling control toward the owned
+     title stage instead of relying on DOM-shape :has() guesses. */
+  .performance-shell--coach .page > .shared-dashboard-back-action {
+    margin-bottom: -14px !important;
+  }
 }
