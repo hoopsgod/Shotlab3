@@ -3,8 +3,8 @@ const STYLE_ID = "shotlab-visual-system-reboot";
 export const VISUAL_SYSTEM_REBOOT_VERSION = "product-light-v3-mission-control";
 
 const CSS = `
-/* ShotLab product-light reboot now owns Mission Control only.
-   Secondary pages and empty states use their component/semantic contracts. */
+/* ShotLab product-light reboot owns Mission Control support surfaces only.
+   Coach Hero identity, crest, title, summary, and Hero geometry are source-owned. */
 :root {
   --sl-canvas: #f5f5f2;
   --sl-surface: #ffffff;
@@ -71,70 +71,6 @@ body.mission-control-active .mcHeader button {
   background: #fff !important;
   color: var(--sl-ink) !important;
   box-shadow: none !important;
-}
-
-body.mission-control-active .mcHero {
-  min-height: 0 !important;
-  margin-top: 16px !important;
-  padding: 0 !important;
-  border: 1px solid var(--sl-line) !important;
-  border-radius: 22px !important;
-  background: var(--sl-surface) !important;
-  color: var(--sl-ink) !important;
-  box-shadow: var(--sl-shadow) !important;
-}
-
-body.mission-control-active .mcHero::before,
-body.mission-control-active .mcHero::after {
-  opacity: 0 !important;
-  background: none !important;
-}
-
-body.mission-control-active .mcHeroContent {
-  max-width: none !important;
-  padding: 24px !important;
-  display: grid !important;
-  grid-template-columns: minmax(0,1fr) auto !important;
-  gap: 18px 24px !important;
-  align-items: center !important;
-}
-
-body.mission-control-active .mcHeroContent h1 {
-  max-width: 13ch !important;
-  margin: 4px 0 0 !important;
-  color: var(--sl-ink) !important;
-  font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif !important;
-  font-size: clamp(35px,7vw,54px) !important;
-  font-weight: 790 !important;
-  line-height: .98 !important;
-  letter-spacing: -.055em !important;
-  text-transform: none !important;
-}
-
-body.mission-control-active .mcHeroContent > p {
-  max-width: 48ch !important;
-  margin: 10px 0 0 !important;
-  color: var(--sl-muted) !important;
-  font-size: 15px !important;
-  line-height: 1.5 !important;
-}
-
-body.mission-control-active .mcHeroEyebrow,
-body.mission-control-active .mcEyebrow {
-  color: var(--sl-accent) !important;
-  font-family: -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 760 !important;
-  letter-spacing: .06em !important;
-  text-transform: none !important;
-}
-
-body.mission-control-active .mcHeroLogo,
-body.mission-control-active .mcHeroContent img {
-  width: clamp(72px,18vw,132px) !important;
-  max-height: 112px !important;
-  object-fit: contain !important;
-  filter: none !important;
 }
 
 body.mission-control-active .mcRealityStrip {
@@ -251,21 +187,6 @@ body.mission-control-active .mcAssignmentAccountabilityRow {
 @media (max-width: 760px) {
   body.mission-control-active .missionControl {
     padding: 12px 12px 96px !important;
-  }
-
-  body.mission-control-active .mcHeroContent {
-    grid-template-columns: 1fr auto !important;
-    padding: 20px !important;
-  }
-
-  body.mission-control-active .mcHeroContent h1 {
-    font-size: 39px !important;
-  }
-
-  body.mission-control-active .mcHeroLogo,
-  body.mission-control-active .mcHeroContent img {
-    width: 82px !important;
-    max-height: 78px !important;
   }
 
   body.mission-control-active .mcAssignmentStateFacts {
