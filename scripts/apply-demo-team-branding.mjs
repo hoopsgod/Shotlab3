@@ -1,34 +1,20 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 
 const demoDataPath = 'src/lib/demoData.js';
-let source = readFileSync(demoDataPath, 'utf8');
+const source = readFileSync(demoDataPath, 'utf8');
 
-const exactLogo = '/branding/titans-exact-logo.png.PNG';
-const finalMarker = 'const DEMO_TEAM_BRANDING = Object.freeze({';
+const requiredContracts = [
+  ['Demo Titans team name', /teamName:\s*"Demo Titans"/],
+  ['exact Titans logo URL', /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/],
+  ['Titans mark URL', /logoMarkUrl:\s*"\/branding\/titans-default-mark\.svg"/],
+  ['source-owned demo branding constant', /const DEMO_TEAM_BRANDING = Object\.freeze\(\{/],
+  ['source-owned team field', /teamName:\s*DEMO_TEAM_BRANDING\.teamName/],
+  ['source-owned logo field', /logoUrl:\s*DEMO_TEAM_BRANDING\.logoUrl/],
+  ['source-owned logo mark field', /logoMarkUrl:\s*DEMO_TEAM_BRANDING\.logoMarkUrl/],
+];
 
-if (source.includes(finalMarker)) {
-  console.log('Demo Titans branding normalization already applied.');
-  process.exit(0);
+for (const [label, pattern] of requiredContracts) {
+  if (!pattern.test(source)) throw new Error(`Demo Titans ${label} is not source-owned in ${demoDataPath}.`);
 }
 
-const constantsAnchor = 'const DEMO_TEAM_ID = "team-demo-titans";\nconst DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");';
-const constantsReplacement = `const DEMO_TEAM_ID = "team-demo-titans";\nconst DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");\nconst DEMO_TEAM_BRANDING = Object.freeze({\n  teamName: "Demo Titans",\n  logoUrl: "${exactLogo}",\n  logoMarkUrl: "${exactLogo}",\n});`;
-if (!source.includes(constantsAnchor)) {
-  throw new Error('Could not locate Demo Titans constants anchor in src/lib/demoData.js.');
-}
-source = source.replace(constantsAnchor, constantsReplacement);
-
-const functionStart = source.indexOf('function buildDemoTeam(teamId, coachEmail, team) {');
-const functionEnd = source.indexOf('\n}\n\nexport function buildDemoDataBundle', functionStart);
-if (functionStart < 0 || functionEnd < 0) {
-  throw new Error('Could not locate buildDemoTeam in src/lib/demoData.js.');
-}
-const legacyFunction = source.slice(functionStart, functionEnd + 2);
-const finalFunction = `function buildDemoTeam(teamId, coachEmail, team) {\n  if (team) {\n    const existing = clone(team);\n    const currentName = String(existing?.name || "").trim();\n    const currentBrandingName = String(existing?.branding?.teamName || "").trim();\n    const genericName = !currentName || /^(demo team|shotlab team)$/i.test(currentName);\n    const genericBranding = !currentBrandingName || /^(demo team|shotlab team)$/i.test(currentBrandingName);\n    const shouldSeedDemoIdentity = genericName && genericBranding;\n    const existingLogo = String(existing?.branding?.logoUrl || "").trim();\n    const existingMark = String(existing?.branding?.logoMarkUrl || "").trim();\n    const logoUrl = !existingLogo || /\\/branding\\/titans-default-mark(?:-free)?\\.svg/i.test(existingLogo) ? DEMO_TEAM_BRANDING.logoUrl : existingLogo;\n    const logoMarkUrl = !existingMark || /\\/branding\\/titans-default-mark(?:-free)?\\.svg/i.test(existingMark) ? DEMO_TEAM_BRANDING.logoMarkUrl : existingMark;\n    return {\n      ...existing,\n      id: teamId || existing.id,\n      ...(shouldSeedDemoIdentity ? {\n        name: "Demo Titans",\n        branding: {\n          ...(existing.branding || {}),\n          ...DEMO_TEAM_BRANDING,\n          logoUrl,\n          logoMarkUrl,\n        },\n      } : {}),\n      ownerCoachId: coachEmail || existing.ownerCoachId || existing.coachEmail || null,\n      updatedAt: Date.now(),\n    };\n  }\n\n  return {\n    id: teamId || DEMO_TEAM_ID,\n    name: "Demo Titans",\n    branding: { ...DEMO_TEAM_BRANDING },\n    ownerCoachId: coachEmail || null,\n    createdAt: DEMO_TIMESTAMP,\n    joinCode: "DEMO26",\n    updatedAt: Date.now(),\n  };\n}`;
-if (!/name:\s*"Demo Titans"/.test(legacyFunction)) {
-  throw new Error('buildDemoTeam no longer matches the expected Demo Titans source shape.');
-}
-source = source.slice(0, functionStart) + finalFunction + source.slice(functionEnd + 2);
-
-writeFileSync(demoDataPath, source);
-console.log('Normalized generic Demo Team identity to Demo Titans with the exact crest while preserving explicit demo customizations.');
+console.log('Verified source-owned Demo Titans teamName, logoUrl and logoMarkUrl; no build-time identity mutation performed.');
