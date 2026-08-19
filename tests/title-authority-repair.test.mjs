@@ -21,6 +21,7 @@ const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs')
 const secondaryEnhancer = read('scripts/apply-mobile-premium-secondary-page-system.mjs');
 const playerCompositionEnhancer = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
 const demoBrandingEnhancer = read('scripts/apply-demo-team-branding.mjs');
+const demoData = read('src/lib/demoData.js');
 const coachV2Css = read('src/components/CoachMissionControlV2.css');
 const coachHeaderCss = read('src/components/CoachMissionControlHeader.css');
 const coachPolishCss = read('src/components/CoachMissionControlPolish.css');
@@ -131,17 +132,20 @@ test('shared title geometry preserves premium crest scale, containment and diffi
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
 });
 
-test('no-logo fallback is explicit while generic demo identity normalizes to the exact Titans crest', () => {
+test('no-logo fallback is explicit and Demo Titans branding is seeded directly by source data', () => {
   assert.match(stage, /isDefaultTitansLogo/);
   assert.match(stage, /teamOwnsDefaultTitansIdentity/);
   assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
   assert.match(coach, /mcTeamFallback/);
-  assert.match(demoBrandingEnhancer, /teamName: "Demo Titans"/);
-  assert.match(demoBrandingEnhancer, /const exactLogo = '\/branding\/titans-exact-logo\.png\.PNG'/);
-  assert.match(demoBrandingEnhancer, /genericName[\s\S]*genericBranding[\s\S]*shouldSeedDemoIdentity/);
-  assert.match(demoBrandingEnhancer, /titans-default-mark/);
-  assert.match(demoBrandingEnhancer, /const logoUrl =/);
-  assert.match(demoBrandingEnhancer, /const logoMarkUrl =/);
+  assert.match(demoData, /const DEMO_TEAM_BRANDING = Object\.freeze\(\{/);
+  assert.match(demoData, /teamName:\s*"Demo Titans"/);
+  assert.match(demoData, /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);
+  assert.match(demoData, /logoMarkUrl:\s*"\/branding\/titans-default-mark\.svg"/);
+  assert.match(demoData, /teamName:\s*DEMO_TEAM_BRANDING\.teamName/);
+  assert.match(demoData, /logoUrl:\s*DEMO_TEAM_BRANDING\.logoUrl/);
+  assert.match(demoData, /logoMarkUrl:\s*DEMO_TEAM_BRANDING\.logoMarkUrl/);
+  assert.doesNotMatch(demoBrandingEnhancer, /writeFileSync|source\.replace|source\.slice/);
+  assert.match(demoBrandingEnhancer, /no build-time identity mutation performed/);
   assert.ok(DEV_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
   assert.ok(BUILD_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
 });
