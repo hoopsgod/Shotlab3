@@ -7,7 +7,7 @@ import resolveTeamBranding from "../theme/resolveTeamBranding";
 const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
 
 const TeamBrandingContext = createContext({
-  branding: DEFAULT_BRANDING,
+  branding: resolveTeamBranding({}),
   theme: defaultTheme,
   tokens: defaultTheme,
 });
@@ -34,7 +34,7 @@ function readActiveStoredTeamName() {
 
 export function TeamBrandingProvider({ branding, children }) {
   const safeBranding = useMemo(() => {
-    const resolved = resolveTeamBranding(branding || DEFAULT_BRANDING);
+    const resolved = resolveTeamBranding(branding || {});
     const storedTeamName = readActiveStoredTeamName();
     const resolvedTeamName = String(resolved?.teamName || "").trim();
     const defaultTeamName = String(DEFAULT_BRANDING?.teamName || "").trim();
