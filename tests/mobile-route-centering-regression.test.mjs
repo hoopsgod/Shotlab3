@@ -23,7 +23,8 @@ test('mobile secondary route mastheads resolve through the shared source-owned t
   assert.match(stageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/)
   assert.match(stageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/)
   assert.match(stageCss, /@media \(max-width: 390px\)/)
-  assert.match(stageCss, /\.teamIdentityTitleStage--standard \{ --identity-crest: 76px; --identity-title: 38px; \}/)
+  assert.match(stageCss, /\.teamIdentityTitleStage--standard \{ --identity-crest: 84px; --identity-title: 38px; \}/)
+  assert.match(stageCss, /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner \{ gap: 8px;/)
   assert.match(stageCss, /\.teamIdentityTitleStage__title[\s\S]*overflow-wrap:\s*normal[\s\S]*word-break:\s*normal/)
 })
 
