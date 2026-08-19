@@ -204,6 +204,7 @@
 @media (max-width: 760px) {
   [data-testid="coach-dashboard-identity-header"].coachDashboardIdentityStage { display: none; }
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none; }
+  .teamIdentityTitleStage:has(.teamIdentityTitleStage__crest) .teamIdentityTitleStage__tonalCrest { display: none; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action {
     padding-inline: 8px;
     font-size: 11px;
