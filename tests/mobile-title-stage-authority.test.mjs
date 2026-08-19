@@ -37,20 +37,17 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(36px,\s*9\.6vw,\s*40px\)/);
 });
 
-test('secondary destinations use semantic team-brand treatments instead of one repeated crest template', () => {
+test('secondary destinations retain semantic metadata while restoring the full custom crest', () => {
   assert.match(stage, /BRAND_TREATMENTS = new Set\(\["hero", "compact", "signature", "watermark", "none"\]\)/);
   assert.match(stage, /AUTO_BRAND_TREATMENT_BY_PAGE_KIND/);
   assert.match(stage, /events: "compact"/);
   assert.match(stage, /strength: "watermark"/);
   assert.match(stage, /leaderboards: "none"/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
-  assert.match(stage, /resolvedBrandTreatment === "hero"/);
-  assert.match(brandCss, /data-brand-treatment="compact"/);
-  assert.match(stage, /resolvedBrandTreatment === "watermark"/);
-  assert.match(brandCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(brandCss, /teamIdentityTitleStage__microBrand/);
-  assert.match(brandCss, /teamIdentityTitleStage__signatureRule/);
-  assert.match(brandCss, /teamIdentityTitleStage__watermarkBrand/);
+  assert.match(stage, /const fullCrestBrand =/);
+  assert.match(stage, /\{fullCrestBrand\}/);
+  assert.doesNotMatch(stage, /teamIdentityTitleStage__microBrandImage/);
+  assert.doesNotMatch(stage, /teamIdentityTitleStage__watermarkBrand/);
   assert.match(secondary, /training:"signature"/);
   assert.match(secondary, /calendar:"compact"/);
   assert.match(secondary, /strength:"watermark"/);
@@ -70,23 +67,23 @@ test('Home and Program Branding preserve an intentional identity-heavy hero trea
   assert.match(brandingPreview, /variant="editorial" brandTreatment="compact"/);
 });
 
-test('custom team logos remain data-driven and visibly present across every title treatment', () => {
+test('custom team logos remain data-driven and use the full crest slot on every title stage', () => {
   assert.match(stage, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
   assert.match(stage, /useCleanTeamLogo\(rawLogo\)/);
-  assert.match(stage, /const supportingBrand = resolvedBrandTreatment !== "hero"/);
+  assert.match(stage, /const fullCrestBrand =/);
   assert.match(stage, /className="teamIdentityTitleStage__crest"[\s\S]*src=\{cleanedLogo\}/);
-  assert.match(stage, /className="teamIdentityTitleStage__microBrandImage"[\s\S]*src=\{cleanedLogo\}/);
-  assert.match(stage, /className="teamIdentityTitleStage__watermarkBrand"[\s\S]*src=\{cleanedLogo\}/);
+  assert.match(stage, /className="teamIdentityTitleStage__crestSlot"/);
+  assert.match(stage, /\{fullCrestBrand\}/);
   assert.doesNotMatch(stage, /titans-exact-logo|titans-default-mark/);
 });
 
-test('compact editorial stages preserve typography authority while keeping team identity obvious', () => {
-  assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-crest:\s*clamp\(60px,\s*16vw,\s*68px\)/);
+test('secondary mobile stages restore the exact pre-reset crest scale and right-side geometry', () => {
+  assert.match(brandCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(brandCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(brandCss, /align-items:\s*end/);
+  assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
+  assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*8px[\s\S]*padding:\s*10px 2px 12px/);
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
-  assert.match(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*width:\s*30px[\s\S]*height:\s*30px/);
-  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*data-brand-treatment="signature"[\s\S]*padding-top:\s*5px[\s\S]*padding-bottom:\s*6px/);
-  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*teamIdentityTitleStage__microBrand[\s\S]*width:\s*28px[\s\S]*height:\s*28px/);
-  assert.doesNotMatch(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*drop-shadow/);
 });
 
 test('Back is a first-class title-stage affordance with accessible semantics and touch target', () => {
