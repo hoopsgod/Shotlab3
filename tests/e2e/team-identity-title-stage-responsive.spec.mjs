@@ -161,7 +161,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       const title = element.querySelector("h1");
       const team = element.querySelector(".mcProgramIdentity");
       const crest = element.querySelector(".mcHeroTeamMark img");
-      const fallback = element.querySelector(".mcHeroTeamMark .mcLogoSetupPrompt");
+      const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
       const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
       return {
         left: rect.left,
@@ -195,7 +195,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     const title = element.querySelector("h1");
     const team = element.querySelector('[data-identity-role="team-name"]');
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
-    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
+    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest');
     const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       left: rect.left,
@@ -225,6 +225,17 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
   await expectNoHorizontalOverflow(page);
+}
+
+async function expectSingleLineTitle(page, expectedText) {
+  const title = page.locator('[data-team-identity-stage="true"]:visible [data-identity-role="page-title"]').first();
+  await expect(title).toHaveText(expectedText);
+  const geometry = await title.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const lineHeight = Number.parseFloat(style.lineHeight) || Number.parseFloat(style.fontSize);
+    return { height: element.getBoundingClientRect().height, lineHeight };
+  });
+  expect(geometry.height).toBeLessThanOrEqual(geometry.lineHeight * 1.25);
 }
 
 async function expectReadableTeamIdentity(page) {
@@ -275,6 +286,7 @@ test("team-owned Home and standard title stages satisfy the exact required mobil
     await expectTitleStageGeometry(page, { variant: "hero", teamName: "Demo Titans" });
     await navigate(page, "leaderboards");
     await expectTitleStageGeometry(page, { variant: "standard", teamName: "Demo Titans" });
+    await expectSingleLineTitle(page, "Leaderboards");
     await capture(page, `required-${viewport.width}x${viewport.height}-player-rankings`);
   }
 });
