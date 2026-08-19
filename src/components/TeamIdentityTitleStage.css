@@ -65,7 +65,9 @@
   color: #46504a;
   font: 720 14px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
-.teamIdentityTitleStage__summary {
+/* Title Authority: keep summary foreground component-owned even when legacy
+   performance-shell paragraph rules are loaded later in the runtime cascade. */
+.teamIdentityTitleStage .teamIdentityTitleStage__summary {
   max-width: 40ch;
   margin: 10px 0 0;
   color: #667069;
