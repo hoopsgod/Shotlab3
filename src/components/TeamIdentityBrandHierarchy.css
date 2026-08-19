@@ -1,8 +1,9 @@
 /*
  * Team identity hierarchy: Home owns the hero crest. Functional destinations
- * use compact attribution, a text signature, a tonal watermark, or no
- * decorative mark at all. This file intentionally loads after the title-stage
- * foundation so the semantic treatment, not page-specific CSS, owns branding.
+ * keep the coach-configured logo visibly present while compact attribution,
+ * signature, watermark, and minimal treatments control its supporting role.
+ * This file intentionally loads after the title-stage foundation so the
+ * semantic treatment, not page-specific CSS, owns branding.
  */
 .teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
   grid-template-columns: minmax(0, 1fr);
@@ -12,12 +13,12 @@
 .teamIdentityTitleStage__microBrand {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
   padding: 3px;
   border: 1px solid rgba(21, 25, 24, .12);
-  border-radius: 9px;
+  border-radius: 11px;
   background: rgba(21, 25, 24, .035);
   overflow: hidden;
 }
@@ -127,9 +128,9 @@
   }
 
   .teamIdentityTitleStage__microBrand {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
   }
 
   .teamIdentityTitleStage__watermarkBrand,
