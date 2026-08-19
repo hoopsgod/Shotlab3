@@ -19,6 +19,7 @@
     --shotlab-mobile-content-rail: var(--space-5, 20px);
     --shotlab-mobile-content-landing: var(--space-6, 24px);
     --layout-gutter: var(--shotlab-mobile-content-rail);
+    --phase4e-mobile-gutter: var(--shotlab-mobile-content-rail);
   }
 
   html body #root .performance-shell .player-scroll-container,
