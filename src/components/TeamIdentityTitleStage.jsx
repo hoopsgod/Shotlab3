@@ -76,6 +76,23 @@ export default function TeamIdentityTitleStage({
       brandingAction.onClick();
       return;
     }
+
+    const directBrandingDestination = document.querySelector('[data-nav-key="branding"]');
+    if (directBrandingDestination instanceof HTMLElement) {
+      directBrandingDestination.click();
+      return;
+    }
+
+    const mobileMore = document.querySelector('[data-testid="mobile-navigation-more"]');
+    if (mobileMore instanceof HTMLElement) {
+      mobileMore.click();
+      window.setTimeout(() => {
+        const brandingDestination = document.querySelector('[data-nav-key="branding"]');
+        if (brandingDestination instanceof HTMLElement) brandingDestination.click();
+      }, 0);
+      return;
+    }
+
     document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click();
   };
 
