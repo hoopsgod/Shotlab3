@@ -84,6 +84,9 @@
     background:transparent!important;
     box-shadow:none!important;
   }
+  [data-team-workspace='program'] .metricPrimary + .metricSupporting{
+    padding-inline-start:2px!important;
+  }
   .metricPrimary + .metricSupporting{border-left:0!important}
   .metricSupporting + .metricSupporting{border-left:1px solid rgba(23,26,24,.1)!important}
   .metricSupporting::after{display:none!important}
