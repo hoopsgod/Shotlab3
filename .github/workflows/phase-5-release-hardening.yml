@@ -51,6 +51,7 @@ jobs:
           node --test
           tests/phase-5-release-hardening.test.mjs
           tests/phase-5-mobile-precision.test.mjs
+          tests/mobile-geometry-precision.test.mjs
           tests/coach-follow-up-integrity.test.mjs
           tests/coach-player-response-loop.test.mjs
           tests/coach-player-invitation-contract.test.mjs
