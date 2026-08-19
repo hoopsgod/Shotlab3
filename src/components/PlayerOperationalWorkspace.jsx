@@ -33,7 +33,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id} data-title-stage-family="editorial">
     <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
       <TeamIdentityTitleStage
-        variant="editorial"
+        variant="standard"
         surface="light"
         role={resolveWorkspaceIdentityLabel(model)}
         title={model.title}
@@ -47,7 +47,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         dataLayoutRole="editorial-header"
         dataVisualRole="player-team-workspace-title"
         dataPageKind={model.id}
-        dataMobileStage="editorial"
+        dataMobileStage="team-identity"
         ariaLabel={`${model.title} team identity and page title`}
       />
     </div>
