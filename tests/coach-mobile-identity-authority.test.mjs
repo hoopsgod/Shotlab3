@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { enforceCoachMobileIdentityAuthority } from '../scripts/enforce-coach-mobile-identity-authority.mjs';
+
+const foundationCss = fs.readFileSync(new URL('../public/shotlab-v3-foundation.css', import.meta.url), 'utf8');
+const sessionIntegrityCss = fs.readFileSync(new URL('../public/shotlab-v15-session-integrity.css', import.meta.url), 'utf8');
 
 test('final production reconciliation removes obsolete Coach identity geometry but preserves the component owner', () => {
   const source = `
@@ -21,4 +25,13 @@ body.mission-control-active .mcProgramIdentity{color:#17242b!important;font-size
   assert.match(css, /data-team-identity-stage="coach-mission-control"[^}]*min-height:428px/);
   assert.match(css, /data-team-identity-stage="coach-mission-control"[^}]*mcHeroTeamMark\{width:112px;height:112px/);
   assert.match(css, /data-team-identity-stage="coach-mission-control"[^}]*h1\{font-size:48px;color:#f8fbfc/);
+});
+
+test('legacy public layers cannot own Coach Mission Control title geometry in dev', () => {
+  assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcHero(?:\{|Content\{|TeamMark\{|\s+h1\{)/);
+  assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcEyebrow\{/);
+  assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcHeroContent>p\{/);
+  assert.doesNotMatch(foundationCss, /\.mcCourtArtwork[^\n{]*\{display:none!important\}/);
+  assert.doesNotMatch(sessionIntegrityCss, /\[data-testid="coach-primary-objective"\][^{]*\{[^}]*max-height:/s);
+  assert.doesNotMatch(sessionIntegrityCss, /\[data-testid="coach-primary-objective"\][^{]*:is\(h1,h2\)[^{]*\{[^}]*font-size:/s);
 });
