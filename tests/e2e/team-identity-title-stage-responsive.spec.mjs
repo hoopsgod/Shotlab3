@@ -195,7 +195,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     const title = element.querySelector("h1");
     const team = element.querySelector('[data-identity-role="team-name"]');
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
-    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest');
+    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
     const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       left: rect.left,
