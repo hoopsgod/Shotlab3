@@ -109,7 +109,7 @@ export default function TeamIdentityTitleStage({
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
-  const showLogoSetupPrompt = resolvedBrandTreatment === "hero" && isCoachStage && (!cleanedLogo || logoFailed);
+  const showLogoSetupPrompt = isCoachStage && (!cleanedLogo || logoFailed);
   const hasUsableLogo = Boolean(cleanedLogo && !logoFailed);
   const openBrandingSettings = () => {
     if (brandingAction?.onClick) {
@@ -138,44 +138,7 @@ export default function TeamIdentityTitleStage({
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
-  // Every authenticated destination keeps the coach-configured team logo visibly present.
-  // Treatment still controls hierarchy: editorial pages use a supporting mark, watermark
-  // pages may add tonal depth behind it, and Home keeps the full hero crest.
-  const supportingBrand = resolvedBrandTreatment !== "hero" ? (
-    <span className="teamIdentityTitleStage__microBrand" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
-      {hasUsableLogo ? (
-        <img
-          className="teamIdentityTitleStage__microBrandImage"
-          data-identity-role="brand-mark"
-          src={cleanedLogo}
-          alt=""
-          aria-hidden="true"
-          draggable="false"
-          onError={() => setLogoFailed(true)}
-        />
-      ) : (
-        <span className="teamIdentityTitleStage__microBrandFallback" aria-hidden="true">{fallbackInitials}</span>
-      )}
-    </span>
-  ) : null;
-
-  const watermarkBrand = resolvedBrandTreatment === "watermark" ? (
-    hasUsableLogo ? (
-      <img
-        className="teamIdentityTitleStage__watermarkBrand"
-        data-identity-role="brand-watermark"
-        src={cleanedLogo}
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-        onError={() => setLogoFailed(true)}
-      />
-    ) : (
-      <span className="teamIdentityTitleStage__watermarkFallback" data-identity-role="brand-watermark" aria-hidden="true">{fallbackInitials}</span>
-    )
-  ) : null;
-
-  const heroBrand = resolvedBrandTreatment === "hero" ? (
+  const fullCrestBrand = (
     <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
       {hasUsableLogo ? (
         <img
@@ -200,7 +163,7 @@ export default function TeamIdentityTitleStage({
         <span className="teamIdentityTitleStage__fallbackCrest" data-identity-role="brand-fallback" aria-label={`${teamName} initials`}>{fallbackInitials}</span>
       )}
     </div>
-  ) : null;
+  );
 
   return (
     <header
@@ -229,7 +192,6 @@ export default function TeamIdentityTitleStage({
       aria-label={ariaLabel || `${teamName} ${displayTitle}`}
     >
       {resolvedBrandTreatment === "hero" ? <div className="teamIdentityTitleStage__tonalCrest" aria-hidden="true">{fallbackInitials}</div> : null}
-      {watermarkBrand}
       {backAction?.onClick ? (
         <nav className="teamIdentityTitleStage__navigation" aria-label={backAction.ariaLabel || "Back navigation"}>
           <button
@@ -246,7 +208,6 @@ export default function TeamIdentityTitleStage({
       <div className="teamIdentityTitleStage__inner">
         <div className="teamIdentityTitleStage__copy">
           <div className="teamIdentityTitleStage__identityLine">
-            {supportingBrand}
             {resolvedBrandTreatment === "signature" ? <span className="teamIdentityTitleStage__signatureRule" aria-hidden="true" /> : null}
             <span className="teamIdentityTitleStage__team" data-identity-role="team-name">{teamName}</span>
             <span className="teamIdentityTitleStage__descriptor" data-identity-role="role">{descriptor}</span>
@@ -256,7 +217,7 @@ export default function TeamIdentityTitleStage({
           {summary ? <p className="teamIdentityTitleStage__summary">{summary}</p> : null}
           <TeamIdentitySupportRail status={status} actions={actions} />
         </div>
-        {heroBrand}
+        {fullCrestBrand}
       </div>
     </header>
   );
