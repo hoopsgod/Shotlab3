@@ -16,6 +16,40 @@
   min-width: 0;
 }
 
+.teamIdentityTitleStage__navigation {
+  position: relative;
+  z-index: 3;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.teamIdentityTitleStage__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #58635c;
+  font: 760 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.teamIdentityTitleStage__backIcon {
+  font-size: 17px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+.teamIdentityTitleStage__back:focus-visible {
+  outline: 3px solid rgba(113, 133, 31, .25);
+  outline-offset: 2px;
+}
+
 .teamIdentityTitleStage__inner {
   position: relative;
   z-index: 2;
@@ -25,6 +59,10 @@
   gap: clamp(16px, 4vw, 24px);
   min-width: 0;
   padding: 14px 2px 16px;
+}
+
+.teamIdentityTitleStage:has(.teamIdentityTitleStage__navigation) .teamIdentityTitleStage__inner {
+  padding-top: 2px;
 }
 
 .teamIdentityTitleStage__copy { min-width: 0; }
@@ -55,12 +93,27 @@
   text-wrap: balance;
   overflow-wrap: normal;
   word-break: normal;
+  hyphens: none;
 }
-.teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title {
-  max-width: 15ch;
-  font-size: clamp(40px, 9.8vw, 44px);
+.teamIdentityTitleStage--singleWord .teamIdentityTitleStage__title {
+  max-width: none;
+  white-space: nowrap;
+  text-wrap: nowrap;
+}
+.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
+  font-size: clamp(36px, 9.6vw, 40px);
+  letter-spacing: -.068em;
+}
+.teamIdentityTitleStage--longTitle.teamIdentityTitleStage--multiWord .teamIdentityTitleStage__title {
+  max-width: 16ch;
+  font-size: clamp(38px, 9.8vw, 44px);
   line-height: .94;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+.teamIdentityTitleStage--title-long .teamIdentityTitleStage__title {
+  font-size: clamp(36px, 9.5vw, 42px);
 }
 .teamIdentityTitleStage__person {
   margin-top: 8px;
@@ -78,7 +131,7 @@
 }
 .teamIdentityTitleStage__support {
   display: grid;
-  gap: 10px;
+  gap: 9px;
   margin-top: 12px;
 }
 .teamIdentityTitleStage__support--external {
@@ -197,6 +250,8 @@
     linear-gradient(132deg, #061923 0%, #082630 58%, #0a2e38 100%);
 }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__inner { padding: max(18px, env(safe-area-inset-top)) 18px 20px; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__navigation { padding-inline: 18px; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__back { color: #d3dde0; }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__team { color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 62%, #f2f7e6); }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__descriptor { color: #b6c3c8; }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__descriptor::before { color: #6f838c; }
@@ -226,7 +281,7 @@
   align-items: end;
   padding-block-end: 24px;
 }
-.teamIdentityTitleStage--hero .teamIdentityTitleStage__title { max-width: 11ch; }
+.teamIdentityTitleStage--hero .teamIdentityTitleStage__title { max-width: 11ch; white-space: normal; text-wrap: balance; }
 .teamIdentityTitleStage--hero.teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title { font-size: clamp(44px, 11vw, 52px); }
 
 @media (max-width: 760px) {
@@ -234,19 +289,77 @@
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none; }
   .teamIdentityTitleStage:has(.teamIdentityTitleStage__crest) .teamIdentityTitleStage__tonalCrest,
   .teamIdentityTitleStage:has(.teamIdentityTitleStage__logoSetup) .teamIdentityTitleStage__tonalCrest { display: none; }
+
+  /* Compact Editorial Stage: keep the team mark present but subordinate to page identity. */
+  .teamIdentityTitleStage--standard {
+    --identity-crest: clamp(60px, 16vw, 68px);
+    --identity-title: clamp(39px, 10.35vw, 44px);
+  }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner {
+    align-items: start;
+    gap: clamp(12px, 3.4vw, 16px);
+    padding: 10px 2px 12px;
+  }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot {
+    align-self: start;
+    margin-top: 15px;
+  }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackCrest {
+    border-radius: 16px;
+    font-size: 21px;
+  }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__logoSetup {
+    padding: 6px;
+    border-radius: 15px;
+    font-size: 9px;
+  }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine { margin-bottom: 6px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__support {
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__actions { gap: 7px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__action {
+    min-height: 44px;
+    padding-inline: 12px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action {
     padding-inline: 8px;
     font-size: 11px;
     letter-spacing: -.01em;
   }
+
+  /* Transitional route compatibility: legacy DashboardReturnButton remains the
+     semantic Back control, while title authority owns its optical relationship
+     to the adjacent editorial stage until callers adopt backAction directly. */
+  @supports selector(button:has(+ *)) {
+    .performance-shell--player .player-scroll-container > button:has(+ * [data-title-stage-family="editorial"]),
+    .performance-shell--coach .page > button:has(+ .secondaryPageShell) {
+      min-width: 44px !important;
+      min-height: 44px !important;
+      margin: 0 0 0 !important;
+      padding: 0 2px !important;
+      border: 0 !important;
+      border-radius: 10px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: #58635c !important;
+      font-size: 11px !important;
+      letter-spacing: .055em !important;
+    }
+  }
 }
 
 @media (max-width: 390px) {
-  .teamIdentityTitleStage--standard { --identity-crest: 84px; --identity-title: 38px; }
+  .teamIdentityTitleStage--standard { --identity-crest: 60px; --identity-title: 39px; }
   .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
-  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 8px; padding: 10px 2px 12px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 10px; padding: 8px 2px 10px; }
   .teamIdentityTitleStage__identityLine { margin-bottom: 6px; font-size: 11px; }
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary { margin-top: 8px; line-height: 1.4; }
+  .teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title { font-size: 36px; }
   .teamIdentityTitleStage__support--external { gap: 7px; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { gap: 6px; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__status { font-size: 11px; white-space: nowrap; }
