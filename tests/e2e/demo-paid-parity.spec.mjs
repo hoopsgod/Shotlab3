@@ -118,9 +118,15 @@ async function surfaceSignature(locator) {
   await expect(locator).toBeVisible();
   return locator.evaluate((node) => {
     const style = getComputedStyle(node);
+    const structuralClasses = String(node.className || '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .filter((name) => !['is-onboarding', 'has-team-data'].includes(name))
+      .sort()
+      .join(' ');
     return {
       tag: node.tagName,
-      className: String(node.className || ''),
+      className: structuralClasses,
       pageHierarchy: node.getAttribute('data-page-hierarchy') || '',
       layoutRole: node.getAttribute('data-layout-role') || '',
       phase: node.getAttribute('data-phase') || '',

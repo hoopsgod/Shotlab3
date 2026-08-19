@@ -125,7 +125,7 @@ test("coach branding save persists and renders a cleaned prominent logo", async 
   await page.getByRole("button", { name: "Save team branding", exact: true }).click();
   await page.getByRole("button", { name: "Back to Coach", exact: true }).click();
 
-  const visibleIdentityLogo = page.locator(".mcHeaderTeamMark img");
+  const visibleIdentityLogo = page.locator('[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
   await expect(visibleIdentityLogo).toBeVisible({ timeout: 20_000 });
   const savedBranding = await readTeamBranding(page);
   expect(stripCacheBuster(savedBranding?.logoUrl)).toBe(FULL_LOGO_URL);

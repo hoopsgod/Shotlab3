@@ -9,6 +9,7 @@ const parity = read("../public/shotlab-v8-demo-parity.css");
 const sessionIntegrity = read("../public/shotlab-v15-session-integrity.css");
 const legacy = read("../src/styles/appLegacyStyles.js");
 const secondary = read("../src/components/SecondaryPageSystem.css");
+const titleStage = read("../src/components/TeamIdentityTitleStage.css");
 
 test("light-canvas parity targets structural shells without erasing component surfaces", () => {
   assert.match(parity, /:is\(\.page,\.pageShell,\.performance-shell,\.performance-workspace,\.secondaryPageShell\)/);
@@ -44,8 +45,8 @@ test("dark title authority uses explicit surface contracts instead of test-id he
   assert.doesNotMatch(sessionIntegrity, /\[data-testid\*="insight"\]/);
 });
 
-test("Coach Players preserves dark surfaces wherever white foreground copy is intentional", () => {
-  assert.match(secondary, /\.secondaryPageAction--primary\s*\{[\s\S]*background:\s*#202421;[\s\S]*color:\s*#fff;/);
+test("Coach Players preserves dark surfaces wherever light foreground copy is intentional", () => {
+  assert.match(titleStage, /\.teamIdentityTitleStage__action--primary\s*\{[^}]*background:\s*#202522;[^}]*color:\s*#f9faf6;/);
   assert.match(secondary, /\.secondaryPageDecision\s*\{[\s\S]*linear-gradient\(145deg,\s*#171b18,\s*#0c0f0d 72%\);[\s\S]*color:\s*#f5f7f4;/);
   assert.match(secondary, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg,\s*#171b18,\s*#0c0f0d 72%\);[\s\S]*color:\s*#f5f7f4;/);
 });

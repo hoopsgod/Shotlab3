@@ -3,26 +3,30 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const header = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
-const headerCss = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
+const titleStage = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
+const titleStageCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
 const daily = fs.readFileSync("src/components/PlayerDailyCommandCenter.jsx", "utf8");
 const dailyCss = fs.readFileSync("src/components/PlayerDailyCommandCenter.module.css", "utf8");
 const workspaceCss = fs.readFileSync("src/components/PlayerOperationalWorkspace.module.css", "utf8");
 
-const systemFont = /-apple-system,\s*BlinkMacSystemFont,\s*'SF Pro (?:Display|Text)'/;
+const systemFont = /-apple-system,\s*BlinkMacSystemFont,\s*["']SF Pro (?:Display|Text)["']/;
 const legacyCondensedFont = /'Bebas Neue'|'Barlow Condensed'/;
 
-test("player identity uses an unboxed editorial shell with authoritative team branding", () => {
-  assert.match(header, /DashboardIdentityHeader\.module\.css/);
-  assert.match(header, /branding\?\.teamName \|\| branding\?\.name/);
-  assert.match(header, /data-testid="player-dashboard-identity-header"/);
-  assert.match(header, /<img className=\{styles\.brandMark\}/);
-  assert.match(headerCss, /\.header\.player\{[\s\S]*?border:0;[\s\S]*?border-radius:0;[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/);
-  assert.match(headerCss, /\.player \.brandPanel\{[\s\S]*?background:transparent/);
-  assert.match(headerCss, /\.player \.brandMark\{width:118px;height:112px/);
-  assert.doesNotMatch(headerCss, /backdrop-filter:blur\(26px\)/);
-  assert.doesNotMatch(headerCss, /linear-gradient\(150deg,rgba\(28,30,32/);
-  assert.match(headerCss, systemFont);
-  assert.doesNotMatch(headerCss, legacyCondensedFont);
+test("player identity uses the shared immersive title stage with authoritative team branding", () => {
+  assert.match(header, /import TeamIdentityTitleStage from "\.\/TeamIdentityTitleStage\.jsx"/);
+  assert.match(header, /<TeamIdentityTitleStage/);
+  assert.match(header, /variant="hero"/);
+  assert.match(header, /surface="dark"/);
+  assert.match(header, /role="Player Mode"/);
+  assert.match(header, /testId="player-dashboard-identity-header"/);
+  assert.match(titleStage, /useTeamBranding/);
+  assert.match(titleStage, /data-identity-role="team-name"/);
+  assert.match(titleStage, /data-identity-role="brand-mark"/);
+  assert.match(titleStageCss, /\.teamIdentityTitleStage--hero\s*\{[\s\S]*?--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
+  assert.match(titleStageCss, /\.teamIdentityTitleStage__crest\s*\{[\s\S]*?object-fit:\s*contain/);
+  assert.match(titleStageCss, systemFont);
+  assert.doesNotMatch(titleStageCss, legacyCondensedFont);
+  assert.doesNotMatch(header, /DashboardIdentityHeader\.module\.css/);
 });
 
 test("Daily Command Center uses performance narrative hierarchy without changing its actions", () => {
@@ -58,7 +62,7 @@ test("all six player operational workspaces share the same current design system
 });
 
 test("the modernization remains presentation-only", () => {
-  for (const source of [header, headerCss, daily, dailyCss, workspaceCss]) {
+  for (const source of [header, titleStage, titleStageCss, daily, dailyCss, workspaceCss]) {
     assert.doesNotMatch(source, /supabase|auth\.|fetch\(|localStorage|sessionStorage|create table|alter table/i);
   }
 });

@@ -5,6 +5,7 @@ const authorityPath = 'public/shotlab-v3-mobile-corrections.css';
 let source = readFileSync(appPath, 'utf8');
 let authority = readFileSync(authorityPath, 'utf8');
 
+const compactCss = (value) => String(value || '').replace(/\s+/g, '');
 const marker = 'data-player-program-rsvp-action';
 const anchor = '<button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%"';
 
@@ -33,16 +34,18 @@ const intermediateTarget = `.performance-shell[data-workspace-tab="program"] but
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
-const safeTarget = `html body #root .performance-shell.performance-shell--player[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
+const safeSelector = 'html body #root .performance-shell.performance-shell--player[data-workspace-tab="program"] button[data-player-program-rsvp-action]';
+const safeTarget = `${safeSelector} {
   min-height: 46px !important;
   height: 46px !important;
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
 
-if (!authority.includes(authorityMarker)) {
-  authority += `\n\n/* ${authorityMarker}. Final cascade owner with a 2px physical safety margin above the 44px minimum. */\n${safeTarget}\n`;
-  writeFileSync(authorityPath, authority);
+const compactAuthority = compactCss(authority);
+const compactSafeSelector = compactCss(safeSelector);
+if (compactAuthority.includes(compactSafeSelector)) {
+  console.log('Phase 4E.4 final Player Program RSVP physical target already applied.');
 } else if (authority.includes(legacyTarget)) {
   authority = authority.replace(legacyTarget, safeTarget);
   writeFileSync(authorityPath, authority);
@@ -51,10 +54,13 @@ if (!authority.includes(authorityMarker)) {
   authority = authority.replace(intermediateTarget, safeTarget);
   writeFileSync(authorityPath, authority);
   console.log('Phase 4E.4 promoted Player Program RSVP target above later cascade overrides.');
-} else if (!authority.includes(safeTarget)) {
-  throw new Error('Phase 4E.4 RSVP marker exists but the physical target contract is unrecognized.');
+} else if (compactAuthority.includes(compactCss(legacyTarget)) || compactAuthority.includes(compactCss(intermediateTarget))) {
+  throw new Error('Phase 4E.4 found a minified legacy RSVP target that must be normalized before the final contract can be installed.');
+} else if (authority.includes(authorityMarker)) {
+  throw new Error('Phase 4E.4 RSVP marker exists but the physical target contract is malformed.');
 } else {
-  console.log('Phase 4E.4 final Player Program RSVP authority already applied.');
+  authority += `\n\n/* ${authorityMarker}. Touch-safety contract only; title composition remains source-owned. */\n${safeTarget}\n`;
+  writeFileSync(authorityPath, authority);
 }
 
 console.log('Applied Phase 4E.4 Player Program RSVP hit-area correction.');

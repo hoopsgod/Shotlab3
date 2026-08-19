@@ -39,13 +39,13 @@ jobs:
         run: npm ci
 
       - name: Verify Phase 2 and Phase 3 visual contracts
-        run: node --test tests/phase-2-contrast-integrity.test.mjs tests/phase-3-visual-coherence-contract.test.mjs tests/demo-visual-parity-contract.test.mjs
+        run: node --test tests/phase-2-contrast-integrity.test.mjs tests/phase-3-visual-coherence-contract.test.mjs tests/demo-visual-parity-contract.test.mjs tests/coach-logo-setup-guidance.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium browser
+        run: npx playwright install chromium
 
       - name: Build exact production head
         run: npm run build

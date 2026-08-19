@@ -11,35 +11,7 @@ const replaceOnce = (source, from, to, label) => {
 };
 
 export function reconcileCoachHierarchy(source) {
-  let next = source;
-
-  next = replaceOnce(next,
-`body.mission-control-active .mcShellV3 .mcTeamSelect,
-body.mission-control-active .mcShellV3 .mcBell,
-body.mission-control-active .mcShellV3 .mcMobileMenu {
-  min-height: 44px !important;
-  min-width: 44px !important;
-  border: 1px solid var(--mc-line) !important;
-  border-radius: var(--radius-md,14px) !important;
-  background: var(--mc-surface) !important;
-  color: var(--mc-ink) !important;
-  box-shadow: none !important;
-}`,
-`body.mission-control-active .mcShellV3 .mcTeamSelect,
-body.mission-control-active .mcShellV3 .mcBell,
-body.mission-control-active .mcShellV3 .mcMobileMenu {
-  min-height: 44px !important;
-  min-width: 44px !important;
-  border: 1px solid rgba(223,236,241,.14) !important;
-  border-radius: var(--radius-md,14px) !important;
-  background: rgba(255,255,255,.055) !important;
-  color: #e2eaed !important;
-  box-shadow: none !important;
-}`,
-    'Coach header controls',
-  );
-
-  next = replaceOnce(next,
+  return replaceOnce(source,
 `body.mission-control-active .mcShellV3 .mcSection,
 body.mission-control-active .mcShellV3 .mcTodayPlan,
 body.mission-control-active [data-testid="coach-assignment-accountability"],
@@ -63,8 +35,6 @@ body.mission-control-active [data-testid="coach-follow-up-queue"] {
 }`,
     'Coach supporting editorial surfaces',
   );
-
-  return next;
 }
 
 export function applyMobileCoachCascadeReconciliation({ cwd = process.cwd() } = {}) {
@@ -72,7 +42,7 @@ export function applyMobileCoachCascadeReconciliation({ cwd = process.cwd() } = 
   const hierarchySource = readFileSync(hierarchyPath, 'utf8');
   const nextHierarchy = reconcileCoachHierarchy(hierarchySource);
   if (nextHierarchy !== hierarchySource) writeFileSync(hierarchyPath, nextHierarchy);
-  console.log('Reconciled late Mission Control authority with the ShotLab mobile Coach signature stage.');
+  console.log('Reconciled late Mission Control support surfaces without touching Coach mobile identity authority.');
 }
 
 const currentFile = fileURLToPath(import.meta.url);

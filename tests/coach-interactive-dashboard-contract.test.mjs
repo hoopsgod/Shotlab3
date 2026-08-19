@@ -8,6 +8,7 @@ const dashboardSource = fs.readFileSync("src/components/CoachInteractiveDashboar
 const calendarSource = fs.readFileSync("src/components/CoachEventsMonthCalendar.jsx", "utf8");
 const pageSystemSource = fs.readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
 const pageSystemCss = fs.readFileSync("src/components/SecondaryPageSystem.css", "utf8");
+const titleStageCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
 const dashboardCss = fs.readFileSync("src/components/CoachDashboardPrimitives.module.css", "utf8");
 const integrationCss = fs.readFileSync("src/styles/CoachInteractiveDashboard.css", "utf8");
 
@@ -33,7 +34,8 @@ test("canonical secondary page system defines one page, toolbar, decision, and e
   for (const component of ["SecondaryPageShell", "SecondaryPageIntro", "SecondaryPageToolbar", "SecondaryPageDecision", "SecondaryPageEvidence"]) {
     assert.match(pageSystemSource, new RegExp(`export function ${component}`));
   }
-  assert.match(pageSystemCss, /\.secondaryPageIntro/);
+  assert.match(titleStageCss, /\.teamIdentityTitleStage/);
+  assert.match(titleStageCss, /\.teamIdentityTitleStage__title/);
   assert.match(pageSystemCss, /\.secondaryPageToolbar/);
   assert.match(pageSystemCss, /\.secondaryPageDecision/);
   assert.match(pageSystemCss, /\.secondaryPageEvidence/);
@@ -86,7 +88,7 @@ test("remaining coach pages retain the current control layer for incremental mig
 });
 
 test("cohesion pass introduces no schema, auth, persistence, or network writes", () => {
-  for (const source of [pageSystemSource, pageSystemCss, dashboardSource, calendarSource, integrationCss]) {
+  for (const source of [pageSystemSource, pageSystemCss, titleStageCss, dashboardSource, calendarSource, integrationCss]) {
     assert.doesNotMatch(source, /supabase|auth\.|create table|alter table|fetch\(|XMLHttpRequest|localStorage|sessionStorage/i);
   }
 });

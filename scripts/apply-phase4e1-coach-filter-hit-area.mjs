@@ -5,6 +5,7 @@ const authorityPath = 'public/shotlab-v3-mobile-corrections.css';
 let source = readFileSync(componentPath, 'utf8');
 let authority = readFileSync(authorityPath, 'utf8');
 
+const compactCss = (value) => String(value || '').replace(/\s+/g, '');
 const marker = 'data-coach-filter-chip';
 const classAnchor = 'className={cx(styles.filterChip, filter.key === activeFilter && styles.filterChipActive)}';
 
@@ -24,11 +25,22 @@ if (!source.includes(marker)) {
 }
 
 const authorityMarker = 'Phase 4E.1 shared Coach filter-chip physical target';
-if (!authority.includes(authorityMarker)) {
-  authority += `\n\n/* ${authorityMarker}. The mobile-corrections file is the final visual authority,\n * so this rule intentionally outranks earlier compact-control sizing while preserving\n * the chip's existing width, typography, color, radius, and horizontal-scroll rail. */\nhtml body button[data-coach-filter-chip][data-coach-filter-chip] {\n  min-height: 44px !important;\n  box-sizing: border-box !important;\n  touch-action: manipulation !important;\n}\n`;
-  writeFileSync(authorityPath, authority);
+const targetSelector = 'html body button[data-coach-filter-chip][data-coach-filter-chip]';
+const targetRule = `${targetSelector} {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}`;
+const compactAuthority = compactCss(authority);
+const compactTargetSelector = compactCss(targetSelector);
+
+if (compactAuthority.includes(compactTargetSelector)) {
+  console.log('Phase 4E.1 Coach filter-chip physical target already applied.');
+} else if (authority.includes(authorityMarker)) {
+  throw new Error('Phase 4E.1 authority marker exists but the physical target contract is malformed.');
 } else {
-  console.log('Phase 4E.1 final Coach filter-chip authority already applied.');
+  authority += `\n\n/* ${authorityMarker}. Touch-safety contract only; visual composition remains component-owned. */\n${targetRule}\n`;
+  writeFileSync(authorityPath, authority);
 }
 
 console.log('Applied Phase 4E.1 shared Coach filter-chip hit-area correction.');

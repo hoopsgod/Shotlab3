@@ -6,38 +6,43 @@ import { promoteCoachCommandCenter, promoteCoachFinalCss } from '../scripts/appl
 const command = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
 const finalCss = readFileSync('src/components/CoachMissionControlFinal.css', 'utf8');
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
-
-const promotedCommand = promoteCoachCommandCenter(command);
+const enhancer = readFileSync('scripts/apply-mobile-coach-signature-stage.mjs', 'utf8');
 const promotedCss = promoteCoachFinalCss(finalCss);
 
-test('Coach signature stage is part of both dev and build route promotion', () => {
+test('Coach title authority is no longer rewritten by the signature enhancer', () => {
+  assert.equal(promoteCoachCommandCenter(command), command);
+  assert.doesNotMatch(enhancer, /Coach mobile hero mark/);
+  assert.doesNotMatch(enhancer, /mcHeroTeamMark\{display:none/);
+  assert.doesNotMatch(enhancer, /font-size:clamp\(39px,11vw,45px\)/);
+});
+
+test('obsolete secondary-title mutation scripts are not orchestrated', () => {
+  assert.doesNotMatch(routeEnhancers, /apply-mobile-route-signature-promotion\.mjs/);
+  assert.doesNotMatch(routeEnhancers, /apply-mobile-centered-route-stage\.mjs/);
   assert.match(routeEnhancers, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-phase4c-coach-event-manage-hit-area\.mjs/);
 });
 
-test('Coach Home opens with a branded mobile identity stage rather than utility chrome', () => {
-  assert.match(promotedCommand, /\.mcHeader\{[^}]*margin-inline:-12px!important/);
-  assert.match(promotedCommand, /background:linear-gradient\(126deg,#061923,#0b2d37\)!important/);
-  assert.match(promotedCommand, /\.mcHeaderTeamMark img\{width:50px!important;height:50px!important\}/);
-  assert.match(promotedCommand, /\.mcBrandCopy small\{color:#c8ff1a!important;font-size:11px!important/);
-  assert.match(promotedCommand, /\.mcBrandCopy strong\{[^}]*font-size:22px!important/);
+test('Coach Home source owns integrated program identity, premium crest and actionable logo setup', () => {
+  assert.match(command, /mcProgramIdentity/);
+  assert.match(command, /mcHeroIdentity/);
+  assert.match(command, /mcHeroLogoSetup/);
+  assert.match(command, /Click here to add your custom team logo/);
+  assert.match(command, /data-team-identity-stage="coach-mission-control"/);
+  assert.match(command, /className="mcHeroTeamMark"/);
+  assert.doesNotMatch(command, /mcHeroTeamMark\{display:none/);
 });
 
-test('Coach primary decision has sports-product scale without adding a new CSS authority', () => {
-  assert.match(promotedCommand, /\.mcHero h1\{max-width:9\.5ch!important;font-size:clamp\(39px,11vw,45px\)!important;line-height:\.91!important\}/);
-  assert.match(promotedCommand, /\.mcHeroTeamMark\{top:22px!important;right:17px!important;width:76px!important;height:76px!important\}/);
-  assert.match(promotedCss, /\.mcHero \{\n    min-height: 350px !important;\n    border-radius: 0 !important;/);
-  assert.match(promotedCss, /\.mcRealityStrip \{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important;/);
-});
-
-test('Coach supporting information becomes editorial and respects mobile readability', () => {
-  assert.match(promotedCss, /\.mcSection \{\n    overflow: visible;\n    border: 0;\n    border-top: 1px solid var\(--mc-hairline-modern\);\n    border-radius: 0;\n    background: transparent;\n    box-shadow: none;/);
-  assert.match(promotedCss, /\.mcSectionHead small \{\n    font-size: 11px;/);
-  assert.match(promotedCss, /\.mcAttentionMeta \{[\s\S]*font-size: 11px !important;/);
-  assert.match(promotedCss, /\.mcTodayPlanCopy small \{\n    font-size: 11px;/);
+test('supporting Coach reconciliation remains idempotent and does not touch title geometry', () => {
+  assert.equal(promoteCoachFinalCss(promotedCss), promotedCss);
+  assert.match(promotedCss, /\.mcSection \{\n    overflow: visible;\n    border: 0;\n    border-top: 1px solid var\(--mc-hairline-modern\);/);
   assert.match(promotedCss, /\.mcTodayPlan > button \{[\s\S]*min-height: 44px;/);
 });
 
-test('promotion is idempotent', () => {
-  assert.equal(promoteCoachCommandCenter(promotedCommand), promotedCommand);
-  assert.equal(promoteCoachFinalCss(promotedCss), promotedCss);
+test('supporting Coach reconciliation rejects mixed legacy and final anchors', () => {
+  const legacyMetricLedger = '    border-radius: 16px !important;\n    background: rgba(4, 8, 10, .5) !important;';
+  const malformed = `${promotedCss}\n${legacyMetricLedger}\n`;
+  assert.throws(
+    () => promoteCoachFinalCss(malformed),
+    /Coach final metric ledger: expected exactly one legacy anchor or one final anchor; found legacy 1, final 1 \(mixed legacy\/final state\)/,
+  );
 });

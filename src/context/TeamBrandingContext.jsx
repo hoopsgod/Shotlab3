@@ -7,13 +7,40 @@ import resolveTeamBranding from "../theme/resolveTeamBranding";
 const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
 
 const TeamBrandingContext = createContext({
-  branding: DEFAULT_BRANDING,
+  branding: resolveTeamBranding({}),
   theme: defaultTheme,
   tokens: defaultTheme,
 });
 
+function readActiveStoredTeamName() {
+  if (typeof window === "undefined") return "";
+  try {
+    const parse = (raw, fallback) => {
+      try { return raw ? JSON.parse(raw) : fallback; }
+      catch { return fallback; }
+    };
+    const tabSession = parse(window.sessionStorage?.getItem("sl:session"), null);
+    const localSession = parse(window.localStorage?.getItem("sl:session"), null);
+    const session = tabSession || localSession;
+    const teams = parse(window.localStorage?.getItem("sl:teams"), []);
+    const activeTeamId = String(session?.teamId || session?.team_id || "");
+    if (!activeTeamId || !Array.isArray(teams)) return "";
+    const activeTeam = teams.find((team) => String(team?.id || "") === activeTeamId);
+    return String(activeTeam?.branding?.teamName || activeTeam?.name || "").trim();
+  } catch {
+    return "";
+  }
+}
+
 export function TeamBrandingProvider({ branding, children }) {
-  const safeBranding = useMemo(() => resolveTeamBranding(branding || DEFAULT_BRANDING), [branding]);
+  const safeBranding = useMemo(() => {
+    const resolved = resolveTeamBranding(branding || {});
+    const storedTeamName = readActiveStoredTeamName();
+    const resolvedTeamName = String(resolved?.teamName || "").trim();
+    const defaultTeamName = String(DEFAULT_BRANDING?.teamName || "").trim();
+    if (!storedTeamName || (resolvedTeamName && resolvedTeamName !== defaultTeamName)) return resolved;
+    return { ...resolved, teamName: storedTeamName };
+  }, [branding]);
   const theme = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
 
   useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);

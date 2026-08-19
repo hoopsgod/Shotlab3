@@ -12,13 +12,7 @@
 
 .mcShellV3 .missionControl{gap:14px}
 
-/* Signature cinematic gym */
-.mcShellV3 .mcHero{
-  min-height:330px;
-  border:1px solid rgba(222,232,238,.13);
-  background:#020405;
-  box-shadow:0 28px 68px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.028);
-}
+/* Signature cinematic gym artwork only. Hero identity geometry is source-owned. */
 .mcShellV3 .mcHero:after{
   content:'';
   position:absolute;
@@ -55,28 +49,11 @@
   mask-image:radial-gradient(ellipse at center,#000 44%,rgba(0,0,0,.92) 61%,transparent 80%);
   filter:saturate(1.14) contrast(1.12) drop-shadow(0 0 18px color-mix(in srgb,var(--mc) 24%,transparent));
 }
-.mcShellV3 .mcHeroTeamMark{
-  width:118px;
-  height:118px;
-  right:24px;
-  top:20px;
-  opacity:.92;
-}
-.mcShellV3 .mcHeroTeamMark:before{inset:17%;opacity:.78;filter:blur(27px)}
-.mcShellV3 .mcHeroTeamMark img{
-  mix-blend-mode:screen;
-  -webkit-mask-image:radial-gradient(ellipse at center,#000 46%,rgba(0,0,0,.94) 64%,transparent 82%);
-  mask-image:radial-gradient(ellipse at center,#000 46%,rgba(0,0,0,.94) 64%,transparent 82%);
-  filter:saturate(1.12) contrast(1.12) drop-shadow(0 13px 19px rgba(0,0,0,.48)) drop-shadow(0 0 17px color-mix(in srgb,var(--mc) 24%,transparent));
-}
 .mcShellV3 .mcHeroScrim{
   background:
     linear-gradient(90deg,rgba(2,5,6,.995) 0%,rgba(2,5,6,.96) 45%,rgba(2,5,6,.53) 71%,rgba(2,5,6,.06) 100%),
     linear-gradient(180deg,transparent 51%,rgba(2,5,6,.9) 100%);
 }
-.mcShellV3 .mcHeroContent{padding:28px 29px 24px}
-.mcShellV3 .mcHero h1{max-width:500px;font-size:43px;line-height:.93;letter-spacing:.008em}
-.mcShellV3 .mcHeroContent>p{max-width:420px;color:#9ca7af;font:560 13px/1.48 var(--mc-body-2026)}
 .mcShellV3 .mcPrimary{box-shadow:0 15px 35px color-mix(in srgb,var(--mc) 16%,transparent)}
 
 /* Lime is reserved for commands, active state, and live status */
@@ -250,15 +227,6 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] button{
     gap:9px;
     padding-bottom:calc(88px + env(safe-area-inset-bottom));
   }
-  .mcShellV3 .mcHero{
-    min-height:300px;
-    border-radius:18px;
-  }
-  .mcShellV3 .mcHeroContent{padding:17px 15px 14px}
-  .mcShellV3 .mcHero h1{max-width:216px;font-size:29px;line-height:.95}
-  .mcShellV3 .mcHeroContent>p{max-width:216px;font-size:10.5px;line-height:1.42}
-  .mcShellV3 .mcHeroTeamMark{right:8px;top:9px;width:92px;height:92px}
-  .mcShellV3 .mcHeroTeamMark img{-webkit-mask-image:radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 60%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 60%,transparent 80%)}
   .mcShellV3 .mcArenaLights{right:-8%;top:9px;width:76%;opacity:.94}
   .mcShellV3 .mcHoop{right:-1%;top:67px;opacity:.78}
   .mcShellV3 .mcCourtFloor{right:-19%;bottom:-15%;width:112%;height:72%}
@@ -306,9 +274,6 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] button{
 }
 
 @media(max-width:390px){
-  .mcShellV3 .mcHero{min-height:302px}
-  .mcShellV3 .mcHero h1{max-width:204px;font-size:27px}
-  .mcShellV3 .mcHeroTeamMark{width:86px;height:86px}
   .mcShellV3 .mcLaunchPath em{font-size:7.5px}
 }
 

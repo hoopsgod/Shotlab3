@@ -2,20 +2,26 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
-const identityCss = fs.readFileSync("public/shotlab-phase3-secondary-cohesion.css", "utf8");
+const titleStage = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
+const titleStageCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
+const playerWorkspace = fs.readFileSync("src/components/PlayerOperationalWorkspace.jsx", "utf8");
+const playerCommitment = fs.readFileSync("src/components/PlayerCommitmentCenter.jsx", "utf8");
 const metricCss = fs.readFileSync("src/components/PlayerMetricHierarchy.module.css", "utf8");
 const visualAudit = fs.readFileSync("tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs", "utf8");
 const feedback = fs.readFileSync("src/components/AppFeedbackLayer.jsx", "utf8");
 
-test("Phase 5 keeps every mobile Player secondary identity header compact and inside the viewport", () => {
-  assert.match(identityCss, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)/);
-  assert.match(identityCss, /margin:2px 16px 4px!important/);
-  assert.match(identityCss, /border-left:3px solid var\(--p3-accent\)!important/);
-  assert.match(identityCss, /border-radius:0!important/);
-  assert.match(identityCss, /background:transparent!important/);
-  assert.match(identityCss, /box-shadow:none!important/);
-  assert.match(identityCss, /min-height:50px!important/);
-  assert.match(identityCss, /transform:none!important/);
+test("Phase 5 keeps every mobile Player secondary identity source-owned, prominent, and inside the viewport", () => {
+  assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
+  assert.match(playerWorkspace, /variant="standard"/);
+  assert.match(playerCommitment, /<TeamIdentityTitleStage/);
+  assert.match(playerCommitment, /variant="standard"/);
+  assert.match(titleStage, /data-team-identity-stage="true"/);
+  assert.match(titleStage, /data-identity-role="page-title"/);
+  assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
+  assert.match(titleStageCss, /object-fit:\s*contain/);
+  assert.match(titleStageCss, /@media \(max-width: 390px\)/);
+  assert.doesNotMatch(titleStageCss, /html\s+body\s+#root/);
 });
 
 test("Phase 5 gives dark Player metric surfaces explicit readable foreground ownership", () => {

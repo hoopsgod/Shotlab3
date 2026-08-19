@@ -2,7 +2,8 @@ const STYLE_ID = "shotlab-visual-system-reboot-release-fixes";
 const BRANDING_MARKER = "shotlab-branding-compatibility-labels";
 
 const CSS = `
-/* Release corrections for the product-light visual system. */
+/* Release corrections for the product-light visual system.
+   Coach Hero identity/title geometry is intentionally excluded. */
 .appHeader,
 .performance-shell .appHeader,
 .premium-screen .appHeader {
@@ -31,25 +32,6 @@ const CSS = `
 }
 
 @media (max-width: 760px) {
-  body.mission-control-active .mcHeroContent {
-    padding: 14px !important;
-    gap: 8px 12px !important;
-  }
-  body.mission-control-active .mcHeroContent h1 {
-    margin-top: 0 !important;
-    font-size: 34px !important;
-    line-height: .96 !important;
-  }
-  body.mission-control-active .mcHeroContent > p {
-    margin-top: 6px !important;
-    font-size: 14px !important;
-    line-height: 1.38 !important;
-  }
-  body.mission-control-active .mcHeroLogo,
-  body.mission-control-active .mcHeroContent img {
-    width: 68px !important;
-    max-height: 64px !important;
-  }
   body.mission-control-active .mcRealityStrip > * {
     min-height: 50px !important;
     padding-block: 8px !important;

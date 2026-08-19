@@ -4,7 +4,8 @@ import fs from "node:fs";
 
 const app = fs.readFileSync("src/App.jsx", "utf8");
 const header = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
-const styles = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
+const titleStage = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
+const titleStageStyles = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
 const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeaderboardsHub.jsx", "utf8");
 const sharedDeferred = fs.readFileSync("src/components/DeferredSharedAuthenticatedUi.jsx", "utf8");
 const sharedChrome = fs.readFileSync("src/components/Phase7AuthenticatedChrome.css", "utf8");
@@ -13,19 +14,24 @@ const backEnhancer = fs.readFileSync("scripts/apply-phase4d-shared-back-hit-area
 const industrialFoundation = fs.readFileSync("src/lib/industrialDesignFoundation.js", "utf8");
 const releaseBoundary = fs.readFileSync("src/components/ReleaseReadinessBoundary.jsx", "utf8");
 
-test("Phase 7 exposes stable Player identity semantics", () => {
-  for (const role of ["inner", "identity", "mode-row", "badge", "team-name", "name", "tagline", "mission", "brand-panel", "brand-mark"]) {
-    assert.match(header, new RegExp(`data-identity-role=["']${role}["']`));
+test("Phase 7 exposes stable Player identity semantics through the shared title authority", () => {
+  assert.match(header, /<TeamIdentityTitleStage/);
+  assert.match(header, /variant="hero"/);
+  assert.match(header, /surface="dark"/);
+  assert.match(header, /role="Player Mode"/);
+  assert.match(header, /testId="player-dashboard-identity-header"/);
+  for (const role of ["team-name", "page-title", "brand-panel", "brand-mark", "brand-fallback"]) {
+    assert.match(titleStage, new RegExp(`data-identity-role=["']${role}["']`));
   }
 });
 
-test("Phase 7 makes the compact Player identity the mobile default", () => {
-  assert.match(styles, /@media\(max-width:700px\)/);
-  assert.match(styles, /\.player\{margin:0 14px 8px\}/);
-  assert.match(styles, /\.player \.inner\{grid-template-columns:minmax\(0,1fr\) 62px;gap:10px;min-height:92px;padding:10px 0 11px\}/);
-  assert.match(styles, /\.player \.tagline\{display:none\}/);
-  assert.match(styles, /\.player \.brandMark\{width:58px;height:58px/);
-  assert.doesNotMatch(styles, /performance-shell--player\.is-mobile:not/);
+test("Phase 7 makes the immersive shared Player identity the mobile Home default", () => {
+  assert.match(titleStageStyles, /\.teamIdentityTitleStage--hero\s*\{/);
+  assert.match(titleStageStyles, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
+  assert.match(titleStageStyles, /--identity-title:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(titleStageStyles, /\.teamIdentityTitleStage__crest\s*\{[\s\S]*?object-fit:\s*contain/);
+  assert.match(titleStageStyles, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\)[\s\S]*player-dashboard-identity-header[\s\S]*display:\s*none/);
+  assert.doesNotMatch(header, /DashboardIdentityHeader\.module\.css/);
 });
 
 test("Phase 7 uses one shared 44px native return-control authority", () => {
@@ -39,7 +45,7 @@ test("Phase 7 uses one shared 44px native return-control authority", () => {
   assert.match(sharedChrome, /:focus-visible/);
   assert.match(backEnhancer, /minHeight:44/);
   assert.match(backEnhancer, /touchAction:"manipulation"/);
-  assert.doesNotMatch(styles, /shared-dashboard-back-action/);
+  assert.doesNotMatch(titleStageStyles, /shared-dashboard-back-action/);
 });
 
 test("Phase 7 overrides the legacy dark Coach workspace canvas at the exact source layer", () => {

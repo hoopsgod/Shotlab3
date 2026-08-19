@@ -32,8 +32,7 @@ html body:has(.auth-card-enter) div:has(>.auth-ball-enter)>div:first-child{width
 html body:has(.auth-card-enter) div:has(>.auth-ball-enter)>div:first-child svg{width:44px!important;height:44px!important}
 
 @media(max-width:700px){
-html body #root [data-testid="coach-primary-objective"]{padding:18px 20px!important;gap:12px!important;max-height:318px!important}
-html body #root [data-testid="coach-primary-objective"] :is(h1,h2){font-size:clamp(36px,10.5vw,46px)!important;line-height:1!important}
+/* Coach Mission Control title/Hero geometry is source-owned by CoachMissionControlTitleStage.css. */
 html body #root [data-testid="coach-onboarding-state"]{grid-template-columns:40px minmax(0,1fr)!important;gap:10px!important;padding:12px 15px!important;border-radius:18px!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanIcon{width:38px!important;height:38px!important;border-radius:12px!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy small{margin-bottom:2px!important;font-size:9px!important}

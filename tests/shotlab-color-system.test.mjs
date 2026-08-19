@@ -6,6 +6,9 @@ const css = fs.readFileSync(new URL("../public/shotlab-v3-foundation.css", impor
 const corrections = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const secondaryCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
+const titleCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const coach = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
+const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 
 const channel = (hex) => {
   const value = Number.parseInt(hex, 16) / 255;
@@ -35,19 +38,26 @@ test("V3 palette stays light, restrained, and meets core contrast targets", () =
   assert.doesNotMatch(css, /hue-rotate|sepia\(1\) saturate\(5\)/i);
 });
 
-test("Mission Control uses one readable light hierarchy", () => {
-  assert.match(css, /mission-control-active[\s\S]*background:var\(--v3-canvas\)/);
-  assert.match(css, /\.mcHero[\s\S]*background:var\(--v3-surface\)/);
-  assert.match(css, /\.mcHero h1[\s\S]*color:var\(--v3-ink\)/);
-  assert.match(css, /\.mcHeroContent>p[\s\S]*color:var\(--v3-muted\)/);
-  assert.match(css, /\.mcPrimary[\s\S]*background:var\(--v3-ink\)/);
-  assert.match(corrections, /coach-primary-objective/);
-  assert.match(corrections, /max-height:\s*310px/);
+test("Mission Control uses one dark component-owned title hierarchy without legacy mobile correction caps", () => {
+  assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
+  assert.match(coach, /CoachMissionControlTitleStage\.css/);
+  assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*428px/);
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(coachTitleCss, /\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
+  assert.match(coachTitleCss, /\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
+  assert.doesNotMatch(coachTitleCss, /!important/);
+  assert.match(corrections, /Title and team-identity composition are intentionally excluded/);
+  assert.doesNotMatch(corrections, /coach-primary-objective|\.mcHero\s*\{|max-height:\s*310px/);
 });
 
-test("secondary coach pages and Team Store share the same product language", () => {
+test("secondary coach pages and Team Store share the restrained light-and-dark product language", () => {
   assert.match(secondaryCss, /\.secondaryPageShell[\s\S]*color: var\(--sl-ink/);
-  assert.match(secondaryCss, /\.secondaryPageIntro[\s\S]*background: transparent/);
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
+  assert.match(titleCss, /\.teamIdentityTitleStage\s*\{[\s\S]*color:\s*#151918/);
+  assert.match(titleCss, /\.teamIdentityTitleStage--dark/);
+  assert.match(titleCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(secondaryCss, /\.secondaryPageDecision[\s\S]*linear-gradient\(145deg/);
   assert.match(css, /\.ts-panel[\s\S]*background:var\(--v3-canvas\)/);
   assert.match(css, /\.ts-header h2[\s\S]*font-family:inherit/);

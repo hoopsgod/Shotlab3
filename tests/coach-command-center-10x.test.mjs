@@ -8,6 +8,7 @@ const css=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",
 const headerCss=fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css",import.meta.url),"utf8");
 const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPolish.css",import.meta.url),"utf8");
 const premiumCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
+const titleCss=fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css",import.meta.url),"utf8");
 const navigationCss=fs.readFileSync(new URL("../src/components/MobileNavigation.module.css",import.meta.url),"utf8");
 const shellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
 const finalCss=fs.readFileSync(new URL("../src/components/CoachMissionControlFinal.css",import.meta.url),"utf8");
@@ -50,27 +51,30 @@ test("attention rows explain the issue instead of using unresolved placeholder c
   assert.doesNotMatch(source,/Inactive or unresolved player items/);
 });
 
-test("cinematic hero preserves a visible coach-controlled logo and integrates it into the gym",()=>{
+test("cinematic hero preserves a visible source-owned coach logo and integrates it into the gym",()=>{
   assert.match(source,/useTeamBranding/);
   assert.match(source,/useCleanTeamLogo/);
   assert.match(source,/cleanFullLogoUrl/);
   assert.match(source,/cleanMarkLogoUrl/);
-  assert.match(source,/branding\?\.logoMarkUrl && branding\.logoMarkUrl !== DEFAULT_MARK/);
-  assert.match(source,/mcArenaGlow/);
-  assert.match(source,/mcRafters/);
-  assert.match(source,/mcCourtFloor/);
+  assert.match(source,/configuredMarkSource = branding\?\.logoMarkUrl && !isDefaultTitansLogo\(branding\.logoMarkUrl\)/);
+  assert.match(source,/mcTacticalWash/);
+  assert.match(source,/mcTacticalGlow/);
+  assert.match(source,/mcCourtArtwork/);
   assert.match(source,/openBrandingSettings/);
   assert.match(source,/mcHeroTeamMark/);
   assert.match(source,/aria-label=\{`Customize \$\{teamName\} team identity`\}/);
   assert.match(source,/data-testid="mission-control-team-header"/);
+  assert.match(source,/data-team-identity-stage="coach-mission-control"/);
+  assert.match(source,/CoachMissionControlTitleStage\.css/);
+  assert.doesNotMatch(source,/MOBILE_PRODUCT_RESET_CSS|<style>/);
+  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(titleCss,/\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\);[\s\S]*height:\s*var\(--coach-hero-crest\)/);
+  assert.match(titleCss,/\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
+  assert.doesNotMatch(titleCss,/!important/);
   assert.match(premiumCss,/mix-blend-mode:screen/);
-  assert.match(premiumCss,/mask-image:radial-gradient/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
-  assert.match(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]*display:\s*grid\s*!important/);
-  assert.match(finalCss,/width:\s*84px\s*!important/);
-  assert.match(finalCss,/@keyframes mcFinalArenaPulse/);
-  assert.match(finalCss,/\.mcRealityStrip\s*\{[\s\S]*border:\s*0/);
-  assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]{0,220}display:\s*none\s*!important/);
+  assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{/);
+  assert.doesNotMatch(finalCss,/\.mcHeroTeamMark\s*\{/);
 });
 
 test("custom team logos are cleaned, persisted, and previewed on light and dark surfaces",()=>{
@@ -127,7 +131,7 @@ test("Mission Control keeps Players and Analytics as distinct destinations",()=>
   assert.doesNotMatch(source,/label: "Analytics", icon: "chart", onClick: onActiveTodayClick/);
 });
 
-test("responsive CSS creates a compact native-feeling mobile operating system",()=>{
+test("responsive CSS creates a native-feeling mobile operating system with premium owned hero geometry",()=>{
   assert.match(css,/grid-template-columns:112px minmax\(0,1fr\)/);
   assert.match(css,/@media\(max-width:980px\)/);
   assert.match(css,/@media\(max-width:700px\)/);
@@ -135,7 +139,11 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(finalCss,/min-height:\s*286px\s*!important/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*428px/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(titleCss,/\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
+  assert.doesNotMatch(titleCss,/!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(navigationCss,/--mobile-tab-bar-height:\s*56px/);
@@ -151,15 +159,15 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
-test("Mission Control uses the modern native visual system instead of tiny condensed dashboard UI",()=>{
+test("Mission Control uses the modern native support system while title geometry remains component-owned",()=>{
   assert.match(finalCss,/--mc-native:/);
-  assert.match(finalCss,/--mc-title-size:/);
-  assert.match(finalCss,/--mc-radius-hero:/);
+  assert.match(finalCss,/--mc-radius-card:/);
   assert.match(finalCss,/font-family:\s*var\(--mc-native\)/);
-  assert.match(finalCss,/\.mcHero h1\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
   assert.match(finalCss,/\.mcSectionHead h2\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
-  assert.match(finalCss,/\.mcHeader\s*\{[\s\S]*backdrop-filter:\s*blur\(24px\)/);
+  assert.doesNotMatch(finalCss,/--mc-title-size|--mc-radius-hero/);
+  assert.doesNotMatch(finalCss,/\.mcHero\s+h1\s*\{|\.mcHeroTeamMark\s*\{|\.mcHeroContent\s*>\s*p\s*\{/);
+  assert.match(headerCss,/@media\(max-width:700px\)[\s\S]*\.mcHeader\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) 44px/);
+  assert.match(titleCss,/font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss,/\.mcHeroContent\s*>\s*p\s*\{[\s\S]*font-size:\s*12\.5px/);
   assert.match(finalCss,/\.mcSection\s*\{[\s\S]*border-radius:\s*var\(--mc-radius-card\)/);
-  assert.match(finalCss,/@media \(max-width: 700px\)\s*\{[\s\S]*font-size:\s*34px\s*!important/);
-  assert.match(finalCss,/@media \(max-width: 700px\)\s*\{[\s\S]*font-size:\s*13px\s*!important/);
 });

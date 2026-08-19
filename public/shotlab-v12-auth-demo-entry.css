@@ -79,13 +79,14 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
 
 /* First-paint logo safety — DashboardIdentityHeader is role-chunk styled. On a
    cold Player Demo launch the high-resolution team PNG could paint at its
-   natural dimensions before that CSS chunk arrived. */
-[data-testid="player-dashboard-identity-header"],
-[data-testid="coach-dashboard-identity-header"]{
+   natural dimensions before that CSS chunk arrived. The source-owned shared
+   title stage is explicitly excluded; TeamIdentityTitleStage owns that geometry. */
+[data-testid="player-dashboard-identity-header"]:not([data-team-identity-stage="true"]),
+[data-testid="coach-dashboard-identity-header"]:not([data-team-identity-stage="true"]){
   overflow:hidden!important;
 }
-[data-testid="player-dashboard-identity-header"] img,
-[data-testid="coach-dashboard-identity-header"] img{
+[data-testid="player-dashboard-identity-header"]:not([data-team-identity-stage="true"]) img,
+[data-testid="coach-dashboard-identity-header"]:not([data-team-identity-stage="true"]) img{
   display:block!important;
   width:96px!important;
   height:92px!important;
@@ -96,8 +97,8 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
 }
 
 @media(max-width:700px){
-  [data-testid="player-dashboard-identity-header"] img,
-  [data-testid="coach-dashboard-identity-header"] img{
+  [data-testid="player-dashboard-identity-header"]:not([data-team-identity-stage="true"]) img,
+  [data-testid="coach-dashboard-identity-header"]:not([data-team-identity-stage="true"]) img{
     width:72px!important;
     height:70px!important;
     max-width:72px!important;

@@ -19,6 +19,11 @@ const STORAGE_KEYS = Object.freeze({
 
 const DEMO_TEAM_ID = "team-demo-titans";
 const DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");
+const DEMO_TEAM_BRANDING = Object.freeze({
+  teamName: "Demo Titans",
+  logoUrl: "/branding/titans-exact-logo.png.PNG",
+  logoMarkUrl: "/branding/titans-default-mark.svg",
+});
 
 const padDatePart = (value) => String(value).padStart(2, "0");
 export const localDateKey = (value = new Date()) => {
@@ -97,7 +102,6 @@ const demoProgramScores = [
   { id: "program-demo-03", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", drillId: "demo-program-230s", drillName: "2:30 Shooting", score: 34, date: relativeDate(-3), ts: relativeTimestamp(-3, 18, 20), src: "program" },
   { id: "program-demo-04", email: "jordan.lee@demo.shotlab.app", playerId: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", drillId: "demo-program-230s", drillName: "2:30 Shooting", score: 29, date: relativeDate(-4), ts: relativeTimestamp(-4, 18, 25), src: "program" },
 ];
-
 const demoChallenges = [
   { id: "challenge-demo-pending", teamId: DEMO_TEAM_ID, playerId: "ava.brooks@demo.shotlab.app", from: "ava.brooks@demo.shotlab.app", fromName: "Ava Brooks", to: "demo@shotlab.app", toName: "Demo Player", drillId: "demo-home-warm-up-shooting-4-minute", score: 12, max: 25, status: "pending", ts: relativeTimestamp(-1, 20, 5) },
   { id: "challenge-demo-complete", teamId: DEMO_TEAM_ID, playerId: "demo@shotlab.app", from: "demo@shotlab.app", fromName: "Demo Player", to: "jordan.lee@demo.shotlab.app", toName: "Jordan Lee", drillId: "demo-home-warm-up-shooting-4-minute", score: 14, respScore: 11, max: 25, status: "won", ts: relativeTimestamp(-5, 19, 10), respTs: relativeTimestamp(-4, 19, 10) },
@@ -136,10 +140,26 @@ function clone(value) {
 
 function buildDemoTeam(teamId, coachEmail, team) {
   if (team) {
+    const existing = clone(team);
+    const currentName = String(existing?.name || "").trim();
+    const currentBrandingName = String(existing?.branding?.teamName || "").trim();
+    const genericName = !currentName || /^(demo team|shotlab team)$/i.test(currentName);
+    const genericBranding = !currentBrandingName || /^(demo team|shotlab team)$/i.test(currentBrandingName);
+    const shouldSeedDemoIdentity = genericName && genericBranding;
     return {
-      ...clone(team),
-      id: teamId || team.id,
-      ownerCoachId: coachEmail || team.ownerCoachId || team.coachEmail || null,
+      ...existing,
+      id: teamId || existing.id,
+      ...(shouldSeedDemoIdentity ? {
+        name: "Demo Titans",
+        teamName: DEMO_TEAM_BRANDING.teamName,
+        logoUrl: DEMO_TEAM_BRANDING.logoUrl,
+        logoMarkUrl: DEMO_TEAM_BRANDING.logoMarkUrl,
+        branding: {
+          ...(existing.branding || {}),
+          ...DEMO_TEAM_BRANDING,
+        },
+      } : {}),
+      ownerCoachId: coachEmail || existing.ownerCoachId || existing.coachEmail || null,
       updatedAt: Date.now(),
     };
   }
@@ -147,6 +167,10 @@ function buildDemoTeam(teamId, coachEmail, team) {
   return {
     id: teamId || DEMO_TEAM_ID,
     name: "Demo Titans",
+    teamName: DEMO_TEAM_BRANDING.teamName,
+    logoUrl: DEMO_TEAM_BRANDING.logoUrl,
+    logoMarkUrl: DEMO_TEAM_BRANDING.logoMarkUrl,
+    branding: { ...DEMO_TEAM_BRANDING },
     ownerCoachId: coachEmail || null,
     createdAt: DEMO_TIMESTAMP,
     joinCode: "DEMO26",

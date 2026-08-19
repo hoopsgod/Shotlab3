@@ -4,20 +4,33 @@ import assert from "node:assert/strict";
 import resolveTeamBranding from "../src/theme/resolveTeamBranding.js";
 import { DEFAULT_BRANDING } from "../src/theme/brandingDefaults.js";
 
-test("legacy placeholder full-logo paths resolve to the canonical Titans demo logo", () => {
+test("bundled Titans logo paths are removed from non-demo team branding", () => {
   for (const legacyLogo of [
     "/branding/titans-default-mark.svg",
     "/branding/titans-default-mark-free.svg",
     "/branding/titans-default-mark.svg?v=stale",
+    DEFAULT_BRANDING.logoUrl,
   ]) {
     const branding = resolveTeamBranding({
+      teamName: "Registered Team",
       logoUrl: legacyLogo,
       logoMarkUrl: DEFAULT_BRANDING.logoMarkUrl,
     });
 
-    assert.equal(branding.logoUrl, DEFAULT_BRANDING.logoUrl);
-    assert.equal(branding.logoMarkUrl, DEFAULT_BRANDING.logoMarkUrl);
+    assert.equal(branding.logoUrl, "");
+    assert.equal(branding.logoMarkUrl, "");
   }
+});
+
+test("Demo Titans keeps the canonical bundled demo identity", () => {
+  const branding = resolveTeamBranding({
+    teamName: "Demo Titans",
+    logoUrl: DEFAULT_BRANDING.logoUrl,
+    logoMarkUrl: DEFAULT_BRANDING.logoMarkUrl,
+  });
+
+  assert.equal(branding.logoUrl, DEFAULT_BRANDING.logoUrl);
+  assert.equal(branding.logoMarkUrl, DEFAULT_BRANDING.logoMarkUrl);
 });
 
 test("custom team logos remain untouched by the legacy repair", () => {
@@ -32,9 +45,9 @@ test("custom team logos remain untouched by the legacy repair", () => {
   assert.equal(branding.logoMarkUrl, customMark);
 });
 
-test("missing full-logo data still resolves through the canonical branding default", () => {
-  const branding = resolveTeamBranding({ logoUrl: "" });
+test("missing team-logo data remains unconfigured until a coach adds branding", () => {
+  const branding = resolveTeamBranding({ logoUrl: "", logoMarkUrl: "" });
 
-  assert.equal(branding.logoUrl, DEFAULT_BRANDING.logoUrl);
-  assert.equal(branding.logoMarkUrl, DEFAULT_BRANDING.logoMarkUrl);
+  assert.equal(branding.logoUrl, "");
+  assert.equal(branding.logoMarkUrl, "");
 });

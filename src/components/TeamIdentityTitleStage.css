@@ -1,0 +1,264 @@
+.teamIdentityTitleStage {
+  --identity-crest: clamp(96px, 25vw, 108px);
+  --identity-title: clamp(42px, 10.2vw, 44px);
+  --identity-tonal: clamp(170px, 48vw, 220px);
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: #151918;
+}
+
+.teamIdentityTitleStageFrame {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.teamIdentityTitleStage__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+  align-items: end;
+  gap: clamp(16px, 4vw, 24px);
+  min-width: 0;
+  padding: 14px 2px 16px;
+}
+
+.teamIdentityTitleStage__copy { min-width: 0; }
+.teamIdentityTitleStage__identityLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 9px;
+  min-width: 0;
+  margin-bottom: 8px;
+  font: 780 11px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+.teamIdentityTitleStage__team {
+  max-width: 30ch;
+  color: #5e7413;
+  overflow-wrap: anywhere;
+}
+.teamIdentityTitleStage__descriptor { color: #6b746e; }
+.teamIdentityTitleStage__descriptor::before { content: "·"; margin-right: 8px; color: #9aa29d; }
+.teamIdentityTitleStage__title {
+  max-width: 13ch;
+  margin: 0;
+  color: inherit;
+  font: 820 var(--identity-title)/.92 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.062em;
+  text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title {
+  max-width: 15ch;
+  font-size: clamp(40px, 9.8vw, 44px);
+  line-height: .94;
+  overflow-wrap: anywhere;
+}
+.teamIdentityTitleStage__person {
+  margin-top: 8px;
+  color: #46504a;
+  font: 720 14px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+/* Title Authority: keep summary foreground component-owned even when legacy
+   performance-shell paragraph rules are loaded later in the runtime cascade. */
+.teamIdentityTitleStage .teamIdentityTitleStage__summary {
+  max-width: 40ch;
+  margin: 10px 0 0;
+  color: #667069;
+  font: 520 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  text-wrap: pretty;
+}
+.teamIdentityTitleStage__support {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.teamIdentityTitleStage__support--external {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0 2px 2px;
+}
+.teamIdentityTitleStage__status {
+  color: #58635c;
+  font: 680 12px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.teamIdentityTitleStage__support--external .teamIdentityTitleStage__status {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.teamIdentityTitleStage__status::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #71851f;
+  vertical-align: 1px;
+}
+.teamIdentityTitleStage__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
+.teamIdentityTitleStage__action {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(21, 25, 24, .14);
+  border-radius: 12px;
+  background: transparent;
+  color: #202522;
+  font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.teamIdentityTitleStage__action--primary { border-color: #202522; background: #202522; color: #f9faf6; }
+.teamIdentityTitleStage__action:focus-visible { outline: 3px solid rgba(113, 133, 31, .25); outline-offset: 2px; }
+.teamIdentityTitleStage__action:disabled { cursor: not-allowed; opacity: .52; }
+.teamIdentityTitleStage__crestSlot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--identity-crest);
+  height: var(--identity-crest);
+  min-width: var(--identity-crest);
+  align-self: end;
+}
+.teamIdentityTitleStage__crest {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 13px 20px rgba(7, 28, 40, .2));
+  user-select: none;
+}
+.teamIdentityTitleStage__fallbackCrest {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(21, 25, 24, .14);
+  border-radius: 22px;
+  background: rgba(21, 25, 24, .035);
+  color: #202522;
+  font: 900 28px/.9 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.06em;
+}
+.teamIdentityTitleStage__logoSetup {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px dashed rgba(94, 116, 19, .42);
+  border-radius: 20px;
+  background: rgba(94, 116, 19, .055);
+  color: #4f6112;
+  font: 760 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+  text-align: center;
+  text-wrap: balance;
+  cursor: pointer;
+}
+.teamIdentityTitleStage__logoSetup:focus-visible {
+  outline: 3px solid rgba(113, 133, 31, .25);
+  outline-offset: 2px;
+}
+.teamIdentityTitleStage__tonalCrest {
+  position: absolute;
+  z-index: 0;
+  right: -28px;
+  bottom: -58px;
+  width: var(--identity-tonal);
+  height: var(--identity-tonal);
+  display: grid;
+  place-items: center;
+  color: rgba(21, 25, 24, .035);
+  font: 900 calc(var(--identity-tonal) * .35)/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.08em;
+  pointer-events: none;
+}
+.teamIdentityTitleStage--dark {
+  color: #f8fbfc;
+  background:
+    radial-gradient(circle at 90% 2%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 15%, transparent), transparent 38%),
+    linear-gradient(132deg, #061923 0%, #082630 58%, #0a2e38 100%);
+}
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__inner { padding: max(18px, env(safe-area-inset-top)) 18px 20px; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__team { color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 62%, #f2f7e6); }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__descriptor { color: #b6c3c8; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__descriptor::before { color: #6f838c; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__person { color: #d4dde0; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__summary { color: #aebbc0; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__status { color: #d3dde0; }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__status::before { background: var(--team-brand-primary, #c8ff1a); }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__fallbackCrest {
+  border-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 38%, rgba(255,255,255,.14));
+  background: rgba(3, 17, 24, .55);
+  color: #f8fbfc;
+}
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__logoSetup {
+  border-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 44%, rgba(255,255,255,.16));
+  background: rgba(3, 17, 24, .58);
+  color: #e5f2c4;
+}
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalCrest { color: rgba(218, 231, 236, .055); }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__crest { filter: drop-shadow(0 16px 25px rgba(0,0,0,.4)) drop-shadow(0 0 12px color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 10%, transparent)); }
+.teamIdentityTitleStage--hero {
+  --identity-crest: clamp(104px, 29vw, 120px);
+  --identity-title: clamp(46px, 12vw, 58px);
+  --identity-tonal: clamp(205px, 61vw, 250px);
+}
+.teamIdentityTitleStage--hero .teamIdentityTitleStage__inner {
+  min-height: 188px;
+  align-items: end;
+  padding-block-end: 24px;
+}
+.teamIdentityTitleStage--hero .teamIdentityTitleStage__title { max-width: 11ch; }
+.teamIdentityTitleStage--hero.teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title { font-size: clamp(44px, 11vw, 52px); }
+
+@media (max-width: 760px) {
+  [data-testid="coach-dashboard-identity-header"].coachDashboardIdentityStage { display: none; }
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none; }
+  .teamIdentityTitleStage:has(.teamIdentityTitleStage__crest) .teamIdentityTitleStage__tonalCrest,
+  .teamIdentityTitleStage:has(.teamIdentityTitleStage__logoSetup) .teamIdentityTitleStage__tonalCrest { display: none; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action {
+    padding-inline: 8px;
+    font-size: 11px;
+    letter-spacing: -.01em;
+  }
+}
+
+@media (max-width: 390px) {
+  .teamIdentityTitleStage--standard { --identity-crest: 84px; --identity-title: 38px; }
+  .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 8px; padding: 10px 2px 12px; }
+  .teamIdentityTitleStage__identityLine { margin-bottom: 6px; font-size: 11px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary { margin-top: 8px; line-height: 1.4; }
+  .teamIdentityTitleStage__support--external { gap: 7px; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { gap: 6px; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__status { font-size: 11px; white-space: nowrap; }
+  .teamIdentityTitleStage__logoSetup { padding: 7px; font-size: 11px; }
+}
+
+@media (max-width: 350px) {
+  .teamIdentityTitleStage__support--external { align-items: stretch; flex-direction: column; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { width: 100%; }
+  .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action { flex: 1 1 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teamIdentityTitleStage *, .teamIdentityTitleStage *::before, .teamIdentityTitleStage *::after { transition: none; animation: none; }
+}

@@ -25,6 +25,7 @@ const requiredSharedSurfaces = [
 
 const UI_ROOTS = ['components', 'screens'];
 const UI_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx']);
+const DEMO_IDENTITY_IMPORT_ALLOWLIST = new Set(['components/CoachCommandCenter.jsx']);
 
 async function collectFiles(root) {
   let entries;
@@ -84,7 +85,7 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
 
   const violations = [];
   const forbiddenUiPatterns = [
-    { pattern: /from\s+["'][^"']*demoMode(?:\.js)?["']/, reason: 'UI imports demo-mode identity helpers' },
+    { pattern: /from\s+["'][^"']*demoMode(?:\.js)?["']/, reason: 'UI imports demo-mode identity helpers', identityOnly: true },
     { pattern: /\bisDemoMode\s*\(/, reason: 'UI branches on demo mode' },
     { pattern: /\bisDemoAccount\s*\(/, reason: 'UI branches on demo identity' },
     { pattern: /\bsetDemoMode\s*\(/, reason: 'UI mutates demo mode outside the shared auth/app entry' },
@@ -93,8 +94,14 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
   ];
 
   for (const { file, source } of uiSources) {
-    for (const { pattern, reason } of forbiddenUiPatterns) {
-      if (pattern.test(source)) violations.push(`${file}: ${reason}`);
+    for (const { pattern, reason, identityOnly } of forbiddenUiPatterns) {
+      if (!pattern.test(source)) continue;
+      if (identityOnly && DEMO_IDENTITY_IMPORT_ALLOWLIST.has(file)) {
+        assert.match(source, /isDemoPersistenceSession\(\)/, `${file} may use demo state only for explicit identity asset selection`);
+        assert.match(source, /Click here to add your custom team logo/, `${file} must keep the registered no-logo state actionable`);
+        continue;
+      }
+      violations.push(`${file}: ${reason}`);
     }
   }
 

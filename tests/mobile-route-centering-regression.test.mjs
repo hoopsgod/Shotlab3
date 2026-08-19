@@ -1,85 +1,35 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import { centerMobileRouteStage } from '../scripts/apply-mobile-centered-route-stage.mjs'
 
 const runner = fs.readFileSync(new URL('../scripts/run-route-enhancers.mjs', import.meta.url), 'utf8')
+const secondary = fs.readFileSync(new URL('../src/components/SecondaryPageSystem.jsx', import.meta.url), 'utf8')
+const secondaryCss = fs.readFileSync(new URL('../src/components/SecondaryPageSystem.css', import.meta.url), 'utf8')
+const stageCss = fs.readFileSync(new URL('../src/components/TeamIdentityTitleStage.css', import.meta.url), 'utf8')
 
-const promotedFixture = `@media (max-width: 760px) {
-  .secondaryPageIntro {
-    position: relative;
-    display: grid;
-    grid-template-columns: 46px minmax(0, 1fr);
-    align-items: start;
-    column-gap: 10px;
-    row-gap: 8px;
-    min-height: 0;
-    padding: 7px 0 12px;
-  }
-  .secondaryPageIntro__copy { min-width: 0; max-width: none; }
-  .secondaryPageIntro__icon {
-    position: static;
-    width: 46px;
-    height: 54px;
-    display: grid;
-    place-items: center;
-    margin-top: 1px;
-    border: 1px solid rgba(7, 26, 34, .1);
-    border-radius: 0;
-    background: #0b2028;
-  }
-  .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle,
-  .performance-shell .secondaryPageIntro .secondaryPageIntro__title.appHeaderTitle {
-    max-width: 9.8ch;
-    font-size: clamp(36px, 10vw, 42px) !important;
-    line-height: .91;
-  }
-  .secondaryPageIntro__actions {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-    margin-top: 1px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
-  }
-  .secondaryPageIntro__status {
-    max-width: 100%;
-    color: #5b665e;
-    font-size: 11px;
-    line-height: 1.25;
-    text-align: left;
-    text-overflow: ellipsis;
-  }
-}
-
-@media (max-width: 430px) {
-  .secondaryPageIntro { grid-template-columns: 44px minmax(0, 1fr); column-gap: 9px; }
-  .secondaryPageIntro__icon { width: 44px; height: 50px; border-radius: 0; }
-}`
-
-test('final route enhancer runs after the signature promotion that previously restored left alignment', () => {
-  const promotionIndex = runner.indexOf('scripts/apply-mobile-route-signature-promotion.mjs')
-  const centeringIndex = runner.indexOf('scripts/apply-mobile-centered-route-stage.mjs')
-  assert.ok(promotionIndex >= 0)
-  assert.ok(centeringIndex > promotionIndex)
+test('legacy route promotion and centering mutators stay out of the enhancer pipeline', () => {
+  assert.doesNotMatch(runner, /apply-mobile-route-signature-promotion\.mjs/)
+  assert.doesNotMatch(runner, /apply-mobile-centered-route-stage\.mjs/)
+  assert.equal(fs.existsSync(new URL('../scripts/apply-mobile-route-signature-promotion.mjs', import.meta.url)), false)
+  assert.equal(fs.existsSync(new URL('../scripts/apply-mobile-centered-route-stage.mjs', import.meta.url)), false)
 })
 
-test('mobile secondary route mastheads resolve to a compact centered team-branded title stage', () => {
-  const centered = centerMobileRouteStage(promotedFixture)
-  assert.match(centered, /grid-template-columns: minmax\(0, 1fr\);[\s\S]*justify-items: center;[\s\S]*row-gap: 3px;[\s\S]*text-align: center;/)
-  assert.match(centered, /padding: 2px 0 7px;/)
-  assert.match(centered, /\.secondaryPageIntro__copy \{ width: 100%; max-width: 360px; text-align: center; \}/)
-  assert.match(centered, /width: 56px;\n    height: 56px;/)
-  assert.match(centered, /margin: 0 auto;\n    border: 0;\n    border-radius: 0;\n    background: transparent;/)
-  assert.match(centered, /max-width: 10\.5ch;\n    margin-inline: auto;\n    font-size:/)
-  assert.match(centered, /\.secondaryPageIntro__actions \{[\s\S]*max-width: 360px;[\s\S]*grid-template-columns: minmax\(0, 1fr\);[\s\S]*gap: 5px;/)
-  assert.match(centered, /line-height: 1\.25;\n    text-align: center;/)
-  assert.match(centered, /@media \(max-width: 430px\) \{\n  \.secondaryPageIntro \{ grid-template-columns: minmax\(0, 1fr\); column-gap: 0; \}/)
-  assert.match(centered, /\.secondaryPageIntro__icon \{ width: 54px; height: 54px; border-radius: 0; \}/)
+test('mobile secondary route mastheads resolve through the shared source-owned title stage', () => {
+  assert.match(secondary, /<TeamIdentityTitleStage/)
+  assert.match(secondary, /variant="standard"/)
+  assert.match(secondary, /surface="light"/)
+  assert.doesNotMatch(secondary, /secondaryPageIntro__title|appHeaderTitle/)
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/)
+  assert.match(stageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/)
+  assert.match(stageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/)
+  assert.match(stageCss, /@media \(max-width: 390px\)/)
+  assert.match(stageCss, /\.teamIdentityTitleStage--standard \{ --identity-crest: 84px; --identity-title: 38px; \}/)
+  assert.match(stageCss, /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner \{ gap: 8px;/)
+  assert.match(stageCss, /\.teamIdentityTitleStage__title[\s\S]*overflow-wrap:\s*normal[\s\S]*word-break:\s*normal/)
 })
 
-test('centering transform is idempotent', () => {
-  const centered = centerMobileRouteStage(promotedFixture)
-  assert.equal(centerMobileRouteStage(centered), centered)
+test('shared title stage owns responsive geometry without build-time source transforms', () => {
+  assert.match(stageCss, /\.teamIdentityTitleStage__crest\s*\{[\s\S]*object-fit:\s*contain/)
+  assert.match(stageCss, /\.teamIdentityTitleStage--longTitle[\s\S]*clamp\(40px, 9\.8vw, 44px\)/)
+  assert.doesNotMatch(stageCss, /html\s+body\s+#root/)
 })

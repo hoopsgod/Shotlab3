@@ -71,15 +71,15 @@ async function expectReadableContrast(locator, minimum = 4.5) {
   return result;
 }
 
-test("Coach Leaderboards uses the accepted light editorial and dark decision hierarchy", async ({ page }) => {
+test("Coach Leaderboards uses the accepted shared title and dark decision hierarchy", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await enterCoachDemo(page);
   await openLeaderboards(page);
 
   const shell = page.getByTestId("coach-page-dashboard-leaderboards");
-  const title = shell.locator(".secondaryPageIntro__title");
-  const summary = shell.locator(".secondaryPageIntro__summary");
+  const title = shell.locator('[data-identity-role="page-title"]');
+  const summary = shell.locator(".teamIdentityTitleStage__summary");
   await expect(title).toHaveText("Leaderboards");
   await expect(summary).toContainText("Recognize the standard");
 
@@ -115,8 +115,8 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
     };
     const shellNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards"]');
     const pageSurfaceNode = shellNode?.closest(".pageShell");
-    const titleNode = shellNode?.querySelector(".secondaryPageIntro__title");
-    const summaryNode = shellNode?.querySelector(".secondaryPageIntro__summary");
+    const titleNode = shellNode?.querySelector('[data-identity-role="page-title"]');
+    const summaryNode = shellNode?.querySelector(".teamIdentityTitleStage__summary");
     const decisionNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards-decision-brief"]');
     const metricRailNode = decisionNode?.querySelector('[data-visual-role="performance-evidence"]');
     const metricNodes = [...(metricRailNode?.querySelectorAll("[data-route-stage-metric]") || [])];

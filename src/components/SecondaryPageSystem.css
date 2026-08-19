@@ -7,137 +7,20 @@
   color: var(--sl-ink, #171a18);
 }
 
-/* Editorial page opening: hierarchy comes from type and whitespace, not another card. */
-.secondaryPageIntro {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 18px;
-  padding: 12px 2px 6px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--sl-ink, #171a18);
-}
-
-.secondaryPageIntro__icon,
+/* Secondary title presentation is owned exclusively by TeamIdentityTitleStage.
+   This stylesheet begins at the post-title toolbar/decision system. */
 .secondaryPageDecision__icon {
   display: grid;
   place-items: center;
   color: var(--sl-accent, #71851f);
 }
 
-.secondaryPageIntro__icon {
-  width: 48px;
-  height: 48px;
-  align-self: start;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.secondaryPageIntro__copy {
-  min-width: 0;
-  max-width: 720px;
-}
-
-.secondaryPageIntro__eyebrow,
 .secondaryPageDecision__eyebrow {
   margin-bottom: 8px;
+  color: var(--sl-accent, #c8ff1a);
   font: 760 var(--type-micro, 11px)/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   letter-spacing: .07em;
   text-transform: uppercase;
-}
-
-.secondaryPageIntro__eyebrow { color: var(--sl-accent, #71851f); }
-
-.secondaryPageIntro__title {
-  margin: 0;
-  color: var(--sl-ink, #171a18);
-  font: 790 clamp(40px, 6vw, 58px)/.96 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  letter-spacing: -.055em;
-  overflow-wrap: anywhere;
-}
-
-.secondaryPageIntro__summary {
-  max-width: 58ch;
-  margin: 11px 0 0;
-  color: var(--sl-muted, #68706a);
-  font: 500 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  letter-spacing: -.01em;
-}
-
-.secondaryPageIntro__actions {
-  display: grid;
-  justify-items: end;
-  gap: 10px;
-  min-width: min(100%, 250px);
-}
-
-.secondaryPageIntro__status {
-  max-width: 30ch;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: #536057;
-  background: transparent;
-  font: 680 var(--type-meta, 12px)/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  text-align: right;
-}
-
-.secondaryPageIntro__status::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 7px;
-  border-radius: 50%;
-  background: var(--sl-accent, #71851f);
-  vertical-align: 1px;
-}
-
-.secondaryPageIntro__buttonRow {
-  display: flex;
-  justify-content: flex-end;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-
-.secondaryPageAction {
-  min-height: var(--control-height, 48px);
-  padding: 0 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  border: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
-  border-radius: var(--radius-md, 14px);
-  font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  cursor: pointer;
-  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.secondaryPageAction--primary {
-  border-color: #202421;
-  background: #202421;
-  color: #fff;
-}
-
-.secondaryPageAction--secondary {
-  background: transparent;
-  color: var(--sl-ink, #171a18);
-}
-
-.secondaryPageAction:hover:not(:disabled) { transform: translateY(-1px); }
-.secondaryPageAction:active:not(:disabled) { transform: scale(.985); }
-.secondaryPageAction:disabled { opacity: .5; cursor: not-allowed; }
-.secondaryPageAction:focus-visible,
-.secondaryPageDecision button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--sl-accent, #71851f) 30%, transparent);
-  outline-offset: 3px;
 }
 
 /* One information rail, not four floating metric cards. Semantic roles are explicit
@@ -236,7 +119,6 @@
   color: var(--sl-accent, #c8ff1a);
 }
 
-.secondaryPageDecision__eyebrow { color: var(--sl-accent, #c8ff1a); }
 .secondaryPageDecision__copy { min-width: 0; }
 
 .secondaryPageDecision h2 {
@@ -278,6 +160,10 @@
 
 .secondaryPageDecision button:active:not(:disabled) { transform: scale(.985); }
 .secondaryPageDecision button:disabled { opacity: .5; cursor: not-allowed; }
+.secondaryPageDecision button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sl-accent, #71851f) 30%, transparent);
+  outline-offset: 3px;
+}
 
 .secondaryPageDecision__visual {
   display: block;
@@ -620,21 +506,6 @@
     padding: 10px var(--layout-gutter, 16px) 96px;
   }
 
-  .secondaryPageIntro {
-    grid-template-columns: 42px minmax(0, 1fr);
-    align-items: start;
-    gap: 12px;
-    padding: 8px 0 2px;
-  }
-
-  .secondaryPageIntro__icon { width: 42px; height: 42px; border-radius: var(--radius-md, 14px); }
-  .secondaryPageIntro__title { font-size: clamp(35px, 10vw, 43px); }
-  .secondaryPageIntro__summary { font-size: var(--type-secondary, 14px); }
-  .secondaryPageIntro__actions { grid-column: 1 / -1; width: 100%; justify-items: start; }
-  .secondaryPageIntro__status { text-align: left; }
-  .secondaryPageIntro__buttonRow { width: 100%; justify-content: flex-start; }
-  .secondaryPageAction { flex: 1 1 0; }
-
   .secondaryPageToolbar [data-visual-role="metric-strip"] {
     overflow-x: auto;
     scroll-snap-type: x proximity;
@@ -693,16 +564,8 @@
   .seasonArchiveStat:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
 }
 
-@media (max-width: 390px) {
-  .secondaryPageIntro { grid-template-columns: 40px minmax(0, 1fr); }
-  .secondaryPageIntro__icon { width: 40px; height: 40px; border-radius: 12px; }
-  .secondaryPageIntro__title { font-size: 34px; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .secondaryPageAction,
   .secondaryPageDecision button { transition: none; }
-  .secondaryPageAction:active:not(:disabled),
   .secondaryPageDecision button:active:not(:disabled) { transform: none; }
   .secondaryPageDecision::after { filter: none; }
 }

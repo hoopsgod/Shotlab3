@@ -1,6 +1,11 @@
 import { DEFAULT_BRANDING } from "./brandingDefaults.js";
 
 const HTTP_URL_RE = /^https?:\/\//i;
+const BUNDLED_TITANS_LOGOS = [
+  "/branding/titans-exact-logo.png.PNG",
+  "/branding/titans-default-mark.svg",
+  "/branding/titans-default-mark-free.svg",
+];
 
 function resolveLegacyColor(value, fallback) {
   return typeof value === "string" && value.trim() ? value : fallback;
@@ -8,6 +13,11 @@ function resolveLegacyColor(value, fallback) {
 
 function resolveTextScale(value) {
   return ["standard", "large", "xl"].includes(value) ? value : DEFAULT_BRANDING.textScale;
+}
+
+function isBundledTitansLogo(value) {
+  const url = String(value || "");
+  return BUNDLED_TITANS_LOGOS.some((candidate) => url.includes(candidate));
 }
 
 function withBrandingCacheBust(url, branding) {
@@ -25,6 +35,11 @@ function withBrandingCacheBust(url, branding) {
 
 export default function resolveTeamBranding(teamBranding = {}) {
   const legacyColors = teamBranding?.colors || {};
+  const isDemoTitansIdentity = String(teamBranding?.teamName || "").trim().toLowerCase() === "demo titans";
+  const suppliedLogoUrl = teamBranding?.logoUrl || "";
+  const suppliedLogoMarkUrl = teamBranding?.logoMarkUrl || "";
+  const logoUrl = !isDemoTitansIdentity && isBundledTitansLogo(suppliedLogoUrl) ? "" : suppliedLogoUrl;
+  const logoMarkUrl = !isDemoTitansIdentity && isBundledTitansLogo(suppliedLogoMarkUrl) ? "" : suppliedLogoMarkUrl;
   const merged = {
     ...DEFAULT_BRANDING,
     ...(teamBranding || {}),
@@ -35,15 +50,15 @@ export default function resolveTeamBranding(teamBranding = {}) {
       DEFAULT_BRANDING.accentColor
     ),
     textOnPrimary: resolveLegacyColor(teamBranding?.textOnPrimary || legacyColors.primaryText, DEFAULT_BRANDING.textOnPrimary),
-    logoUrl: teamBranding?.logoUrl || DEFAULT_BRANDING.logoUrl,
-    logoMarkUrl: teamBranding?.logoMarkUrl || DEFAULT_BRANDING.logoMarkUrl,
+    logoUrl,
+    logoMarkUrl,
     textScale: resolveTextScale(teamBranding?.textScale),
   };
 
   return {
     ...merged,
     logoUrl: withBrandingCacheBust(
-      merged.logoUrl?.includes("/branding/titans-default-mark") ? DEFAULT_BRANDING.logoUrl : merged.logoUrl,
+      isDemoTitansIdentity && merged.logoUrl?.includes("/branding/titans-default-mark") ? DEFAULT_BRANDING.logoUrl : merged.logoUrl,
       merged
     ),
     logoMarkUrl: withBrandingCacheBust(merged.logoMarkUrl, merged),

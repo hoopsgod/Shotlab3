@@ -9,6 +9,7 @@ const commandCenterSource=fs.readFileSync(new URL("../src/components/CoachComman
 const playerCommandCenterSource=fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx",import.meta.url),"utf8");
 const missionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
 const premiumMissionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
+const coachTitleCss=fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css",import.meta.url),"utf8");
 const leaderboardSource=fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx",import.meta.url),"utf8");
 
 test("shared hierarchy primitives remain available",()=>{
@@ -72,6 +73,9 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(missionControlCss,/mission-control-active/);
   assert.match(missionControlCss,/safe-area-inset-bottom/);
   assert.match(premiumMissionControlCss,/mobile-navigation-dock/);
-  assert.match(premiumMissionControlCss,/min-height:300px/);
+  assert.match(premiumMissionControlCss,/Hero identity geometry is source-owned/);
+  assert.match(coachTitleCss,/@media \(max-width: 700px\)/);
+  assert.match(coachTitleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*428px/);
+  assert.match(coachTitleCss,/safe-area-inset-top/);
   assert.equal((playerCommandCenterSource.match(/data-testid="player-daily-command-center"/g)||[]).length,1);
 });

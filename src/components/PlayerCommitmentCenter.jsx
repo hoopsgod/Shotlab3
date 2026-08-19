@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import styles from "./PlayerCommitmentCenter.module.css";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const clean = (value) => String(value ?? "").trim();
@@ -171,14 +172,20 @@ export default function PlayerCommitmentCenter({
       data-testid={`player-commitment-center-${mode}`}
       data-mode={mode}
     >
-      <header className={styles.routeHeader} data-testid={`player-commitment-route-header-${mode}`}>
-        <div className={styles.routeEyebrow}>{model?.eyebrow || (isStrength ? "Physical development" : "Team commitments")}</div>
-        <div className={styles.routeTitleRow}>
-          <h1>{model?.title || (isStrength ? "Strength & Conditioning" : "Events & Attendance")}</h1>
-          <span>{routeStatus}</span>
-        </div>
-        <p>{routeSubtitle}</p>
-      </header>
+      <TeamIdentityTitleStage
+        variant="standard"
+        surface="light"
+        role={model?.eyebrow || (isStrength ? "Physical Development" : "Team Commitments")}
+        title={model?.title || (isStrength ? "Strength & Conditioning" : "Events & Attendance")}
+        summary={routeSubtitle}
+        status={routeStatus}
+        testId={`player-commitment-route-header-${mode}`}
+        dataLayoutRole="editorial-header"
+        dataVisualRole="player-team-workspace-title"
+        dataPageKind={mode}
+        dataMobileStage="team-identity"
+        ariaLabel={`${isStrength ? "Strength and Conditioning" : "Events and Attendance"} team identity and page title`}
+      />
 
       <div className={styles.hero} data-testid={`player-commitment-hero-${mode}`}>
         <div className={styles.heroTopline}>

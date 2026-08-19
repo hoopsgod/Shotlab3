@@ -5,12 +5,14 @@ import "./CoachMissionControlHeader.css";
 import "./CoachMissionControlPolish.css";
 import "./CoachMissionControl2026.css";
 import "./CoachMissionControlFinal.css";
+import "./CoachMissionControlTitleStage.css";
 import "./CoachActivationPath.css";
 import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import { buildCoachInboxModel } from "../lib/coachInbox.js";
 import { getRemoteActiveNamesToday, loadCoachCrossDeviceActivity, mergeCoachActivityItems } from "../lib/coachCrossDeviceActivity.js";
+import { isDemoPersistenceSession } from "../lib/demoMode.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
@@ -18,35 +20,7 @@ const DEFAULT_MARK = "/branding/titans-default-mark.svg";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
 const normalizedName = (value = "") => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
-const MOBILE_PRODUCT_RESET_CSS = `
-body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup{min-width:0!important;display:flex!important;align-items:center!important;gap:10px!important}
-body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{color:var(--mc-dim)!important;font-family:var(--font-body)!important;font-size:var(--type-micro,11px)!important;font-weight:700!important;line-height:1.2!important;letter-spacing:.04em!important;text-transform:uppercase!important}
-body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{color:var(--mc-ink)!important;font-family:var(--font-display)!important;font-size:clamp(20px,4vw,25px)!important;font-weight:790!important;line-height:1!important;letter-spacing:-.04em!important;text-transform:none!important}
-@media(max-width:700px){
-  body.mission-control-active [data-mobile-product-reset="phase-1"].missionControl{padding:8px 12px 108px!important;gap:16px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeader{grid-template-columns:40px minmax(0,1fr) auto!important;gap:8px!important;padding:max(6px,env(safe-area-inset-top)) 0 4px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandLockup{gap:8px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark{width:46px!important;height:46px!important;flex-basis:46px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderTeamMark img{width:44px!important;height:44px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy small{font-size:10px!important;letter-spacing:.055em!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcBrandCopy strong{max-width:30vw!important;overflow:hidden!important;font-size:18px!important;line-height:1.05!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeaderActions{display:flex!important;align-items:center!important;min-width:0!important;gap:6px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{display:inline-flex!important;min-width:0!important;max-width:min(104px,27vw)!important;padding-inline:8px!important;font-size:var(--type-micro,11px)!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent{grid-template-columns:minmax(0,1fr) 68px!important;padding:20px 18px!important;gap:8px 12px!important;background:transparent!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroTeamMark{top:18px!important;right:18px!important;width:64px!important;height:64px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHero h1{max-width:12ch!important;font-size:clamp(31px,9vw,39px)!important;line-height:.98!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcHeroContent>p{max-width:30ch!important;font-size:14px!important;line-height:1.45!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcCourtArtwork{opacity:.4!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip{margin-top:8px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip>button{min-height:52px!important;padding:5px 4px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcRealityStrip strong{font-size:21px!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcPrimary{min-height:48px!important}
-}
-@media(max-width:390px){
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect{width:62px!important;max-width:62px!important;font-size:0!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect:before{content:"Team";font-size:var(--type-micro,11px)!important;font-weight:720!important}
-  body.mission-control-active [data-mobile-product-reset="phase-1"] .mcTeamSelect>span{font-size:11px!important}
-}`;
+const isDefaultTitansLogo = (value = "") => [FALLBACK_LOGO, DEFAULT_MARK].some((candidate) => String(value).includes(candidate));
 
 function Icon({ name, size = 22 }) {
   const paths = {
@@ -72,118 +46,64 @@ function Icon({ name, size = 22 }) {
 function Avatar({ item, size = 44 }) {
   const src = item?.avatarUrl || item?.photoUrl || item?.imageUrl || "";
   const label = item?.name || item?.title || "Player";
-  return src
-    ? <img className="mcAvatar" src={src} alt={`${label} headshot`} style={{ width: size, height: size }} />
-    : <span className="mcAvatar mcAvatar--fallback" aria-label={`${label} headshot placeholder`} style={{ width: size, height: size }}>{initials(label)}</span>;
+  return src ? <img className="mcAvatar" src={src} alt={`${label} headshot`} style={{ width: size, height: size }} /> : <span className="mcAvatar mcAvatar--fallback" aria-label={`${label} headshot placeholder`} style={{ width: size, height: size }}>{initials(label)}</span>;
 }
 
 function CourtArtwork({ logoUrl }) {
-  return (
-    <div className="mcCourtArtwork" aria-hidden="true">
-      <div className="mcArenaGlow" />
-      <div className="mcRafters"><span /><span /><span /><span /></div>
-      <div className="mcArenaLights"><span /><span /><span /></div>
-      <div className="mcHoop"><span className="mcBackboard" /><span className="mcRim" /><span className="mcPost" /></div>
-      <div className="mcCourtFloor"><span className="mcSideline" /><span className="mcCenterLine" /><span className="mcKey" /><span className="mcThreePoint" /><img src={logoUrl || FALLBACK_LOGO} alt="" /></div>
-    </div>
-  );
+  return <div className="mcCourtArtwork" aria-hidden="true">
+    <svg viewBox="0 0 390 370" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+      <defs>
+        <linearGradient id="mcTacticalWash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#0b3840" stopOpacity=".08" /><stop offset=".52" stopColor="#0b5a58" stopOpacity=".18" /><stop offset="1" stopColor="#c8ff1a" stopOpacity=".04" /></linearGradient>
+        <radialGradient id="mcTacticalGlow" cx="74%" cy="48%" r="58%"><stop offset="0" stopColor="#c8ff1a" stopOpacity=".16" /><stop offset=".5" stopColor="#0f7a70" stopOpacity=".07" /><stop offset="1" stopColor="#071c28" stopOpacity="0" /></radialGradient>
+      </defs>
+      <rect width="390" height="370" fill="url(#mcTacticalWash)" /><rect width="390" height="370" fill="url(#mcTacticalGlow)" />
+      <g transform="translate(208 22) rotate(-4 86 163)" fill="none" stroke="rgba(220,235,241,.23)" strokeWidth="2" vectorEffect="non-scaling-stroke">
+        <rect x="0" y="0" width="172" height="326" rx="18" /><line x1="0" y1="0" x2="0" y2="326" opacity=".72" /><line x1="172" y1="0" x2="172" y2="326" opacity=".52" /><rect x="105" y="116" width="67" height="94" /><circle cx="105" cy="163" r="47" strokeDasharray="3 5" opacity=".72" /><path d="M172 48h-17C87 58 63 108 63 163s24 105 92 115h17" /><line x1="155" y1="48" x2="172" y2="48" /><line x1="155" y1="278" x2="172" y2="278" /><line x1="151" y1="142" x2="151" y2="184" /><circle cx="143" cy="163" r="6" stroke="#c8ff1a" strokeOpacity=".62" /><path d="M137 163h12" stroke="#c8ff1a" strokeOpacity=".52" /><circle cx="1" cy="163" r="44" opacity=".4" />
+      </g>
+      <g opacity=".58"><circle cx="294" cy="82" r="4" fill="#c8ff1a" /><circle cx="267" cy="191" r="4" fill="#c8ff1a" /><circle cx="319" cy="266" r="4" fill="#c8ff1a" /><path d="M294 82C272 108 263 145 267 191s24 59 52 75" fill="none" stroke="rgba(200,255,26,.28)" strokeWidth="1.5" strokeDasharray="4 7" /></g>
+      {logoUrl ? <image href={logoUrl} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" /> : null}
+    </svg>
+  </div>;
+}
+
+function LogoSetupPrompt({ className = "" }) {
+  return <span className={["mcLogoSetupPrompt", className].filter(Boolean).join(" ")}>Click here to add your custom team logo</span>;
 }
 
 function AttentionRow({ item, onFallback }) {
   const tone = item?.tone === "danger" ? "danger" : item?.tone === "success" ? "success" : "warning";
-  return (
-    <button type="button" className="mcAttentionRow" onClick={item?.onClick || onFallback}>
-      <span className={`mcStatusDot is-${tone}`} />
-      <Avatar item={item} />
-      <span className="mcAttentionCopy">
-        <strong>{item?.name || item?.title || "Player follow-up"}</strong>
-        <small>{item?.detail || "Review player status"}</small>
-        {item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}
-      </span>
-      <span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span>
-    </button>
-  );
+  return <button type="button" className="mcAttentionRow" onClick={item?.onClick || onFallback}><span className={`mcStatusDot is-${tone}`} /><Avatar item={item} /><span className="mcAttentionCopy"><strong>{item?.name || item?.title || "Player follow-up"}</strong><small>{item?.detail || "Review player status"}</small>{item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}</span><span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span></button>;
 }
 
 function TeamActivityPanel({ activeCount, inactiveCount, rosterSize, activeRate, onOpen }) {
-  return (
-    <article className="mcSection mcTeamHealth" aria-labelledby="mc-health-heading">
-      <div className="mcSectionHead"><span><small>Team pulse</small><h2 id="mc-health-heading">Activity today</h2></span><strong className="mcHealthScore">{activeRate}%</strong></div>
-      <div className="mcHealthBar"><span style={{ width: `${activeRate}%` }} /></div>
-      <div className="mcHealthFacts"><div><strong>{activeCount}</strong><small>Active</small></div><div><strong>{inactiveCount}</strong><small>Not active</small></div><div><strong>{rosterSize}</strong><small>Rostered</small></div></div>
-      <button type="button" className="mcTextLink" onClick={onOpen}>Review activity <Icon name="arrow" size={15} /></button>
-    </article>
-  );
+  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-health-heading"><div className="mcSectionHead"><span><small>Team pulse</small><h2 id="mc-health-heading">Activity today</h2></span><strong className="mcHealthScore">{activeRate}%</strong></div><div className="mcHealthBar"><span style={{ width: `${activeRate}%` }} /></div><div className="mcHealthFacts"><div><strong>{activeCount}</strong><small>Active</small></div><div><strong>{inactiveCount}</strong><small>Not active</small></div><div><strong>{rosterSize}</strong><small>Rostered</small></div></div><button type="button" className="mcTextLink" onClick={onOpen}>Review activity <Icon name="arrow" size={15} /></button></article>;
 }
-
 function LiveActivityPanel({ items }) {
-  return (
-    <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity">
-      <div className="mcSectionHead"><span><small>Live team feed</small><h2 id="mc-activity-heading">Recent activity</h2></span></div>
-      <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div>
-    </article>
-  );
+  return <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity"><div className="mcSectionHead"><span><small>Live team feed</small><h2 id="mc-activity-heading">Recent activity</h2></span></div><div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div></article>;
 }
-
 function NextSessionPanel({ date, onOpen }) {
-  return (
-    <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading">
-      <div className="mcSectionHead"><span><small>Coming up</small><h2 id="mc-session-heading">Next session</h2></span></div>
-      <div className="mcSessionSummary"><span className="mcSessionIcon is-ready"><Icon name="calendar" /></span><div><strong>Team session ready</strong><small>{String(date)}</small></div></div>
-      <button type="button" className="mcSecondaryAction" onClick={onOpen}>Open session<Icon name="arrow" size={17} /></button>
-    </article>
-  );
+  return <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading"><div className="mcSectionHead"><span><small>Coming up</small><h2 id="mc-session-heading">Next session</h2></span></div><div className="mcSessionSummary"><span className="mcSessionIcon is-ready"><Icon name="calendar" /></span><div><strong>Team session ready</strong><small>{String(date)}</small></div></div><button type="button" className="mcSecondaryAction" onClick={onOpen}>Open session<Icon name="arrow" size={17} /></button></article>;
 }
-
 function TodayPlan({ activation, onAction }) {
   const next = activation?.next;
   if (!next) return null;
-  return (
-    <article className="mcTodayPlan mcActivationPlan" data-testid="coach-onboarding-state" data-home-role="supporting">
-      <span className="mcTodayPlanIcon"><Icon name={next.icon || "spark"} size={21} /></span>
-      <span className="mcTodayPlanCopy">
-        <small>Coach activation · {activation.completed}/{activation.total}</small>
-        <strong>{next.title}</strong>
-        <em>{next.detail}</em>
-        <span className="mcActivationProgress" aria-label={`${activation.completed} of ${activation.total} activation milestones complete`}>
-          <span className="mcActivationProgressTrack"><span style={{ width: `${activation.progress}%` }} /></span>
-          <strong>{activation.progress}% ready</strong>
-        </span>
-      </span>
-      <button type="button" onClick={() => onAction?.(next.action)}>{next.label}<Icon name="arrow" size={16} /></button>
-    </article>
-  );
+  return <article className="mcTodayPlan mcActivationPlan" data-testid="coach-onboarding-state" data-home-role="supporting"><span className="mcTodayPlanIcon"><Icon name={next.icon || "spark"} size={21} /></span><span className="mcTodayPlanCopy"><small>Coach activation · {activation.completed}/{activation.total}</small><strong>{next.title}</strong><em>{next.detail}</em><span className="mcActivationProgress" aria-label={`${activation.completed} of ${activation.total} activation milestones complete`}><span className="mcActivationProgressTrack"><span style={{ width: `${activation.progress}%` }} /></span><strong>{activation.progress}% ready</strong></span></span><button type="button" onClick={() => onAction?.(next.action)}>{next.label}<Icon name="arrow" size={16} /></button></article>;
 }
 
 export default function CoachCommandCenter({
-  variant = "full",
-  totalPlayers,
-  activeTodayCount,
-  nextEventDateFormatted,
-  highlightPlayersAttention,
-  onPlayersClick,
-  onActiveTodayClick,
-  onAnalyticsClick,
-  onNextEventClick,
-  onAddPlayer,
-  onAddDrill,
-  onScheduleEvent,
-  onLogScore,
-  joinCode,
-  onCopyJoinCode,
-  onRegenerateJoinCode,
-  codeErr,
-  attentionItems = [],
-  activityItems = [],
-  eventReadiness = null,
-  onEventReadinessClick,
+  variant = "full", totalPlayers, activeTodayCount, nextEventDateFormatted, highlightPlayersAttention, onPlayersClick, onActiveTodayClick, onAnalyticsClick, onNextEventClick, onAddPlayer, onAddDrill, onScheduleEvent, onLogScore, joinCode, onCopyJoinCode, onRegenerateJoinCode, codeErr, attentionItems = [], activityItems = [], eventReadiness = null, onEventReadinessClick,
 }) {
   const { branding } = useTeamBranding();
-  const fullLogoSource = branding?.logoUrl || FALLBACK_LOGO;
-  const markSource = branding?.logoMarkUrl && branding.logoMarkUrl !== DEFAULT_MARK ? branding.logoMarkUrl : fullLogoSource;
+  const isDemoSession = isDemoPersistenceSession();
+  const configuredFullLogoSource = branding?.logoUrl && !isDefaultTitansLogo(branding.logoUrl) ? branding.logoUrl : "";
+  const configuredMarkSource = branding?.logoMarkUrl && !isDefaultTitansLogo(branding.logoMarkUrl) ? branding.logoMarkUrl : "";
+  const fullLogoSource = configuredFullLogoSource || (isDemoSession ? (branding?.logoUrl || FALLBACK_LOGO) : "");
+  const markSource = configuredMarkSource || fullLogoSource || (isDemoSession ? DEFAULT_MARK : "");
   const cleanFullLogoUrl = useCleanTeamLogo(fullLogoSource);
   const cleanMarkLogoUrl = useCleanTeamLogo(markSource);
-  const teamName = branding?.teamName || branding?.name || "Thomas Titans";
+  const teamName = branding?.teamName || branding?.name || (isDemoSession ? "Thomas Titans" : "Your Team");
+  const fullTeamLogoUrl = fullLogoSource ? cleanFullLogoUrl : "";
+  const heroTeamLogoUrl = markSource ? cleanMarkLogoUrl : "";
   const accent = branding?.accentColor || branding?.primaryColor || "#C8FF1A";
   const secondary = branding?.secondaryColor || "#9CA3AF";
   const [copied, setCopied] = useState(false);
@@ -196,118 +116,35 @@ export default function CoachCommandCenter({
   const inboxRef = useRef(null);
   const restoreInboxFocusRef = useRef(true);
 
+  useEffect(() => { document.body.classList.add("mission-control-active"); return () => { document.body.classList.remove("mission-control-active"); document.body.classList.remove("mission-control-priority-open"); }; }, []);
   useEffect(() => {
-    document.body.classList.add("mission-control-active");
-    return () => {
-      document.body.classList.remove("mission-control-active");
-      document.body.classList.remove("mission-control-priority-open");
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    let requestActive = false;
-    const refresh = async () => {
-      if (requestActive) return;
-      requestActive = true;
-      const result = await loadCoachCrossDeviceActivity({ joinCode });
-      requestActive = false;
-      if (!cancelled && result.ok) setRemoteActivityItems(result.items);
-    };
-    const onFocus = () => void refresh();
-    const onVisibility = () => { if (document.visibilityState === "visible") void refresh(); };
-    void refresh();
-    const timer = window.setInterval(refresh, 15_000);
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
+    let cancelled = false; let requestActive = false;
+    const refresh = async () => { if (requestActive) return; requestActive = true; const result = await loadCoachCrossDeviceActivity({ joinCode }); requestActive = false; if (!cancelled && result.ok) setRemoteActivityItems(result.items); };
+    const onFocus = () => void refresh(); const onVisibility = () => { if (document.visibilityState === "visible") void refresh(); };
+    void refresh(); const timer = window.setInterval(refresh, 15_000); window.addEventListener("focus", onFocus); document.addEventListener("visibilitychange", onVisibility);
+    return () => { cancelled = true; window.clearInterval(timer); window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onVisibility); };
   }, [joinCode]);
 
-  const openBrandingSettings = () => {
-    const existingBrandingControl = document.querySelector('[data-testid="coach-dashboard-identity-header"] button');
-    existingBrandingControl?.click();
-  };
-
-  const openTeamTools = () => {
-    setActionsOpen(false);
-    setToolsOpen(true);
-    window.setTimeout(() => document.querySelector('[data-testid="coach-secondary-tools"]')?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
-  };
-
-  const closePriorityEditor = () => {
-    const editor = document.querySelector('[data-testid="coach-priority-editor"]');
-    if (editor) {
-      editor.open = false;
-      editor.removeAttribute("role");
-      editor.removeAttribute("aria-modal");
-      editor.removeAttribute("aria-label");
-    }
-    document.body.classList.remove("mission-control-priority-open");
-    setPrioritiesOpen(false);
-  };
-
-  const openPriorityEditor = () => {
-    const editor = document.querySelector('[data-testid="coach-priority-editor"]');
-    if (!editor) return;
-    setActionsOpen(false);
-    setNavOpen(false);
-    editor.open = true;
-    editor.setAttribute("role", "dialog");
-    editor.setAttribute("aria-modal", "true");
-    editor.setAttribute("aria-label", "Set team focus");
-    document.body.classList.add("mission-control-priority-open");
-    setPrioritiesOpen(true);
-    window.setTimeout(() => editor.querySelector("input, select, textarea, button")?.focus?.({ preventScroll: true }), 60);
-  };
-
-  useEffect(() => {
-    if (!prioritiesOpen) return undefined;
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") closePriorityEditor();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [prioritiesOpen]);
-
+  const openBrandingSettings = () => { document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click(); };
+  const openTeamTools = () => { setActionsOpen(false); setToolsOpen(true); window.setTimeout(() => document.querySelector('[data-testid="coach-secondary-tools"]')?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
+  const closePriorityEditor = () => { const editor = document.querySelector('[data-testid="coach-priority-editor"]'); if (editor) { editor.open = false; editor.removeAttribute("role"); editor.removeAttribute("aria-modal"); editor.removeAttribute("aria-label"); } document.body.classList.remove("mission-control-priority-open"); setPrioritiesOpen(false); };
+  const openPriorityEditor = () => { const editor = document.querySelector('[data-testid="coach-priority-editor"]'); if (!editor) return; setActionsOpen(false); setNavOpen(false); editor.open = true; editor.setAttribute("role", "dialog"); editor.setAttribute("aria-modal", "true"); editor.setAttribute("aria-label", "Set team focus"); document.body.classList.add("mission-control-priority-open"); setPrioritiesOpen(true); window.setTimeout(() => editor.querySelector("input, select, textarea, button")?.focus?.({ preventScroll: true }), 60); };
+  useEffect(() => { if (!prioritiesOpen) return undefined; const onKeyDown = (event) => { if (event.key === "Escape") closePriorityEditor(); }; document.addEventListener("keydown", onKeyDown); return () => document.removeEventListener("keydown", onKeyDown); }, [prioritiesOpen]);
   useEffect(() => {
     if (!inboxOpen) return undefined;
     const previousActiveElement = document.activeElement;
     const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        restoreInboxFocusRef.current = true;
-        setInboxOpen(false);
-        return;
-      }
+      if (event.key === "Escape") { restoreInboxFocusRef.current = true; setInboxOpen(false); return; }
       if (event.key !== "Tab") return;
       const controls = [...(inboxRef.current?.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])") || [])];
-      if (!controls.length) return;
-      const first = controls[0];
-      const last = controls.at(-1);
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      if (!controls.length) return; const first = controls[0]; const last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
-    document.addEventListener("keydown", onKeyDown);
-    window.setTimeout(() => inboxRef.current?.querySelector("button")?.focus?.({ preventScroll: true }), 40);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      if (restoreInboxFocusRef.current) previousActiveElement?.focus?.({ preventScroll: true });
-    };
+    document.addEventListener("keydown", onKeyDown); window.setTimeout(() => inboxRef.current?.querySelector("button")?.focus?.({ preventScroll: true }), 40);
+    return () => { document.removeEventListener("keydown", onKeyDown); if (restoreInboxFocusRef.current) previousActiveElement?.focus?.({ preventScroll: true }); };
   }, [inboxOpen]);
-
-  const openInbox = () => {
-    restoreInboxFocusRef.current = true;
-    setInboxOpen(true);
-  };
-
-  const closeInbox = () => {
-    restoreInboxFocusRef.current = true;
-    setInboxOpen(false);
-  };
+  const openInbox = () => { restoreInboxFocusRef.current = true; setInboxOpen(true); };
+  const closeInbox = () => { restoreInboxFocusRef.current = true; setInboxOpen(false); };
 
   const mergedActivityItems = useMemo(() => mergeCoachActivityItems({ localItems: activityItems, remoteItems: remoteActivityItems }), [activityItems, remoteActivityItems]);
   const remoteActiveNames = useMemo(() => getRemoteActiveNamesToday(remoteActivityItems), [remoteActivityItems]);
@@ -316,121 +153,47 @@ export default function CoachCommandCenter({
   const activeCount = Math.min(rosterSize || remoteActiveNames.size, Math.max(localActiveCount, remoteActiveNames.size));
   const inactiveCount = Math.max(rosterSize - activeCount, 0);
   const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;
+  const unresolvedRsvps = Math.max(0, Number(eventReadiness?.missing) || 0);
   const hasTeamActivity = activeCount > 0;
   const hasScheduledSession = Boolean(nextEventDateFormatted && String(nextEventDateFormatted).trim() && !/^(none|—|not set)$/i.test(String(nextEventDateFormatted).trim()));
-  const fallbackAttention = highlightPlayersAttention ? [{
-    name: "Roster activity gap",
-    detail: rosterSize === 1 ? "No training activity has been logged this week." : "At least one player has no logged activity this week.",
-    meta: "Review training status and account connection",
-    tone: "danger",
-    actionLabel: "Open",
-    onClick: onPlayersClick,
-  }] : [];
+  const fallbackAttention = highlightPlayersAttention ? [{ name: "Roster activity gap", detail: rosterSize === 1 ? "No training activity has been logged this week." : "At least one player has no logged activity this week.", meta: "Review training status and account connection", tone: "danger", actionLabel: "Open", onClick: onPlayersClick }] : [];
   const attentionSource = attentionItems.length ? attentionItems : fallbackAttention;
   const resolvedAttention = attentionSource.filter((item) => !remoteActiveNames.has(normalizedName(item?.name || item?.title)));
   const attentionCount = resolvedAttention.length;
   const resolvedActivity = mergedActivityItems.length ? mergedActivityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
   const hasLiveActivity = resolvedActivity.length > 0;
-  const activationPath = useMemo(() => deriveCoachActivationPath({
-    teamCode: joinCode,
-    teamName,
-    logoUrl: fullLogoSource,
-    fallbackLogo: FALLBACK_LOGO,
-    rosterSize,
-    hasScheduledSession,
-    activeTodayCount: activeCount,
-    hasLiveActivity,
-  }), [activeCount, fullLogoSource, hasLiveActivity, hasScheduledSession, joinCode, rosterSize, teamName]);
-  const inboxModel = useMemo(() => buildCoachInboxModel({
-    attentionItems: resolvedAttention,
-    activationPath,
-    hasScheduledSession,
-    nextEventDateFormatted,
-    eventReadiness,
-  }), [activationPath, eventReadiness, hasScheduledSession, nextEventDateFormatted, resolvedAttention]);
+  const activationPath = useMemo(() => deriveCoachActivationPath({ teamCode: joinCode, teamName, logoUrl: fullLogoSource, fallbackLogo: FALLBACK_LOGO, rosterSize, hasScheduledSession, activeTodayCount: activeCount, hasLiveActivity }), [activeCount, fullLogoSource, hasLiveActivity, hasScheduledSession, joinCode, rosterSize, teamName]);
+  const inboxModel = useMemo(() => buildCoachInboxModel({ attentionItems: resolvedAttention, activationPath, hasScheduledSession, nextEventDateFormatted, eventReadiness }), [activationPath, eventReadiness, hasScheduledSession, nextEventDateFormatted, resolvedAttention]);
   const onboardingMode = !activationPath.complete;
   const sparseOnboardingMode = onboardingMode && !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
 
-  const runActivationAction = (action) => {
-    if (action === "team-tools") { openTeamTools(); return; }
-    if (action === "branding") { openBrandingSettings(); return; }
-    if (action === "add-player") { onAddPlayer?.(); return; }
-    if (action === "schedule-session") { onScheduleEvent?.(); return; }
-    if (action === "review-engagement") onPlayersClick?.();
-  };
+  const runActivationAction = (action) => { if (action === "team-tools") { openTeamTools(); return; } if (action === "branding") { openBrandingSettings(); return; } if (action === "add-player") { onAddPlayer?.(); return; } if (action === "schedule-session") { onScheduleEvent?.(); return; } if (action === "review-engagement") onPlayersClick?.(); };
+  const runInboxAction = (item) => { restoreInboxFocusRef.current = false; setInboxOpen(false); if (item?.action === "open-attention") { const source = resolvedAttention[item.sourceIndex]; (source?.onClick || onPlayersClick)?.(); return; } if (item?.action === "open-session") { onNextEventClick?.(); return; } if (item?.action === "open-event-readiness") { onEventReadinessClick?.(item.eventId); return; } runActivationAction(item?.action); };
 
-  const runInboxAction = (item) => {
-    restoreInboxFocusRef.current = false;
-    setInboxOpen(false);
-    if (item?.action === "open-attention") {
-      const source = resolvedAttention[item.sourceIndex];
-      (source?.onClick || onPlayersClick)?.();
-      return;
-    }
-    if (item?.action === "open-session") {
-      onNextEventClick?.();
-      return;
-    }
-    if (item?.action === "open-event-readiness") {
-      onEventReadinessClick?.(item.eventId);
-      return;
-    }
-    runActivationAction(item?.action);
-  };
-
-  const activationCommand = onboardingMode && activationPath.next
-    ? { eyebrow: `Coach activation · ${activationPath.completed}/${activationPath.total}`, title: activationPath.next.title, detail: activationPath.next.detail, label: activationPath.next.label, onClick: () => runActivationAction(activationPath.next.action), state: "planning" }
-    : null;
+  const activationCommand = onboardingMode && activationPath.next ? { eyebrow: `Activation · ${activationPath.completed}/${activationPath.total}`, title: activationPath.next.title, detail: activationPath.next.detail, label: activationPath.next.label, onClick: () => runActivationAction(activationPath.next.action), state: "planning" } : null;
   const primaryCommand = attentionCount > 0
     ? { eyebrow: "Today at a glance", title: `${attentionCount} decision${attentionCount === 1 ? "" : "s"} before practice`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
-    : activationCommand || (hasScheduledSession
-      ? { eyebrow: "Practice ready", title: "Today is under control", detail: `Your next team session is ${nextEventDateFormatted}.`, label: "Open session", onClick: onNextEventClick, state: "ready" }
-      : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });
+    : unresolvedRsvps > 0
+      ? { eyebrow: "Today at a glance", title: "1 decision before practice", detail: unresolvedRsvps + " RSVP" + (unresolvedRsvps === 1 ? "" : "s") + " still open for " + (eventReadiness?.title || "the next session") + ".", label: "Review RSVPs", onClick: () => onEventReadinessClick?.(eventReadiness?.key), state: "attention" }
+      : activationCommand || (hasScheduledSession
+        ? { eyebrow: "Practice ready", title: "Today is under control", detail: `Your next team session is ${nextEventDateFormatted}.`, label: "Open session", onClick: onNextEventClick, state: "ready" }
+        : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });
+  const quickActions = useMemo(() => [{ label: "Add Player", icon: "users", onClick: onAddPlayer }, { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent }, { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor }, { label: "Build Mission", icon: "target", onClick: onAddDrill }, { label: "Record Result", icon: "score", onClick: onLogScore }, { label: "Review Players", icon: "message", onClick: onPlayersClick }, { label: "Team Code", icon: "settings", onClick: openTeamTools }], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
+  const navigation = [{ label: "Mission Control", icon: "home", active: true }, { label: "Players", icon: "users", onClick: onPlayersClick }, { label: "Sessions", icon: "calendar", onClick: onNextEventClick }, { label: "Drills", icon: "target", onClick: onAddDrill }, { label: "Analytics", icon: "chart", onClick: onAnalyticsClick }, { label: "Coach Tools", icon: "plus", onClick: () => setActionsOpen(true) }];
 
-  const quickActions = useMemo(() => [
-    { label: "Add Player", icon: "users", onClick: onAddPlayer },
-    { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent },
-    { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor },
-    { label: "Build Mission", icon: "target", onClick: onAddDrill },
-    { label: "Record Result", icon: "score", onClick: onLogScore },
-    { label: "Review Players", icon: "message", onClick: onPlayersClick },
-    { label: "Team Code", icon: "settings", onClick: openTeamTools },
-  ], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
-
-  const navigation = [
-    { label: "Mission Control", icon: "home", active: true },
-    { label: "Players", icon: "users", onClick: onPlayersClick },
-    { label: "Sessions", icon: "calendar", onClick: onNextEventClick },
-    { label: "Drills", icon: "target", onClick: onAddDrill },
-    { label: "Analytics", icon: "chart", onClick: onAnalyticsClick },
-    { label: "Coach Tools", icon: "plus", onClick: () => setActionsOpen(true) },
-  ];
-
-  const attentionPanel = (
-    <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading">
-      <div className="mcSectionHead"><span><small>Priority queue</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>
-      {attentionCount > 0
-        ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} />)}</div>
-        : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}
-      <button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button>
-    </article>
-  );
-
+  const attentionPanel = <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading"><div className="mcSectionHead"><span><small>Priority queue</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>{attentionCount > 0 ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} />)}</div> : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}<button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button></article>;
   const livePanel = hasLiveActivity ? <LiveActivityPanel items={resolvedActivity} /> : null;
   const sessionPanel = hasScheduledSession ? <NextSessionPanel date={nextEventDateFormatted} onOpen={onNextEventClick} /> : null;
   const teamPanel = hasTeamActivity ? <TeamActivityPanel activeCount={activeCount} inactiveCount={inactiveCount} rosterSize={rosterSize} activeRate={activeRate} onOpen={onActiveTodayClick} /> : null;
   const priorityPanel = sessionPanel || teamPanel || livePanel;
   const lowerPanels = [sessionPanel ? teamPanel : null, sessionPanel || teamPanel ? livePanel : null].filter(Boolean);
 
-  if (variant === "compact") {
-    return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
-  }
+  if (variant === "compact") return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
 
   return <>
-    <style>{MOBILE_PRODUCT_RESET_CSS}</style>
     <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
-        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button>
+        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcRailLogoSetup" />}</button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside>
@@ -438,62 +201,33 @@ export default function CoachCommandCenter({
       <main className="missionControl">
         <header className="mcHeader" data-testid="mission-control-team-header">
           <button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button>
-          <div className="mcBrandLockup">
-            <button type="button" className="mcHeaderTeamMark" style={{width:52,height:52,flex:"0 0 52px",display:"grid",placeItems:"center",padding:0,border:0,borderRadius:14,background:"transparent",color:"inherit",boxShadow:"none",cursor:"pointer"}} onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img style={{width:48,height:48,display:"block",objectFit:"contain",filter:"drop-shadow(0 8px 16px rgba(7,28,40,.13))"}} src={cleanMarkLogoUrl} alt="" /></button>
-            <span className="mcBrandCopy"><small>Coach workspace</small><strong>{teamName}</strong></span>
-          </div>
+          <div className="mcBrandLockup"><button type="button" className="mcHeaderTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt="" /> : <LogoSetupPrompt className="mcHeaderLogoSetup" />}</button><span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span></div>
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
         </header>
 
-        <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective" data-home-role="primary">
-          <CourtArtwork logoUrl={cleanMarkLogoUrl} />
-          <div className="mcHeroScrim" />
-          <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>
+        <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective" data-home-role="primary" data-team-identity-stage="coach-mission-control">
+          <CourtArtwork logoUrl={heroTeamLogoUrl} /><div className="mcHeroScrim" />
           <div className="mcHeroContent">
-            <span className="mcEyebrow">{primaryCommand.eyebrow}</span>
-            <h1>{primaryCommand.title}</h1>
-            <p>{primaryCommand.detail}</p>
-            <div className="mcRealityStrip" data-testid="coach-primary-metrics">
-              <button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button>
-              <button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button>
-              <button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button>
+            <div className="mcHeroIdentity">
+              <div className="mcHeroIdentityCopy"><span className="mcProgramIdentity">{teamName}</span><span className="mcEyebrow">Coach Mode · {primaryCommand.eyebrow}</span></div>
+              <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcHeroLogoSetup" />}</button>
             </div>
+            <h1>{primaryCommand.title}</h1><p>{primaryCommand.detail}</p>
+            <div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button><button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button></div>
             <button type="button" className="mcPrimary" onClick={primaryCommand.onClick}>{primaryCommand.label}<Icon name="arrow" /></button>
           </div>
         </section>
 
-        <section className={`mcFocusGrid ${onboardingMode ? "is-onboarding-grid" : ""}`}>
-          {attentionPanel}
-          {onboardingMode ? <TodayPlan activation={activationPath} onAction={runActivationAction} /> : priorityPanel}
-        </section>
-
+        <section className={`mcFocusGrid ${onboardingMode ? "is-onboarding-grid" : ""}`}>{attentionPanel}{onboardingMode ? <TodayPlan activation={activationPath} onAction={runActivationAction} /> : priorityPanel}</section>
         {!sparseOnboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}
-
         {toolsOpen ? <section className="mcSection mcTools" data-testid="coach-secondary-tools"><div><small>Team code</small><strong>{joinCode || "—"}</strong>{codeErr ? <span>{codeErr}</span> : null}</div><div><button type="button" onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }}>{copied ? "Copied" : "Copy code"}</button><button type="button" onClick={onRegenerateJoinCode}>New code</button><button type="button" onClick={() => setToolsOpen(false)}>Close</button></div><span data-testid="coach-team-code-bar" /></section> : null}
       </main>
 
       {prioritiesOpen ? <div className="mcPriorityOverlayLayer" data-testid="coach-priority-overlay"><button type="button" className="mcPriorityOverlayBackdrop" aria-label="Close team focus editor" onClick={closePriorityEditor} /><button type="button" className="mcPriorityOverlayClose" aria-label="Close team focus editor" onClick={closePriorityEditor}><Icon name="close" size={20} /></button></div> : null}
+      {inboxOpen ? <div className="mcInboxLayer" data-testid="coach-inbox-layer"><button type="button" className="mcInboxBackdrop" aria-label="Close Coach Inbox" onClick={closeInbox} /><section ref={inboxRef} id="coach-inbox-panel" className="mcInboxPanel" role="dialog" aria-modal="true" aria-labelledby="coach-inbox-title" data-testid="coach-inbox"><header className="mcInboxHead"><span><small>Live team signals</small><strong id="coach-inbox-title">Coach Inbox</strong></span><button type="button" aria-label="Close Coach Inbox" onClick={closeInbox}><Icon name="close" /></button></header><div className="mcInboxSummary"><strong>{inboxModel.actionableCount > 0 ? `${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "move" : "moves"} to make` : "You’re caught up"}</strong><span>Only current team actions appear here.</span></div>{inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : item.kind === "event-readiness" ? "calendar" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : item.kind === "event-readiness" ? "Event readiness" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player, RSVP, or team-launch tasks need attention right now.</small></div></div>}{inboxModel.context ? <button type="button" className="mcInboxContext" onClick={() => runInboxAction(inboxModel.context)}><span className="mcInboxItemIcon"><Icon name="calendar" size={19} /></span><span><small>Coming up</small><strong>{inboxModel.context.title}</strong><em>{inboxModel.context.detail}</em></span><b>{inboxModel.context.label}<Icon name="arrow" size={15} /></b></button> : null}<footer>Built from live roster, RSVP, activation, and schedule data.</footer></section></div> : null}
 
-      {inboxOpen ? <div className="mcInboxLayer" data-testid="coach-inbox-layer">
-        <button type="button" className="mcInboxBackdrop" aria-label="Close Coach Inbox" onClick={closeInbox} />
-        <section ref={inboxRef} id="coach-inbox-panel" className="mcInboxPanel" role="dialog" aria-modal="true" aria-labelledby="coach-inbox-title" data-testid="coach-inbox">
-          <header className="mcInboxHead"><span><small>Live team signals</small><strong id="coach-inbox-title">Coach Inbox</strong></span><button type="button" aria-label="Close Coach Inbox" onClick={closeInbox}><Icon name="close" /></button></header>
-          <div className="mcInboxSummary"><strong>{inboxModel.actionableCount > 0 ? `${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "move" : "moves"} to make` : "You’re caught up"}</strong><span>Only current team actions appear here.</span></div>
-          {inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : item.kind === "event-readiness" ? "calendar" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : item.kind === "event-readiness" ? "Event readiness" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player, RSVP, or team-launch tasks need attention right now.</small></div></div>}
-          {inboxModel.context ? <button type="button" className="mcInboxContext" onClick={() => runInboxAction(inboxModel.context)}><span className="mcInboxItemIcon"><Icon name="calendar" size={19} /></span><span><small>Coming up</small><strong>{inboxModel.context.title}</strong><em>{inboxModel.context.detail}</em></span><b>{inboxModel.context.label}<Icon name="arrow" size={15} /></b></button> : null}
-          <footer>Built from live roster, RSVP, activation, and schedule data.</footer>
-        </section>
-      </div> : null}
-
-      <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}>
-        <button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} />
-        <section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach command menu</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section>
-      </div>
-
-      <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}>
-        <button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} />
-        <aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}><img src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside>
-      </div>
+      <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}><button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} /><section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach command menu</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section></div>
+      <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}>{fullTeamLogoUrl ? <img src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcDrawerLogoSetup" />}</button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
     </div>
   </>;
 }
