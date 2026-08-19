@@ -56,7 +56,7 @@ test("cinematic hero preserves a visible source-owned coach logo and integrates 
   assert.match(source,/useCleanTeamLogo/);
   assert.match(source,/cleanFullLogoUrl/);
   assert.match(source,/cleanMarkLogoUrl/);
-  assert.match(source,/branding\?\.logoMarkUrl && branding\.logoMarkUrl !== DEFAULT_MARK/);
+  assert.match(source,/configuredMarkSource = branding\?\.logoMarkUrl && !isDefaultTitansLogo\(branding\.logoMarkUrl\)/);
   assert.match(source,/mcTacticalWash/);
   assert.match(source,/mcTacticalGlow/);
   assert.match(source,/mcCourtArtwork/);
