@@ -84,7 +84,10 @@
     background:transparent!important;
     box-shadow:none!important;
   }
-  .metricPrimary + .metricSupporting{border-left:0!important}
+  .metricPrimary + .metricSupporting{
+    padding-inline-start:2px!important;
+    border-left:0!important;
+  }
   .metricSupporting + .metricSupporting{border-left:1px solid rgba(23,26,24,.1)!important}
   .metricSupporting::after{display:none!important}
   .metricSupporting [class*="metricLabel"]{
