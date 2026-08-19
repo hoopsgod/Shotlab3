@@ -24,10 +24,18 @@ for (const [source, label] of [
 
 for (const required of [
   '<TeamIdentityTitleStage',
-  'dataMobileStage="team-identity"',
+  'variant="editorial"',
+  'dataMobileStage="editorial"',
+  'brandTreatment={brandTreatment}',
+  'BRAND_TREATMENT_BY_ICON',
+  'training:"signature"',
+  'calendar:"compact"',
+  'strength:"watermark"',
+  'trophy:"none"',
+  'team:"signature"',
 ]) {
   if (!secondarySystem.includes(required)) {
-    throw new Error(`SecondaryPageSystem source-owned title contract missing: ${required}`);
+    throw new Error(`SecondaryPageSystem semantic brand hierarchy contract missing: ${required}`);
   }
 }
 
@@ -56,4 +64,4 @@ for (const obsolete of [
   }
 }
 
-console.log("Verified source-owned secondary title architecture; no product composition mutation performed.");
+console.log("Verified source-owned secondary title architecture and semantic team-brand hierarchy; no product composition mutation performed.");
