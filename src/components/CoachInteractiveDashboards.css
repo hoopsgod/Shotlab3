@@ -22,6 +22,14 @@
     margin-inline: var(--shotlab-mobile-content-rail, 20px);
   }
 
+  /* Events still loads older calendar-first CSS after the shared workspace
+     layer. Reassert only the canonical title rail here; the Events stylesheet
+     continues to own calendar, filter, and list composition. */
+  .performance-shell--coach .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
+    margin-inline: var(--shotlab-mobile-content-rail, 20px) !important;
+  }
+
   /* The build-time Phase 4D enhancer assigns this stable class to the shared
      Dashboard return control. The legacy page shell owns a fixed inter-row gap,
      so move the rendered control optically toward the title without changing
