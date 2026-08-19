@@ -37,7 +37,7 @@ interface TeamBrandingContextValue {
 const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
 
 const defaultValue: TeamBrandingContextValue = {
-  branding: resolveTeamBranding(DEFAULT_BRANDING),
+  branding: resolveTeamBranding({}),
   theme: defaultTheme,
   teamName: "ShotLab",
   teamWordmark: "ShotLab",
@@ -53,7 +53,7 @@ const defaultValue: TeamBrandingContextValue = {
 const TeamBrandingContext = createContext<TeamBrandingContextValue>(defaultValue);
 
 export function TeamBrandingProvider({ branding, children }: { branding?: TeamBranding; children: React.ReactNode }) {
-  const safeBranding = useMemo(() => resolveTeamBranding(branding || DEFAULT_BRANDING), [branding]);
+  const safeBranding = useMemo(() => resolveTeamBranding(branding || {}), [branding]);
   const theme = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
 
   useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);
