@@ -91,7 +91,7 @@ test("Schedule disclosure is structurally limited to two non-overlapping informa
   assert.doesNotMatch(scheduleCss, /!important/);
 });
 
-test("Player Home is the immersive Hero variant while Coach Home integrates identity into Mission Control", () => {
+test("Player Home is the immersive Hero variant while Coach Home integrates compact identity into Mission Control", () => {
   assert.match(playerHeader, /variant="hero"/);
   assert.match(playerHeader, /surface="dark"/);
   assert.match(playerHeader, /role="Player Mode"/);
@@ -100,8 +100,9 @@ test("Player Home is the immersive Hero variant while Coach Home integrates iden
   assert.match(coachCommand, /mcHeroIdentity/);
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
-  assert.match(coachTitleCss, /font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(coachTitleCss, /min-height:\s*428px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);
