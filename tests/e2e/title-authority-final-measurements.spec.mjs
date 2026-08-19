@@ -124,14 +124,14 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
   const teamName = await applyDifficultBranding(page);
   const hero = page.getByTestId("coach-primary-objective");
   await expect(hero).toBeVisible();
-  await expect(hero.locator(".mcHeroTeamMark .mcTeamFallback")).toBeVisible();
+  await expect(hero.locator(".mcHeroTeamMark .mcHeroLogoSetup")).toBeVisible();
 
   const metrics = await hero.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
     const team = element.querySelector(".mcProgramIdentity");
     const crest = element.querySelector(".mcHeroTeamMark img");
-    const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
+    const fallback = element.querySelector(".mcHeroTeamMark .mcLogoSetupPrompt");
     const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       viewport: { width: innerWidth, height: innerHeight },
