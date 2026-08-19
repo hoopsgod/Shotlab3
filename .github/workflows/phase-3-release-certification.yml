@@ -44,8 +44,8 @@ jobs:
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium browser
+        run: npx playwright install chromium
 
       - name: Build exact production head
         run: npm run build
