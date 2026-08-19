@@ -350,6 +350,14 @@
       font-size: 11px !important;
       letter-spacing: .055em !important;
     }
+
+    /* Coach pages still render the legacy Back as a sibling immediately before
+       SecondaryPageShell. Pull only that sibling pair together so the Back and
+       editorial title read as one opening composition, matching the in-stage
+       Back treatment without altering route behavior. */
+    .performance-shell--coach .page > button:has(+ .secondaryPageShell) {
+      margin-bottom: -14px !important;
+    }
   }
 }
 
