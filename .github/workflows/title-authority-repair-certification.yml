@@ -94,7 +94,8 @@ jobs:
       - run: npm ci
       - name: Install isolated Playwright test runner
         run: npm install --no-save --package-lock=false @playwright/test@1.51.1
-      - run: npx playwright install --with-deps chromium
+      - name: Install Chromium browser
+        run: npx playwright install chromium
       - run: npm run build
       - name: Team identity responsive and computed-style E2E
         run: npx playwright test tests/e2e/team-identity-title-stage-responsive.spec.mjs tests/e2e/team-identity-title-stage-intermediate-widths.spec.mjs tests/e2e/title-authority-final-measurements.spec.mjs tests/e2e/coach-mobile-identity-computed.spec.mjs --config=playwright.acceptance.config.mjs
