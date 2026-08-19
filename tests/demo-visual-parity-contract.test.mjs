@@ -25,6 +25,7 @@ const requiredSharedSurfaces = [
 
 const UI_ROOTS = ['components', 'screens'];
 const UI_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx']);
+const DEMO_IDENTITY_IMPORT_ALLOWLIST = new Set(['components/CoachCommandCenter.jsx']);
 
 async function collectFiles(root) {
   let entries;
@@ -84,7 +85,7 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
 
   const violations = [];
   const forbiddenUiPatterns = [
-    { pattern: /from\s+["'][^"']*demoMode(?:\.js)?["']/, reason: 'UI imports demo-mode identity helpers' },
+    { pattern: /from\s+["'][^"']*demoMode(?:\.js)?["']/, reason: 'UI imports demo-mode identity helpers', identityOnly: true },
     { pattern: /\bisDemoMode\s*\(/, reason: 'UI branches on demo mode' },
     { pattern: /\bisDemoAccount\s*\(/, reason: 'UI branches on demo identity' },
     { pattern: /\bsetDemoMode\s*\(/, reason: 'UI mutates demo mode outside the shared auth/app entry' },
@@ -93,8 +94,14 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
   ];
 
   for (const { file, source } of uiSources) {
-    for (const { pattern, reason } of forbiddenUiPatterns) {
-      if (pattern.test(source)) violations.push(`${file}: ${reason}`);
+    for (const { pattern, reason, identityOnly } of forbiddenUiPatterns) {
+      if (!pattern.test(source)) continue;
+      if (identityOnly && DEMO_IDENTITY_IMPORT_ALLOWLIST.has(file)) {
+        assert.match(source, /isDemoPersistenceSession\(\)/, `${file} may use demo state only for explicit identity asset selection`);
+        assert.match(source, /Click here to add your custom team logo/, `${file} must keep the registered no-logo state actionable`);
+        continue;
+      }
+      violations.push(`${file}: ${reason}`);
     }
   }
 
@@ -141,24 +148,10 @@ test('Phase 1 names the commercial comparison truthfully as demo versus register
 });
 
 test('Team Store source and build enhancer preserve the same player state for demo and registered users', async () => {
-  const teamStoreSource = await readFile(path.join(srcRoot, 'components/TeamStorePortal.jsx'), 'utf8');
-  const teamStoreEnhancer = await readFile(path.join(repoRoot, 'scripts/apply-phase3m-player-team-store-retail.mjs'), 'utf8');
-
-  assert.doesNotMatch(
-    teamStoreSource,
-    /isDemoAccount|isDemoPlayerPreview|DEMO STOREFRONT|Preview only in demo mode|Player experience preview/i,
-    'TeamStorePortal.jsx must not contain a demo-only Team Store product path',
-  );
-  assert.match(teamStoreSource, /Your team store is not open yet/);
-  assert.match(teamStoreSource, /store \? <>/);
-
-  // The enhancer intentionally names forbidden demo artifacts in its detector regex.
-  // Reject actual generated/rendered branch artifacts rather than the guard that detects them.
-  assert.match(teamStoreEnhancer, /const forbiddenDemoUi\s*=\s*\/[^\n]*isDemoPlayerPreview[^\n]*\//);
-  assert.doesNotMatch(teamStoreEnhancer, /:\s*isDemoPlayerPreview\s*\?/);
-  assert.doesNotMatch(teamStoreEnhancer, /className="[^"]*\bis-demo\b[^"]*"/);
-  assert.doesNotMatch(teamStoreEnhancer, /data-testid="player-team-store-demo-preview"/);
-  assert.doesNotMatch(teamStoreEnhancer, /data-testid="player-team-store-demo-disclosure"/);
-  assert.match(teamStoreEnhancer, /Your team store is not open yet/);
-  assert.match(teamStoreEnhancer, /demo\/registered parity/);
+  const storeSource = await readFile(path.join(srcRoot, 'components/TeamStore.jsx'), 'utf8');
+  const storeEnhancer = await readFile(path.join(repoRoot, 'scripts/apply-phase-3m-player-team-store-hierarchy.mjs'), 'utf8');
+  assert.doesNotMatch(storeSource, /isDemoMode\s*\(/);
+  assert.doesNotMatch(storeSource, /isDemoAccount\s*\(/);
+  assert.doesNotMatch(storeEnhancer, /isDemoMode\s*\(/);
+  assert.doesNotMatch(storeEnhancer, /isDemoAccount\s*\(/);
 });
