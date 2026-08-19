@@ -27,7 +27,7 @@ test('full-bleed route performance stages still break the rail symmetrically', (
   assert.match(centering, /width:\s*calc\(100% \+ var\(--layout-gutter, 18px\) \+ var\(--layout-gutter, 18px\)\) !important/);
   assert.match(centering, /margin-left:\s*calc\(var\(--layout-gutter, 18px\) \* -1\) !important/);
   assert.match(centering, /margin-right:\s*calc\(var\(--layout-gutter, 18px\) \* -1\) !important/);
-  assert.match(secondaryPages, /primary-decision/);
+  assert.match(secondaryPages, /\.secondaryPageDecision\s*\{/);
 });
 
 test('first supporting mobile metric returns to the editorial rail without flattening card internals', () => {
