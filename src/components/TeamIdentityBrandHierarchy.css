@@ -120,18 +120,30 @@
     padding-bottom: 10px;
   }
 
-  /* Signature pages carry the logo plus a rule, so reclaim only the vertical
-     whitespace needed to preserve the 290px first-view title-stage ceiling. */
+  /* Signature pages carry the logo plus a rule. Tighten expendable vertical
+     rhythm instead of shrinking the title or custom mark so the full
+     375–430px range remains inside the 290px first-view ceiling. */
   .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__inner {
     padding-top: 5px;
     padding-bottom: 6px;
   }
 
   .teamIdentityTitleStage[data-brand-treatment="compact"] .teamIdentityTitleStage__identityLine,
-  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__identityLine,
   .teamIdentityTitleStage[data-brand-treatment="watermark"] .teamIdentityTitleStage__identityLine,
   .teamIdentityTitleStage[data-brand-treatment="none"] .teamIdentityTitleStage__identityLine {
     margin-bottom: 7px;
+  }
+
+  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__identityLine {
+    margin-bottom: 5px;
+  }
+
+  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__summary {
+    margin-top: 8px;
+  }
+
+  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__support {
+    margin-top: 5px;
   }
 
   .teamIdentityTitleStage__microBrand {
