@@ -7,6 +7,22 @@ import "../styles/Phase2PremiumRosterLayer.css";
 
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/strength|lifting|conditioning/,"strength"],[/activity|signal|feed/,"activity"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/program|brand|identity/,"program"],[/account|setting/,"settings"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";
+const BRAND_TREATMENT_BY_ICON=Object.freeze({
+  training:"signature",
+  calendar:"compact",
+  strength:"watermark",
+  trophy:"none",
+  team:"signature",
+  activity:"watermark",
+  profile:"signature",
+  chart:"signature",
+  program:"compact",
+  store:"compact",
+  settings:"signature",
+  coach:"signature",
+  target:"signature",
+});
+const brandTreatmentFor=iconName=>BRAND_TREATMENT_BY_ICON[iconName]||"signature";
 const TITLE_LABELS=new Map([
   ["Drills Dashboard","Drills"],
   ["Strength & Conditioning Dashboard","S&C"],
@@ -20,9 +36,10 @@ export function SecondaryPageShell({children,testId,className=""}){return <secti
 export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],backAction=null,titleSize="auto",testId,icon}){
   const displayTitle=normalizeTitle(title);
   const iconName=icon||iconFor(`${eyebrow} ${displayTitle}`);
+  const brandTreatment=brandTreatmentFor(iconName);
   return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations" data-title-stage-family="editorial">
     <TeamIdentityTitleStage
-      variant="standard"
+      variant="editorial"
       surface="light"
       role={eyebrow||"Team"}
       title={displayTitle}
@@ -31,12 +48,13 @@ export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],back
       actions={actions}
       backAction={backAction}
       titleSize={titleSize}
+      brandTreatment={brandTreatment}
       testId={testId}
       className="secondaryPageTitleStage"
       dataLayoutRole="editorial-header"
       dataVisualRole="page-intro"
       dataPageKind={iconName}
-      dataMobileStage="team-identity"
+      dataMobileStage="editorial"
       ariaLabel={`${displayTitle} team identity and page title`}
     />
   </div>

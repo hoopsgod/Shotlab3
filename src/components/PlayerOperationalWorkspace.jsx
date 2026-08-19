@@ -4,6 +4,15 @@ import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
+const PLAYER_BRAND_TREATMENT = Object.freeze({
+  "at-home": "signature",
+  program: "compact",
+  events: "compact",
+  strength: "watermark",
+  leaderboards: "none",
+  profile: "signature",
+});
+
 function MetricContent({ metric }) {
   return <><span className={styles.metricLabel} data-metric-role="label">{metric.label}</span><span className={styles.metricValue} data-metric-role="value">{metric.value}</span><span className={styles.metricDetail} data-metric-role="detail">{metric.detail}</span></>;
 }
@@ -22,6 +31,10 @@ function resolveWorkspaceIdentityLabel(model) {
   return labels[model?.id] || model?.eyebrow || "Player";
 }
 
+function resolveWorkspaceBrandTreatment(model) {
+  return PLAYER_BRAND_TREATMENT[model?.id] || "signature";
+}
+
 export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", backAction = null, titleSize = "auto", testId }) {
   if (!model) return null;
   const runAction = (action) => { onAction?.(action); scheduleWorkspaceActionReveal(action); };
@@ -33,7 +46,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id} data-title-stage-family="editorial">
     <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
       <TeamIdentityTitleStage
-        variant="standard"
+        variant="editorial"
         surface="light"
         role={resolveWorkspaceIdentityLabel(model)}
         title={model.title}
@@ -42,12 +55,13 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         actions={primaryAction}
         backAction={backAction}
         titleSize={titleSize}
+        brandTreatment={resolveWorkspaceBrandTreatment(model)}
         testId={`${testId || `player-workspace-${model.id}`}-title-stage`}
         className={styles.teamTitleStage || ""}
         dataLayoutRole="editorial-header"
         dataVisualRole="player-team-workspace-title"
         dataPageKind={model.id}
-        dataMobileStage="team-identity"
+        dataMobileStage="editorial"
         ariaLabel={`${model.title} team identity and page title`}
       />
     </div>

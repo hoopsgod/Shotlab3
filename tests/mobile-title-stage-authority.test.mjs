@@ -5,10 +5,12 @@ import { readFileSync } from 'node:fs';
 const read = (path) => readFileSync(path, 'utf8');
 const stage = read('src/components/TeamIdentityTitleStage.jsx');
 const stageCss = read('src/components/TeamIdentityTitleStage.css');
+const brandCss = read('src/components/TeamIdentityBrandHierarchy.css');
 const secondary = read('src/components/SecondaryPageSystem.jsx');
 const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
 const playerHome = read('src/components/PlayerDashboardHeader.jsx');
 const coachHome = read('src/components/CoachCommandCenter.jsx');
+const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const geometry = read('src/styles/AuthenticatedVisualAuthority2026.css');
 
 const titleRule = stageCss.match(/\.teamIdentityTitleStage__title\s*\{([\s\S]*?)\}/)?.[1] || '';
@@ -34,10 +36,49 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(36px,\s*9\.6vw,\s*40px\)/);
 });
 
+test('secondary destinations use semantic team-brand treatments instead of one repeated crest template', () => {
+  assert.match(stage, /BRAND_TREATMENTS = new Set\(\["hero", "compact", "signature", "watermark", "none"\]\)/);
+  assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
+  assert.match(stage, /resolvedBrandTreatment === "hero"/);
+  assert.match(stage, /resolvedBrandTreatment === "compact"/);
+  assert.match(stage, /resolvedBrandTreatment === "watermark"/);
+  assert.match(brandCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(brandCss, /teamIdentityTitleStage__microBrand/);
+  assert.match(brandCss, /teamIdentityTitleStage__signatureRule/);
+  assert.match(brandCss, /teamIdentityTitleStage__watermarkBrand/);
+  assert.match(secondary, /training:"signature"/);
+  assert.match(secondary, /calendar:"compact"/);
+  assert.match(secondary, /strength:"watermark"/);
+  assert.match(secondary, /trophy:"none"/);
+  assert.match(secondary, /team:"signature"/);
+  assert.match(playerWorkspace, /"at-home": "signature"/);
+  assert.match(playerWorkspace, /events: "compact"/);
+  assert.match(playerWorkspace, /strength: "watermark"/);
+  assert.match(playerWorkspace, /leaderboards: "none"/);
+});
+
+test('Home and Program Branding preserve an intentional identity-heavy hero treatment', () => {
+  assert.match(stage, /requestedBrandTreatment === "auto"[\s\S]*titleFamily === "identity" \? "hero" : "signature"/);
+  assert.match(playerHome, /variant="hero"/);
+  assert.match(coachHome, /mcHeroIdentity/);
+  assert.match(brandingPreview, /variant="hero" brandTreatment="hero"/);
+  assert.match(brandingPreview, /variant="editorial" brandTreatment="compact"/);
+});
+
+test('custom team logos remain data-driven across hero, compact and watermark treatments', () => {
+  assert.match(stage, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
+  assert.match(stage, /useCleanTeamLogo\(rawLogo\)/);
+  assert.match(stage, /className="teamIdentityTitleStage__crest"[\s\S]*src=\{cleanedLogo\}/);
+  assert.match(stage, /className="teamIdentityTitleStage__microBrandImage"[\s\S]*src=\{cleanedLogo\}/);
+  assert.match(stage, /className="teamIdentityTitleStage__watermarkBrand"[\s\S]*src=\{cleanedLogo\}/);
+  assert.doesNotMatch(stage, /titans-exact-logo|titans-default-mark/);
+});
+
 test('compact editorial stages reserve typography authority over team-mark decoration', () => {
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-crest:\s*clamp\(60px,\s*16vw,\s*68px\)/);
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
-  assert.match(stageCss, /Compact Editorial Stage/);
+  assert.match(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*width:\s*30px[\s\S]*height:\s*30px/);
+  assert.doesNotMatch(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*drop-shadow/);
 });
 
 test('Back is a first-class title-stage affordance with accessible semantics and touch target', () => {
@@ -69,4 +110,5 @@ test('page title remains a real level-one heading with discoverable identity met
   assert.match(stage, /<h1 className="teamIdentityTitleStage__title" data-identity-role="page-title">/);
   assert.match(stage, /data-title-word-count=\{titleWords\.length\}/);
   assert.match(stage, /data-title-size=\{titleSize\}/);
+  assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
 });
