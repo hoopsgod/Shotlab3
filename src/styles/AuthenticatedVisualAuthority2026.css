@@ -39,4 +39,16 @@
       + env(safe-area-inset-bottom, 0px)
     ) !important;
   }
+
+  /* Coach route content still arrives inside a legacy 16px inline scroller.
+   * Compensate at the shared secondary shell so the composed page lands on the
+   * same 20px rail as Player without altering route/business logic. Dark
+   * decision surfaces no longer need the historical shell breakout here. */
+  html body #root .performance-shell--coach .secondaryPageShell {
+    padding-inline: calc(var(--shotlab-mobile-content-rail) - var(--space-4, 16px)) !important;
+  }
+
+  html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
+    margin-inline: 0 !important;
+  }
 }
