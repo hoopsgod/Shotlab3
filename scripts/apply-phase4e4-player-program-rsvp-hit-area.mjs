@@ -34,7 +34,8 @@ const intermediateTarget = `.performance-shell[data-workspace-tab="program"] but
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
-const safeTarget = `html body #root .performance-shell.performance-shell--player[data-workspace-tab="program"] button[data-player-program-rsvp-action] {
+const safeSelector = 'html body #root .performance-shell.performance-shell--player[data-workspace-tab="program"] button[data-player-program-rsvp-action]';
+const safeTarget = `${safeSelector} {
   min-height: 46px !important;
   height: 46px !important;
   box-sizing: border-box !important;
@@ -42,8 +43,8 @@ const safeTarget = `html body #root .performance-shell.performance-shell--player
 }`;
 
 const compactAuthority = compactCss(authority);
-const compactSafeTarget = compactCss(safeTarget);
-if (compactAuthority.includes(compactSafeTarget)) {
+const compactSafeSelector = compactCss(safeSelector);
+if (compactAuthority.includes(compactSafeSelector)) {
   console.log('Phase 4E.4 final Player Program RSVP physical target already applied.');
 } else if (authority.includes(legacyTarget)) {
   authority = authority.replace(legacyTarget, safeTarget);
