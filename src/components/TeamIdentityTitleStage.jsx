@@ -138,10 +138,10 @@ export default function TeamIdentityTitleStage({
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
-  // Every authenticated destination keeps the coach-configured team logo visible.
-  // Treatment still controls prominence: compact/signature/none use the small
-  // supporting mark, watermark stays tonal, and Home keeps the full hero crest.
-  const supportingBrand = resolvedBrandTreatment === "compact" || resolvedBrandTreatment === "signature" || resolvedBrandTreatment === "none" ? (
+  // Every authenticated destination keeps the coach-configured team logo visibly present.
+  // Treatment still controls hierarchy: editorial pages use a supporting mark, watermark
+  // pages may add tonal depth behind it, and Home keeps the full hero crest.
+  const supportingBrand = resolvedBrandTreatment !== "hero" ? (
     <span className="teamIdentityTitleStage__microBrand" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
       {hasUsableLogo ? (
         <img
