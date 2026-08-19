@@ -18,9 +18,9 @@ test('mobile geometry authority owns one 20px content rail across player and coa
 
 test('secondary mobile pages land beyond bottom navigation with deliberate breathing room', () => {
   assert.match(authority, /--shotlab-mobile-content-landing:\s*var\(--space-6, 24px\)/);
-  assert.match(authority, /\.secondaryPageShell[\s\S]*padding-bottom:\s*calc\(var\(--bottom-nav-content-padding, 82px\) \+ var\(--shotlab-mobile-content-landing\)\) !important/);
+  assert.match(authority, /\.secondaryPageShell[\s\S]*padding-bottom:\s*calc\([\s\S]*var\(--bottom-nav-content-padding, 82px\)[\s\S]*\+ var\(--shotlab-mobile-content-landing\)[\s\S]*\+ env\(safe-area-inset-bottom, 0px\)[\s\S]*\) !important/);
   assert.match(navigation, /--bottom-nav-content-padding:\s*82px/);
-  assert.match(navigation, /env\(safe-area-inset-bottom, 0px\)/);
+  assert.match(navigation, /min-height:\s*calc\(var\(--mobile-tab-bar-height\) \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
 test('full-bleed route performance stages still break the rail symmetrically', () => {
