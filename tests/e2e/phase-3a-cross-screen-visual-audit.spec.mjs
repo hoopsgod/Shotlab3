@@ -106,34 +106,36 @@ async function expectCompactFunctionalIntro(page) {
     const geometry = await titleStage.evaluate((element) => {
       const rect = element.getBoundingClientRect();
       const title = element.querySelector('[data-identity-role="page-title"]');
-      const crest = element.querySelector('[data-identity-role="brand-mark"], [data-identity-role="brand-fallback"]');
-      const crestRect = crest?.getBoundingClientRect();
+      const brandPanel = element.querySelector('[data-identity-role="brand-panel"]');
+      const brandPanelRect = brandPanel?.getBoundingClientRect();
       return {
         left: rect.left,
         right: rect.right,
         width: rect.width,
         titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
-        crestWidth: crestRect?.width || 0,
-        crestHeight: crestRect?.height || 0,
+        brandPanelWidth: brandPanelRect?.width || 0,
+        brandPanelHeight: brandPanelRect?.height || 0,
         viewportWidth: window.innerWidth,
         variant: element.getAttribute("data-variant"),
+        family: element.getAttribute("data-title-stage-family"),
+        brandTreatment: element.getAttribute("data-brand-treatment"),
       };
     });
     expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
     expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
     expect(geometry.width).toBeGreaterThan(300);
-    if (geometry.variant === "hero") {
-      expect(geometry.titleSize).toBeGreaterThanOrEqual(44);
-      expect(geometry.titleSize).toBeLessThanOrEqual(60);
-      expect(geometry.crestWidth).toBeGreaterThanOrEqual(104);
-      expect(geometry.crestHeight).toBeGreaterThanOrEqual(104);
+    expect(geometry.variant).not.toBe("hero");
+    expect(geometry.family).toBe("editorial");
+    expect(["compact", "signature", "watermark", "none"]).toContain(geometry.brandTreatment);
+    expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+    expect(geometry.titleSize).toBeLessThanOrEqual(46);
+    if (geometry.brandTreatment === "compact") {
+      expect(geometry.brandPanelWidth).toBeGreaterThan(0);
+      expect(geometry.brandPanelWidth).toBeLessThanOrEqual(36);
+      expect(geometry.brandPanelHeight).toBeLessThanOrEqual(36);
     } else {
-      expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
-      expect(geometry.titleSize).toBeLessThanOrEqual(46);
-      expect(geometry.crestWidth).toBeGreaterThanOrEqual(84);
-      expect(geometry.crestWidth).toBeLessThanOrEqual(108);
-      expect(geometry.crestHeight).toBeGreaterThanOrEqual(84);
-      expect(geometry.crestHeight).toBeLessThanOrEqual(108);
+      expect(geometry.brandPanelWidth).toBe(0);
+      expect(geometry.brandPanelHeight).toBe(0);
     }
     return;
   }
