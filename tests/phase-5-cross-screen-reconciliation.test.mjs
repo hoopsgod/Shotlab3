@@ -4,23 +4,36 @@ import test from "node:test";
 
 const titleStage = fs.readFileSync("src/components/TeamIdentityTitleStage.jsx", "utf8");
 const titleStageCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css", "utf8");
+const brandHierarchyCss = fs.readFileSync("src/components/TeamIdentityBrandHierarchy.css", "utf8");
 const playerWorkspace = fs.readFileSync("src/components/PlayerOperationalWorkspace.jsx", "utf8");
 const playerCommitment = fs.readFileSync("src/components/PlayerCommitmentCenter.jsx", "utf8");
 const metricCss = fs.readFileSync("src/components/PlayerMetricHierarchy.module.css", "utf8");
 const visualAudit = fs.readFileSync("tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs", "utf8");
 const feedback = fs.readFileSync("src/components/AppFeedbackLayer.jsx", "utf8");
 
-test("Phase 5 keeps every mobile Player secondary identity source-owned, prominent, and inside the viewport", () => {
+test("Phase 5 keeps mobile Player secondary identity source-owned, subordinate, and inside the viewport", () => {
   assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
-  assert.match(playerWorkspace, /variant="standard"/);
+  assert.match(playerWorkspace, /variant="editorial"/);
+  assert.match(playerWorkspace, /dataMobileStage="editorial"/);
+  assert.match(playerWorkspace, /"at-home": "signature"/);
+  assert.match(playerWorkspace, /program: "compact"/);
+  assert.match(playerWorkspace, /events: "compact"/);
+  assert.match(playerWorkspace, /strength: "watermark"/);
+  assert.match(playerWorkspace, /leaderboards: "none"/);
+  assert.match(playerWorkspace, /profile: "signature"/);
   assert.match(playerCommitment, /<TeamIdentityTitleStage/);
   assert.match(playerCommitment, /variant="standard"/);
   assert.match(titleStage, /data-team-identity-stage="true"/);
   assert.match(titleStage, /data-identity-role="page-title"/);
+  assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
   assert.match(titleStageCss, /@media \(max-width: 390px\)/);
+  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__microBrand/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__watermarkBrand/);
   assert.doesNotMatch(titleStageCss, /html\s+body\s+#root/);
 });
 
