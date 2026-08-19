@@ -35,7 +35,7 @@ export function SecondaryPageShell({children,testId,className=""}){return <secti
 
 export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],backAction=null,titleSize="auto",testId,icon}){
   const displayTitle=normalizeTitle(title);
-  const iconName=icon||iconFor(`${eyebrow} ${displayTitle}`);
+  const iconName=icon||iconFor(`${eyebrow} ${title} ${displayTitle}`);
   const brandTreatment=brandTreatmentFor(iconName);
   return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations" data-title-stage-family="editorial">
     <TeamIdentityTitleStage
