@@ -69,7 +69,7 @@ export default function TeamIdentityTitleStage({
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
-  const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className}`);
+  const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
   const showLogoSetupPrompt = isCoachStage && (!cleanedLogo || logoFailed);
   const openBrandingSettings = () => {
     if (brandingAction?.onClick) {
