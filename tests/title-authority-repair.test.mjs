@@ -61,16 +61,17 @@ test('Player optical reconciliation cannot mutate the shared commitment title su
   assert.doesNotMatch(playerCompositionEnhancer, /MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home markup and owned component CSS form one integrated Mission Control title authority', () => {
+test('Coach Home markup and owned component CSS form one compact decision-first Mission Control title authority', () => {
   assert.match(coach, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
-  assert.match(coachTitleCss, /font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
+  assert.match(coachTitleCss, /\.mcBrandLockup,[\s\S]*\.mcTeamSelect\s*\{\s*display:\s*none/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
@@ -79,8 +80,8 @@ test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or su
   const legacyLayers = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
   for (const legacyCss of legacyLayers) {
     assert.doesNotMatch(legacyCss, /\.mcHero\s*\{[^}]*min-height\s*:\s*(?:286|292|300|302|304|306|318|322|330|370|382)px/s);
-    assert.doesNotMatch(legacyCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:\s*(?:74|80|82|84|86|88|92|118)px/s);
-    assert.doesNotMatch(legacyCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:\s*(?:27|28|29|30|31|33|34|36|43)px/s);
+    assert.doesNotMatch(legacyCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:\s*(?:68|72|74|80|82|84|86|88|92|118)px/s);
+    assert.doesNotMatch(legacyCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:\s*(?:27|28|29|30|31|33|34|36|39\.375|43)px/s);
   }
   assert.doesNotMatch(coachHeaderCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
   assert.doesNotMatch(coachPolishCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
@@ -95,6 +96,8 @@ test('late static and runtime Coach cascade layers cannot hide or redesign the o
     assert.doesNotMatch(lateCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
     assert.doesNotMatch(lateCss, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
   }
+  assert.doesNotMatch(coachHierarchyCss, /\.mcHeader\s*\{/);
+  assert.doesNotMatch(coachCascadeLockCss, /\.mcHeader\s*\{/);
   assert.doesNotMatch(visualReboot, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
   assert.doesNotMatch(visualReleaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
 });
