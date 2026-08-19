@@ -23,10 +23,11 @@
   }
 
   /* Events still loads older calendar-first CSS after the shared workspace
-     layer. Reassert only the canonical title rail here; the Events stylesheet
-     continues to own calendar, filter, and list composition. */
+     layer. Its parent is already narrowed by the legacy Events gutter, so use
+     that full parent width and shift it onto the canonical 20px rail instead of
+     subtracting the rail a second time. */
   .performance-shell--coach .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
+    width: 100% !important;
     margin-inline: var(--shotlab-mobile-content-rail, 20px) !important;
   }
 
