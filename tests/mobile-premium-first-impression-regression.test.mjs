@@ -24,10 +24,11 @@ const scheduleCss = fs.readFileSync(new URL("../src/components/SecondaryPageDisc
 
 test("secondary routes use one explicit TeamIdentityTitleStage owner instead of deleted route-stage mutators", () => {
   assert.match(secondaryPageSystem, /TeamIdentityTitleStage/);
+  assert.match(secondaryPageSystem, /variant="standard"/);
   assert.match(secondaryPageSystem, /dataMobileStage="editorial"/);
-  assert.match(secondaryPageSystem, /brandTreatment=\{brandTreatment\}/);
+  assert.match(secondaryPageSystem, /brandTreatment="compact"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
-  assert.doesNotMatch(secondaryPageSystem, /SecondaryPageFirstViewport\.css|secondaryPageIntro appHeader|appHeaderTitle/);
+  assert.doesNotMatch(secondaryPageSystem, /BRAND_TREATMENT_BY_ICON|brandTreatmentFor|SecondaryPageFirstViewport\.css|secondaryPageIntro appHeader|appHeaderTitle/);
   assert.equal(fs.existsSync(new URL("../src/components/SecondaryPageFirstViewport.css", import.meta.url)), false);
   assert.doesNotMatch(routeRunner, /apply-mobile-centered-route-stage\.mjs|apply-mobile-route-signature-promotion\.mjs/);
   assert.doesNotMatch(enhancer, /writeFileSync/);
@@ -36,30 +37,30 @@ test("secondary routes use one explicit TeamIdentityTitleStage owner instead of 
 test("team branding keeps semantic metadata while restoring one full custom crest on every title stage", () => {
   assert.match(titleStage, /useTeamBranding/);
   assert.match(titleStage, /useCleanTeamLogo/);
-  assert.match(titleStage, /BRAND_TREATMENTS = new Set\(\["hero", "compact", "signature", "watermark", "none"\]\)/);
+  assert.match(titleStage, /BRAND_TREATMENTS = new Set\(\["hero", "compact"\]\)/);
+  assert.match(titleStage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
+  assert.doesNotMatch(titleStage, /AUTO_BRAND_TREATMENT_BY_PAGE_KIND|signature|watermark|brandTreatment="none"/);
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleStage, /const fullCrestBrand =/);
   assert.match(titleStage, /className="teamIdentityTitleStage__crestSlot"/);
   assert.match(titleStage, /className="teamIdentityTitleStage__crest"[\s\S]*src=\{cleanedLogo\}/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
+  assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
   assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
   assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
-  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
-  assert.match(secondaryPageSystem, /training:"signature"/);
-  assert.match(secondaryPageSystem, /calendar:"compact"/);
-  assert.match(secondaryPageSystem, /strength:"watermark"/);
-  assert.match(secondaryPageSystem, /trophy:"none"/);
+  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__signatureRule|teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand|data-brand-treatment="none"/);
+  assert.match(secondaryPageSystem, /brandTreatment="compact"/);
   assert.match(playerOperationalWorkspace, /<TeamIdentityTitleStage/);
+  assert.match(playerOperationalWorkspace, /brandTreatment="compact"/);
+  assert.doesNotMatch(playerOperationalWorkspace, /PLAYER_BRAND_TREATMENT|resolveWorkspaceBrandTreatment|signature|watermark|brandTreatment="none"|SecondaryTeamBrandMark/);
   assert.match(playerCommitmentCenter, /<TeamIdentityTitleStage/);
-  assert.doesNotMatch(playerOperationalWorkspace, /SecondaryTeamBrandMark/);
 });
 
 test("mobile secondary title stages keep editorial hierarchy while the enhancer only verifies ownership", () => {
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
-  assert.match(titleStageCss, /teamIdentityTitleStage--longTitle\.teamIdentityTitleStage--multiWord[\s\S]*clamp\(38px, 9\.8vw, 44px\)/);
+  assert.match(titleStageCss, /teamIdentityTitleStage--longTitle\.teamIdentityTitleStage--multiWord[\s\S]*clamp\(40px, 9\.8vw, 44px\)/);
   assert.match(titleStageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(36px, 9\.6vw, 40px\)/);
   assert.match(secondaryPageSystem, /TITLE_LABELS=new Map/);
   assert.match(secondaryPageSystem, /\["Drills Dashboard","Drills"\]/);

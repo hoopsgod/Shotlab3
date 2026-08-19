@@ -11,16 +11,12 @@ const metricCss = fs.readFileSync("src/components/PlayerMetricHierarchy.module.c
 const visualAudit = fs.readFileSync("tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs", "utf8");
 const feedback = fs.readFileSync("src/components/AppFeedbackLayer.jsx", "utf8");
 
-test("Phase 5 keeps mobile Player secondary identity source-owned, subordinate, and inside the viewport", () => {
+test("Phase 5 keeps mobile Player secondary identity source-owned, subordinate, converged, and inside the viewport", () => {
   assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
-  assert.match(playerWorkspace, /variant="editorial"/);
+  assert.match(playerWorkspace, /variant="standard"/);
   assert.match(playerWorkspace, /dataMobileStage="editorial"/);
-  assert.match(playerWorkspace, /"at-home": "signature"/);
-  assert.match(playerWorkspace, /program: "compact"/);
-  assert.match(playerWorkspace, /events: "compact"/);
-  assert.match(playerWorkspace, /strength: "watermark"/);
-  assert.match(playerWorkspace, /leaderboards: "none"/);
-  assert.match(playerWorkspace, /profile: "signature"/);
+  assert.match(playerWorkspace, /brandTreatment="compact"/);
+  assert.doesNotMatch(playerWorkspace, /PLAYER_BRAND_TREATMENT|resolveWorkspaceBrandTreatment|signature|watermark|brandTreatment="none"/);
   assert.match(playerCommitment, /<TeamIdentityTitleStage/);
   assert.match(playerCommitment, /variant="standard"/);
   assert.match(titleStage, /data-team-identity-stage="true"/);
@@ -30,10 +26,11 @@ test("Phase 5 keeps mobile Player secondary identity source-owned, subordinate, 
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
   assert.match(titleStageCss, /@media \(max-width: 390px\)/);
-  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__microBrand/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__watermarkBrand/);
+  assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
+  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
+  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand|teamIdentityTitleStage__signatureRule|teamIdentityTitleStage__watermarkBrand|data-brand-treatment="none"/);
   assert.doesNotMatch(titleStageCss, /html\s+body\s+#root/);
 });
 
