@@ -20,6 +20,7 @@ const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const signatureEnhancer = read('scripts/apply-mobile-coach-signature-stage.mjs');
 const secondaryEnhancer = read('scripts/apply-mobile-premium-secondary-page-system.mjs');
 const playerCompositionEnhancer = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
+const demoBrandingEnhancer = read('scripts/apply-demo-team-branding.mjs');
 const coachV2Css = read('src/components/CoachMissionControlV2.css');
 const coachHeaderCss = read('src/components/CoachMissionControlHeader.css');
 const coachPolishCss = read('src/components/CoachMissionControlPolish.css');
@@ -29,6 +30,8 @@ const coachFinalCss = read('src/components/CoachMissionControlFinal.css');
 const coachHierarchyCss = read('src/styles/MissionControlHierarchy2026.css');
 const coachCascadeLockCss = read('src/styles/MissionControlCascadeLock2026.css');
 const coachCriticalCss = read('public/shotlab-phase2-critical.css');
+const visualReboot = read('src/lib/visualSystemReboot.js');
+const visualReleaseFixes = read('src/lib/visualSystemRebootReleaseFixes.js');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -85,13 +88,15 @@ test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or su
   assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
 });
 
-test('late central Coach cascade layers cannot hide or redesign the owned title stage', () => {
-  for (const lateCss of [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss]) {
+test('late static and runtime Coach cascade layers cannot hide or redesign the owned title stage', () => {
+  for (const lateCss of [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss, visualReboot, visualReleaseFixes]) {
     assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
     assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
     assert.doesNotMatch(lateCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
     assert.doesNotMatch(lateCss, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
   }
+  assert.doesNotMatch(visualReboot, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
+  assert.doesNotMatch(visualReleaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
 });
 
 test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {
@@ -128,4 +133,9 @@ test('no-logo fallback is explicit while the canonical Titans demo identity can 
   assert.match(stage, /teamOwnsDefaultTitansIdentity/);
   assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
   assert.match(coach, /mcTeamFallback/);
+  assert.match(demoBrandingEnhancer, /teamName: "Demo Titans"/);
+  assert.match(demoBrandingEnhancer, /logoUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
+  assert.match(demoBrandingEnhancer, /logoMarkUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
+  assert.ok(DEV_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
+  assert.ok(BUILD_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
 });
