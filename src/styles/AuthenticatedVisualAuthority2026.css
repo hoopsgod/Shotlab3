@@ -51,4 +51,14 @@
   html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
     margin-inline: 0 !important;
   }
+
+  /* Back is part of the opening title composition, not a detached row. The
+   * legacy button margin plus secondary-shell top padding created a 32px void. */
+  html body #root .performance-shell--coach .shared-dashboard-back-action {
+    margin-bottom: 0 !important;
+  }
+
+  html body #root .performance-shell--coach .shared-dashboard-back-action + .secondaryPageShell {
+    padding-top: 0 !important;
+  }
 }
