@@ -10,6 +10,7 @@ const playerWorkspace = readFileSync('src/components/PlayerOperationalWorkspace.
 const playerWorkspaceCss = readFileSync('src/components/PlayerOperationalWorkspace.module.css', 'utf8');
 const titleStage = readFileSync('src/components/TeamIdentityTitleStage.jsx', 'utf8');
 const titleCss = readFileSync('src/components/TeamIdentityTitleStage.css', 'utf8');
+const brandHierarchyCss = readFileSync('src/components/TeamIdentityBrandHierarchy.css', 'utf8');
 
 test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance order', () => {
   const phase2 = html.indexOf('id="shotlab-phase2-critical"');
@@ -38,18 +39,23 @@ test('Phase 3 is scoped to high-value secondary destinations', () => {
   assert.match(css, /display:none!important/);
 });
 
-test('Player Home is immersive while secondary Player routes use the shared premium Standard title stage', () => {
+test('Player Home is immersive while secondary Player routes use editorial title authority with subordinate team identity', () => {
   assert.match(playerHeader, /<TeamIdentityTitleStage/);
   assert.match(playerHeader, /variant="hero"/);
   assert.match(playerHeader, /surface="dark"/);
   assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
-  assert.match(playerWorkspace, /variant="standard"/);
+  assert.match(playerWorkspace, /variant="editorial"/);
+  assert.match(playerWorkspace, /dataMobileStage="editorial"/);
+  assert.match(playerWorkspace, /brandTreatment=\{resolveWorkspaceBrandTreatment\(model\)\}/);
+  assert.match(playerWorkspace, /strength: "watermark"/);
+  assert.match(playerWorkspace, /leaderboards: "none"/);
   assert.match(titleStage, /data-identity-role="team-name"/);
   assert.match(titleStage, /data-identity-role="page-title"/);
-  assert.match(titleStage, /data-identity-role="brand-mark"/);
+  assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleCss, /object-fit:\s*contain/);
+  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.doesNotMatch(playerHeader, /width:58px!important|font-size:26px!important/);
 });
 
