@@ -58,11 +58,11 @@ async function expectNoHorizontalOverflow(page) {
 }
 
 async function expectPlayerIdentityInsideViewport(page) {
-  const identity = page.getByTestId("player-dashboard-identity-header");
+  const identity = page.locator('[data-team-identity-stage="true"][data-testid="player-dashboard-identity-header"]:visible').first();
   if (!(await identity.count())) return;
   const geometry = await identity.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const title = element.querySelector("h1");
+    const title = element.querySelector('[data-identity-role="page-title"]');
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
     const fallback = element.querySelector('[data-identity-role="brand-fallback"]');
     const crestRect = (crest || fallback)?.getBoundingClientRect();
@@ -89,28 +89,70 @@ async function expectPlayerIdentityInsideViewport(page) {
     expect(geometry.titleSize).toBeLessThanOrEqual(60);
     expect(geometry.crestWidth).toBeGreaterThanOrEqual(104);
     expect(geometry.crestHeight).toBeGreaterThanOrEqual(104);
-    if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
+  } else {
+    expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+    expect(geometry.titleSize).toBeLessThanOrEqual(46);
+    expect(geometry.crestWidth).toBeGreaterThanOrEqual(84);
+    expect(geometry.crestWidth).toBeLessThanOrEqual(108);
+    expect(geometry.crestHeight).toBeGreaterThanOrEqual(84);
+    expect(geometry.crestHeight).toBeLessThanOrEqual(108);
   }
+  if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
 }
 
 async function expectCompactFunctionalIntro(page) {
-  const sharedIntro = page.locator('[data-visual-role="page-intro"]').first();
-  const specializedIntro = page.locator('[data-page-hierarchy="editorial"] [data-layout-role="editorial-header"]').first();
-  const intro = await sharedIntro.count() ? sharedIntro : specializedIntro;
-  await expect(intro).toBeVisible();
-  const geometry = await intro.evaluate((element) => {
+  const titleStage = page.locator('[data-team-identity-stage="true"]:visible').first();
+  if (await titleStage.count()) {
+    const geometry = await titleStage.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const title = element.querySelector('[data-identity-role="page-title"]');
+      const crest = element.querySelector('[data-identity-role="brand-mark"], [data-identity-role="brand-fallback"]');
+      const crestRect = crest?.getBoundingClientRect();
+      return {
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+        crestWidth: crestRect?.width || 0,
+        crestHeight: crestRect?.height || 0,
+        viewportWidth: window.innerWidth,
+        variant: element.getAttribute("data-variant"),
+      };
+    });
+    expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+    expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
+    expect(geometry.width).toBeGreaterThan(300);
+    if (geometry.variant === "hero") {
+      expect(geometry.titleSize).toBeGreaterThanOrEqual(44);
+      expect(geometry.titleSize).toBeLessThanOrEqual(60);
+      expect(geometry.crestWidth).toBeGreaterThanOrEqual(104);
+      expect(geometry.crestHeight).toBeGreaterThanOrEqual(104);
+    } else {
+      expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+      expect(geometry.titleSize).toBeLessThanOrEqual(46);
+      expect(geometry.crestWidth).toBeGreaterThanOrEqual(84);
+      expect(geometry.crestWidth).toBeLessThanOrEqual(108);
+      expect(geometry.crestHeight).toBeGreaterThanOrEqual(84);
+      expect(geometry.crestHeight).toBeLessThanOrEqual(108);
+    }
+    return;
+  }
+
+  const specializedIntro = page.locator('[data-page-hierarchy="editorial"] [data-layout-role="editorial-header"]:visible').first();
+  await expect(specializedIntro).toBeVisible();
+  const geometry = await specializedIntro.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
     return {
-      height: rect.height,
       titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      left: rect.left,
       right: rect.right,
       viewportWidth: window.innerWidth,
     };
   });
-  expect(geometry.height).toBeLessThanOrEqual(200);
+  expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
   expect(geometry.titleSize).toBeLessThanOrEqual(44);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
 }
 
 async function expectProgressStoryCommandSurface(page) {
