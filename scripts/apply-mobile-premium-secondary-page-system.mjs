@@ -10,8 +10,19 @@ const secondarySystem = readFileSync(secondarySystemPath, "utf8");
 const playerCommitment = readFileSync(playerCommitmentPath, "utf8");
 const appSource = readFileSync(appPath, "utf8");
 
+const hasCanonicalTitleImport = (source) =>
+  /import\s+TeamIdentityTitleStage(?:\s*,\s*\{[\s\S]*?\})?\s+from\s+["']\.\/TeamIdentityTitleStage\.jsx["']\s*;?/.test(source);
+
+for (const [source, label] of [
+  [secondarySystem, "SecondaryPageSystem"],
+  [playerCommitment, "Player commitment"],
+]) {
+  if (!hasCanonicalTitleImport(source)) {
+    throw new Error(`${label} source-owned title contract missing canonical TeamIdentityTitleStage import.`);
+  }
+}
+
 for (const required of [
-  'import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";',
   '<TeamIdentityTitleStage',
   'dataMobileStage="team-identity"',
 ]) {
@@ -21,7 +32,6 @@ for (const required of [
 }
 
 for (const required of [
-  'import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";',
   '<TeamIdentityTitleStage',
   'testId={`player-commitment-route-header-${mode}`}',
   'dataMobileStage="team-identity"',
