@@ -3,19 +3,20 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const source = fs.readFileSync(new URL("../src/lib/visualSystemReboot.js", import.meta.url), "utf8");
+const releaseFixes = fs.readFileSync(new URL("../src/lib/visualSystemRebootReleaseFixes.js", import.meta.url), "utf8");
 const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 const playerBootstrap = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
 
-test("visual reboot owns one restrained Mission Control product language", () => {
+test("visual reboot owns one restrained Mission Control support language", () => {
   assert.match(source, /product-light-v3-mission-control/);
   assert.match(source, /--sl-canvas/);
   assert.match(source, /body\.mission-control-active/);
   assert.match(source, /coach-assignment-accountability/);
 });
 
-test("reboot no longer competes with secondary-page or empty-state component authorities", () => {
-  assert.match(source, /mcHero[\s\S]*min-height: 0 !important/);
-  assert.match(source, /mcHeroContent[\s\S]*grid-template-columns/);
+test("runtime reboot layers cannot compete with source-owned Coach Hero or secondary-page authorities", () => {
+  assert.doesNotMatch(source, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
+  assert.doesNotMatch(releaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
   assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(5/);
   assert.doesNotMatch(source, /\.secondaryPageShell|\.secondaryPageDecision|\.secondaryPageEvidence/);
   assert.doesNotMatch(source, /\[class\s*\*=|\[data-testid\s*\*=/i);
