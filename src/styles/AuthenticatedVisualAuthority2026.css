@@ -11,3 +11,27 @@
   --sl-font-text: -apple-system,BlinkMacSystemFont,SF Pro Text,Segoe UI,sans-serif;
   --sl-font-display: -apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif;
 }
+
+/* Mobile geometry authority: meaningful content shares one 20px rail while
+ * full-bleed surfaces continue to opt out through their existing breakout rules. */
+@media (max-width: 767px) {
+  :root {
+    --shotlab-mobile-content-rail: var(--space-5, 20px);
+    --shotlab-mobile-content-landing: var(--space-6, 24px);
+    --layout-gutter: var(--shotlab-mobile-content-rail);
+  }
+
+  html body #root .performance-shell .player-scroll-container,
+  html body #root .performance-shell .coach-scroll-container {
+    padding-inline: var(--shotlab-mobile-content-rail) !important;
+  }
+
+  html body #root .performance-shell--player .player-quick-actions {
+    padding-inline: var(--shotlab-mobile-content-rail) !important;
+  }
+
+  html body #root .secondaryPageShell {
+    padding-inline: var(--shotlab-mobile-content-rail) !important;
+    padding-bottom: calc(var(--bottom-nav-content-padding, 82px) + var(--shotlab-mobile-content-landing)) !important;
+  }
+}
