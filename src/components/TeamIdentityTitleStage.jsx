@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
+import { isDemoPersistenceSession } from "../lib/demoMode.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
 
@@ -65,8 +66,8 @@ export default function TeamIdentityTitleStage({
   const { branding } = useTeamBranding();
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
   const rawLogo = tidy(branding?.logoUrl || branding?.logoMarkUrl);
-  const teamOwnsDefaultTitansIdentity = /titans/i.test(teamName);
-  const logoCandidate = rawLogo && (!isDefaultTitansLogo(rawLogo) || teamOwnsDefaultTitansIdentity) ? rawLogo : "";
+  const isDemoSession = isDemoPersistenceSession();
+  const logoCandidate = rawLogo && (!isDefaultTitansLogo(rawLogo) || isDemoSession) ? rawLogo : "";
   const cleanedLogo = useCleanTeamLogo(logoCandidate);
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
@@ -76,6 +77,16 @@ export default function TeamIdentityTitleStage({
   const heroClass = variant === "hero" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
+  const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
+  const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className}`);
+  const showLogoSetupPrompt = isCoachStage && !isDemoSession && (!cleanedLogo || logoFailed);
+  const openBrandingSettings = () => {
+    if (brandingAction?.onClick) {
+      brandingAction.onClick();
+      return;
+    }
+    document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click();
+  };
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
@@ -114,6 +125,16 @@ export default function TeamIdentityTitleStage({
               draggable="false"
               onError={() => setLogoFailed(true)}
             />
+          ) : showLogoSetupPrompt ? (
+            <button
+              type="button"
+              className="teamIdentityTitleStage__logoSetup"
+              data-identity-role="brand-setup"
+              onClick={openBrandingSettings}
+              aria-label="Add your custom team logo in Program Branding"
+            >
+              Click here to add your custom team logo
+            </button>
           ) : (
             <span className="teamIdentityTitleStage__fallbackCrest" data-identity-role="brand-fallback" aria-label={`${teamName} initials`}>{fallbackInitials}</span>
           )}
