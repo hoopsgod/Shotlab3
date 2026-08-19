@@ -48,6 +48,8 @@ export default function TeamIdentityTitleStage({
   summary = "",
   status = null,
   actions = [],
+  backAction = null,
+  titleSize = "auto",
   testId,
   className = "",
   ariaLabel,
@@ -64,9 +66,14 @@ export default function TeamIdentityTitleStage({
   const displayTitle = tidy(title, personName || "ShotLab");
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
-  const longTitle = displayTitle.length > 22 || displayTitle.split(/\s+/).some((word) => word.length > 12);
-  const heroClass = variant === "hero" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
+  const titleWords = displayTitle.split(/\s+/).filter(Boolean);
+  const singleWordTitle = titleWords.length === 1;
+  const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
+  const longSingleWord = singleWordTitle && longestWordLength >= 11;
+  const longTitle = displayTitle.length > 22 || longestWordLength > 12;
+  const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
+  const titleFamily = heroClass === "teamIdentityTitleStage--hero" ? "identity" : "editorial";
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
@@ -100,10 +107,22 @@ export default function TeamIdentityTitleStage({
 
   return (
     <header
-      className={["teamIdentityTitleStage", heroClass, surfaceClass, longTitle ? "teamIdentityTitleStage--longTitle" : "", className].filter(Boolean).join(" ")}
+      className={[
+        "teamIdentityTitleStage",
+        heroClass,
+        surfaceClass,
+        longTitle ? "teamIdentityTitleStage--longTitle" : "",
+        singleWordTitle ? "teamIdentityTitleStage--singleWord" : "teamIdentityTitleStage--multiWord",
+        longSingleWord ? "teamIdentityTitleStage--longSingleWord" : "",
+        titleSize !== "auto" ? `teamIdentityTitleStage--title-${titleSize}` : "",
+        className,
+      ].filter(Boolean).join(" ")}
       data-testid={testId}
       data-team-identity-stage="true"
-      data-variant={variant === "hero" ? "hero" : "standard"}
+      data-variant={titleFamily === "identity" ? "hero" : "standard"}
+      data-title-stage-family={titleFamily}
+      data-title-size={titleSize}
+      data-title-word-count={titleWords.length}
       data-surface={surface === "dark" ? "dark" : "light"}
       data-layout-role={dataLayoutRole}
       data-visual-role={dataVisualRole}
@@ -112,6 +131,19 @@ export default function TeamIdentityTitleStage({
       aria-label={ariaLabel || `${teamName} ${displayTitle}`}
     >
       <div className="teamIdentityTitleStage__tonalCrest" aria-hidden="true">{fallbackInitials}</div>
+      {backAction?.onClick ? (
+        <nav className="teamIdentityTitleStage__navigation" aria-label={backAction.ariaLabel || "Back navigation"}>
+          <button
+            type="button"
+            className="teamIdentityTitleStage__back"
+            onClick={backAction.onClick}
+            aria-label={backAction.ariaLabel || backAction.label || "Back"}
+          >
+            <span aria-hidden="true" className="teamIdentityTitleStage__backIcon">←</span>
+            <span>{backAction.label || "Back"}</span>
+          </button>
+        </nav>
+      ) : null}
       <div className="teamIdentityTitleStage__inner">
         <div className="teamIdentityTitleStage__copy">
           <div className="teamIdentityTitleStage__identityLine">
