@@ -67,7 +67,7 @@ test("cinematic hero preserves a visible source-owned coach logo and integrates 
   assert.match(source,/data-team-identity-stage="coach-mission-control"/);
   assert.match(source,/CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(source,/MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(titleCss,/\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\);[\s\S]*height:\s*var\(--coach-hero-crest\)/);
   assert.match(titleCss,/\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
   assert.doesNotMatch(titleCss,/!important/);
@@ -139,9 +139,9 @@ test("responsive CSS creates a native-feeling mobile operating system with premi
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*clamp\(420px,\s*112vw,\s*468px\)/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
-  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*428px/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(titleCss,/\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
   assert.doesNotMatch(titleCss,/!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
@@ -167,7 +167,7 @@ test("Mission Control uses the modern native support system while title geometry
   assert.doesNotMatch(finalCss,/--mc-title-size|--mc-radius-hero/);
   assert.doesNotMatch(finalCss,/\.mcHero\s+h1\s*\{|\.mcHeroTeamMark\s*\{|\.mcHeroContent\s*>\s*p\s*\{/);
   assert.match(headerCss,/@media\(max-width:700px\)[\s\S]*\.mcHeader\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) 44px/);
-  assert.match(titleCss,/font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
-  assert.match(titleCss,/\.mcHeroContent\s*>\s*p\s*\{[\s\S]*font-size:\s*13px/);
+  assert.match(titleCss,/font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss,/\.mcHeroContent\s*>\s*p\s*\{[\s\S]*font-size:\s*12\.5px/);
   assert.match(finalCss,/\.mcSection\s*\{[\s\S]*border-radius:\s*var\(--mc-radius-card\)/);
 });
