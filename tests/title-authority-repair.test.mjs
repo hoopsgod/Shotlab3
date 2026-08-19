@@ -132,11 +132,13 @@ test('shared title geometry preserves premium crest scale, containment and diffi
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
 });
 
-test('no-logo fallback is explicit and Demo Titans branding is seeded directly by source data', () => {
-  assert.match(stage, /isDefaultTitansLogo/);
-  assert.match(stage, /teamOwnsDefaultTitansIdentity/);
+test('no-logo handling is explicit and Demo Titans branding is seeded directly by source data', () => {
+  assert.match(stage, /showLogoSetupPrompt/);
+  assert.match(stage, /teamIdentityTitleStage__logoSetup/);
   assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
-  assert.match(coach, /mcTeamFallback/);
+  assert.match(stage, /Click here to add your custom team logo/);
+  assert.match(coach, /mcHeroLogoSetup/);
+  assert.match(coach, /Click here to add your custom team logo/);
   assert.match(demoData, /const DEMO_TEAM_BRANDING = Object\.freeze\(\{/);
   assert.match(demoData, /teamName:\s*"Demo Titans"/);
   assert.match(demoData, /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);
