@@ -5,26 +5,7 @@ import "./TeamIdentityTitleStage.css";
 import "./TeamIdentityBrandHierarchy.css";
 
 const tidy = (value, fallback = "") => String(value ?? fallback).trim();
-const BRAND_TREATMENTS = new Set(["hero", "compact", "signature", "watermark", "none"]);
-const AUTO_BRAND_TREATMENT_BY_PAGE_KIND = Object.freeze({
-  events: "compact",
-  schedule: "compact",
-  calendar: "compact",
-  program: "compact",
-  strength: "watermark",
-  lifting: "watermark",
-  conditioning: "watermark",
-  leaderboards: "none",
-  rankings: "none",
-  trophy: "none",
-  players: "signature",
-  roster: "signature",
-  team: "signature",
-  training: "signature",
-  drills: "signature",
-  progress: "signature",
-  profile: "signature",
-});
+const BRAND_TREATMENTS = new Set(["hero", "compact"]);
 const initialsFor = (value) => {
   const parts = tidy(value, "ShotLab Team").split(/\s+/).filter(Boolean);
   return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)[0]}` : parts[0]?.slice(0, 2) || "SL").toUpperCase();
@@ -101,11 +82,10 @@ export default function TeamIdentityTitleStage({
     ? "editorial"
     : requestedMobileStage || (titleFamily === "identity" ? "team-identity" : "editorial");
   const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
-  const normalizedPageKind = tidy(dataPageKind, "team").toLowerCase();
-  const automaticEditorialTreatment = AUTO_BRAND_TREATMENT_BY_PAGE_KIND[normalizedPageKind] || "signature";
+  const fallbackBrandTreatment = titleFamily === "identity" ? "hero" : "compact";
   const resolvedBrandTreatment = requestedBrandTreatment === "auto"
-    ? (titleFamily === "identity" ? "hero" : automaticEditorialTreatment)
-    : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : automaticEditorialTreatment);
+    ? fallbackBrandTreatment
+    : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : fallbackBrandTreatment);
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
@@ -208,7 +188,6 @@ export default function TeamIdentityTitleStage({
       <div className="teamIdentityTitleStage__inner">
         <div className="teamIdentityTitleStage__copy">
           <div className="teamIdentityTitleStage__identityLine">
-            {resolvedBrandTreatment === "signature" ? <span className="teamIdentityTitleStage__signatureRule" aria-hidden="true" /> : null}
             <span className="teamIdentityTitleStage__team" data-identity-role="team-name">{teamName}</span>
             <span className="teamIdentityTitleStage__descriptor" data-identity-role="role">{descriptor}</span>
           </div>

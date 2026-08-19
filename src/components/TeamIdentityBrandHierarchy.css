@@ -1,43 +1,23 @@
 /*
- * Team identity hierarchy after user review: every authenticated title stage
- * keeps the coach-configured custom logo in the original right-side crest slot.
- * Page-specific treatment metadata still supports typography and tone, but no
- * treatment may replace, shrink, watermark, or remove the primary team crest.
+ * Visual System Convergence: authenticated title stages expose exactly two
+ * visual families. Home/identity stages own the hero treatment; every
+ * secondary/editorial stage keeps the coach-configured custom logo in the
+ * same restored right-side crest slot and uses one compact supporting tone.
  */
-.teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
   grid-template-columns: minmax(0, 1fr) var(--identity-crest);
   gap: clamp(16px, 4vw, 24px);
 }
 
-.teamIdentityTitleStage__signatureRule {
-  width: 18px;
-  height: 2px;
-  flex: 0 0 18px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--team-brand-primary, #71851f) 72%, #71851f);
-}
-
-.teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__identityLine {
-  align-items: center;
-}
-
-.teamIdentityTitleStage[data-brand-treatment="none"] .teamIdentityTitleStage__team {
-  color: #68716c;
-}
-
-.teamIdentityTitleStage[data-brand-treatment="none"] .teamIdentityTitleStage__descriptor {
-  color: #7e8781;
-}
-
 @media (max-width: 760px) {
-  /* Restore the exact pre-reset crest scale and right-side placement while
-     retaining the newer editorial title and operational hierarchy. */
+  /* Preserve the restored full custom crest while keeping one secondary-page
+     geometry across Coach, Player, Demo, and registered experiences. */
   .teamIdentityTitleStage--standard {
     --identity-crest: clamp(96px, 25vw, 108px);
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
-  .teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
     grid-template-columns: minmax(0, 1fr) var(--identity-crest);
     align-items: end;
     gap: clamp(16px, 4vw, 24px);
@@ -76,13 +56,12 @@
 }
 
 @media (max-width: 390px) {
-  /* Exact pre-reset mobile crest size. */
   .teamIdentityTitleStage--standard {
     --identity-crest: 84px;
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
-  .teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
     gap: 8px;
     padding: 10px 2px 12px;
   }

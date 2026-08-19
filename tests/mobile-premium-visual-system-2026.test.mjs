@@ -39,27 +39,28 @@ test("retired Coach dashboard authorities cannot override the current production
   assert.match(indexHtml, /shotlab-phase3-secondary-cohesion\.css/);
 });
 
-test("secondary pages keep editorial title authority while restoring the full custom crest column", () => {
+test("secondary pages use one editorial title treatment while retaining the full custom crest column", () => {
   assert.match(secondaryPageSystem, /dataPageKind=\{iconName\}/);
   assert.match(secondaryPageSystem, /dataMobileStage="editorial"/);
-  assert.match(secondaryPageSystem, /brandTreatment=\{brandTreatment\}/);
-  assert.match(secondaryPageSystem, /training:"signature"/);
-  assert.match(secondaryPageSystem, /calendar:"compact"/);
-  assert.match(secondaryPageSystem, /strength:"watermark"/);
-  assert.match(secondaryPageSystem, /trophy:"none"/);
+  assert.match(secondaryPageSystem, /variant="standard"/);
+  assert.match(secondaryPageSystem, /brandTreatment="compact"/);
+  assert.doesNotMatch(secondaryPageSystem, /BRAND_TREATMENT_BY_ICON|brandTreatmentFor|signature|watermark|brandTreatment="none"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
   assert.match(titleStage, /data-team-identity-stage="true"/);
+  assert.match(titleStage, /BRAND_TREATMENTS = new Set\(\["hero", "compact"\]\)/);
+  assert.match(titleStage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleStage, /const fullCrestBrand =/);
   assert.match(titleStage, /className="teamIdentityTitleStage__crestSlot"/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
+  assert.match(titleStageCss, /clamp\(40px, 9\.8vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
+  assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
   assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
   assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
-  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
+  assert.doesNotMatch(brandHierarchyCss, /signatureRule|data-brand-treatment="none"|teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
   assert.doesNotMatch(secondaryPageSystem, /secondaryPageIntro/);
   assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b/);
 });

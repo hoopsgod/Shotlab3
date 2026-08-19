@@ -23,8 +23,8 @@ test('authenticated mobile title authority exposes exactly identity and editoria
   assert.match(playerHome, /variant="hero"/);
   assert.match(playerHome, /surface="dark"/);
   assert.match(coachHome, /data-team-identity-stage="coach-mission-control"/);
-  assert.match(secondary, /variant="editorial"/);
-  assert.match(playerWorkspace, /variant="editorial"/);
+  assert.match(secondary, /variant="standard"/);
+  assert.match(playerWorkspace, /variant="standard"/);
 });
 
 test('editorial page titles cannot opt into partial-word wrapping', () => {
@@ -35,32 +35,25 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.doesNotMatch(longMultiRule, /anywhere|break-all/);
   assert.match(stageCss, /teamIdentityTitleStage--singleWord[\s\S]*white-space:\s*nowrap/);
   assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(36px,\s*9\.6vw,\s*40px\)/);
+  assert.match(longMultiRule, /clamp\(40px,\s*9\.8vw,\s*44px\)/);
 });
 
-test('secondary destinations retain semantic metadata while restoring the full custom crest', () => {
-  assert.match(stage, /BRAND_TREATMENTS = new Set\(\["hero", "compact", "signature", "watermark", "none"\]\)/);
-  assert.match(stage, /AUTO_BRAND_TREATMENT_BY_PAGE_KIND/);
-  assert.match(stage, /events: "compact"/);
-  assert.match(stage, /strength: "watermark"/);
-  assert.match(stage, /leaderboards: "none"/);
+test('secondary destinations converge on one editorial treatment while restoring the full custom crest', () => {
+  assert.match(stage, /BRAND_TREATMENTS = new Set\(\["hero", "compact"\]\)/);
+  assert.match(stage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
+  assert.doesNotMatch(stage, /AUTO_BRAND_TREATMENT_BY_PAGE_KIND/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(stage, /const fullCrestBrand =/);
   assert.match(stage, /\{fullCrestBrand\}/);
-  assert.doesNotMatch(stage, /teamIdentityTitleStage__microBrandImage/);
-  assert.doesNotMatch(stage, /teamIdentityTitleStage__watermarkBrand/);
-  assert.match(secondary, /training:"signature"/);
-  assert.match(secondary, /calendar:"compact"/);
-  assert.match(secondary, /strength:"watermark"/);
-  assert.match(secondary, /trophy:"none"/);
-  assert.match(secondary, /team:"signature"/);
-  assert.match(playerWorkspace, /"at-home": "signature"/);
-  assert.match(playerWorkspace, /events: "compact"/);
-  assert.match(playerWorkspace, /strength: "watermark"/);
-  assert.match(playerWorkspace, /leaderboards: "none"/);
+  assert.doesNotMatch(stage, /teamIdentityTitleStage__microBrandImage|teamIdentityTitleStage__watermarkBrand|teamIdentityTitleStage__signatureRule/);
+  assert.match(secondary, /brandTreatment="compact"/);
+  assert.doesNotMatch(secondary, /BRAND_TREATMENT_BY_ICON|brandTreatmentFor|signature|watermark|brandTreatment="none"/);
+  assert.match(playerWorkspace, /brandTreatment="compact"/);
+  assert.doesNotMatch(playerWorkspace, /PLAYER_BRAND_TREATMENT|resolveWorkspaceBrandTreatment|signature|watermark|brandTreatment="none"/);
 });
 
 test('Home and Program Branding preserve an intentional identity-heavy hero treatment', () => {
-  assert.match(stage, /requestedBrandTreatment === "auto"[\s\S]*titleFamily === "identity" \? "hero" : automaticEditorialTreatment/);
+  assert.match(stage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
   assert.match(playerHome, /variant="hero"/);
   assert.match(coachHome, /mcHeroIdentity/);
   assert.match(brandingPreview, /variant="hero" brandTreatment="hero"/);
@@ -77,12 +70,14 @@ test('custom team logos remain data-driven and use the full crest slot on every 
   assert.doesNotMatch(stage, /titans-exact-logo|titans-default-mark/);
 });
 
-test('secondary mobile stages restore the exact pre-reset crest scale and right-side geometry', () => {
+test('secondary mobile stages preserve the restored crest scale with one shared geometry', () => {
+  assert.match(brandCss, /data-title-stage-family="editorial"/);
   assert.match(brandCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
   assert.match(brandCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
   assert.match(brandCss, /align-items:\s*end/);
   assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
   assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*8px[\s\S]*padding:\s*10px 2px 12px/);
+  assert.doesNotMatch(brandCss, /data-brand-treatment="signature"|data-brand-treatment="none"|signatureRule|watermarkBrand|microBrand/);
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
 });
 
