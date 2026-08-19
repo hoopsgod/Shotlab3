@@ -3,6 +3,7 @@ import path from 'node:path'
 
 const assetsDir = path.resolve('dist/assets')
 const coachSourcePath = path.resolve('src/components/CoachCommandCenter.jsx')
+const coachTitleCssPath = path.resolve('src/components/CoachMissionControlTitleStage.css')
 
 if (!fs.existsSync(assetsDir)) {
   throw new Error(`Missing production assets directory: ${assetsDir}`)
@@ -31,22 +32,26 @@ if (!/function CourtArtwork\(/.test(coachSource) || !/className="mcCourtArtwork"
   throw new Error('Phase 5B could not verify the live Coach court artwork component contract')
 }
 
-const brandLockup = coachSource.match(/<div className="mcBrandLockup">([\s\S]*?)<\/div>/)?.[1]
-if (!brandLockup) {
-  throw new Error('Phase 5B could not verify the Coach brand-lockup DOM contract')
-}
-
-if (/<img\b/.test(brandLockup)) {
-  for (const imageSafetyContract of [
-    /style=\{\{[^}]*width:\s*48[^}]*height:\s*48/,
-    /objectFit:\s*"contain"/,
-    /display:\s*"block"/,
-    /src=\{cleanMarkLogoUrl\}/,
-  ]) {
-    if (!imageSafetyContract.test(brandLockup)) {
-      throw new Error(`Coach brand lockup image is missing production-safe sizing contract: ${imageSafetyContract}`)
-    }
+for (const sourceOwnedIdentityContract of [
+  /data-team-identity-stage="coach-mission-control"/,
+  /className="mcHeroIdentity"/,
+  /className="mcHeroTeamMark"/,
+  /<TeamLogo src=\{heroTeamLogoUrl\} teamName=\{teamName\}/,
+]) {
+  if (!sourceOwnedIdentityContract.test(coachSource)) {
+    throw new Error(`Coach Hero identity is missing source-owned DOM contract: ${sourceOwnedIdentityContract}`)
   }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork and brand-image sizing contracts verified`)
+const coachTitleCss = fs.readFileSync(coachTitleCssPath, 'utf8')
+for (const sourceOwnedGeometryContract of [
+  /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/,
+  /\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\);[\s\S]*height:\s*var\(--coach-hero-crest\)/,
+  /\.mcHeroTeamMark img\s*\{[\s\S]*width:\s*100%;[\s\S]*height:\s*100%;[\s\S]*object-fit:\s*contain/,
+]) {
+  if (!sourceOwnedGeometryContract.test(coachTitleCss)) {
+    throw new Error(`Coach Hero identity is missing source-owned geometry contract: ${sourceOwnedGeometryContract}`)
+  }
+}
+
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork and source-owned Hero identity contracts verified`)
