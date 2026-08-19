@@ -78,6 +78,27 @@
     gap: 0;
   }
 
+  .mcShellV3 .mcLogoSetupPrompt {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 6px;
+    border: 1px dashed color-mix(in srgb, var(--mc, #c8ff1a) 44%, rgba(255,255,255,.18));
+    border-radius: 14px;
+    background: rgba(3, 17, 24, .56);
+    color: #e7f3c7;
+    -webkit-text-fill-color: currentColor;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
+    font-size: 8px;
+    font-weight: 760;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    text-align: center;
+    text-wrap: balance;
+  }
+
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
     width: auto;
     min-height: 428px;
@@ -198,6 +219,13 @@
     mask-image: none;
     mix-blend-mode: normal;
     filter: drop-shadow(0 12px 20px rgba(0, 0, 0, .42)) drop-shadow(0 0 12px color-mix(in srgb, var(--mc, #c8ff1a) 10%, transparent));
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroLogoSetup {
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 9.5px;
+    line-height: 1.18;
   }
 
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcTeamFallback {
