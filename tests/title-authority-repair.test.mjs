@@ -136,8 +136,8 @@ test('no-logo fallback is explicit while generic demo identity normalizes to the
   assert.match(demoBrandingEnhancer, /teamName: "Demo Titans"/);
   assert.match(demoBrandingEnhancer, /const exactLogo = '\/branding\/titans-exact-logo\.png\.PNG'/);
   assert.match(demoBrandingEnhancer, /genericName[\s\S]*genericBranding[\s\S]*shouldSeedDemoIdentity/);
-  assert.match(demoBrandingEnhancer, /logoUrl: existing\?\.branding\?\.logoUrl \|\| DEMO_TEAM_BRANDING\.logoUrl/);
-  assert.match(demoBrandingEnhancer, /logoMarkUrl: existing\?\.branding\?\.logoMarkUrl \|\| existing\?\.branding\?\.logoUrl \|\| DEMO_TEAM_BRANDING\.logoMarkUrl/);
+  assert.match(demoBrandingEnhancer, /titans-default-mark\(\?:-free\)\?\\\\\.svg/);
+  assert.match(demoBrandingEnhancer, /logoUrl,\n          logoMarkUrl,/);
   assert.ok(DEV_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
   assert.ok(BUILD_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
 });
