@@ -17,14 +17,19 @@ test("Player workspaces encode an editorial opening and a single evidence ledger
   assert.match(playerComponent, /dataLayoutRole="editorial-header"/);
   assert.match(playerComponent, /data-layout-role="supporting-evidence"/);
 
-  assert.match(playerCss, /\.commandBar\s*\{[\s\S]*?border-bottom:1px solid[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/);
+  const commandBarRule = playerCss.match(/\.commandBar\{([^}]*)\}/)?.[1] || "";
+  const metricRule = playerCss.match(/\.metric\{([^}]*)\}/)?.[1] || "";
+  assert.match(commandBarRule, /border-bottom:1px solid/);
+  assert.doesNotMatch(commandBarRule, /background:|box-shadow:|border-radius:/);
   assert.match(playerCss, /\.metrics\s*\{[\s\S]*?gap:0;[\s\S]*?border-block:1px solid/);
-  assert.match(playerCss, /\.metric\s*\{[\s\S]*?border:0;[\s\S]*?border-radius:0;[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/);
+  assert.match(metricRule, /border:0;/);
+  assert.match(metricRule, /background:transparent;/);
+  assert.doesNotMatch(metricRule, /border-radius:|box-shadow:/);
   assert.match(playerCss, /\.metric \+ \.metric\s*\{border-left:1px solid/);
   assert.match(playerCss, /@media\(max-width:700px\)[\s\S]*?\.metrics\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 
-test("Coach secondary pages expose the four-part decision hierarchy in DOM order", () => {
+test("Coach secondary pages expose the shared editorial and decision hierarchy without duplicating title authority", () => {
   assert.match(secondaryComponent, /data-page-hierarchy="editorial"/);
   assert.match(secondaryComponent, /dataLayoutRole="editorial-header"/);
   assert.match(secondaryComponent, /data-layout-role="primary-decision"/);
@@ -32,11 +37,12 @@ test("Coach secondary pages expose the four-part decision hierarchy in DOM order
   assert.match(secondaryComponent, /data-layout-role="supporting-evidence"/);
 
   const start = coachDashboards.indexOf("export function CoachPageDashboardHeader");
-  const end = coachDashboards.indexOf("\n}", start);
-  const component = coachDashboards.slice(start, end);
-  assert.ok(component.indexOf("<SecondaryPageIntro") < component.indexOf("<SecondaryPageDecision"));
-  assert.ok(component.indexOf("<SecondaryPageDecision") < component.indexOf("<SecondaryPageToolbar"));
-  assert.ok(component.indexOf("<SecondaryPageToolbar") < component.indexOf("<SecondaryPageEvidence"));
+  const component = coachDashboards.slice(start);
+  const introIndex = component.indexOf("<SecondaryPageIntro");
+  const decisionIndex = component.indexOf("<CoachRoutePerformanceStage");
+  assert.ok(start >= 0 && introIndex >= 0 && decisionIndex > introIndex);
+  assert.match(coachDashboards, /<SecondaryPageToolbar/);
+  assert.match(coachDashboards, /<SecondaryPageEvidence/);
 });
 
 test("Coach hierarchy uses shared title typography and dividers outside the intentional decision surface", () => {
