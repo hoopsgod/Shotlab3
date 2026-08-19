@@ -42,9 +42,9 @@ test("Mission Control uses one dark component-owned title hierarchy without lega
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*clamp\(420px,\s*112vw,\s*468px\)/);
-  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*428px/);
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(coachTitleCss, /\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);
