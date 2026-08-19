@@ -64,6 +64,9 @@ for (const viewport of VIEWPORTS) {
       const bell = header?.querySelector('.mcBell');
       const headerBrand = header?.querySelector('.mcBrandLockup');
       const teamSelect = header?.querySelector('.mcTeamSelect');
+      const headerStyle = header ? getComputedStyle(header) : null;
+      const menuStyle = menu ? getComputedStyle(menu) : null;
+      const bellStyle = bell ? getComputedStyle(bell) : null;
       return {
         viewport: { width: innerWidth, height: innerHeight },
         header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), menu: rect(menu), bell: rect(bell),
@@ -72,6 +75,13 @@ for (const viewport of VIEWPORTS) {
         eyebrowColor: eyebrow ? getComputedStyle(eyebrow).color : '',
         heroBackground: hero ? getComputedStyle(hero).backgroundColor : '',
         heroBackgroundImage: hero ? getComputedStyle(hero).backgroundImage : '',
+        headerBackground: headerStyle?.backgroundColor || '',
+        headerBackgroundImage: headerStyle?.backgroundImage || '',
+        headerColor: headerStyle?.color || '',
+        menuBackground: menuStyle?.backgroundColor || '',
+        menuColor: menuStyle?.color || '',
+        bellBackground: bellStyle?.backgroundColor || '',
+        bellColor: bellStyle?.color || '',
         headerBrandDisplay: headerBrand ? getComputedStyle(headerBrand).display : 'missing',
         teamSelectDisplay: teamSelect ? getComputedStyle(teamSelect).display : 'missing',
         overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
@@ -106,6 +116,14 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.menu.bottom - 1);
     expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.bell.bottom - 1);
     expect(metrics.mark.left).toBeGreaterThanOrEqual(metrics.team.right - 1);
+
+    expect(metrics.headerBackgroundImage).toContain('linear-gradient');
+    expect(luminance(parseRgb(metrics.headerBackground))).toBeLessThan(0.2);
+    expect(luminance(parseRgb(metrics.headerColor))).toBeGreaterThan(0.75);
+    expect(luminance(parseRgb(metrics.menuBackground))).toBeLessThan(0.2);
+    expect(luminance(parseRgb(metrics.menuColor))).toBeGreaterThan(0.75);
+    expect(luminance(parseRgb(metrics.bellBackground))).toBeLessThan(0.2);
+    expect(luminance(parseRgb(metrics.bellColor))).toBeGreaterThan(0.75);
 
     const bg = parseRgb(metrics.heroBackground || 'rgb(7, 28, 40)');
     expect(contrast(parseRgb(metrics.teamColor), bg)).toBeGreaterThanOrEqual(4.5);

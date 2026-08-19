@@ -41,11 +41,13 @@ body.mission-control-active .mcHeroTeamMark{width:900px;height:900px}
   assert.doesNotMatch(css, /mcHeroTeamMark\{width:900px;height:900px/);
 });
 
-test('legacy public layers cannot own Coach Mission Control title geometry in dev', () => {
+test('legacy public layers cannot own Coach Mission Control title or mobile control-bar authority in dev', () => {
   assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcHero(?:\{|Content\{|TeamMark\{|\s+h1\{)/);
   assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcEyebrow\{/);
   assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcHeroContent>p\{/);
   assert.doesNotMatch(foundationCss, /\.mcCourtArtwork[^\n{]*\{display:none!important\}/);
+  assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcHeader\{/);
+  assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mc(?:MobileMenu|Bell|TeamSelect)(?:,|\{)/);
   assert.doesNotMatch(sessionIntegrityCss, /\[data-testid="coach-primary-objective"\][^{]*\{[^}]*max-height:/s);
   assert.doesNotMatch(sessionIntegrityCss, /\[data-testid="coach-primary-objective"\][^{]*:is\(h1,h2\)[^{]*\{[^}]*font-size:/s);
 });
