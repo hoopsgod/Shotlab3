@@ -33,18 +33,21 @@ test("secondary routes use one explicit TeamIdentityTitleStage owner instead of 
   assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
-test("team branding has deliberate hero, compact, signature, watermark and none levels instead of one secondary crest template", () => {
+test("team branding keeps semantic metadata while restoring one full custom crest on every title stage", () => {
   assert.match(titleStage, /useTeamBranding/);
   assert.match(titleStage, /useCleanTeamLogo/);
   assert.match(titleStage, /BRAND_TREATMENTS = new Set\(\["hero", "compact", "signature", "watermark", "none"\]\)/);
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
-  assert.match(titleStage, /teamIdentityTitleStage__fallbackCrest/);
+  assert.match(titleStage, /const fullCrestBrand =/);
+  assert.match(titleStage, /className="teamIdentityTitleStage__crestSlot"/);
+  assert.match(titleStage, /className="teamIdentityTitleStage__crest"[\s\S]*src=\{cleanedLogo\}/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
-  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__microBrand/);
+  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
   assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__watermarkBrand/);
+  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
   assert.match(secondaryPageSystem, /training:"signature"/);
   assert.match(secondaryPageSystem, /calendar:"compact"/);
   assert.match(secondaryPageSystem, /strength:"watermark"/);
@@ -80,8 +83,8 @@ test("first-impression controls and labels respect the product readability floor
   assert.match(titleStageCss, /@media \(max-width: 390px\)[\s\S]*teamIdentityTitleStage__identityLine \{[^}]*font-size:\s*11px;[^}]*\}/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__eyebrow \{[\s\S]*font: 760 var\(--type-micro, 11px\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*font: 720 13px/);
-  assert.match(titleStage, /showLogoSetupPrompt = resolvedBrandTreatment === "hero"/);
-  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand[^}]*font-size:\s*(?:8|9|10)px/);
+  assert.match(titleStage, /showLogoSetupPrompt = isCoachStage && \(!cleanedLogo \|\| logoFailed\)/);
+  assert.match(titleStage, /aria-label="Add your custom team logo in Program Branding"/);
 });
 
 test("Coach secondary metrics use a readable 2x2 scoreboard rather than a clipped or compressed strip", () => {
