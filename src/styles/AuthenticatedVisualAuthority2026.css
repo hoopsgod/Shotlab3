@@ -32,6 +32,10 @@
 
   html body #root .secondaryPageShell {
     padding-inline: var(--shotlab-mobile-content-rail) !important;
-    padding-bottom: calc(var(--bottom-nav-content-padding, 82px) + var(--shotlab-mobile-content-landing)) !important;
+    padding-bottom: calc(
+      var(--bottom-nav-content-padding, 82px)
+      + var(--shotlab-mobile-content-landing)
+      + env(safe-area-inset-bottom, 0px)
+    ) !important;
   }
 }
