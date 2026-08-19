@@ -161,3 +161,84 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
   fs.writeFileSync(path.join(OUTPUT, "difficult-branding-coach-375x844.json"), `${JSON.stringify(metrics, null, 2)}\n`);
   await page.screenshot({ path: path.join(OUTPUT, "difficult-branding-coach-375x844.png"), animations: "disabled", fullPage: false });
 });
+
+test("captures the default Coach Demo crest cascade before repair", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await enterCoachDemo(page);
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(350);
+
+  const hero = page.getByTestId("coach-primary-objective");
+  const mark = hero.locator(".mcHeroTeamMark");
+  const image = mark.locator("img");
+  await expect(hero).toBeVisible();
+  await expect(image).toBeVisible();
+
+  const metrics = await image.evaluate((element) => {
+    const tracked = ["display", "position", "width", "height", "min-width", "min-height", "max-width", "max-height", "object-fit", "overflow", "inset", "top", "right"];
+    const matchingRules = [];
+    let order = 0;
+    const visit = (rules, href, media = "") => {
+      for (const rule of Array.from(rules || [])) {
+        order += 1;
+        if (rule.cssRules) {
+          const condition = rule.conditionText || media;
+          if (!rule.conditionText || matchMedia(rule.conditionText).matches) visit(rule.cssRules, href, condition);
+          continue;
+        }
+        const selector = rule.selectorText;
+        if (!selector) continue;
+        let matches = false;
+        try { matches = element.matches(selector) || element.parentElement?.matches(selector); } catch {}
+        if (!matches) continue;
+        const declarations = {};
+        for (const property of tracked) {
+          const value = rule.style?.getPropertyValue(property);
+          if (value) declarations[property] = { value: value.trim(), priority: rule.style.getPropertyPriority(property) || "" };
+        }
+        if (Object.keys(declarations).length) matchingRules.push({ order, href, media, selector, declarations });
+      }
+    };
+    for (const sheet of Array.from(document.styleSheets)) {
+      try { visit(sheet.cssRules, sheet.href || "inline"); } catch {}
+    }
+    const rect = element.getBoundingClientRect();
+    const parent = element.parentElement;
+    const parentRect = parent?.getBoundingClientRect();
+    const hero = element.closest('[data-testid="coach-primary-objective"]');
+    const heroRect = hero?.getBoundingClientRect();
+    const computed = getComputedStyle(element);
+    const parentComputed = parent ? getComputedStyle(parent) : null;
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      source: element.getAttribute("src"),
+      image: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      mark: parentRect ? { left: parentRect.left, top: parentRect.top, right: parentRect.right, bottom: parentRect.bottom, width: parentRect.width, height: parentRect.height } : null,
+      hero: heroRect ? { left: heroRect.left, top: heroRect.top, right: heroRect.right, bottom: heroRect.bottom, width: heroRect.width, height: heroRect.height } : null,
+      computed: {
+        display: computed.display,
+        position: computed.position,
+        width: computed.width,
+        height: computed.height,
+        maxWidth: computed.maxWidth,
+        maxHeight: computed.maxHeight,
+        objectFit: computed.objectFit,
+      },
+      parentComputed: parentComputed ? {
+        display: parentComputed.display,
+        position: parentComputed.position,
+        width: parentComputed.width,
+        height: parentComputed.height,
+        minWidth: parentComputed.minWidth,
+        minHeight: parentComputed.minHeight,
+        maxWidth: parentComputed.maxWidth,
+        maxHeight: parentComputed.maxHeight,
+        overflow: parentComputed.overflow,
+      } : null,
+      matchingRules,
+    };
+  });
+
+  fs.writeFileSync(path.join(OUTPUT, "coach-demo-crest-cascade-before-repair.json"), `${JSON.stringify(metrics, null, 2)}\n`);
+  await page.screenshot({ path: path.join(OUTPUT, "coach-demo-crest-cascade-before-repair.png"), animations: "disabled", fullPage: false });
+});
