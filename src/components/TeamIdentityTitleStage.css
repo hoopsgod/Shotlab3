@@ -242,9 +242,9 @@
 }
 
 @media (max-width: 390px) {
-  .teamIdentityTitleStage--standard { --identity-crest: 76px; --identity-title: 38px; }
+  .teamIdentityTitleStage--standard { --identity-crest: 84px; --identity-title: 38px; }
   .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
-  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 10px; padding: 10px 2px 12px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 8px; padding: 10px 2px 12px; }
   .teamIdentityTitleStage__identityLine { margin-bottom: 6px; font-size: 11px; }
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary { margin-top: 8px; line-height: 1.4; }
   .teamIdentityTitleStage__support--external { gap: 7px; }
