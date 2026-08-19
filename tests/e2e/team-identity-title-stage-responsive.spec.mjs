@@ -279,7 +279,7 @@ test("team-owned Home and standard title stages satisfy the exact required mobil
   }
 });
 
-test("long names, no logo, hostile colors, and awkward logo shapes remain stable", async ({ page }) => {
+test("long names, Demo logo restoration, hostile colors, and awkward logo shapes remain stable", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 844 });
   await enterDemo(page, "Coach");
   const longTeamName = "Northwestern Metropolitan Preparatory Basketball";
@@ -289,7 +289,7 @@ test("long names, no logo, hostile colors, and awkward logo shapes remain stable
     branding: { primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" },
   });
   await expectTitleStageGeometry(page, { variant: "hero", teamName: longTeamName });
-  await expect(page.locator('.mcHeroTeamMark .mcHeroLogoSetup')).toBeVisible();
+  await expect(page.locator('.mcHeroTeamMark img')).toBeVisible();
   await expectReadableTeamIdentity(page);
   await navigate(page, "players");
   await expectTitleStageGeometry(page, { variant: "standard", teamName: longTeamName });
