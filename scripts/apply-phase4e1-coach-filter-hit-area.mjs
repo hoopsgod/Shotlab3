@@ -25,15 +25,16 @@ if (!source.includes(marker)) {
 }
 
 const authorityMarker = 'Phase 4E.1 shared Coach filter-chip physical target';
-const targetRule = `html body button[data-coach-filter-chip][data-coach-filter-chip] {
+const targetSelector = 'html body button[data-coach-filter-chip][data-coach-filter-chip]';
+const targetRule = `${targetSelector} {
   min-height: 44px !important;
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
 const compactAuthority = compactCss(authority);
-const compactTarget = compactCss(targetRule);
+const compactTargetSelector = compactCss(targetSelector);
 
-if (compactAuthority.includes(compactTarget)) {
+if (compactAuthority.includes(compactTargetSelector)) {
   console.log('Phase 4E.1 Coach filter-chip physical target already applied.');
 } else if (authority.includes(authorityMarker)) {
   throw new Error('Phase 4E.1 authority marker exists but the physical target contract is malformed.');
