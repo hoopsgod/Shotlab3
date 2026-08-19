@@ -83,8 +83,9 @@ test('custom team logos remain data-driven and visibly present across every titl
 test('compact editorial stages preserve typography authority while keeping team identity obvious', () => {
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-crest:\s*clamp\(60px,\s*16vw,\s*68px\)/);
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
-  assert.match(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*width:\s*38px[\s\S]*height:\s*38px/);
-  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*teamIdentityTitleStage__microBrand[\s\S]*width:\s*36px[\s\S]*height:\s*36px/);
+  assert.match(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*width:\s*30px[\s\S]*height:\s*30px/);
+  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*data-brand-treatment="signature"[\s\S]*padding-top:\s*5px[\s\S]*padding-bottom:\s*6px/);
+  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*teamIdentityTitleStage__microBrand[\s\S]*width:\s*28px[\s\S]*height:\s*28px/);
   assert.doesNotMatch(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*drop-shadow/);
 });
 
