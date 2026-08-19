@@ -32,9 +32,9 @@ test("custom team logos remain untouched by the legacy repair", () => {
   assert.equal(branding.logoMarkUrl, customMark);
 });
 
-test("missing full-logo data still resolves through the canonical branding default", () => {
-  const branding = resolveTeamBranding({ logoUrl: "" });
+test("missing team-logo data remains unconfigured until a coach adds branding", () => {
+  const branding = resolveTeamBranding({ logoUrl: "", logoMarkUrl: "" });
 
-  assert.equal(branding.logoUrl, DEFAULT_BRANDING.logoUrl);
-  assert.equal(branding.logoMarkUrl, DEFAULT_BRANDING.logoMarkUrl);
+  assert.equal(branding.logoUrl, "");
+  assert.equal(branding.logoMarkUrl, "");
 });
