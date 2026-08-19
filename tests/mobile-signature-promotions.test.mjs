@@ -34,7 +34,8 @@ test('Coach Home signature enhancer leaves title identity source-owned while ret
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coachCommand, /className="mcProgramIdentity"/);
   assert.match(coachCommand, /className="mcHeroTeamMark"/);
-  assert.match(coachCommand, /mcTeamFallback/);
+  assert.match(coachCommand, /mcHeroLogoSetup/);
+  assert.match(coachCommand, /Click here to add your custom team logo/);
 });
 
 test('Player Coach Assignment uses the ShotLab primary signature rather than a blue article callout', () => {
