@@ -352,7 +352,7 @@ test("Phase 3A captures auth and the complete Coach mobile hierarchy at iPhone w
   await expectCompactFunctionalIntro(page);
   await capture(page, "10-coach-team-account.png");
 
-  await page.getByTestId("coach-administration-header").getByRole("button", { name: "Team Branding", exact: true }).click();
+  await navigateByKey(page, "branding");
   await expect(page.getByTestId("coach-branding-workspace")).toBeVisible({ timeout: 10_000 });
   await expectCompactFunctionalIntro(page);
   await capture(page, "11-coach-program-branding.png", { authenticated: false });
