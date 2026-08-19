@@ -153,6 +153,27 @@
   font: 900 28px/.9 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.06em;
 }
+.teamIdentityTitleStage__logoSetup {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px dashed rgba(94, 116, 19, .42);
+  border-radius: 20px;
+  background: rgba(94, 116, 19, .055);
+  color: #4f6112;
+  font: 760 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+  text-align: center;
+  text-wrap: balance;
+  cursor: pointer;
+}
+.teamIdentityTitleStage__logoSetup:focus-visible {
+  outline: 3px solid rgba(113, 133, 31, .25);
+  outline-offset: 2px;
+}
 .teamIdentityTitleStage__tonalCrest {
   position: absolute;
   z-index: 0;
@@ -186,6 +207,11 @@
   background: rgba(3, 17, 24, .55);
   color: #f8fbfc;
 }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__logoSetup {
+  border-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 44%, rgba(255,255,255,.16));
+  background: rgba(3, 17, 24, .58);
+  color: #e5f2c4;
+}
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalCrest { color: rgba(218, 231, 236, .055); }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__crest { filter: drop-shadow(0 16px 25px rgba(0,0,0,.4)) drop-shadow(0 0 12px color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 10%, transparent)); }
 .teamIdentityTitleStage--hero {
@@ -204,7 +230,8 @@
 @media (max-width: 760px) {
   [data-testid="coach-dashboard-identity-header"].coachDashboardIdentityStage { display: none; }
   .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none; }
-  .teamIdentityTitleStage:has(.teamIdentityTitleStage__crest) .teamIdentityTitleStage__tonalCrest { display: none; }
+  .teamIdentityTitleStage:has(.teamIdentityTitleStage__crest) .teamIdentityTitleStage__tonalCrest,
+  .teamIdentityTitleStage:has(.teamIdentityTitleStage__logoSetup) .teamIdentityTitleStage__tonalCrest { display: none; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__action {
     padding-inline: 8px;
     font-size: 11px;
@@ -221,6 +248,7 @@
   .teamIdentityTitleStage__support--external { gap: 7px; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { gap: 6px; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__status { font-size: 11px; white-space: nowrap; }
+  .teamIdentityTitleStage__logoSetup { padding: 7px; font-size: 9px; }
 }
 
 @media (max-width: 350px) {
