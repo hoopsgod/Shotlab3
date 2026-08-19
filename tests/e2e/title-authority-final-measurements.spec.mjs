@@ -162,7 +162,8 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
   await page.screenshot({ path: path.join(OUTPUT, "difficult-branding-coach-375x844.png"), animations: "disabled", fullPage: false });
 });
 
-test("captures the default Coach Demo crest cascade before repair", async ({ page }) => {
+test("captures the exact default Coach Demo winning cascade before repair", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "CDP cascade diagnostics require Chromium");
   await page.setViewportSize({ width: 390, height: 844 });
   await enterCoachDemo(page);
   await page.evaluate(() => document.fonts?.ready);
@@ -175,38 +176,13 @@ test("captures the default Coach Demo crest cascade before repair", async ({ pag
   await expect(image).toBeVisible();
 
   const metrics = await image.evaluate((element) => {
-    const tracked = ["display", "position", "width", "height", "min-width", "min-height", "max-width", "max-height", "object-fit", "overflow", "inset", "top", "right"];
-    const matchingRules = [];
-    let order = 0;
-    const visit = (rules, href, media = "") => {
-      for (const rule of Array.from(rules || [])) {
-        order += 1;
-        if (rule.cssRules) {
-          const condition = rule.conditionText || media;
-          if (!rule.conditionText || matchMedia(rule.conditionText).matches) visit(rule.cssRules, href, condition);
-          continue;
-        }
-        const selector = rule.selectorText;
-        if (!selector) continue;
-        let matches = false;
-        try { matches = element.matches(selector) || element.parentElement?.matches(selector); } catch {}
-        if (!matches) continue;
-        const declarations = {};
-        for (const property of tracked) {
-          const value = rule.style?.getPropertyValue(property);
-          if (value) declarations[property] = { value: value.trim(), priority: rule.style.getPropertyPriority(property) || "" };
-        }
-        if (Object.keys(declarations).length) matchingRules.push({ order, href, media, selector, declarations });
-      }
-    };
-    for (const sheet of Array.from(document.styleSheets)) {
-      try { visit(sheet.cssRules, sheet.href || "inline"); } catch {}
-    }
     const rect = element.getBoundingClientRect();
     const parent = element.parentElement;
     const parentRect = parent?.getBoundingClientRect();
     const hero = element.closest('[data-testid="coach-primary-objective"]');
     const heroRect = hero?.getBoundingClientRect();
+    const title = hero?.querySelector("h1");
+    const titleRect = title?.getBoundingClientRect();
     const computed = getComputedStyle(element);
     const parentComputed = parent ? getComputedStyle(parent) : null;
     return {
@@ -215,30 +191,39 @@ test("captures the default Coach Demo crest cascade before repair", async ({ pag
       image: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
       mark: parentRect ? { left: parentRect.left, top: parentRect.top, right: parentRect.right, bottom: parentRect.bottom, width: parentRect.width, height: parentRect.height } : null,
       hero: heroRect ? { left: heroRect.left, top: heroRect.top, right: heroRect.right, bottom: heroRect.bottom, width: heroRect.width, height: heroRect.height } : null,
-      computed: {
-        display: computed.display,
-        position: computed.position,
-        width: computed.width,
-        height: computed.height,
-        maxWidth: computed.maxWidth,
-        maxHeight: computed.maxHeight,
-        objectFit: computed.objectFit,
-      },
-      parentComputed: parentComputed ? {
-        display: parentComputed.display,
-        position: parentComputed.position,
-        width: parentComputed.width,
-        height: parentComputed.height,
-        minWidth: parentComputed.minWidth,
-        minHeight: parentComputed.minHeight,
-        maxWidth: parentComputed.maxWidth,
-        maxHeight: parentComputed.maxHeight,
-        overflow: parentComputed.overflow,
-      } : null,
-      matchingRules,
+      title: titleRect ? { top: titleRect.top, height: titleRect.height, fontSize: getComputedStyle(title).fontSize } : null,
+      computed: { display: computed.display, position: computed.position, width: computed.width, height: computed.height, maxWidth: computed.maxWidth, maxHeight: computed.maxHeight, objectFit: computed.objectFit },
+      parentComputed: parentComputed ? { display: parentComputed.display, position: parentComputed.position, width: parentComputed.width, height: parentComputed.height, minWidth: parentComputed.minWidth, minHeight: parentComputed.minHeight, maxWidth: parentComputed.maxWidth, maxHeight: parentComputed.maxHeight, overflow: parentComputed.overflow } : null,
     };
   });
 
-  fs.writeFileSync(path.join(OUTPUT, "coach-demo-crest-cascade-before-repair.json"), `${JSON.stringify(metrics, null, 2)}\n`);
-  await page.screenshot({ path: path.join(OUTPUT, "coach-demo-crest-cascade-before-repair.png"), animations: "disabled", fullPage: false });
+  const client = await page.context().newCDPSession(page);
+  await client.send("DOM.enable");
+  await client.send("CSS.enable");
+  const { root } = await client.send("DOM.getDocument", { depth: -1, pierce: true });
+  const selectors = {
+    mark: '[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark',
+    image: '[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img',
+    hero: '[data-team-identity-stage="coach-mission-control"]',
+    title: '[data-team-identity-stage="coach-mission-control"] h1',
+  };
+  const cascade = {};
+  for (const [key, selector] of Object.entries(selectors)) {
+    const { nodeId } = await client.send("DOM.querySelector", { nodeId: root.nodeId, selector });
+    const matched = await client.send("CSS.getMatchedStylesForNode", { nodeId });
+    cascade[key] = (matched.matchedCSSRules || []).map(({ rule, matchingSelectors }) => ({
+      selector: rule.selectorList?.text || "",
+      matchingSelectors,
+      origin: rule.origin,
+      styleSheetId: rule.style?.styleSheetId || null,
+      declarations: (rule.style?.cssProperties || [])
+        .filter((prop) => ["width", "height", "min-width", "min-height", "max-width", "max-height", "position", "display", "object-fit", "font-size", "overflow"].includes(prop.name))
+        .map((prop) => ({ name: prop.name, value: prop.value, important: Boolean(prop.important), disabled: Boolean(prop.disabled) })),
+    })).filter((entry) => entry.declarations.length);
+  }
+  await client.detach();
+
+  const output = { metrics, cascade };
+  fs.writeFileSync(path.join(OUTPUT, "coach-demo-winning-cascade-before-repair.json"), `${JSON.stringify(output, null, 2)}\n`);
+  await page.screenshot({ path: path.join(OUTPUT, "coach-demo-winning-cascade-before-repair.png"), animations: "disabled", fullPage: false });
 });
