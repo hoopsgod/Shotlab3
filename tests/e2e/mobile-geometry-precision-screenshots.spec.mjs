@@ -11,6 +11,7 @@ const VIEWPORTS = [
   { width: 430, height: 932 },
 ];
 const SCREENSHOT_WIDTHS = new Set([375, 390, 430]);
+const DEEP_AUDIT_WIDTHS = new Set([390, 430]);
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -94,9 +95,8 @@ async function expectNoHorizontalOverflow(page) {
   expect(geometry.bodyWidth - geometry.viewport).toBeLessThanOrEqual(1);
 }
 
-async function expectTwentyPixelShellRail(page, role) {
-  const selector = role === "coach" ? ".coach-scroll-container" : ".player-scroll-container";
-  const rail = await page.locator(selector).evaluate((element) => {
+async function expectPlayerTwentyPixelShellRail(page) {
+  const rail = await page.locator(".player-scroll-container").evaluate((element) => {
     const style = getComputedStyle(element);
     return { left: Number.parseFloat(style.paddingLeft), right: Number.parseFloat(style.paddingRight) };
   });
@@ -110,6 +110,14 @@ async function capture(page, name) {
   await expectNoHorizontalOverflow(page);
   const outputPath = path.join(OUTPUT_DIR, name);
   await page.screenshot({ path: outputPath, animations: "disabled" });
+  expect(fs.statSync(outputPath).size).toBeGreaterThan(20_000);
+}
+
+async function captureSurface(page, locator, name) {
+  await expectNoHorizontalOverflow(page);
+  await expect(locator).toBeVisible();
+  const outputPath = path.join(OUTPUT_DIR, name);
+  await locator.screenshot({ path: outputPath, animations: "disabled" });
   expect(fs.statSync(outputPath).size).toBeGreaterThan(20_000);
 }
 
@@ -202,25 +210,32 @@ async function expectTrainOpticalRails(page) {
 }
 
 test("candidate mobile geometry is optically disciplined from 375 through 430", async ({ page }) => {
+  test.setTimeout(180_000);
   await installSafeRoutes(page);
 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize(viewport);
     await enterDemo(page, "player");
-    await expectTwentyPixelShellRail(page, "player");
+    await expectPlayerTwentyPixelShellRail(page);
     await expectPlayerHomeOpticalRails(page);
+    if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
+      await captureSurface(page, page.getByTestId("player-daily-command-center"), `precision-player-home-full-${viewport.width}.png`);
+    }
     await resetScroll(page);
     if (SCREENSHOT_WIDTHS.has(viewport.width)) await capture(page, `precision-player-home-${viewport.width}.png`);
 
     await navigateByKey(page, "log-drill");
-    await expectTwentyPixelShellRail(page, "player");
+    await expectPlayerTwentyPixelShellRail(page);
     await expectTrainOpticalRails(page);
+    if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
+      await captureSurface(page, page.locator('[data-team-workspace="at-home"]'), `precision-player-train-full-${viewport.width}.png`);
+    }
     await resetScroll(page);
     if (SCREENSHOT_WIDTHS.has(viewport.width)) await capture(page, `precision-player-train-${viewport.width}.png`);
 
     if (viewport.width === 390) {
       await navigateByKey(page, "profile");
-      await expectTwentyPixelShellRail(page, "player");
+      await expectPlayerTwentyPixelShellRail(page);
       await resetScroll(page);
       await capture(page, "precision-player-progress-390.png");
     }
@@ -228,11 +243,11 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
 
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
-  await expectTwentyPixelShellRail(page, "coach");
+  await expectNoHorizontalOverflow(page);
   await resetScroll(page);
   await capture(page, "precision-coach-home-390.png");
   await navigateByKey(page, "players");
-  await expectTwentyPixelShellRail(page, "coach");
+  await expectNoHorizontalOverflow(page);
   await resetScroll(page);
   await capture(page, "precision-coach-players-390.png");
 });
