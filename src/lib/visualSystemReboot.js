@@ -4,7 +4,7 @@ export const VISUAL_SYSTEM_REBOOT_VERSION = "product-light-v3-mission-control";
 
 const CSS = `
 /* ShotLab product-light reboot owns Mission Control support surfaces only.
-   Coach Hero identity, crest, title, summary, and Hero geometry are source-owned. */
+   Coach Hero identity, crest, title, summary, and mobile control bar are source-owned. */
 :root {
   --sl-canvas: #f5f5f2;
   --sl-surface: #ffffff;
@@ -40,8 +40,7 @@ body.mission-control-active .missionControl {
 }
 
 body.mission-control-active .mcTopbar,
-body.mission-control-active .mcTopBar,
-body.mission-control-active .mcHeader {
+body.mission-control-active .mcTopBar {
   min-height: 0 !important;
   padding: 14px 16px !important;
   border: 1px solid var(--sl-line) !important;
@@ -53,8 +52,7 @@ body.mission-control-active .mcHeader {
 }
 
 body.mission-control-active .mcTopbar h1,
-body.mission-control-active .mcTopBar h1,
-body.mission-control-active .mcHeader h1 {
+body.mission-control-active .mcTopBar h1 {
   color: var(--sl-ink) !important;
   font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif !important;
   font-size: clamp(25px,5vw,38px) !important;
@@ -65,8 +63,7 @@ body.mission-control-active .mcHeader h1 {
 }
 
 body.mission-control-active .mcTopbar button,
-body.mission-control-active .mcTopBar button,
-body.mission-control-active .mcHeader button {
+body.mission-control-active .mcTopBar button {
   border-color: var(--sl-line) !important;
   background: #fff !important;
   color: var(--sl-ink) !important;
