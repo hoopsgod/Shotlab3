@@ -45,7 +45,7 @@ test('secondary destinations use semantic team-brand treatments instead of one r
   assert.match(stage, /leaderboards: "none"/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(stage, /resolvedBrandTreatment === "hero"/);
-  assert.match(stage, /resolvedBrandTreatment === "compact"/);
+  assert.match(brandCss, /data-brand-treatment="compact"/);
   assert.match(stage, /resolvedBrandTreatment === "watermark"/);
   assert.match(brandCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.match(brandCss, /teamIdentityTitleStage__microBrand/);
