@@ -70,19 +70,21 @@ test('Home and Program Branding preserve an intentional identity-heavy hero trea
   assert.match(brandingPreview, /variant="editorial" brandTreatment="compact"/);
 });
 
-test('custom team logos remain data-driven across hero, compact and watermark treatments', () => {
+test('custom team logos remain data-driven and visibly present across every title treatment', () => {
   assert.match(stage, /branding\?\.logoUrl \|\| branding\?\.logoMarkUrl/);
   assert.match(stage, /useCleanTeamLogo\(rawLogo\)/);
+  assert.match(stage, /const supportingBrand = resolvedBrandTreatment !== "hero"/);
   assert.match(stage, /className="teamIdentityTitleStage__crest"[\s\S]*src=\{cleanedLogo\}/);
   assert.match(stage, /className="teamIdentityTitleStage__microBrandImage"[\s\S]*src=\{cleanedLogo\}/);
   assert.match(stage, /className="teamIdentityTitleStage__watermarkBrand"[\s\S]*src=\{cleanedLogo\}/);
   assert.doesNotMatch(stage, /titans-exact-logo|titans-default-mark/);
 });
 
-test('compact editorial stages reserve typography authority over team-mark decoration', () => {
+test('compact editorial stages preserve typography authority while keeping team identity obvious', () => {
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-crest:\s*clamp\(60px,\s*16vw,\s*68px\)/);
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
-  assert.match(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*width:\s*30px[\s\S]*height:\s*30px/);
+  assert.match(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*width:\s*38px[\s\S]*height:\s*38px/);
+  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*teamIdentityTitleStage__microBrand[\s\S]*width:\s*36px[\s\S]*height:\s*36px/);
   assert.doesNotMatch(brandCss, /teamIdentityTitleStage__microBrand[\s\S]*drop-shadow/);
 });
 
