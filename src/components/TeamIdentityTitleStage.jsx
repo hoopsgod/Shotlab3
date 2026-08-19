@@ -59,7 +59,7 @@ export default function TeamIdentityTitleStage({
   dataLayoutRole = "editorial-header",
   dataVisualRole = "team-identity-title",
   dataPageKind = "team",
-  dataMobileStage = "team-identity",
+  dataMobileStage = "",
 }) {
   const { branding } = useTeamBranding();
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
@@ -77,6 +77,7 @@ export default function TeamIdentityTitleStage({
   const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
   const titleFamily = heroClass === "teamIdentityTitleStage--hero" ? "identity" : "editorial";
+  const resolvedMobileStage = tidy(dataMobileStage) || (titleFamily === "identity" ? "team-identity" : "editorial");
   const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
   const resolvedBrandTreatment = requestedBrandTreatment === "auto"
     ? (titleFamily === "identity" ? "hero" : "signature")
@@ -197,7 +198,7 @@ export default function TeamIdentityTitleStage({
       data-layout-role={dataLayoutRole}
       data-visual-role={dataVisualRole}
       data-page-kind={dataPageKind}
-      data-mobile-stage={dataMobileStage}
+      data-mobile-stage={resolvedMobileStage}
       aria-label={ariaLabel || `${teamName} ${displayTitle}`}
     >
       {resolvedBrandTreatment === "hero" ? <div className="teamIdentityTitleStage__tonalCrest" aria-hidden="true">{fallbackInitials}</div> : null}
