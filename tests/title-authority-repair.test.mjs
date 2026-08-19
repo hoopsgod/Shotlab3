@@ -128,14 +128,16 @@ test('shared title geometry preserves premium crest scale, containment and diffi
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
 });
 
-test('no-logo fallback is explicit while the canonical Titans demo identity can retain its real mark', () => {
+test('no-logo fallback is explicit while generic demo identity normalizes to the exact Titans crest', () => {
   assert.match(stage, /isDefaultTitansLogo/);
   assert.match(stage, /teamOwnsDefaultTitansIdentity/);
   assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
   assert.match(coach, /mcTeamFallback/);
   assert.match(demoBrandingEnhancer, /teamName: "Demo Titans"/);
-  assert.match(demoBrandingEnhancer, /logoUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
-  assert.match(demoBrandingEnhancer, /logoMarkUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
+  assert.match(demoBrandingEnhancer, /const exactLogo = '\/branding\/titans-exact-logo\.png\.PNG'/);
+  assert.match(demoBrandingEnhancer, /genericName[\s\S]*genericBranding[\s\S]*shouldSeedDemoIdentity/);
+  assert.match(demoBrandingEnhancer, /logoUrl: existing\?\.branding\?\.logoUrl \|\| DEMO_TEAM_BRANDING\.logoUrl/);
+  assert.match(demoBrandingEnhancer, /logoMarkUrl: existing\?\.branding\?\.logoMarkUrl \|\| existing\?\.branding\?\.logoUrl \|\| DEMO_TEAM_BRANDING\.logoMarkUrl/);
   assert.ok(DEV_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
   assert.ok(BUILD_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
 });
