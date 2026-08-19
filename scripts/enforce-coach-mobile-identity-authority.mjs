@@ -2,8 +2,8 @@ import { readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const DIST_ASSETS = path.resolve(process.cwd(), 'dist', 'assets')
-const AUTHORITATIVE_STAGE = 'data-team-identity-stage="coach-mission-control"'
-const AUTHORITATIVE_HEADER = 'data-testid="mission-control-team-header"'
+const AUTHORITATIVE_STAGE = /\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]/
+const AUTHORITATIVE_HEADER = /\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]/
 
 const GEOMETRY = new Set([
   'width','height','min-width','min-height','max-width','max-height',
@@ -24,8 +24,8 @@ function stripDeclarations(body, blocked) {
 
 function reconcileRule(selector, body) {
   const normalized = selector.replace(/\s+/g, ' ').trim()
-  const isAuthoritativeStage = normalized.includes(AUTHORITATIVE_STAGE)
-  const isAuthoritativeHeader = normalized.includes(AUTHORITATIVE_HEADER)
+  const isAuthoritativeStage = AUTHORITATIVE_STAGE.test(normalized)
+  const isAuthoritativeHeader = AUTHORITATIVE_HEADER.test(normalized)
   if (isAuthoritativeStage || isAuthoritativeHeader) return body
 
   if (normalized.includes('.mcHeroTeamMark')) return stripDeclarations(body, GEOMETRY)
