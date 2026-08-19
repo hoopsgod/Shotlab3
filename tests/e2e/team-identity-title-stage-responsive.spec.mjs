@@ -161,7 +161,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       const title = element.querySelector("h1");
       const team = element.querySelector(".mcProgramIdentity");
       const crest = element.querySelector(".mcHeroTeamMark img");
-      const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
+      const fallback = element.querySelector(".mcHeroTeamMark .mcLogoSetupPrompt");
       const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
       return {
         left: rect.left,
@@ -195,7 +195,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     const title = element.querySelector("h1");
     const team = element.querySelector('[data-identity-role="team-name"]');
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
-    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest');
+    const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
     const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       left: rect.left,
@@ -289,7 +289,7 @@ test("long names, no logo, hostile colors, and awkward logo shapes remain stable
     branding: { primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" },
   });
   await expectTitleStageGeometry(page, { variant: "hero", teamName: longTeamName });
-  await expect(page.locator('.mcHeroTeamMark .mcTeamFallback')).toBeVisible();
+  await expect(page.locator('.mcHeroTeamMark .mcHeroLogoSetup')).toBeVisible();
   await expectReadableTeamIdentity(page);
   await navigate(page, "players");
   await expectTitleStageGeometry(page, { variant: "standard", teamName: longTeamName });
