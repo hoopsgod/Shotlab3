@@ -19,6 +19,7 @@ const longMultiRule = stageCss.match(/\.teamIdentityTitleStage--longTitle\.teamI
 test('authenticated mobile title authority exposes exactly identity and editorial families', () => {
   assert.match(stage, /data-title-stage-family=\{titleFamily\}/);
   assert.match(stage, /titleFamily = heroClass === "teamIdentityTitleStage--hero" \? "identity" : "editorial"/);
+  assert.match(stage, /titleFamily === "editorial" && requestedMobileStage === "team-identity"[\s\S]*\? "editorial"/);
   assert.match(playerHome, /variant="hero"/);
   assert.match(playerHome, /surface="dark"/);
   assert.match(coachHome, /data-team-identity-stage="coach-mission-control"/);
@@ -38,6 +39,10 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
 
 test('secondary destinations use semantic team-brand treatments instead of one repeated crest template', () => {
   assert.match(stage, /BRAND_TREATMENTS = new Set\(\["hero", "compact", "signature", "watermark", "none"\]\)/);
+  assert.match(stage, /AUTO_BRAND_TREATMENT_BY_PAGE_KIND/);
+  assert.match(stage, /events: "compact"/);
+  assert.match(stage, /strength: "watermark"/);
+  assert.match(stage, /leaderboards: "none"/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(stage, /resolvedBrandTreatment === "hero"/);
   assert.match(stage, /resolvedBrandTreatment === "compact"/);
@@ -58,7 +63,7 @@ test('secondary destinations use semantic team-brand treatments instead of one r
 });
 
 test('Home and Program Branding preserve an intentional identity-heavy hero treatment', () => {
-  assert.match(stage, /requestedBrandTreatment === "auto"[\s\S]*titleFamily === "identity" \? "hero" : "signature"/);
+  assert.match(stage, /requestedBrandTreatment === "auto"[\s\S]*titleFamily === "identity" \? "hero" : automaticEditorialTreatment/);
   assert.match(playerHome, /variant="hero"/);
   assert.match(coachHome, /mcHeroIdentity/);
   assert.match(brandingPreview, /variant="hero" brandTreatment="hero"/);
@@ -111,4 +116,5 @@ test('page title remains a real level-one heading with discoverable identity met
   assert.match(stage, /data-title-word-count=\{titleWords\.length\}/);
   assert.match(stage, /data-title-size=\{titleSize\}/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
+  assert.match(stage, /data-mobile-stage=\{resolvedMobileStage\}/);
 });
