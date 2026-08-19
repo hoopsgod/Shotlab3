@@ -34,7 +34,7 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.doesNotMatch(titleRule, /anywhere|break-all/);
   assert.doesNotMatch(longMultiRule, /anywhere|break-all/);
   assert.match(stageCss, /teamIdentityTitleStage--singleWord[\s\S]*white-space:\s*nowrap/);
-  assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(36px,\s*9\.6vw,\s*40px\)/);
+  assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(38px,\s*9\.6vw,\s*40px\)/);
   assert.match(longMultiRule, /clamp\(40px,\s*9\.8vw,\s*44px\)/);
 });
 
