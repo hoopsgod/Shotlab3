@@ -8,6 +8,7 @@ const secondaryPageSystem = fs.readFileSync(new URL("../src/components/Secondary
 const secondaryPageCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
 const titleStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
 const titleStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const brandHierarchyCss = fs.readFileSync(new URL("../src/components/TeamIdentityBrandHierarchy.css", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const coachCommand = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
@@ -38,14 +39,24 @@ test("retired Coach dashboard authorities cannot override the current production
   assert.match(indexHtml, /shotlab-phase3-secondary-cohesion\.css/);
 });
 
-test("secondary pages use the shared premium team-identity stage with compact standard geometry", () => {
+test("secondary pages use editorial title authority with semantic team-brand hierarchy instead of a repeated crest column", () => {
   assert.match(secondaryPageSystem, /dataPageKind=\{iconName\}/);
-  assert.match(secondaryPageSystem, /dataMobileStage="team-identity"/);
+  assert.match(secondaryPageSystem, /dataMobileStage="editorial"/);
+  assert.match(secondaryPageSystem, /brandTreatment=\{brandTreatment\}/);
+  assert.match(secondaryPageSystem, /training:"signature"/);
+  assert.match(secondaryPageSystem, /calendar:"compact"/);
+  assert.match(secondaryPageSystem, /strength:"watermark"/);
+  assert.match(secondaryPageSystem, /trophy:"none"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
   assert.match(titleStage, /data-team-identity-stage="true"/);
+  assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
+  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__microBrand/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__watermarkBrand/);
   assert.doesNotMatch(secondaryPageSystem, /secondaryPageIntro/);
   assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b/);
 });
