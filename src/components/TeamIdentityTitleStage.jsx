@@ -1,20 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
-import { isDemoPersistenceSession } from "../lib/demoMode.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
-
-const DEFAULT_TITANS_LOGOS = [
-  "/branding/titans-exact-logo.png.PNG",
-  "/branding/titans-default-mark.svg",
-];
 
 const tidy = (value, fallback = "") => String(value ?? fallback).trim();
 const initialsFor = (value) => {
   const parts = tidy(value, "ShotLab Team").split(/\s+/).filter(Boolean);
   return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)[0]}` : parts[0]?.slice(0, 2) || "SL").toUpperCase();
 };
-const isDefaultTitansLogo = (url = "") => DEFAULT_TITANS_LOGOS.some((candidate) => String(url).includes(candidate));
 
 export function TeamIdentitySupportRail({ status = null, actions = [], external = false, className = "", ariaLabel = "Page status and actions" }) {
   const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
@@ -66,9 +59,7 @@ export default function TeamIdentityTitleStage({
   const { branding } = useTeamBranding();
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
   const rawLogo = tidy(branding?.logoUrl || branding?.logoMarkUrl);
-  const isDemoSession = isDemoPersistenceSession();
-  const logoCandidate = rawLogo && (!isDefaultTitansLogo(rawLogo) || isDemoSession) ? rawLogo : "";
-  const cleanedLogo = useCleanTeamLogo(logoCandidate);
+  const cleanedLogo = useCleanTeamLogo(rawLogo);
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
   const displayPerson = tidy(personName);
@@ -79,7 +70,7 @@ export default function TeamIdentityTitleStage({
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className}`);
-  const showLogoSetupPrompt = isCoachStage && !isDemoSession && (!cleanedLogo || logoFailed);
+  const showLogoSetupPrompt = isCoachStage && (!cleanedLogo || logoFailed);
   const openBrandingSettings = () => {
     if (brandingAction?.onClick) {
       brandingAction.onClick();
