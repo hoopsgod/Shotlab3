@@ -48,6 +48,8 @@ test("shared Coach title stages replace missing logos with an actionable Brandin
   assert.match(titleStageSource, new RegExp(PROMPT));
   assert.match(titleStageSource, /data-identity-role="brand-setup"/);
   assert.match(titleStageSource, /brandingAction\?\.onClick/);
+  assert.match(titleStageSource, /data-nav-key=\\?"branding\\?"/);
+  assert.match(titleStageSource, /mobile-navigation-more/);
   assert.match(titleStageSource, /coach-dashboard-identity-header/);
 });
 
