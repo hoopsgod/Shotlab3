@@ -38,16 +38,17 @@ for (const target of targets) {
 if (sourceChanged) writeFileSync(appPath, source);
 
 const authorityMarker = 'Phase 4E.5 Player Home expanded secondary-link physical targets';
-const targetRule = `.performance-shell[data-workspace-tab="home"] button[data-player-home-schedule-action],
-.performance-shell[data-workspace-tab="home"] button[data-player-home-coach-guidance-action] {
+const targetSelector = `.performance-shell[data-workspace-tab="home"] button[data-player-home-schedule-action],
+.performance-shell[data-workspace-tab="home"] button[data-player-home-coach-guidance-action]`;
+const targetRule = `${targetSelector} {
   min-height: 44px !important;
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }`;
 const compactAuthority = compactCss(authority);
-const compactTarget = compactCss(targetRule);
+const compactTargetSelector = compactCss(targetSelector);
 
-if (compactAuthority.includes(compactTarget)) {
+if (compactAuthority.includes(compactTargetSelector)) {
   console.log('Phase 4E.5 final Player Home secondary-link physical targets already applied.');
 } else if (authority.includes(authorityMarker)) {
   throw new Error('Phase 4E.5 authority marker exists but the secondary-link physical target contract is malformed.');
