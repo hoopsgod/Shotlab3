@@ -1,5 +1,5 @@
 /* ShotLab 2026 — Mission Control support hierarchy. Functional contracts unchanged.
-   Coach Hero identity/title composition is owned by CoachCommandCenter source. */
+   Coach mobile header, identity, crest and Hero geometry are component-owned. */
 body.mission-control-active .performance-workspace--coach { background: var(--bg-0) !important; }
 
 body.mission-control-active .mcShellV3 {
@@ -19,47 +19,7 @@ body.mission-control-active .mcShellV3 {
 body.mission-control-active .mcShellV3 .missionControl {
   width: min(100%,1120px) !important;
   margin-inline: auto !important;
-  padding: 10px 16px 112px !important;
-  gap: 20px !important;
   background: transparent !important;
-}
-
-body.mission-control-active .mcShellV3 .mcHeader {
-  min-height: 0 !important;
-  padding: 10px 12px !important;
-  border: 1px solid var(--mc-line) !important;
-  border-radius: var(--radius-lg,18px) !important;
-  background: rgba(255,255,255,.88) !important;
-  color: var(--mc-ink) !important;
-  box-shadow: 0 1px 2px rgba(17,26,33,.04),0 10px 30px rgba(7,28,40,.045) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
-  backdrop-filter: blur(18px) saturate(120%) !important;
-}
-body.mission-control-active .mcShellV3 .mcHeaderTeamMark:focus-visible {
-  outline: 3px solid rgba(126,158,30,.22) !important;
-  outline-offset: 2px !important;
-}
-body.mission-control-active .mcShellV3 .mcHeaderActions { min-width: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: 7px !important; }
-body.mission-control-active .mcShellV3 .mcTeamSelect,
-body.mission-control-active .mcShellV3 .mcBell,
-body.mission-control-active .mcShellV3 .mcMobileMenu {
-  min-height: 44px !important;
-  min-width: 44px !important;
-  border: 1px solid var(--mc-line) !important;
-  border-radius: var(--radius-md,14px) !important;
-  background: var(--mc-surface) !important;
-  color: var(--mc-ink) !important;
-  box-shadow: none !important;
-}
-body.mission-control-active .mcShellV3 .mcTeamSelect {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  max-width: min(210px,44vw) !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
 }
 
 /* Court atmosphere remains a supporting visual layer, not title authority. */
@@ -152,9 +112,6 @@ body.mission-control-active .mcShellV3 .mcAttentionCopy small,
 body.mission-control-active .mcShellV3 .mcAttentionMeta,
 body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
 
-@media (prefers-reduced-transparency: reduce) {
-  body.mission-control-active .mcShellV3 .mcHeader { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--mc-surface) !important; }
-}
 @media (prefers-reduced-motion: reduce) {
   body.mission-control-active .mcShellV3 * { animation: none !important; transition-duration: .01ms !important; }
 }
