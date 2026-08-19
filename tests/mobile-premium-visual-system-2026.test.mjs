@@ -39,7 +39,7 @@ test("retired Coach dashboard authorities cannot override the current production
   assert.match(indexHtml, /shotlab-phase3-secondary-cohesion\.css/);
 });
 
-test("secondary pages use editorial title authority with semantic team-brand hierarchy instead of a repeated crest column", () => {
+test("secondary pages keep editorial title authority while restoring the full custom crest column", () => {
   assert.match(secondaryPageSystem, /dataPageKind=\{iconName\}/);
   assert.match(secondaryPageSystem, /dataMobileStage="editorial"/);
   assert.match(secondaryPageSystem, /brandTreatment=\{brandTreatment\}/);
@@ -50,13 +50,16 @@ test("secondary pages use editorial title authority with semantic team-brand hie
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
   assert.match(titleStage, /data-team-identity-stage="true"/);
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
+  assert.match(titleStage, /const fullCrestBrand =/);
+  assert.match(titleStage, /className="teamIdentityTitleStage__crestSlot"/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
-  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__microBrand/);
+  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
   assert.match(brandHierarchyCss, /teamIdentityTitleStage__signatureRule/);
-  assert.match(brandHierarchyCss, /teamIdentityTitleStage__watermarkBrand/);
+  assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
   assert.doesNotMatch(secondaryPageSystem, /secondaryPageIntro/);
   assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b/);
 });
