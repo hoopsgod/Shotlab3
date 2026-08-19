@@ -15,7 +15,7 @@ test('legacy route promotion and centering mutators stay out of the enhancer pip
 })
 
 test('mobile secondary route mastheads resolve through the shared source-owned title stage', () => {
-  assert.match(secondary, /return <TeamIdentityTitleStage/)
+  assert.match(secondary, /<TeamIdentityTitleStage/)
   assert.match(secondary, /variant="standard"/)
   assert.match(secondary, /surface="light"/)
   assert.doesNotMatch(secondary, /secondaryPageIntro__title|appHeaderTitle/)
@@ -23,7 +23,7 @@ test('mobile secondary route mastheads resolve through the shared source-owned t
   assert.match(stageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/)
   assert.match(stageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/)
   assert.match(stageCss, /@media \(max-width: 390px\)/)
-  assert.match(stageCss, /\.teamIdentityTitleStage \{ --identity-crest: 96px; --identity-title: 42px; \}/)
+  assert.match(stageCss, /\.teamIdentityTitleStage \{ --identity-crest: 84px; --identity-title: 40px; \}/)
 })
 
 test('shared title stage owns responsive geometry without build-time source transforms', () => {

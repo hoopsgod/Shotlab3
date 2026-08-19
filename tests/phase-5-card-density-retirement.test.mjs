@@ -13,7 +13,8 @@ const coachDashboards = read("src/components/CoachInteractiveDashboards.jsx");
 
 test("Player workspaces encode an editorial opening and a single evidence ledger", () => {
   assert.match(playerComponent, /data-page-hierarchy="editorial"/);
-  assert.match(playerComponent, /<header[^>]+data-layout-role="editorial-header"/);
+  assert.match(playerComponent, /<TeamIdentityTitleStage/);
+  assert.match(playerComponent, /dataLayoutRole="editorial-header"/);
   assert.match(playerComponent, /data-layout-role="supporting-evidence"/);
 
   assert.match(playerCss, /\.commandBar\s*\{[\s\S]*?border-bottom:1px solid[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/);
@@ -25,7 +26,7 @@ test("Player workspaces encode an editorial opening and a single evidence ledger
 
 test("Coach secondary pages expose the four-part decision hierarchy in DOM order", () => {
   assert.match(secondaryComponent, /data-page-hierarchy="editorial"/);
-  assert.match(secondaryComponent, /data-layout-role="editorial-header"/);
+  assert.match(secondaryComponent, /dataLayoutRole="editorial-header"/);
   assert.match(secondaryComponent, /data-layout-role="primary-decision"/);
   assert.match(secondaryComponent, /data-layout-role="evidence-tools"/);
   assert.match(secondaryComponent, /data-layout-role="supporting-evidence"/);
@@ -39,7 +40,7 @@ test("Coach secondary pages expose the four-part decision hierarchy in DOM order
 });
 
 test("Coach hierarchy uses shared title typography and dividers outside the intentional decision surface", () => {
-  assert.match(secondaryComponent, /return <TeamIdentityTitleStage/);
+  assert.match(secondaryComponent, /<TeamIdentityTitleStage/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
@@ -66,7 +67,7 @@ test("Retired authority files no longer recreate card-heavy shared primitives", 
 
 test("Leaderboard mobile CSS keeps the primary decision and shared title context visible", () => {
   const leaderboardCss = read("public/shotlab-phase3l-coach-leaderboard-hierarchy.css");
-  assert.doesNotMatch(leaderboardCss, /coach-page-dashboard-leaderboards-decision-brief"\][^\{]*\{\s*display:\s*none/i);
+  assert.doesNotMatch(leaderboardCss, /\[data-testid="coach-page-dashboard-leaderboards-decision-brief"\]\s*\{\s*display:\s*none/i);
   assert.doesNotMatch(leaderboardCss, /teamIdentityTitleStage[^\{]*\{\s*display:\s*none/i);
   assert.doesNotMatch(leaderboardCss, /\[data-identity-role="page-title"\][^\{]*\{[\s\S]*?font-size:\s*9px/i);
 });

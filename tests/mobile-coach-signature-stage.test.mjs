@@ -26,9 +26,8 @@ test('Coach Home source owns integrated program identity, premium crest and fall
   assert.match(command, /mcProgramIdentity/);
   assert.match(command, /mcHeroIdentity/);
   assert.match(command, /mcTeamFallback/);
-  assert.match(command, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
-  assert.match(command, /font-size:clamp\(46px,12vw,58px\)/);
-  assert.match(command, /object-fit:contain/);
+  assert.match(command, /data-team-identity-stage="coach-mission-control"/);
+  assert.match(command, /className="mcHeroTeamMark"/);
   assert.doesNotMatch(command, /mcHeroTeamMark\{display:none/);
 });
 

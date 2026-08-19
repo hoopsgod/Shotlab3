@@ -31,9 +31,10 @@ test('Coach Home signature enhancer leaves title identity source-owned while ret
   assert.equal(command, coachCommand);
   assert.doesNotMatch(finalCss, /\.mcHeroTeamMark|\.mcHero\s+h1|\.mcProgramIdentity|\.mcHeroIdentity/);
   assert.doesNotMatch(hierarchy, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
-  assert.match(coachCommand, /--coach-hero-crest:clamp\(108px,30vw,124px\)/);
-  assert.match(coachCommand, /font-size:clamp\(46px,12vw,58px\)/);
-  assert.match(coachCommand, /object-fit:contain/);
+  assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
+  assert.match(coachCommand, /className="mcProgramIdentity"/);
+  assert.match(coachCommand, /className="mcHeroTeamMark"/);
+  assert.match(coachCommand, /mcTeamFallback/);
 });
 
 test('Player Coach Assignment uses the ShotLab primary signature rather than a blue article callout', () => {

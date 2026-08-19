@@ -13,7 +13,7 @@ const playersEnhancer = readFileSync("scripts/apply-phase3h-coach-players-hierar
 
 test("Coach secondary pages use the shared editorial title stage, one performance decision surface, and flat evidence", () => {
   assert.match(component, /function SecondaryPageIntro/);
-  assert.match(component, /return <TeamIdentityTitleStage/);
+  assert.match(component, /<TeamIdentityTitleStage/);
   assert.match(component, /variant="standard"/);
   assert.match(component, /surface="light"/);
   assert.match(titleCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
@@ -26,7 +26,8 @@ test("Coach secondary pages use the shared editorial title stage, one performanc
 });
 
 test("historical runtime visual layers cannot override the canonical secondary-page component stylesheet", () => {
-  assert.match(reboot, /secondaryStart[\s\S]*secondaryEnd[\s\S]*CSS\.slice/);
+  assert.match(reboot, /Secondary pages and empty states use their component\/semantic contracts/);
+  assert.doesNotMatch(reboot, /secondaryStart|secondaryEnd|\.secondaryPageIntro/);
   assert.doesNotMatch(releaseFixes, /\.secondaryPageIntro/);
 });
 

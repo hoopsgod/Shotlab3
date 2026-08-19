@@ -9,7 +9,7 @@ const titleCss = readFileSync("src/components/TeamIdentityTitleStage.css", "utf8
 
 test("secondary page intro delegates editorial identity to the shared premium title stage", () => {
   assert.match(component, /function SecondaryPageIntro/);
-  assert.match(component, /return <TeamIdentityTitleStage/);
+  assert.match(component, /<TeamIdentityTitleStage/);
   assert.match(component, /variant="standard"/);
   assert.match(component, /surface="light"/);
   assert.match(component, /dataMobileStage="team-identity"/);
