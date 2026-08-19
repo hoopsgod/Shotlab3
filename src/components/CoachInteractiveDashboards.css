@@ -8,11 +8,17 @@
     padding-bottom: 0;
   }
 
-  /* SecondaryPageShell already contributes the mobile route gutter. The shared
-     title stage owns its own 20px editorial rail, so let the title frame break
-     back to the shell edge rather than stacking both gutters. */
-  .secondaryPageShell > .teamIdentityTitleStageFrame {
-    width: calc(100% + (var(--layout-gutter, 16px) * 2));
-    margin-inline: calc(var(--layout-gutter, 16px) * -1);
+  /* Coach routes still arrive through a legacy inline wrapper. Break the title
+     frame back across that wrapper, then inset the actual editorial header on
+     the canonical 20px mobile rail. This prevents both the former 36px double
+     gutter and a full-bleed 0px title edge. */
+  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame {
+    width: calc(100% + (var(--layout-gutter, 20px) * 2));
+    margin-inline: calc(var(--layout-gutter, 20px) * -1);
+  }
+
+  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2));
+    margin-inline: var(--shotlab-mobile-content-rail, 20px);
   }
 }
