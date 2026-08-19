@@ -53,12 +53,14 @@
   font: 820 var(--identity-title)/.92 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.062em;
   text-wrap: balance;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 .teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title {
   max-width: 15ch;
   font-size: clamp(40px, 9.8vw, 44px);
   line-height: .94;
+  overflow-wrap: anywhere;
 }
 .teamIdentityTitleStage__person {
   margin-top: 8px;
@@ -240,15 +242,15 @@
 }
 
 @media (max-width: 390px) {
-  .teamIdentityTitleStage { --identity-crest: 84px; --identity-title: 40px; }
+  .teamIdentityTitleStage--standard { --identity-crest: 76px; --identity-title: 38px; }
   .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
-  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 12px; padding: 10px 2px 12px; }
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 10px; padding: 10px 2px 12px; }
   .teamIdentityTitleStage__identityLine { margin-bottom: 6px; font-size: 11px; }
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary { margin-top: 8px; line-height: 1.4; }
   .teamIdentityTitleStage__support--external { gap: 7px; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__actions { gap: 6px; }
   .teamIdentityTitleStage__support--external .teamIdentityTitleStage__status { font-size: 11px; white-space: nowrap; }
-  .teamIdentityTitleStage__logoSetup { padding: 7px; font-size: 9px; }
+  .teamIdentityTitleStage__logoSetup { padding: 7px; font-size: 11px; }
 }
 
 @media (max-width: 350px) {
