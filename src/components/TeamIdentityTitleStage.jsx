@@ -6,6 +6,25 @@ import "./TeamIdentityBrandHierarchy.css";
 
 const tidy = (value, fallback = "") => String(value ?? fallback).trim();
 const BRAND_TREATMENTS = new Set(["hero", "compact", "signature", "watermark", "none"]);
+const AUTO_BRAND_TREATMENT_BY_PAGE_KIND = Object.freeze({
+  events: "compact",
+  schedule: "compact",
+  calendar: "compact",
+  program: "compact",
+  strength: "watermark",
+  lifting: "watermark",
+  conditioning: "watermark",
+  leaderboards: "none",
+  rankings: "none",
+  trophy: "none",
+  players: "signature",
+  roster: "signature",
+  team: "signature",
+  training: "signature",
+  drills: "signature",
+  progress: "signature",
+  profile: "signature",
+});
 const initialsFor = (value) => {
   const parts = tidy(value, "ShotLab Team").split(/\s+/).filter(Boolean);
   return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)[0]}` : parts[0]?.slice(0, 2) || "SL").toUpperCase();
@@ -77,11 +96,16 @@ export default function TeamIdentityTitleStage({
   const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
   const titleFamily = heroClass === "teamIdentityTitleStage--hero" ? "identity" : "editorial";
-  const resolvedMobileStage = tidy(dataMobileStage) || (titleFamily === "identity" ? "team-identity" : "editorial");
+  const requestedMobileStage = tidy(dataMobileStage);
+  const resolvedMobileStage = titleFamily === "editorial" && requestedMobileStage === "team-identity"
+    ? "editorial"
+    : requestedMobileStage || (titleFamily === "identity" ? "team-identity" : "editorial");
   const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
+  const normalizedPageKind = tidy(dataPageKind, "team").toLowerCase();
+  const automaticEditorialTreatment = AUTO_BRAND_TREATMENT_BY_PAGE_KIND[normalizedPageKind] || "signature";
   const resolvedBrandTreatment = requestedBrandTreatment === "auto"
-    ? (titleFamily === "identity" ? "hero" : "signature")
-    : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : "signature");
+    ? (titleFamily === "identity" ? "hero" : automaticEditorialTreatment)
+    : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : automaticEditorialTreatment);
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
