@@ -22,7 +22,7 @@ export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],back
   const iconName=icon||iconFor(`${eyebrow} ${displayTitle}`);
   return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations" data-title-stage-family="editorial">
     <TeamIdentityTitleStage
-      variant="editorial"
+      variant="standard"
       surface="light"
       role={eyebrow||"Team"}
       title={displayTitle}
@@ -36,7 +36,7 @@ export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],back
       dataLayoutRole="editorial-header"
       dataVisualRole="page-intro"
       dataPageKind={iconName}
-      dataMobileStage="editorial"
+      dataMobileStage="team-identity"
       ariaLabel={`${displayTitle} team identity and page title`}
     />
   </div>
