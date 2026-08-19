@@ -27,6 +27,20 @@ body.mission-control-active .mcProgramIdentity{color:#17242b!important;font-size
   assert.match(css, /data-team-identity-stage="coach-mission-control"[^}]*h1\{font-size:48px;color:#f8fbfc/);
 });
 
+test('production reconciliation preserves minifier-normalized Coach owner selectors', () => {
+  const source = `
+.mcShellV3 .mcHero[data-team-identity-stage=coach-mission-control]{min-height:428px;overflow:hidden}
+.mcShellV3 .mcHero[data-team-identity-stage=coach-mission-control] .mcHeroTeamMark{width:112px;height:112px;max-width:112px;max-height:112px}
+.mcShellV3 .mcHeader[data-testid=mission-control-team-header]{min-height:68px;padding:10px 12px;background:#071c28;color:#f5f8f9}
+body.mission-control-active .mcHeroTeamMark{width:900px;height:900px}
+`;
+  const { css } = enforceCoachMobileIdentityAuthority(source);
+  assert.match(css, /data-team-identity-stage=coach-mission-control[^}]*min-height:428px;overflow:hidden/);
+  assert.match(css, /data-team-identity-stage=coach-mission-control[^}]*mcHeroTeamMark\{width:112px;height:112px;max-width:112px;max-height:112px/);
+  assert.match(css, /data-testid=mission-control-team-header[^}]*min-height:68px;padding:10px 12px;background:#071c28;color:#f5f8f9/);
+  assert.doesNotMatch(css, /mcHeroTeamMark\{width:900px;height:900px/);
+});
+
 test('legacy public layers cannot own Coach Mission Control title geometry in dev', () => {
   assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcHero(?:\{|Content\{|TeamMark\{|\s+h1\{)/);
   assert.doesNotMatch(foundationCss, /body\.mission-control-active \.mcEyebrow\{/);
