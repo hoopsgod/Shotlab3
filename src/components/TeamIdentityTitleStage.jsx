@@ -138,7 +138,10 @@ export default function TeamIdentityTitleStage({
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
-  const compactBrand = resolvedBrandTreatment === "compact" ? (
+  // Every authenticated destination keeps the coach-configured team logo visible.
+  // The treatment still controls prominence: compact/signature/none use the small
+  // supporting mark, watermark stays tonal, and Home keeps the full hero crest.
+  const supportingBrand = ["compact", "signature", "none"].includes(resolvedBrandTreatment) ? (
     <span className="teamIdentityTitleStage__microBrand" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
       {hasUsableLogo ? (
         <img
@@ -243,7 +246,7 @@ export default function TeamIdentityTitleStage({
       <div className="teamIdentityTitleStage__inner">
         <div className="teamIdentityTitleStage__copy">
           <div className="teamIdentityTitleStage__identityLine">
-            {compactBrand}
+            {supportingBrand}
             {resolvedBrandTreatment === "signature" ? <span className="teamIdentityTitleStage__signatureRule" aria-hidden="true" /> : null}
             <span className="teamIdentityTitleStage__team" data-identity-role="team-name">{teamName}</span>
             <span className="teamIdentityTitleStage__descriptor" data-identity-role="role">{descriptor}</span>
