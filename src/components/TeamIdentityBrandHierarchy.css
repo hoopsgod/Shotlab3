@@ -1,41 +1,12 @@
 /*
- * Team identity hierarchy: Home owns the hero crest. Functional destinations
- * keep the coach-configured logo visibly present while compact attribution,
- * signature, watermark, and minimal treatments control its supporting role.
- * This file intentionally loads after the title-stage foundation so the
- * semantic treatment, not page-specific CSS, owns branding.
+ * Team identity hierarchy after user review: every authenticated title stage
+ * keeps the coach-configured custom logo in the original right-side crest slot.
+ * Page-specific treatment metadata still supports typography and tone, but no
+ * treatment may replace, shrink, watermark, or remove the primary team crest.
  */
 .teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-}
-
-.teamIdentityTitleStage__microBrand {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  padding: 3px;
-  border: 1px solid rgba(21, 25, 24, .12);
-  border-radius: 9px;
-  background: rgba(21, 25, 24, .035);
-  overflow: hidden;
-}
-
-.teamIdentityTitleStage__microBrandImage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  filter: none;
-}
-
-.teamIdentityTitleStage__microBrandFallback {
-  color: #46504a;
-  font: 900 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  letter-spacing: -.04em;
+  grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+  gap: clamp(16px, 4vw, 24px);
 }
 
 .teamIdentityTitleStage__signatureRule {
@@ -46,46 +17,8 @@
   background: color-mix(in srgb, var(--team-brand-primary, #71851f) 72%, #71851f);
 }
 
-.teamIdentityTitleStage__watermarkBrand,
-.teamIdentityTitleStage__watermarkFallback {
-  position: absolute;
-  z-index: 0;
-  right: -4px;
-  top: 3px;
-  width: 104px;
-  height: 104px;
-  pointer-events: none;
-  user-select: none;
-}
-
-.teamIdentityTitleStage__watermarkBrand {
-  object-fit: contain;
-  object-position: center;
-  opacity: .055;
-  filter: grayscale(1) contrast(.9);
-}
-
-.teamIdentityTitleStage__watermarkFallback {
-  display: grid;
-  place-items: center;
-  color: rgba(21, 25, 24, .045);
-  font: 900 36px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  letter-spacing: -.08em;
-}
-
-.teamIdentityTitleStage[data-brand-treatment="compact"] .teamIdentityTitleStage__identityLine {
-  align-items: center;
-  gap: 6px 8px;
-}
-
 .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__identityLine {
   align-items: center;
-}
-
-.teamIdentityTitleStage[data-brand-treatment="watermark"] .teamIdentityTitleStage__copy {
-  position: relative;
-  z-index: 1;
-  padding-right: clamp(24px, 7vw, 42px);
 }
 
 .teamIdentityTitleStage[data-brand-treatment="none"] .teamIdentityTitleStage__team {
@@ -96,71 +29,61 @@
   color: #7e8781;
 }
 
-.teamIdentityTitleStage--dark .teamIdentityTitleStage__microBrand {
-  border-color: rgba(255,255,255,.16);
-  background: rgba(3, 17, 24, .48);
-}
-
-.teamIdentityTitleStage--dark .teamIdentityTitleStage__microBrandFallback {
-  color: #edf4f5;
-}
-
-.teamIdentityTitleStage--dark .teamIdentityTitleStage__watermarkBrand {
-  opacity: .075;
-  filter: grayscale(1) brightness(1.7);
-}
-
-.teamIdentityTitleStage--dark .teamIdentityTitleStage__watermarkFallback {
-  color: rgba(226, 237, 240, .065);
-}
-
 @media (max-width: 760px) {
+  /* Restore the exact pre-reset crest scale and right-side placement while
+     retaining the newer editorial title and operational hierarchy. */
+  .teamIdentityTitleStage--standard {
+    --identity-crest: clamp(96px, 25vw, 108px);
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
   .teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
-    padding-top: 8px;
-    padding-bottom: 10px;
+    grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+    align-items: end;
+    gap: clamp(16px, 4vw, 24px);
+    padding: 14px 2px 16px;
   }
 
-  /* Signature pages carry the logo plus a rule. Tighten expendable vertical
-     rhythm instead of shrinking the title or custom mark so the full
-     375–430px range remains inside the 290px first-view ceiling. */
-  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__inner {
-    padding-top: 5px;
-    padding-bottom: 6px;
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot {
+    align-self: end;
+    margin-top: 0;
   }
 
-  .teamIdentityTitleStage[data-brand-treatment="compact"] .teamIdentityTitleStage__identityLine,
-  .teamIdentityTitleStage[data-brand-treatment="watermark"] .teamIdentityTitleStage__identityLine,
-  .teamIdentityTitleStage[data-brand-treatment="none"] .teamIdentityTitleStage__identityLine {
-    margin-bottom: 7px;
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine {
+    margin-bottom: 6px;
   }
 
-  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__identityLine {
-    margin-bottom: 5px;
-  }
-
-  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__summary {
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary {
     margin-top: 8px;
+    line-height: 1.4;
   }
 
-  .teamIdentityTitleStage[data-brand-treatment="signature"] .teamIdentityTitleStage__support {
-    margin-top: 5px;
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__support {
+    gap: 8px;
+    margin-top: 10px;
   }
 
-  .teamIdentityTitleStage__microBrand {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__actions {
+    gap: 7px;
   }
 
-  .teamIdentityTitleStage__watermarkBrand,
-  .teamIdentityTitleStage__watermarkFallback {
-    right: -10px;
-    top: 0;
-    width: 92px;
-    height: 92px;
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__action {
+    min-height: 44px;
+    padding-inline: 12px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 390px) {
+  /* Exact pre-reset mobile crest size. */
+  .teamIdentityTitleStage--standard {
+    --identity-crest: 84px;
   }
 
-  .teamIdentityTitleStage[data-brand-treatment="watermark"] .teamIdentityTitleStage__copy {
-    padding-right: clamp(18px, 6vw, 30px);
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
+  .teamIdentityTitleStage:not([data-brand-treatment="hero"]) .teamIdentityTitleStage__inner {
+    gap: 8px;
+    padding: 10px 2px 12px;
   }
 }
