@@ -10,7 +10,6 @@ const cascadeLock = fs.readFileSync(new URL("../src/styles/MissionControlCascade
 const criticalCss = fs.readFileSync(new URL("../public/shotlab-phase2-critical.css", import.meta.url), "utf8");
 const commandCenter = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const titleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
-const headerCss = fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css", import.meta.url), "utf8");
 
 const indexOfOrFail = (source, value) => {
   const position = source.indexOf(value);
@@ -47,19 +46,19 @@ test("Phase 2 preserves the existing Mission Control interaction contract", () =
   }
 });
 
-test("Phase 2 source owns one dominant premium Coach hero and its team identity geometry", () => {
+test("Phase 2 source owns one compact premium Coach identity plus dominant decision hero", () => {
   assert.match(commandCenter, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
   assert.match(commandCenter, /mcHeroIdentity/);
   assert.doesNotMatch(commandCenter, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(titleCss, /Coach Home title authority/);
-  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*clamp\(420px,\s*112vw,\s*468px\)/);
+  assert.match(titleCss, /Coach Home mobile identity \+ decision authority/);
+  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*428px/);
   assert.match(titleCss, /\.mcHeroContent[\s\S]*width:\s*100%[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
-  assert.match(titleCss, /--coach-hero-crest:\s*clamp\(108px,\s*30vw,\s*124px\)/);
+  assert.match(titleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(titleCss, /\.mcHeroTeamMark[\s\S]*width:\s*var\(--coach-hero-crest\)[\s\S]*height:\s*var\(--coach-hero-crest\)/);
   assert.match(titleCss, /\.mcHeroTeamMark img[\s\S]*object-fit:\s*contain/);
-  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(46px,\s*12vw,\s*58px\)/);
+  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
   assert.doesNotMatch(titleCss, /!important|html\s+body\s+#root/);
   assert.match(css, /\.mcRealityStrip\s*\{/);
   assert.match(css, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
@@ -74,11 +73,12 @@ test("late hierarchy and critical layers cannot redesign or hide Coach title ide
     assert.doesNotMatch(lateAuthority, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*>\s*p\s*\{[^}]*max-width\s*:/s);
+    assert.doesNotMatch(lateAuthority, /\.mcHeader\s*\{[^}]*grid-template-columns\s*:/s);
   }
   assert.doesNotMatch(criticalCss, /\[data-testid="coach-primary-objective"\]/);
   assert.doesNotMatch(criticalCss, /\.mcHero\s*,|\.mcHeroContent\s*\{/);
   assert.match(criticalCss, /Title\/Hero composition is intentionally excluded and source-owned/);
-  assert.match(cascadeLock, /Coach Hero identity, crest, title, summary and Hero geometry are source-owned/);
+  assert.match(cascadeLock, /Coach mobile header,[\s\S]*team identity,[\s\S]*crest,[\s\S]*title and Hero geometry are component-owned/);
 });
 
 test("critical cascade remains narrowly scoped to commands and support rows", () => {
@@ -98,19 +98,18 @@ test("light support tokens cannot inherit legacy dark shell variables", () => {
 
 test("mobile hierarchy preserves safe controls while Coach title composition stays source-owned", () => {
   assert.match(titleCss, /@media \(max-width:\s*700px\)/);
-  assert.match(css, /min-height:\s*44px !important/);
-  assert.match(headerCss, /@media\(max-width:700px\)[\s\S]*\.mcHeader\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) 44px/);
+  assert.match(titleCss, /\.mcMobileMenu,[\s\S]*\.mcBell\s*\{[\s\S]*width:\s*44px;[\s\S]*height:\s*44px;/);
+  assert.match(titleCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*grid-template-columns:\s*44px minmax\(0, 1fr\) 44px/);
   assert.match(titleCss, /\.mcHeroContent[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
   assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*max-height:\s*none/);
-  assert.equal(/\.mcTeamSelect[^}]*display:\s*none/s.test(css), false);
-  assert.equal(/\.mcBell[^}]*display:\s*none/s.test(css), false);
-  assert.equal(/\.mcMobileMenu[^}]*display:\s*none/s.test(css), false);
+  assert.match(titleCss, /\.mcBrandLockup,[\s\S]*\.mcTeamSelect\s*\{\s*display:\s*none/);
+  assert.doesNotMatch(css, /\.mcHeader\s*\{/);
 });
 
-test("Phase 2 includes reduced motion and reduced transparency handling", () => {
-  assert.match(css, /prefers-reduced-transparency: reduce/);
+test("Phase 2 keeps reduced motion and avoids transparency-dependent Coach identity chrome", () => {
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /backdrop-filter:\s*none !important/);
   assert.match(css, /animation:\s*none !important/);
+  assert.match(titleCss, /backdrop-filter:\s*none/);
+  assert.match(titleCss, /-webkit-backdrop-filter:\s*none/);
 });
