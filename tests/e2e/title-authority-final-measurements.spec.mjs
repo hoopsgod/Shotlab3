@@ -124,7 +124,7 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
   const teamName = await applyDifficultBranding(page);
   const hero = page.getByTestId("coach-primary-objective");
   await expect(hero).toBeVisible();
-  await expect(hero.locator(".mcHeroTeamMark .mcHeroLogoSetup")).toBeVisible();
+  await expect(hero.locator(".mcHeroTeamMark img")).toBeVisible();
 
   const metrics = await hero.evaluate((element) => {
     const rect = element.getBoundingClientRect();
