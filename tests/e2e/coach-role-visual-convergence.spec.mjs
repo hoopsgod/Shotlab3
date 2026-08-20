@@ -2,6 +2,11 @@ import { test, expect } from "@playwright/test";
 
 const NAVY_RGB = ["rgb(11, 38, 51)", "rgb(7, 24, 32)"];
 
+function rgbStops(background = "") {
+  return [...String(background).matchAll(/\brgb\((\d+),\s*(\d+),\s*(\d+)\)/g)]
+    .map((match) => match.slice(1, 4).map(Number));
+}
+
 test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
 
 async function installSafeRoutes(page) {
@@ -104,8 +109,11 @@ test("every Coach mobile destination uses the converged navy/cream product gramm
     decisionBackground: getComputedStyle(element.querySelector('h1')).backgroundImage,
   }));
   expect(home.heroBackground).toBe("rgb(244, 241, 233)");
+  expect(home.identityBackground).toContain("linear-gradient");
+  const identityStops = rgbStops(home.identityBackground);
+  expect(identityStops.length).toBeGreaterThanOrEqual(2);
+  expect(identityStops.every(([red, green, blue]) => Math.max(red, green, blue) < 64 && blue > green && green > red)).toBe(true);
   for (const color of NAVY_RGB) {
-    expect(home.identityBackground).toContain(color);
     expect(home.decisionBackground).toContain(color);
   }
   await expectNoHorizontalOverflow(page);
