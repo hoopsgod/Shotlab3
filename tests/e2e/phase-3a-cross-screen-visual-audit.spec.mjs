@@ -119,7 +119,6 @@ async function expectCompactFunctionalIntro(page) {
         variant: element.getAttribute("data-variant"),
         family: element.getAttribute("data-title-stage-family"),
         brandTreatment: element.getAttribute("data-brand-treatment"),
-        longSingleWord: element.classList.contains("teamIdentityTitleStage--longSingleWord"),
       };
     });
     expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
@@ -127,17 +126,13 @@ async function expectCompactFunctionalIntro(page) {
     expect(geometry.width).toBeGreaterThan(300);
     expect(geometry.variant).not.toBe("hero");
     expect(geometry.family).toBe("editorial");
-    expect(["compact", "signature", "watermark", "none"]).toContain(geometry.brandTreatment);
-    expect(geometry.titleSize).toBeGreaterThanOrEqual(geometry.longSingleWord ? 36 : 38);
+    expect(geometry.brandTreatment).toBe("compact");
+    expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
     expect(geometry.titleSize).toBeLessThanOrEqual(46);
-    if (geometry.brandTreatment === "compact") {
-      expect(geometry.brandPanelWidth).toBeGreaterThan(0);
-      expect(geometry.brandPanelWidth).toBeLessThanOrEqual(36);
-      expect(geometry.brandPanelHeight).toBeLessThanOrEqual(36);
-    } else {
-      expect(geometry.brandPanelWidth).toBe(0);
-      expect(geometry.brandPanelHeight).toBe(0);
-    }
+    expect(geometry.brandPanelWidth).toBeGreaterThanOrEqual(84);
+    expect(geometry.brandPanelWidth).toBeLessThanOrEqual(108);
+    expect(geometry.brandPanelHeight).toBeGreaterThanOrEqual(84);
+    expect(geometry.brandPanelHeight).toBeLessThanOrEqual(108);
     return;
   }
 
