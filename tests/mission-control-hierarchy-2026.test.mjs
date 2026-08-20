@@ -46,7 +46,7 @@ test("Phase 2 preserves the existing Mission Control interaction contract", () =
   }
 });
 
-test("Phase 2 source owns one compact premium Coach identity plus dominant decision hero", () => {
+test("Phase 2 source owns one shared-grammar Coach identity chapter plus a dominant decision surface", () => {
   assert.match(commandCenter, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
   assert.match(commandCenter, /mcHeroIdentity/);
@@ -58,7 +58,8 @@ test("Phase 2 source owns one compact premium Coach identity plus dominant decis
   assert.match(titleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(titleCss, /\.mcHeroTeamMark[\s\S]*width:\s*var\(--coach-hero-crest\)[\s\S]*height:\s*var\(--coach-hero-crest\)/);
   assert.match(titleCss, /\.mcHeroTeamMark img[\s\S]*object-fit:\s*contain/);
-  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss, /\.mcHeroIdentity::after[\s\S]*content:\s*"Mission Control"[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(32px,\s*8\.7vw,\s*38px\)/);
   assert.doesNotMatch(titleCss, /!important|html\s+body\s+#root/);
   assert.match(css, /\.mcRealityStrip\s*\{/);
   assert.match(css, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
