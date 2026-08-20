@@ -3,7 +3,7 @@ const BRANDING_MARKER = "shotlab-branding-compatibility-labels";
 
 const CSS = `
 /* Release corrections for the product-light visual system.
-   Coach Hero identity/title geometry is intentionally excluded. */
+   Coach Hero identity, decision metrics, CTA, and title geometry are intentionally excluded. */
 .appHeader,
 .performance-shell .appHeader,
 .premium-screen .appHeader {
@@ -29,16 +29,6 @@ const CSS = `
 .${BRANDING_MARKER}__system {
   color: var(--sl-muted, #68706a);
   font: 650 13px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-}
-
-@media (max-width: 760px) {
-  body.mission-control-active .mcRealityStrip > * {
-    min-height: 50px !important;
-    padding-block: 8px !important;
-  }
-  body.mission-control-active .mcPrimary {
-    min-height: 46px !important;
-  }
 }
 `;
 
