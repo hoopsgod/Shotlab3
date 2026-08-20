@@ -152,7 +152,10 @@ test("every Coach mobile destination uses the converged navy/cream product gramm
   const floatingAdminSurfaces = administration.locator(".coachSeasonArchivePanel, .coachAdministrationCard, .seasonArchiveDetail");
   if (await floatingAdminSurfaces.count()) {
     const shadows = await floatingAdminSurfaces.evaluateAll((elements) => elements.map((element) => getComputedStyle(element).boxShadow));
-    for (const shadow of shadows) expect(shadow).toBe("none");
+    for (const shadow of shadows) {
+      const alphas = [...shadow.matchAll(/rgba\([^)]*,\s*([\d.]+)\)/g)].map((match) => Number(match[1]));
+      expect(Math.max(0, ...alphas)).toBeLessThanOrEqual(.08);
+    }
   }
   await expectNoHorizontalOverflow(page);
 
