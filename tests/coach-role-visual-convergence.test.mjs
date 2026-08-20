@@ -12,7 +12,7 @@ const events = read("src/components/CoachEventsPremiumV2.css");
 const branding = read("src/screens/CoachTeamBrandingScreen.jsx");
 const app = read("src/App.jsx");
 
-const navyGradient = /linear-gradient\(145deg,\s*#0b2633,\s*#071820 72%\)/;
+const brandGradient = /linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,[^)]+\),\s*var\(--team-brand-surface-deep,[^)]+\) 72%\)/;
 
 test("all Coach operational destinations resolve through the shared editorial and performance system", () => {
   for (const marker of [
@@ -28,8 +28,8 @@ test("all Coach operational destinations resolve through the shared editorial an
   assert.match(secondary, /\.coachPlayerDetailWorkspace/);
 });
 
-test("Coach route decisions use the same navy performance material and lime action rhythm as Player", () => {
-  assert.match(routeCss, navyGradient);
+test("Coach route decisions use the same brand-driven performance material and primary action rhythm as Player", () => {
+  assert.match(routeCss, brandGradient);
   assert.doesNotMatch(routeCss, /linear-gradient\(145deg,\s*#121817 0%,\s*#07100f 74%\)/);
   assert.match(routeCss, /\.stage \.action[\s\S]*min-height:\s*54px/);
   assert.match(routeCss, /background:\s*color-mix\(in srgb, var\(--stage-accent\) 92%, white 8%\)/);
@@ -38,8 +38,8 @@ test("Coach route decisions use the same navy performance material and lime acti
   assert.match(routeCss, /@media \(max-width: 760px\)[\s\S]*\.watermark \{ display: none; \}/);
 });
 
-test("Coach supporting surfaces converge on cream paper and flat evidence instead of black glass", () => {
-  assert.match(convergence, /--coach-2026-canvas:\s*#f4f1e9/);
+test("Coach supporting surfaces converge on a brand-washed cream paper and flat evidence instead of black glass", () => {
+  assert.match(convergence, /--coach-2026-canvas:\s*var\(--team-brand-page-wash, #f4f1e9\)/);
   assert.match(convergence, /--coach-2026-paper:\s*#ffffff/);
   assert.match(convergence, /\[data-visual-role="insight-card"\]\[data-surface="light"\][\s\S]*border-radius:\s*0;[\s\S]*background:\s*transparent;[\s\S]*box-shadow:\s*none;/);
   assert.match(convergence, /\.coachAdministrationCard,[\s\S]*\.seasonArchiveDetail[\s\S]*box-shadow:\s*none;/);
@@ -60,10 +60,10 @@ test("Coach Events keeps calendar-first behavior while replacing green-black dee
   assert.match(convergence, /\.coachEventsCalendar__day\[data-selected="true"\][\s\S]*background:\s*var\(--coach-2026-navy\)/);
 });
 
-test("Program Branding uses navy preview, quiet controls, and the shared lime primary action", () => {
+test("Program Branding uses a brand-driven preview, quiet controls, and the shared primary action", () => {
   assert.match(branding, /data-visual-role="branding-preview"/);
   assert.match(branding, /data-visual-role="branding-controls"/);
-  assert.match(convergence, /coach-branding-workspace[\s\S]*branding-preview[\s\S]*linear-gradient\(145deg, #0b2633, #071820 72%\)/);
+  assert.match(convergence, /coach-branding-workspace[\s\S]*branding-preview[\s\S]*linear-gradient\(145deg, var\(--team-brand-surface-elevated/);
   assert.match(convergence, /branding-controls[\s\S]*background:\s*#fff !important;[\s\S]*box-shadow:\s*none !important/);
   assert.match(convergence, /form button\[type="submit"\][\s\S]*min-height:\s*52px !important/);
 });

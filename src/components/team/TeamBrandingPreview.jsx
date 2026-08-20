@@ -15,7 +15,7 @@ function TeamBrandingPreviewContent() {
     <section style={{ padding: 16, border: "1px solid rgba(24,32,31,.1)", borderRadius: 18, background: "#f8f7f3" }}>
       <div style={{ color: "#747d77", fontSize: 10, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase" }}>Typography · {label}</div>
       <div style={{ marginTop: 9, color: "#17201e", fontSize: "calc(23px * var(--coach-text-scale-display))", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-.035em" }}>One program. Coach and player.</div>
-      <div style={{ marginTop: 7, color: "#68716c", fontSize: "calc(12px * var(--coach-text-scale-medium))", lineHeight: 1.55 }}>Team color personalizes identity accents while ShotLab keeps body text, status, actions, and navigation readable.</div>
+      <div style={{ marginTop: 7, color: "#68716c", fontSize: "calc(12px * var(--coach-text-scale-medium))", lineHeight: 1.55 }}>Primary color shapes the program atmosphere and main actions. Secondary color carries supporting actions while ShotLab keeps status, text, and navigation readable.</div>
     </section>
   </div>;
 }

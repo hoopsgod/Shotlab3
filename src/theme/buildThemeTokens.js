@@ -1,7 +1,7 @@
-import resolveTeamBranding from "./resolveTeamBranding";
-import DEFAULT_BRANDING from "./brandingDefaults";
-import { balanceBrandColor, mixHex, normalizeHexColor, resolveOnColor, rgba } from "./brandColorUtils";
-import { SEMANTIC_COLORS, SEMANTIC_TONES } from "./semanticColors";
+import resolveTeamBranding from "./resolveTeamBranding.js";
+import DEFAULT_BRANDING from "./brandingDefaults.js";
+import { balanceBrandColor, mixHex, normalizeHexColor, resolveOnColor, rgba } from "./brandColorUtils.js";
+import { SEMANTIC_COLORS, SEMANTIC_TONES } from "./semanticColors.js";
 
 export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
@@ -15,9 +15,13 @@ export default function buildThemeTokens(teamBranding = {}) {
   const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);
   const rawSecondary = normalizeHexColor(branding.secondaryColor, rawPrimary);
 
-  // Team colors control identity and primary actions only. Semantic state colors stay fixed.
+  // Team colors control identity atmosphere plus primary and secondary actions.
+  // Semantic state colors stay fixed so brand choices cannot disguise status.
   const darkSurfaceBase = "#0F1115";
   const darkSurfaceElevated = "#171D28";
+  const identitySurfaceBase = "#071820";
+  const identitySurfaceElevated = "#0B2633";
+  const editorialCanvas = "#F4F1E9";
   const neutralText = "#E5E7EB";
 
   const brandPrimary = balanceBrandColor(rawPrimary);
@@ -33,6 +37,14 @@ export default function buildThemeTokens(teamBranding = {}) {
   const brandIconAccent = mixHex(brandSecondary, brandPrimary, 0.6);
   const brandActionBg = rgba(brandPrimary, 0.18);
   const brandActionBgHover = rgba(brandPrimary, 0.28);
+  const brandSurfaceDeep = mixHex(identitySurfaceBase, brandPrimary, 0.24);
+  const brandSurface = mixHex(identitySurfaceBase, brandPrimary, 0.31);
+  const brandSurfaceElevated = mixHex(identitySurfaceElevated, brandPrimary, 0.36);
+  const brandSurfaceGlow = rgba(brandPrimary, 0.2);
+  const brandPageWash = mixHex(editorialCanvas, brandPrimary, 0.055);
+  const brandSecondaryAction = brandSecondary;
+  const brandOnSecondary = resolveOnColor(brandSecondaryAction);
+  const brandSecondarySoft = rgba(brandSecondaryAction, 0.18);
 
   return {
     branding: {
@@ -65,6 +77,14 @@ export default function buildThemeTokens(teamBranding = {}) {
       actionBg: brandActionBg,
       actionBgHover: brandActionBgHover,
       actionText: brandAccentText,
+      surfaceDeep: brandSurfaceDeep,
+      surface: brandSurface,
+      surfaceElevated: brandSurfaceElevated,
+      surfaceGlow: brandSurfaceGlow,
+      pageWash: brandPageWash,
+      secondaryAction: brandSecondaryAction,
+      secondaryActionText: brandOnSecondary,
+      secondaryActionSoft: brandSecondarySoft,
       accentSoft: brandPrimarySoft,
       accentBg: brandTintSurface,
       secondary: brandSecondary,
@@ -96,6 +116,14 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--team-brand-action-bg": brandActionBg,
       "--team-brand-action-bg-hover": brandActionBgHover,
       "--team-brand-action-text": brandAccentText,
+      "--team-brand-surface-deep": brandSurfaceDeep,
+      "--team-brand-surface": brandSurface,
+      "--team-brand-surface-elevated": brandSurfaceElevated,
+      "--team-brand-surface-glow": brandSurfaceGlow,
+      "--team-brand-page-wash": brandPageWash,
+      "--team-brand-secondary-action": brandSecondaryAction,
+      "--team-brand-on-secondary": brandOnSecondary,
+      "--team-brand-secondary-soft": brandSecondarySoft,
       "--accent": brandAccentText,
       "--accent-soft": brandPrimarySoft,
       "--team-brand-accent-soft": brandPrimarySoft,

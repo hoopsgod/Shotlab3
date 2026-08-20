@@ -17,14 +17,15 @@ test("branding screen leads with program identity while retaining controls", () 
 
 test("live preview shows distinct coach and player product surfaces", () => {
   assert.match(preview, /Mission Control/);
-  assert.match(preview, /Today’s Training/);
+  assert.match(preview, /Program Training/);
   assert.match(preview, /data-testid="branding-live-preview"/);
   assert.match(preview, /Typography ·/);
 });
 
 test("branding workspace gives identity the dominant surface and subordinates controls", () => {
-  assert.match(styles, /#f5f3ee/);
-  assert.match(styles, /linear-gradient\(145deg,#0a2633/);
+  assert.match(styles, /background:var\(--team-brand-page-wash,#f5f3ee\)/);
+  assert.match(styles, /linear-gradient\(145deg,var\(--team-brand-surface-deep,#0a2633\),var\(--team-brand-surface-elevated,#102f39\)\)/);
+  assert.match(styles, /background:var\(--team-brand-primary,#1f5e4c\)!important/);
   assert.match(styles, /branding-industrial__controls\{width:min\(100%,820px\)/);
   assert.match(styles, /min-height:48px!important/);
   assert.match(styles, /focus-visible/);

@@ -176,6 +176,11 @@
   font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 .teamIdentityTitleStage__action--primary { border-color: #202522; background: #202522; color: #f9faf6; }
+.teamIdentityTitleStage__action:not(.teamIdentityTitleStage__action--primary) {
+  border-color: color-mix(in srgb, var(--team-brand-secondary-action, #9ca3af) 42%, rgba(21, 25, 24, .14));
+  background: var(--team-brand-secondary-soft, rgba(156, 163, 175, .18));
+  color: color-mix(in srgb, var(--team-brand-secondary-action, #64748b) 68%, #202522);
+}
 .teamIdentityTitleStage__action:focus-visible { outline: 3px solid rgba(113, 133, 31, .25); outline-offset: 2px; }
 .teamIdentityTitleStage__action:disabled { cursor: not-allowed; opacity: .52; }
 .teamIdentityTitleStage__crestSlot {
@@ -247,7 +252,7 @@
   color: #f8fbfc;
   background:
     radial-gradient(circle at 90% 2%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 15%, transparent), transparent 38%),
-    linear-gradient(132deg, #061923 0%, #082630 58%, #0a2e38 100%);
+    linear-gradient(132deg, var(--team-brand-surface-deep, #061923) 0%, var(--team-brand-surface, #082630) 58%, var(--team-brand-surface-elevated, #0a2e38) 100%);
 }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__inner { padding: max(18px, env(safe-area-inset-top)) 18px 20px; }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__navigation { padding-inline: 18px; }
@@ -271,6 +276,11 @@
 }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__tonalCrest { color: rgba(218, 231, 236, .055); }
 .teamIdentityTitleStage--dark .teamIdentityTitleStage__crest { filter: drop-shadow(0 16px 25px rgba(0,0,0,.4)) drop-shadow(0 0 12px color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 10%, transparent)); }
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__action:not(.teamIdentityTitleStage__action--primary) {
+  border-color: color-mix(in srgb, var(--team-brand-secondary-action, #9ca3af) 52%, rgba(255,255,255,.14));
+  background: color-mix(in srgb, var(--team-brand-secondary-action, #9ca3af) 22%, transparent);
+  color: color-mix(in srgb, var(--team-brand-secondary-action, #9ca3af) 42%, #f8fbfc);
+}
 .teamIdentityTitleStage--hero {
   --identity-crest: clamp(104px, 29vw, 120px);
   --identity-title: clamp(46px, 12vw, 58px);

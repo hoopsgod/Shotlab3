@@ -67,7 +67,7 @@ test("secondary pages use one editorial title treatment while retaining the full
 
 test("primary decisions are dark performance bands owned by SecondaryPageSystem CSS", () => {
   assert.match(secondaryPageCss, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns: 44px minmax\(0, 1fr\) minmax\(180px, 30%\)/);
-  assert.match(secondaryPageCss, /linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryPageCss, /linear-gradient\(145deg, var\(--team-brand-surface-elevated, #171b18\), var\(--team-brand-surface-deep, #0c0f0d\) 72%\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__icon\s*\{[\s\S]*display: grid/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__visual\s*\{[\s\S]*display: block/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision h2\s*\{[\s\S]*font: 770 clamp\(27px, 5vw, 38px\)/);
@@ -98,8 +98,8 @@ test("mobile metric interactions stay stable and reduced-motion safe", () => {
   assert.match(secondaryPageCss, /\.secondaryPageDecision button:active:not\(:disabled\) \{ transform: none; \}/);
 });
 
-test("Coach detail surfaces retain the same dark performance language below the shared title", () => {
-  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+test("Coach detail surfaces retain the same brand-driven dark performance language below the shared title", () => {
+  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg, var\(--team-brand-surface-elevated/);
   assert.match(secondaryPageCss, /\.coachPlayerProfileHero h2\s*\{[\s\S]*font: 780 clamp\(28px, 5vw, 40px\)/);
   assert.match(secondaryPageCss, /\.coachPlayerProfileMetrics\s*\{[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(secondaryPageCss, /@media \(max-width: 760px\)[\s\S]*\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
@@ -117,7 +117,7 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
   assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(coachTitleCss, /min-height:\s*420px/);
+  assert.match(coachTitleCss, /min-height:\s*488px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);

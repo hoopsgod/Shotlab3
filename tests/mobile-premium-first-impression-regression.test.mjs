@@ -72,7 +72,7 @@ test("mobile secondary title stages keep editorial hierarchy while the enhancer 
 
 test("primary decision moment remains a full-bleed dark performance stage in owned component CSS", () => {
   assert.match(secondaryPageCss, /\.secondaryPageDecision \{[\s\S]*border-radius: var\(--radius-xl, 24px\)/);
-  assert.match(secondaryPageCss, /linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryPageCss, /linear-gradient\(145deg, var\(--team-brand-surface-elevated, #171b18\), var\(--team-brand-surface-deep, #0c0f0d\) 72%\)/);
   assert.match(secondaryPageCss, /@media \(max-width: 760px\)[\s\S]*\.secondaryPageDecision \{[\s\S]*grid-template-columns: 40px minmax\(0, 1fr\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision h2 \{[\s\S]*font: 770 clamp\(27px, 5vw, 38px\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*min-height: var\(--touch-target, 44px\)/);
@@ -119,7 +119,7 @@ test("Player Home is the immersive Hero variant while Coach Home integrates comp
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
   assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(coachTitleCss, /min-height:\s*420px/);
+  assert.match(coachTitleCss, /min-height:\s*488px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);
@@ -132,10 +132,10 @@ test("legacy final-mobile compatibility cannot override title or team-identity c
   assert.doesNotMatch(enhancer, /opacity:\s*\.17|mcHeroTeamMark/);
 });
 
-test("Program Branding keeps intentional dark identity contrast against later global surface authorities", () => {
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview\{[^}]*background:linear-gradient\(145deg,#0a2633,#102f39\)!important/);
+test("Program Branding keeps intentional brand-derived identity contrast against later global surface authorities", () => {
+  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview\{[^}]*background:linear-gradient\(145deg,var\(--team-brand-surface-deep,#0a2633\),var\(--team-brand-surface-elevated,#102f39\)\)!important/);
   assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header h2\{color:#f8faf6!important/);
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__kicker\{color:#c8ff1a!important/);
+  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__kicker\{color:var\(--team-brand-primary,#c8ff1a\)!important/);
 });
 
 test("Player Progress carries the shared program title before its purposeful command-story surface", () => {

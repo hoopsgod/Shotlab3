@@ -65,7 +65,7 @@ test('Player optical reconciliation cannot mutate the shared commitment title su
   assert.doesNotMatch(playerCompositionEnhancer, /MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home markup and owned component CSS form one compact decision-first Mission Control title authority', () => {
+test('Coach Home markup and owned component CSS form one tactical decision-first Mission Control title authority', () => {
   assert.match(coach, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
@@ -75,7 +75,8 @@ test('Coach Home markup and owned component CSS form one compact decision-first 
   assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
-  assert.match(coachTitleCss, /\.mcBrandLockup,[\s\S]*\.mcTeamSelect\s*\{\s*display:\s*none/);
+  assert.match(coachTitleCss, /\.mcTeamSelect\s*\{\s*display:\s*none/);
+  assert.match(coachTitleCss, /\.mcBrandLockup\s*\{[\s\S]*display:\s*flex/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
@@ -101,7 +102,7 @@ test('Coach Home decision, metrics and CTA have one source owner', () => {
   }
   assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcRealityStrip\s*\{/);
   assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcPrimary\s*\{/);
-  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*linear-gradient\(145deg,\s*#0b2633,\s*#071820 72%\)/);
+  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--team-brand-surface-deep/);
   assert.match(coachTitleCss, /\.mcRealityStrip strong\s*\{[\s\S]*color:\s*#f5f8f9/);
   assert.match(coachTitleCss, /\.mcRealityStrip small\s*\{[\s\S]*color:\s*#9ba7ae/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
