@@ -75,7 +75,7 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(premiumMissionControlCss,/mobile-navigation-dock/);
   assert.match(premiumMissionControlCss,/Hero identity geometry is source-owned/);
   assert.match(coachTitleCss,/@media \(max-width: 700px\)/);
-  assert.match(coachTitleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*420px/);
+  assert.match(coachTitleCss,/\.mcShellV3\s+\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*488px/);
   assert.match(coachTitleCss,/safe-area-inset-top/);
   assert.equal((playerCommandCenterSource.match(/data-testid="player-daily-command-center"/g)||[]).length,1);
 });
