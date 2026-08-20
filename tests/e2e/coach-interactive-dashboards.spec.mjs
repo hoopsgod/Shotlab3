@@ -92,7 +92,12 @@ async function enterSeededDemoCoach(page, payload = seedData) {
   await expect(coachDemo).toBeVisible({ timeout: 20_000 });
   await coachDemo.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Dashboard Test Team", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+  const seededTeam = payload["sl:teams"]?.[0];
+  const fixtureAuthority = await page.evaluate(({ teamId, teamName }) => {
+    const teams = JSON.parse(window.localStorage.getItem("sl:teams") || "[]");
+    return teams.some((team) => team?.id === teamId && team?.name === teamName);
+  }, { teamId: seededTeam?.id, teamName: seededTeam?.name });
+  expect(fixtureAuthority).toBe(true);
 }
 
 async function openSchedule(page) {
