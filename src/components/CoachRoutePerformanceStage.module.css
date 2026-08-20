@@ -6,17 +6,17 @@
   min-width: 0;
   min-height: 236px;
   padding: 22px 22px 0;
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-radius: 28px;
+  border: 1px solid rgba(220, 235, 241, .11);
+  border-radius: 24px;
   --stage-accent: #c8ff1a;
-  --surface-title: #f6f7ef;
-  --surface-body: #b7c0b6;
-  --surface-muted: #9ea99f;
+  --surface-title: #f5f8f9;
+  --surface-body: #bdc9cf;
+  --surface-muted: #9ba7ae;
   background:
-    radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--stage-accent) 15%, transparent), transparent 34%),
-    linear-gradient(145deg, #121817 0%, #07100f 74%);
-  color: #f4f6ed;
-  box-shadow: 0 22px 52px rgba(7, 16, 15, .16);
+    radial-gradient(circle at 94% 0, color-mix(in srgb, var(--stage-accent) 9%, transparent), transparent 32%),
+    linear-gradient(145deg, #0b2633, #071820 72%);
+  color: #f5f8f9;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .03), 0 18px 42px rgba(7, 24, 32, .18);
 }
 
 .stage::before {
@@ -24,55 +24,55 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  opacity: .18;
+  opacity: .07;
   pointer-events: none;
 }
 
 .stage[data-route-kind="players"]::before {
   background:
-    radial-gradient(circle at 12% 116%, transparent 0 72px, rgba(200, 255, 26, .22) 73px 75px, transparent 76px),
-    linear-gradient(90deg, transparent 49.7%, rgba(255, 255, 255, .08) 50%, transparent 50.3%);
+    radial-gradient(circle at 12% 116%, transparent 0 72px, rgba(220, 235, 241, .28) 73px 74px, transparent 75px),
+    linear-gradient(90deg, transparent 49.8%, rgba(220, 235, 241, .18) 50%, transparent 50.2%);
 }
 
 .stage[data-route-kind="schedule"]::before {
-  background: repeating-linear-gradient(90deg, transparent 0 58px, rgba(255, 255, 255, .1) 59px 60px);
+  background: repeating-linear-gradient(90deg, transparent 0 58px, rgba(220, 235, 241, .18) 59px 60px);
 }
 
 .stage[data-route-kind="training"]::before {
   background:
-    radial-gradient(circle at 86% 58%, transparent 0 52px, rgba(200, 255, 26, .22) 53px 55px, transparent 56px),
-    linear-gradient(0deg, transparent 49.7%, rgba(255, 255, 255, .08) 50%, transparent 50.3%);
+    radial-gradient(circle at 86% 58%, transparent 0 52px, rgba(220, 235, 241, .24) 53px 54px, transparent 55px),
+    linear-gradient(0deg, transparent 49.8%, rgba(220, 235, 241, .16) 50%, transparent 50.2%);
 }
 
 .stage[data-route-kind="strength"]::before {
-  background: repeating-linear-gradient(132deg, transparent 0 26px, rgba(255, 255, 255, .075) 27px 28px);
+  background: repeating-linear-gradient(132deg, transparent 0 27px, rgba(220, 235, 241, .12) 28px 29px);
 }
 
 .stage[data-route-kind="activity"]::before {
   background:
-    linear-gradient(161deg, transparent 0 54%, rgba(200, 255, 26, .2) 54.5% 55%, transparent 55.5%),
-    linear-gradient(16deg, transparent 0 68%, rgba(255, 255, 255, .08) 68.4% 68.8%, transparent 69.2%);
+    linear-gradient(161deg, transparent 0 54%, rgba(220, 235, 241, .22) 54.5% 55%, transparent 55.5%),
+    linear-gradient(16deg, transparent 0 68%, rgba(220, 235, 241, .13) 68.4% 68.8%, transparent 69.2%);
 }
 
 .stage[data-route-kind="leaderboards"]::before {
   background:
-    linear-gradient(to top, rgba(200, 255, 26, .13) 0 34%, transparent 34%) 78% 100% / 34px 84px no-repeat,
-    linear-gradient(to top, rgba(255, 255, 255, .09) 0 34%, transparent 34%) 88% 100% / 34px 62px no-repeat,
-    linear-gradient(to top, rgba(255, 255, 255, .07) 0 34%, transparent 34%) 98% 100% / 34px 45px no-repeat;
+    linear-gradient(to top, rgba(220, 235, 241, .18) 0 34%, transparent 34%) 78% 100% / 34px 84px no-repeat,
+    linear-gradient(to top, rgba(220, 235, 241, .13) 0 34%, transparent 34%) 88% 100% / 34px 62px no-repeat,
+    linear-gradient(to top, rgba(220, 235, 241, .1) 0 34%, transparent 34%) 98% 100% / 34px 45px no-repeat;
 }
 
 .stage[data-route-kind="settings"]::before {
-  background: radial-gradient(circle at 88% 34%, transparent 0 44px, rgba(255, 255, 255, .09) 45px 46px, transparent 47px 64px, rgba(255, 255, 255, .06) 65px 66px, transparent 67px);
+  background: radial-gradient(circle at 88% 34%, transparent 0 44px, rgba(220, 235, 241, .15) 45px 46px, transparent 47px 64px, rgba(220, 235, 241, .1) 65px 66px, transparent 67px);
 }
 
 .watermark {
   position: absolute;
-  top: 9px;
-  right: -12px;
+  top: 10px;
+  right: -10px;
   z-index: -1;
-  color: var(--stage-accent);
-  opacity: .07;
-  transform: rotate(-6deg);
+  color: #dcebf1;
+  opacity: .035;
+  transform: rotate(-5deg);
   pointer-events: none;
 }
 
@@ -84,21 +84,21 @@
 }
 
 .routeMark {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--stage-accent) 24%, rgba(255, 255, 255, .12));
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 25%, rgba(220, 235, 241, .12));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--stage-accent) 7%, transparent);
+  background: color-mix(in srgb, var(--stage-accent) 7%, rgba(255, 255, 255, .02));
   color: var(--stage-accent);
 }
 
 .eyebrow {
-  color: var(--stage-accent);
+  color: color-mix(in srgb, var(--stage-accent) 84%, white 16%);
   font: 760 10px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  letter-spacing: .095em;
+  letter-spacing: .085em;
   text-transform: uppercase;
 }
 
@@ -107,55 +107,58 @@
   z-index: 1;
   max-width: 650px;
   margin-top: 13px;
-  padding-right: min(16vw, 112px);
+  padding-right: min(15vw, 104px);
 }
 
 .title {
   max-width: 20ch;
   margin: 0;
-  color: #f6f7ef;
-  -webkit-text-fill-color: #f6f7ef;
-  font: 790 clamp(28px, 5vw, 38px)/.99 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  color: #f5f8f9;
+  -webkit-text-fill-color: #f5f8f9;
+  font: 810 clamp(30px, 5vw, 39px)/.96 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.048em;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
 .detail {
   max-width: 58ch;
   margin: 9px 0 0;
-  color: #b7c0b6;
-  -webkit-text-fill-color: #b7c0b6;
-  font: 520 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  letter-spacing: -.01em;
+  color: #bdc9cf;
+  -webkit-text-fill-color: #bdc9cf;
+  font: 510 14px/1.44 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.008em;
+  text-wrap: pretty;
 }
 
 .stage .action {
   min-width: 0;
-  min-height: var(--touch-target, 44px);
+  min-height: 54px;
   margin-top: 15px;
-  padding: 0 14px;
+  padding: 0 17px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  border: 1px solid color-mix(in srgb, var(--stage-accent) 36%, rgba(255, 255, 255, .1));
-  border-radius: 12px;
-  background: var(--stage-accent);
-  color: #11170f;
-  -webkit-text-fill-color: #11170f;
-  font: 780 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 82%, #91b500 18%);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--stage-accent) 92%, white 8%);
+  color: #071007;
+  -webkit-text-fill-color: #071007;
+  font: 730 14px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.006em;
   cursor: pointer;
-  box-shadow: none;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--stage-accent) 15%, transparent), inset 0 1px rgba(255, 255, 255, .24);
   transition: transform 150ms ease, filter 150ms ease;
 }
 
-.stage .action:hover:not(:disabled) { filter: brightness(.96); transform: translateY(-1px); }
-.stage .action:active:not(:disabled) { transform: scale(.985); }
+.stage .action:hover:not(:disabled) { filter: brightness(1.025); transform: translateY(-1px); }
+.stage .action:active:not(:disabled) { transform: scale(.987); }
 .stage .action:disabled { opacity: .52; cursor: not-allowed; }
 .stage .action:focus-visible,
 .stage .metric:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--stage-accent) 38%, transparent);
-  outline-offset: 3px;
+  outline: 3px solid color-mix(in srgb, var(--stage-accent) 34%, transparent);
+  outline-offset: 2px;
 }
 
 .visual {
@@ -163,7 +166,7 @@
   z-index: 1;
   width: min(100%, 360px);
   margin-top: 12px;
-  color: #aeb8ae;
+  color: #aebbc0;
 }
 
 .metricRail {
@@ -177,8 +180,8 @@
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: none;
-  border-top: 1px solid rgba(255, 255, 255, .1);
-  background: rgba(255, 255, 255, .018);
+  border-top: 1px solid rgba(220, 235, 241, .11);
+  background: rgba(2, 13, 19, .18);
 }
 
 .metricRail::-webkit-scrollbar { display: none; }
@@ -194,7 +197,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #f4f6ed;
+  color: #f5f8f9;
   -webkit-text-fill-color: currentColor;
   text-align: left;
   box-shadow: none;
@@ -206,7 +209,7 @@
   touch-action: manipulation;
 }
 
-.stage .metric + .metric { border-left: 1px solid rgba(255, 255, 255, .09); }
+.stage .metric + .metric { border-left: 1px solid rgba(220, 235, 241, .1); }
 
 .stage .metricActive::after {
   content: "";
@@ -220,10 +223,10 @@
 }
 
 .stage .metricLabel {
-  color: #9ea99f;
-  -webkit-text-fill-color: #9ea99f;
+  color: #9ba7ae;
+  -webkit-text-fill-color: #9ba7ae;
   font: 700 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  letter-spacing: .075em;
+  letter-spacing: .07em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -232,10 +235,10 @@
 
 .stage .metricValue,
 .stage button.metric .metricValue {
-  color: #f7f8f0;
-  -webkit-text-fill-color: #f7f8f0;
-  font: 800 26px/.98 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  letter-spacing: -.05em;
+  color: #f5f8f9;
+  -webkit-text-fill-color: #f5f8f9;
+  font: 790 25px/.98 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.04em;
   white-space: nowrap;
 }
 
@@ -246,8 +249,8 @@
 }
 
 .stage .metricDetail {
-  color: #aeb8ae;
-  -webkit-text-fill-color: #aeb8ae;
+  color: #9ba7ae;
+  -webkit-text-fill-color: #9ba7ae;
   font: 510 10px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   white-space: nowrap;
   overflow: hidden;
@@ -256,47 +259,55 @@
 
 @media (max-width: 760px) {
   .stage {
-    min-height: 244px;
-    margin-inline: calc(var(--layout-gutter, 16px) * -1);
-    padding: 18px var(--layout-gutter, 16px) 0;
-    border-right: 0;
-    border-left: 0;
-    border-radius: 0;
-    box-shadow: none;
+    min-height: 248px;
+    margin-inline: 0;
+    padding: 18px 18px 0;
+    border: 1px solid rgba(220, 235, 241, .11);
+    border-radius: 22px;
+    box-shadow: inset 0 1px rgba(255, 255, 255, .03), 0 18px 42px rgba(7, 24, 32, .14);
   }
 
+  .stage::before { opacity: .045; }
+  .watermark { display: none; }
+
   .routeMark {
-    width: 36px;
-    height: 36px;
-    flex-basis: 36px;
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 11px;
   }
 
   .copy {
     margin-top: 11px;
-    padding-right: 44px;
+    padding-right: 0;
   }
 
   .title {
     max-width: 18ch;
-    font-size: clamp(27px, 8.1vw, 34px);
+    font-size: clamp(30px, 8.4vw, 36px);
   }
 
   .detail {
     max-width: 48ch;
-    font-size: 12.5px;
-    line-height: 1.46;
+    font-size: 14px;
+    line-height: 1.44;
   }
 
-  .stage .action { margin-top: 13px; }
+  .stage .action {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 15px;
+  }
 
   .visual {
     width: min(100%, 320px);
-    margin-top: 10px;
+    margin-top: 11px;
   }
 
   .metricRail {
-    margin-inline: calc(var(--layout-gutter, 16px) * -1);
+    margin-inline: -18px;
     grid-auto-columns: minmax(118px, 42vw);
+    background: rgba(2, 13, 19, .18);
   }
 
   .stage[data-route-kind="leaderboards"] .metricRail {
@@ -307,9 +318,7 @@
     overscroll-behavior-inline: auto;
   }
 
-  .stage[data-route-kind="leaderboards"] .metricDetail {
-    display: none;
-  }
+  .stage[data-route-kind="leaderboards"] .metricDetail { display: none; }
 
   .stage .metric {
     min-height: 86px;
@@ -321,10 +330,11 @@
 }
 
 @media (max-width: 390px) {
-  .copy { padding-right: 28px; }
-  .watermark { right: -28px; opacity: .055; }
+  .stage { padding-inline: 16px; }
+  .metricRail { margin-inline: -16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .stage .action { transition: none; }
+  .stage .action:active:not(:disabled) { transform: none; }
 }
