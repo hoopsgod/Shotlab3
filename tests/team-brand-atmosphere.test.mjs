@@ -11,6 +11,7 @@ const secondaryCss = read("src/components/SecondaryPageSystem.css");
 const coachConvergenceCss = read("src/styles/CoachRoleVisualConvergence2026.css");
 const coachRouteCss = read("src/components/CoachRoutePerformanceStage.module.css");
 const missionControlHierarchyCss = read("src/styles/MissionControlHierarchy2026.css");
+const legacyFoundationCss = read("public/shotlab-v3-foundation.css");
 
 test("Coach Home uses the full uploaded custom logo for every visible and tactical identity slot", () => {
   assert.match(coach, /const heroTeamLogoUrl = fullTeamLogoUrl;/);
@@ -32,6 +33,12 @@ test("Coach Home contains the full custom logo at desktop and mobile widths", ()
   assert.match(coachHomeCss, /\.mcHeroTeamMark\s*\{[\s\S]*width:\s*clamp\(/);
   assert.match(coachHomeCss, /\.mcHeroTeamMark img\s*\{[\s\S]*width:\s*100%;[\s\S]*height:\s*100%;[\s\S]*object-fit:\s*contain/);
   assert.match(coachHomeCss, /@media \(max-width:\s*700px\)[\s\S]*\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\)/);
+});
+
+test("legacy compatibility cannot enlarge or recolor the compact Coach utility lockup", () => {
+  assert.doesNotMatch(legacyFoundationCss, /body\.mission-control-active \.mcBrandCopy/);
+  assert.match(coachHomeCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*\.mcBrandCopy small\s*\{[\s\S]*font-size:\s*9px/);
+  assert.match(coachHomeCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*\.mcBrandCopy strong\s*\{[\s\S]*color:\s*#f5f8f9;[\s\S]*font-size:\s*15px/);
 });
 
 test("team palettes derive accessible branded atmosphere and secondary-action tokens", () => {
