@@ -72,7 +72,7 @@ for (const viewport of VIEWPORTS) {
       const teamSelect = header?.querySelector('.mcTeamSelect');
       const headerStyle = header ? getComputedStyle(header) : null;
       const identityStyle = identity ? getComputedStyle(identity) : null;
-      const identityTitleStyle = identity ? getComputedStyle(identity, '::after') : null;
+      const teamStyle = team ? getComputedStyle(team) : null;
       const titleStyle = title ? getComputedStyle(title) : null;
       const detailStyle = detail ? getComputedStyle(detail) : null;
       const realityStyle = reality ? getComputedStyle(reality) : null;
@@ -82,7 +82,7 @@ for (const viewport of VIEWPORTS) {
       return {
         viewport: { width: innerWidth, height: innerHeight },
         header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), attention: rect(attention), dock: rect(dock), menu: rect(menu), bell: rect(bell),
-        identityTitleSize: identityTitleStyle ? Number.parseFloat(identityTitleStyle.fontSize) : 0,
+        teamIdentitySize: teamStyle ? Number.parseFloat(teamStyle.fontSize) : 0,
         decisionTitleSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
         imageStyle: image ? { objectFit: getComputedStyle(image).objectFit, width: getComputedStyle(image).width, height: getComputedStyle(image).height, position: getComputedStyle(image).position } : null,
         teamColor: team ? getComputedStyle(team).color : '',
@@ -137,10 +137,12 @@ for (const viewport of VIEWPORTS) {
     const identityRegionHeight = metrics.identity.bottom - metrics.header.top;
     expect(identityRegionHeight).toBeGreaterThanOrEqual(160);
     expect(identityRegionHeight).toBeLessThanOrEqual(300);
-    expect(metrics.identityTitleSize).toBeGreaterThanOrEqual(44);
-    expect(metrics.identityTitleSize).toBeLessThanOrEqual(60);
+    // Mission Control intentionally keeps team identity compact and gives the decision headline title authority.
+    expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
+    expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
     expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
     expect(metrics.decisionTitleSize).toBeLessThanOrEqual(40);
+    expect(metrics.decisionTitleSize - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
     expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
     expect(metrics.hero.height).toBeLessThanOrEqual(470);
     expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
