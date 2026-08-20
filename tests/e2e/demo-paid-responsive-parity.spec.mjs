@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { installParityBranding, withParityBranding } from './parity-branding-fixture.mjs';
 
 const REGISTERED_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const TEAM_ID = 'team-responsive-parity-2026';
@@ -18,7 +19,7 @@ function registeredSeed(role) {
       'sl:supabase-session': { access_token: `responsive-${role}-token`, refresh_token: `responsive-${role}-refresh`, expires_at: nowSeconds + 3600, expires_in: 3600, token_type: 'bearer', user: { id: current.id, email: current.email } },
       'sl:supabase-access-token': `responsive-${role}-token`,
       'sl:session': { email: current.email },
-      'sl:teams': [{ id: TEAM_ID, name: 'Responsive Parity Team', ownerCoachId: coach.email, joinCode: 'RESP26', createdAt: 1_780_000_000_000 }],
+      'sl:teams': [withParityBranding({ id: TEAM_ID, name: 'Responsive Parity Team', ownerCoachId: coach.email, joinCode: 'RESP26', createdAt: 1_780_000_000_000 })],
       'sl:players': [coach, player],
       'sl:player-profiles': [{ id: 'profile-responsive-player', userId: player.email, teamId: TEAM_ID, firstName: 'Responsive', lastName: 'Player', jerseyNumber: '12' }],
       'sl:scores': [{ id: 'score-responsive-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, drillId: 'demo-home-warm-up-shooting-4-minute', score: 12, date: '2026-08-13', src: 'home' }],
@@ -64,6 +65,8 @@ async function createDemo(browser, role, viewport) {
   await installRoutes(page);
   await page.goto('/?demo=1');
   await page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true }).click();
+  await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
+  await installParityBranding(page);
   await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
   return { context, page };
 }

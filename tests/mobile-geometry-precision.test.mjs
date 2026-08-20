@@ -9,13 +9,20 @@ const secondaryPages = read('src/components/SecondaryPageSystem.css');
 const centering = read('public/shotlab-mobile-centering-reconciliation.css');
 const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
+const app = read('src/App.jsx');
 
 test('mobile geometry authority owns one 20px content rail across current and legacy mobile owners', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
-  assert.match(authority, /\.performance-shell \.player-scroll-container,[\s\S]*\.performance-shell \.coach-scroll-container[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
+  assert.match(authority, /\.performance-shell \.player-scroll-container[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
   assert.match(authority, /\.performance-shell--player \.player-quick-actions[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
+});
+
+test('Coach secondary routes compose the canonical 20px rail from one shared wrapper token', () => {
+  assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
+  assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
+  assert.match(authority, /\.performance-shell--coach \.secondaryPageShell\s*\{[\s\S]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\) !important/);
 });
 
 test('secondary mobile pages land beyond bottom navigation with deliberate breathing room', () => {

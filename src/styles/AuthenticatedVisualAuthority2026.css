@@ -19,12 +19,12 @@
   :root {
     --shotlab-mobile-content-rail: var(--space-5, 20px);
     --shotlab-mobile-content-landing: var(--space-6, 24px);
+    --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
     --layout-gutter: var(--shotlab-mobile-content-rail);
     --phase4e-mobile-gutter: var(--shotlab-mobile-content-rail);
   }
 
-  html body #root .performance-shell .player-scroll-container,
-  html body #root .performance-shell .coach-scroll-container {
+  html body #root .performance-shell .player-scroll-container {
     padding-inline: var(--shotlab-mobile-content-rail) !important;
   }
 
@@ -41,12 +41,11 @@
     ) !important;
   }
 
-  /* Coach route content still arrives inside a legacy 16px inline scroller.
-   * Compensate at the shared secondary shell so the composed page lands on the
-   * same 20px rail as Player without altering route/business logic. Dark
-   * decision surfaces no longer need the historical shell breakout here. */
+  /* Coach route content arrives inside the route wrapper declared in App.jsx.
+   * Both owners use the same gutter token so their composed inset is exactly
+   * the canonical 20px rail: 16px wrapper + 4px secondary shell. */
   html body #root .performance-shell--coach .secondaryPageShell {
-    padding-inline: calc(var(--shotlab-mobile-content-rail) - var(--space-4, 16px)) !important;
+    padding-inline: calc(var(--shotlab-mobile-content-rail) - var(--shotlab-coach-route-wrapper-gutter)) !important;
   }
 
   html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
