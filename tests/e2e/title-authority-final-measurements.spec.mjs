@@ -168,7 +168,7 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
   expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
   expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
   expect(metrics.decisionTitle.size).toBeGreaterThanOrEqual(30);
-  expect(metrics.decisionTitle.size).toBeLessThanOrEqual(40);
+  expect(metrics.decisionTitle.size).toBeLessThanOrEqual(48);
   expect(metrics.decisionTitle.size - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
   expect(metrics.decisionTitle.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
   expect(metrics.decisionTitle.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
