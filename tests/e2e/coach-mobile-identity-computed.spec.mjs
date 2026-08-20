@@ -39,7 +39,9 @@ function contrast(a, b) {
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
 function parseRgb(value) {
-  const parts = String(value).match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  const serialized = String(value).trim();
+  const parts = serialized.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  if (parts?.length === 3 && serialized.startsWith('color(srgb ')) return parts.map((part) => part * 255);
   return parts?.length === 3 ? parts : [0, 0, 0];
 }
 
