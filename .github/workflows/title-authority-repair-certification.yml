@@ -31,6 +31,7 @@ jobs:
           node --test
           tests/title-authority-repair.test.mjs
           tests/coach-player-home-visual-parity.test.mjs
+          tests/coach-role-visual-convergence.test.mjs
           tests/coach-mobile-identity-authority.test.mjs
           tests/mobile-coach-signature-stage.test.mjs
           tests/phase-5a-route-enhancer-orchestration.test.mjs
@@ -78,6 +79,7 @@ jobs:
           set -euo pipefail
           grep -R "teamIdentityTitleStage" dist/assets/*.css >/dev/null
           grep -R "object-fit:contain" dist/assets/*.css >/dev/null
+          grep -R "Coach role visual convergence" dist/assets/*.css >/dev/null
           if grep -R "shotlab-team-identity-title-authority" dist index.html; then
             echo "Emergency title authority leaked into production build" >&2
             exit 1
