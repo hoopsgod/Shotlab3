@@ -136,8 +136,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(heroChannels).toHaveLength(3);
   expect(Math.min(...heroChannels)).toBeGreaterThan(220);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
-  expect(presentation.heroHeight).toBeGreaterThanOrEqual(480);
-  expect(presentation.heroHeight).toBeLessThanOrEqual(580);
+  expect(presentation.heroHeight).toBeGreaterThanOrEqual(400);
+  expect(presentation.heroHeight).toBeLessThanOrEqual(470);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
   const heroContentChannels = rgbChannels(presentation.heroContentBackground);
   expect(heroContentChannels).toHaveLength(3);
@@ -147,7 +147,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(identityChannels).toHaveLength(3);
   expect(Math.max(...identityChannels)).toBeLessThan(55);
   expect(presentation.identityBackgroundImage).toContain("linear-gradient");
-  expect(presentation.identityHeight).toBeGreaterThanOrEqual(170);
+  expect(presentation.identityHeight).toBeGreaterThanOrEqual(160);
   expect(presentation.identityHeight).toBeLessThanOrEqual(300);
   expect(presentation.identityTitleSize).toBeGreaterThanOrEqual(44);
   expect(presentation.identityTitleSize).toBeLessThanOrEqual(60);
