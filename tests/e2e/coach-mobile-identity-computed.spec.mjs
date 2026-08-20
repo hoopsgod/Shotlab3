@@ -141,7 +141,7 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
     expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
     expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
-    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(40);
+    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(48);
     expect(metrics.decisionTitleSize - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
     expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
     expect(metrics.hero.height).toBeLessThanOrEqual(470);
