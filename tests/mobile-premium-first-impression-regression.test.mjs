@@ -61,7 +61,7 @@ test("team branding keeps semantic metadata while restoring one full custom cres
 test("mobile secondary title stages keep editorial hierarchy while the enhancer only verifies ownership", () => {
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /teamIdentityTitleStage--longTitle\.teamIdentityTitleStage--multiWord[\s\S]*clamp\(40px, 9\.8vw, 44px\)/);
-  assert.match(titleStageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(36px, 9\.6vw, 40px\)/);
+  assert.match(titleStageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(38px, 9\.6vw, 40px\)/);
   assert.match(secondaryPageSystem, /TITLE_LABELS=new Map/);
   assert.match(secondaryPageSystem, /\["Drills Dashboard","Drills"\]/);
   assert.match(secondaryPageSystem, /\["Strength & Conditioning Dashboard","S&C"\]/);
