@@ -19,7 +19,7 @@ test("Coach secondary pages use the shared editorial title stage, one performanc
   assert.match(titleCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.doesNotMatch(css, /\.secondaryPageIntro\b/);
   assert.match(css, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\][\s\S]*?gap:\s*0 !important/);
-  assert.match(css, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(css, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#171b18\),\s*var\(--team-brand-surface-deep,\s*#0c0f0d\) 72%\)/);
   assert.match(css, /\.secondaryPageDecision__visual\s*\{[\s\S]*?display:\s*block/);
   assert.match(css, /\.secondaryPageEvidence > \*[\s\S]*?border-radius:\s*0 !important/);
   assert.match(css, /\.secondaryPageEvidence > \*[\s\S]*?background:\s*transparent !important/);
@@ -53,7 +53,7 @@ test("Coach Player Detail enters through the canonical editorial workspace and k
   assert.match(detail, /<SecondaryPageIntro[^>]*eyebrow="Player intelligence"/);
   assert.match(detail, /className="coachPlayerDataManagement"/);
   assert.match(detail, /<summary className="coachPlayerDataManagement__summary">/);
-  assert.match(css, /\.coachPlayerProfileHero\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(css, /\.coachPlayerProfileHero\s*\{[\s\S]*?linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#171b18\),\s*var\(--team-brand-surface-deep,\s*#0c0f0d\) 72%\)/);
   assert.match(css, /\.coachPlayerDataManagement\s*\{[\s\S]*?background:\s*#fff/);
 });
 

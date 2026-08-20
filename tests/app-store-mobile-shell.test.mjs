@@ -66,9 +66,9 @@ test("More navigation is a floating modal sheet with keyboard focus containment"
   assert.match(navigationCss, /\.sheet\s*\{[^}]*backdrop-filter:\s*blur\(18px\) saturate\(125%\)/s);
 });
 
-test("shared V3 mobile foundation supports touch, safe areas, contrast, reduced motion, and no title authority", () => {
+test("mobile shell preserves current touch targets, safe areas, contrast, reduced motion, and no legacy title authority", () => {
   assert.match(foundationCss, /color-scheme:light/);
-  assert.match(foundationCss, /min-height:44px/);
+  assert.match(navigationCss, /\.dockItem\s*\{[^}]*min-height:\s*48px/s);
   assert.match(foundationCss, /env\(safe-area-inset-bottom/);
   assert.match(foundationCss, /prefers-reduced-motion:\s*reduce/);
   assert.match(correctionsCss, /Title and team-identity composition are intentionally excluded/);

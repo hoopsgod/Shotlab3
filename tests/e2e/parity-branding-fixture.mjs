@@ -23,17 +23,28 @@ export function withParityBranding(team = {}) {
 }
 
 export async function installParityBranding(page) {
-  await page.evaluate(({ logoUrl }) => {
-    const rawTeams = window.localStorage.getItem("sl:teams");
-    if (!rawTeams) return;
-    let teams;
-    try {
-      teams = JSON.parse(rawTeams);
-    } catch {
-      return;
-    }
-    if (!Array.isArray(teams)) return;
-    window.localStorage.setItem("sl:teams", JSON.stringify(teams.map((team) => {
+  const restoreState = await page.evaluate(({ logoUrl }) => {
+    const parse = (raw, fallback) => {
+      try { return raw ? JSON.parse(raw) : fallback; }
+      catch { return fallback; }
+    };
+    const idOf = (row) => String(row?.id || row?.teamId || row?.team_id || "");
+    const teamIdOf = (row) => String(row?.teamId || row?.team_id || "");
+    const emailOf = (row) => String(row?.email || "").trim().toLowerCase();
+
+    const session = parse(window.localStorage.getItem("sl:session"), null)
+      || parse(window.sessionStorage.getItem("sl:session"), null);
+    const teams = parse(window.localStorage.getItem("sl:teams"), []);
+    const players = parse(window.localStorage.getItem("sl:players"), []);
+    if (!session || !Array.isArray(teams) || !Array.isArray(players)) return null;
+
+    const sessionEmail = emailOf(session);
+    const player = players.find((row) => emailOf(row) === sessionEmail) || null;
+    const activeTeamId = String(session?.teamId || session?.team_id || teamIdOf(player) || teams[0]?.id || "");
+    if (!sessionEmail || !activeTeamId) return null;
+
+    const nextTeams = teams.map((team) => {
+      if (idOf(team) !== activeTeamId) return team;
       const teamName = String(team?.branding?.teamName || team?.teamName || team?.name || "Parity Team");
       return {
         ...team,
@@ -46,7 +57,48 @@ export async function installParityBranding(page) {
           logoMarkUrl: logoUrl,
         },
       };
-    })));
+    });
+    const activeTeam = nextTeams.find((team) => idOf(team) === activeTeamId) || null;
+    if (!activeTeam) return null;
+
+    window.localStorage.setItem("sl:teams", JSON.stringify(nextTeams));
+    return {
+      profile: {
+        email: String(player?.email || session?.email || ""),
+        name: String(player?.name || session?.name || ""),
+        role: player?.role === "coach" || session?.role === "coach" ? "coach" : "player",
+        team_id: activeTeamId,
+        teamId: activeTeamId,
+        hide_from_leaderboards: player?.hideFromLeaderboards === true || player?.hide_from_leaderboards === true,
+      },
+      team: activeTeam,
+    };
   }, { logoUrl: PARITY_CUSTOM_LOGO_URL });
-  await page.reload();
+
+  if (!restoreState?.profile?.email || !restoreState?.team?.id) {
+    throw new Error("Parity branding requires an active signed-in profile and team before reload");
+  }
+
+  const authPattern = "**/v1/legacy-auth/restore";
+  const teamPattern = "**/v1/teams/restore-context";
+  const authHandler = (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, profile: restoreState.profile }),
+  });
+  const teamHandler = (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, team: restoreState.team }),
+  });
+
+  await page.route(authPattern, authHandler);
+  await page.route(teamPattern, teamHandler);
+  try {
+    await page.reload();
+    await page.getByTestId("mobile-navigation-dock").waitFor({ state: "visible", timeout: 20_000 });
+  } finally {
+    await page.unroute(authPattern, authHandler);
+    await page.unroute(teamPattern, teamHandler);
+  }
 }
