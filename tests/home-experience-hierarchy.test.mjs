@@ -10,8 +10,8 @@ test("home hierarchy establishes one dominant coach and player action", () => {
   assert.match(source, /player-daily-primary-action/);
   assert.match(source, /single-primary-objective/);
   assert.match(source, /single-primary-action/);
-  assert.match(source, /mcHeroContent h1/);
-  assert.match(source, /mcPrimary/);
+  assert.match(source, /decision headline, metrics rail, and primary action are source-owned/);
+  assert.doesNotMatch(source, /mcHeroContent h1/);
 });
 
 test("supporting coach panels are visually flattened instead of removed", () => {
@@ -31,8 +31,7 @@ test("player metrics become an integrated evidence strip and remain available", 
 
 test("home hierarchy preserves accessibility and reduced motion", () => {
   assert.match(source, /prefers-reduced-motion: reduce/);
-  assert.match(source, /min-height: 54px/);
-  assert.match(source, /min-height: 56px/);
+  assert.match(source, /player-daily-primary-action[^}]*\{[\s\S]*min-height: 56px/);
   assert.match(source, /MutationObserver/);
 });
 
