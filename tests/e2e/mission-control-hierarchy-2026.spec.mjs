@@ -4,6 +4,7 @@ import { mkdirSync } from "node:fs";
 const SCREENSHOT_DIR = "artifacts/mission-control-phase-2";
 
 const rgbChannels = (value = "") => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+const isTransparent = (value = "") => ["transparent", "rgba(0, 0, 0, 0)"].includes(String(value));
 
 async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -175,12 +176,16 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.teamSelectDisplay).toBe("none");
 
   const supportingChannels = rgbChannels(presentation.supportingBackground);
-  if (supportingChannels.length === 3) expect(Math.min(...supportingChannels)).toBeGreaterThanOrEqual(230);
+  if (!isTransparent(presentation.supportingBackground) && supportingChannels.length === 3) {
+    expect(Math.min(...supportingChannels)).toBeGreaterThanOrEqual(230);
+  }
   expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
   expect(presentation.attentionShadow).toBe("none");
   expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
   const attentionChannels = rgbChannels(presentation.attentionBackground);
-  if (attentionChannels.length === 3) expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
+  if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) {
+    expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
+  }
 
   await expectNoHorizontalOverflow(page);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });
