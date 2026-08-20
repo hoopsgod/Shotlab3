@@ -89,7 +89,7 @@ for (const viewport of VIEWPORTS) {
         realityBackgroundColor: realityStyle?.backgroundColor || '',
         realityBackgroundImage: realityStyle?.backgroundImage || '',
         realityBackground: realityStyle?.background || '',
-        realityBorder: realityStyle?.border || '',
+        realityBorder: realityStyle?.borderBottom || '',
         realityColumns: realityStyle?.gridTemplateColumns.split(' ').filter(Boolean).length || 0,
         metricButtons: realityButtons.map((button) => ({
           background: getComputedStyle(button).backgroundColor,

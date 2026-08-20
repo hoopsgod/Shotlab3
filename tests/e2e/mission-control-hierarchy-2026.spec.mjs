@@ -118,7 +118,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       metricBackgroundColor: realityStyle.backgroundColor,
       metricBackground: realityStyle.background,
       metricBackgroundImage: realityStyle.backgroundImage,
-      metricBorder: realityStyle.border,
+      metricBorder: realityStyle.borderBottom,
       metricValues: metricButtons.map((button) => getComputedStyle(button.querySelector("strong")).color),
       metricLabels: metricButtons.map((button) => getComputedStyle(button.querySelector("small")).color),
       metricButtonBackgrounds: metricButtons.map((button) => getComputedStyle(button).backgroundColor),
