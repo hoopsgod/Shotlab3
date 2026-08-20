@@ -25,6 +25,13 @@ test("Coach mobile Home keeps the tactical court visible and brand-driven", () =
   assert.doesNotMatch(coachHomeCss, /\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
 });
 
+test("Coach Home contains the full custom logo at desktop and mobile widths", () => {
+  assert.match(coachHomeCss, /\.mcHeroIdentity\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+clamp\(/);
+  assert.match(coachHomeCss, /\.mcHeroTeamMark\s*\{[\s\S]*width:\s*clamp\(/);
+  assert.match(coachHomeCss, /\.mcHeroTeamMark img\s*\{[\s\S]*width:\s*100%;[\s\S]*height:\s*100%;[\s\S]*object-fit:\s*contain/);
+  assert.match(coachHomeCss, /@media \(max-width:\s*700px\)[\s\S]*\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\)/);
+});
+
 test("team palettes derive accessible branded atmosphere and secondary-action tokens", () => {
   const blue = buildThemeTokens({ primaryColor: "#3B82F6", secondaryColor: "#93C5FD" }).cssVariables;
   const red = buildThemeTokens({ primaryColor: "#EF4444", secondaryColor: "#FCA5A5" }).cssVariables;
