@@ -79,7 +79,7 @@ jobs:
           set -euo pipefail
           grep -R "teamIdentityTitleStage" dist/assets/*.css >/dev/null
           grep -R "object-fit:contain" dist/assets/*.css >/dev/null
-          grep -R -- "--coach-2026-navy:#071820" dist/assets/*.css >/dev/null
+          grep -R -- "team-brand-surface-deep" dist/assets/*.css >/dev/null
           if grep -R "shotlab-team-identity-title-authority" dist index.html; then
             echo "Emergency title authority leaked into production build" >&2
             exit 1
