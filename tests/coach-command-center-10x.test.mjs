@@ -156,8 +156,8 @@ test("responsive CSS creates a native-feeling mobile operating system with Playe
   assert.match(navigationCss,/\.dockItem\s*\{[\s\S]*?min-height:\s*48px/);
   assert.match(navigationCss,/\.dockLabelText\s*\{[\s\S]*?font-size:\s*var\(--type-micro, 11px\)/);
   assert.doesNotMatch(navigationCss,/\.dock\s*\{[^}]*translateX\(-50%\)/s);
-  assert.match(finalCss,/\.mcPrimary:active/);
-  assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(titleCss,/\.mcPrimary:active/);
+  assert.match(titleCss,/@media \(prefers-reduced-motion: reduce\)/);
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
 });
 

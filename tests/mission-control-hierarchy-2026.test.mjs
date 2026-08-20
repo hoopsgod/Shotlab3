@@ -63,9 +63,10 @@ test("Phase 2 source owns one shared-grammar Coach identity chapter plus a domin
   assert.match(titleCss, /\.mcHeroIdentity::after[\s\S]*content:\s*"Mission Control"[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
   assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(32px,\s*8\.7vw,\s*38px\)/);
   assert.doesNotMatch(titleCss, /!important|html\s+body\s+#root/);
-  assert.match(css, /\.mcRealityStrip\s*\{/);
-  assert.match(css, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
-  assert.match(css, /\.mcPrimary\s*\{/);
+  assert.match(titleCss, /\.mcRealityStrip\s*\{/);
+  assert.match(titleCss, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
+  assert.match(titleCss, /\.mcPrimary\s*\{/);
+  assert.doesNotMatch(css, /\.mcRealityStrip\b|\.mcPrimary\b/);
   assert.match(css, /\.mcSection,/);
 });
 
@@ -77,6 +78,7 @@ test("late hierarchy and compatibility layers cannot redesign Coach Home identit
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*>\s*p\s*\{[^}]*max-width\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeader\s*\{[^}]*grid-template-columns\s*:/s);
+    assert.doesNotMatch(lateAuthority, /\.mcRealityStrip\b|\.mcPrimary\b/);
   }
   for (const compatibilityLayer of [foundationCss, mobileCorrectionsCss]) {
     assert.doesNotMatch(compatibilityLayer, /\.mcRealityStrip\b/);
@@ -84,12 +86,12 @@ test("late hierarchy and compatibility layers cannot redesign Coach Home identit
   }
   assert.doesNotMatch(criticalCss, /\[data-testid="coach-primary-objective"\]/);
   assert.doesNotMatch(criticalCss, /\.mcHero\s*,|\.mcHeroContent\s*\{/);
-  assert.match(criticalCss, /Title\/Hero composition is intentionally excluded and source-owned/);
-  assert.match(cascadeLock, /Coach mobile header,[\s\S]*team identity,[\s\S]*crest,[\s\S]*title and Hero geometry are component-owned/);
+  assert.match(criticalCss, /Coach Home identity, decision, metrics and CTA are intentionally excluded[\s\S]*source-owned by CoachMissionControlTitleStage\.css/);
+  assert.match(cascadeLock, /Coach mobile header,[\s\S]*identity,[\s\S]*decision,[\s\S]*metrics and CTA are component-owned/);
 });
 
-test("critical cascade remains narrowly scoped to commands and support rows", () => {
-  assert.match(criticalCss, /\.mcPrimary\s*\{[\s\S]*display:\s*inline-flex !important/s);
+test("critical cascade remains narrowly scoped to support rows", () => {
+  assert.doesNotMatch(criticalCss, /\.mcRealityStrip\b|\.mcPrimary\b/);
   assert.match(criticalCss, /\.mcAttentionRow/);
   assert.match(criticalCss, /mobile-navigation-sheet/);
 });

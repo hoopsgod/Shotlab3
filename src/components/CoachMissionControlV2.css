@@ -56,16 +56,6 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 .mcEyebrow:before{content:"";width:18px;height:2px;background:var(--mc);box-shadow:0 0 10px color-mix(in srgb,var(--mc) 55%,transparent)}
 .mcHero h1{max-width:610px;margin:12px 0 0;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}
 .mcHeroContent>p{max-width:490px;margin:12px 0 0;color:#9ba5ad;font:700 14px/1.45 'Barlow Condensed','Arial Narrow',sans-serif}
-.mcRealityStrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:520px;margin-top:22px;border:1px solid rgba(255,255,255,.13);border-radius:14px;overflow:hidden;background:rgba(4,8,10,.78);backdrop-filter:blur(12px)}
-.mcRealityStrip button{min-width:0;padding:12px 14px;border:0;border-left:1px solid rgba(255,255,255,.1);background:transparent;color:#fff;text-align:left;cursor:pointer}
-.mcRealityStrip button:first-child{border-left:0}
-.mcRealityStrip strong,.mcRealityStrip small{display:block}
-.mcRealityStrip strong{font-family:'Bebas Neue','Impact',sans-serif;font-size:25px;line-height:1;color:#f4f6f7}
-.mcRealityStrip strong span{font-size:16px;color:#7e8992}
-.mcRealityStrip small{margin-top:5px;color:#77828b;font:800 9px 'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.04em}
-.mcPrimary{min-height:52px;margin-top:18px;padding:0 20px;border:0;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:34px;background:linear-gradient(135deg,color-mix(in srgb,var(--mc) 82%,white),var(--mc));color:#030607;font:900 12px 'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.035em;cursor:pointer;box-shadow:0 14px 34px color-mix(in srgb,var(--mc) 15%,transparent);transition:transform 160ms ease,box-shadow 160ms ease}
-.mcPrimary:hover{transform:translateY(-1px);box-shadow:0 17px 40px color-mix(in srgb,var(--mc) 22%,transparent)}
-
 .mcFocusGrid,.mcLowerGrid{display:grid;gap:16px}
 .mcFocusGrid{grid-template-columns:1.25fr .75fr}
 .mcLowerGrid{grid-template-columns:1.15fr .85fr}
@@ -152,9 +142,6 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
   .mcBrandLockup{gap:8px}.mcBrandLockup img{width:34px;height:34px}.mcBrandLockup small{font-size:8px}.mcBrandLockup strong{font-size:26px;white-space:nowrap}
   .mcTeamSelect{display:none}.mcBell{width:40px;height:40px}.mcBell b{right:-3px;top:-5px}
   /* Hero/title/crest mobile composition intentionally omitted: CoachCommandCenter owns it. */
-  .mcRealityStrip{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px;border-radius:12px}
-  .mcRealityStrip button{padding:10px 7px;text-align:center}.mcRealityStrip strong{font-size:21px}.mcRealityStrip strong span{font-size:13px}.mcRealityStrip small{font-size:7px;line-height:1.15;white-space:normal}
-  .mcPrimary{width:100%;min-height:49px;margin-top:14px;gap:20px}
   .mcArenaLights{right:-7%;width:61%;transform:skewX(-18deg) scale(.78);transform-origin:top right}
   .mcHoop{right:3%;top:68px;transform:scale(.68);transform-origin:top right}
   .mcCourtFloor{right:-18%;bottom:-10%;width:76%;height:68%}
@@ -178,7 +165,6 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 
 @media(max-width:390px){
   .mcBrandLockup small{display:none}.mcBrandLockup strong{font-size:24px}
-  .mcRealityStrip button{padding-left:5px;padding-right:5px}.mcRealityStrip strong{font-size:19px}
 }
 
 @media(prefers-reduced-motion:reduce){.mcShellV3 *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

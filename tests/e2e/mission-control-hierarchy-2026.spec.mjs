@@ -85,6 +85,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const primaryStyle = getComputedStyle(primary);
     const sectionStyle = section ? getComputedStyle(section) : null;
     const realityStyle = getComputedStyle(reality);
+    const metricButtons = [...reality.querySelectorAll(":scope > button")];
     const teamSelectStyle = getComputedStyle(teamSelect);
     const attentionStyle = attentionRow ? getComputedStyle(attentionRow) : null;
     const attentionTitleStyle = attentionTitle ? getComputedStyle(attentionTitle) : null;
@@ -109,11 +110,18 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       heroMarkHeight: heroMarkRect.height,
       heroLogoObjectFit: heroLogo ? getComputedStyle(heroLogo).objectFit : (heroFallback ? "fallback" : "missing"),
       primaryBackground: primaryStyle.backgroundColor,
+      primaryColor: primaryStyle.color,
+      primaryBorder: primaryStyle.border,
       primaryHeight: parseFloat(primaryStyle.minHeight),
       supportingBackground: sectionStyle?.backgroundColor || "",
       metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
-      metricBackground: realityStyle.backgroundColor,
+      metricBackgroundColor: realityStyle.backgroundColor,
+      metricBackground: realityStyle.background,
       metricBackgroundImage: realityStyle.backgroundImage,
+      metricBorder: realityStyle.border,
+      metricValues: metricButtons.map((button) => getComputedStyle(button.querySelector("strong")).color),
+      metricLabels: metricButtons.map((button) => getComputedStyle(button.querySelector("small")).color),
+      metricButtonBackgrounds: metricButtons.map((button) => getComputedStyle(button).backgroundColor),
       teamSelectDisplay: teamSelectStyle.display,
       attentionBackground: attentionStyle?.backgroundColor || "",
       attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 99,
@@ -154,8 +162,16 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   if (presentation.heroLogoObjectFit !== "fallback") expect(presentation.heroLogoObjectFit).toBe("contain");
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
   expect(presentation.primaryBackground).not.toBe("rgb(32, 36, 33)");
+  expect(presentation.primaryBackground).not.toBe("rgba(0, 0, 0, 0)");
+  expect(presentation.primaryColor).toBe("rgb(7, 16, 7)");
+  expect(presentation.primaryBorder).toContain("solid");
   expect(presentation.metricColumns).toBe(3);
   expect(presentation.metricBackgroundImage).toContain("linear-gradient");
+  expect(presentation.metricBackground).not.toContain("rgba(0, 0, 0, 0) none");
+  expect(presentation.metricBorder).toContain("solid");
+  expect(presentation.metricValues).toEqual(["rgb(245, 248, 249)", "rgb(245, 248, 249)", "rgb(245, 248, 249)"]);
+  expect(presentation.metricLabels).toEqual(["rgb(155, 167, 174)", "rgb(155, 167, 174)", "rgb(155, 167, 174)"]);
+  expect(presentation.metricButtonBackgrounds).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]);
   expect(presentation.teamSelectDisplay).toBe("none");
 
   const supportingChannels = rgbChannels(presentation.supportingBackground);

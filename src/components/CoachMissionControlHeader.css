@@ -79,9 +79,6 @@
     linear-gradient(90deg,rgba(3,6,7,.98) 0%,rgba(3,6,7,.91) 48%,rgba(3,6,7,.52) 72%,rgba(3,6,7,.12) 100%),
     linear-gradient(180deg,transparent 58%,rgba(3,6,7,.72));
 }
-.mcShellV3 .mcRealityStrip{max-width:440px;margin-top:17px}
-.mcShellV3 .mcPrimary{min-height:48px;margin-top:14px;border-radius:11px}
-
 .mcShellV3 .mcRailBrand{
   width:96px;
   min-height:104px;
@@ -147,18 +144,6 @@
       linear-gradient(90deg,rgba(3,6,7,.99) 0%,rgba(3,6,7,.93) 55%,rgba(3,6,7,.48) 79%,rgba(3,6,7,.12) 100%),
       linear-gradient(180deg,transparent 54%,rgba(3,6,7,.82));
   }
-  .mcShellV3 .mcRealityStrip{
-    max-width:100%;
-    margin-top:13px;
-    border-radius:11px;
-    background:rgba(4,8,10,.84);
-  }
-  .mcShellV3 .mcRealityStrip button{padding:9px 5px;text-align:center}
-  .mcShellV3 .mcRealityStrip strong{font-size:19px}
-  .mcShellV3 .mcRealityStrip strong span{font-size:12px}
-  .mcShellV3 .mcRealityStrip small{margin-top:4px;font-size:7px;line-height:1.1}
-  .mcShellV3 .mcPrimary{width:100%;min-height:44px;margin-top:11px;gap:18px;border-radius:10px;font-size:10px}
-
   .mcShellV3 .mcFocusGrid,
   .mcShellV3 .mcLowerGrid{gap:0}
   .mcShellV3 .mcSection{

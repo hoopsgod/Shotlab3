@@ -31,6 +31,7 @@ const coachFinalCss = read('src/components/CoachMissionControlFinal.css');
 const coachHierarchyCss = read('src/styles/MissionControlHierarchy2026.css');
 const coachCascadeLockCss = read('src/styles/MissionControlCascadeLock2026.css');
 const coachCriticalCss = read('public/shotlab-phase2-critical.css');
+const coachV5IntegrityCss = read('public/shotlab-v5-coach-integrity.css');
 const visualReboot = read('src/lib/visualSystemReboot.js');
 const visualReleaseFixes = read('src/lib/visualSystemRebootReleaseFixes.js');
 
@@ -88,6 +89,21 @@ test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or su
   assert.doesNotMatch(coachPolishCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
   assert.doesNotMatch(coachShellCss, /Rebalance the signature hero/);
   assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
+});
+
+test('Coach Home decision, metrics and CTA have one source owner', () => {
+  const obsoleteComponentOwners = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
+  const lateOwners = [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss, coachV5IntegrityCss, visualReboot, visualReleaseFixes];
+  for (const obsoleteCss of [...obsoleteComponentOwners, ...lateOwners]) {
+    assert.doesNotMatch(obsoleteCss, /\.mcRealityStrip\b|\.mcPrimary\b/);
+  }
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcRealityStrip\s*\{/);
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcPrimary\s*\{/);
+  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*linear-gradient\(145deg,\s*#0b2633,\s*#071820 72%\)/);
+  assert.match(coachTitleCss, /\.mcRealityStrip strong\s*\{[\s\S]*color:\s*#f5f8f9/);
+  assert.match(coachTitleCss, /\.mcRealityStrip small\s*\{[\s\S]*color:\s*#9ba7ae/);
+  assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
+  assert.doesNotMatch(signatureEnhancer, /mcRealityStrip|mcPrimary|Coach final metric ledger|Coach final metric label/);
 });
 
 test('late static and runtime Coach cascade layers cannot hide or redesign the owned title stage', () => {

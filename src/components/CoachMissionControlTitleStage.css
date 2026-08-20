@@ -4,6 +4,109 @@
    dark decision surface, restrained typography, and a prominent team crest.
    This source layer owns the mobile Coach header and first-view composition. */
 
+/* Desktop keeps its existing tactical-court presentation, but this file remains
+   the single source owner for the objective metrics and primary command. */
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 520px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-block: 1px solid rgba(220,235,241,.13);
+  border-radius: 0;
+  background: rgba(5,20,28,.28);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button {
+  min-width: 0;
+  min-height: 68px;
+  padding: 10px 14px;
+  border: 0;
+  border-right: 1px solid rgba(220,235,241,.12);
+  border-radius: 0;
+  background: transparent;
+  color: #f5f8f9;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 140ms ease;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button:last-child {
+  border-right: 0;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button:hover,
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button:focus-visible {
+  background: rgba(255,255,255,.05);
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong,
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip small {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong {
+  color: #f5f8f9;
+  font-size: 27px;
+  font-weight: 810;
+  line-height: 1;
+  letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong span,
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip small {
+  color: #afbdc4;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong span {
+  font-size: 16px;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip small {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: .035em;
+  text-transform: none;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary {
+  width: 100%;
+  min-height: 52px;
+  margin: 2px 0 0;
+  padding: 12px 18px;
+  border: 1px solid #a5cf00;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #c8ff1a;
+  color: #10170b;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1;
+  letter-spacing: -.01em;
+  text-transform: none;
+  box-shadow: 0 10px 24px rgba(78,99,0,.16);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease, box-shadow 160ms ease;
+}
+
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary:active {
+  transform: scale(.985);
+  box-shadow: 0 6px 17px color-mix(in srgb, var(--mc, #c8ff1a) 14%, transparent), inset 0 1px rgba(255,255,255,.3);
+}
+
 @media (max-width: 700px) {
   .mcShellV3 .missionControl {
     gap: 0;
@@ -356,6 +459,11 @@
     border-left: 0;
   }
 
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button:hover,
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button:focus-visible {
+    background: rgba(255,255,255,.05);
+  }
+
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong,
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip small {
     display: block;
@@ -411,6 +519,13 @@
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary:focus-visible {
     outline: 3px solid color-mix(in srgb, var(--mc, #c8ff1a) 34%, transparent);
     outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button,
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary {
+    transition: none;
   }
 }
 

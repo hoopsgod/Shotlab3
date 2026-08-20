@@ -6,18 +6,13 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcRowAction{color:#44515b!important;-webkit-text-fill-color:#44515b!important}
 
 /* Late compatibility is intentionally shell/support-only. Coach mobile header,
-   team identity, crest, title and Hero geometry are component-owned. */
+   identity, decision, metrics and CTA are component-owned. */
 @media(max-width:980px){
   html body.mission-control-active #root .ts-launcher{display:none!important}
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3{width:100vw!important;max-width:100vw!important;margin-inline:calc(50% - 50vw)!important;overflow-x:clip;box-shadow:0 -36px 0 #082731!important}
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl{width:100%;max-width:none}
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcCourtArtwork{opacity:.99!important}
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroScrim{opacity:.18!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip{position:relative!important;z-index:7!important;margin:14px 0 0!important;padding-top:12px!important;border:0!important;border-top:1px solid rgba(220,235,241,.14)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip>button{min-height:58px!important;padding:5px 8px!important;border:0!important;background:transparent!important;box-shadow:none!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip strong{color:#f5f8f9!important;-webkit-text-fill-color:#f5f8f9!important;font-size:27px!important;letter-spacing:-.05em!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcRealityStrip small{color:#a9b9bf!important;-webkit-text-fill-color:#a9b9bf!important;font-size:10px!important;text-transform:uppercase!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcPrimary{min-height:52px!important;margin-top:12px!important;border-radius:12px!important;box-shadow:none!important}
 }
 
 @media(min-width:701px){

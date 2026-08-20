@@ -14,6 +14,7 @@ test('Coach title authority is no longer rewritten by the signature enhancer', (
   assert.doesNotMatch(enhancer, /Coach mobile hero mark/);
   assert.doesNotMatch(enhancer, /mcHeroTeamMark\{display:none/);
   assert.doesNotMatch(enhancer, /font-size:clamp\(39px,11vw,45px\)/);
+  assert.doesNotMatch(enhancer, /mcRealityStrip|mcPrimary|Coach final metric ledger|Coach final metric label/);
 });
 
 test('obsolete secondary-title mutation scripts are not orchestrated', () => {
@@ -38,11 +39,8 @@ test('supporting Coach reconciliation remains idempotent and does not touch titl
   assert.match(promotedCss, /\.mcTodayPlan > button \{[\s\S]*min-height: 44px;/);
 });
 
-test('supporting Coach reconciliation rejects mixed legacy and final anchors', () => {
+test('supporting Coach reconciliation cannot rewrite a historical metric ledger', () => {
   const legacyMetricLedger = '    border-radius: 16px !important;\n    background: rgba(4, 8, 10, .5) !important;';
   const malformed = `${promotedCss}\n${legacyMetricLedger}\n`;
-  assert.throws(
-    () => promoteCoachFinalCss(malformed),
-    /Coach final metric ledger: expected exactly one legacy anchor or one final anchor; found legacy 1, final 1 \(mixed legacy\/final state\)/,
-  );
+  assert.equal(promoteCoachFinalCss(malformed), malformed);
 });

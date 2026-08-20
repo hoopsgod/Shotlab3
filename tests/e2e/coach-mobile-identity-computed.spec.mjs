@@ -60,6 +60,8 @@ for (const viewport of VIEWPORTS) {
       const title = hero?.querySelector('h1');
       const detail = hero?.querySelector('.mcHeroContent > p');
       const reality = document.querySelector('.mcRealityStrip');
+      const realityButtons = [...(reality?.querySelectorAll(':scope > button') || [])];
+      const primary = hero?.querySelector('.mcPrimary');
       const menu = header?.querySelector('.mcMobileMenu');
       const bell = header?.querySelector('.mcBell');
       const headerBrand = header?.querySelector('.mcBrandLockup');
@@ -69,6 +71,7 @@ for (const viewport of VIEWPORTS) {
       const identityTitleStyle = identity ? getComputedStyle(identity, '::after') : null;
       const titleStyle = title ? getComputedStyle(title) : null;
       const realityStyle = reality ? getComputedStyle(reality) : null;
+      const primaryStyle = primary ? getComputedStyle(primary) : null;
       const menuStyle = menu ? getComputedStyle(menu) : null;
       const bellStyle = bell ? getComputedStyle(bell) : null;
       return {
@@ -83,8 +86,22 @@ for (const viewport of VIEWPORTS) {
         heroBackgroundImage: hero ? getComputedStyle(hero).backgroundImage : '',
         identityBackground: identityStyle?.backgroundColor || '',
         identityBackgroundImage: identityStyle?.backgroundImage || '',
-        realityBackground: realityStyle?.backgroundColor || '',
+        realityBackgroundColor: realityStyle?.backgroundColor || '',
         realityBackgroundImage: realityStyle?.backgroundImage || '',
+        realityBackground: realityStyle?.background || '',
+        realityBorder: realityStyle?.border || '',
+        realityColumns: realityStyle?.gridTemplateColumns.split(' ').filter(Boolean).length || 0,
+        metricButtons: realityButtons.map((button) => ({
+          background: getComputedStyle(button).backgroundColor,
+          borderLeft: getComputedStyle(button).borderLeft,
+          height: button.getBoundingClientRect().height,
+          valueColor: getComputedStyle(button.querySelector('strong')).color,
+          labelColor: getComputedStyle(button.querySelector('small')).color,
+        })),
+        primaryBackground: primaryStyle?.backgroundColor || '',
+        primaryColor: primaryStyle?.color || '',
+        primaryBorder: primaryStyle?.border || '',
+        primaryHeight: primary?.getBoundingClientRect().height || 0,
         headerBackground: headerStyle?.backgroundColor || '',
         headerBackgroundImage: headerStyle?.backgroundImage || '',
         headerColor: headerStyle?.color || '',
@@ -125,6 +142,20 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.reality.top).toBeGreaterThanOrEqual(metrics.detail.bottom - 1);
     expect(metrics.reality.top).toBeLessThan(viewport.height);
     expect(metrics.realityBackgroundImage).toContain('linear-gradient');
+    expect(metrics.realityBackground).not.toBe('rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box');
+    expect(metrics.realityBorder).toContain('solid');
+    expect(metrics.realityColumns).toBe(3);
+    expect(metrics.metricButtons).toHaveLength(3);
+    for (const metric of metrics.metricButtons) {
+      expect(metric.background).toBe('rgba(0, 0, 0, 0)');
+      expect(metric.height).toBeGreaterThanOrEqual(44);
+      expect(contrast(parseRgb(metric.valueColor), [7, 24, 32])).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(parseRgb(metric.labelColor), [7, 24, 32])).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(metrics.primaryHeight).toBeGreaterThanOrEqual(54);
+    expect(metrics.primaryBackground).not.toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.primaryColor).toBe('rgb(7, 16, 7)');
+    expect(metrics.primaryBorder).toContain('solid');
     expect(metrics.overflow).toBeLessThanOrEqual(1);
 
     expect(metrics.headerBrandDisplay).toBe('none');
