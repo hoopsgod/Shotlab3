@@ -7,6 +7,7 @@ import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleas
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
 import './styles/ExpertVisualPolish.css'
+import './components/Phase7AuthenticatedChrome.css'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
