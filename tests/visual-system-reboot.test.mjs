@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const source = fs.readFileSync(new URL("../src/lib/visualSystemReboot.js", import.meta.url), "utf8");
 const releaseFixes = fs.readFileSync(new URL("../src/lib/visualSystemRebootReleaseFixes.js", import.meta.url), "utf8");
+const homeHierarchy = fs.readFileSync(new URL("../src/lib/homeExperienceHierarchy.js", import.meta.url), "utf8");
 const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 const playerBootstrap = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
 
@@ -19,6 +20,9 @@ test("runtime reboot layers cannot compete with source-owned Coach Hero or secon
   assert.doesNotMatch(releaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
   assert.doesNotMatch(source, /\.mcPrimary\b|\.mcRealityStrip\b/);
   assert.doesNotMatch(releaseFixes, /\.mcPrimary\b|\.mcRealityStrip\b/);
+  assert.doesNotMatch(homeHierarchy, /body\.mission-control-active\s+\.mcHero\b|body\.mission-control-active\s+\.mcHeroContent\b|body\.mission-control-active\s+\.mcPrimary\b|body\.mission-control-active\s+\.mcRealityStrip\b/);
+  assert.match(homeHierarchy, /body\.mission-control-active\s+\.mcFocusGrid/);
+  assert.match(homeHierarchy, /\[data-testid="player-daily-command-center"\]/);
   assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(5/);
   assert.doesNotMatch(source, /\.secondaryPageShell|\.secondaryPageDecision|\.secondaryPageEvidence/);
   assert.doesNotMatch(source, /\[class\s*\*=|\[data-testid\s*\*=/i);
