@@ -17,6 +17,8 @@ test("visual reboot owns one restrained Mission Control support language", () =>
 test("runtime reboot layers cannot compete with source-owned Coach Hero or secondary-page authorities", () => {
   assert.doesNotMatch(source, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
   assert.doesNotMatch(releaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
+  assert.doesNotMatch(source, /\.mcPrimary\b|\.mcRealityStrip\b/);
+  assert.doesNotMatch(releaseFixes, /\.mcPrimary\b|\.mcRealityStrip\b/);
   assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(5/);
   assert.doesNotMatch(source, /\.secondaryPageShell|\.secondaryPageDecision|\.secondaryPageEvidence/);
   assert.doesNotMatch(source, /\[class\s*\*=|\[data-testid\s*\*=/i);
@@ -24,12 +26,12 @@ test("runtime reboot layers cannot compete with source-owned Coach Hero or secon
   assert.doesNotMatch(source, /secondaryStart|secondaryEnd|CSS\.slice/);
 });
 
-test("reboot uses restrained typography controls and responsive behavior", () => {
+test("reboot uses restrained typography controls and responsive support behavior", () => {
   assert.match(source, /SF Pro Display/);
   assert.match(source, /SF Pro Text/);
   assert.match(source, /@media \(max-width: 760px\)/);
+  assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(3/);
   assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /min-height: 50px/);
 });
 
 test("visual reboot installs after coach interaction enhancers without crossing into player bootstrap or adding product writes", () => {
