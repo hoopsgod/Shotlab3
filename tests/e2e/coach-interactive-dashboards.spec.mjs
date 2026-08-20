@@ -85,7 +85,9 @@ async function enterSeededDemoCoach(page, payload = seedData) {
     for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
   }, payload);
   await page.goto("/?bootDebug=1");
-  await expect(page.locator('[aria-label="ShotLab boot debug"]')).toContainText("hydration_completed", { timeout: 20_000 });
+  const bootPanel = page.locator('[aria-label="ShotLab boot debug"]');
+  await expect(bootPanel).toContainText("hydration_completed", { timeout: 20_000 });
+  await bootPanel.evaluate((element) => element.remove());
   const coachDemo = page.getByRole("button", { name: /Coach demo/i });
   await expect(coachDemo).toBeVisible({ timeout: 20_000 });
   await coachDemo.click();
