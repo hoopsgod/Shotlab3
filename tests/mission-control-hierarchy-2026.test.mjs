@@ -8,6 +8,8 @@ const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8")
 const css = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");
 const cascadeLock = fs.readFileSync(new URL("../src/styles/MissionControlCascadeLock2026.css", import.meta.url), "utf8");
 const criticalCss = fs.readFileSync(new URL("../public/shotlab-phase2-critical.css", import.meta.url), "utf8");
+const foundationCss = fs.readFileSync(new URL("../public/shotlab-v3-foundation.css", import.meta.url), "utf8");
+const mobileCorrectionsCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
 const commandCenter = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const titleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 
@@ -67,7 +69,7 @@ test("Phase 2 source owns one shared-grammar Coach identity chapter plus a domin
   assert.match(css, /\.mcSection,/);
 });
 
-test("late hierarchy and critical layers cannot redesign or hide Coach title identity", () => {
+test("late hierarchy and compatibility layers cannot redesign Coach Home identity or decision surfaces", () => {
   for (const lateAuthority of [css, cascadeLock, criticalCss]) {
     assert.doesNotMatch(lateAuthority, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
@@ -75,6 +77,10 @@ test("late hierarchy and critical layers cannot redesign or hide Coach title ide
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*>\s*p\s*\{[^}]*max-width\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeader\s*\{[^}]*grid-template-columns\s*:/s);
+  }
+  for (const compatibilityLayer of [foundationCss, mobileCorrectionsCss]) {
+    assert.doesNotMatch(compatibilityLayer, /\.mcRealityStrip\b/);
+    assert.doesNotMatch(compatibilityLayer, /\.mcPrimary\b/);
   }
   assert.doesNotMatch(criticalCss, /\[data-testid="coach-primary-objective"\]/);
   assert.doesNotMatch(criticalCss, /\.mcHero\s*,|\.mcHeroContent\s*\{/);
