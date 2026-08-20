@@ -2,63 +2,13 @@ const STYLE_ID = "shotlab-home-experience-hierarchy";
 const ROOT_ATTR = "data-shotlab-home-hierarchy";
 
 export const HOME_EXPERIENCE_HIERARCHY_CSS = `
-/* ShotLab home hierarchy: one dominant decision, quieter supporting evidence. */
+/* ShotLab home hierarchy: supporting layout only for Coach; the Coach identity,
+   decision headline, metrics rail, and primary action are source-owned. */
 body.mission-control-active .missionControl {
   max-width: 1320px;
   margin-inline: auto;
   padding-bottom: clamp(42px, 8vw, 88px);
 }
-
-body.mission-control-active .mcHero {
-  min-height: clamp(390px, 58vh, 610px);
-  border-radius: 30px;
-  box-shadow: 0 26px 80px rgba(28, 31, 33, .14);
-}
-
-body.mission-control-active .mcHeroContent {
-  max-width: 720px;
-  padding: clamp(30px, 6vw, 72px);
-}
-
-body.mission-control-active .mcHeroContent h1 {
-  max-width: 13ch;
-  font-size: clamp(44px, 7vw, 82px);
-  line-height: .94;
-  letter-spacing: -.035em;
-}
-
-body.mission-control-active .mcHeroContent > p {
-  max-width: 52ch;
-  font-size: clamp(15px, 1.7vw, 19px);
-  line-height: 1.55;
-}
-
-body.mission-control-active .mcPrimary {
-  min-height: 54px;
-  padding-inline: 24px;
-  border-radius: 16px;
-  box-shadow: 0 16px 36px rgba(18, 20, 22, .2);
-}
-
-body.mission-control-active .mcRealityStrip {
-  width: min(100%, 520px);
-  margin-block: 26px 22px;
-  padding: 0;
-  border: 1px solid rgba(21, 23, 25, .08);
-  border-radius: 17px;
-  overflow: hidden;
-  background: rgba(255,255,255,.82);
-  box-shadow: 0 10px 28px rgba(24, 27, 29, .07);
-  backdrop-filter: blur(14px);
-}
-
-body.mission-control-active .mcRealityStrip > button {
-  min-height: 76px;
-  border: 0;
-  border-right: 1px solid rgba(21, 23, 25, .08);
-  background: transparent;
-}
-body.mission-control-active .mcRealityStrip > button:last-child { border-right: 0; }
 
 body.mission-control-active .mcFocusGrid {
   grid-template-columns: minmax(0, 1.32fr) minmax(280px, .68fr);
@@ -147,12 +97,6 @@ body.mission-control-active .mcSectionHead h2 {
 }
 
 @media (max-width: 760px) {
-  body.mission-control-active .mcHero {
-    min-height: 470px;
-    border-radius: 24px;
-  }
-  body.mission-control-active .mcHeroContent { padding: 28px 20px 24px; }
-  body.mission-control-active .mcHeroContent h1 { font-size: clamp(40px, 12vw, 58px); }
   body.mission-control-active .mcFocusGrid { grid-template-columns: 1fr; margin-top: 24px; }
   body.mission-control-active .mcFocusGrid > .mcTodayPlan {
     min-height: auto;
