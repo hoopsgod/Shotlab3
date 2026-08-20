@@ -81,7 +81,7 @@ async function installSafeRoutes(page) {
 }
 
 async function enterSeededDemoCoach(page, payload = seedData) {
-  const deterministicPayload = { ...payload, "sl:session": { email: COACH_EMAIL } };
+  const deterministicPayload = { ...payload };
   await page.goto("/");
   const coachDemo = page.getByRole("button", { name: /Coach demo/i });
   await expect(coachDemo).toBeVisible({ timeout: 20_000 });
