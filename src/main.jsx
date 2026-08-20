@@ -7,7 +7,6 @@ import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleas
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
 import './styles/ExpertVisualPolish.css'
-import './components/Phase7AuthenticatedChrome.css'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -165,6 +164,10 @@ window.addEventListener('shotlab:app-ready', () => {
     installIndustrialDesignFoundation()
     const { default: App } = await import('./App.jsx')
     await import('./styles/AuthenticatedVisualAuthority2026.css')
+    // Phase 7 owns shared authenticated chrome details such as the compact Back control.
+    // Load it after the broader authenticated authority so its intentionally narrow rules
+    // are the final cascade authority in both development and optimized production builds.
+    await import('./components/Phase7AuthenticatedChrome.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 
