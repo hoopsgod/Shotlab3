@@ -142,7 +142,6 @@ body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !im
 
   body.mission-control-active .mcShellV3 .mcHeroContent > p {
     width: 100% !important;
-    max-width: none !important;
     margin: 0 !important;
     padding: 9px 18px 10px !important;
     border-inline: 1px solid rgba(220,235,241,.11) !important;
