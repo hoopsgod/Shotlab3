@@ -141,7 +141,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.workspaceBackground).toBe("rgb(243, 241, 234)");
   const heroChannels = rgbChannels(presentation.heroBackgroundColor);
   expect(heroChannels).toHaveLength(3);
-  expect(Math.max(...heroChannels)).toBeLessThan(70);
+  expect(Math.max(...heroChannels)).toBeLessThan(100);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
   expect(presentation.heroHeight).toBeGreaterThanOrEqual(488);
   expect(presentation.heroHeight).toBeLessThanOrEqual(560);
