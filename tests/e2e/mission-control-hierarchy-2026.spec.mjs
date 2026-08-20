@@ -49,8 +49,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(metrics).toBeVisible();
 
   await expect(page.locator(".mcHeader")).toBeVisible();
-  await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
+  await expect(page.locator(".mcHeaderTeamMark")).toBeVisible();
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
+  await expect(page.locator(".mcCourtArtwork")).toBeVisible();
+  await expect(page.locator(".mcHeroScrim")).toBeVisible();
   await expect(page.locator(".mcTeamSelect")).toBeHidden();
   await expect(page.locator(".mcBell")).toBeVisible();
   await expect(page.locator(".mcMobileMenu")).toBeVisible();
@@ -60,6 +62,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   const presentation = await page.evaluate(() => {
     const workspace = document.querySelector(".performance-workspace--coach");
     const hero = document.querySelector(".mcHero");
+    const court = hero?.querySelector(".mcCourtArtwork");
+    const scrim = hero?.querySelector(".mcHeroScrim");
     const heroContent = document.querySelector(".mcHeroContent");
     const identity = hero?.querySelector(".mcHeroIdentity");
     const title = hero?.querySelector("h1");
@@ -77,8 +81,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const heroStyle = getComputedStyle(hero);
     const heroContentStyle = getComputedStyle(heroContent);
     const identityStyle = getComputedStyle(identity);
-    const identityTitleStyle = getComputedStyle(identity, "::after");
     const headerMarkStyle = getComputedStyle(headerMark);
+    const headerMarkRect = headerMark.getBoundingClientRect();
     const heroMarkStyle = getComputedStyle(heroMark);
     const heroMarkRect = heroMark.getBoundingClientRect();
     const identityRect = identity.getBoundingClientRect();
@@ -97,15 +101,18 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       heroMaxHeight: heroStyle.maxHeight,
       heroHeight: hero.getBoundingClientRect().height,
       heroRadius: parseFloat(heroStyle.borderRadius),
+      courtDisplay: getComputedStyle(court).display,
+      scrimDisplay: getComputedStyle(scrim).display,
       heroContentBackground: heroContentStyle.backgroundColor,
       identityBackground: identityStyle.backgroundColor,
       identityBackgroundImage: identityStyle.backgroundImage,
       identityHeight: identityRect.height,
       identityBottom: identityRect.bottom,
-      identityTitleSize: parseFloat(identityTitleStyle.fontSize),
       decisionTitleSize: parseFloat(getComputedStyle(title).fontSize),
       decisionTitleTop: titleRect.top,
       headerMarkDisplay: headerMarkStyle.display,
+      headerMarkWidth: headerMarkRect.width,
+      headerMarkHeight: headerMarkRect.height,
       heroMarkDisplay: heroMarkStyle.display,
       heroMarkWidth: heroMarkRect.width,
       heroMarkHeight: heroMarkRect.height,
@@ -134,29 +141,27 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.workspaceBackground).toBe("rgb(243, 241, 234)");
   const heroChannels = rgbChannels(presentation.heroBackgroundColor);
   expect(heroChannels).toHaveLength(3);
-  expect(Math.min(...heroChannels)).toBeGreaterThan(220);
+  expect(Math.max(...heroChannels)).toBeLessThan(70);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
-  expect(presentation.heroHeight).toBeGreaterThanOrEqual(400);
-  expect(presentation.heroHeight).toBeLessThanOrEqual(470);
+  expect(presentation.heroHeight).toBeGreaterThanOrEqual(488);
+  expect(presentation.heroHeight).toBeLessThanOrEqual(560);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
-  const heroContentChannels = rgbChannels(presentation.heroContentBackground);
-  expect(heroContentChannels).toHaveLength(3);
-  expect(Math.min(...heroContentChannels)).toBeGreaterThan(220);
+  expect(presentation.courtDisplay).toBe("block");
+  expect(presentation.scrimDisplay).toBe("block");
+  expect(isTransparent(presentation.heroContentBackground)).toBe(true);
 
-  const identityChannels = rgbChannels(presentation.identityBackground);
-  expect(identityChannels).toHaveLength(3);
-  expect(Math.max(...identityChannels)).toBeLessThan(55);
-  expect(presentation.identityBackgroundImage).toContain("linear-gradient");
-  expect(presentation.identityHeight).toBeGreaterThanOrEqual(160);
-  expect(presentation.identityHeight).toBeLessThanOrEqual(300);
-  expect(presentation.identityTitleSize).toBeGreaterThanOrEqual(44);
-  expect(presentation.identityTitleSize).toBeLessThanOrEqual(60);
-  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(30);
-  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(40);
+  expect(isTransparent(presentation.identityBackground)).toBe(true);
+  expect(presentation.identityBackgroundImage).toBe("none");
+  expect(presentation.identityHeight).toBeGreaterThanOrEqual(104);
+  expect(presentation.identityHeight).toBeLessThanOrEqual(120);
+  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(44);
+  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(50);
   expect(presentation.decisionTitleTop).toBeGreaterThanOrEqual(presentation.identityBottom - 1);
   expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 48);
 
-  expect(presentation.headerMarkDisplay).toBe("none");
+  expect(presentation.headerMarkDisplay).toBe("grid");
+  expect(presentation.headerMarkWidth).toBeGreaterThanOrEqual(38);
+  expect(presentation.headerMarkHeight).toBeGreaterThanOrEqual(38);
   expect(presentation.heroMarkDisplay).not.toBe("none");
   expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(104);
   expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(104);
@@ -167,8 +172,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.primaryColor).toBe("rgb(7, 16, 7)");
   expect(presentation.primaryBorder).toContain("solid");
   expect(presentation.metricColumns).toBe(3);
-  expect(presentation.metricBackgroundImage).toContain("linear-gradient");
-  expect(presentation.metricBackground).not.toContain("rgba(0, 0, 0, 0) none");
+  expect(presentation.metricBackgroundColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(presentation.metricBorder).toContain("solid");
   expect(presentation.metricValues).toEqual(["rgb(245, 248, 249)", "rgb(245, 248, 249)", "rgb(245, 248, 249)"]);
   expect(presentation.metricLabels).toEqual(["rgb(155, 167, 174)", "rgb(155, 167, 174)", "rgb(155, 167, 174)"]);
