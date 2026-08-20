@@ -158,7 +158,13 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     await expect(coachHero).toBeVisible();
     const result = await coachHero.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      const title = element.querySelector("h1");
+      const identity = element.querySelector(".mcHeroIdentity");
+      const identityRect = identity?.getBoundingClientRect();
+      const identityTitleStyle = identity ? getComputedStyle(identity, "::after") : null;
+      const decisionTitle = element.querySelector("h1");
+      const decisionRect = decisionTitle?.getBoundingClientRect();
+      const reality = element.querySelector(".mcRealityStrip");
+      const realityRect = reality?.getBoundingClientRect();
       const team = element.querySelector(".mcProgramIdentity");
       const crest = element.querySelector(".mcHeroTeamMark img");
       const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
@@ -168,7 +174,13 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
         right: rect.right,
         height: rect.height,
         viewport: innerWidth,
-        titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+        identityHeight: identityRect?.height || 0,
+        identityBottom: identityRect?.bottom || 0,
+        identityTitleSize: identityTitleStyle ? Number.parseFloat(identityTitleStyle.fontSize) : 0,
+        decisionTitleSize: decisionTitle ? Number.parseFloat(getComputedStyle(decisionTitle).fontSize) : 0,
+        decisionTop: decisionRect?.top || 0,
+        decisionBottom: decisionRect?.bottom || 0,
+        realityTop: realityRect?.top || 0,
         teamName: team?.textContent?.trim() || "",
         crestWidth: crestRect?.width || 0,
         crestHeight: crestRect?.height || 0,
@@ -178,12 +190,19 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    expect(result.titleSize).toBeGreaterThanOrEqual(44);
-    expect(result.titleSize).toBeLessThanOrEqual(60);
+    expect(result.identityHeight).toBeGreaterThanOrEqual(170);
+    expect(result.identityHeight).toBeLessThanOrEqual(300);
+    expect(result.identityTitleSize).toBeGreaterThanOrEqual(44);
+    expect(result.identityTitleSize).toBeLessThanOrEqual(60);
+    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(30);
+    expect(result.decisionTitleSize).toBeLessThanOrEqual(40);
+    expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
+    expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
+    expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
     expect(result.crestWidth).toBeGreaterThanOrEqual(104);
     expect(result.crestHeight).toBeGreaterThanOrEqual(104);
-    expect(result.height).toBeGreaterThanOrEqual(360);
-    expect(result.height).toBeLessThanOrEqual(500);
+    expect(result.height).toBeGreaterThanOrEqual(480);
+    expect(result.height).toBeLessThanOrEqual(580);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
     return;
