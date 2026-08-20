@@ -30,6 +30,7 @@ jobs:
         run: >-
           node --test
           tests/title-authority-repair.test.mjs
+          tests/coach-player-home-visual-parity.test.mjs
           tests/coach-mobile-identity-authority.test.mjs
           tests/mobile-coach-signature-stage.test.mjs
           tests/phase-5a-route-enhancer-orchestration.test.mjs
