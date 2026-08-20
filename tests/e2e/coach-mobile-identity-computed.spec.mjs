@@ -64,6 +64,8 @@ for (const viewport of VIEWPORTS) {
       const reality = document.querySelector('.mcRealityStrip');
       const realityButtons = [...(reality?.querySelectorAll(':scope > button') || [])];
       const primary = hero?.querySelector('.mcPrimary');
+      const attention = document.querySelector('.mcAttention');
+      const dock = document.querySelector('[data-testid="mobile-navigation-dock"]');
       const menu = header?.querySelector('.mcMobileMenu');
       const bell = header?.querySelector('.mcBell');
       const headerBrand = header?.querySelector('.mcBrandLockup');
@@ -72,13 +74,14 @@ for (const viewport of VIEWPORTS) {
       const identityStyle = identity ? getComputedStyle(identity) : null;
       const identityTitleStyle = identity ? getComputedStyle(identity, '::after') : null;
       const titleStyle = title ? getComputedStyle(title) : null;
+      const detailStyle = detail ? getComputedStyle(detail) : null;
       const realityStyle = reality ? getComputedStyle(reality) : null;
       const primaryStyle = primary ? getComputedStyle(primary) : null;
       const menuStyle = menu ? getComputedStyle(menu) : null;
       const bellStyle = bell ? getComputedStyle(bell) : null;
       return {
         viewport: { width: innerWidth, height: innerHeight },
-        header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), menu: rect(menu), bell: rect(bell),
+        header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), attention: rect(attention), dock: rect(dock), menu: rect(menu), bell: rect(bell),
         identityTitleSize: identityTitleStyle ? Number.parseFloat(identityTitleStyle.fontSize) : 0,
         decisionTitleSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
         imageStyle: image ? { objectFit: getComputedStyle(image).objectFit, width: getComputedStyle(image).width, height: getComputedStyle(image).height, position: getComputedStyle(image).position } : null,
@@ -88,6 +91,8 @@ for (const viewport of VIEWPORTS) {
         heroBackgroundImage: hero ? getComputedStyle(hero).backgroundImage : '',
         identityBackground: identityStyle?.backgroundColor || '',
         identityBackgroundImage: identityStyle?.backgroundImage || '',
+        detailBackgroundColor: detailStyle?.backgroundColor || '',
+        detailBackgroundImage: detailStyle?.backgroundImage || '',
         realityBackgroundColor: realityStyle?.backgroundColor || '',
         realityBackgroundImage: realityStyle?.backgroundImage || '',
         realityBackground: realityStyle?.background || '',
@@ -136,11 +141,18 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.identityTitleSize).toBeLessThanOrEqual(60);
     expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
     expect(metrics.decisionTitleSize).toBeLessThanOrEqual(40);
-    expect(metrics.hero.height).toBeGreaterThanOrEqual(480);
-    expect(metrics.hero.height).toBeLessThanOrEqual(560);
+    expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
+    expect(metrics.hero.height).toBeLessThanOrEqual(470);
     expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
     expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
     expect(metrics.detail.top).toBeGreaterThanOrEqual(metrics.title.top);
+    expect(metrics.title.height).toBeLessThanOrEqual(90);
+    expect(Math.abs(metrics.title.left - metrics.detail.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(metrics.title.right - metrics.detail.right)).toBeLessThanOrEqual(1);
+    expect(Math.abs(metrics.detail.left - metrics.reality.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(metrics.detail.right - metrics.reality.right)).toBeLessThanOrEqual(1);
+    expect(metrics.detailBackgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.detailBackgroundImage).toContain('linear-gradient');
     expect(metrics.reality.top).toBeGreaterThanOrEqual(metrics.detail.bottom - 1);
     expect(metrics.reality.top).toBeLessThan(viewport.height);
     expect(metrics.realityBackgroundImage).toContain('linear-gradient');
@@ -159,6 +171,7 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.primaryColor).toBe('rgb(7, 16, 7)');
     expect(metrics.primaryBorder).toContain('solid');
     expect(metrics.overflow).toBeLessThanOrEqual(1);
+    expect(metrics.attention.top).toBeLessThan(metrics.dock.top);
 
     expect(metrics.headerBrandDisplay).toBe('none');
     expect(metrics.teamSelectDisplay).toBe('none');

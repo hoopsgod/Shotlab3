@@ -119,7 +119,7 @@ test("Player Home is the immersive Hero variant while Coach Home integrates comp
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
   assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(coachTitleCss, /min-height:\s*428px/);
+  assert.match(coachTitleCss, /min-height:\s*420px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);

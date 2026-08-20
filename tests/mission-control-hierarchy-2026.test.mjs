@@ -54,14 +54,14 @@ test("Phase 2 source owns one shared-grammar Coach identity chapter plus a domin
   assert.match(commandCenter, /mcHeroIdentity/);
   assert.doesNotMatch(commandCenter, /MOBILE_PRODUCT_RESET_CSS|<style>/);
   assert.match(titleCss, /Coach Home mobile identity \+ decision authority/);
-  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*428px/);
+  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*420px/);
   assert.match(titleCss, /\.mcHeroContent[\s\S]*width:\s*100%[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
   assert.match(titleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(titleCss, /\.mcHeroTeamMark[\s\S]*width:\s*var\(--coach-hero-crest\)[\s\S]*height:\s*var\(--coach-hero-crest\)/);
   assert.match(titleCss, /\.mcHeroTeamMark img[\s\S]*object-fit:\s*contain/);
   assert.match(titleCss, /\.mcHeroIdentity::after[\s\S]*content:\s*"Mission Control"[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(32px,\s*8\.7vw,\s*38px\)/);
+  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(32px,\s*7\.9vw,\s*34px\)/);
   assert.doesNotMatch(titleCss, /!important|html\s+body\s+#root/);
   assert.match(titleCss, /\.mcRealityStrip\s*\{/);
   assert.match(titleCss, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);

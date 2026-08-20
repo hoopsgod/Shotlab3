@@ -140,9 +140,9 @@ test("responsive CSS creates a native-feeling mobile operating system with Playe
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*428px/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*420px/);
   assert.match(titleCss,/\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(32px,\s*8\.7vw,\s*38px\)/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(32px,\s*7\.9vw,\s*34px\)/);
   assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(titleCss,/\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
   assert.doesNotMatch(titleCss,/!important/);

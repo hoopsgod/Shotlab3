@@ -21,7 +21,7 @@ test("Coach primary decision uses the same premium dark material and lime action
   const coachHome = compact(coachCss);
   assert.ok(player.includes("linear-gradient(145deg,#0b2633,#07182072%)"));
   assert.ok(coachHome.includes("linear-gradient(145deg,#0b2633,#07182072%)"));
-  assert.match(coachCss, /h1\s*\{[\s\S]*?font-size:\s*clamp\(32px,\s*8\.7vw,\s*38px\)/);
+  assert.match(coachCss, /h1\s*\{[\s\S]*?font-size:\s*clamp\(32px,\s*7\.9vw,\s*34px\)/);
   assert.match(coachCss, /\.mcPrimary\s*\{[\s\S]*?min-height:\s*54px/);
   assert.match(coachCss, /\.mcRealityStrip\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
 });

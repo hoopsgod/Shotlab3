@@ -119,9 +119,9 @@
     position: relative;
     top: auto;
     z-index: 20;
-    min-height: 68px;
+    min-height: 58px;
     margin: 0 -12px;
-    padding: max(10px, env(safe-area-inset-top)) 12px 8px;
+    padding: max(7px, env(safe-area-inset-top)) 12px 7px;
     border: 0;
     border-bottom: 1px solid rgba(220, 235, 241, .1);
     border-radius: 0;
@@ -210,7 +210,7 @@
      language as Player Home. */
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
     width: auto;
-    min-height: 428px;
+    min-height: 420px;
     max-height: none;
     margin: 0 -12px;
     overflow: visible;
@@ -230,8 +230,8 @@
     z-index: 4;
     display: grid;
     width: 100%;
-    min-height: 428px;
-    padding: 0 20px 18px;
+    min-height: 420px;
+    padding: 0 20px 14px;
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     gap: 0;
@@ -243,9 +243,9 @@
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity {
     --coach-hero-crest: clamp(104px, 27vw, 112px);
     display: grid;
-    min-height: 188px;
+    min-height: 164px;
     margin: 0 -20px;
-    padding: 22px 20px 24px;
+    padding: 16px 20px 18px;
     grid-template-columns: minmax(0, 1fr) var(--coach-hero-crest);
     grid-template-rows: auto auto;
     align-items: end;
@@ -389,9 +389,9 @@
   /* Primary Coach decision: same premium dark-card rhythm as the Player daily
      command center, while preserving Coach-specific decision copy and actions. */
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1 {
-    max-width: 13ch;
-    margin: 14px 0 0;
-    padding: 20px 18px 0;
+    max-width: none;
+    margin: 10px 0 0;
+    padding: 16px 16px 4px;
     border: 1px solid rgba(220,235,241,.11);
     border-bottom: 0;
     border-radius: 22px 22px 0 0;
@@ -401,9 +401,9 @@
     color: #f5f8f9;
     -webkit-text-fill-color: currentColor;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, "Segoe UI", sans-serif;
-    font-size: clamp(32px, 8.7vw, 38px);
+    font-size: clamp(32px, 7.9vw, 34px);
     font-weight: 810;
-    line-height: .95;
+    line-height: .98;
     letter-spacing: -.048em;
     text-transform: none;
     text-wrap: balance;
@@ -413,9 +413,10 @@
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent > p {
     max-width: none;
     margin: 0;
-    padding: 9px 18px 2px;
+    padding: 5px 16px 9px;
     border-inline: 1px solid rgba(220,235,241,.11);
-    background: linear-gradient(145deg, #0b2633, #071820 72%);
+    background-color: #071820;
+    background-image: linear-gradient(145deg, #0b2633, #071820 72%);
     color: #bdc9cf;
     -webkit-text-fill-color: currentColor;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
@@ -432,7 +433,7 @@
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: 15px 18px 18px;
+    padding: 8px 16px 10px;
     overflow: hidden;
     border: 1px solid rgba(220,235,241,.11);
     border-top: 0;
@@ -445,8 +446,8 @@
 
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button {
     min-width: 0;
-    min-height: 58px;
-    padding: 8px 12px;
+    min-height: 48px;
+    padding: 6px 10px;
     border: 0;
     border-left: 1px solid rgba(220,235,241,.11);
     background: transparent;
@@ -497,7 +498,7 @@
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary {
     width: 100%;
     min-height: 54px;
-    margin-top: 12px;
+    margin-top: 10px;
     padding: 0 18px;
     border: 1px solid color-mix(in srgb, var(--mc, #c8ff1a) 82%, #91b500 18%);
     border-radius: 14px;
@@ -531,11 +532,11 @@
 
 @media (max-width: 380px) {
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
-    min-height: 422px;
+    min-height: 412px;
   }
 
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent {
-    min-height: 422px;
+    min-height: 412px;
     padding-inline: 16px;
   }
 
