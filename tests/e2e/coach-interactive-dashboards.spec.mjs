@@ -82,12 +82,10 @@ async function installSafeRoutes(page) {
 
 async function enterSeededDemoCoach(page, payload = seedData) {
   await page.addInitScript((data) => {
-    window.__shotlabBootStages = [];
-    window.__shotlabBootMark = (stage) => window.__shotlabBootStages.push(stage);
     for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
   }, payload);
-  await page.goto("/");
-  await page.waitForFunction(() => window.__shotlabBootStages?.includes("hydration_completed"), null, { timeout: 20_000 });
+  await page.goto("/?bootDebug=1");
+  await expect(page.locator('[aria-label="ShotLab boot debug"]')).toContainText("hydration_completed", { timeout: 20_000 });
   const coachDemo = page.getByRole("button", { name: /Coach demo/i });
   await expect(coachDemo).toBeVisible({ timeout: 20_000 });
   await coachDemo.click();
