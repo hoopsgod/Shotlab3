@@ -160,12 +160,12 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       const rect = element.getBoundingClientRect();
       const identity = element.querySelector(".mcHeroIdentity");
       const identityRect = identity?.getBoundingClientRect();
-      const identityTitleStyle = identity ? getComputedStyle(identity, "::after") : null;
       const decisionTitle = element.querySelector("h1");
       const decisionRect = decisionTitle?.getBoundingClientRect();
       const reality = element.querySelector(".mcRealityStrip");
       const realityRect = reality?.getBoundingClientRect();
       const team = element.querySelector(".mcProgramIdentity");
+      const teamStyle = team ? getComputedStyle(team) : null;
       const crest = element.querySelector(".mcHeroTeamMark img");
       const fallback = element.querySelector(".mcHeroTeamMark .mcTeamFallback");
       const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
@@ -176,7 +176,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
         viewport: innerWidth,
         identityHeight: identityRect?.height || 0,
         identityBottom: identityRect?.bottom || 0,
-        identityTitleSize: identityTitleStyle ? Number.parseFloat(identityTitleStyle.fontSize) : 0,
+        teamIdentitySize: teamStyle ? Number.parseFloat(teamStyle.fontSize) : 0,
         decisionTitleSize: decisionTitle ? Number.parseFloat(getComputedStyle(decisionTitle).fontSize) : 0,
         decisionTop: decisionRect?.top || 0,
         decisionBottom: decisionRect?.bottom || 0,
@@ -190,18 +190,20 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    expect(result.identityHeight).toBeGreaterThanOrEqual(170);
-    expect(result.identityHeight).toBeLessThanOrEqual(300);
-    expect(result.identityTitleSize).toBeGreaterThanOrEqual(44);
-    expect(result.identityTitleSize).toBeLessThanOrEqual(60);
+    // Mission Control's identity row is intentionally compact; hierarchy belongs to the decision headline.
+    expect(result.identityHeight).toBeGreaterThanOrEqual(96);
+    expect(result.identityHeight).toBeLessThanOrEqual(160);
+    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(14);
+    expect(result.teamIdentitySize).toBeLessThanOrEqual(20);
     expect(result.decisionTitleSize).toBeGreaterThanOrEqual(30);
     expect(result.decisionTitleSize).toBeLessThanOrEqual(40);
+    expect(result.decisionTitleSize - result.teamIdentitySize).toBeGreaterThanOrEqual(12);
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
     expect(result.crestWidth).toBeGreaterThanOrEqual(104);
     expect(result.crestHeight).toBeGreaterThanOrEqual(104);
-    expect(result.height).toBeGreaterThanOrEqual(480);
+    expect(result.height).toBeGreaterThanOrEqual(460);
     expect(result.height).toBeLessThanOrEqual(580);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
