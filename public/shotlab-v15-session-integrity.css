@@ -4,8 +4,8 @@
 html body #root :is([data-role="coach"],[data-role="player"]) .page{width:min(100%,1180px);margin-inline:auto;padding-inline:clamp(16px,4vw,28px)}
 
 /* Preserve validated Phase 2 dark foregrounds through explicit contracts only. */
-html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]) :is(h1,h2,h3,h4,strong){color:#f7f8f5!important;-webkit-text-fill-color:currentColor!important}
-html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]) :is(p,small){color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important}
+html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]):not([data-testid="coach-primary-objective"]) :is(h1,h2,h3,h4,strong){color:#f7f8f5!important;-webkit-text-fill-color:currentColor!important}
+html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]):not([data-testid="coach-primary-objective"]) :is(p,small){color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important}
 
 /* Form geometry remains global to actual form elements; surface colors are owned by
    the nearest data-surface contract in Phase3SurfaceContracts.css. */

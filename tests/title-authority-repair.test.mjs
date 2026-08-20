@@ -34,6 +34,8 @@ const coachCriticalCss = read('public/shotlab-phase2-critical.css');
 const coachV5IntegrityCss = read('public/shotlab-v5-coach-integrity.css');
 const visualReboot = read('src/lib/visualSystemReboot.js');
 const visualReleaseFixes = read('src/lib/visualSystemRebootReleaseFixes.js');
+const sessionIntegrityCss = read('public/shotlab-v15-session-integrity.css');
+const industrialDesignFoundation = read('src/lib/industrialDesignFoundation.js');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -104,6 +106,10 @@ test('Coach Home decision, metrics and CTA have one source owner', () => {
   assert.match(coachTitleCss, /\.mcRealityStrip small\s*\{[\s\S]*color:\s*#9ba7ae/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcRealityStrip|mcPrimary|Coach final metric ledger|Coach final metric label/);
+  assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(h1,h2,h3,h4,strong\)/);
+  assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(p,small\)/);
+  assert.match(industrialDesignFoundation, /button:not\(\.mcPrimary\)/);
+  assert.doesNotMatch(industrialDesignFoundation, /performance-shell\.performance-shell button\s*,/);
 });
 
 test('late static and runtime Coach cascade layers cannot hide or redesign the owned title stage', () => {
