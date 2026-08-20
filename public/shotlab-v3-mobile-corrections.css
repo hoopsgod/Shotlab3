@@ -1,6 +1,6 @@
 /* Legacy rendered-mobile compatibility layer.
-   Title and team-identity composition are intentionally excluded: React source and
-   TeamIdentityTitleStage / CoachCommandCenter own those surfaces. */
+   Title, team identity, Coach Home decision, metrics, and primary action composition
+   are intentionally excluded: React source and component-owned CSS own those surfaces. */
 
 :root {
   --v3-canvas: #f1f2ef;
@@ -41,27 +41,11 @@ body {
   color: #102019 !important;
 }
 
-/* Supporting Mission Control evidence, never the title/Hero composition. */
-body.mission-control-active .mcRealityStrip {
-  background: var(--v3-surface-subtle) !important;
-}
-body.mission-control-active .mcRealityStrip strong {
-  font-size: 22px !important;
-  font-weight: 750 !important;
-}
-body.mission-control-active .mcRealityStrip small {
-  color: var(--v3-muted) !important;
-  font-size: 11px !important;
-  font-weight: 650 !important;
-}
+/* Supporting Mission Control evidence, never the title/Hero decision composition. */
 body.mission-control-active .mcAttentionRow,
 body.mission-control-active .mcAssignmentAccountabilityRow,
 body.mission-control-active .mcAssignmentAccountabilityEmpty {
   background: var(--v3-surface-subtle) !important;
-}
-body.mission-control-active .mcPrimary {
-  background: var(--v3-ink) !important;
-  color: #fff !important;
 }
 
 /* Team Store and other non-title primary actions retain established contrast. */
