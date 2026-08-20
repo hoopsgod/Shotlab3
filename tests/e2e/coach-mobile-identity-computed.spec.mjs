@@ -66,11 +66,16 @@ for (const viewport of VIEWPORTS) {
       const teamSelect = header?.querySelector('.mcTeamSelect');
       const headerStyle = header ? getComputedStyle(header) : null;
       const identityStyle = identity ? getComputedStyle(identity) : null;
+      const identityTitleStyle = identity ? getComputedStyle(identity, '::after') : null;
+      const titleStyle = title ? getComputedStyle(title) : null;
+      const realityStyle = reality ? getComputedStyle(reality) : null;
       const menuStyle = menu ? getComputedStyle(menu) : null;
       const bellStyle = bell ? getComputedStyle(bell) : null;
       return {
         viewport: { width: innerWidth, height: innerHeight },
         header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), menu: rect(menu), bell: rect(bell),
+        identityTitleSize: identityTitleStyle ? Number.parseFloat(identityTitleStyle.fontSize) : 0,
+        decisionTitleSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
         imageStyle: image ? { objectFit: getComputedStyle(image).objectFit, width: getComputedStyle(image).width, height: getComputedStyle(image).height, position: getComputedStyle(image).position } : null,
         teamColor: team ? getComputedStyle(team).color : '',
         eyebrowColor: eyebrow ? getComputedStyle(eyebrow).color : '',
@@ -78,6 +83,8 @@ for (const viewport of VIEWPORTS) {
         heroBackgroundImage: hero ? getComputedStyle(hero).backgroundImage : '',
         identityBackground: identityStyle?.backgroundColor || '',
         identityBackgroundImage: identityStyle?.backgroundImage || '',
+        realityBackground: realityStyle?.backgroundColor || '',
+        realityBackgroundImage: realityStyle?.backgroundImage || '',
         headerBackground: headerStyle?.backgroundColor || '',
         headerBackgroundImage: headerStyle?.backgroundImage || '',
         headerColor: headerStyle?.color || '',
@@ -106,11 +113,18 @@ for (const viewport of VIEWPORTS) {
     const identityRegionHeight = metrics.identity.bottom - metrics.header.top;
     expect(identityRegionHeight).toBeGreaterThanOrEqual(160);
     expect(identityRegionHeight).toBeLessThanOrEqual(300);
-    expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
-    expect(metrics.hero.height).toBeLessThanOrEqual(460);
-    expect(metrics.title.top).toBeLessThanOrEqual(310);
-    expect(metrics.title.top).toBeLessThan(viewport.height * 0.4);
+    expect(metrics.identityTitleSize).toBeGreaterThanOrEqual(44);
+    expect(metrics.identityTitleSize).toBeLessThanOrEqual(60);
+    expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
+    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(40);
+    expect(metrics.hero.height).toBeGreaterThanOrEqual(480);
+    expect(metrics.hero.height).toBeLessThanOrEqual(560);
+    expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
+    expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
+    expect(metrics.detail.top).toBeGreaterThanOrEqual(metrics.title.top);
+    expect(metrics.reality.top).toBeGreaterThanOrEqual(metrics.detail.bottom - 1);
     expect(metrics.reality.top).toBeLessThan(viewport.height);
+    expect(metrics.realityBackgroundImage).toContain('linear-gradient');
     expect(metrics.overflow).toBeLessThanOrEqual(1);
 
     expect(metrics.headerBrandDisplay).toBe('none');
