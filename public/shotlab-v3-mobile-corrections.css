@@ -1,6 +1,7 @@
 /* Legacy rendered-mobile compatibility layer.
-   Title, team identity, Coach Home decision, metrics, and primary action composition
-   are intentionally excluded: React source and component-owned CSS own those surfaces. */
+   Title and team-identity composition are intentionally excluded.
+   Coach Home decision, metrics, and primary action composition are also excluded:
+   React source and component-owned CSS own those surfaces. */
 
 :root {
   --v3-canvas: #f1f2ef;
