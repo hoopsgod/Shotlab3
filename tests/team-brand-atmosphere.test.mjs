@@ -10,6 +10,7 @@ const titleCss = read("src/components/TeamIdentityTitleStage.css");
 const secondaryCss = read("src/components/SecondaryPageSystem.css");
 const coachConvergenceCss = read("src/styles/CoachRoleVisualConvergence2026.css");
 const coachRouteCss = read("src/components/CoachRoutePerformanceStage.module.css");
+const missionControlHierarchyCss = read("src/styles/MissionControlHierarchy2026.css");
 
 test("Coach Home uses the full uploaded custom logo for every visible and tactical identity slot", () => {
   assert.match(coach, /const heroTeamLogoUrl = fullTeamLogoUrl;/);
@@ -20,6 +21,7 @@ test("Coach Home uses the full uploaded custom logo for every visible and tactic
 
 test("Coach mobile Home keeps the tactical court visible and brand-driven", () => {
   assert.doesNotMatch(coachHomeCss, /\.mcCourtArtwork,[\s\S]*?\.mcHeroScrim\s*\{\s*display:\s*none;/);
+  assert.doesNotMatch(missionControlHierarchyCss, /\.mcCourtArtwork,[\s\S]*?\.mcHeroScrim\s*\{[\s\S]*?display:\s*none\s*!important/);
   assert.match(coachHomeCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*background:\s*var\(--team-brand-surface-deep/);
   assert.match(coachHomeCss, /\.mcHeroContent\s*\{[\s\S]*background:\s*transparent/);
   assert.doesNotMatch(coachHomeCss, /\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);

@@ -22,7 +22,7 @@ body.mission-control-active .mcShellV3 .missionControl {
   background: transparent !important;
 }
 
-/* Court atmosphere remains a supporting desktop visual layer, not title authority. */
+/* Court atmosphere remains a supporting visual layer, not title authority. */
 body.mission-control-active .mcShellV3 .mcCourtArtwork {
   display: block !important;
   position: absolute !important;
@@ -75,16 +75,6 @@ body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow strong { c
 body.mission-control-active .mcShellV3 .mcAttentionCopy small,
 body.mission-control-active .mcShellV3 .mcAttentionMeta,
 body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
-
-/* Mobile Mission Control support only. The full first-view composition is owned
-   by CoachMissionControlTitleStage.css. */
-@media (max-width: 700px) {
-  body.mission-control-active .mcShellV3 .mcCourtArtwork,
-  body.mission-control-active .mcShellV3 .mcHeroScrim {
-    display: none !important;
-  }
-
-}
 
 @media (prefers-reduced-motion: reduce) {
   body.mission-control-active .mcShellV3 * { animation: none !important; transition-duration: .01ms !important; }
