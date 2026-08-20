@@ -51,22 +51,36 @@ async function expectDockTouchTargets(page) {
   }
 }
 
-async function expectPremiumHeader(page) {
-  const header = page.locator(".appHeader").first();
-  await expect(header).toBeVisible({ timeout: 20_000 });
-  const visual = await header.evaluate((node) => {
-    const style = getComputedStyle(node);
+async function expectPremiumTitleStage(page) {
+  const stage = page.locator('[data-team-identity-stage="true"]:visible').first();
+  await expect(stage).toBeVisible({ timeout: 20_000 });
+  const visual = await stage.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const title = node.querySelector('[data-identity-role="page-title"], h1');
+    const team = node.querySelector('[data-identity-role="team-name"]');
+    const crest = node.querySelector('[data-identity-role="brand-mark"], .teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
+    const crestRect = crest?.getBoundingClientRect();
     return {
-      radius: Number.parseFloat(style.borderRadius),
-      borderStyle: style.borderTopStyle,
-      backgroundImage: style.backgroundImage,
-      shadow: style.boxShadow,
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      viewport: innerWidth,
+      titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
+      teamText: team?.textContent?.trim() || "",
+      crestWidth: crestRect?.width || 0,
+      crestHeight: crestRect?.height || 0,
+      overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
     };
   });
-  expect(visual.radius).toBeGreaterThanOrEqual(18);
-  expect(visual.borderStyle).not.toBe("none");
-  expect(visual.backgroundImage).not.toBe("none");
-  expect(visual.shadow).not.toBe("none");
+  // Secondary pages are intentionally editorial/flat; premium authority comes from the shared title stage, not a generic card shell.
+  expect(visual.titleSize).toBeGreaterThanOrEqual(38);
+  expect(visual.titleSize).toBeLessThanOrEqual(58);
+  expect(visual.teamText.length).toBeGreaterThan(0);
+  expect(visual.crestWidth).toBeGreaterThanOrEqual(80);
+  expect(visual.crestHeight).toBeGreaterThanOrEqual(80);
+  expect(visual.left).toBeGreaterThanOrEqual(-1);
+  expect(visual.right).toBeLessThanOrEqual(visual.viewport + 1);
+  expect(visual.overflow).toBeLessThanOrEqual(1);
 }
 
 async function expectCoachPerformanceRail(page) {
@@ -95,7 +109,7 @@ test("coach secondary workspaces share the Mission Control visual system", async
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await expectWorkspace(page, "coach", "players");
-  await expectPremiumHeader(page);
+  await expectPremiumTitleStage(page);
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible();
   await expectCoachPerformanceRail(page);
   await expect(page.getByRole("heading", { name: "PLAYER ROSTER", exact: true })).toBeVisible();
@@ -122,7 +136,7 @@ test("coach secondary workspaces share the Mission Control visual system", async
 
   await openMoreDestination(page, "branding");
   await expect(page.locator(".premium-screen--branding")).toBeVisible({ timeout: 20_000 });
-  await expectPremiumHeader(page);
+  await expectPremiumTitleStage(page);
 });
 
 test("player workspaces share premium surfaces and preserve mobile geometry", async ({ page }) => {
