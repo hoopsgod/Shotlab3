@@ -175,7 +175,11 @@
   color: #202522;
   font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
-.teamIdentityTitleStage__action--primary { border-color: #202522; background: #202522; color: #f9faf6; }
+.teamIdentityTitleStage__action--primary {
+  border-color: color-mix(in srgb, var(--team-brand-surface-deep, #202522) 84%, white 16%);
+  background: var(--team-brand-surface-deep, #202522);
+  color: #f9faf6;
+}
 .teamIdentityTitleStage__action:not(.teamIdentityTitleStage__action--primary) {
   border-color: color-mix(in srgb, var(--team-brand-secondary-action, #9ca3af) 42%, rgba(21, 25, 24, .14));
   background: var(--team-brand-secondary-soft, rgba(156, 163, 175, .18));

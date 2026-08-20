@@ -131,10 +131,10 @@ test("mobile navigation is a ShotLab dark edge rail, safe-area aware, and touch 
   assert.match(mobileNav, /width:\s*100%/);
   assert.match(mobileNav, /border-radius:\s*0/);
   assert.match(mobileNav, /min-height:\s*48px/);
-  assert.match(mobileNav, /background:\s*rgba\(7, 26, 34, \.975\)/);
-  assert.match(mobileNav, /dockItem\.active \.dockIcon \{ background: rgba\(200, 255, 26, \.08\); \}/);
-  assert.match(navArchitecture, /background:\s*rgba\(7, 26, 34, \.975\) !important/);
-  assert.match(navArchitecture, /button\[data-active="true"\] \{[\s\S]*color: #c8ff1a/);
+  assert.match(mobileNav, /background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep/);
+  assert.match(mobileNav, /dockItem\.active \.dockIcon \{ background: color-mix\(in srgb, var\(--team-brand-primary/);
+  assert.match(navArchitecture, /background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep[\s\S]*!important/);
+  assert.match(navArchitecture, /button\[data-active="true"\] \{[\s\S]*color: var\(--team-brand-nav-active/);
   assert.match(navArchitecture, /transform: translateY\(4px\) scale\(\.995\) !important/);
   assert.match(navArchitecture, /prefers-reduced-transparency/);
   assert.doesNotMatch(navArchitecture, /translateX\(-50%\)/);

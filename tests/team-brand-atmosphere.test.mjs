@@ -10,6 +10,12 @@ const titleCss = read("src/components/TeamIdentityTitleStage.css");
 const secondaryCss = read("src/components/SecondaryPageSystem.css");
 const coachConvergenceCss = read("src/styles/CoachRoleVisualConvergence2026.css");
 const coachRouteCss = read("src/components/CoachRoutePerformanceStage.module.css");
+const surfaceContractCss = read("src/styles/Phase3SurfaceContracts.css");
+const leaderboardCss = read("src/components/Phase3CoachLeaderboardHierarchy.css");
+const commandHierarchyCss = read("src/styles/CommandHierarchy2026.css");
+const dashboardPrimitivesCss = read("src/components/CoachDashboardPrimitives.module.css");
+const mobileNavigationCss = read("src/components/MobileNavigation.module.css");
+const mobileNavigationAuthorityCss = read("src/components/MobileNavigationArchitecture.css");
 const missionControlHierarchyCss = read("src/styles/MissionControlHierarchy2026.css");
 const legacyFoundationCss = read("public/shotlab-v3-foundation.css");
 
@@ -73,9 +79,19 @@ test("shared authenticated surfaces consume the brand atmosphere instead of fixe
   assert.match(coachConvergenceCss, /--coach-2026-navy-2:\s*var\(--team-brand-surface-elevated/);
   assert.match(coachRouteCss, /var\(--team-brand-surface-elevated/);
   assert.match(coachRouteCss, /var\(--team-brand-surface-deep/);
+  assert.match(surfaceContractCss, /--sl-surface-dark-material:\s*var\(--team-brand-surface-deep/);
+  assert.match(surfaceContractCss, /--sl-surface-dark-material-elevated:\s*var\(--team-brand-surface-elevated/);
+  assert.match(surfaceContractCss, /primary-decision[\s\S]*linear-gradient\(145deg, var\(--sl-surface-dark-material-elevated\), var\(--sl-surface-dark-material\) 72%\)/);
+  assert.match(leaderboardCss, /secondaryPageDecision[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.doesNotMatch(leaderboardCss, /linear-gradient\(145deg, #171b18, #0c0f0d/);
+  assert.match(commandHierarchyCss, /player-primary-logging-region[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.match(dashboardPrimitivesCss, /commandBar[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.match(mobileNavigationCss, /\.dock\s*\{[\s\S]*var\(--team-brand-surface-deep/);
+  assert.match(mobileNavigationAuthorityCss, /mobile-navigation-dock[\s\S]*var\(--team-brand-surface-deep/);
 });
 
 test("secondary actions use the selected secondary team color without recoloring semantic status", () => {
+  assert.match(titleCss, /teamIdentityTitleStage__action--primary[\s\S]*--team-brand-surface-deep/);
   assert.match(titleCss, /teamIdentityTitleStage__action:not\(\.teamIdentityTitleStage__action--primary\)[\s\S]*--team-brand-secondary-action/);
   assert.match(secondaryCss, /secondaryPageEvidence[\s\S]*--team-brand-secondary-soft/);
   assert.match(coachConvergenceCss, /cta-secondary[\s\S]*--team-brand-secondary-soft/);

@@ -1,7 +1,7 @@
 /* Premium information architecture for the shared mobile dock and More sheet. */
 [data-testid="mobile-navigation-dock"] {
-  border-top-color: rgba(200, 255, 26, .12) !important;
-  background: rgba(7, 26, 34, .975) !important;
+  border-top-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 20%, transparent) !important;
+  background: color-mix(in srgb, var(--team-brand-surface-deep, #071a22) 97.5%, transparent) !important;
   box-shadow: 0 -10px 28px rgba(7, 26, 34, .16) !important;
   -webkit-backdrop-filter: blur(20px) saturate(118%) !important;
   backdrop-filter: blur(20px) saturate(118%) !important;
@@ -24,7 +24,7 @@ body.mission-control-active [data-testid="mobile-navigation-dock"][data-navigati
 }
 
 [data-testid="mobile-navigation-dock"] button[data-active="true"] {
-  color: #c8ff1a;
+  color: var(--team-brand-nav-active, #c8ff1a);
 }
 
 [data-testid="mobile-navigation-dock"] button:active {
@@ -117,8 +117,8 @@ body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
 }
 
 [data-testid="mobile-navigation-groups"] button[data-active="true"] {
-  background: color-mix(in srgb, var(--accent, #617233) 8%, white) !important;
-  color: var(--accent, #617233) !important;
+  background: color-mix(in srgb, var(--team-brand-primary, #617233) 8%, white) !important;
+  color: color-mix(in srgb, var(--team-brand-nav-active, #617233) 78%, #27322b) !important;
 }
 
 [data-testid="mobile-navigation-groups"] button[data-active="true"] > span:last-child {
@@ -126,7 +126,7 @@ body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  [data-testid="mobile-navigation-dock"] { background: #071a22 !important; }
+  [data-testid="mobile-navigation-dock"] { background: var(--team-brand-surface-deep, #071a22) !important; }
   [data-testid="mobile-navigation-sheet"] { background: #f8f7f3 !important; }
 }
 

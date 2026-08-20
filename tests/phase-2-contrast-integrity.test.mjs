@@ -46,7 +46,7 @@ test("dark title authority uses explicit surface contracts instead of test-id he
 });
 
 test("Coach Players preserves dark surfaces wherever light foreground copy is intentional", () => {
-  assert.match(titleStage, /\.teamIdentityTitleStage__action--primary\s*\{[^}]*background:\s*#202522;[^}]*color:\s*#f9faf6;/);
-  assert.match(secondary, /\.secondaryPageDecision\s*\{[\s\S]*linear-gradient\(145deg,\s*#171b18,\s*#0c0f0d 72%\);[\s\S]*color:\s*#f5f7f4;/);
-  assert.match(secondary, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg,\s*#171b18,\s*#0c0f0d 72%\);[\s\S]*color:\s*#f5f7f4;/);
+  assert.match(titleStage, /\.teamIdentityTitleStage__action--primary\s*\{[^}]*background:\s*var\(--team-brand-surface-deep[^}]*color:\s*#f9faf6;/);
+  assert.match(secondary, /\.secondaryPageDecision\s*\{[\s\S]*linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep[\s\S]*color:\s*#f5f7f4;/);
+  assert.match(secondary, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep[\s\S]*color:\s*#f5f7f4;/);
 });
