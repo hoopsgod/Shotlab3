@@ -81,14 +81,15 @@ async function installSafeRoutes(page) {
 }
 
 async function enterSeededDemoCoach(page, payload = seedData) {
+  const deterministicPayload = { ...payload, "sl:session": { email: COACH_EMAIL } };
   await page.addInitScript((data) => {
     if (window.sessionStorage.getItem("coach-dashboard-e2e-seeded") === "1") return;
     for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
     window.sessionStorage.setItem("coach-dashboard-e2e-seeded", "1");
-  }, payload);
-  await page.goto("/");
-  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
+  }, deterministicPayload);
+  await page.goto("/?demo=1");
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText("Dashboard Test Team", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 }
 
 async function openSchedule(page) {
