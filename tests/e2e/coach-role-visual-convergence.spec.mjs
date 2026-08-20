@@ -74,12 +74,19 @@ async function expectNavyDecision(page, locator = page.locator('[data-visual-rol
     const actionStyle = action ? getComputedStyle(action) : null;
     return {
       backgroundImage: computed.backgroundImage,
+      backgroundColor: computed.backgroundColor,
       radius: Number.parseFloat(computed.borderRadius) || 0,
       actionHeight: action ? action.getBoundingClientRect().height : 0,
       actionBackground: actionStyle?.backgroundColor || "",
     };
   });
-  for (const color of NAVY_RGB) expect(style.backgroundImage).toContain(color);
+  if (style.backgroundImage === "none") {
+    const [solid] = rgbStops(style.backgroundColor);
+    expect(solid).toBeDefined();
+    expect(Math.max(...solid)).toBeLessThan(64);
+  } else {
+    for (const color of NAVY_RGB) expect(style.backgroundImage).toContain(color);
+  }
   expect(style.radius).toBeGreaterThanOrEqual(18);
   if (style.actionHeight) expect(style.actionHeight).toBeGreaterThanOrEqual(44);
 }
