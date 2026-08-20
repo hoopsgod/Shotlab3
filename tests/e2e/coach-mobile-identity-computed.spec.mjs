@@ -65,6 +65,7 @@ for (const viewport of VIEWPORTS) {
       const headerBrand = header?.querySelector('.mcBrandLockup');
       const teamSelect = header?.querySelector('.mcTeamSelect');
       const headerStyle = header ? getComputedStyle(header) : null;
+      const identityStyle = identity ? getComputedStyle(identity) : null;
       const menuStyle = menu ? getComputedStyle(menu) : null;
       const bellStyle = bell ? getComputedStyle(bell) : null;
       return {
@@ -75,6 +76,8 @@ for (const viewport of VIEWPORTS) {
         eyebrowColor: eyebrow ? getComputedStyle(eyebrow).color : '',
         heroBackground: hero ? getComputedStyle(hero).backgroundColor : '',
         heroBackgroundImage: hero ? getComputedStyle(hero).backgroundImage : '',
+        identityBackground: identityStyle?.backgroundColor || '',
+        identityBackgroundImage: identityStyle?.backgroundImage || '',
         headerBackground: headerStyle?.backgroundColor || '',
         headerBackgroundImage: headerStyle?.backgroundImage || '',
         headerColor: headerStyle?.color || '',
@@ -125,9 +128,12 @@ for (const viewport of VIEWPORTS) {
     expect(luminance(parseRgb(metrics.bellBackground))).toBeLessThan(0.2);
     expect(luminance(parseRgb(metrics.bellColor))).toBeGreaterThan(0.75);
 
-    const bg = parseRgb(metrics.heroBackground || 'rgb(7, 28, 40)');
-    expect(contrast(parseRgb(metrics.teamColor), bg)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(parseRgb(metrics.eyebrowColor), bg)).toBeGreaterThanOrEqual(4.5);
+    expect(metrics.identityBackgroundImage).toContain('linear-gradient');
+    expect(luminance(parseRgb(metrics.identityBackground))).toBeLessThan(0.2);
+    expect(luminance(parseRgb(metrics.heroBackground))).toBeGreaterThan(0.75);
+    const identityBg = parseRgb(metrics.identityBackground || 'rgb(6, 25, 35)');
+    expect(contrast(parseRgb(metrics.teamColor), identityBg)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(parseRgb(metrics.eyebrowColor), identityBg)).toBeGreaterThanOrEqual(4.5);
 
     fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight }, null, 2)}\n`);
     if (viewport.width === 390) {
