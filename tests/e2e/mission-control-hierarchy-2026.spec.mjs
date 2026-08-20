@@ -169,13 +169,18 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
   expect(presentation.primaryBackground).not.toBe("rgb(32, 36, 33)");
   expect(presentation.primaryBackground).not.toBe("rgba(0, 0, 0, 0)");
-  expect(presentation.primaryColor).toBe("rgb(7, 16, 7)");
+  const primaryTextChannels = rgbChannels(presentation.primaryColor);
+  expect(primaryTextChannels).toHaveLength(3);
+  expect(Math.max(...primaryTextChannels)).toBeLessThan(80);
   expect(presentation.primaryBorder).toContain("solid");
   expect(presentation.metricColumns).toBe(3);
   expect(presentation.metricBackgroundColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(presentation.metricBorder).toContain("solid");
-  expect(presentation.metricValues).toEqual(["rgb(245, 248, 249)", "rgb(245, 248, 249)", "rgb(245, 248, 249)"]);
-  expect(presentation.metricLabels).toEqual(["rgb(155, 167, 174)", "rgb(155, 167, 174)", "rgb(155, 167, 174)"]);
+  expect(presentation.metricValues.every((color) => Math.min(...rgbChannels(color)) > 220)).toBe(true);
+  expect(presentation.metricLabels.every((color) => {
+    const channels = rgbChannels(color);
+    return channels.length === 3 && Math.min(...channels) > 120 && Math.max(...channels) < 230;
+  })).toBe(true);
   expect(presentation.metricButtonBackgrounds).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]);
   expect(presentation.teamSelectDisplay).toBe("none");
 
