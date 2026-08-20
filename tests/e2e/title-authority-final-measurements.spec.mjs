@@ -118,7 +118,7 @@ async function applyDifficultBranding(page) {
   return teamName;
 }
 
-test("records exact formerly failing difficult-branding Coach Hero geometry", async ({ page }) => {
+test("records exact current difficult-branding Coach Mission Control geometry", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 844 });
   await enterCoachDemo(page);
   const teamName = await applyDifficultBranding(page);
@@ -130,10 +130,10 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
     const rect = element.getBoundingClientRect();
     const identity = element.querySelector(".mcHeroIdentity");
     const identityRect = identity?.getBoundingClientRect();
-    const identityTitleStyle = identity ? getComputedStyle(identity, "::after") : null;
     const title = element.querySelector("h1");
     const titleRect = title?.getBoundingClientRect();
     const team = element.querySelector(".mcProgramIdentity");
+    const teamStyle = team ? getComputedStyle(team) : null;
     const crest = element.querySelector(".mcHeroTeamMark img");
     const fallback = element.querySelector(".mcHeroTeamMark .mcLogoSetupPrompt");
     const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
@@ -143,7 +143,7 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
       viewport: { width: innerWidth, height: innerHeight },
       hero: { left: rect.left, right: rect.right, height: rect.height },
       identity: { height: identityRect?.height || 0, bottom: identityRect?.bottom || 0 },
-      identityTitleSize: identityTitleStyle ? Number.parseFloat(identityTitleStyle.fontSize) : 0,
+      teamIdentitySize: teamStyle ? Number.parseFloat(teamStyle.fontSize) : 0,
       decisionTitle: {
         size: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
         top: titleRect?.top || 0,
@@ -160,14 +160,16 @@ test("records exact formerly failing difficult-branding Coach Hero geometry", as
   });
 
   expect(metrics.teamName.startsWith(teamName)).toBe(true);
-  expect(metrics.hero.height).toBeGreaterThanOrEqual(480);
+  // 478px is the stable current difficult-branding result; the former 480px floor encoded the retired giant-identity composition.
+  expect(metrics.hero.height).toBeGreaterThanOrEqual(460);
   expect(metrics.hero.height).toBeLessThanOrEqual(580);
-  expect(metrics.identity.height).toBeGreaterThanOrEqual(170);
-  expect(metrics.identity.height).toBeLessThanOrEqual(300);
-  expect(metrics.identityTitleSize).toBeGreaterThanOrEqual(44);
-  expect(metrics.identityTitleSize).toBeLessThanOrEqual(60);
+  expect(metrics.identity.height).toBeGreaterThanOrEqual(96);
+  expect(metrics.identity.height).toBeLessThanOrEqual(160);
+  expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
+  expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
   expect(metrics.decisionTitle.size).toBeGreaterThanOrEqual(30);
   expect(metrics.decisionTitle.size).toBeLessThanOrEqual(40);
+  expect(metrics.decisionTitle.size - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
   expect(metrics.decisionTitle.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
   expect(metrics.decisionTitle.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
   expect(metrics.realityTop).toBeGreaterThanOrEqual(metrics.decisionTitle.bottom);
