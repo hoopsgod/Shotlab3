@@ -183,7 +183,9 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.overflow).toBeLessThanOrEqual(1);
     expect(metrics.attention.top).toBeLessThan(metrics.dock.top);
 
-    expect(metrics.headerBrandDisplay).toBe('none');
+    // The compact mobile control bar intentionally keeps the team brand visible
+    // while the full team selector remains hidden; identity then expands in the hero.
+    expect(metrics.headerBrandDisplay).toBe('flex');
     expect(metrics.teamSelectDisplay).toBe('none');
     expect(metrics.heroBackgroundImage).not.toContain('titans-exact-logo');
     expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.menu.bottom - 1);
