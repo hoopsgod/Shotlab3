@@ -6,13 +6,16 @@ const MODE = process.env.TITLE_STAGE_EVIDENCE_MODE || "after";
 const STRICT = MODE !== "baseline";
 const OUTPUT_DIR = path.resolve(process.cwd(), `artifacts/mobile-title-stage-authority-${MODE}`);
 const VIEWPORTS = [
+  { width: 320, height: 700 },
+  { width: 360, height: 780 },
   { width: 375, height: 812 },
   { width: 390, height: 844 },
   { width: 393, height: 852 },
   { width: 402, height: 874 },
+  { width: 414, height: 896 },
   { width: 430, height: 932 },
 ];
-const SCREENSHOT_WIDTHS = new Set([375, 390, 430]);
+const SCREENSHOT_WIDTHS = new Set(VIEWPORTS.map(({ width }) => width));
 const metrics = [];
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -187,8 +190,8 @@ const coachRoutes = [
 function shouldCapture(width) { return SCREENSHOT_WIDTHS.has(width); }
 
 for (const role of ["player", "coach"]) {
-  test(`${role} title stages restore the full custom crest across 375–430px`, async ({ page }) => {
-    test.setTimeout(260_000);
+  test(`${role} title stages preserve custom-crest and viewport geometry across the Phase 0 320–430px matrix`, async ({ page }) => {
+    test.setTimeout(420_000);
     await installSafeRoutes(page);
     const routes = role === "player" ? playerRoutes : coachRoutes;
     for (const viewport of VIEWPORTS) {
