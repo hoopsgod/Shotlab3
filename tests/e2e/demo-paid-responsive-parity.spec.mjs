@@ -184,22 +184,45 @@ async function expectPlayerTitleCrestIntegrity(page, viewportWidth, accountKind)
       });
     }
 
-    const fullRange = document.createRange();
-    fullRange.selectNodeContents(title);
-    const titleLineRects = visibleRects(fullRange);
+    // Build visual line bounds from the actual lexical glyph ranges rather than
+    // the h1 box. A wide title is allowed to borrow empty stage width, but its
+    // rendered words themselves may never intersect the crest.
+    const glyphRects = words.flatMap((word) => word.rects.map((rect) => ({ ...rect, word: word.word })));
+    const titleLineRects = [];
+    for (const rect of glyphRects.sort((a, b) => a.top - b.top || a.left - b.left)) {
+      const existing = titleLineRects.find((line) => Math.abs(line.top - rect.top) <= 1);
+      if (existing) {
+        existing.left = Math.min(existing.left, rect.left);
+        existing.right = Math.max(existing.right, rect.right);
+        existing.top = Math.min(existing.top, rect.top);
+        existing.bottom = Math.max(existing.bottom, rect.bottom);
+        existing.width = round(existing.right - existing.left);
+        existing.height = round(existing.bottom - existing.top);
+        existing.words.push(rect.word);
+      } else {
+        titleLineRects.push({ ...rect, words: [rect.word] });
+      }
+    }
+
     const crestRect = rectData(crest.getBoundingClientRect());
     const stageRect = rectData(node.getBoundingClientRect());
     const collisions = titleLineRects
-      .map((rect, index) => ({ index, overlap: overlap(rect, crestRect) }))
+      .map((rect, index) => ({ index, words: rect.words, overlap: overlap(rect, crestRect) }))
       .filter(({ overlap: amount }) => amount.x > 1 && amount.y > 1);
     const minGap = titleLineRects.length
       ? Math.min(...titleLineRects.map((rect) => separation(rect, crestRect)))
       : 0;
+    const titleStyle = getComputedStyle(title);
 
     return {
       missing: [],
       title: text.trim(),
       wideWordClass: node.classList.contains('teamIdentityTitleStage--wideWord'),
+      wrapStyle: {
+        overflowWrap: titleStyle.overflowWrap,
+        wordBreak: titleStyle.wordBreak,
+        hyphens: titleStyle.hyphens,
+      },
       fragmentedWords: words.filter((word) => word.visualLines > 1).map((word) => ({ word: word.word, visualLines: word.visualLines, rects: word.rects })),
       titleLineRects,
       crestRect,
@@ -213,9 +236,15 @@ async function expectPlayerTitleCrestIntegrity(page, viewportWidth, accountKind)
 
   expect(geometry.missing).toEqual([]);
   expect(geometry.fragmentedWords, `${accountKind} ${viewportWidth}px title must never split a lexical word across visual lines`).toEqual([]);
-  expect(geometry.collisions, `${accountKind} ${viewportWidth}px title lines must not collide with the crest`).toEqual([]);
+  expect(geometry.collisions, `${accountKind} ${viewportWidth}px title glyphs must not collide with the crest`).toEqual([]);
   expect(geometry.titleInsideStage).toBe(true);
   expect(geometry.crestInsideStage).toBe(true);
+
+  if (geometry.wideWordClass && viewportWidth < 768) {
+    expect(geometry.wrapStyle.overflowWrap, `${accountKind} ${viewportWidth}px wide title must own lexical wrapping over generic mobile h1 safety`).toBe('normal');
+    expect(geometry.wrapStyle.wordBreak).toBe('normal');
+    expect(geometry.wrapStyle.hyphens).toBe('none');
+  }
 
   if (viewportWidth <= 350) {
     expect(geometry.minGap, `${accountKind} ${viewportWidth}px title/crest separation should remain visually balanced`).toBeGreaterThanOrEqual(8);
