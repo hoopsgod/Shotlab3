@@ -78,6 +78,16 @@ body.mission-control-active .mcShellV3 .mcAttentionCopy small,
 body.mission-control-active .mcShellV3 .mcAttentionMeta,
 body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
 
+/* Registered onboarding/sparse state uses a dark activation surface. Lock its
+   copy to the dark-material palette here because this late hierarchy authority
+   otherwise makes inherited Coach text use the light editorial ink token. */
+body.mission-control-active .mcShellV3 .mcTodayPlan.mcActivationPlan .mcTodayPlanCopy strong {
+  color: #ffffff !important;
+}
+body.mission-control-active .mcShellV3 .mcTodayPlan.mcActivationPlan .mcTodayPlanCopy em {
+  color: rgba(255,255,255,.68) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.mission-control-active .mcShellV3 * { animation: none !important; transition-duration: .01ms !important; }
 }
