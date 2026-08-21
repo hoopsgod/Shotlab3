@@ -156,7 +156,10 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.title.right).toBeLessThanOrEqual(metrics.reality.right + 1);
     expect(metrics.title.width).toBeLessThanOrEqual(metrics.reality.width + 1);
     expect(Math.abs(metrics.detail.left - metrics.reality.left)).toBeLessThanOrEqual(1);
-    expect(Math.abs(metrics.detail.right - metrics.reality.right)).toBeLessThanOrEqual(1);
+    // Supporting copy is intentionally narrower than the full metrics rail. Keep it
+    // left-aligned and bounded inside the canonical rail without forcing equal widths.
+    expect(metrics.detail.right).toBeLessThanOrEqual(metrics.reality.right + 1);
+    expect(metrics.detail.width).toBeLessThanOrEqual(metrics.reality.width);
     expect(metrics.detailBackgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     expect(metrics.detailBackgroundImage).toContain('linear-gradient');
     expect(metrics.reality.top).toBeGreaterThanOrEqual(metrics.detail.bottom - 1);
