@@ -145,4 +145,21 @@
   .teamIdentityTitleStage--standard.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
     font-size: clamp(32px, calc(20vw - 32px), 38px);
   }
+
+  /* Player Home keeps the full identity crest at 320px. Give the hero name the
+     unused horizontal stage width instead of shrinking type or breaking a real
+     first name internally; extra stage height keeps the crest clear of the
+     resulting lexical two-line title. This is identity-family only and cannot
+     alter the certified secondary/editorial title geometry. */
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero .teamIdentityTitleStage__inner {
+    min-height: 260px;
+  }
+
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero .teamIdentityTitleStage__title {
+    width: calc(100% + var(--identity-crest) + 16px);
+    max-width: calc(100% + var(--identity-crest) + 16px);
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
 }
