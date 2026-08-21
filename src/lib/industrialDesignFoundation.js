@@ -189,8 +189,8 @@ const CSS = `
  * Identity-neutral control contract. Route-level styles load on demand, so
  * geometry must be owned here to keep demo and registered sessions identical.
  */
-html body .performance-shell.performance-shell button,
-html body .premium-screen.premium-screen button {
+html body .performance-shell.performance-shell button:not(.mcPrimary),
+html body .premium-screen.premium-screen button:not(.mcPrimary) {
   min-height:44px !important;
 }
 html body .performance-shell.performance-shell .secondaryPageAction,

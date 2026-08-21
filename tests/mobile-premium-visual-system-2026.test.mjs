@@ -8,6 +8,7 @@ const secondaryPageSystem = fs.readFileSync(new URL("../src/components/Secondary
 const secondaryPageCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
 const titleStage = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.jsx", import.meta.url), "utf8");
 const titleStageCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleStage.css", import.meta.url), "utf8");
+const brandHierarchyCss = fs.readFileSync(new URL("../src/components/TeamIdentityBrandHierarchy.css", import.meta.url), "utf8");
 const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardHeader.jsx", import.meta.url), "utf8");
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const coachCommand = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
@@ -38,21 +39,35 @@ test("retired Coach dashboard authorities cannot override the current production
   assert.match(indexHtml, /shotlab-phase3-secondary-cohesion\.css/);
 });
 
-test("secondary pages use the shared premium team-identity stage with compact standard geometry", () => {
+test("secondary pages use one editorial title treatment while retaining the full custom crest column", () => {
   assert.match(secondaryPageSystem, /dataPageKind=\{iconName\}/);
-  assert.match(secondaryPageSystem, /dataMobileStage="team-identity"/);
+  assert.match(secondaryPageSystem, /dataMobileStage="editorial"/);
+  assert.match(secondaryPageSystem, /variant="standard"/);
+  assert.match(secondaryPageSystem, /brandTreatment="compact"/);
+  assert.doesNotMatch(secondaryPageSystem, /BRAND_TREATMENT_BY_ICON|brandTreatmentFor|signature|watermark|brandTreatment="none"/);
   assert.match(secondaryPageSystem, /data-mobile-stage="performance"/);
   assert.match(titleStage, /data-team-identity-stage="true"/);
+  assert.match(titleStage, /BRAND_TREATMENTS = new Set\(\["hero", "compact"\]\)/);
+  assert.match(titleStage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
+  assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
+  assert.match(titleStage, /const fullCrestBrand =/);
+  assert.match(titleStage, /className="teamIdentityTitleStage__crestSlot"/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
+  assert.match(titleStageCss, /clamp\(40px, 9\.8vw, 44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
+  assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
+  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
+  assert.doesNotMatch(brandHierarchyCss, /signatureRule|data-brand-treatment="none"|teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
   assert.doesNotMatch(secondaryPageSystem, /secondaryPageIntro/);
   assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b/);
 });
 
 test("primary decisions are dark performance bands owned by SecondaryPageSystem CSS", () => {
   assert.match(secondaryPageCss, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns: 44px minmax\(0, 1fr\) minmax\(180px, 30%\)/);
-  assert.match(secondaryPageCss, /linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryPageCss, /linear-gradient\(145deg, var\(--team-brand-surface-elevated, #171b18\), var\(--team-brand-surface-deep, #0c0f0d\) 72%\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__icon\s*\{[\s\S]*display: grid/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__visual\s*\{[\s\S]*display: block/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision h2\s*\{[\s\S]*font: 770 clamp\(27px, 5vw, 38px\)/);
@@ -83,8 +98,8 @@ test("mobile metric interactions stay stable and reduced-motion safe", () => {
   assert.match(secondaryPageCss, /\.secondaryPageDecision button:active:not\(:disabled\) \{ transform: none; \}/);
 });
 
-test("Coach detail surfaces retain the same dark performance language below the shared title", () => {
-  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+test("Coach detail surfaces retain the same brand-driven dark performance language below the shared title", () => {
+  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg, var\(--team-brand-surface-elevated/);
   assert.match(secondaryPageCss, /\.coachPlayerProfileHero h2\s*\{[\s\S]*font: 780 clamp\(28px, 5vw, 40px\)/);
   assert.match(secondaryPageCss, /\.coachPlayerProfileMetrics\s*\{[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(secondaryPageCss, /@media \(max-width: 760px\)[\s\S]*\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
@@ -102,7 +117,7 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
   assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
   assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(coachTitleCss, /min-height:\s*428px/);
+  assert.match(coachTitleCss, /min-height:\s*488px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);
@@ -116,10 +131,10 @@ test("mobile navigation is a ShotLab dark edge rail, safe-area aware, and touch 
   assert.match(mobileNav, /width:\s*100%/);
   assert.match(mobileNav, /border-radius:\s*0/);
   assert.match(mobileNav, /min-height:\s*48px/);
-  assert.match(mobileNav, /background:\s*rgba\(7, 26, 34, \.975\)/);
-  assert.match(mobileNav, /dockItem\.active \.dockIcon \{ background: rgba\(200, 255, 26, \.08\); \}/);
-  assert.match(navArchitecture, /background:\s*rgba\(7, 26, 34, \.975\) !important/);
-  assert.match(navArchitecture, /button\[data-active="true"\] \{[\s\S]*color: #c8ff1a/);
+  assert.match(mobileNav, /background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep/);
+  assert.match(mobileNav, /dockItem\.active \.dockIcon \{ background: color-mix\(in srgb, var\(--team-brand-primary/);
+  assert.match(navArchitecture, /background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep[\s\S]*!important/);
+  assert.match(navArchitecture, /button\[data-active="true"\] \{[\s\S]*color: var\(--team-brand-nav-active/);
   assert.match(navArchitecture, /transform: translateY\(4px\) scale\(\.995\) !important/);
   assert.match(navArchitecture, /prefers-reduced-transparency/);
   assert.doesNotMatch(navArchitecture, /translateX\(-50%\)/);

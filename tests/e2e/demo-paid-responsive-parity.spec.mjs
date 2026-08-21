@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { installParityBranding, withParityBranding } from './parity-branding-fixture.mjs';
 
 const REGISTERED_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const TEAM_ID = 'team-responsive-parity-2026';
@@ -6,6 +7,7 @@ const IDENTITIES = {
   coach: { id: '33333333-3333-4333-8333-333333333333', email: 'responsive.coach@shotlab.test', name: 'Responsive Coach', role: 'coach', isCoach: true },
   player: { id: '44444444-4444-4444-8444-444444444444', email: 'responsive.player@shotlab.test', name: 'Responsive Player', role: 'player', isCoach: false },
 };
+const DATA_STATE_CLASSES = new Set(['is-onboarding', 'has-team-data']);
 
 function registeredSeed(role) {
   const current = IDENTITIES[role];
@@ -18,7 +20,7 @@ function registeredSeed(role) {
       'sl:supabase-session': { access_token: `responsive-${role}-token`, refresh_token: `responsive-${role}-refresh`, expires_at: nowSeconds + 3600, expires_in: 3600, token_type: 'bearer', user: { id: current.id, email: current.email } },
       'sl:supabase-access-token': `responsive-${role}-token`,
       'sl:session': { email: current.email },
-      'sl:teams': [{ id: TEAM_ID, name: 'Responsive Parity Team', ownerCoachId: coach.email, joinCode: 'RESP26', createdAt: 1_780_000_000_000 }],
+      'sl:teams': [withParityBranding({ id: TEAM_ID, name: 'Responsive Parity Team', ownerCoachId: coach.email, joinCode: 'RESP26', createdAt: 1_780_000_000_000 })],
       'sl:players': [coach, player],
       'sl:player-profiles': [{ id: 'profile-responsive-player', userId: player.email, teamId: TEAM_ID, firstName: 'Responsive', lastName: 'Player', jerseyNumber: '12' }],
       'sl:scores': [{ id: 'score-responsive-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, drillId: 'demo-home-warm-up-shooting-4-minute', score: 12, date: '2026-08-13', src: 'home' }],
@@ -65,15 +67,64 @@ async function createDemo(browser, role, viewport) {
   await page.goto('/?demo=1');
   await page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true }).click();
   await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
+  await installParityBranding(page);
+  await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
   return { context, page };
 }
 
 async function signature(page, testId) {
   const locator = page.getByTestId(testId);
-  return locator.evaluate((node) => {
+  return locator.evaluate((node, stateClasses) => {
     const style = getComputedStyle(node);
-    return { tag: node.tagName, className: String(node.className || ''), display: style.display, position: style.position, borderRadius: style.borderRadius, fontFamily: style.fontFamily };
+    const rect = node.getBoundingClientRect();
+    const stableClassName = String(node.className || '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .filter((name) => !stateClasses.includes(name))
+      .join(' ');
+    return {
+      tag: node.tagName,
+      className: stableClassName,
+      display: style.display,
+      position: style.position,
+      borderRadius: style.borderRadius,
+      fontFamily: style.fontFamily,
+      textAlign: style.textAlign,
+      left: Math.round(rect.left * 2) / 2,
+      width: Math.round(rect.width * 2) / 2,
+    };
+  }, [...DATA_STATE_CLASSES]);
+}
+
+async function expectRegisteredStateQuality(page, role, viewportWidth) {
+  if (role !== 'coach') return;
+  const activation = page.locator('.mcTodayPlan.mcActivationPlan');
+  if (await activation.count() === 0) return;
+
+  const visual = await activation.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const strong = node.querySelector('.mcTodayPlanCopy strong');
+    const strongStyle = strong ? getComputedStyle(strong) : null;
+    const button = node.querySelector(':scope > button');
+    const buttonRect = button?.getBoundingClientRect();
+    const rect = node.getBoundingClientRect();
+    return {
+      backgroundImage: style.backgroundImage,
+      borderRadius: Number.parseFloat(style.borderRadius),
+      textColor: strongStyle?.color || '',
+      width: rect.width,
+      buttonWidth: buttonRect?.width || 0,
+    };
   });
+
+  // A truthful sparse/onboarding state may change content, but it may not fall
+  // back to the generic pale editorial card. Preserve the component-owned dark
+  // premium material and, on mobile, the same full-width action treatment.
+  expect(visual.backgroundImage).toContain('linear-gradient');
+  expect(visual.backgroundImage).not.toBe('none');
+  expect(visual.borderRadius).toBeGreaterThanOrEqual(16);
+  expect(visual.textColor).toBe('rgb(255, 255, 255)');
+  if (viewportWidth < 768) expect(visual.buttonWidth).toBeGreaterThanOrEqual(visual.width - 34);
 }
 
 async function expectNoOverflow(page) {
@@ -83,6 +134,10 @@ async function expectNoOverflow(page) {
 }
 
 for (const viewportCase of [
+  { name: '375-mobile', viewport: { width: 375, height: 812 } },
+  { name: '390-mobile', viewport: { width: 390, height: 844 } },
+  { name: '393-mobile', viewport: { width: 393, height: 852 } },
+  { name: '402-mobile', viewport: { width: 402, height: 874 } },
   { name: '430-mobile', viewport: { width: 430, height: 932 } },
   { name: 'desktop', viewport: { width: 1440, height: 1000 } },
 ]) {
@@ -93,6 +148,7 @@ for (const viewportCase of [
       const testId = role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center';
       try {
         expect(await signature(demo.page, testId)).toEqual(await signature(registered.page, testId));
+        await expectRegisteredStateQuality(registered.page, role, viewportCase.viewport.width);
         await expectNoOverflow(demo.page);
         await expectNoOverflow(registered.page);
         if (viewportCase.viewport.width < 768) {

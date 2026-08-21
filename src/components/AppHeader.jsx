@@ -1,3 +1,5 @@
+import "./Phase7AuthenticatedChrome.css";
+
 const VARIANT_STYLES = {
   standard: {
     padding: "4px 0 18px",

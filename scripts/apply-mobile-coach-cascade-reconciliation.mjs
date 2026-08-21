@@ -13,7 +13,6 @@ const replaceOnce = (source, from, to, label) => {
 export function reconcileCoachHierarchy(source) {
   return replaceOnce(source,
 `body.mission-control-active .mcShellV3 .mcSection,
-body.mission-control-active .mcShellV3 .mcTodayPlan,
 body.mission-control-active [data-testid="coach-assignment-accountability"],
 body.mission-control-active [data-testid="coach-follow-up-queue"] {
   border: 1px solid var(--mc-line) !important;
@@ -23,7 +22,6 @@ body.mission-control-active [data-testid="coach-follow-up-queue"] {
   box-shadow: 0 1px 2px rgba(17,26,33,.03),0 10px 28px rgba(7,28,40,.04) !important;
 }`,
 `body.mission-control-active .mcShellV3 .mcSection,
-body.mission-control-active .mcShellV3 .mcTodayPlan,
 body.mission-control-active [data-testid="coach-assignment-accountability"],
 body.mission-control-active [data-testid="coach-follow-up-queue"] {
   border: 0 !important;
@@ -42,7 +40,7 @@ export function applyMobileCoachCascadeReconciliation({ cwd = process.cwd() } = 
   const hierarchySource = readFileSync(hierarchyPath, 'utf8');
   const nextHierarchy = reconcileCoachHierarchy(hierarchySource);
   if (nextHierarchy !== hierarchySource) writeFileSync(hierarchyPath, nextHierarchy);
-  console.log('Reconciled late Mission Control support surfaces without touching Coach mobile identity authority.');
+  console.log('Reconciled late Mission Control support surfaces while preserving the component-owned Coach activation material.');
 }
 
 const currentFile = fileURLToPath(import.meta.url);

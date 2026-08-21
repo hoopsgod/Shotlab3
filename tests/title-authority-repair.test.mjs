@@ -6,6 +6,7 @@ import { DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS } from '../scripts/run-route
 const read = (path) => readFileSync(path, 'utf8');
 const stage = read('src/components/TeamIdentityTitleStage.jsx');
 const stageCss = read('src/components/TeamIdentityTitleStage.css');
+const stageBrandCss = read('src/components/TeamIdentityBrandHierarchy.css');
 const coach = read('src/components/CoachCommandCenter.jsx');
 const coachTitleCss = read('src/components/CoachMissionControlTitleStage.css');
 const coachHeader = read('src/components/CoachDashboardHeader.jsx');
@@ -31,8 +32,11 @@ const coachFinalCss = read('src/components/CoachMissionControlFinal.css');
 const coachHierarchyCss = read('src/styles/MissionControlHierarchy2026.css');
 const coachCascadeLockCss = read('src/styles/MissionControlCascadeLock2026.css');
 const coachCriticalCss = read('public/shotlab-phase2-critical.css');
+const coachV5IntegrityCss = read('public/shotlab-v5-coach-integrity.css');
 const visualReboot = read('src/lib/visualSystemReboot.js');
 const visualReleaseFixes = read('src/lib/visualSystemRebootReleaseFixes.js');
+const sessionIntegrityCss = read('public/shotlab-v15-session-integrity.css');
+const industrialDesignFoundation = read('src/lib/industrialDesignFoundation.js');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -62,7 +66,7 @@ test('Player optical reconciliation cannot mutate the shared commitment title su
   assert.doesNotMatch(playerCompositionEnhancer, /MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home markup and owned component CSS form one compact decision-first Mission Control title authority', () => {
+test('Coach Home markup and owned component CSS form one tactical decision-first Mission Control title authority', () => {
   assert.match(coach, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
@@ -72,7 +76,8 @@ test('Coach Home markup and owned component CSS form one compact decision-first 
   assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
-  assert.match(coachTitleCss, /\.mcBrandLockup,[\s\S]*\.mcTeamSelect\s*\{\s*display:\s*none/);
+  assert.match(coachTitleCss, /\.mcTeamSelect\s*\{\s*display:\s*none/);
+  assert.match(coachTitleCss, /\.mcBrandLockup\s*\{[\s\S]*display:\s*flex/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
@@ -88,6 +93,25 @@ test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or su
   assert.doesNotMatch(coachPolishCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
   assert.doesNotMatch(coachShellCss, /Rebalance the signature hero/);
   assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
+});
+
+test('Coach Home decision, metrics and CTA have one source owner', () => {
+  const obsoleteComponentOwners = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
+  const lateOwners = [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss, coachV5IntegrityCss, visualReboot, visualReleaseFixes];
+  for (const obsoleteCss of [...obsoleteComponentOwners, ...lateOwners]) {
+    assert.doesNotMatch(obsoleteCss, /\.mcRealityStrip\b|\.mcPrimary\b/);
+  }
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcRealityStrip\s*\{/);
+  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcPrimary\s*\{/);
+  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--team-brand-surface-deep/);
+  assert.match(coachTitleCss, /\.mcRealityStrip strong\s*\{[\s\S]*color:\s*#f5f8f9/);
+  assert.match(coachTitleCss, /\.mcRealityStrip small\s*\{[\s\S]*color:\s*#9ba7ae/);
+  assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
+  assert.doesNotMatch(signatureEnhancer, /mcRealityStrip|mcPrimary|Coach final metric ledger|Coach final metric label/);
+  assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(h1,h2,h3,h4,strong\)/);
+  assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(p,small\)/);
+  assert.match(industrialDesignFoundation, /button:not\(\.mcPrimary\)/);
+  assert.doesNotMatch(industrialDesignFoundation, /performance-shell\.performance-shell button\s*,/);
 });
 
 test('late static and runtime Coach cascade layers cannot hide or redesign the owned title stage', () => {
@@ -132,13 +156,20 @@ test('shared title geometry preserves premium crest scale, containment and diffi
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
 });
 
-test('no-logo handling is explicit and Demo Titans branding is seeded directly by source data', () => {
-  assert.match(stage, /showLogoSetupPrompt/);
-  assert.match(stage, /teamIdentityTitleStage__logoSetup/);
+test('no-logo handling is explicit, premium and Demo Titans branding is seeded directly by source data', () => {
+  assert.match(stage, /showLogoSetupAction/);
+  assert.match(stage, /teamIdentityTitleStage__fallbackAction/);
+  assert.match(stage, /data-team-logo-fallback=\{fallbackInitials\}/);
   assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
-  assert.match(stage, /Click here to add your custom team logo/);
+  assert.match(stage, />Add logo</);
+  assert.doesNotMatch(stage, /Click here to add your custom team logo/);
+  assert.match(stageBrandCss, /\.teamIdentityTitleStage__fallbackAction/);
+  assert.match(stageBrandCss, /min-width:\s*44px/);
   assert.match(coach, /mcHeroLogoSetup/);
-  assert.match(coach, /Click here to add your custom team logo/);
+  assert.match(coach, /mcTeamFallback/);
+  assert.match(coach, /data-team-logo-fallback=\{mark\}/);
+  assert.match(coach, /<small>Add logo<\/small>/);
+  assert.doesNotMatch(coach, /Click here to add your custom team logo/);
   assert.match(demoData, /const DEMO_TEAM_BRANDING = Object\.freeze\(\{/);
   assert.match(demoData, /teamName:\s*"Demo Titans"/);
   assert.match(demoData, /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);

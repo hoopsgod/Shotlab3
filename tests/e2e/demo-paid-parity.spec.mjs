@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { installParityBranding, withParityBranding } from './parity-branding-fixture.mjs';
 
 const REGISTERED_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const TEAM_ID = 'team-parity-2026';
@@ -26,7 +27,7 @@ function registeredSeed(role) {
       },
       'sl:supabase-access-token': `registered-${role}-token`,
       'sl:session': { email: current.email },
-      'sl:teams': [{ id: TEAM_ID, name: 'Parity Team', ownerCoachId: coach.email, joinCode: 'PARITY26', createdAt: 1_780_000_000_000 }],
+      'sl:teams': [withParityBranding({ id: TEAM_ID, name: 'Parity Team', ownerCoachId: coach.email, joinCode: 'PARITY26', createdAt: 1_780_000_000_000 })],
       'sl:players': [coach, player],
       'sl:player-profiles': [{ id: 'profile-registered-player', userId: player.email, teamId: TEAM_ID, firstName: 'Registered', lastName: 'Player', jerseyNumber: '12' }],
       'sl:scores': [
@@ -105,6 +106,8 @@ async function enterDemo(page, role) {
   const button = page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true });
   await expect(button).toBeVisible({ timeout: 20_000 });
   await button.click();
+  await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 });
+  await installParityBranding(page);
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 });
 }
 

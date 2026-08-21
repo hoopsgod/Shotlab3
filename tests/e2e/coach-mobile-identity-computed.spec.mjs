@@ -39,7 +39,9 @@ function contrast(a, b) {
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
 function parseRgb(value) {
-  const parts = String(value).match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  const serialized = String(value).trim();
+  const parts = serialized.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  if (parts?.length === 3 && serialized.startsWith('color(srgb ')) return parts.map((part) => part * 255);
   return parts?.length === 3 ? parts : [0, 0, 0];
 }
 
@@ -60,21 +62,53 @@ for (const viewport of VIEWPORTS) {
       const title = hero?.querySelector('h1');
       const detail = hero?.querySelector('.mcHeroContent > p');
       const reality = document.querySelector('.mcRealityStrip');
+      const realityButtons = [...(reality?.querySelectorAll(':scope > button') || [])];
+      const primary = hero?.querySelector('.mcPrimary');
+      const attention = document.querySelector('.mcAttention');
+      const dock = document.querySelector('[data-testid="mobile-navigation-dock"]');
       const menu = header?.querySelector('.mcMobileMenu');
       const bell = header?.querySelector('.mcBell');
       const headerBrand = header?.querySelector('.mcBrandLockup');
       const teamSelect = header?.querySelector('.mcTeamSelect');
       const headerStyle = header ? getComputedStyle(header) : null;
+      const identityStyle = identity ? getComputedStyle(identity) : null;
+      const teamStyle = team ? getComputedStyle(team) : null;
+      const titleStyle = title ? getComputedStyle(title) : null;
+      const detailStyle = detail ? getComputedStyle(detail) : null;
+      const realityStyle = reality ? getComputedStyle(reality) : null;
+      const primaryStyle = primary ? getComputedStyle(primary) : null;
       const menuStyle = menu ? getComputedStyle(menu) : null;
       const bellStyle = bell ? getComputedStyle(bell) : null;
       return {
         viewport: { width: innerWidth, height: innerHeight },
-        header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), menu: rect(menu), bell: rect(bell),
+        header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), attention: rect(attention), dock: rect(dock), menu: rect(menu), bell: rect(bell),
+        teamIdentitySize: teamStyle ? Number.parseFloat(teamStyle.fontSize) : 0,
+        decisionTitleSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
         imageStyle: image ? { objectFit: getComputedStyle(image).objectFit, width: getComputedStyle(image).width, height: getComputedStyle(image).height, position: getComputedStyle(image).position } : null,
         teamColor: team ? getComputedStyle(team).color : '',
         eyebrowColor: eyebrow ? getComputedStyle(eyebrow).color : '',
         heroBackground: hero ? getComputedStyle(hero).backgroundColor : '',
         heroBackgroundImage: hero ? getComputedStyle(hero).backgroundImage : '',
+        identityBackground: identityStyle?.backgroundColor || '',
+        identityBackgroundImage: identityStyle?.backgroundImage || '',
+        detailBackgroundColor: detailStyle?.backgroundColor || '',
+        detailBackgroundImage: detailStyle?.backgroundImage || '',
+        realityBackgroundColor: realityStyle?.backgroundColor || '',
+        realityBackgroundImage: realityStyle?.backgroundImage || '',
+        realityBackground: realityStyle?.background || '',
+        realityBorder: realityStyle?.borderBottom || '',
+        realityColumns: realityStyle?.gridTemplateColumns.split(' ').filter(Boolean).length || 0,
+        metricButtons: realityButtons.map((button) => ({
+          background: getComputedStyle(button).backgroundColor,
+          borderLeft: getComputedStyle(button).borderLeft,
+          height: button.getBoundingClientRect().height,
+          valueColor: getComputedStyle(button.querySelector('strong')).color,
+          labelColor: getComputedStyle(button.querySelector('small')).color,
+        })),
+        primaryBackground: primaryStyle?.backgroundColor || '',
+        primaryColor: primaryStyle?.color || '',
+        primaryBorder: primaryStyle?.border || '',
+        primaryHeight: primary?.getBoundingClientRect().height || 0,
         headerBackground: headerStyle?.backgroundColor || '',
         headerBackgroundImage: headerStyle?.backgroundImage || '',
         headerColor: headerStyle?.color || '',
@@ -103,14 +137,55 @@ for (const viewport of VIEWPORTS) {
     const identityRegionHeight = metrics.identity.bottom - metrics.header.top;
     expect(identityRegionHeight).toBeGreaterThanOrEqual(160);
     expect(identityRegionHeight).toBeLessThanOrEqual(300);
+    // Mission Control intentionally keeps team identity compact and gives the decision headline title authority.
+    expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
+    expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
+    expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
+    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(48);
+    expect(metrics.decisionTitleSize - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
     expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
-    expect(metrics.hero.height).toBeLessThanOrEqual(460);
-    expect(metrics.title.top).toBeLessThanOrEqual(310);
-    expect(metrics.title.top).toBeLessThan(viewport.height * 0.4);
+    expect(metrics.hero.height).toBeLessThanOrEqual(580);
+    expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
+    expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
+    expect(metrics.detail.top).toBeGreaterThanOrEqual(metrics.title.top);
+    expect(metrics.title.height).toBeLessThanOrEqual(90);
+    expect(Math.abs(metrics.title.left - metrics.detail.left)).toBeLessThanOrEqual(1);
+    // The current decision-first composition deliberately lets the Coach headline
+    // use the full canonical content rail while supporting body copy stays narrower.
+    // Bound the title to the shared metrics rail instead of the old detail-column width.
+    expect(metrics.title.right).toBeLessThanOrEqual(metrics.reality.right + 1);
+    expect(metrics.title.width).toBeLessThanOrEqual(metrics.reality.width + 1);
+    expect(Math.abs(metrics.detail.left - metrics.reality.left)).toBeLessThanOrEqual(1);
+    // Supporting copy is intentionally narrower than the full metrics rail and
+    // transparent over the hero artwork; it is not a nested material card.
+    expect(metrics.detail.right).toBeLessThanOrEqual(metrics.reality.right + 1);
+    expect(metrics.detail.width).toBeLessThanOrEqual(metrics.reality.width);
+    expect(metrics.detailBackgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.detailBackgroundImage).toBe('none');
+    expect(metrics.reality.top).toBeGreaterThanOrEqual(metrics.detail.bottom - 1);
     expect(metrics.reality.top).toBeLessThan(viewport.height);
+    // The metrics rail uses one translucent team-surface material, not a gradient.
+    expect(metrics.realityBackgroundImage).toBe('none');
+    expect(metrics.realityBackground).not.toBe('rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box');
+    expect(metrics.realityBorder).toContain('solid');
+    expect(metrics.realityColumns).toBe(3);
+    expect(metrics.metricButtons).toHaveLength(3);
+    for (const metric of metrics.metricButtons) {
+      expect(metric.background).toBe('rgba(0, 0, 0, 0)');
+      expect(metric.height).toBeGreaterThanOrEqual(44);
+      expect(contrast(parseRgb(metric.valueColor), [7, 24, 32])).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(parseRgb(metric.labelColor), [7, 24, 32])).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(metrics.primaryHeight).toBeGreaterThanOrEqual(54);
+    expect(metrics.primaryBackground).not.toBe('rgba(0, 0, 0, 0)');
+    expect(contrast(parseRgb(metrics.primaryColor), parseRgb(metrics.primaryBackground))).toBeGreaterThanOrEqual(4.5);
+    expect(metrics.primaryBorder).toContain('solid');
     expect(metrics.overflow).toBeLessThanOrEqual(1);
+    expect(metrics.attention.top).toBeLessThan(metrics.dock.top);
 
-    expect(metrics.headerBrandDisplay).toBe('none');
+    // The compact mobile control bar intentionally keeps the team brand visible
+    // while the full team selector remains hidden; identity then expands in the hero.
+    expect(metrics.headerBrandDisplay).toBe('flex');
     expect(metrics.teamSelectDisplay).toBe('none');
     expect(metrics.heroBackgroundImage).not.toContain('titans-exact-logo');
     expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.menu.bottom - 1);
@@ -125,9 +200,14 @@ for (const viewport of VIEWPORTS) {
     expect(luminance(parseRgb(metrics.bellBackground))).toBeLessThan(0.2);
     expect(luminance(parseRgb(metrics.bellColor))).toBeGreaterThan(0.75);
 
-    const bg = parseRgb(metrics.heroBackground || 'rgb(7, 28, 40)');
-    expect(contrast(parseRgb(metrics.teamColor), bg)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(parseRgb(metrics.eyebrowColor), bg)).toBeGreaterThanOrEqual(4.5);
+    // Coach Home is one immersive dark hero. Identity is intentionally transparent
+    // over that hero instead of becoming a separate nested material card.
+    expect(metrics.identityBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.identityBackgroundImage).toBe('none');
+    expect(luminance(parseRgb(metrics.heroBackground))).toBeLessThan(0.2);
+    const heroBg = parseRgb(metrics.heroBackground || 'rgb(7, 24, 32)');
+    expect(contrast(parseRgb(metrics.teamColor), heroBg)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(parseRgb(metrics.eyebrowColor), heroBg)).toBeGreaterThanOrEqual(4.5);
 
     fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight }, null, 2)}\n`);
     if (viewport.width === 390) {

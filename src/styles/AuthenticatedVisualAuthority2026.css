@@ -5,6 +5,7 @@
 @import "./MissionControlHierarchy2026.css";
 @import "./MissionControlCascadeLock2026.css";
 @import "./Phase3SurfaceContracts.css";
+@import "./CoachRoleVisualConvergence2026.css";
 
 :root {
   --sl-font-system: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
@@ -18,12 +19,12 @@
   :root {
     --shotlab-mobile-content-rail: var(--space-5, 20px);
     --shotlab-mobile-content-landing: var(--space-6, 24px);
+    --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
     --layout-gutter: var(--shotlab-mobile-content-rail);
     --phase4e-mobile-gutter: var(--shotlab-mobile-content-rail);
   }
 
-  html body #root .performance-shell .player-scroll-container,
-  html body #root .performance-shell .coach-scroll-container {
+  html body #root .performance-shell .player-scroll-container {
     padding-inline: var(--shotlab-mobile-content-rail) !important;
   }
 
@@ -38,5 +39,26 @@
       + var(--shotlab-mobile-content-landing)
       + env(safe-area-inset-bottom, 0px)
     ) !important;
+  }
+
+  /* Coach route content arrives inside the route wrapper declared in App.jsx.
+   * Both owners use the same gutter token so their composed inset is exactly
+   * the canonical 20px rail: 16px wrapper + 4px secondary shell. */
+  html body #root .performance-shell--coach .secondaryPageShell {
+    padding-inline: calc(var(--shotlab-mobile-content-rail) - var(--shotlab-coach-route-wrapper-gutter)) !important;
+  }
+
+  html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
+    margin-inline: 0 !important;
+  }
+
+  /* Back is part of the opening title composition, not a detached row. The
+   * legacy button margin plus secondary-shell top padding created a 32px void. */
+  html body #root .performance-shell--coach .shared-dashboard-back-action {
+    margin-bottom: 0 !important;
+  }
+
+  html body #root .performance-shell--coach .shared-dashboard-back-action + .secondaryPageShell {
+    padding-top: 0 !important;
   }
 }

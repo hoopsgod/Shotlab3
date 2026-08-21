@@ -62,7 +62,7 @@ test("shared navigation remains authoritative inside coach Mission Control", () 
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
-  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(7, 26, 34, \.975\)\s*!important/s);
+  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep[^}]*!important/s);
   assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });
 
@@ -89,7 +89,7 @@ test("secondary tools are grouped without removing destinations", () => {
 
 test("native edge navigation removes the competing floating-card silhouette while preserving touch targets", () => {
   assert.match(navigationSource, /MobileNavigationArchitecture\.css/);
-  assert.match(architectureCss, /background:\s*rgba\(7, 26, 34, \.975\)/);
+  assert.match(architectureCss, /background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep/);
   assert.match(architectureCss, /background:\s*#f8f7f3/);
   assert.match(navigationCss, /left:\s*0/);
   assert.match(navigationCss, /right:\s*0/);
@@ -99,7 +99,7 @@ test("native edge navigation removes the competing floating-card silhouette whil
   assert.match(navigationCss, /min-height:\s*48px/);
   assert.match(navigationCss, /min-height:\s*66px/);
   assert.match(navigationCss, /width:\s*100%/);
-  assert.match(architectureCss, /button\[data-active="true"\]\s*\{[^}]*color:\s*#c8ff1a/s);
+  assert.match(architectureCss, /button\[data-active="true"\]\s*\{[^}]*color:\s*var\(--team-brand-nav-active/s);
   assert.match(architectureCss, /prefers-reduced-transparency/);
   assert.doesNotMatch(architectureCss, /translateX\(-50%\)/);
 });

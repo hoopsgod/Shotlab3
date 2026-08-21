@@ -116,7 +116,7 @@ test("authentication segmented controls expose native interaction semantics", ()
 });
 
 test("mobile navigation is a branded native edge tab rail", () => {
-  assert.match(mobileNavigation, /background: rgba\(7, 26, 34, \.975\)/);
+  assert.match(mobileNavigation, /background: color-mix\(in srgb, var\(--team-brand-surface-deep/);
   assert.match(mobileNavigation, /box-shadow: 0 -10px 28px rgba\(7, 26, 34, \.16\)/);
   assert.match(mobileNavigation, /--mobile-tab-bar-height: 56px/);
   assert.match(mobileNavigation, /border-radius: 0/);
@@ -124,8 +124,8 @@ test("mobile navigation is a branded native edge tab rail", () => {
   assert.match(mobileNavigation, /left: 0/);
   assert.match(mobileNavigation, /right: 0/);
   assert.match(mobileNavigation, /bottom: 0/);
-  assert.match(mobileNavigation, /\.dockItem\.active \.dockIcon \{ background: rgba\(200, 255, 26, \.08\)/);
-  assert.match(mobileNavigation, /color: #c8ff1a/);
+  assert.match(mobileNavigation, /\.dockItem\.active \.dockIcon \{ background: color-mix\(in srgb, var\(--team-brand-primary/);
+  assert.match(mobileNavigation, /color: var\(--team-brand-nav-active, #c8ff1a\)/);
   assert.match(mobileNavigation, /font-size: var\(--type-micro, 11px\)/);
   assert.doesNotMatch(mobileNavigation, /background: rgba\(250, 249, 245, \.965\)/);
 });

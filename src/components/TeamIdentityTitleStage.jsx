@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
+import "./TeamIdentityBrandHierarchy.css";
 
 const tidy = (value, fallback = "") => String(value ?? fallback).trim();
+const BRAND_TREATMENTS = new Set(["hero", "compact"]);
 const initialsFor = (value) => {
   const parts = tidy(value, "ShotLab Team").split(/\s+/).filter(Boolean);
   return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)[0]}` : parts[0]?.slice(0, 2) || "SL").toUpperCase();
@@ -48,13 +50,16 @@ export default function TeamIdentityTitleStage({
   summary = "",
   status = null,
   actions = [],
+  backAction = null,
+  titleSize = "auto",
+  brandTreatment = "auto",
   testId,
   className = "",
   ariaLabel,
   dataLayoutRole = "editorial-header",
   dataVisualRole = "team-identity-title",
   dataPageKind = "team",
-  dataMobileStage = "team-identity",
+  dataMobileStage = "",
 }) {
   const { branding } = useTeamBranding();
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
@@ -64,13 +69,28 @@ export default function TeamIdentityTitleStage({
   const displayTitle = tidy(title, personName || "ShotLab");
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
-  const longTitle = displayTitle.length > 22 || displayTitle.split(/\s+/).some((word) => word.length > 12);
-  const heroClass = variant === "hero" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
+  const titleWords = displayTitle.split(/\s+/).filter(Boolean);
+  const singleWordTitle = titleWords.length === 1;
+  const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
+  const longSingleWord = singleWordTitle && longestWordLength >= 11;
+  const longTitle = displayTitle.length > 22 || longestWordLength > 12;
+  const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
+  const titleFamily = heroClass === "teamIdentityTitleStage--hero" ? "identity" : "editorial";
+  const requestedMobileStage = tidy(dataMobileStage);
+  const resolvedMobileStage = titleFamily === "editorial" && requestedMobileStage === "team-identity"
+    ? "editorial"
+    : requestedMobileStage || (titleFamily === "identity" ? "team-identity" : "editorial");
+  const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
+  const fallbackBrandTreatment = titleFamily === "identity" ? "hero" : "compact";
+  const resolvedBrandTreatment = requestedBrandTreatment === "auto"
+    ? fallbackBrandTreatment
+    : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : fallbackBrandTreatment);
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
-  const showLogoSetupPrompt = isCoachStage && (!cleanedLogo || logoFailed);
+  const showLogoSetupAction = isCoachStage && (!cleanedLogo || logoFailed);
+  const hasUsableLogo = Boolean(cleanedLogo && !logoFailed);
   const openBrandingSettings = () => {
     if (brandingAction?.onClick) {
       brandingAction.onClick();
@@ -98,20 +118,75 @@ export default function TeamIdentityTitleStage({
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
+  const fullCrestBrand = (
+    <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
+      {hasUsableLogo ? (
+        <img
+          className="teamIdentityTitleStage__crest"
+          data-identity-role="brand-mark"
+          src={cleanedLogo}
+          alt={`${teamName} logo`}
+          draggable="false"
+          onError={() => setLogoFailed(true)}
+        />
+      ) : showLogoSetupAction ? (
+        <button
+          type="button"
+          className="teamIdentityTitleStage__fallbackCrest teamIdentityTitleStage__fallbackAction"
+          data-identity-role="brand-fallback"
+          data-team-logo-fallback={fallbackInitials}
+          onClick={openBrandingSettings}
+          aria-label={`Add a logo for ${teamName} in Program Branding`}
+        >
+          <strong className="teamIdentityTitleStage__fallbackActionMark">{fallbackInitials}</strong>
+          <span className="teamIdentityTitleStage__fallbackActionLabel">Add logo</span>
+        </button>
+      ) : (
+        <span className="teamIdentityTitleStage__fallbackCrest" data-identity-role="brand-fallback" aria-label={`${teamName} initials`}>{fallbackInitials}</span>
+      )}
+    </div>
+  );
+
   return (
     <header
-      className={["teamIdentityTitleStage", heroClass, surfaceClass, longTitle ? "teamIdentityTitleStage--longTitle" : "", className].filter(Boolean).join(" ")}
+      className={[
+        "teamIdentityTitleStage",
+        heroClass,
+        surfaceClass,
+        longTitle ? "teamIdentityTitleStage--longTitle" : "",
+        singleWordTitle ? "teamIdentityTitleStage--singleWord" : "teamIdentityTitleStage--multiWord",
+        longSingleWord ? "teamIdentityTitleStage--longSingleWord" : "",
+        titleSize !== "auto" ? `teamIdentityTitleStage--title-${titleSize}` : "",
+        className,
+      ].filter(Boolean).join(" ")}
       data-testid={testId}
       data-team-identity-stage="true"
-      data-variant={variant === "hero" ? "hero" : "standard"}
+      data-variant={titleFamily === "identity" ? "hero" : "standard"}
+      data-title-stage-family={titleFamily}
+      data-brand-treatment={resolvedBrandTreatment}
+      data-title-size={titleSize}
+      data-title-word-count={titleWords.length}
       data-surface={surface === "dark" ? "dark" : "light"}
       data-layout-role={dataLayoutRole}
       data-visual-role={dataVisualRole}
       data-page-kind={dataPageKind}
-      data-mobile-stage={dataMobileStage}
+      data-mobile-stage={resolvedMobileStage}
       aria-label={ariaLabel || `${teamName} ${displayTitle}`}
     >
-      <div className="teamIdentityTitleStage__tonalCrest" aria-hidden="true">{fallbackInitials}</div>
+      {resolvedBrandTreatment === "hero" ? <div className="teamIdentityTitleStage__tonalCrest" aria-hidden="true">{fallbackInitials}</div> : null}
+      {backAction?.onClick ? (
+        <nav className="teamIdentityTitleStage__navigation" aria-label={backAction.ariaLabel || "Back navigation"}>
+          <button
+            type="button"
+            className="teamIdentityTitleStage__back"
+            onClick={backAction.onClick}
+            aria-label={backAction.ariaLabel || backAction.label || "Back"}
+          >
+            <span aria-hidden="true" className="teamIdentityTitleStage__backIcon">←</span>
+            <span>{backAction.label || "Back"}</span>
+          </button>
+        </nav>
+      ) : null}
       <div className="teamIdentityTitleStage__inner">
         <div className="teamIdentityTitleStage__copy">
           <div className="teamIdentityTitleStage__identityLine">
@@ -123,30 +198,7 @@ export default function TeamIdentityTitleStage({
           {summary ? <p className="teamIdentityTitleStage__summary">{summary}</p> : null}
           <TeamIdentitySupportRail status={status} actions={actions} />
         </div>
-        <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
-          {cleanedLogo && !logoFailed ? (
-            <img
-              className="teamIdentityTitleStage__crest"
-              data-identity-role="brand-mark"
-              src={cleanedLogo}
-              alt={`${teamName} logo`}
-              draggable="false"
-              onError={() => setLogoFailed(true)}
-            />
-          ) : showLogoSetupPrompt ? (
-            <button
-              type="button"
-              className="teamIdentityTitleStage__logoSetup"
-              data-identity-role="brand-setup"
-              onClick={openBrandingSettings}
-              aria-label="Add your custom team logo in Program Branding"
-            >
-              Click here to add your custom team logo
-            </button>
-          ) : (
-            <span className="teamIdentityTitleStage__fallbackCrest" data-identity-role="brand-fallback" aria-label={`${teamName} initials`}>{fallbackInitials}</span>
-          )}
-        </div>
+        {fullCrestBrand}
       </div>
     </header>
   );

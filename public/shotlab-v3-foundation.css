@@ -19,21 +19,15 @@ body *{box-sizing:border-box}
    The current Coach court artwork is component-owned and intentionally remains visible. */
 .mcHeroScrim,.mcArenaGlow,.mcRafters,.mcArenaLights,.mcHoop,.mcCourtFloor{display:none!important}
 
-/* Mission Control supporting surfaces. Title/Hero identity geometry and the mobile
-   Coach control bar are owned by CoachMissionControlTitleStage.css and are intentionally
-   excluded from this legacy layer. */
+/* Mission Control supporting surfaces only. Coach identity, decision headline,
+   metrics rail, primary action, mobile control bar, and sparse activation path are
+   source-owned. The activation plan must never be forced into a generic light card.
+   Keep foreground ownership off the shell itself so dark source-owned surfaces can
+   retain their native light ink while light support cards opt into V3 ink below. */
 body.mission-control-active .mcShellV3,
-body.mission-control-active .missionControl{background:var(--v3-canvas)!important;color:var(--v3-ink)!important}
+body.mission-control-active .missionControl{background:var(--v3-canvas)!important}
 body.mission-control-active .missionControl{width:min(100%,760px)!important;margin:0 auto!important;padding:12px 16px calc(104px + env(safe-area-inset-bottom,0px))!important;gap:16px!important}
-body.mission-control-active .mcBrandCopy small{color:var(--v3-muted)!important;font-size:12px!important;letter-spacing:0!important;text-transform:none!important}
-body.mission-control-active .mcBrandCopy strong{color:var(--v3-ink)!important;font-size:25px!important;line-height:1!important;letter-spacing:-.04em!important}
-body.mission-control-active .mcRealityStrip{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;margin:8px 0 0!important;border:1px solid var(--v3-line)!important;border-radius:14px!important;background:var(--v3-surface-subtle)!important;overflow:hidden!important}
-body.mission-control-active .mcRealityStrip>button{min-height:52px!important;padding:6px!important;border:0!important;border-right:1px solid var(--v3-line)!important;background:transparent!important;color:var(--v3-ink)!important;box-shadow:none!important}
-body.mission-control-active .mcRealityStrip>button:last-child{border-right:0!important}
-body.mission-control-active .mcRealityStrip strong{color:var(--v3-ink)!important;font-size:20px!important}
-body.mission-control-active .mcRealityStrip small{color:var(--v3-muted)!important;font-size:10px!important;letter-spacing:0!important;text-transform:none!important}
-body.mission-control-active .mcPrimary{grid-column:1/-1!important;min-height:46px!important;margin:0!important;border:0!important;border-radius:14px!important;background:var(--v3-ink)!important;color:#fff!important;box-shadow:none!important}
-body.mission-control-active .mcSection,body.mission-control-active .mcTodayPlan,body.mission-control-active [data-testid="coach-assignment-accountability"]{border:1px solid var(--v3-line)!important;border-radius:20px!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important;overflow:hidden!important}
+body.mission-control-active .mcSection,body.mission-control-active [data-testid="coach-assignment-accountability"]{border:1px solid var(--v3-line)!important;border-radius:20px!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important;overflow:hidden!important}
 body.mission-control-active .mcSection h2,body.mission-control-active .mcSection h3,body.mission-control-active [data-testid="coach-assignment-accountability"] h2{color:var(--v3-ink)!important;letter-spacing:-.035em!important;text-transform:none!important}
 body.mission-control-active .mcSection p,body.mission-control-active .mcSection small,body.mission-control-active [data-testid="coach-assignment-accountability"] p,body.mission-control-active [data-testid="coach-assignment-accountability"] small{color:var(--v3-muted)!important;letter-spacing:0!important;text-transform:none!important}
 body.mission-control-active .mcAttentionRow,body.mission-control-active .mcAssignmentAccountabilityRow,body.mission-control-active .mcAssignmentAccountabilityEmpty{background:var(--v3-surface-subtle)!important;color:var(--v3-ink)!important;border-color:var(--v3-line)!important;box-shadow:none!important}

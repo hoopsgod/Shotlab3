@@ -82,13 +82,22 @@ async function installSafeRoutes(page) {
 
 async function enterSeededDemoCoach(page, payload = seedData) {
   await page.addInitScript((data) => {
-    if (window.sessionStorage.getItem("coach-dashboard-e2e-seeded") === "1") return;
     for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
-    window.sessionStorage.setItem("coach-dashboard-e2e-seeded", "1");
   }, payload);
-  await page.goto("/");
-  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
+  await page.goto("/?bootDebug=1");
+  const bootPanel = page.locator('[aria-label="ShotLab boot debug"]');
+  await expect(bootPanel).toContainText("hydration_completed", { timeout: 20_000 });
+  await bootPanel.evaluate((element) => element.remove());
+  const coachDemo = page.getByRole("button", { name: /Coach demo/i });
+  await expect(coachDemo).toBeVisible({ timeout: 20_000 });
+  await coachDemo.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  const seededTeam = payload["sl:teams"]?.[0];
+  const fixtureAuthority = await page.evaluate(({ teamId, teamName }) => {
+    const teams = JSON.parse(window.localStorage.getItem("sl:teams") || "[]");
+    return teams.some((team) => team?.id === teamId && team?.name === teamName);
+  }, { teamId: seededTeam?.id, teamName: seededTeam?.name });
+  expect(fixtureAuthority).toBe(true);
 }
 
 async function openSchedule(page) {

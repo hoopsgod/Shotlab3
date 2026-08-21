@@ -7,6 +7,7 @@ import "./CoachMissionControl2026.css";
 import "./CoachMissionControlFinal.css";
 import "./CoachMissionControlTitleStage.css";
 import "./CoachActivationPath.css";
+import "./CoachTeamMonogramFallback.css";
 import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
@@ -16,11 +17,14 @@ import { isDemoPersistenceSession } from "../lib/demoMode.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
-const DEFAULT_MARK = "/branding/titans-default-mark.svg";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
 const normalizedName = (value = "") => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
-const isDefaultTitansLogo = (value = "") => [FALLBACK_LOGO, DEFAULT_MARK].some((candidate) => String(value).includes(candidate));
+const isDefaultTitansLogo = (value = "") => [
+  FALLBACK_LOGO,
+  "/branding/titans-default-mark.svg",
+  "/branding/titans-default-mark-free.svg",
+].some((candidate) => String(value).includes(candidate));
 
 function Icon({ name, size = 22 }) {
   const paths = {
@@ -53,21 +57,22 @@ function CourtArtwork({ logoUrl }) {
   return <div className="mcCourtArtwork" aria-hidden="true">
     <svg viewBox="0 0 390 370" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
       <defs>
-        <linearGradient id="mcTacticalWash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#0b3840" stopOpacity=".08" /><stop offset=".52" stopColor="#0b5a58" stopOpacity=".18" /><stop offset="1" stopColor="#c8ff1a" stopOpacity=".04" /></linearGradient>
-        <radialGradient id="mcTacticalGlow" cx="74%" cy="48%" r="58%"><stop offset="0" stopColor="#c8ff1a" stopOpacity=".16" /><stop offset=".5" stopColor="#0f7a70" stopOpacity=".07" /><stop offset="1" stopColor="#071c28" stopOpacity="0" /></radialGradient>
+        <linearGradient id="mcTacticalWash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="var(--team-brand-surface-elevated, #0b3840)" stopOpacity=".22" /><stop offset=".52" stopColor="var(--mc-secondary, #0b5a58)" stopOpacity=".15" /><stop offset="1" stopColor="var(--mc, #c8ff1a)" stopOpacity=".06" /></linearGradient>
+        <radialGradient id="mcTacticalGlow" cx="74%" cy="48%" r="58%"><stop offset="0" stopColor="var(--mc, #c8ff1a)" stopOpacity=".16" /><stop offset=".5" stopColor="var(--mc-secondary, #0f7a70)" stopOpacity=".08" /><stop offset="1" stopColor="var(--team-brand-surface-deep, #071c28)" stopOpacity="0" /></radialGradient>
       </defs>
       <rect width="390" height="370" fill="url(#mcTacticalWash)" /><rect width="390" height="370" fill="url(#mcTacticalGlow)" />
       <g transform="translate(208 22) rotate(-4 86 163)" fill="none" stroke="rgba(220,235,241,.23)" strokeWidth="2" vectorEffect="non-scaling-stroke">
-        <rect x="0" y="0" width="172" height="326" rx="18" /><line x1="0" y1="0" x2="0" y2="326" opacity=".72" /><line x1="172" y1="0" x2="172" y2="326" opacity=".52" /><rect x="105" y="116" width="67" height="94" /><circle cx="105" cy="163" r="47" strokeDasharray="3 5" opacity=".72" /><path d="M172 48h-17C87 58 63 108 63 163s24 105 92 115h17" /><line x1="155" y1="48" x2="172" y2="48" /><line x1="155" y1="278" x2="172" y2="278" /><line x1="151" y1="142" x2="151" y2="184" /><circle cx="143" cy="163" r="6" stroke="#c8ff1a" strokeOpacity=".62" /><path d="M137 163h12" stroke="#c8ff1a" strokeOpacity=".52" /><circle cx="1" cy="163" r="44" opacity=".4" />
+        <rect x="0" y="0" width="172" height="326" rx="18" /><line x1="0" y1="0" x2="0" y2="326" opacity=".72" /><line x1="172" y1="0" x2="172" y2="326" opacity=".52" /><rect x="105" y="116" width="67" height="94" /><circle cx="105" cy="163" r="47" strokeDasharray="3 5" opacity=".72" /><path d="M172 48h-17C87 58 63 108 63 163s24 105 92 115h17" /><line x1="155" y1="48" x2="172" y2="48" /><line x1="155" y1="278" x2="172" y2="278" /><line x1="151" y1="142" x2="151" y2="184" /><circle cx="143" cy="163" r="6" stroke="var(--mc, #c8ff1a)" strokeOpacity=".62" /><path d="M137 163h12" stroke="var(--mc, #c8ff1a)" strokeOpacity=".52" /><circle cx="1" cy="163" r="44" opacity=".4" />
       </g>
-      <g opacity=".58"><circle cx="294" cy="82" r="4" fill="#c8ff1a" /><circle cx="267" cy="191" r="4" fill="#c8ff1a" /><circle cx="319" cy="266" r="4" fill="#c8ff1a" /><path d="M294 82C272 108 263 145 267 191s24 59 52 75" fill="none" stroke="rgba(200,255,26,.28)" strokeWidth="1.5" strokeDasharray="4 7" /></g>
+      <g opacity=".58"><circle cx="294" cy="82" r="4" fill="var(--mc, #c8ff1a)" /><circle cx="267" cy="191" r="4" fill="var(--mc, #c8ff1a)" /><circle cx="319" cy="266" r="4" fill="var(--mc, #c8ff1a)" /><path d="M294 82C272 108 263 145 267 191s24 59 52 75" fill="none" stroke="var(--mc, #c8ff1a)" strokeOpacity=".28" strokeWidth="1.5" strokeDasharray="4 7" /></g>
       {logoUrl ? <image href={logoUrl} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" /> : null}
     </svg>
   </div>;
 }
 
-function LogoSetupPrompt({ className = "" }) {
-  return <span className={["mcLogoSetupPrompt", className].filter(Boolean).join(" ")}>Click here to add your custom team logo</span>;
+function LogoSetupPrompt({ teamName, className = "" }) {
+  const mark = initials(teamName);
+  return <span className={["mcTeamFallback", className].filter(Boolean).join(" ")} data-team-logo-fallback={mark} aria-hidden="true"><strong>{mark}</strong><small>Add logo</small></span>;
 }
 
 function AttentionRow({ item, onFallback }) {
@@ -96,14 +101,11 @@ export default function CoachCommandCenter({
   const { branding } = useTeamBranding();
   const isDemoSession = isDemoPersistenceSession();
   const configuredFullLogoSource = branding?.logoUrl && !isDefaultTitansLogo(branding.logoUrl) ? branding.logoUrl : "";
-  const configuredMarkSource = branding?.logoMarkUrl && !isDefaultTitansLogo(branding.logoMarkUrl) ? branding.logoMarkUrl : "";
   const fullLogoSource = configuredFullLogoSource || (isDemoSession ? (branding?.logoUrl || FALLBACK_LOGO) : "");
-  const markSource = configuredMarkSource || fullLogoSource || (isDemoSession ? DEFAULT_MARK : "");
   const cleanFullLogoUrl = useCleanTeamLogo(fullLogoSource);
-  const cleanMarkLogoUrl = useCleanTeamLogo(markSource);
   const teamName = branding?.teamName || branding?.name || (isDemoSession ? "Thomas Titans" : "Your Team");
   const fullTeamLogoUrl = fullLogoSource ? cleanFullLogoUrl : "";
-  const heroTeamLogoUrl = markSource ? cleanMarkLogoUrl : "";
+  const heroTeamLogoUrl = fullTeamLogoUrl;
   const accent = branding?.accentColor || branding?.primaryColor || "#C8FF1A";
   const secondary = branding?.secondaryColor || "#9CA3AF";
   const [copied, setCopied] = useState(false);
@@ -193,7 +195,7 @@ export default function CoachCommandCenter({
   return <>
     <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
-        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcRailLogoSetup" />}</button>
+        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside>
@@ -201,7 +203,7 @@ export default function CoachCommandCenter({
       <main className="missionControl">
         <header className="mcHeader" data-testid="mission-control-team-header">
           <button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button>
-          <div className="mcBrandLockup"><button type="button" className="mcHeaderTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt="" /> : <LogoSetupPrompt className="mcHeaderLogoSetup" />}</button><span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span></div>
+          <div className="mcBrandLockup"><button type="button" className="mcHeaderTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt="" /> : <LogoSetupPrompt teamName={teamName} className="mcHeaderLogoSetup" />}</button><span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span></div>
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
         </header>
 
@@ -210,7 +212,7 @@ export default function CoachCommandCenter({
           <div className="mcHeroContent">
             <div className="mcHeroIdentity">
               <div className="mcHeroIdentityCopy"><span className="mcProgramIdentity">{teamName}</span><span className="mcEyebrow">Coach Mode · {primaryCommand.eyebrow}</span></div>
-              <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcHeroLogoSetup" />}</button>
+              <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcHeroLogoSetup" />}</button>
             </div>
             <h1>{primaryCommand.title}</h1><p>{primaryCommand.detail}</p>
             <div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button><button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button></div>
@@ -227,7 +229,7 @@ export default function CoachCommandCenter({
       {inboxOpen ? <div className="mcInboxLayer" data-testid="coach-inbox-layer"><button type="button" className="mcInboxBackdrop" aria-label="Close Coach Inbox" onClick={closeInbox} /><section ref={inboxRef} id="coach-inbox-panel" className="mcInboxPanel" role="dialog" aria-modal="true" aria-labelledby="coach-inbox-title" data-testid="coach-inbox"><header className="mcInboxHead"><span><small>Live team signals</small><strong id="coach-inbox-title">Coach Inbox</strong></span><button type="button" aria-label="Close Coach Inbox" onClick={closeInbox}><Icon name="close" /></button></header><div className="mcInboxSummary"><strong>{inboxModel.actionableCount > 0 ? `${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "move" : "moves"} to make` : "You’re caught up"}</strong><span>Only current team actions appear here.</span></div>{inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : item.kind === "event-readiness" ? "calendar" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : item.kind === "event-readiness" ? "Event readiness" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player, RSVP, or team-launch tasks need attention right now.</small></div></div>}{inboxModel.context ? <button type="button" className="mcInboxContext" onClick={() => runInboxAction(inboxModel.context)}><span className="mcInboxItemIcon"><Icon name="calendar" size={19} /></span><span><small>Coming up</small><strong>{inboxModel.context.title}</strong><em>{inboxModel.context.detail}</em></span><b>{inboxModel.context.label}<Icon name="arrow" size={15} /></b></button> : null}<footer>Built from live roster, RSVP, activation, and schedule data.</footer></section></div> : null}
 
       <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}><button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} /><section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach command menu</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section></div>
-      <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}>{fullTeamLogoUrl ? <img src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcDrawerLogoSetup" />}</button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
+      <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}>{fullTeamLogoUrl ? <img src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcDrawerLogoSetup" />}</button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
     </div>
   </>;
 }

@@ -21,16 +21,6 @@ export function promoteCoachCommandCenter(source) { return source; }
 export function promoteCoachFinalCss(source) {
   let next = source;
   next = replaceOnce(next,
-    '    border-radius: 16px !important;\n    background: rgba(4, 8, 10, .5) !important;',
-    '    border-radius: 0 !important;\n    background: transparent !important;',
-    'Coach final metric ledger',
-  );
-  next = replaceOnce(next,
-    '    font-size: 10px !important;\n    letter-spacing: 0 !important;',
-    '    font-size: 11px !important;\n    letter-spacing: 0 !important;',
-    'Coach final metric label',
-  );
-  next = replaceOnce(next,
     '  body.mission-control-active .mcShellV3 .mcSection {\n    overflow: hidden;\n    border: 1px solid var(--mc-hairline-modern);\n    border-radius: var(--mc-radius-card);\n    background:\n      linear-gradient(145deg, rgba(255, 255, 255, .02), transparent 42%),\n      var(--mc-material);\n    box-shadow: 0 16px 40px rgba(0, 0, 0, .18), inset 0 1px rgba(255, 255, 255, .018);\n  }',
     '  body.mission-control-active .mcShellV3 .mcSection {\n    overflow: visible;\n    border: 0;\n    border-top: 1px solid var(--mc-hairline-modern);\n    border-radius: 0;\n    background: transparent;\n    box-shadow: none;\n  }',
     'Coach final editorial sections',
@@ -64,7 +54,7 @@ export function applyMobileCoachSignatureStage({ cwd = process.cwd() } = {}) {
   const nextFinalCss = promoteCoachFinalCss(finalCssSource);
   if (nextCommand !== commandSource) writeFileSync(commandPath, nextCommand);
   if (nextFinalCss !== finalCssSource) writeFileSync(finalCssPath, nextFinalCss);
-  console.log('Reconciled Coach supporting surfaces; mobile title and hero identity remain source-owned.');
+  console.log('Reconciled Coach supporting surfaces; mobile identity, decision, metrics and CTA remain source-owned.');
 }
 
 const currentFile = fileURLToPath(import.meta.url);

@@ -24,10 +24,25 @@ for (const [source, label] of [
 
 for (const required of [
   '<TeamIdentityTitleStage',
-  'dataMobileStage="team-identity"',
+  'variant="standard"',
+  'dataMobileStage="editorial"',
+  'brandTreatment="compact"',
+  'data-title-stage-family="editorial"',
 ]) {
   if (!secondarySystem.includes(required)) {
-    throw new Error(`SecondaryPageSystem source-owned title contract missing: ${required}`);
+    throw new Error(`SecondaryPageSystem converged editorial title contract missing: ${required}`);
+  }
+}
+
+for (const obsolete of [
+  'BRAND_TREATMENT_BY_ICON',
+  'brandTreatmentFor',
+  'training:"signature"',
+  'strength:"watermark"',
+  'trophy:"none"',
+]) {
+  if (secondarySystem.includes(obsolete)) {
+    throw new Error(`SecondaryPageSystem still exposes a route-specific brand treatment: ${obsolete}`);
   }
 }
 
@@ -56,4 +71,4 @@ for (const obsolete of [
   }
 }
 
-console.log("Verified source-owned secondary title architecture; no product composition mutation performed.");
+console.log("Verified source-owned secondary title architecture and converged compact team-brand hierarchy; no product composition mutation performed.");

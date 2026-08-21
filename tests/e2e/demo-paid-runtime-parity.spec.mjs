@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { installParityBranding } from "./parity-branding-fixture.mjs";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/demo-registered-runtime-parity");
 const TEAM_ID = "team-demo-titans";
@@ -289,6 +290,12 @@ async function enterDemo(page, role) {
   await page.goto("/?demo=1");
   await expect(page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true }).click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  // Compare equivalent configured-team states. Demo ships with a branded team,
+  // while a registered tenant without a custom logo intentionally enters the
+  // onboarding state. A shared test-only logo keeps the parity audit focused on
+  // presentation instead of treating that real product-state difference as UI drift.
+  await installParityBranding(page);
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.addStyleTag({ content: MOTION_FREEZE });
   await settle(page);

@@ -11,8 +11,6 @@ const providerSource = await readFile(new URL("../src/branding/TeamBrandingProvi
 const runtimeContextSource = await readFile(new URL("../src/context/TeamBrandingContext.jsx", import.meta.url), "utf8");
 const demoDataSource = await readFile(new URL("../src/lib/demoData.js", import.meta.url), "utf8");
 
-const PROMPT = "Click here to add your custom team logo";
-
 test("registered teams without branding remain logo-unconfigured", () => {
   const branding = resolveTeamBranding({ teamName: "Webster Thomas" });
   assert.equal(branding.logoUrl, "");
@@ -44,17 +42,22 @@ test("Demo Titans owns its logo as explicit demo data instead of a global fallba
   assert.equal(branding.logoMarkUrl, DEFAULT_BRANDING.logoMarkUrl);
 });
 
-test("shared Coach title stages replace missing logos with an actionable Branding prompt", () => {
-  assert.match(titleStageSource, new RegExp(PROMPT));
-  assert.match(titleStageSource, /data-identity-role="brand-setup"/);
+test("shared Coach title stages replace missing logos with an actionable premium monogram", () => {
+  assert.match(titleStageSource, /showLogoSetupAction/);
+  assert.match(titleStageSource, /data-identity-role="brand-fallback"/);
+  assert.match(titleStageSource, /data-team-logo-fallback=\{fallbackInitials\}/);
+  assert.match(titleStageSource, />Add logo<\/span>/);
+  assert.doesNotMatch(titleStageSource, /Click here to add your custom team logo/);
   assert.match(titleStageSource, /brandingAction\?\.onClick/);
   assert.match(titleStageSource, /data-nav-key=\\?"branding\\?"/);
   assert.match(titleStageSource, /mobile-navigation-more/);
   assert.match(titleStageSource, /coach-dashboard-identity-header/);
 });
 
-test("Mission Control exposes the same Branding prompt in every Coach logo placement", () => {
-  assert.match(commandCenterSource, new RegExp(PROMPT));
+test("Mission Control exposes the same premium monogram affordance in every Coach logo placement", () => {
+  assert.match(commandCenterSource, /data-team-logo-fallback=\{mark\}/);
+  assert.match(commandCenterSource, /<strong>\{mark\}<\/strong><small>Add logo<\/small>/);
+  assert.doesNotMatch(commandCenterSource, /Click here to add your custom team logo/);
   assert.match(commandCenterSource, /mcRailLogoSetup/);
   assert.match(commandCenterSource, /mcHeaderLogoSetup/);
   assert.match(commandCenterSource, /mcHeroLogoSetup/);

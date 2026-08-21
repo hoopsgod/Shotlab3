@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const source = fs.readFileSync(new URL("../src/lib/visualSystemReboot.js", import.meta.url), "utf8");
 const releaseFixes = fs.readFileSync(new URL("../src/lib/visualSystemRebootReleaseFixes.js", import.meta.url), "utf8");
+const homeHierarchy = fs.readFileSync(new URL("../src/lib/homeExperienceHierarchy.js", import.meta.url), "utf8");
 const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 const playerBootstrap = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
 
@@ -17,6 +18,11 @@ test("visual reboot owns one restrained Mission Control support language", () =>
 test("runtime reboot layers cannot compete with source-owned Coach Hero or secondary-page authorities", () => {
   assert.doesNotMatch(source, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
   assert.doesNotMatch(releaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
+  assert.doesNotMatch(source, /\.mcPrimary\b|\.mcRealityStrip\b/);
+  assert.doesNotMatch(releaseFixes, /\.mcPrimary\b|\.mcRealityStrip\b/);
+  assert.doesNotMatch(homeHierarchy, /body\.mission-control-active\s+\.mcHero\b|body\.mission-control-active\s+\.mcHeroContent\b|body\.mission-control-active\s+\.mcPrimary\b|body\.mission-control-active\s+\.mcRealityStrip\b/);
+  assert.match(homeHierarchy, /body\.mission-control-active\s+\.mcFocusGrid/);
+  assert.match(homeHierarchy, /\[data-testid="player-daily-command-center"\]/);
   assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(5/);
   assert.doesNotMatch(source, /\.secondaryPageShell|\.secondaryPageDecision|\.secondaryPageEvidence/);
   assert.doesNotMatch(source, /\[class\s*\*=|\[data-testid\s*\*=/i);
@@ -24,12 +30,12 @@ test("runtime reboot layers cannot compete with source-owned Coach Hero or secon
   assert.doesNotMatch(source, /secondaryStart|secondaryEnd|CSS\.slice/);
 });
 
-test("reboot uses restrained typography controls and responsive behavior", () => {
+test("reboot uses restrained typography controls and responsive support behavior", () => {
   assert.match(source, /SF Pro Display/);
   assert.match(source, /SF Pro Text/);
   assert.match(source, /@media \(max-width: 760px\)/);
+  assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(3/);
   assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /min-height: 50px/);
 });
 
 test("visual reboot installs after coach interaction enhancers without crossing into player bootstrap or adding product writes", () => {

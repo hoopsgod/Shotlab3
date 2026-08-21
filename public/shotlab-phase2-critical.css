@@ -1,20 +1,6 @@
 /* Phase 2 critical cascade lock. Loaded after legacy public authorities.
-   Title/Hero composition is intentionally excluded and source-owned. */
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcRealityStrip,
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcPrimary {
-  margin-right: 0 !important;
-}
-
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcPrimary {
-  position: relative !important;
-  display: inline-flex !important;
-  width: 100% !important;
-  min-height: 48px !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  background-color: #c8ff1a !important;
-  color: #10170b !important;
-}
+   Coach Home identity, decision, metrics and CTA are intentionally excluded
+   and source-owned by CoachMissionControlTitleStage.css. */
 
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow,
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAssignmentAccountabilityRow,

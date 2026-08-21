@@ -14,16 +14,6 @@
 }
 
 /* Non-title Mission Control compatibility only. */
-body.mission-control-active .mcPrimary{
-  background:#f7f5ee!important;
-  color:#121512!important;
-  -webkit-text-fill-color:#121512!important;
-  opacity:1!important;
-}
-body.mission-control-active .mcPrimary *{
-  color:#121512!important;
-  -webkit-text-fill-color:#121512!important;
-}
 body.mission-control-active .mcAttentionRow{
   background:var(--v5-surface-2)!important;
   border:1px solid var(--v5-line)!important;

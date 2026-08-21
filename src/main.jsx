@@ -164,6 +164,10 @@ window.addEventListener('shotlab:app-ready', () => {
     installIndustrialDesignFoundation()
     const { default: App } = await import('./App.jsx')
     await import('./styles/AuthenticatedVisualAuthority2026.css')
+    // Phase 7 owns shared authenticated chrome details such as the compact Back control.
+    // Load it after the broader authenticated authority so its intentionally narrow rules
+    // are the final cascade authority in both development and optimized production builds.
+    await import('./components/Phase7AuthenticatedChrome.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 

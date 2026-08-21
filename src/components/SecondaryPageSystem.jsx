@@ -1,5 +1,5 @@
 import ShotLabIcon from "./ShotLabIcon";
-import TeamIdentityTitleStage, { TeamIdentitySupportRail } from "./TeamIdentityTitleStage.jsx";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import "./SecondaryPageSystem.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
@@ -17,25 +17,29 @@ const normalizeTitle=value=>TITLE_LABELS.get(String(value||""))||value;
 
 export function SecondaryPageShell({children,testId,className=""}){return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>}
 
-export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],testId,icon}){
+export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],backAction=null,titleSize="auto",testId,icon}){
   const displayTitle=normalizeTitle(title);
-  const iconName=icon||iconFor(`${eyebrow} ${displayTitle}`);
-  return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
+  const iconName=icon||iconFor(`${eyebrow} ${title} ${displayTitle}`);
+  return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations" data-title-stage-family="editorial">
     <TeamIdentityTitleStage
       variant="standard"
       surface="light"
       role={eyebrow||"Team"}
       title={displayTitle}
       summary={summary}
+      status={status}
+      actions={actions}
+      backAction={backAction}
+      titleSize={titleSize}
+      brandTreatment="compact"
       testId={testId}
       className="secondaryPageTitleStage"
       dataLayoutRole="editorial-header"
       dataVisualRole="page-intro"
       dataPageKind={iconName}
-      dataMobileStage="team-identity"
+      dataMobileStage="editorial"
       ariaLabel={`${displayTitle} team identity and page title`}
     />
-    <TeamIdentitySupportRail status={status} actions={actions} external ariaLabel={`${displayTitle} status and actions`} />
   </div>
 }
 

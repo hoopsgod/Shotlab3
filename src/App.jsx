@@ -3673,7 +3673,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
 />
 </>}
 </div>
-<div style={{flex:1,padding:`${isOverviewTab&&showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
+<div style={{flex:1,padding:`${isOverviewTab&&showMiniHeader?"74px":"12px"} var(--shotlab-coach-route-wrapper-gutter, 16px) 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed coach-home-dashboard fade-up" data-accent="feed" style={shellVars("feed")}>
     <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">

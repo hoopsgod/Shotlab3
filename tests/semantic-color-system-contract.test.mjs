@@ -30,7 +30,8 @@ test("app and runtime theme tokens expose semantic roles independently from team
   for (const role of ["success", "info", "warning", "danger", "neutral"]) {
     assert.match(themeSource, new RegExp(`--semantic-${role}`));
   }
-  assert.match(themeSource, /Team colors control identity and primary actions only/);
+  assert.match(themeSource, /Team colors control identity atmosphere plus primary and secondary actions/);
+  assert.match(themeSource, /Semantic state colors stay fixed/);
 });
 
 test("legacy aliases no longer collapse warning and information into team colors", () => {

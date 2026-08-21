@@ -1,5 +1,5 @@
 /* ShotLab 2026 — Mission Control support hierarchy. Functional contracts unchanged.
-   Coach mobile header, identity, crest and Hero geometry are component-owned. */
+   Coach mobile header, identity, decision, metrics and CTA are component-owned. */
 body.mission-control-active .performance-workspace--coach { background: var(--bg-0) !important; }
 
 body.mission-control-active .mcShellV3 {
@@ -48,44 +48,10 @@ body.mission-control-active .mcShellV3 .mcRafters { opacity: .18 !important; }
 body.mission-control-active .mcShellV3 .mcArenaLights { opacity: .26 !important; }
 body.mission-control-active .mcShellV3 .mcHoop { opacity: .5 !important; }
 
-body.mission-control-active .mcShellV3 .mcRealityStrip {
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  margin: 12px 0 0 !important;
-  border-block: 1px solid rgba(220,235,241,.13) !important;
-  border-radius: 0 !important;
-  background: rgba(5,20,28,.28) !important;
-  box-shadow: none !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-body.mission-control-active .mcShellV3 .mcRealityStrip > button { min-height: 68px !important; padding: 10px 14px !important; border: 0 !important; border-right: 1px solid rgba(220,235,241,.12) !important; border-radius: 0 !important; background: transparent !important; color: var(--performance-copy,#f5f8f9) !important; box-shadow: none !important; }
-body.mission-control-active .mcShellV3 .mcRealityStrip > button:last-child { border-right: 0 !important; }
-body.mission-control-active .mcShellV3 .mcRealityStrip > button:hover,
-body.mission-control-active .mcShellV3 .mcRealityStrip > button:focus-visible { background: rgba(255,255,255,.05) !important; }
-body.mission-control-active .mcShellV3 .mcRealityStrip strong { color: var(--performance-copy,#f5f8f9) !important; font-family: var(--font-display) !important; font-size: 27px !important; font-weight: 810 !important; letter-spacing: -.04em !important; font-variant-numeric: tabular-nums !important; }
-body.mission-control-active .mcShellV3 .mcRealityStrip strong span,
-body.mission-control-active .mcShellV3 .mcRealityStrip small { color: #afbdc4 !important; }
-body.mission-control-active .mcShellV3 .mcRealityStrip small { font-size: var(--type-micro,11px) !important; font-weight: 650 !important; letter-spacing: .035em !important; text-transform: none !important; }
-
-body.mission-control-active .mcShellV3 .mcPrimary {
-  min-height: 52px !important;
-  margin: 2px 0 0 !important;
-  padding: 12px 18px !important;
-  border: 1px solid #a5cf00 !important;
-  border-radius: var(--radius-md,14px) !important;
-  background: #c8ff1a !important;
-  color: #10170b !important;
-  box-shadow: 0 10px 24px rgba(78,99,0,.16) !important;
-  font-size: 14px !important;
-  font-weight: 780 !important;
-  letter-spacing: -.01em !important;
-  text-transform: none !important;
-}
-body.mission-control-active .mcShellV3 .mcPrimary::after { display: none !important; }
-
+/* Generic Coach support cards use the light editorial material. The activation
+   plan is intentionally excluded: CoachActivationPath.css owns its dark premium
+   state so a sparse/registered account never downgrades into a pale setup card. */
 body.mission-control-active .mcShellV3 .mcSection,
-body.mission-control-active .mcShellV3 .mcTodayPlan,
 body.mission-control-active [data-testid="coach-assignment-accountability"],
 body.mission-control-active [data-testid="coach-follow-up-queue"] {
   border: 1px solid var(--mc-line) !important;
@@ -111,6 +77,16 @@ body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow strong { c
 body.mission-control-active .mcShellV3 .mcAttentionCopy small,
 body.mission-control-active .mcShellV3 .mcAttentionMeta,
 body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
+
+/* Registered onboarding/sparse state uses a dark activation surface. Lock its
+   copy to the dark-material palette here because this late hierarchy authority
+   otherwise makes inherited Coach text use the light editorial ink token. */
+body.mission-control-active .mcShellV3 .mcTodayPlan.mcActivationPlan .mcTodayPlanCopy strong {
+  color: #ffffff !important;
+}
+body.mission-control-active .mcShellV3 .mcTodayPlan.mcActivationPlan .mcTodayPlanCopy em {
+  color: rgba(255,255,255,.68) !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
   body.mission-control-active .mcShellV3 * { animation: none !important; transition-duration: .01ms !important; }

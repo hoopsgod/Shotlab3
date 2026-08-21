@@ -7,4 +7,35 @@
     gap: 18px;
     padding-bottom: 0;
   }
+
+  /* Coach routes still arrive through a legacy inline wrapper. Break the title
+     frame back across that wrapper, then inset the actual editorial header on
+     the canonical 20px mobile rail. This prevents both the former 36px double
+     gutter and a full-bleed 0px title edge. */
+  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame {
+    width: calc(100% + (var(--layout-gutter, 20px) * 2));
+    margin-inline: calc(var(--layout-gutter, 20px) * -1);
+  }
+
+  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2));
+    margin-inline: var(--shotlab-mobile-content-rail, 20px);
+  }
+
+  /* Events still loads older calendar-first CSS after the shared workspace
+     layer. Its parent is already narrowed by the legacy Events gutter, so use
+     that full parent width and shift it onto the canonical 20px rail instead of
+     subtracting the rail a second time. */
+  .performance-shell--coach .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: 100% !important;
+    margin-inline: var(--shotlab-mobile-content-rail, 20px) !important;
+  }
+
+  /* The build-time Phase 4D enhancer assigns this stable class to the shared
+     Dashboard return control. The legacy page shell owns a fixed inter-row gap,
+     so move the rendered control optically toward the title without changing
+     document flow, hit area, or route behavior. */
+  .performance-shell--coach .page > .shared-dashboard-back-action {
+    transform: translateY(14px) !important;
+  }
 }

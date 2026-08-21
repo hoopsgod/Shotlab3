@@ -1,0 +1,183 @@
+name: Mobile Title Stage Authority Certification
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: true
+
+jobs:
+  baseline-evidence:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out candidate evidence harness
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate-source
+
+      - name: Check out exact production starting SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 9a11c3e279a023aed27b368bcfbffd7dc9ccff07
+          path: baseline
+
+      - name: Install candidate baseline evidence harness into baseline checkout
+        run: cp candidate-source/tests/e2e/mobile-title-stage-baseline-evidence.spec.mjs baseline/tests/e2e/mobile-title-stage-baseline-evidence.spec.mjs
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+
+      - name: Install baseline dependencies
+        working-directory: baseline
+        run: npm ci
+
+      - name: Install pinned Playwright runner
+        working-directory: baseline
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        working-directory: baseline
+        run: npx playwright install --with-deps chromium
+
+      - name: Build exact production baseline
+        working-directory: baseline
+        run: npm run build
+
+      - name: Start baseline production preview
+        working-directory: baseline
+        run: |
+          npm run preview:agent > /tmp/title-stage-baseline-preview.log 2>&1 &
+          echo $! > /tmp/title-stage-baseline-preview.pid
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/title-stage-baseline-preview.log
+          exit 1
+
+      - name: Capture exact pre-phase comparison evidence
+        working-directory: baseline
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/mobile-title-stage-baseline-evidence.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload before evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-title-stage-authority-before
+          path: baseline/artifacts/mobile-title-stage-authority-before/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload baseline diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-title-stage-authority-before-failure
+          path: |
+            baseline/playwright-report/
+            baseline/test-results/
+            /tmp/title-stage-baseline-preview.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  candidate-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run focused Title Authority and mobile geometry contracts
+        run: >-
+          node --test
+          tests/mobile-title-stage-authority.test.mjs
+          tests/title-authority-repair.test.mjs
+          tests/mobile-geometry-precision.test.mjs
+          tests/mobile-secondary-page-parity-contract.test.mjs
+          tests/mobile-premium-visual-system-2026.test.mjs
+          tests/mobile-premium-first-impression-regression.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Verify production performance budget
+        run: npm run verify:performance-budget
+
+      - name: Start candidate production preview
+        run: |
+          npm run preview:agent > /tmp/title-stage-candidate-preview.log 2>&1 &
+          echo $! > /tmp/title-stage-candidate-preview.pid
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/title-stage-candidate-preview.log
+          exit 1
+
+      - name: Certify five mobile widths and capture required screenshots
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+          TITLE_STAGE_EVIDENCE_MODE: after
+        run: npx playwright test tests/e2e/mobile-title-stage-authority.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Run existing mobile geometry production smoke
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/mobile-geometry-precision-screenshots.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload candidate visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-title-stage-authority-after
+          path: |
+            artifacts/mobile-title-stage-authority-after/
+            artifacts/phase-3a-cross-screen-visual-audit/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload candidate diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-title-stage-authority-after-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/title-stage-candidate-preview.log
+          if-no-files-found: ignore
+          retention-days: 7

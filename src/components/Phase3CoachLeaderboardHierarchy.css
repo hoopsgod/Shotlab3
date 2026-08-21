@@ -49,8 +49,8 @@
 [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageDecision {
   border: 1px solid rgba(255, 255, 255, .08) !important;
   background:
-    radial-gradient(circle at 90% 0%, rgba(113, 133, 31, .18), transparent 36%),
-    linear-gradient(145deg, #171b18, #0c0f0d 72%) !important;
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, transparent), transparent 36%),
+    linear-gradient(145deg, var(--team-brand-surface-elevated, #171b18), var(--team-brand-surface-deep, #0c0f0d) 72%) !important;
   color: #f5f7f4 !important;
   box-shadow: 0 24px 58px rgba(25, 31, 26, .16) !important;
 }

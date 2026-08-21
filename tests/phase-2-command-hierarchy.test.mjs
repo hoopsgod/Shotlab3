@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),"utf8");
-const main=read("../src/main.jsx"),authenticatedAuthority=read("../src/styles/AuthenticatedVisualAuthority2026.css"),player=read("../src/components/PlayerDailyCommandCenter.jsx"),playerCss=read("../src/components/PlayerDailyCommandCenter.module.css"),narrative=read("../src/lib/playerPerformanceNarrative.js"),hierarchy=read("../src/styles/CommandHierarchy2026.css"),rail=read("../src/components/OperationalInsightRail.jsx"),railCss=read("../src/components/OperationalInsightRail.module.css"),railModel=read("../src/lib/operationalInsightRails.js"),coach=read("../src/components/CoachCommandCenter.jsx"),session=read("../public/shotlab-v15-session-integrity.css");
+const main=read("../src/main.jsx"),authenticatedAuthority=read("../src/styles/AuthenticatedVisualAuthority2026.css"),player=read("../src/components/PlayerDailyCommandCenter.jsx"),playerCss=read("../src/components/PlayerDailyCommandCenter.module.css"),narrative=read("../src/lib/playerPerformanceNarrative.js"),hierarchy=read("../src/styles/CommandHierarchy2026.css"),rail=read("../src/components/OperationalInsightRail.jsx"),railCss=read("../src/components/OperationalInsightRail.module.css"),railModel=read("../src/lib/operationalInsightRails.js"),coach=read("../src/components/CoachCommandCenter.jsx"),activation=read("../src/components/CoachActivationPath.css"),session=read("../public/shotlab-v15-session-integrity.css");
 
 test("Phase 2 hierarchy contracts remain intact beneath the Dashboard Showstopper successor",()=>{
  const app=main.indexOf("await import('./App.jsx')"),authority=main.indexOf("await import('./styles/AuthenticatedVisualAuthority2026.css')"),foundation=authenticatedAuthority.indexOf("./VisualFoundation2026.css"),command=authenticatedAuthority.indexOf("./CommandHierarchy2026.css");
@@ -39,5 +39,7 @@ test("Phase 2 copy and coach-primary contracts remain intact",()=>{
  for(const value of ['title: "Daily brief"','"1 RSVP needs a response"','at-home makes logged']) assert.ok(railModel.includes(value));
  assert.ok(!railModel.includes('verified At Home makes'));
  for(const value of ['data-home-hierarchy="decision-first"','data-testid="coach-primary-objective" data-home-role="primary"','data-testid="coach-onboarding-state" data-home-role="supporting"']) assert.ok(coach.includes(value));
- assert.ok(session.includes('[data-testid="coach-onboarding-state"]::before{inset:0 auto 0 0!important;width:4px!important'));
+ assert.ok(!session.includes('[data-testid="coach-onboarding-state"]'));
+ assert.match(activation,/\.mcActivationPlan\s*\{[\s\S]*linear-gradient/);
+ assert.match(activation,/\.mcActivationPlan \.mcTodayPlanCopy strong\s*\{[\s\S]*color:#fff/);
 });

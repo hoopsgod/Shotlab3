@@ -6,6 +6,7 @@ const runner = fs.readFileSync(new URL('../scripts/run-route-enhancers.mjs', imp
 const secondary = fs.readFileSync(new URL('../src/components/SecondaryPageSystem.jsx', import.meta.url), 'utf8')
 const secondaryCss = fs.readFileSync(new URL('../src/components/SecondaryPageSystem.css', import.meta.url), 'utf8')
 const stageCss = fs.readFileSync(new URL('../src/components/TeamIdentityTitleStage.css', import.meta.url), 'utf8')
+const brandHierarchyCss = fs.readFileSync(new URL('../src/components/TeamIdentityBrandHierarchy.css', import.meta.url), 'utf8')
 
 test('legacy route promotion and centering mutators stay out of the enhancer pipeline', () => {
   assert.doesNotMatch(runner, /apply-mobile-route-signature-promotion\.mjs/)
@@ -23,8 +24,9 @@ test('mobile secondary route mastheads resolve through the shared source-owned t
   assert.match(stageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/)
   assert.match(stageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/)
   assert.match(stageCss, /@media \(max-width: 390px\)/)
-  assert.match(stageCss, /\.teamIdentityTitleStage--standard \{ --identity-crest: 84px; --identity-title: 38px; \}/)
-  assert.match(stageCss, /\.teamIdentityTitleStage--standard \.teamIdentityTitleStage__inner \{ gap: 8px;/)
+  assert.match(stageCss, /\.teamIdentityTitleStage--standard \{ --identity-crest: 60px; --identity-title: 39px; \}/)
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/)
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*8px[\s\S]*padding:\s*10px 2px 12px/)
   assert.match(stageCss, /\.teamIdentityTitleStage__title[\s\S]*overflow-wrap:\s*normal[\s\S]*word-break:\s*normal/)
 })
 

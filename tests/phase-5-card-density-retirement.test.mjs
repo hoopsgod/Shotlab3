@@ -45,13 +45,13 @@ test("Coach secondary pages expose the shared editorial and decision hierarchy w
   assert.match(coachDashboards, /<SecondaryPageEvidence/);
 });
 
-test("Coach hierarchy uses shared title typography and dividers outside the intentional decision surface", () => {
+test("Coach hierarchy uses shared title typography and semantic branded decision surfaces", () => {
   assert.match(secondaryComponent, /<TeamIdentityTitleStage/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
   assert.match(secondaryCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*?border-block: 1px solid[\s\S]*?border-radius: 0 !important;[\s\S]*?background: transparent !important;/);
-  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#171b18\),\s*var\(--team-brand-surface-deep,\s*#0c0f0d\) 72%\)/);
   assert.match(secondaryCss, /\.secondaryPageEvidence\s*\{[\s\S]*?gap: 0;[\s\S]*?border-block: 1px solid/);
 });
 

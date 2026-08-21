@@ -244,7 +244,7 @@ test("1280px Player and Coach representative workspaces remain coherent", async 
   await suppressMotion(page);
   await expect(page.getByRole("button", { name: /Coach demo/i })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: /Coach demo/i }).click();
-  await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   await capture(page, "1280-coach-home.png");
 
   const playerNav = page.locator('[data-nav-key="players"]').first();

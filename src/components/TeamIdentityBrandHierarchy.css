@@ -1,0 +1,130 @@
+/*
+ * Visual System Convergence: authenticated title stages expose exactly two
+ * visual families. Home/identity stages own the hero treatment; every
+ * secondary/editorial stage keeps the coach-configured custom logo in the
+ * same restored right-side crest slot and uses one compact supporting tone.
+ */
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
+  grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+  gap: clamp(16px, 4vw, 24px);
+}
+
+/* Missing artwork remains a brand state, not setup scaffolding. Coach stages
+   keep the crest footprint with team-derived initials; the entire mark remains
+   the subtle Program Branding affordance. */
+.teamIdentityTitleStage__fallbackAction {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #71851f) 24%, rgba(21,25,24,.14));
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--team-brand-primary, #71851f) 9%, transparent), transparent 44%),
+    color-mix(in srgb, var(--team-brand-surface-soft, #f0f1ed) 82%, white 18%);
+  color: var(--team-brand-surface-deep, #202522);
+  box-shadow: inset 0 1px rgba(255,255,255,.72), 0 8px 20px rgba(18,24,20,.07);
+  cursor: pointer;
+}
+
+.teamIdentityTitleStage__fallbackActionMark {
+  color: inherit;
+  font: 900 28px/.9 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.06em;
+}
+
+.teamIdentityTitleStage__fallbackActionLabel {
+  color: color-mix(in srgb, var(--team-brand-primary, #71851f) 70%, #44504a);
+  font: 760 8px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.teamIdentityTitleStage__fallbackAction:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #71851f) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__fallbackAction {
+  border-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 34%, rgba(255,255,255,.14));
+  background:
+    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 11%, transparent), transparent 44%),
+    linear-gradient(145deg, var(--team-brand-surface-elevated, #0b2633), var(--team-brand-surface-deep, #071820));
+  color: #f8fbfc;
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 11px 24px rgba(0,0,0,.2);
+}
+
+.teamIdentityTitleStage--dark .teamIdentityTitleStage__fallbackActionLabel {
+  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 64%, #eef5da);
+}
+
+@media (max-width: 760px) {
+  /* Preserve the restored full custom crest while keeping one secondary-page
+     geometry across Coach, Player, Demo, and registered experiences. */
+  .teamIdentityTitleStage--standard {
+    --identity-crest: clamp(96px, 25vw, 108px);
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
+    grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+    align-items: end;
+    gap: clamp(16px, 4vw, 24px);
+    padding: 14px 2px 16px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot {
+    align-self: end;
+    margin-top: 0;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine {
+    margin-bottom: 6px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__summary {
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__support {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__actions {
+    gap: 7px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__action {
+    min-height: 44px;
+    padding-inline: 12px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 390px) {
+  .teamIdentityTitleStage--standard {
+    --identity-crest: 84px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
+    gap: 8px;
+    padding: 10px 2px 12px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackAction {
+    border-radius: 18px;
+  }
+
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackActionMark {
+    font-size: 24px;
+  }
+}

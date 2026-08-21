@@ -1,6 +1,6 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
-import TeamIdentityTitleStage, { TeamIdentitySupportRail } from "./TeamIdentityTitleStage.jsx";
+import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
@@ -22,7 +22,7 @@ function resolveWorkspaceIdentityLabel(model) {
   return labels[model?.id] || model?.eyebrow || "Player";
 }
 
-export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", testId }) {
+export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", backAction = null, titleSize = "auto", testId }) {
   if (!model) return null;
   const runAction = (action) => { onAction?.(action); scheduleWorkspaceActionReveal(action); };
   const runMetric = (metric) => { onMetric?.(metric); if (metric?.action) scheduleWorkspaceActionReveal(metric.action); };
@@ -30,7 +30,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   const subtitle = resolveWorkspaceSubtitle(model);
   const primaryAction = model.primaryAction ? [{ key: `workspace-${model.id}-primary`, label: model.primaryAction.label, onClick: () => runAction(model.primaryAction), ariaLabel: model.primaryAction.label }] : [];
 
-  return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id}>
+  return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id} data-title-stage-family="editorial">
     <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
       <TeamIdentityTitleStage
         variant="standard"
@@ -38,15 +38,19 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         role={resolveWorkspaceIdentityLabel(model)}
         title={model.title}
         summary={subtitle}
+        status={model.status}
+        actions={primaryAction}
+        backAction={backAction}
+        titleSize={titleSize}
+        brandTreatment="compact"
         testId={`${testId || `player-workspace-${model.id}`}-title-stage`}
         className={styles.teamTitleStage || ""}
         dataLayoutRole="editorial-header"
         dataVisualRole="player-team-workspace-title"
         dataPageKind={model.id}
-        dataMobileStage="team-identity"
+        dataMobileStage="editorial"
         ariaLabel={`${model.title} team identity and page title`}
       />
-      <TeamIdentitySupportRail status={model.status} actions={primaryAction} external ariaLabel={`${model.title} status and actions`} />
     </div>
     <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
       {metrics.map((metric, index) => {
