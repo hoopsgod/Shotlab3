@@ -9,6 +9,15 @@
   gap: clamp(16px, 4vw, 24px);
 }
 
+/* The editorial title component owns lexical wrapping. Generic secondary-page
+   safety rules may protect arbitrary headings, but they must not introduce
+   emergency breaks inside authenticated page-title words. */
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__title {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
 /* Missing artwork remains a brand state, not setup scaffolding. Coach stages
    keep the crest footprint with team-derived initials; the entire mark remains
    the subtle Program Branding affordance. */
@@ -126,5 +135,14 @@
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackActionMark {
     font-size: 24px;
+  }
+}
+
+@media (max-width: 350px) {
+  /* Only the extreme-small interval needs type accommodation. Interpolate from
+     32px at 320px back to the established 38px floor by 350px so every normal
+     mobile width keeps the certified editorial scale unchanged. */
+  .teamIdentityTitleStage--standard.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
+    font-size: clamp(32px, calc(20vw - 32px), 38px);
   }
 }
