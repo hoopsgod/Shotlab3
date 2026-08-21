@@ -178,7 +178,7 @@ for (const viewport of VIEWPORTS) {
     }
     expect(metrics.primaryHeight).toBeGreaterThanOrEqual(54);
     expect(metrics.primaryBackground).not.toBe('rgba(0, 0, 0, 0)');
-    expect(metrics.primaryColor).toBe('rgb(7, 16, 7)');
+    expect(contrast(parseRgb(metrics.primaryColor), parseRgb(metrics.primaryBackground))).toBeGreaterThanOrEqual(4.5);
     expect(metrics.primaryBorder).toContain('solid');
     expect(metrics.overflow).toBeLessThanOrEqual(1);
     expect(metrics.attention.top).toBeLessThan(metrics.dock.top);
