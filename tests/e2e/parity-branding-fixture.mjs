@@ -96,7 +96,14 @@ export async function installParityBranding(page) {
   await page.route(teamPattern, teamHandler);
   try {
     await page.reload();
-    await page.getByTestId("mobile-navigation-dock").waitFor({ state: "visible", timeout: 20_000 });
+    const rootTestId = restoreState.profile.role === "coach"
+      ? "coach-command-center-full"
+      : "player-daily-command-center";
+    await page.getByTestId(rootTestId).waitFor({ state: "visible", timeout: 20_000 });
+    const viewportWidth = page.viewportSize()?.width ?? 430;
+    if (viewportWidth < 768) {
+      await page.getByTestId("mobile-navigation-dock").waitFor({ state: "visible", timeout: 20_000 });
+    }
   } finally {
     await page.unroute(authPattern, authHandler);
     await page.unroute(teamPattern, teamHandler);
