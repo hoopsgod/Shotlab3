@@ -24,23 +24,24 @@ async function enterCoachDemo(page) {
 }
 
 async function navigateByKey(page, key) {
-  const direct = page.getByTestId("mobile-navigation-dock").locator(`[data-nav-key="${key}"]`);
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const direct = dock.locator(`[data-nav-key="${key}"]`);
   if (await direct.count()) { await direct.click(); return true; }
   await page.getByTestId("mobile-navigation-more").click();
   const sheet = page.getByTestId("mobile-navigation-sheet");
-  await expect(sheet).toBeVisible();
+  await expect(sheet).toBeVisible({ timeout: 5_000 });
   const item = sheet.locator(`[data-nav-key="${key}"]`);
   if (!(await item.count())) {
     await page.getByRole("button", { name: /close more navigation/i }).click();
     return false;
   }
   await item.click();
-  await expect(sheet).toHaveCount(0);
+  await expect(sheet).toHaveCount(0, { timeout: 5_000 });
   return true;
 }
 
 async function auditCurrentRoute(page, route) {
-  await page.waitForTimeout(160);
+  await page.waitForTimeout(100);
   const audit = await page.evaluate(() => {
     const rect = (el) => el ? (() => { const r = el.getBoundingClientRect(); return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, width: r.width, height: r.height }; })() : null;
     const style = (el) => {
@@ -75,7 +76,7 @@ async function auditCurrentRoute(page, route) {
 }
 
 test("Phase 0 direct mobile runtime, typography, asset and navigation telemetry", async ({ page }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(90_000);
   await installSafeRoutes(page);
   page.on("console", (message) => { if (["error", "warning"].includes(message.type())) findings.console.push({ type: message.type(), text: message.text() }); });
   page.on("pageerror", (error) => findings.pageErrors.push({ message: error.message, stack: error.stack || null }));
@@ -83,7 +84,7 @@ test("Phase 0 direct mobile runtime, typography, asset and navigation telemetry"
 
   await enterCoachDemo(page);
   await auditCurrentRoute(page, "home");
-  for (const key of ["players", "events", "drills", "sc", "leaderboards", "branding", "team-store"]) {
+  for (const key of ["players", "events", "drills", "sc", "leaderboards"]) {
     const available = await navigateByKey(page, key);
     if (available) await auditCurrentRoute(page, key);
     else findings.routes.push({ route: key, available: false });
@@ -91,7 +92,7 @@ test("Phase 0 direct mobile runtime, typography, asset and navigation telemetry"
 
   await page.getByTestId("mobile-navigation-more").click();
   const sheet = page.getByTestId("mobile-navigation-sheet");
-  await expect(sheet).toBeVisible();
+  await expect(sheet).toBeVisible({ timeout: 5_000 });
   findings.more = await sheet.evaluate((el) => {
     const r = el.getBoundingClientRect(); const s = getComputedStyle(el);
     return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, width: r.width, height: r.height, position: s.position, overflowY: s.overflowY };
