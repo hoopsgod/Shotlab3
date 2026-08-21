@@ -48,8 +48,10 @@ body.mission-control-active .mcShellV3 .mcRafters { opacity: .18 !important; }
 body.mission-control-active .mcShellV3 .mcArenaLights { opacity: .26 !important; }
 body.mission-control-active .mcShellV3 .mcHoop { opacity: .5 !important; }
 
+/* Generic Coach support cards use the light editorial material. The activation
+   plan is intentionally excluded: CoachActivationPath.css owns its dark premium
+   state so a sparse/registered account never downgrades into a pale setup card. */
 body.mission-control-active .mcShellV3 .mcSection,
-body.mission-control-active .mcShellV3 .mcTodayPlan,
 body.mission-control-active [data-testid="coach-assignment-accountability"],
 body.mission-control-active [data-testid="coach-follow-up-queue"] {
   border: 1px solid var(--mc-line) !important;
