@@ -54,6 +54,14 @@ test("wide Player Home identities retain lexical wrapping authority across mobil
   );
 });
 
+test("wide Player Home crest separation is content-sensitive at the narrow collision interval", () => {
+  assert.match(
+    hierarchyCss,
+    /@media \(max-width: 360px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__crestSlot\s*\{[\s\S]*?transform:\s*translateY\(18px\);/,
+  );
+  assert.doesNotMatch(hierarchyCss, /@media \(max-width: 360px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero(?!\.teamIdentityTitleStage--wideWord)[^\{]*\.teamIdentityTitleStage__crestSlot/);
+});
+
 test("extreme-small Player Home preserves wide lexical identity without shrinking the crest", () => {
   assert.match(hierarchyCss, /@media \(max-width: 350px\)/);
   assert.match(hierarchyCss, /\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title/);
