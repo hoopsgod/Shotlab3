@@ -89,7 +89,7 @@ export default function TeamIdentityTitleStage({
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
-  const showLogoSetupPrompt = isCoachStage && (!cleanedLogo || logoFailed);
+  const showLogoSetupAction = isCoachStage && (!cleanedLogo || logoFailed);
   const hasUsableLogo = Boolean(cleanedLogo && !logoFailed);
   const openBrandingSettings = () => {
     if (brandingAction?.onClick) {
@@ -129,15 +129,17 @@ export default function TeamIdentityTitleStage({
           draggable="false"
           onError={() => setLogoFailed(true)}
         />
-      ) : showLogoSetupPrompt ? (
+      ) : showLogoSetupAction ? (
         <button
           type="button"
-          className="teamIdentityTitleStage__logoSetup"
-          data-identity-role="brand-setup"
+          className="teamIdentityTitleStage__fallbackAction"
+          data-identity-role="brand-fallback"
+          data-team-logo-fallback={fallbackInitials}
           onClick={openBrandingSettings}
-          aria-label="Add your custom team logo in Program Branding"
+          aria-label={`Add a logo for ${teamName} in Program Branding`}
         >
-          Click here to add your custom team logo
+          <strong className="teamIdentityTitleStage__fallbackActionMark">{fallbackInitials}</strong>
+          <span className="teamIdentityTitleStage__fallbackActionLabel">Add logo</span>
         </button>
       ) : (
         <span className="teamIdentityTitleStage__fallbackCrest" data-identity-role="brand-fallback" aria-label={`${teamName} initials`}>{fallbackInitials}</span>
