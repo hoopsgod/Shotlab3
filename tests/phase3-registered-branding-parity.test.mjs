@@ -45,9 +45,16 @@ test("Demo Titans retains the bundled Demo identity", () => {
   assert.match(resolved.logoMarkUrl, /titans-default-mark/);
 });
 
-test("extreme-small Player Home preserves wide lexical identity without shrinking the crest", () => {
+test("wide Player Home identities retain lexical wrapping authority across mobile", () => {
   assert.match(titleStageSource, /const wideTitleWord = longestWordLength >= 10;/);
   assert.match(titleStageSource, /wideTitleWord \? "teamIdentityTitleStage--wideWord" : ""/);
+  assert.match(
+    hierarchyCss,
+    /@media \(max-width: 760px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title\s*\{[\s\S]*?overflow-wrap:\s*normal;[\s\S]*?word-break:\s*normal;[\s\S]*?hyphens:\s*none;/,
+  );
+});
+
+test("extreme-small Player Home preserves wide lexical identity without shrinking the crest", () => {
   assert.match(hierarchyCss, /@media \(max-width: 350px\)/);
   assert.match(hierarchyCss, /\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title/);
   assert.match(hierarchyCss, /width: calc\(100% \+ var\(--identity-crest\) \+ 16px\)/);
