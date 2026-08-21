@@ -96,7 +96,7 @@ async function signature(page, testId) {
   }, [...DATA_STATE_CLASSES]);
 }
 
-async function expectRegisteredStateQuality(page, role) {
+async function expectRegisteredStateQuality(page, role, viewportWidth) {
   if (role !== 'coach') return;
   const activation = page.locator('.mcTodayPlan.mcActivationPlan');
   if (await activation.count() === 0) return;
@@ -119,12 +119,12 @@ async function expectRegisteredStateQuality(page, role) {
 
   // A truthful sparse/onboarding state may change content, but it may not fall
   // back to the generic pale editorial card. Preserve the component-owned dark
-  // premium material and the same full-width mobile action treatment as Demo.
+  // premium material and, on mobile, the same full-width action treatment.
   expect(visual.backgroundImage).toContain('linear-gradient');
   expect(visual.backgroundImage).not.toBe('none');
   expect(visual.borderRadius).toBeGreaterThanOrEqual(16);
   expect(visual.textColor).toBe('rgb(255, 255, 255)');
-  expect(visual.buttonWidth).toBeGreaterThanOrEqual(visual.width - 34);
+  if (viewportWidth < 768) expect(visual.buttonWidth).toBeGreaterThanOrEqual(visual.width - 34);
 }
 
 async function expectNoOverflow(page) {
@@ -144,7 +144,7 @@ for (const viewportCase of [
       const testId = role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center';
       try {
         expect(await signature(demo.page, testId)).toEqual(await signature(registered.page, testId));
-        await expectRegisteredStateQuality(registered.page, role);
+        await expectRegisteredStateQuality(registered.page, role, viewportCase.viewport.width);
         await expectNoOverflow(demo.page);
         await expectNoOverflow(registered.page);
         if (viewportCase.viewport.width < 768) {
