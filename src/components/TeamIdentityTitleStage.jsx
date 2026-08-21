@@ -132,7 +132,7 @@ export default function TeamIdentityTitleStage({
       ) : showLogoSetupAction ? (
         <button
           type="button"
-          className="teamIdentityTitleStage__fallbackAction"
+          className="teamIdentityTitleStage__fallbackCrest teamIdentityTitleStage__fallbackAction"
           data-identity-role="brand-fallback"
           data-team-logo-fallback={fallbackInitials}
           onClick={openBrandingSettings}
