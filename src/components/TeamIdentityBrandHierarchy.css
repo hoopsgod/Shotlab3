@@ -73,15 +73,6 @@
 }
 
 @media (max-width: 760px) {
-  /* Generic mobile safety CSS still allows emergency h1 breaks. Wide Player
-     identities are already content-classified at the shared title authority,
-     so reclaim lexical wrapping here without changing short Demo titles. */
-  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__title {
-    overflow-wrap: normal;
-    word-break: normal;
-    hyphens: none;
-  }
-
   /* Preserve the restored full custom crest while keeping one secondary-page
      geometry across Coach, Player, Demo, and registered experiences. */
   .teamIdentityTitleStage--standard {
@@ -147,36 +138,11 @@
   }
 }
 
-@media (max-width: 360px) {
-  /* At the two narrowest certified Player Home widths, an intact wide lexical
-     word reaches into the crest column. Preserve both at full scale by lowering
-     only the content-classified crest into the existing hero bottom breathing
-     room; short Demo titles retain the normal geometry. */
-  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__crestSlot {
-    transform: translateY(18px);
-  }
-}
-
 @media (max-width: 350px) {
   /* Only the extreme-small interval needs type accommodation. Interpolate from
      32px at 320px back to the established 38px floor by 350px so every normal
      mobile width keeps the certified editorial scale unchanged. */
   .teamIdentityTitleStage--standard.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
     font-size: clamp(32px, calc(20vw - 32px), 38px);
-  }
-
-  /* Player Home keeps the full identity crest at 320px. Only names containing
-     a genuinely wide word receive the unused horizontal stage width, avoiding
-     both emergency intra-word breaks and short-title/crest collisions. */
-  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__inner {
-    min-height: 260px;
-  }
-
-  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__title {
-    width: calc(100% + var(--identity-crest) + 16px);
-    max-width: calc(100% + var(--identity-crest) + 16px);
-    overflow-wrap: normal;
-    word-break: normal;
-    hyphens: none;
   }
 }
