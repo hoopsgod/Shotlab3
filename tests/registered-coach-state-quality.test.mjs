@@ -6,6 +6,7 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 
 test('registered sparse Coach activation remains component-owned', () => {
   const foundation = read('public/shotlab-v3-foundation.css');
+  const legacySession = read('public/shotlab-v15-session-integrity.css');
   const reboot = read('src/lib/visualSystemReboot.js');
   const activation = read('src/components/CoachActivationPath.css');
 
@@ -17,8 +18,15 @@ test('registered sparse Coach activation remains component-owned', () => {
   assert.ok(rebootSupportRule, 'expected the runtime reboot support-surface rule');
   assert.doesNotMatch(rebootSupportRule, /\.mcTodayPlan/);
 
+  assert.doesNotMatch(
+    legacySession,
+    /\[data-testid="coach-onboarding-state"\]/,
+    'legacy session CSS must not override the source-owned Coach activation surface',
+  );
   assert.match(activation, /\.mcActivationPlan\s*\{[\s\S]*linear-gradient/);
   assert.match(activation, /\.mcActivationPlan \.mcTodayPlanCopy strong\s*\{[\s\S]*color:#fff/);
+  assert.match(activation, /@media\(max-width:700px\)/);
+  assert.match(activation, /@media\(prefers-reduced-motion:reduce\)/);
 });
 
 test('registered Coach without a custom logo uses team-derived monogram identity', () => {
