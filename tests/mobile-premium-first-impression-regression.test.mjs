@@ -84,8 +84,11 @@ test("first-impression controls and labels respect the product readability floor
   assert.match(titleStageCss, /@media \(max-width: 390px\)[\s\S]*teamIdentityTitleStage__identityLine \{[^}]*font-size:\s*11px;[^}]*\}/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision__eyebrow \{[\s\S]*font: 760 var\(--type-micro, 11px\)/);
   assert.match(secondaryPageCss, /\.secondaryPageDecision button \{[\s\S]*font: 720 13px/);
-  assert.match(titleStage, /showLogoSetupPrompt = isCoachStage && \(!cleanedLogo \|\| logoFailed\)/);
-  assert.match(titleStage, /aria-label="Add your custom team logo in Program Branding"/);
+  assert.match(titleStage, /showLogoSetupAction = isCoachStage && \(!cleanedLogo \|\| logoFailed\)/);
+  assert.match(titleStage, /aria-label=\{`Add a logo for \$\{teamName\} in Program Branding`\}/);
+  assert.match(titleStage, /teamIdentityTitleStage__fallbackAction/);
+  assert.match(brandHierarchyCss, /teamIdentityTitleStage__fallbackAction[\s\S]*min-width:\s*44px/);
+  assert.doesNotMatch(titleStage, /Click here to add your custom team logo/);
 });
 
 test("Coach secondary metrics use a readable 2x2 scoreboard rather than a clipped or compressed strip", () => {
