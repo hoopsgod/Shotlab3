@@ -10,6 +10,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const appSource = fs.readFileSync(path.join(here, "../src/App.jsx"), "utf8");
 const titleStageSource = fs.readFileSync(path.join(here, "../src/components/TeamIdentityTitleStage.jsx"), "utf8");
 const hierarchyCss = fs.readFileSync(path.join(here, "../src/components/TeamIdentityBrandHierarchy.css"), "utf8");
+const playerHeaderSource = fs.readFileSync(path.join(here, "../src/components/PlayerDashboardHeader.jsx"), "utf8");
+const playerHeaderCss = fs.readFileSync(path.join(here, "../src/components/PlayerDashboardHeader.css"), "utf8");
 
 test("registered team identity is injected at the shared branding authority boundary", () => {
   assert.match(appSource, /myTeam\?\.name\?\{teamName:myTeam\.name\}:\{\}/);
@@ -45,29 +47,32 @@ test("Demo Titans retains the bundled Demo identity", () => {
   assert.match(resolved.logoMarkUrl, /titans-default-mark/);
 });
 
+test("Player Home wide-name rules stay inside the Player workspace styling boundary", () => {
+  assert.match(playerHeaderSource, /import "\.\/PlayerDashboardHeader\.css";/);
+  assert.doesNotMatch(hierarchyCss, /playerDashboardIdentityStage/);
+});
+
 test("wide Player Home identities retain lexical wrapping authority across mobile", () => {
   assert.match(titleStageSource, /const wideTitleWord = longestWordLength >= 10;/);
   assert.match(titleStageSource, /wideTitleWord \? "teamIdentityTitleStage--wideWord" : ""/);
   assert.match(
-    hierarchyCss,
+    playerHeaderCss,
     /@media \(max-width: 760px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title\s*\{[\s\S]*?overflow-wrap:\s*normal;[\s\S]*?word-break:\s*normal;[\s\S]*?hyphens:\s*none;/,
   );
 });
 
 test("wide Player Home crest separation is content-sensitive at the narrow collision interval", () => {
   assert.match(
-    hierarchyCss,
+    playerHeaderCss,
     /@media \(max-width: 360px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__crestSlot\s*\{[\s\S]*?transform:\s*translateY\(18px\);/,
   );
-  assert.doesNotMatch(hierarchyCss, /@media \(max-width: 360px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero(?!\.teamIdentityTitleStage--wideWord)[^\{]*\.teamIdentityTitleStage__crestSlot/);
+  assert.doesNotMatch(playerHeaderCss, /@media \(max-width: 360px\)[\s\S]*?\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero(?!\.teamIdentityTitleStage--wideWord)[^\{]*\.teamIdentityTitleStage__crestSlot/);
 });
 
 test("extreme-small Player Home preserves wide lexical identity without shrinking the crest", () => {
-  assert.match(hierarchyCss, /@media \(max-width: 350px\)/);
-  assert.match(hierarchyCss, /\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title/);
-  assert.match(hierarchyCss, /width: calc\(100% \+ var\(--identity-crest\) \+ 16px\)/);
-  assert.match(hierarchyCss, /overflow-wrap: normal;/);
-  assert.match(hierarchyCss, /word-break: normal;/);
-  assert.match(hierarchyCss, /hyphens: none;/);
-  assert.doesNotMatch(hierarchyCss, /\.playerDashboardIdentityStage[^}]*--identity-crest:\s*(?:[0-9]|[1-9][0-9])px/s);
+  assert.match(playerHeaderCss, /@media \(max-width: 350px\)/);
+  assert.match(playerHeaderCss, /\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title/);
+  assert.match(playerHeaderCss, /width: calc\(100% \+ var\(--identity-crest\) \+ 16px\)/);
+  assert.match(playerHeaderCss, /max-width: calc\(100% \+ var\(--identity-crest\) \+ 16px\)/);
+  assert.doesNotMatch(playerHeaderCss, /--identity-crest:\s*(?:[0-9]|[1-9][0-9])px/);
 });
