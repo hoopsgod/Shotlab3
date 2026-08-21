@@ -73,6 +73,15 @@
 }
 
 @media (max-width: 760px) {
+  /* Generic mobile safety CSS still allows emergency h1 breaks. Wide Player
+     identities are already content-classified at the shared title authority,
+     so reclaim lexical wrapping here without changing short Demo titles. */
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__title {
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+
   /* Preserve the restored full custom crest while keeping one secondary-page
      geometry across Coach, Player, Demo, and registered experiences. */
   .teamIdentityTitleStage--standard {
