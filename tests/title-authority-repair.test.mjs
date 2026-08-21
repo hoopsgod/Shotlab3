@@ -6,6 +6,7 @@ import { DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS } from '../scripts/run-route
 const read = (path) => readFileSync(path, 'utf8');
 const stage = read('src/components/TeamIdentityTitleStage.jsx');
 const stageCss = read('src/components/TeamIdentityTitleStage.css');
+const stageBrandCss = read('src/components/TeamIdentityBrandHierarchy.css');
 const coach = read('src/components/CoachCommandCenter.jsx');
 const coachTitleCss = read('src/components/CoachMissionControlTitleStage.css');
 const coachHeader = read('src/components/CoachDashboardHeader.jsx');
@@ -155,13 +156,20 @@ test('shared title geometry preserves premium crest scale, containment and diffi
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
 });
 
-test('no-logo handling is explicit and Demo Titans branding is seeded directly by source data', () => {
-  assert.match(stage, /showLogoSetupPrompt/);
-  assert.match(stage, /teamIdentityTitleStage__logoSetup/);
+test('no-logo handling is explicit, premium and Demo Titans branding is seeded directly by source data', () => {
+  assert.match(stage, /showLogoSetupAction/);
+  assert.match(stage, /teamIdentityTitleStage__fallbackAction/);
+  assert.match(stage, /data-team-logo-fallback=\{fallbackInitials\}/);
   assert.match(stage, /teamIdentityTitleStage__fallbackCrest/);
-  assert.match(stage, /Click here to add your custom team logo/);
+  assert.match(stage, />Add logo</);
+  assert.doesNotMatch(stage, /Click here to add your custom team logo/);
+  assert.match(stageBrandCss, /\.teamIdentityTitleStage__fallbackAction/);
+  assert.match(stageBrandCss, /min-width:\s*44px/);
   assert.match(coach, /mcHeroLogoSetup/);
-  assert.match(coach, /Click here to add your custom team logo/);
+  assert.match(coach, /mcTeamFallback/);
+  assert.match(coach, /data-team-logo-fallback=\{mark\}/);
+  assert.match(coach, /<small>Add logo<\/small>/);
+  assert.doesNotMatch(coach, /Click here to add your custom team logo/);
   assert.match(demoData, /const DEMO_TEAM_BRANDING = Object\.freeze\(\{/);
   assert.match(demoData, /teamName:\s*"Demo Titans"/);
   assert.match(demoData, /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);
