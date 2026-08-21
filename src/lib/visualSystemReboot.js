@@ -70,8 +70,11 @@ body.mission-control-active .mcTopBar button {
   box-shadow: none !important;
 }
 
+/* Light editorial support cards are shared by populated Demo and registered
+   experiences. The Coach activation plan is deliberately excluded: sparse or
+   onboarding registered accounts must keep the component-owned dark premium
+   material instead of degrading into a generic setup card. */
 body.mission-control-active .mcSection,
-body.mission-control-active .mcTodayPlan,
 body.mission-control-active [data-testid="coach-assignment-accountability"] {
   border: 1px solid var(--sl-line) !important;
   border-radius: 20px !important;
