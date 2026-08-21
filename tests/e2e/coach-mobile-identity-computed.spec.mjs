@@ -150,8 +150,11 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.detail.top).toBeGreaterThanOrEqual(metrics.title.top);
     expect(metrics.title.height).toBeLessThanOrEqual(90);
     expect(Math.abs(metrics.title.left - metrics.detail.left)).toBeLessThanOrEqual(1);
-    expect(metrics.title.right).toBeLessThanOrEqual(metrics.detail.right + 1);
-    expect(metrics.title.width).toBeLessThanOrEqual(metrics.detail.width + 1);
+    // The current decision-first composition deliberately lets the Coach headline
+    // use the full canonical content rail while supporting body copy stays narrower.
+    // Bound the title to the shared metrics rail instead of the old detail-column width.
+    expect(metrics.title.right).toBeLessThanOrEqual(metrics.reality.right + 1);
+    expect(metrics.title.width).toBeLessThanOrEqual(metrics.reality.width + 1);
     expect(Math.abs(metrics.detail.left - metrics.reality.left)).toBeLessThanOrEqual(1);
     expect(Math.abs(metrics.detail.right - metrics.reality.right)).toBeLessThanOrEqual(1);
     expect(metrics.detailBackgroundColor).not.toBe('rgba(0, 0, 0, 0)');

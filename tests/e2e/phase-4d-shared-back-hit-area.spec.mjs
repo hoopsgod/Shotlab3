@@ -107,8 +107,10 @@ async function verifyBackControl(page, role, surface) {
   // forcing production styling to manufacture an implementation detail.
   expect(presentation.borderTopWidth).toBeGreaterThanOrEqual(0);
   expect(presentation.borderTopWidth).toBeLessThanOrEqual(1);
-  expect(presentation.borderRadius).toBeGreaterThanOrEqual(13);
-  expect(presentation.borderRadius).toBeLessThanOrEqual(15);
+  // The approved compact title-stage Back control uses the shared 10px radius.
+  // Preserve touch safety and focus behavior without reviving the retired 14px shell.
+  expect(presentation.borderRadius).toBeGreaterThanOrEqual(9);
+  expect(presentation.borderRadius).toBeLessThanOrEqual(11);
   expect(presentation.backgroundImage).not.toContain("url(");
   expect(presentation.backgroundImage).not.toContain("radial-gradient");
   if (presentation.backgroundImage !== "none") expect(presentation.backgroundImage).toContain("linear-gradient");
