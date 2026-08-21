@@ -200,12 +200,14 @@ for (const viewport of VIEWPORTS) {
     expect(luminance(parseRgb(metrics.bellBackground))).toBeLessThan(0.2);
     expect(luminance(parseRgb(metrics.bellColor))).toBeGreaterThan(0.75);
 
-    expect(metrics.identityBackgroundImage).toContain('linear-gradient');
-    expect(luminance(parseRgb(metrics.identityBackground))).toBeLessThan(0.2);
-    expect(luminance(parseRgb(metrics.heroBackground))).toBeGreaterThan(0.75);
-    const identityBg = parseRgb(metrics.identityBackground || 'rgb(6, 25, 35)');
-    expect(contrast(parseRgb(metrics.teamColor), identityBg)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(parseRgb(metrics.eyebrowColor), identityBg)).toBeGreaterThanOrEqual(4.5);
+    // Coach Home is one immersive dark hero. Identity is intentionally transparent
+    // over that hero instead of becoming a separate nested material card.
+    expect(metrics.identityBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.identityBackgroundImage).toBe('none');
+    expect(luminance(parseRgb(metrics.heroBackground))).toBeLessThan(0.2);
+    const heroBg = parseRgb(metrics.heroBackground || 'rgb(7, 24, 32)');
+    expect(contrast(parseRgb(metrics.teamColor), heroBg)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(parseRgb(metrics.eyebrowColor), heroBg)).toBeGreaterThanOrEqual(4.5);
 
     fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight }, null, 2)}\n`);
     if (viewport.width === 390) {
