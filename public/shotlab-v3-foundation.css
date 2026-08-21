@@ -21,9 +21,11 @@ body *{box-sizing:border-box}
 
 /* Mission Control supporting surfaces only. Coach identity, decision headline,
    metrics rail, primary action, mobile control bar, and sparse activation path are
-   source-owned. The activation plan must never be forced into a generic light card. */
+   source-owned. The activation plan must never be forced into a generic light card.
+   Keep foreground ownership off the shell itself so dark source-owned surfaces can
+   retain their native light ink while light support cards opt into V3 ink below. */
 body.mission-control-active .mcShellV3,
-body.mission-control-active .missionControl{background:var(--v3-canvas)!important;color:var(--v3-ink)!important}
+body.mission-control-active .missionControl{background:var(--v3-canvas)!important}
 body.mission-control-active .missionControl{width:min(100%,760px)!important;margin:0 auto!important;padding:12px 16px calc(104px + env(safe-area-inset-bottom,0px))!important;gap:16px!important}
 body.mission-control-active .mcSection,body.mission-control-active [data-testid="coach-assignment-accountability"]{border:1px solid var(--v3-line)!important;border-radius:20px!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important;overflow:hidden!important}
 body.mission-control-active .mcSection h2,body.mission-control-active .mcSection h3,body.mission-control-active [data-testid="coach-assignment-accountability"] h2{color:var(--v3-ink)!important;letter-spacing:-.035em!important;text-transform:none!important}
