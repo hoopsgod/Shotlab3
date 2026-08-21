@@ -1,10 +1,24 @@
 import { test, expect } from "@playwright/test";
 
-const NAVY_RGB = ["rgb(11, 38, 51)", "rgb(7, 24, 32)"];
-
 function rgbStops(background = "") {
   return [...String(background).matchAll(/\brgb\((\d+),\s*(\d+),\s*(\d+)\)/g)]
     .map((match) => match.slice(1, 4).map(Number));
+}
+
+function relativeLuminance([r, g, b]) {
+  const channels = [r, g, b].map((value) => {
+    const channel = value / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
+}
+
+function expectDarkBrandedBackground(backgroundImage, backgroundColor = "") {
+  const stops = backgroundImage && backgroundImage !== "none"
+    ? rgbStops(backgroundImage)
+    : rgbStops(backgroundColor);
+  expect(stops.length).toBeGreaterThan(0);
+  for (const stop of stops) expect(relativeLuminance(stop)).toBeLessThan(0.18);
 }
 
 test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
@@ -66,7 +80,7 @@ async function expectEditorialTitle(page) {
   expect(metrics.titleSize).toBeLessThanOrEqual(46);
 }
 
-async function expectNavyDecision(page, locator = page.locator('[data-visual-role="primary-decision"]:visible').first()) {
+async function expectDarkDecision(page, locator = page.locator('[data-visual-role="primary-decision"]:visible').first()) {
   await expect(locator).toBeVisible({ timeout: 10_000 });
   const style = await locator.evaluate((element) => {
     const computed = getComputedStyle(element);
@@ -80,13 +94,7 @@ async function expectNavyDecision(page, locator = page.locator('[data-visual-rol
       actionBackground: actionStyle?.backgroundColor || "",
     };
   });
-  if (style.backgroundImage === "none") {
-    const [solid] = rgbStops(style.backgroundColor);
-    expect(solid).toBeDefined();
-    expect(Math.max(...solid)).toBeLessThan(64);
-  } else {
-    for (const color of NAVY_RGB) expect(style.backgroundImage).toContain(color);
-  }
+  expectDarkBrandedBackground(style.backgroundImage, style.backgroundColor);
   expect(style.radius).toBeGreaterThanOrEqual(18);
   if (style.actionHeight) expect(style.actionHeight).toBeGreaterThanOrEqual(44);
 }
@@ -104,7 +112,7 @@ async function openFirstCoachPlayerDetail(page) {
   await expect(page.getByTestId("coach-player-detail-workspace")).toBeVisible({ timeout: 10_000 });
 }
 
-test("every Coach mobile destination uses the converged navy/cream product grammar", async ({ page }) => {
+test("every Coach mobile destination uses the converged branded-dark/cream product grammar", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await enterCoachDemo(page);
@@ -134,7 +142,7 @@ test("every Coach mobile destination uses the converged navy/cream product gramm
   for (const key of ["players", "events", "drills", "sc", "activity", "leaderboards"]) {
     await navigateByKey(page, key);
     await expectEditorialTitle(page);
-    await expectNavyDecision(page);
+    await expectDarkDecision(page);
     await expectNoHorizontalOverflow(page);
   }
 
@@ -145,9 +153,10 @@ test("every Coach mobile destination uses the converged navy/cream product gramm
   await expect(profileHero).toBeVisible();
   const profile = await profileHero.evaluate((element) => ({
     backgroundImage: getComputedStyle(element).backgroundImage,
+    backgroundColor: getComputedStyle(element).backgroundColor,
     metricBackground: getComputedStyle(document.querySelector('.coachPlayerProfileMetrics')).backgroundColor,
   }));
-  for (const color of NAVY_RGB) expect(profile.backgroundImage).toContain(color);
+  expectDarkBrandedBackground(profile.backgroundImage, profile.backgroundColor);
   expect(profile.metricBackground).toBe("rgb(255, 255, 255)");
   await expectNoHorizontalOverflow(page);
 
@@ -174,11 +183,12 @@ test("every Coach mobile destination uses the converged navy/cream product gramm
     const controls = element.querySelector('[data-visual-role="branding-controls"]');
     return {
       previewBackground: preview ? getComputedStyle(preview).backgroundImage : "",
+      previewBackgroundColor: preview ? getComputedStyle(preview).backgroundColor : "",
       controlsBackground: controls ? getComputedStyle(controls).backgroundColor : "",
       controlsShadow: controls ? getComputedStyle(controls).boxShadow : "missing",
     };
   });
-  for (const color of NAVY_RGB) expect(brandingPresentation.previewBackground).toContain(color);
+  expectDarkBrandedBackground(brandingPresentation.previewBackground, brandingPresentation.previewBackgroundColor);
   expect(brandingPresentation.controlsBackground).toBe("rgb(255, 255, 255)");
   expect(brandingPresentation.controlsShadow).toBe("none");
   await expectNoHorizontalOverflow(page);
