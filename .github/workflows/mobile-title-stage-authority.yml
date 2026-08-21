@@ -148,7 +148,7 @@ jobs:
           cat /tmp/title-stage-candidate-preview.log
           exit 1
 
-      - name: Certify five mobile widths and capture required screenshots
+      - name: Certify full Phase 0 mobile width matrix and capture required screenshots
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
           TITLE_STAGE_EVIDENCE_MODE: after
@@ -158,6 +158,11 @@ jobs:
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/mobile-geometry-precision-screenshots.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture Phase 0 runtime and computed-style telemetry
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase0-mobile-runtime-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Upload candidate visual evidence
         if: always()
