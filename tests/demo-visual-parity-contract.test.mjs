@@ -98,7 +98,9 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
       if (!pattern.test(source)) continue;
       if (identityOnly && DEMO_IDENTITY_IMPORT_ALLOWLIST.has(file)) {
         assert.match(source, /isDemoPersistenceSession\(\)/, `${file} may use demo state only for explicit identity asset selection`);
-        assert.match(source, /Click here to add your custom team logo/, `${file} must keep the registered no-logo state actionable`);
+        assert.match(source, /data-team-logo-fallback=\{mark\}/, `${file} must keep the registered no-logo state as a team-derived identity mark`);
+        assert.match(source, /<small>Add logo<\/small>/, `${file} must keep the registered no-logo state actionable`);
+        assert.doesNotMatch(source, /Click here to add your custom team logo/, `${file} must not downgrade registered identity into setup scaffolding`);
         continue;
       }
       violations.push(`${file}: ${reason}`);
