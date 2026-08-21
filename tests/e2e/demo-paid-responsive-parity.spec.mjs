@@ -134,10 +134,13 @@ async function expectNoOverflow(page) {
 }
 
 for (const viewportCase of [
+  { name: '320-mobile', viewport: { width: 320, height: 812 } },
+  { name: '360-mobile', viewport: { width: 360, height: 812 } },
   { name: '375-mobile', viewport: { width: 375, height: 812 } },
   { name: '390-mobile', viewport: { width: 390, height: 844 } },
   { name: '393-mobile', viewport: { width: 393, height: 852 } },
   { name: '402-mobile', viewport: { width: 402, height: 874 } },
+  { name: '414-mobile', viewport: { width: 414, height: 896 } },
   { name: '430-mobile', viewport: { width: 430, height: 932 } },
   { name: 'desktop', viewport: { width: 1440, height: 1000 } },
 ]) {
