@@ -3,6 +3,9 @@
   --text-2:#4f5a52;
   --text-3:#6d776f;
   position:relative;
+  width:100%;
+  max-width:100%;
+  min-width:0;
   overflow:visible;
   color:var(--text-1);
 }
