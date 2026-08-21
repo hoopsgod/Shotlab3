@@ -16,6 +16,13 @@
   backdrop-filter:blur(24px) saturate(124%);
   -webkit-backdrop-filter:blur(24px) saturate(124%);
 }
+/* Activation material is component-owned. Late Mission Control compatibility may
+   tune geometry and interaction, but must not replace this premium base layer. */
+body.mission-control-active #root .mcShellV3 .mcActivationPlan{
+  background:
+    radial-gradient(circle at 88% 10%,color-mix(in srgb,var(--mc) 14%,transparent),transparent 38%),
+    linear-gradient(148deg,rgba(28,30,33,.94),rgba(11,12,14,.98));
+}
 .mcActivationPlan::before{
   content:"";
   position:absolute;
