@@ -133,6 +133,109 @@ async function expectNoOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
+async function expectPlayerTitleCrestIntegrity(page, viewportWidth, accountKind) {
+  const stage = page.getByTestId('player-dashboard-identity-header');
+  const geometry = await stage.evaluate((node) => {
+    const title = node.querySelector('[data-identity-role="page-title"]');
+    const crest = node.querySelector('[data-identity-role="brand-panel"]');
+    if (!(title instanceof HTMLElement) || !(crest instanceof HTMLElement)) {
+      return { missing: ['title-or-crest'] };
+    }
+
+    const textNode = [...title.childNodes].find((child) => child.nodeType === Node.TEXT_NODE && child.textContent?.trim());
+    if (!textNode) return { missing: ['title-text'] };
+
+    const round = (value) => Math.round(value * 2) / 2;
+    const rectData = (rect) => ({
+      left: round(rect.left),
+      right: round(rect.right),
+      top: round(rect.top),
+      bottom: round(rect.bottom),
+      width: round(rect.width),
+      height: round(rect.height),
+    });
+    const visibleRects = (range) => [...range.getClientRects()]
+      .filter((rect) => rect.width > 0.5 && rect.height > 0.5)
+      .map(rectData);
+    const overlap = (a, b) => ({
+      x: Math.min(a.right, b.right) - Math.max(a.left, b.left),
+      y: Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top),
+    });
+    const separation = (a, b) => {
+      const horizontal = Math.max(b.left - a.right, a.left - b.right, 0);
+      const vertical = Math.max(b.top - a.bottom, a.top - b.bottom, 0);
+      if (horizontal === 0 && vertical === 0) return 0;
+      return Math.hypot(horizontal, vertical);
+    };
+
+    const text = textNode.textContent || '';
+    const words = [];
+    const matcher = /\S+/g;
+    let match;
+    while ((match = matcher.exec(text))) {
+      const range = document.createRange();
+      range.setStart(textNode, match.index);
+      range.setEnd(textNode, match.index + match[0].length);
+      const rects = visibleRects(range);
+      words.push({
+        word: match[0],
+        rects,
+        visualLines: new Set(rects.map((rect) => round(rect.top))).size,
+      });
+    }
+
+    const fullRange = document.createRange();
+    fullRange.selectNodeContents(title);
+    const titleLineRects = visibleRects(fullRange);
+    const crestRect = rectData(crest.getBoundingClientRect());
+    const stageRect = rectData(node.getBoundingClientRect());
+    const collisions = titleLineRects
+      .map((rect, index) => ({ index, overlap: overlap(rect, crestRect) }))
+      .filter(({ overlap: amount }) => amount.x > 1 && amount.y > 1);
+    const minGap = titleLineRects.length
+      ? Math.min(...titleLineRects.map((rect) => separation(rect, crestRect)))
+      : 0;
+
+    return {
+      missing: [],
+      title: text.trim(),
+      wideWordClass: node.classList.contains('teamIdentityTitleStage--wideWord'),
+      fragmentedWords: words.filter((word) => word.visualLines > 1).map((word) => ({ word: word.word, visualLines: word.visualLines, rects: word.rects })),
+      titleLineRects,
+      crestRect,
+      stageRect,
+      collisions,
+      minGap: round(minGap),
+      titleInsideStage: titleLineRects.every((rect) => rect.left >= stageRect.left - 1 && rect.right <= stageRect.right + 1 && rect.top >= stageRect.top - 1 && rect.bottom <= stageRect.bottom + 1),
+      crestInsideStage: crestRect.left >= stageRect.left - 1 && crestRect.right <= stageRect.right + 1 && crestRect.top >= stageRect.top - 1 && crestRect.bottom <= stageRect.bottom + 1,
+    };
+  });
+
+  expect(geometry.missing).toEqual([]);
+  expect(geometry.fragmentedWords, `${accountKind} ${viewportWidth}px title must never split a lexical word across visual lines`).toEqual([]);
+  expect(geometry.collisions, `${accountKind} ${viewportWidth}px title lines must not collide with the crest`).toEqual([]);
+  expect(geometry.titleInsideStage).toBe(true);
+  expect(geometry.crestInsideStage).toBe(true);
+
+  if (viewportWidth <= 350) {
+    expect(geometry.minGap, `${accountKind} ${viewportWidth}px title/crest separation should remain visually balanced`).toBeGreaterThanOrEqual(8);
+  }
+
+  // This is the exact regression boundary that motivated the extreme-small rule:
+  // registered “Responsive Player” needs the wide-word accommodation, while the
+  // shorter Demo title must stay on the normal hero geometry.
+  if (viewportWidth === 320) {
+    expect(geometry.titleLineRects.length).toBeLessThanOrEqual(2);
+    if (accountKind === 'registered') {
+      expect(geometry.title).toBe('Responsive Player');
+      expect(geometry.wideWordClass).toBe(true);
+    } else {
+      expect(geometry.title).toBe('Demo Player');
+      expect(geometry.wideWordClass).toBe(false);
+    }
+  }
+}
+
 for (const viewportCase of [
   { name: '320-mobile', viewport: { width: 320, height: 812 } },
   { name: '360-mobile', viewport: { width: 360, height: 812 } },
@@ -154,6 +257,10 @@ for (const viewportCase of [
         await expectRegisteredStateQuality(registered.page, role, viewportCase.viewport.width);
         await expectNoOverflow(demo.page);
         await expectNoOverflow(registered.page);
+        if (role === 'player') {
+          await expectPlayerTitleCrestIntegrity(demo.page, viewportCase.viewport.width, 'demo');
+          await expectPlayerTitleCrestIntegrity(registered.page, viewportCase.viewport.width, 'registered');
+        }
         if (viewportCase.viewport.width < 768) {
           await expect(demo.page.getByTestId('mobile-navigation-dock')).toBeVisible();
           await expect(registered.page.getByTestId('mobile-navigation-dock')).toBeVisible();
