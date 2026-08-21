@@ -1,0 +1,26 @@
+/* Player Home owns the content-sensitive wide-name treatment so shared title
+   authority CSS stays generic and within its production bundle budget. */
+@media (max-width: 760px) {
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__title {
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__crestSlot {
+    transform: translateY(18px);
+  }
+}
+
+@media (max-width: 350px) {
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__inner {
+    min-height: 260px;
+  }
+
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__title {
+    width: calc(100% + var(--identity-crest) + 16px);
+    max-width: calc(100% + var(--identity-crest) + 16px);
+  }
+}
