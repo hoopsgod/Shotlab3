@@ -147,6 +147,16 @@
   }
 }
 
+@media (max-width: 360px) {
+  /* At the two narrowest certified Player Home widths, an intact wide lexical
+     word reaches into the crest column. Preserve both at full scale by lowering
+     only the content-classified crest into the existing hero bottom breathing
+     room; short Demo titles retain the normal geometry. */
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__crestSlot {
+    transform: translateY(18px);
+  }
+}
+
 @media (max-width: 350px) {
   /* Only the extreme-small interval needs type accommodation. Interpolate from
      32px at 320px back to the established 38px floor by 350px so every normal
