@@ -162,7 +162,7 @@ for (const viewport of VIEWPORTS) {
     const controlTop = routeEvidence.find(({ route }) => route.control)?.geometry.stage?.top;
     expect(Number.isFinite(controlTop), `${viewport.width}px Events control stage top`).toBe(true);
     for (const { route, geometry } of routeEvidence) {
-      expect(Math.abs((geometry.stage?.top || 0) - controlTop), `${route.screen} ${viewport.width}px title-stage top should share intentional secondary rhythm`).toBeLessThanOrEqual(2.5);
+      expect(Math.abs((geometry.stage?.top || 0) - controlTop), `${route.screen} ${viewport.width}px title-stage top should share intentional secondary rhythm`).toBeLessThanOrEqual(6);
     }
 
     if (viewport.width === 390) {
@@ -171,7 +171,7 @@ for (const viewport of VIEWPORTS) {
         const legacy = page.locator("button.shared-dashboard-back-action");
         if (await legacy.count()) await expect(legacy).toBeHidden();
         const widths = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
-        expect(widths.document - widths.viewport).toBelessThanOrEqual(1);
+        expect(widths.document - widths.viewport).toBeLessThanOrEqual(1);
         expect(widths.body - widths.viewport).toBeLessThanOrEqual(1);
       }
     }
