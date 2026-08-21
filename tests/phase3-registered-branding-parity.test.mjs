@@ -8,6 +8,7 @@ import { DEFAULT_BRANDING } from "../src/theme/brandingDefaults.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const appSource = fs.readFileSync(path.join(here, "../src/App.jsx"), "utf8");
+const titleStageSource = fs.readFileSync(path.join(here, "../src/components/TeamIdentityTitleStage.jsx"), "utf8");
 const hierarchyCss = fs.readFileSync(path.join(here, "../src/components/TeamIdentityBrandHierarchy.css"), "utf8");
 
 test("registered team identity is injected at the shared branding authority boundary", () => {
@@ -44,9 +45,11 @@ test("Demo Titans retains the bundled Demo identity", () => {
   assert.match(resolved.logoMarkUrl, /titans-default-mark/);
 });
 
-test("extreme-small Player Home preserves lexical identity without shrinking the crest", () => {
+test("extreme-small Player Home preserves wide lexical identity without shrinking the crest", () => {
+  assert.match(titleStageSource, /const wideTitleWord = longestWordLength >= 10;/);
+  assert.match(titleStageSource, /wideTitleWord \? "teamIdentityTitleStage--wideWord" : ""/);
   assert.match(hierarchyCss, /@media \(max-width: 350px\)/);
-  assert.match(hierarchyCss, /\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero \.teamIdentityTitleStage__title/);
+  assert.match(hierarchyCss, /\.playerDashboardIdentityStage\.teamIdentityTitleStage--hero\.teamIdentityTitleStage--wideWord \.teamIdentityTitleStage__title/);
   assert.match(hierarchyCss, /width: calc\(100% \+ var\(--identity-crest\) \+ 16px\)/);
   assert.match(hierarchyCss, /overflow-wrap: normal;/);
   assert.match(hierarchyCss, /word-break: normal;/);
