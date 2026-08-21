@@ -167,6 +167,21 @@ body.mission-control-active #root .mcShellV3 .mcActivationPlan{
     width:100%;
     min-height:48px;
   }
+  /* The mobile activation CTA remains part of the component-owned activation
+     path; late Mission Control compatibility must not collapse it into a link. */
+  body.mission-control-active #root .mcShellV3 .mcActivationPlan>button{
+    grid-column:1 / -1;
+    grid-row:auto;
+    justify-self:stretch;
+    width:100%;
+    min-height:48px;
+    padding:0 18px;
+    border:1px solid color-mix(in srgb,var(--mc) 82%,white 18%);
+    border-radius:14px;
+    background:color-mix(in srgb,var(--mc) 91%,white 9%);
+    color:#080a08;
+    box-shadow:0 13px 28px color-mix(in srgb,var(--mc) 18%,transparent),inset 0 1px rgba(255,255,255,.25);
+  }
   .mcActivationPlan .mcTodayPlanCopy strong{font-size:21px}
 }
 @media(prefers-reduced-motion:reduce){
