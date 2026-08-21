@@ -7,6 +7,7 @@ import "./CoachMissionControl2026.css";
 import "./CoachMissionControlFinal.css";
 import "./CoachMissionControlTitleStage.css";
 import "./CoachActivationPath.css";
+import "./CoachTeamMonogramFallback.css";
 import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
@@ -69,8 +70,9 @@ function CourtArtwork({ logoUrl }) {
   </div>;
 }
 
-function LogoSetupPrompt({ className = "" }) {
-  return <span className={["mcLogoSetupPrompt", className].filter(Boolean).join(" ")}>Click here to add your custom team logo</span>;
+function LogoSetupPrompt({ teamName, className = "" }) {
+  const mark = initials(teamName);
+  return <span className={["mcTeamFallback", className].filter(Boolean).join(" ")} data-team-logo-fallback={mark} aria-hidden="true"><strong>{mark}</strong><small>Add logo</small></span>;
 }
 
 function AttentionRow({ item, onFallback }) {
@@ -193,7 +195,7 @@ export default function CoachCommandCenter({
   return <>
     <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
-        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcRailLogoSetup" />}</button>
+        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside>
@@ -201,7 +203,7 @@ export default function CoachCommandCenter({
       <main className="missionControl">
         <header className="mcHeader" data-testid="mission-control-team-header">
           <button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button>
-          <div className="mcBrandLockup"><button type="button" className="mcHeaderTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt="" /> : <LogoSetupPrompt className="mcHeaderLogoSetup" />}</button><span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span></div>
+          <div className="mcBrandLockup"><button type="button" className="mcHeaderTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt="" /> : <LogoSetupPrompt teamName={teamName} className="mcHeaderLogoSetup" />}</button><span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span></div>
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
         </header>
 
@@ -210,7 +212,7 @@ export default function CoachCommandCenter({
           <div className="mcHeroContent">
             <div className="mcHeroIdentity">
               <div className="mcHeroIdentityCopy"><span className="mcProgramIdentity">{teamName}</span><span className="mcEyebrow">Coach Mode · {primaryCommand.eyebrow}</span></div>
-              <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcHeroLogoSetup" />}</button>
+              <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcHeroLogoSetup" />}</button>
             </div>
             <h1>{primaryCommand.title}</h1><p>{primaryCommand.detail}</p>
             <div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button><button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button></div>
@@ -227,7 +229,7 @@ export default function CoachCommandCenter({
       {inboxOpen ? <div className="mcInboxLayer" data-testid="coach-inbox-layer"><button type="button" className="mcInboxBackdrop" aria-label="Close Coach Inbox" onClick={closeInbox} /><section ref={inboxRef} id="coach-inbox-panel" className="mcInboxPanel" role="dialog" aria-modal="true" aria-labelledby="coach-inbox-title" data-testid="coach-inbox"><header className="mcInboxHead"><span><small>Live team signals</small><strong id="coach-inbox-title">Coach Inbox</strong></span><button type="button" aria-label="Close Coach Inbox" onClick={closeInbox}><Icon name="close" /></button></header><div className="mcInboxSummary"><strong>{inboxModel.actionableCount > 0 ? `${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "move" : "moves"} to make` : "You’re caught up"}</strong><span>Only current team actions appear here.</span></div>{inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : item.kind === "event-readiness" ? "calendar" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : item.kind === "event-readiness" ? "Event readiness" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player, RSVP, or team-launch tasks need attention right now.</small></div></div>}{inboxModel.context ? <button type="button" className="mcInboxContext" onClick={() => runInboxAction(inboxModel.context)}><span className="mcInboxItemIcon"><Icon name="calendar" size={19} /></span><span><small>Coming up</small><strong>{inboxModel.context.title}</strong><em>{inboxModel.context.detail}</em></span><b>{inboxModel.context.label}<Icon name="arrow" size={15} /></b></button> : null}<footer>Built from live roster, RSVP, activation, and schedule data.</footer></section></div> : null}
 
       <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}><button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} /><section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach command menu</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section></div>
-      <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}>{fullTeamLogoUrl ? <img src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt className="mcDrawerLogoSetup" />}</button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
+      <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}>{fullTeamLogoUrl ? <img src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcDrawerLogoSetup" />}</button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
     </div>
   </>;
 }
