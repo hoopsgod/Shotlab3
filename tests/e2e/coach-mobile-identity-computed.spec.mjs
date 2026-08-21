@@ -156,15 +156,16 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.title.right).toBeLessThanOrEqual(metrics.reality.right + 1);
     expect(metrics.title.width).toBeLessThanOrEqual(metrics.reality.width + 1);
     expect(Math.abs(metrics.detail.left - metrics.reality.left)).toBeLessThanOrEqual(1);
-    // Supporting copy is intentionally narrower than the full metrics rail. Keep it
-    // left-aligned and bounded inside the canonical rail without forcing equal widths.
+    // Supporting copy is intentionally narrower than the full metrics rail and
+    // transparent over the hero artwork; it is not a nested material card.
     expect(metrics.detail.right).toBeLessThanOrEqual(metrics.reality.right + 1);
     expect(metrics.detail.width).toBeLessThanOrEqual(metrics.reality.width);
-    expect(metrics.detailBackgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-    expect(metrics.detailBackgroundImage).toContain('linear-gradient');
+    expect(metrics.detailBackgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.detailBackgroundImage).toBe('none');
     expect(metrics.reality.top).toBeGreaterThanOrEqual(metrics.detail.bottom - 1);
     expect(metrics.reality.top).toBeLessThan(viewport.height);
-    expect(metrics.realityBackgroundImage).toContain('linear-gradient');
+    // The metrics rail uses one translucent team-surface material, not a gradient.
+    expect(metrics.realityBackgroundImage).toBe('none');
     expect(metrics.realityBackground).not.toBe('rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box');
     expect(metrics.realityBorder).toContain('solid');
     expect(metrics.realityColumns).toBe(3);
