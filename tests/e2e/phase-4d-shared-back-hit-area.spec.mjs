@@ -114,7 +114,10 @@ async function verifyBackControl(page, role, surface) {
   expect(presentation.backgroundImage).not.toContain("url(");
   expect(presentation.backgroundImage).not.toContain("radial-gradient");
   if (presentation.backgroundImage !== "none") expect(presentation.backgroundImage).toContain("linear-gradient");
-  expect(presentation.fontSize).toBe(0);
+  // The approved compact control retains a readable 11px Dashboard label rather
+  // than zeroing the button font and relying on icon-only presentation.
+  expect(presentation.fontSize).toBeGreaterThanOrEqual(10);
+  expect(presentation.fontSize).toBeLessThanOrEqual(12);
   expect(presentation.touchAction).toBe("manipulation");
   expect(presentation.iconText.length).toBeGreaterThan(0);
   expect(presentation.iconFontSize).toBeGreaterThanOrEqual(20);
