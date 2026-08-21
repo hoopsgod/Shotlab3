@@ -5,13 +5,10 @@ html body #root :is([data-role="coach"],[data-role="player"]) .page{width:min(10
 
 /* Preserve validated Phase 2 dark foregrounds through explicit contracts only. */
 html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]):not([data-testid="coach-primary-objective"]) :is(h1,h2,h3,h4,strong){color:#f7f8f5!important;-webkit-text-fill-color:currentColor!important}
-html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]):not([data-testid="coach-primary-objective"]) :is(p,small){color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important}
-/* Player Home can inherit a materially brighter custom team surface than the
-   navy baseline. Keep the source-owned command description subordinate while
-   preserving WCAG AA contrast without changing hero geometry or team branding.
-   Pair the existing primary-command and primary-decision contracts so this
-   later rule matches the shared dark-surface rule's maximum :is() specificity. */
-html body #root [data-command-role="primary"][data-layout-role="primary-decision"]:not([data-testid="coach-primary-objective"]) :is(p,small){color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
+/* Player command body copy is source-owned by PlayerDailyCommandCenter.module.css;
+   exclude it from this legacy muted foreground so custom team surfaces can meet
+   WCAG AA without fighting a global !important cascade. */
+html body #root :is([data-home-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]):not([data-testid="coach-primary-objective"]) :is(p,small){color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important}
 
 /* Form geometry remains global to actual form elements; surface colors are owned by
    the nearest data-surface contract in Phase3SurfaceContracts.css. */
