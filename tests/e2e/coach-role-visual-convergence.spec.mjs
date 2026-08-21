@@ -110,19 +110,25 @@ test("every Coach mobile destination uses the converged navy/cream product gramm
   await enterCoachDemo(page);
 
   await expect(page.getByTestId("coach-primary-objective")).toBeVisible({ timeout: 20_000 });
-  const home = await page.getByTestId("coach-primary-objective").evaluate((element) => ({
-    heroBackground: getComputedStyle(element).backgroundColor,
-    identityBackground: getComputedStyle(element.querySelector('.mcHeroIdentity')).backgroundImage,
-    decisionBackground: getComputedStyle(element.querySelector('h1')).backgroundImage,
-  }));
-  expect(home.heroBackground).toBe("rgb(244, 241, 233)");
-  expect(home.identityBackground).toContain("linear-gradient");
-  const identityStops = rgbStops(home.identityBackground);
-  expect(identityStops.length).toBeGreaterThanOrEqual(2);
-  expect(identityStops.every(([red, green, blue]) => Math.max(red, green, blue) < 64 && blue > green && green > red)).toBe(true);
-  for (const color of NAVY_RGB) {
-    expect(home.decisionBackground).toContain(color);
-  }
+  const home = await page.getByTestId("coach-primary-objective").evaluate((element) => {
+    const identity = element.querySelector('.mcHeroIdentity');
+    const title = element.querySelector('h1');
+    const crest = element.querySelector('.mcHeroTeamMark');
+    return {
+      heroBackground: getComputedStyle(element).backgroundColor,
+      identityBackground: identity ? getComputedStyle(identity).backgroundImage : "missing",
+      decisionBackground: title ? getComputedStyle(title).backgroundImage : "missing",
+      titleColor: title ? getComputedStyle(title).color : "missing",
+      crestWidth: crest?.getBoundingClientRect().width || 0,
+    };
+  });
+  const [homeSurface] = rgbStops(home.heroBackground);
+  expect(homeSurface).toBeDefined();
+  expect(Math.max(...homeSurface)).toBeLessThan(112);
+  expect(home.identityBackground).toBe("none");
+  expect(home.decisionBackground).toBe("none");
+  expect(home.titleColor).toBe("rgb(245, 248, 249)");
+  expect(home.crestWidth).toBeGreaterThanOrEqual(104);
   await expectNoHorizontalOverflow(page);
 
   for (const key of ["players", "events", "drills", "sc", "activity", "leaderboards"]) {
