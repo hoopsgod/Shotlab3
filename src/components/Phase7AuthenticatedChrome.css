@@ -1,6 +1,10 @@
 .performance-workspace--coach{background:var(--bg-0)!important}
 @media(max-width:767px){
 .is-mobile .shared-dashboard-back-action{width:44px!important;padding:0!important;justify-content:center!important;border-radius:14px!important;font-size:0!important}
+/* Coach secondary routes already expose Home through the mobile dock and page identity
+   through the shared editorial title stage. Retire the legacy standalone Dashboard
+   return row on mobile so it cannot paint outside its 44px shell or reserve header space. */
+.performance-shell--coach.is-mobile .shared-dashboard-back-action{display:none!important}
 .is-mobile .shared-dashboard-back-action>span[aria-hidden="true"]{color:#182019!important;font-size:21px!important}
 .is-mobile .shared-dashboard-back-action:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 32%,transparent)!important;outline-offset:2px!important}
 }

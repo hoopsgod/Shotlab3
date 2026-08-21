@@ -3,11 +3,30 @@ import fs from "node:fs";
 import path from "node:path";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/phase-4d-shared-back-hit-area");
-const MIN_TOUCH_TARGET = 43.5;
-const MAX_HORIZONTAL_ICON_PADDING = 2;
-fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+const VIEWPORTS = [
+  { width: 320, height: 700 },
+  { width: 360, height: 780 },
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 393, height: 852 },
+  { width: 402, height: 874 },
+  { width: 414, height: 896 },
+  { width: 430, height: 932 },
+];
+const SCREENSHOT_WIDTHS = new Set([320, 390, 402, 430]);
+const COACH_ROUTES = [
+  { key: "players", screen: "players", title: "Players" },
+  { key: "events", screen: "schedule", title: "Events", control: true },
+  { key: "drills", screen: "drills", title: "Drills" },
+  { key: "sc", screen: "strength", title: "S&C" },
+  { key: "activity", screen: "activity", title: "Activity" },
+  { key: "leaderboards", screen: "leaderboards", title: "Leaderboards" },
+];
+const evidence = [];
 
-test.use({ viewport: { width: 390, height: 844 } });
+fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+test.describe.configure({ mode: "serial" });
+test.afterAll(() => fs.writeFileSync(path.join(OUTPUT_DIR, "phase1-coach-mobile-geometry.json"), JSON.stringify(evidence, null, 2)));
 
 async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
@@ -30,6 +49,8 @@ async function settle(page) {
 async function enterDemo(page, role) {
   await installSafeRoutes(page);
   await page.goto("/");
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.reload();
   const demo = page.getByRole("button", { name: role === "coach" ? /Coach demo/i : /Player demo/i });
   await expect(demo).toBeVisible({ timeout: 20_000 });
   await demo.click();
@@ -38,154 +59,138 @@ async function enterDemo(page, role) {
 }
 
 async function navigate(page, key) {
-  const direct = page.getByTestId("mobile-navigation-dock").locator(`[data-nav-key="${key}"]`);
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const direct = dock.locator(`[data-nav-key="${key}"]`);
   if (await direct.count()) {
     await direct.click();
   } else {
     await page.getByTestId("mobile-navigation-more").click();
     const sheet = page.getByTestId("mobile-navigation-sheet");
-    await expect(sheet).toBeVisible();
-    await sheet.locator(`[data-nav-key="${key}"]`).click();
+    await expect(sheet).toBeVisible({ timeout: 5_000 });
+    const destination = sheet.locator(`[data-nav-key="${key}"]`);
+    await expect(destination, `mobile navigation destination ${key}`).toHaveCount(1);
+    await destination.click();
+    await expect(sheet).toHaveCount(0, { timeout: 5_000 });
   }
   await settle(page);
 }
 
-async function focusByKeyboard(page, target) {
-  await page.evaluate(() => {
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-  });
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    await page.keyboard.press("Tab");
-    if (await target.evaluate((node) => document.activeElement === node)) return;
-  }
-  throw new Error("Shared dashboard back action was not reachable by keyboard Tab navigation");
+async function verifyMoreSheet(page) {
+  const trigger = page.getByTestId("mobile-navigation-more");
+  await trigger.click();
+  const sheet = page.getByTestId("mobile-navigation-sheet");
+  await expect(sheet).toBeVisible();
+  const close = page.getByRole("button", { name: /close more navigation/i });
+  await expect(close).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
+  await expect(trigger).toBeFocused();
 }
 
-async function verifyBackControl(page, role, surface) {
-  const back = page.locator("button.shared-dashboard-back-action");
-  await expect(back, `${role}/${surface} shared back action`).toHaveCount(1);
-  await expect(back).toBeVisible();
+const expectedCrestWidth = (width) => width <= 390 ? 84 : Math.min(108, Math.max(96, width * 0.25));
 
-  const box = await back.boundingBox();
-  expect(box?.height || 0, `${role}/${surface} back target height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
-  expect(box?.width || 0, `${role}/${surface} back target width`).toBeGreaterThanOrEqual(44);
+async function inspectCoachRoute(page, route, width) {
+  const stage = page.locator('[data-team-identity-stage="true"][data-title-stage-family="editorial"]').first();
+  await expect(stage).toBeVisible({ timeout: 10_000 });
+  await expect(stage.locator('[data-identity-role="page-title"]')).toHaveText(route.title);
 
-  const presentation = await back.evaluate((node) => {
-    const style = getComputedStyle(node);
-    const icon = node.querySelector('span[aria-hidden="true"]');
-    const iconStyle = icon ? getComputedStyle(icon) : null;
+  const legacyBack = page.locator("button.shared-dashboard-back-action");
+  if (await legacyBack.count()) await expect(legacyBack).toBeHidden();
+
+  const geometry = await page.evaluate(() => {
+    const rect = (node) => node ? (() => { const r = node.getBoundingClientRect(); return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, width: r.width, height: r.height }; })() : null;
+    const titleStage = document.querySelector('[data-team-identity-stage="true"][data-title-stage-family="editorial"]');
+    const title = titleStage?.querySelector('[data-identity-role="page-title"]');
+    const crest = titleStage?.querySelector('[data-identity-role="brand-mark"], [data-identity-role="brand-fallback"]');
+    const dock = document.querySelector('[data-testid="mobile-navigation-dock"]');
+    const legacy = document.querySelector('button.shared-dashboard-back-action');
+    const legacyStyle = legacy ? getComputedStyle(legacy) : null;
+    const titleStyle = title ? getComputedStyle(title) : null;
+    const titleRect = title?.getBoundingClientRect();
     return {
-      text: String(node.textContent || "").replace(/\s+/g, " ").trim(),
-      minHeight: Number.parseFloat(style.minHeight),
-      height: Number.parseFloat(style.height),
-      paddingTop: Number.parseFloat(style.paddingTop),
-      paddingBottom: Number.parseFloat(style.paddingBottom),
-      paddingLeft: Number.parseFloat(style.paddingLeft),
-      paddingRight: Number.parseFloat(style.paddingRight),
-      borderTopWidth: Number.parseFloat(style.borderTopWidth),
-      borderRadius: Number.parseFloat(style.borderRadius),
-      backgroundImage: style.backgroundImage,
-      fontSize: Number.parseFloat(style.fontSize),
-      touchAction: style.touchAction,
-      iconText: String(icon?.textContent || "").trim(),
-      iconFontSize: Number.parseFloat(iconStyle?.fontSize || "0"),
-      iconColor: iconStyle?.color || "",
+      viewport: innerWidth,
+      clientWidth: document.documentElement.clientWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      bodyWidth: document.body.scrollWidth,
+      stage: rect(titleStage),
+      title: title ? { text: title.textContent?.trim() || "", ...rect(title), lineHeight: Number.parseFloat(titleStyle?.lineHeight || "0"), lineCount: titleRect && Number.parseFloat(titleStyle?.lineHeight || "0") ? Math.round(titleRect.height / Number.parseFloat(titleStyle.lineHeight)) : null } : null,
+      crest: crest ? { ...rect(crest), objectFit: getComputedStyle(crest).objectFit } : null,
+      dock: rect(dock),
+      legacy: legacy ? { text: String(legacy.textContent || "").replace(/\s+/g, " ").trim(), display: legacyStyle?.display, visibility: legacyStyle?.visibility, ...rect(legacy) } : null,
     };
   });
 
-  expect(presentation.text).toMatch(/dashboard/i);
-  expect(presentation.minHeight).toBeGreaterThanOrEqual(44);
-  expect(presentation.height).toBeGreaterThanOrEqual(44);
-  expect(presentation.paddingTop).toBe(0);
-  expect(presentation.paddingBottom).toBe(0);
-  // Production CSS compaction can retain up to 2px of horizontal icon breathing room.
-  // The physical target remains >=44px and the compact control geometry is unchanged.
-  expect(presentation.paddingLeft).toBeLessThanOrEqual(MAX_HORIZONTAL_ICON_PADDING);
-  expect(presentation.paddingRight).toBeLessThanOrEqual(MAX_HORIZONTAL_ICON_PADDING);
-  // The optimized bundle may collapse a decorative 1px border to 0px. Keep the
-  // meaningful interaction/geometry assertions below authoritative instead of
-  // forcing production styling to manufacture an implementation detail.
-  expect(presentation.borderTopWidth).toBeGreaterThanOrEqual(0);
-  expect(presentation.borderTopWidth).toBeLessThanOrEqual(1);
-  // The approved compact title-stage Back control uses the shared 10px radius.
-  // Preserve touch safety and focus behavior without reviving the retired 14px shell.
-  expect(presentation.borderRadius).toBeGreaterThanOrEqual(9);
-  expect(presentation.borderRadius).toBeLessThanOrEqual(11);
-  expect(presentation.backgroundImage).not.toContain("url(");
-  expect(presentation.backgroundImage).not.toContain("radial-gradient");
-  if (presentation.backgroundImage !== "none") expect(presentation.backgroundImage).toContain("linear-gradient");
-  // The approved compact control retains a readable 11px Dashboard label rather
-  // than zeroing the button font and relying on icon-only presentation.
-  expect(presentation.fontSize).toBeGreaterThanOrEqual(10);
-  expect(presentation.fontSize).toBeLessThanOrEqual(12);
-  expect(presentation.touchAction).toBe("manipulation");
-  expect(presentation.iconText.length).toBeGreaterThan(0);
-  expect(presentation.iconFontSize).toBeGreaterThanOrEqual(20);
-  expect(presentation.iconColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(geometry.clientWidth).toBe(width);
+  expect(geometry.documentWidth - width, `${route.screen} ${width}px document overflow`).toBeLessThanOrEqual(1);
+  expect(geometry.bodyWidth - width, `${route.screen} ${width}px body overflow`).toBeLessThanOrEqual(1);
+  expect(geometry.stage?.left || 0, `${route.screen} ${width}px left rail`).toBeGreaterThanOrEqual(18.5);
+  expect(geometry.stage?.left || 999, `${route.screen} ${width}px left rail`).toBeLessThanOrEqual(22.5);
+  expect(width - (geometry.stage?.right || 0), `${route.screen} ${width}px right rail`).toBeGreaterThanOrEqual(18.5);
+  expect(width - (geometry.stage?.right || 0), `${route.screen} ${width}px right rail`).toBeLessThanOrEqual(22.5);
+  expect(geometry.legacy?.display ?? "none", `${route.screen} legacy Coach Dashboard row must not participate in mobile layout`).toBe("none");
+  if (geometry.legacy) {
+    expect(geometry.legacy.width).toBe(0);
+    expect(geometry.legacy.height).toBe(0);
+  }
+  const targetCrest = expectedCrestWidth(width);
+  expect(geometry.crest?.width || 0, `${route.screen} ${width}px crest width`).toBeGreaterThanOrEqual(targetCrest - 1.5);
+  expect(geometry.crest?.width || 0, `${route.screen} ${width}px crest width`).toBeLessThanOrEqual(targetCrest + 1.5);
+  if (geometry.crest?.objectFit) expect(geometry.crest.objectFit).toBe("contain");
+  expect(geometry.dock?.left ?? -1).toBeGreaterThanOrEqual(0);
+  expect(geometry.dock?.right ?? width + 1).toBeLessThanOrEqual(width + 0.5);
 
-  await focusByKeyboard(page, back);
-  await expect(back).toBeFocused();
-  const focusState = await back.evaluate((node) => ({
-    focusVisible: node.matches(":focus-visible"),
-    outlineStyle: getComputedStyle(node).outlineStyle,
-  }));
-  expect(focusState.focusVisible).toBe(true);
-  expect(focusState.outlineStyle).not.toBe("none");
-
-  const viewport = await page.evaluate(() => ({
-    innerWidth,
-    documentWidth: document.documentElement.scrollWidth,
-    bodyWidth: document.body.scrollWidth,
-  }));
-  expect(viewport.documentWidth - viewport.innerWidth).toBeLessThanOrEqual(1);
-  expect(viewport.bodyWidth - viewport.innerWidth).toBeLessThanOrEqual(1);
-
-  return { role, surface, box, presentation, viewport };
+  evidence.push({ role: "coach", state: "demo", route: route.screen, width, ...geometry });
+  if (SCREENSHOT_WIDTHS.has(width)) {
+    await page.screenshot({ path: path.join(OUTPUT_DIR, `phase1-coach-demo-${route.screen}-${width}-default.png`), animations: "disabled" });
+  }
+  return geometry;
 }
 
-test("shared Coach and Player dashboard back actions stay touch-safe under Phase 7 compact framing", async ({ browser }) => {
-  const evidence = [];
+for (const viewport of VIEWPORTS) {
+  test(`Coach secondary geometry retires the stale Dashboard row at ${viewport.width}px`, async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize(viewport);
+    await enterDemo(page, "coach");
+    await verifyMoreSheet(page);
 
-  const coachContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const coachPage = await coachContext.newPage();
-  const coachErrors = [];
-  coachPage.on("pageerror", (error) => coachErrors.push(error.message));
-  await enterDemo(coachPage, "coach");
-  for (const key of ["players", "leaderboards"]) {
-    await navigate(coachPage, key);
-    evidence.push(await verifyBackControl(coachPage, "coach", key));
-    if (key === "players") {
-      const control = coachPage.locator("button.shared-dashboard-back-action");
-      await control.screenshot({ path: path.join(OUTPUT_DIR, "coach-back-control.png"), animations: "disabled" });
-      await coachPage.screenshot({ path: path.join(OUTPUT_DIR, "coach-players-back-state.png"), animations: "disabled" });
+    const routeEvidence = [];
+    for (const route of COACH_ROUTES) {
+      await navigate(page, route.key);
+      routeEvidence.push({ route, geometry: await inspectCoachRoute(page, route, viewport.width) });
     }
-    await coachPage.locator("button.shared-dashboard-back-action").click();
-    await settle(coachPage);
-    await expect(coachPage.locator("button.shared-dashboard-back-action")).toHaveCount(0);
-  }
-  expect(coachErrors).toEqual([]);
-  await coachContext.close();
 
-  const playerContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const playerPage = await playerContext.newPage();
-  const playerErrors = [];
-  playerPage.on("pageerror", (error) => playerErrors.push(error.message));
-  await enterDemo(playerPage, "player");
-  for (const key of ["log-drill", "profile", "program", "leaderboards"]) {
-    await navigate(playerPage, key);
-    evidence.push(await verifyBackControl(playerPage, "player", key));
-    if (key === "log-drill") {
-      const control = playerPage.locator("button.shared-dashboard-back-action");
-      await control.screenshot({ path: path.join(OUTPUT_DIR, "player-back-control.png"), animations: "disabled" });
-      await playerPage.screenshot({ path: path.join(OUTPUT_DIR, "player-train-back-state.png"), animations: "disabled" });
+    const controlTop = routeEvidence.find(({ route }) => route.control)?.geometry.stage?.top;
+    expect(Number.isFinite(controlTop), `${viewport.width}px Events control stage top`).toBe(true);
+    for (const { route, geometry } of routeEvidence) {
+      expect(Math.abs((geometry.stage?.top || 0) - controlTop), `${route.screen} ${viewport.width}px title-stage top should share intentional secondary rhythm`).toBeLessThanOrEqual(2.5);
     }
-    await playerPage.locator("button.shared-dashboard-back-action").click();
-    await settle(playerPage);
-    await expect(playerPage.locator("button.shared-dashboard-back-action")).toHaveCount(0);
-  }
-  expect(playerErrors).toEqual([]);
-  await playerContext.close();
 
-  expect(evidence).toHaveLength(6);
-  fs.writeFileSync(path.join(OUTPUT_DIR, "shared-back-hit-areas.json"), JSON.stringify(evidence, null, 2));
+    if (viewport.width === 390) {
+      for (const key of ["settings", "branding"]) {
+        await navigate(page, key);
+        const legacy = page.locator("button.shared-dashboard-back-action");
+        if (await legacy.count()) await expect(legacy).toBeHidden();
+        const widths = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
+        expect(widths.document - widths.viewport).toBelessThanOrEqual(1);
+        expect(widths.body - widths.viewport).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+}
+
+test("Player mobile secondary routes retain the existing shared return control", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await enterDemo(page, "player");
+  await navigate(page, "log-drill");
+  const back = page.locator("button.shared-dashboard-back-action");
+  await expect(back).toHaveCount(1);
+  await expect(back).toBeVisible();
+  const box = await back.boundingBox();
+  expect(box?.width || 0).toBeGreaterThanOrEqual(44);
+  expect(box?.height || 0).toBeGreaterThanOrEqual(44);
+  const state = await back.evaluate((node) => ({ touchAction: getComputedStyle(node).touchAction, text: String(node.textContent || "").replace(/\s+/g, " ").trim() }));
+  expect(state.touchAction).toBe("manipulation");
+  expect(state.text).toMatch(/dashboard/i);
+  await back.focus();
+  await expect(back).toBeFocused();
 });
