@@ -9,7 +9,7 @@ html body #root :is([data-home-role="primary"],[data-command-role="primary"],.se
 /* Player Home can inherit a materially brighter custom team surface than the
    navy baseline. Keep the source-owned command description subordinate while
    preserving WCAG AA contrast without changing hero geometry or team branding. */
-html body #root .player-scroll-container [data-command-role="primary"] p{color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
+html body #root [data-command-role="primary"] p{color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
 
 /* Form geometry remains global to actual form elements; surface colors are owned by
    the nearest data-surface contract in Phase3SurfaceContracts.css. */
