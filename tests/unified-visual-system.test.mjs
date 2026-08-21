@@ -31,15 +31,15 @@ test("forms, accountability, and secondary pages share one contract", () => {
   assert.match(css, /outline:3px solid rgba\(120,149,31,.18\)/);
 });
 
-test("mobile Mission Control and onboarding remain compact and accessible", () => {
+test("mobile Mission Control activation remains compact, accessible, and component-owned", () => {
   assert.match(css, /data-testid="coach-primary-objective"/);
   assert.match(css, /max-height:318px!important/);
-  assert.match(css, /data-testid="coach-onboarding-state"/);
-  assert.match(css, /min-height:48px!important/);
+  assert.doesNotMatch(css, /data-testid="coach-onboarding-state"/);
   assert.match(activationCss, /@media\(max-width:700px\)/);
   assert.match(activationCss, /min-height:48px/);
+  assert.match(activationCss, /\.mcActivationPlan \.mcTodayPlanCopy strong\s*\{[\s\S]*color:#fff/);
 });
 
-test("reduced motion remains a global visual-system requirement", () => {
-  assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+test("reduced motion remains an activation visual-system requirement", () => {
+  assert.match(activationCss, /@media\(prefers-reduced-motion:reduce\)/);
 });
