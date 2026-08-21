@@ -8,8 +8,9 @@ html body #root :is([data-home-role="primary"],[data-command-role="primary"],.se
 html body #root :is([data-home-role="primary"],[data-command-role="primary"],.secondaryPageDecision,.coachPlayerProfileHero,[data-visual-role="insight-card"][data-surface="dark"]):not([data-testid="coach-primary-objective"]) :is(p,small){color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important}
 /* Player Home can inherit a materially brighter custom team surface than the
    navy baseline. Keep the source-owned command description subordinate while
-   preserving WCAG AA contrast without changing hero geometry or team branding. */
-html body #root [data-command-role="primary"] p{color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
+   preserving WCAG AA contrast without changing hero geometry or team branding.
+   Match the shared dark-surface rule's specificity so this later contract wins. */
+html body #root [data-command-role="primary"]:not([data-testid="coach-primary-objective"]) :is(p,small){color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
 
 /* Form geometry remains global to actual form elements; surface colors are owned by
    the nearest data-surface contract in Phase3SurfaceContracts.css. */
@@ -22,7 +23,7 @@ html body #root [data-action-role]{min-height:44px}
 html body #root [data-testid="coach-assignment-accountability"]{width:100%!important;padding:20px!important;overflow:hidden!important;box-sizing:border-box!important;border:1px solid var(--sl-border)!important;border-radius:var(--sl-radius-card)!important;background:#fff!important;box-shadow:var(--sl-shadow-card)!important}
 html body #root [data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityHead,html body #root [data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityHead>span{min-width:0!important}
 html body #root [data-testid="coach-assignment-accountability"] :is(h2,.mcAssignmentAccountabilityMeta,.mcAssignmentAccountabilityEmpty,.mcAssignmentAccountabilityStatus){max-width:100%!important;overflow-wrap:anywhere!important}
-html body #root [data-testid="coach-onboarding-state"]{display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;gap:14px!important;padding:17px 18px!important;border:1px solid var(--sl-border)!important;border-radius:20px!important;background:linear-gradient(145deg,#fffefa,#f5f7ef)!important;box-shadow:var(--sl-shadow-card)!important}
+html body #root [data-testid="coach-onboarding-state"]{display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;gap:14px!important;padding:17px 18px!important;border:1px solid var(--sl-border)!important;border-radius:var(--sl-radius-card)!important;background:linear-gradient(145deg,#fffefa,#f5f7ef)!important;box-shadow:var(--sl-shadow-card)!important}
 html body #root [data-testid="coach-onboarding-state"]::before{inset:0 auto 0 0!important;width:4px!important;border-radius:20px 0 0 20px!important;background:var(--sl-accent)!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanIcon{width:46px!important;height:46px!important;background:#eef2e3!important;color:#667d2d!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy small{margin:0 0 4px!important;color:#667d2d!important;font-size:10px!important;font-weight:750!important}
