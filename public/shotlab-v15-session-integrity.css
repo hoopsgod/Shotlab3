@@ -9,8 +9,9 @@ html body #root :is([data-home-role="primary"],[data-command-role="primary"],.se
 /* Player Home can inherit a materially brighter custom team surface than the
    navy baseline. Keep the source-owned command description subordinate while
    preserving WCAG AA contrast without changing hero geometry or team branding.
-   Match the shared dark-surface rule's specificity so this later contract wins. */
-html body #root [data-command-role="primary"]:not([data-testid="coach-primary-objective"]) :is(p,small){color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
+   Pair the existing primary-command and primary-decision contracts so this
+   later rule matches the shared dark-surface rule's maximum :is() specificity. */
+html body #root [data-command-role="primary"][data-layout-role="primary-decision"]:not([data-testid="coach-primary-objective"]) :is(p,small){color:#e5ebe7!important;-webkit-text-fill-color:currentColor!important}
 
 /* Form geometry remains global to actual form elements; surface colors are owned by
    the nearest data-surface contract in Phase3SurfaceContracts.css. */
