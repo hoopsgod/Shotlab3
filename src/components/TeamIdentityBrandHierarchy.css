@@ -9,6 +9,15 @@
   gap: clamp(16px, 4vw, 24px);
 }
 
+/* The editorial title component owns lexical wrapping. Generic secondary-page
+   safety rules may protect arbitrary headings, but they must not introduce
+   emergency breaks inside authenticated page-title words. */
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__title {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
 /* Missing artwork remains a brand state, not setup scaffolding. Coach stages
    keep the crest footprint with team-derived initials; the entire mark remains
    the subtle Program Branding affordance. */
@@ -118,6 +127,13 @@
   .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
     gap: 8px;
     padding: 10px 2px 12px;
+  }
+
+  /* Long lexical titles keep the same editorial family and crest allocation,
+     but gain only the extreme-small fluid type needed to fit the protected
+     text column. The scale reaches the established 38px by normal mobile widths. */
+  .teamIdentityTitleStage--standard.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
+    font-size: clamp(32px, 10vw, 38px);
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackAction {
