@@ -146,16 +146,14 @@
     font-size: clamp(32px, calc(20vw - 32px), 38px);
   }
 
-  /* Player Home keeps the full identity crest at 320px. Give the hero name the
-     unused horizontal stage width instead of shrinking type or breaking a real
-     first name internally; extra stage height keeps the crest clear of the
-     resulting lexical two-line title. This is identity-family only and cannot
-     alter the certified secondary/editorial title geometry. */
-  .playerDashboardIdentityStage.teamIdentityTitleStage--hero .teamIdentityTitleStage__inner {
+  /* Player Home keeps the full identity crest at 320px. Only names containing
+     a genuinely wide word receive the unused horizontal stage width, avoiding
+     both emergency intra-word breaks and short-title/crest collisions. */
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__inner {
     min-height: 260px;
   }
 
-  .playerDashboardIdentityStage.teamIdentityTitleStage--hero .teamIdentityTitleStage__title {
+  .playerDashboardIdentityStage.teamIdentityTitleStage--hero.teamIdentityTitleStage--wideWord .teamIdentityTitleStage__title {
     width: calc(100% + var(--identity-crest) + 16px);
     max-width: calc(100% + var(--identity-crest) + 16px);
     overflow-wrap: normal;
