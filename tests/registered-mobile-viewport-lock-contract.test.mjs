@@ -8,9 +8,10 @@ const missionControlLock = readFileSync(new URL('../src/styles/MissionControlCas
 const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-viewport-lock.spec.mjs', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 
-test('mobile centering authority clips the authenticated outer shell instead of allowing document panning', () => {
-  assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[\s\S]*overflow-x:\s*clip/);
-  assert.match(centering, /\.app-shell\.is-mobile[\s\S]*\.shell-main[\s\S]*\.content-wrap[\s\S]*\.performance-workspace[\s\S]*overflow-x:\s*clip/);
+test('mobile viewport authority prevents root horizontal scrolling and iOS-style overscroll chaining', () => {
+  assert.match(centering, /html,\s*\n\s*body\s*\{[^}]*overflow-x:\s*hidden;[^}]*overscroll-behavior-x:\s*none;/);
+  assert.match(centering, /#root\s*\{[^}]*overflow-x:\s*clip;[^}]*overscroll-behavior-x:\s*none;/);
+  assert.match(centering, /\.app-shell\.is-mobile[\s\S]*\.shell-main[\s\S]*\.content-wrap[\s\S]*\.performance-workspace[\s\S]*overflow-x:\s*clip;[\s\S]*overscroll-behavior-x:\s*none;/);
   assert.match(centering, /min-width:\s*0/);
   assert.match(centering, /max-width:\s*100%/);
 });
@@ -36,6 +37,15 @@ test('registered Coach Home browser contract requires a symmetric mobile axis, n
   assert.match(registeredViewportSpec, /leftGutter - rightGutter/);
   assert.match(registeredViewportSpec, /must remain on the intended mobile axis/);
   assert.doesNotMatch(registeredViewportSpec, /COACH_HOME_FULL_BLEED_SELECTORS/);
+});
+
+test('registered mobile browser contract emulates touch hardware and verifies root overscroll authority', () => {
+  assert.match(registeredViewportSpec, /isMobile:\s*true/);
+  assert.match(registeredViewportSpec, /hasTouch:\s*true/);
+  assert.match(registeredViewportSpec, /overscrollBehaviorX/);
+  assert.match(registeredViewportSpec, /horizontal overscroll authority/);
+  assert.match(registeredViewportSpec, /page\.mouse\.wheel\(480, 0\)/);
+  assert.match(registeredViewportSpec, /visualViewportOffsetLeft/);
 });
 
 test('Experience Parity executes the registered secondary-route viewport regression', () => {
