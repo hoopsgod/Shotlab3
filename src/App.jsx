@@ -1784,7 +1784,10 @@ const activeHomeShotsLeaderboard=useMemo(()=>({
 rows:filterActiveTeamLeaderboardRows(homeShotsLeaderboard?.rows||[],appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet,appActiveTeamPlayerIdentity.nameSet),
 }),[homeShotsLeaderboard,appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet,appActiveTeamPlayerIdentity.nameSet]);
 const myTeam=teams.find(t=>t.id===user?.teamId)||null;
-const resolvedTeamBranding=resolveTeamBranding(myTeam?.branding||DEFAULT_BRANDING);
+const resolvedTeamBranding=resolveTeamBranding({
+  ...(myTeam?.branding||DEFAULT_BRANDING),
+  ...(myTeam?.name?{teamName:myTeam.name}:{}),
+});
 const coachTextSize=COACH_TEXT_SIZES.includes(resolvedTeamBranding?.textScale)?resolvedTeamBranding.textScale:"standard";
 
 useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
