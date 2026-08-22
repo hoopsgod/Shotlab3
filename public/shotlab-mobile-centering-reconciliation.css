@@ -3,12 +3,25 @@
  * containers that own that copy so every route shares one centered mobile axis. */
 
 @media (max-width: 760px) {
+  /* iOS Safari applies elastic viewport panning at the root scrolling element.
+   * `overflow-x: clip` is appropriate for inner app shells, but it does not by
+   * itself suppress the browser viewport's horizontal rubber-band. Keep the
+   * viewport itself non-scrollable on the x-axis and stop overscroll chaining at
+   * the actual root authority. Intentional inner horizontal scrollers remain
+   * available because overscroll containment does not disable their own scroll. */
   html,
-  body,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
   #root {
     width: 100%;
     max-width: 100%;
     overflow-x: clip;
+    overscroll-behavior-x: none;
   }
 
   /* Registered workspaces can render materially different sparse/data-backed
@@ -24,6 +37,7 @@
     min-width: 0;
     max-width: 100%;
     overflow-x: clip;
+    overscroll-behavior-x: none;
   }
 
   /* Schedule is an informational operational surface. Preserve the semantic-info
