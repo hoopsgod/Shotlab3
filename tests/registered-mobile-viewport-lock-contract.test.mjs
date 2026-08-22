@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
+const finalPolish = readFileSync(new URL('../public/shotlab-phase4e-final-polish.css', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 
 test('mobile centering authority clips the authenticated outer shell instead of allowing document panning', () => {
@@ -10,6 +11,10 @@ test('mobile centering authority clips the authenticated outer shell instead of 
   assert.match(centering, /\.app-shell\.is-mobile[\s\S]*\.shell-main[\s\S]*\.content-wrap[\s\S]*\.performance-workspace[\s\S]*overflow-x:\s*clip/);
   assert.match(centering, /min-width:\s*0/);
   assert.match(centering, /max-width:\s*100%/);
+});
+
+test('registered player and coach content rails include padding inside the mobile viewport width', () => {
+  assert.match(finalPolish, /\.performance-shell \.player-scroll-container,\s*\n\s*\.performance-shell \.coach-scroll-container\s*\{[^}]*box-sizing:\s*border-box!important;[^}]*width:\s*100%!important;[^}]*max-width:\s*100%!important;[^}]*min-width:\s*0!important;[^}]*margin-inline:\s*auto!important;/);
 });
 
 test('Experience Parity executes the registered secondary-route viewport regression', () => {
