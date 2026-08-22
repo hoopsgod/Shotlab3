@@ -9,8 +9,42 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
    identity, decision, metrics and CTA are component-owned. */
 @media(max-width:980px){
   html body.mission-control-active #root .ts-launcher{display:none!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3{width:100vw!important;max-width:100vw!important;margin-inline:calc(50% - 50vw)!important;overflow-x:clip;box-shadow:0 -36px 0 #082731!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl{width:100%;max-width:none}
+
+  /* The authenticated Coach shell is already full-width on mobile. Do not break
+     Mission Control back out with 100vw/negative viewport margins: iOS Safari can
+     resolve that legacy pattern against a wider layout viewport and leave the
+     paid dashboard visibly shifted. Keep the dashboard on the visual viewport
+     axis and include its internal gutter inside the declared width. */
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    overflow-x:clip!important;
+    box-sizing:border-box!important;
+    box-shadow:0 -36px 0 #082731!important;
+  }
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding-left:max(12px,env(safe-area-inset-left))!important;
+    padding-right:max(12px,env(safe-area-inset-right))!important;
+    overflow-x:clip!important;
+    box-sizing:border-box!important;
+  }
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeader,
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero{
+    box-sizing:border-box!important;
+  }
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroContent{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcCourtArtwork{opacity:.99!important}
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroScrim{opacity:.18!important}
 }
