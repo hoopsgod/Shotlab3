@@ -104,9 +104,11 @@ const OVERFLOW_LOCK_SELECTORS = new Set([
   '[data-testid="coach-command-center-full"] .missionControl',
 ]);
 
-const COACH_HOME_FULL_BLEED_SELECTORS = [
-  '.performance-workspace--coach',
-  '.coach-scroll-container',
+/* Coach Home intentionally uses a centered editorial gutter on mobile. The
+   regression reported on iOS was asymmetric: a normal left gutter survived
+   while the stage ran into the right edge. Test the actual visual invariant,
+   not a full-bleed assumption. */
+const COACH_HOME_CENTER_AXIS_SELECTORS = [
   '[data-testid="coach-command-center-full"]',
   '[data-testid="coach-command-center-full"] .missionControl',
   '[data-testid="mission-control-team-header"]',
@@ -149,35 +151,26 @@ async function expectRegisteredViewportLocked(page) {
   }
 }
 
-async function expectCoachHomeFullBleed(page) {
+async function expectCoachHomeCentered(page) {
   const geometry = await page.evaluate((selectors) => {
     const before = Object.fromEntries(selectors.map((selector) => {
       const node = document.querySelector(selector);
       if (!node) return [selector, null];
       const rect = node.getBoundingClientRect();
-      const styles = getComputedStyle(node);
-      return [selector, {
-        left: rect.left,
-        right: rect.right,
-        width: rect.width,
-        paddingLeft: Number.parseFloat(styles.paddingLeft) || 0,
-        paddingRight: Number.parseFloat(styles.paddingRight) || 0,
-      }];
+      return [selector, { left: rect.left, right: rect.right, width: rect.width }];
     }));
     return { viewport: window.innerWidth, before };
-  }, COACH_HOME_FULL_BLEED_SELECTORS);
+  }, COACH_HOME_CENTER_AXIS_SELECTORS);
 
-  for (const selector of COACH_HOME_FULL_BLEED_SELECTORS) {
+  for (const selector of COACH_HOME_CENTER_AXIS_SELECTORS) {
     const entry = geometry.before[selector];
     expect(entry, `${selector} exists on registered Coach Home`).not.toBeNull();
-    expect(Math.abs(entry.left), `${selector} must start on the viewport axis`).toBeLessThanOrEqual(1);
-    expect(Math.abs(entry.right - geometry.viewport), `${selector} must end on the viewport axis`).toBeLessThanOrEqual(1);
-  }
-
-  for (const selector of ['.performance-workspace--coach', '.coach-scroll-container']) {
-    const entry = geometry.before[selector];
-    expect(entry.paddingLeft, `${selector} must not inherit the secondary-page left gutter on Home`).toBeLessThanOrEqual(1);
-    expect(entry.paddingRight, `${selector} must not inherit the secondary-page right gutter on Home`).toBeLessThanOrEqual(1);
+    const leftGutter = entry.left;
+    const rightGutter = geometry.viewport - entry.right;
+    expect(leftGutter, `${selector} left mobile gutter`).toBeGreaterThanOrEqual(-1);
+    expect(rightGutter, `${selector} right mobile gutter`).toBeGreaterThanOrEqual(-1);
+    expect(Math.abs(leftGutter - rightGutter), `${selector} must have symmetric mobile gutters`).toBeLessThanOrEqual(2);
+    expect(Math.max(leftGutter, rightGutter), `${selector} must remain on the intended mobile axis`).toBeLessThanOrEqual(24);
   }
 }
 
@@ -198,7 +191,7 @@ for (const viewport of [
       const registered = await createRegistered(browser, role, viewport);
       try {
         await expectRegisteredViewportLocked(registered.page);
-        if (role === 'coach') await expectCoachHomeFullBleed(registered.page);
+        if (role === 'coach') await expectCoachHomeCentered(registered.page);
         for (const route of routes) {
           await navigateByKey(registered.page, route);
           await expectRegisteredViewportLocked(registered.page);
