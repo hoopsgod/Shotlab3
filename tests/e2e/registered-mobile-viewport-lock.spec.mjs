@@ -44,7 +44,12 @@ async function installRoutes(target, registeredUser) {
 }
 
 async function createRegistered(browser, role, viewport) {
-  const context = await browser.newContext({ viewport });
+  const context = await browser.newContext({
+    viewport,
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 3,
+  });
   const seed = registeredSeed(role);
   await context.addInitScript(({ storage }) => {
     window.localStorage.clear();
@@ -104,6 +109,16 @@ const OVERFLOW_LOCK_SELECTORS = new Set([
   '[data-testid="coach-command-center-full"] .missionControl',
 ]);
 
+const OVERSCROLL_LOCK_SELECTORS = [
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.performance-workspace',
+];
+
 /* Coach Home intentionally uses a centered editorial gutter on mobile. The
    regression reported on iOS was asymmetric: a normal left gutter survived
    while the stage ran into the right edge. Test the actual visual invariant,
@@ -120,6 +135,7 @@ async function expectRegisteredViewportLocked(page) {
     const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
     const before = Object.fromEntries(nodes.map(([selector, node]) => {
       const rect = node.getBoundingClientRect();
+      const styles = getComputedStyle(node);
       return [selector, {
         left: rect.left,
         right: rect.right,
@@ -127,19 +143,29 @@ async function expectRegisteredViewportLocked(page) {
         clientWidth: node.clientWidth,
         scrollWidth: node.scrollWidth,
         scrollLeft: node.scrollLeft,
-        overflowX: getComputedStyle(node).overflowX,
+        overflowX: styles.overflowX,
+        overscrollBehaviorX: styles.overscrollBehaviorX,
       }];
     }));
 
     const y = window.scrollY;
     window.scrollTo(999, y);
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    const result = { viewport: window.innerWidth, windowScrollX: window.scrollX, before };
+    const result = {
+      viewport: window.innerWidth,
+      windowScrollX: window.scrollX,
+      scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      before,
+    };
     window.scrollTo(0, y);
     return result;
   }, VIEWPORT_CONTAINMENT_SELECTORS);
 
   expect(Math.abs(geometry.windowScrollX)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
+
   for (const selector of VIEWPORT_CONTAINMENT_SELECTORS) {
     const entry = geometry.before[selector];
     if (!entry) continue;
@@ -148,6 +174,29 @@ async function expectRegisteredViewportLocked(page) {
     if (OVERFLOW_LOCK_SELECTORS.has(selector)) {
       expect(['clip', 'hidden'], `${selector} horizontal overflow`).toContain(entry.overflowX);
     }
+  }
+
+  for (const selector of OVERSCROLL_LOCK_SELECTORS) {
+    const entry = geometry.before[selector];
+    if (!entry) continue;
+    expect(entry.overscrollBehaviorX, `${selector} horizontal overscroll authority`).toBe('none');
+  }
+
+  /* A trusted horizontal wheel gesture is not the same as iOS rubber-band, but
+     it catches a live scrollable document that static width checks can miss. */
+  const viewport = page.viewportSize();
+  if (viewport) {
+    await page.mouse.move(Math.floor(viewport.width / 2), Math.min(120, Math.floor(viewport.height / 4)));
+    await page.mouse.wheel(480, 0);
+    await page.waitForTimeout(60);
+    const afterGesture = await page.evaluate(() => ({
+      windowScrollX: window.scrollX,
+      scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+    }));
+    expect(Math.abs(afterGesture.windowScrollX)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
   }
 }
 
