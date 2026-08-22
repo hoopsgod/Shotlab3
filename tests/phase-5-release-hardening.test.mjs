@@ -78,7 +78,8 @@ test("team branding form meets practical touch and duplicate-submit contracts", 
   assert.match(source, /if \(saving \|\| cleaning \|\| submitInFlightRef\.current\) return/);
   assert.match(source, /submitInFlightRef\.current = true/);
   assert.match(source, /submitInFlightRef\.current = false/);
-  assert.match(source, /aria-busy=\{saving \|\| cleaning \|\| submitting\}/);
+  assert.match(source, /const isBusy = saving \|\| cleaning \|\| submitting;/);
+  assert.match(source, /aria-busy=\{isBusy\}/);
   assert.match(source, /role="alert"/);
 });
 
