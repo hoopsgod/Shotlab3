@@ -29,37 +29,41 @@ const TEXT_SCALE_OPTIONS = [
   { key: "xl", label: "Extra Large", hint: "Strong readability while keeping hierarchy" },
 ];
 
-const inputStyle = {
-  width: "100%",
-  minHeight: 44,
-  padding: "10px 12px",
-  border: "1px solid rgba(255,255,255,0.14)",
-  borderRadius: 10,
-  background: "#111620",
-  color: "#E5E7EB",
-};
-
 function Field({ field, value, onChange }) {
   return (
-    <label style={{ display: "grid", gap: 6, color: "#E5E7EB", fontSize: 12.5 }}>
-      <span style={{ color: "rgba(229,231,235,0.88)", fontWeight: 600 }}>{field.label}</span>
-      <input type={field.type} value={value || ""} placeholder={field.placeholder || ""} onChange={(event) => onChange(field.name, event.target.value)} style={inputStyle} />
+    <label className="team-branding-form__field">
+      <span>{field.label}</span>
+      <input
+        type={field.type}
+        value={value || ""}
+        placeholder={field.placeholder || ""}
+        onChange={(event) => onChange(field.name, event.target.value)}
+      />
     </label>
   );
 }
 
 function LogoPreview({ src, label }) {
   return (
-    <div style={{ display: "grid", gap: 7 }}>
-      <div style={{ color: "#9CA3AF", fontSize: 11, fontWeight: 600 }}>{label}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#050708", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={`${label} on dark background`} style={{ width: "100%", height: 60, objectFit: "contain", filter: "drop-shadow(0 7px 12px rgba(0,0,0,.35))" }} />
+    <div className="team-branding-form__logo-preview">
+      <div className="team-branding-form__logo-preview-label">{label}</div>
+      <div className="team-branding-form__logo-preview-grid">
+        <div className="team-branding-form__logo-canvas team-branding-form__logo-canvas--dark">
+          <img src={src} alt={`${label} on dark background`} />
         </div>
-        <div style={{ minHeight: 82, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "linear-gradient(45deg,#e5e7eb 25%,#fff 25%,#fff 50%,#e5e7eb 50%,#e5e7eb 75%,#fff 75%) 0 0/18px 18px", display: "grid", placeItems: "center", padding: 10, overflow: "hidden" }}>
-          <img src={src} alt={`${label} transparency preview`} style={{ width: "100%", height: 60, objectFit: "contain" }} />
+        <div className="team-branding-form__logo-canvas team-branding-form__logo-canvas--transparent">
+          <img src={src} alt={`${label} transparency preview`} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function SectionHeading({ title, description }) {
+  return (
+    <div className="team-branding-form__section-heading">
+      <h3>{title}</h3>
+      <p>{description}</p>
     </div>
   );
 }
@@ -79,14 +83,23 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
   useEffect(() => { setValues(initial); }, [initial]);
   useEffect(() => { onChange?.(values); }, [onChange, values]);
 
-  const selectedPaletteKey = useMemo(() => APPROVED_BRAND_PALETTES.find((palette) => palette.primaryColor === values.primaryColor)?.key || null, [values.primaryColor]);
+  const selectedPaletteKey = useMemo(
+    () => APPROVED_BRAND_PALETTES.find((palette) => palette.primaryColor === values.primaryColor)?.key || null,
+    [values.primaryColor],
+  );
 
   const handleChange = (name, value) => {
     setValues((previous) => ({ ...previous, [name]: value || DEFAULT_BRANDING[name] || "" }));
   };
 
   const handlePaletteSelect = (palette) => {
-    setValues((previous) => ({ ...previous, primaryColor: palette.primaryColor, secondaryColor: palette.secondaryColor, accentColor: palette.accentColor, textOnPrimary: palette.textOnPrimary }));
+    setValues((previous) => ({
+      ...previous,
+      primaryColor: palette.primaryColor,
+      secondaryColor: palette.secondaryColor,
+      accentColor: palette.accentColor,
+      textOnPrimary: palette.textOnPrimary,
+    }));
   };
 
   const fileToDataUrl = (file) => new Promise((resolve, reject) => {
@@ -143,7 +156,13 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
     setUploadError("");
     const safePalette = APPROVED_BRAND_PALETTES.find((palette) => palette.primaryColor === values.primaryColor) || APPROVED_BRAND_PALETTES[0];
     try {
-      await Promise.resolve(onSave?.({ ...values, primaryColor: safePalette.primaryColor, secondaryColor: safePalette.secondaryColor, accentColor: safePalette.accentColor, textOnPrimary: safePalette.textOnPrimary }));
+      await Promise.resolve(onSave?.({
+        ...values,
+        primaryColor: safePalette.primaryColor,
+        secondaryColor: safePalette.secondaryColor,
+        accentColor: safePalette.accentColor,
+        textOnPrimary: safePalette.textOnPrimary,
+      }));
     } catch {
       setUploadError("Team branding could not be saved. Your changes are still here; try again.");
     } finally {
@@ -152,58 +171,115 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
     }
   };
 
-  const sectionTitle = (title, description) => (
-    <div style={{ display: "grid", gap: 3 }}>
-      <div style={{ color: "#F3F4F6", fontSize: 13, fontWeight: 720, letterSpacing: -0.1 }}>{title}</div>
-      <div style={{ color: "#929AA5", fontSize: 12, lineHeight: 1.45 }}>{description}</div>
-    </div>
-  );
+  const isBusy = saving || cleaning || submitting;
 
   return (
-    <form noValidate onSubmit={submit} aria-busy={saving || cleaning || submitting} style={{ display: "grid", gap: 18 }}>
-      <section style={{ display: "grid", gap: 11 }}>
-        {sectionTitle("Brand colors", "These colors flow through coach and player surfaces.")}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+    <form noValidate onSubmit={submit} aria-busy={isBusy} className="team-branding-form">
+      <section className="team-branding-form__section">
+        <SectionHeading title="Brand colors" description="These colors flow through coach and player surfaces." />
+        <div className="team-branding-form__palette-grid" aria-label="Approved team color palettes">
           {APPROVED_BRAND_PALETTES.map((palette) => {
             const selected = selectedPaletteKey === palette.key;
             return (
-              <button key={palette.key} type="button" onClick={() => handlePaletteSelect(palette)} aria-pressed={selected} style={{ display: "grid", gap: 10, minHeight: 64, padding: "10px 12px", borderRadius: 10, border: selected ? "1px solid rgba(157,255,122,0.9)" : "1px solid rgba(255,255,255,0.14)", background: selected ? "rgba(157,255,122,0.1)" : "#111620", color: "#E5E7EB", textAlign: "left", cursor: "pointer" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}><span style={{ fontSize: 13, fontWeight: 700 }}>{palette.label}</span>{selected ? <span style={{ fontSize: 11, color: "#9DFF7A", fontWeight: 700 }}>Selected</span> : null}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>{[palette.primaryColor, palette.secondaryColor, palette.accentColor, palette.textOnPrimary].map((swatch) => <span key={swatch} style={{ height: 16, borderRadius: 999, border: "1px solid rgba(255,255,255,0.24)", background: swatch }} />)}</div>
+              <button
+                key={palette.key}
+                type="button"
+                className="team-branding-form__palette"
+                onClick={() => handlePaletteSelect(palette)}
+                aria-pressed={selected}
+              >
+                <span className="team-branding-form__palette-label">
+                  <span>{palette.label}</span>
+                  {selected ? <span className="team-branding-form__selected-label">Selected</span> : null}
+                </span>
+                <span className="team-branding-form__swatches" aria-hidden="true">
+                  {[palette.primaryColor, palette.secondaryColor, palette.accentColor, palette.textOnPrimary].map((swatch) => (
+                    <span key={swatch} className="team-branding-form__swatch" style={{ background: swatch }} />
+                  ))}
+                </span>
               </button>
             );
           })}
         </div>
       </section>
 
-      <section style={{ display: "grid", gap: 10, paddingTop: 15, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-        {sectionTitle("Text size", "Controls shared body, helper, button, input, and navigation labels.")}
-        <div role="radiogroup" aria-label="Text size" style={{ display: "grid", gap: 8 }}>
+      <section className="team-branding-form__section">
+        <SectionHeading title="Text size" description="Controls shared body, helper, button, input, and navigation labels." />
+        <div role="radiogroup" aria-label="Text size" className="team-branding-form__option-list">
           {TEXT_SCALE_OPTIONS.map((option) => {
             const selected = values.textScale === option.key;
-            return <button key={option.key} type="button" role="radio" aria-checked={selected} onClick={() => handleChange("textScale", option.key)} style={{ minHeight: 44, padding: "9px 12px", borderRadius: 10, border: selected ? "1px solid rgba(157,255,122,0.9)" : "1px solid rgba(255,255,255,0.14)", background: selected ? "rgba(157,255,122,0.1)" : "#111620", color: "#E5E7EB", display: "grid", gap: 2, textAlign: "left", cursor: "pointer" }}><span style={{ fontSize: 12.5, fontWeight: 700 }}>{option.label}</span><span style={{ fontSize: 11.5, color: "#9CA3AF" }}>{option.hint}</span></button>;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                className="team-branding-form__text-option"
+                onClick={() => handleChange("textScale", option.key)}
+              >
+                <span className="team-branding-form__text-option-label">{option.label}</span>
+                <span className="team-branding-form__text-option-hint">{option.hint}</span>
+              </button>
+            );
           })}
         </div>
       </section>
 
-      <section style={{ display: "grid", gap: 12, paddingTop: 15, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-        {sectionTitle("Team logos", "Upload transparent PNG or SVG files when possible. ShotLab automatically removes simple flat backgrounds and saves the cleaned result as a PNG.")}
-        <div style={{ display: "grid", gap: 10 }}>{LOGO_FIELDS.map((field) => <Field key={field.name} field={field} value={values[field.name]} onChange={handleChange} />)}</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-          <button type="button" onClick={() => fullLogoInputRef.current?.click()} disabled={cleaning} style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)", color: "#E5E7EB" }}>Upload full logo</button>
-          <button type="button" onClick={() => markLogoInputRef.current?.click()} disabled={cleaning} style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)", color: "#E5E7EB" }}>Upload logo mark</button>
-          <input ref={fullLogoInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: "none" }} onChange={(event) => { handleLogoUpload("full", event.target.files?.[0]); event.target.value = ""; }} />
-          <input ref={markLogoInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: "none" }} onChange={(event) => { handleLogoUpload("mark", event.target.files?.[0]); event.target.value = ""; }} />
+      <section className="team-branding-form__section">
+        <SectionHeading
+          title="Team logos"
+          description="Upload transparent PNG or SVG files when possible. ShotLab automatically removes simple flat backgrounds and saves the cleaned result as a PNG."
+        />
+        <div className="team-branding-form__field-list">
+          {LOGO_FIELDS.map((field) => (
+            <Field key={field.name} field={field} value={values[field.name]} onChange={handleChange} />
+          ))}
         </div>
-        <button type="button" onClick={cleanCurrentLogos} disabled={cleaning} style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(200,255,26,0.34)", background: "rgba(200,255,26,0.06)", color: "#DFFF75", fontWeight: 700 }}>{cleaning ? "Preparing transparent logos…" : "Clean logo backgrounds"}</button>
-        {uploadError ? <div role="alert" style={{ color: "#FF929D", fontSize: 12, lineHeight: 1.4 }}>{uploadError}</div> : null}
-        <LogoPreview src={cleanFullLogo} label="Full logo" />
-        <LogoPreview src={cleanMarkLogo} label="Logo mark" />
+        <div className="team-branding-form__upload-grid">
+          <button type="button" onClick={() => fullLogoInputRef.current?.click()} disabled={cleaning} className="team-branding-form__secondary-action">
+            Upload full logo
+          </button>
+          <button type="button" onClick={() => markLogoInputRef.current?.click()} disabled={cleaning} className="team-branding-form__secondary-action">
+            Upload logo mark
+          </button>
+          <input
+            ref={fullLogoInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            hidden
+            onChange={(event) => {
+              handleLogoUpload("full", event.target.files?.[0]);
+              event.target.value = "";
+            }}
+          />
+          <input
+            ref={markLogoInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            hidden
+            onChange={(event) => {
+              handleLogoUpload("mark", event.target.files?.[0]);
+              event.target.value = "";
+            }}
+          />
+        </div>
+        <button type="button" onClick={cleanCurrentLogos} disabled={cleaning} className="team-branding-form__clean-action">
+          {cleaning ? "Preparing transparent logos…" : "Clean logo backgrounds"}
+        </button>
+        {uploadError ? <div role="alert" className="team-branding-form__alert">{uploadError}</div> : null}
+        <div className="team-branding-form__previews">
+          <LogoPreview src={cleanFullLogo} label="Full logo" />
+          <LogoPreview src={cleanMarkLogo} label="Logo mark" />
+        </div>
       </section>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-        <button type="submit" disabled={saving || cleaning || submitting} className="cta-primary" style={{ width: "auto", margin: 0, minHeight: 44, borderRadius: 10, padding: "0 16px", boxShadow: "0 6px 16px rgba(0,0,0,0.34)" }}>{saving || submitting ? "Saving..." : "Save team branding"}</button>
-        <button type="button" onClick={onCancel} disabled={saving || cleaning || submitting} style={{ minHeight: 44, borderRadius: 10, padding: "0 14px", border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.02)", color: "#E5E7EB" }}>Cancel</button>
+      <div className="team-branding-form__actions">
+        <button type="submit" disabled={isBusy} className="cta-primary team-branding-form__save-action">
+          {saving || submitting ? "Saving..." : "Save team branding"}
+        </button>
+        <button type="button" onClick={onCancel} disabled={isBusy} className="team-branding-form__cancel-action">
+          Cancel
+        </button>
       </div>
     </form>
   );
