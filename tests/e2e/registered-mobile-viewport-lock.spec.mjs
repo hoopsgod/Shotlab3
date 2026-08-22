@@ -104,6 +104,15 @@ const OVERFLOW_LOCK_SELECTORS = new Set([
   '[data-testid="coach-command-center-full"] .missionControl',
 ]);
 
+const COACH_HOME_FULL_BLEED_SELECTORS = [
+  '.performance-workspace--coach',
+  '.coach-scroll-container',
+  '[data-testid="coach-command-center-full"]',
+  '[data-testid="coach-command-center-full"] .missionControl',
+  '[data-testid="mission-control-team-header"]',
+  '.mcHero[data-team-identity-stage="coach-mission-control"]',
+];
+
 async function expectRegisteredViewportLocked(page) {
   const geometry = await page.evaluate(async (selectors) => {
     const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
@@ -128,9 +137,6 @@ async function expectRegisteredViewportLocked(page) {
     return result;
   }, VIEWPORT_CONTAINMENT_SELECTORS);
 
-  // The product regression is both document-level horizontal panning and an
-  // internally shifted Coach Home composition. The landing header, tactical
-  // hero, and hero content must all begin and end inside the visual viewport.
   expect(Math.abs(geometry.windowScrollX)).toBeLessThanOrEqual(1);
   for (const selector of VIEWPORT_CONTAINMENT_SELECTORS) {
     const entry = geometry.before[selector];
@@ -140,6 +146,38 @@ async function expectRegisteredViewportLocked(page) {
     if (OVERFLOW_LOCK_SELECTORS.has(selector)) {
       expect(['clip', 'hidden'], `${selector} horizontal overflow`).toContain(entry.overflowX);
     }
+  }
+}
+
+async function expectCoachHomeFullBleed(page) {
+  const geometry = await page.evaluate((selectors) => {
+    const before = Object.fromEntries(selectors.map((selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return [selector, null];
+      const rect = node.getBoundingClientRect();
+      const styles = getComputedStyle(node);
+      return [selector, {
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        paddingLeft: Number.parseFloat(styles.paddingLeft) || 0,
+        paddingRight: Number.parseFloat(styles.paddingRight) || 0,
+      }];
+    }));
+    return { viewport: window.innerWidth, before };
+  }, COACH_HOME_FULL_BLEED_SELECTORS);
+
+  for (const selector of COACH_HOME_FULL_BLEED_SELECTORS) {
+    const entry = geometry.before[selector];
+    expect(entry, `${selector} exists on registered Coach Home`).not.toBeNull();
+    expect(Math.abs(entry.left), `${selector} must start on the viewport axis`).toBeLessThanOrEqual(1);
+    expect(Math.abs(entry.right - geometry.viewport), `${selector} must end on the viewport axis`).toBeLessThanOrEqual(1);
+  }
+
+  for (const selector of ['.performance-workspace--coach', '.coach-scroll-container']) {
+    const entry = geometry.before[selector];
+    expect(entry.paddingLeft, `${selector} must not inherit the secondary-page left gutter on Home`).toBeLessThanOrEqual(1);
+    expect(entry.paddingRight, `${selector} must not inherit the secondary-page right gutter on Home`).toBeLessThanOrEqual(1);
   }
 }
 
@@ -160,6 +198,7 @@ for (const viewport of [
       const registered = await createRegistered(browser, role, viewport);
       try {
         await expectRegisteredViewportLocked(registered.page);
+        if (role === 'coach') await expectCoachHomeFullBleed(registered.page);
         for (const route of routes) {
           await navigateByKey(registered.page, route);
           await expectRegisteredViewportLocked(registered.page);
