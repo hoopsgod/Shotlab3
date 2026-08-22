@@ -8,6 +8,22 @@
   #root {
     width: 100%;
     max-width: 100%;
+    overflow-x: clip;
+  }
+
+  /* Registered workspaces can render materially different sparse/data-backed
+   * descendants than Demo. Keep those differences inside the visual viewport
+   * instead of allowing an oversized child to turn the authenticated shell into
+   * a horizontally pannable document on iOS Safari. Intentional horizontal
+   * scrollers remain free to own overflow inside this clipped outer hierarchy. */
+  html body #root .app-shell.is-mobile,
+  html body #root .app-shell.is-mobile > .shell-main,
+  html body #root .app-shell.is-mobile > .shell-main > .content-wrap,
+  html body #root .app-shell.is-mobile .performance-workspace {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   /* Schedule is an informational operational surface. Preserve the semantic-info
