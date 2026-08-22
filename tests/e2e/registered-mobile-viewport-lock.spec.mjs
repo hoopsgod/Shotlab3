@@ -75,9 +75,37 @@ async function navigateByKey(page, key) {
   await page.waitForTimeout(180);
 }
 
+const VIEWPORT_CONTAINMENT_SELECTORS = [
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.performance-workspace',
+  '.player-scroll-container',
+  '.coach-scroll-container',
+  '[data-testid="coach-command-center-full"]',
+  '[data-testid="coach-command-center-full"] .missionControl',
+  '[data-testid="mission-control-team-header"]',
+  '.mcHero[data-team-identity-stage="coach-mission-control"]',
+  '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent',
+];
+
+const OVERFLOW_LOCK_SELECTORS = new Set([
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.performance-workspace',
+  '[data-testid="coach-command-center-full"]',
+  '[data-testid="coach-command-center-full"] .missionControl',
+]);
+
 async function expectRegisteredViewportLocked(page) {
-  const geometry = await page.evaluate(async () => {
-    const selectors = ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', '.player-scroll-container', '.coach-scroll-container'];
+  const geometry = await page.evaluate(async (selectors) => {
     const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
     const before = Object.fromEntries(nodes.map(([selector, node]) => {
       const rect = node.getBoundingClientRect();
@@ -98,20 +126,19 @@ async function expectRegisteredViewportLocked(page) {
     const result = { viewport: window.innerWidth, windowScrollX: window.scrollX, before };
     window.scrollTo(0, y);
     return result;
-  });
+  }, VIEWPORT_CONTAINMENT_SELECTORS);
 
-  // The product regression is document-level horizontal panning. Both clip and
-  // hidden are valid outer containment results after production CSS optimization;
-  // the decisive invariant is that the viewport cannot move and every shared
-  // authenticated content rail remains inside the visual viewport.
+  // The product regression is both document-level horizontal panning and an
+  // internally shifted Coach Home composition. The landing header, tactical
+  // hero, and hero content must all begin and end inside the visual viewport.
   expect(Math.abs(geometry.windowScrollX)).toBeLessThanOrEqual(1);
-  for (const selector of ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', '.player-scroll-container', '.coach-scroll-container']) {
+  for (const selector of VIEWPORT_CONTAINMENT_SELECTORS) {
     const entry = geometry.before[selector];
     if (!entry) continue;
-    expect(entry.left).toBeGreaterThanOrEqual(-1);
-    expect(entry.right).toBeLessThanOrEqual(geometry.viewport + 1);
-    if (!['.player-scroll-container', '.coach-scroll-container'].includes(selector)) {
-      expect(['clip', 'hidden']).toContain(entry.overflowX);
+    expect(entry.left, `${selector} left edge`).toBeGreaterThanOrEqual(-1);
+    expect(entry.right, `${selector} right edge`).toBeLessThanOrEqual(geometry.viewport + 1);
+    if (OVERFLOW_LOCK_SELECTORS.has(selector)) {
+      expect(['clip', 'hidden'], `${selector} horizontal overflow`).toContain(entry.overflowX);
     }
   }
 }
