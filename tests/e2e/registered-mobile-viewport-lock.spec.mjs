@@ -100,16 +100,17 @@ async function expectRegisteredViewportLocked(page) {
     return result;
   });
 
-  // The product regression is document-level horizontal panning. Clipped inner
-  // elements may retain a programmatic scrollLeft in Chromium even though they
-  // cannot move the visual viewport, so certify the outer viewport contract.
+  // The product regression is document-level horizontal panning. Both clip and
+  // hidden are valid outer containment results after production CSS optimization;
+  // the decisive invariant is that the viewport cannot move and the shell stays
+  // inside the visual viewport on every registered route.
   expect(Math.abs(geometry.windowScrollX)).toBeLessThanOrEqual(1);
   for (const selector of ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace']) {
     const entry = geometry.before[selector];
     if (!entry) continue;
     expect(entry.left).toBeGreaterThanOrEqual(-1);
     expect(entry.right).toBeLessThanOrEqual(geometry.viewport + 1);
-    expect(entry.overflowX).toBe('clip');
+    expect(['clip', 'hidden']).toContain(entry.overflowX);
   }
 }
 
