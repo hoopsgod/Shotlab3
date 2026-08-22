@@ -116,7 +116,7 @@ async function expectRegisteredViewportLocked(page) {
 
 const CASES = [
   { role: 'coach', routes: ['players', 'drills', 'events', 'sc', 'leaderboards', 'activity'] },
-  { role: 'player', routes: ['log-drill', 'events', 'leaderboards', 'profile'] },
+  { role: 'player', routes: ['log-drill', 'program', 'leaderboards', 'profile'] },
 ];
 
 for (const viewport of [{ width: 390, height: 844 }, { width: 430, height: 932 }]) {
