@@ -10,11 +10,29 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
 @media(max-width:980px){
   html body.mission-control-active #root .ts-launcher{display:none!important}
 
+  /* Coach Home is not a secondary page. The shared registered Coach rail carries
+     the normal 16-20px editorial gutter for secondary routes; on Home that gutter
+     must be retired before Mission Control mounts or the whole full-bleed stage
+     starts one gutter inside the left edge. Keep secondary-route gutters intact by
+     scoping this reset to the mounted mission-control body state only. */
+  html body.mission-control-active #root .performance-workspace--coach,
+  html body.mission-control-active #root .performance-shell--coach .coach-scroll-container{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    box-sizing:border-box!important;
+    overflow-x:clip!important;
+  }
+
   /* The authenticated Coach shell is already full-width on mobile. Do not break
      Mission Control back out with 100vw/negative viewport margins: iOS Safari can
-     resolve that legacy pattern against a wider layout viewport and leave the
-     paid dashboard visibly shifted. Keep the dashboard on the visual viewport
-     axis and include its internal gutter inside the declared width. */
+     resolve that legacy pattern against a wider layout viewport. Once the paid
+     Coach parent gutter above is removed, every Home layer can stay on a simple
+     100% visual-viewport axis. */
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3{
     width:100%!important;
     max-width:100%!important;
