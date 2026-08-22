@@ -77,7 +77,7 @@ async function navigateByKey(page, key) {
 
 async function expectRegisteredViewportLocked(page) {
   const geometry = await page.evaluate(async () => {
-    const selectors = ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace'];
+    const selectors = ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', '.player-scroll-container', '.coach-scroll-container'];
     const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
     const before = Object.fromEntries(nodes.map(([selector, node]) => {
       const rect = node.getBoundingClientRect();
@@ -102,15 +102,17 @@ async function expectRegisteredViewportLocked(page) {
 
   // The product regression is document-level horizontal panning. Both clip and
   // hidden are valid outer containment results after production CSS optimization;
-  // the decisive invariant is that the viewport cannot move and the shell stays
-  // inside the visual viewport on every registered route.
+  // the decisive invariant is that the viewport cannot move and every shared
+  // authenticated content rail remains inside the visual viewport.
   expect(Math.abs(geometry.windowScrollX)).toBeLessThanOrEqual(1);
-  for (const selector of ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace']) {
+  for (const selector of ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', '.player-scroll-container', '.coach-scroll-container']) {
     const entry = geometry.before[selector];
     if (!entry) continue;
     expect(entry.left).toBeGreaterThanOrEqual(-1);
     expect(entry.right).toBeLessThanOrEqual(geometry.viewport + 1);
-    expect(['clip', 'hidden']).toContain(entry.overflowX);
+    if (!['.player-scroll-container', '.coach-scroll-container'].includes(selector)) {
+      expect(['clip', 'hidden']).toContain(entry.overflowX);
+    }
   }
 }
 
@@ -119,7 +121,12 @@ const CASES = [
   { role: 'player', routes: ['log-drill', 'program', 'leaderboards', 'profile'] },
 ];
 
-for (const viewport of [{ width: 390, height: 844 }, { width: 430, height: 932 }]) {
+for (const viewport of [
+  { width: 320, height: 740 },
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+]) {
   for (const { role, routes } of CASES) {
     test(`registered ${role} remains viewport-locked across paid routes at ${viewport.width}px`, async ({ browser }) => {
       test.setTimeout(120_000);
