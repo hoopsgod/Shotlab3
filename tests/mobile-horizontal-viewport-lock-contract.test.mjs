@@ -12,8 +12,8 @@ const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.
 
 test('mobile document and shared Demo/paid page owners use a non-scrollable x boundary', () => {
   assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(finalAxisAuthority, /#root > \.app-shell\.is-mobile > \.shell-main > \.content-wrap[\s\S]*inline-size:\s*100%\s*!important;[\s\S]*margin-inline:\s*0\s*!important;[\s\S]*padding-inline:\s*0\s*!important;[\s\S]*overflow-x:\s*clip\s*!important;/);
-  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap,[\s\S]*coach-command-center-full[\s\S]*inline-size:\s*100%\s*!important;[\s\S]*padding-inline:\s*0\s*!important;/);
+  assert.match(finalAxisAuthority, /#root > \.screen-fade-in:has\(> \.app-shell\.is-mobile\),[\s\S]*#root > \.screen-fade-in > \.app-shell\.is-mobile,[\s\S]*performance-shell\.is-mobile > \.shell-main > \.content-wrap[\s\S]*inline-size:\s*100%\s*!important;[\s\S]*margin-inline:\s*0\s*!important;[\s\S]*padding-inline:\s*0\s*!important;[\s\S]*overflow-x:\s*clip\s*!important;/);
+  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile,[\s\S]*performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap,[\s\S]*coach-command-center-full[\s\S]*inline-size:\s*100%\s*!important;[\s\S]*padding-inline:\s*0\s*!important;/);
 });
 
 test('final mobile viewport axis authority loads after every authenticated visual layer', () => {
