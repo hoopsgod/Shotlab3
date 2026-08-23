@@ -170,6 +170,9 @@ window.addEventListener('shotlab:app-ready', () => {
     // Load it after the broader authenticated authority so its intentionally narrow rules
     // are the final cascade authority in both development and optimized production builds.
     await import('./components/Phase7AuthenticatedChrome.css')
+    // Structural mobile geometry must load after every authenticated visual layer so
+    // Demo and paid workspaces resolve to the same physical viewport origin on iOS.
+    await import('./styles/MobileViewportAxisAuthority2026.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 
