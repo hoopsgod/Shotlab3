@@ -1,0 +1,95 @@
+/* Final mobile viewport-axis authority.
+ *
+ * The authenticated Coach shell does not have a `.coach-scroll-container`.
+ * Its real structural owner is `.shell-main > .content-wrap`.  Older mobile
+ * containment layers targeted the former selector, which allowed iOS Safari
+ * to settle the Coach workspace on an offset layout origin even when the
+ * document itself reported scrollLeft === 0.
+ *
+ * Keep this file last in the authenticated cascade.  It owns only structural
+ * mobile geometry; page-specific gutters remain owned by the existing
+ * workspace/secondary-page rules. */
+
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  html body #root > .app-shell.is-mobile,
+  html body #root > .app-shell.is-mobile > .shell-main,
+  html body #root > .app-shell.is-mobile > .shell-main > .content-wrap {
+    position: relative !important;
+    inset-inline: 0 !important;
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  /* Coach Home has exactly one horizontal gutter owner: `.missionControl`.
+   * Every structural ancestor must therefore start on the viewport origin and
+   * consume exactly the viewport width.  This neutralizes the legacy `.mcShell`
+   * mobile breakout without changing Coach secondary-route gutters. */
+  html body.mission-control-active #root
+    .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
+  html body.mission-control-active #root
+    .performance-shell--coach.is-mobile .performance-workspace--coach,
+  html body.mission-control-active #root
+    .performance-shell--coach.is-mobile
+    [data-testid="coach-command-center-full"].mcShellV3 {
+    position: relative !important;
+    inset-inline: 0 !important;
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  html body.mission-control-active #root
+    .performance-shell--coach.is-mobile
+    [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
+    position: relative !important;
+    inset-inline: 0 !important;
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline-start: max(12px, env(safe-area-inset-left, 0px)) !important;
+    padding-inline-end: max(12px, env(safe-area-inset-right, 0px)) !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-x: clip !important;
+  }
+
+  /* Player keeps its canonical 20px content rail inside the real scroll owner;
+   * the outer shell stays on the same viewport origin as Coach and Demo. */
+  html body #root .performance-shell--player.is-mobile .player-scroll-container,
+  html body #root .performance-shell--player.is-mobile
+    [data-testid="player-daily-command-center"] {
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
