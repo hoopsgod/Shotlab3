@@ -68,9 +68,9 @@
   html body #root .performance-shell.is-mobile [data-testid="coach-command-center-full"],
   html body #root .performance-shell.is-mobile [data-testid="player-daily-command-center"],
   html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
-    inline-size: calc(100% - (2 * var(--shotlab-mobile-page-gutter))) !important;
+    inline-size: calc(100% - 40px) !important;
     min-inline-size: 0 !important;
-    max-inline-size: calc(100% - (2 * var(--shotlab-mobile-page-gutter))) !important;
+    max-inline-size: calc(100% - 40px) !important;
     margin-inline: var(--shotlab-mobile-page-gutter) !important;
     box-sizing: border-box !important;
     overflow-x: clip !important;
