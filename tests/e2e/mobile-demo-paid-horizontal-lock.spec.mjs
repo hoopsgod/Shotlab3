@@ -147,12 +147,33 @@ async function forceInvalidHorizontalState(page, role) {
   }, locked);
 }
 
-async function dispatchHorizontalFingerPan(page) {
+async function dispatchHorizontalFingerPan(page, role) {
   const viewport = page.viewportSize();
+  const dashboard = page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center');
+  const box = await dashboard.boundingBox();
+  const y = box
+    ? Math.round(Math.min(box.y + Math.max(80, Math.min(140, box.height * 0.16)), viewport.height - 180))
+    : Math.max(180, Math.min(Math.round(viewport.height * 0.48), viewport.height - 180));
+  const left = box?.x ?? 0;
+  const width = box?.width ?? viewport.width;
+  const startX = Math.round(left + width * 0.78);
+  const endX = Math.round(left + width * 0.22);
+
+  await page.evaluate(() => {
+    const previous = window.__shotlabHorizontalPanProbeHandler;
+    if (previous) document.removeEventListener('touchmove', previous);
+    window.__shotlabHorizontalPanProbeEvents = [];
+    const handler = (event) => {
+      window.__shotlabHorizontalPanProbeEvents.push({
+        cancelable: event.cancelable,
+        defaultPrevented: event.defaultPrevented,
+      });
+    };
+    window.__shotlabHorizontalPanProbeHandler = handler;
+    document.addEventListener('touchmove', handler, { passive: true });
+  });
+
   const session = await page.context().newCDPSession(page);
-  const y = Math.max(180, Math.min(Math.round(viewport.height * 0.48), viewport.height - 180));
-  const startX = Math.round(viewport.width * 0.78);
-  const endX = Math.round(viewport.width * 0.22);
   try {
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: startX, y }] });
@@ -165,6 +186,19 @@ async function dispatchHorizontalFingerPan(page) {
   } finally {
     await session.detach();
   }
+
+  return page.evaluate(() => {
+    const events = window.__shotlabHorizontalPanProbeEvents || [];
+    const handler = window.__shotlabHorizontalPanProbeHandler;
+    if (handler) document.removeEventListener('touchmove', handler);
+    delete window.__shotlabHorizontalPanProbeHandler;
+    delete window.__shotlabHorizontalPanProbeEvents;
+    return {
+      count: events.length,
+      cancelableCount: events.filter((event) => event.cancelable).length,
+      preventedCount: events.filter((event) => event.defaultPrevented).length,
+    };
+  });
 }
 
 function expectVisualAxis(geometry, label) {
@@ -206,7 +240,11 @@ async function expectSharedMobileLock(page, role, label) {
     expect(Math.abs(entry.scrollLeft), `${label} ${selector} retained forced scrollLeft`).toBeLessThanOrEqual(1);
   }
 
-  await dispatchHorizontalFingerPan(page);
+  const touchProbe = await dispatchHorizontalFingerPan(page, role);
+  expect(touchProbe.count, `${label} must receive trusted touchmove events`).toBeGreaterThan(0);
+  expect(touchProbe.cancelableCount, `${label} must receive cancelable touchmove events`).toBeGreaterThan(0);
+  expect(touchProbe.preventedCount, `${label} outer horizontal touchmove must be cancelled while finger is down`).toBeGreaterThan(0);
+
   const afterTouch = await readGeometry(page, role);
   expect(Math.abs(afterTouch.windowScrollX), `${label} window moved after finger pan`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterTouch.rootScrollLeft), `${label} root moved after finger pan`).toBeLessThanOrEqual(1);
