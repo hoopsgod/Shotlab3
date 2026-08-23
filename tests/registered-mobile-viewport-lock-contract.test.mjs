@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
 const finalPolish = readFileSync(new URL('../public/shotlab-phase4e-final-polish.css', import.meta.url), 'utf8');
+const finalAxis = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const missionControlLock = readFileSync(new URL('../src/styles/MissionControlCascadeLock2026.css', import.meta.url), 'utf8');
 const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-viewport-lock.spec.mjs', import.meta.url), 'utf8');
 const webkitViewportSpec = readFileSync(new URL('./e2e/registered-mobile-webkit-scroll-lock.spec.mjs', import.meta.url), 'utf8');
@@ -23,6 +24,14 @@ test('registered player and coach content rails size inside the mobile viewport'
   for (const invariant of ['box-sizing:border-box!important;', 'width:100%!important;', 'max-width:100%!important;', 'min-width:0!important;']) {
     assert.ok(compact.includes(invariant), `shared player/coach mobile rail must preserve ${invariant}`);
   }
+});
+
+test('final mobile axis owns one fixed symmetric 20px visible-page gutter', () => {
+  assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px;/);
+  assert.match(finalAxis, /--layout-gutter:\s*var\(--shotlab-mobile-page-gutter\);/);
+  assert.match(finalAxis, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-page-gutter\);/);
+  assert.match(finalAxis, /coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*secondary-page[\s\S]*inline-size:\s*calc\(100% - \(2 \* var\(--shotlab-mobile-page-gutter\)\)\)\s*!important;[\s\S]*margin-inline:\s*var\(--shotlab-mobile-page-gutter\)\s*!important;/);
+  assert.match(finalAxis, /secondary-page[\s\S]*primary-decision[^}]*data-route-kind[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-left:\s*0\s*!important;[\s\S]*margin-right:\s*0\s*!important;/);
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
