@@ -15,6 +15,7 @@
   html,
   body,
   #root {
+    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
@@ -38,6 +39,7 @@
   html body #root .performance-shell.is-mobile > .shell-main > .content-wrap {
     position: relative !important;
     inset-inline: 0 !important;
+    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
@@ -51,15 +53,9 @@
     translate: none !important;
   }
 
-  /* Coach mobile geometry is unconditional. Previously this block depended on
-   * body.mission-control-active, which is added from a component effect. On a
-   * real iPhone that allowed the registered workspace to establish a resting
-   * origin with the legacy editorial gutter before the body class became the
-   * cascade authority. Horizontal clipping then froze that wrong origin.
-   *
-   * The outer Coach workspace therefore owns ZERO horizontal gutter on every
-   * mobile Coach route. Home gets its gutter from `.missionControl`; secondary
-   * routes get theirs from their route-owned inner rails. */
+  /* Coach mobile geometry is unconditional. The structural shell never owns an
+   * editorial gutter; route-owned content surfaces provide their own balanced
+   * insets. */
   html body #root .performance-shell--coach.is-mobile,
   html body #root .performance-shell--coach.is-mobile > .shell-main,
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
@@ -68,6 +64,7 @@
     [data-testid="coach-command-center-full"].mcShellV3 {
     position: relative !important;
     inset-inline: 0 !important;
+    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
@@ -77,6 +74,33 @@
     overflow-x: hidden !important;
     overflow-x: clip !important;
     overscroll-behavior-x: none !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* App.jsx has one anonymous route-content wrapper immediately inside the Coach
+   * performance workspace. Its inline shorthand still contributes a 20px left
+   * and right editorial rail. Once the no-pan lock clips horizontal overflow,
+   * that wrapper can leave the registered workspace visibly resting one rail to
+   * the right. Retire the OUTER rail on mobile; Home and secondary routes already
+   * own their intended symmetric inner gutters. The :has() selector identifies
+   * Coach Home semantically, while the unique z-index inline marker covers the
+   * same shared wrapper on every Coach route. */
+  html body #root .performance-shell--coach.is-mobile
+    .performance-workspace--coach > div:has(> [data-testid="coach-command-center-full"]),
+  html body #root .performance-shell--coach.is-mobile
+    .performance-workspace--coach > div[style*="z-index: 1"] {
+    position: relative !important;
+    inset-inline: 0 !important;
+    width: 100% !important;
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
     transform: none !important;
     translate: none !important;
   }
@@ -88,6 +112,7 @@
     [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
     position: relative !important;
     inset-inline: 0 !important;
+    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
@@ -106,6 +131,7 @@
   html body #root .performance-shell--player.is-mobile .player-scroll-container,
   html body #root .performance-shell--player.is-mobile
     [data-testid="player-daily-command-center"] {
+    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
