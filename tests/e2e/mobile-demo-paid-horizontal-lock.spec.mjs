@@ -63,12 +63,11 @@ async function createRegistered(browser, role, viewport) {
 
 async function createDemo(browser, role, viewport) {
   const context = await browser.newContext({ viewport, screen: viewport, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
-  await context.addInitScript(() => {
-    window.localStorage.clear();
-    window.sessionStorage.clear();
-  });
   const page = await context.newPage();
-  await page.goto(`/?demo=${role}`);
+  await page.goto('/?demo=1');
+  const button = page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true });
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
   await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
   return { context, page };
 }
