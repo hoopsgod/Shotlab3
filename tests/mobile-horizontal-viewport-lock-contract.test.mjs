@@ -10,11 +10,12 @@ const main = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.spec.mjs', import.meta.url), 'utf8');
 
-test('mobile document and shared Demo/paid role rails use one split x-axis authority', () => {
+test('mobile document and shared Demo/paid role shells use one split x-axis authority', () => {
   assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
   assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
-  assert.match(finalAxisAuthority, /\.coach-scroll-container,[\s\S]*\.player-scroll-container[\s\S]*padding-inline:\s*20px\s*!important;[\s\S]*box-sizing:\s*border-box\s*!important;/);
-  assert.match(finalAxisAuthority, /\.coach-route-scroll-container[^}]*padding-inline:\s*0\s*!important/);
+  assert.match(finalAxisAuthority, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px\s*!important/);
+  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\([\s\S]*padding-left:\s*20px\s*!important;[\s\S]*padding-right:\s*20px\s*!important;/);
+  assert.match(finalAxisAuthority, /\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0\s*!important;/);
   assert.doesNotMatch(finalAxisAuthority, /calc\(100% - 40px\)/);
   assert.doesNotMatch(finalAxisAuthority, /margin-inline:\s*20px\s*!important/);
 });
