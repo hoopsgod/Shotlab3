@@ -16,12 +16,12 @@
     box-sizing: border-box !important;
   }
 
-  /* Coach routes share the direct workspace scroll wrapper. Replace its legacy
-   * 16px inline gutter with the same fixed 20px rail used by Player. */
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > :is(
-    div:has(> [data-testid="coach-command-center-full"]),
-    div[style*="z-index: 1"]
-  ) {
+  /* The authenticated Coach content-wrap is the shared route rail owner.
+   * Route/workspace descendants fill this box instead of composing gutters. */
+  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     padding-left: 20px !important;
     padding-right: 20px !important;
     box-sizing: border-box !important;
@@ -31,12 +31,12 @@
   html body #root .performance-shell--coach.is-mobile :is(
     .coach-scroll-container,
     .coach-route-scroll-container
-  ) {
+  ),
+  html body #root .performance-shell--player.is-mobile .player-quick-actions {
     padding-inline: 0 !important;
   }
 
-  /* SecondaryPageShell previously compensated for the older 16px Coach wrapper.
-   * The role shell now owns geometry, so route shells remain 100% inside it. */
+  /* SecondaryPageShell belongs inside the role shell's rail. */
   html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
     width: 100% !important;
     max-width: 100% !important;
