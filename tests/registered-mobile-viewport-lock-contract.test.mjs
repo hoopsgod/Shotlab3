@@ -9,10 +9,9 @@ const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-vie
 const webkitViewportSpec = readFileSync(new URL('./e2e/registered-mobile-webkit-scroll-lock.spec.mjs', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 
-test('mobile viewport authority prevents root horizontal scrolling and iOS-style overscroll chaining', () => {
-  assert.match(centering, /html,\s*\n\s*body\s*\{[^}]*overflow-x:\s*hidden;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(centering, /#root\s*\{[^}]*overflow-x:\s*clip;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(centering, /\.app-shell\.is-mobile[\s\S]*\.shell-main[\s\S]*\.content-wrap[\s\S]*\.performance-workspace[\s\S]*overflow-x:\s*clip;[\s\S]*overscroll-behavior-x:\s*none;/);
+test('mobile viewport authority uses a true non-scrollable x boundary and stops overscroll chaining', () => {
+  assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
+  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*\.player-scroll-container,[\s\S]*\.coach-scroll-container[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
   assert.match(centering, /min-width:\s*0/);
   assert.match(centering, /max-width:\s*100%/);
 });
@@ -21,8 +20,9 @@ test('registered player and coach content rails include padding inside the mobil
   assert.match(finalPolish, /\.performance-shell \.player-scroll-container,\s*\n\s*\.performance-shell \.coach-scroll-container\s*\{[^}]*box-sizing:\s*border-box!important;[^}]*width:\s*100%!important;[^}]*max-width:\s*100%!important;[^}]*min-width:\s*0!important;[^}]*margin-inline:\s*auto!important;/);
 });
 
-test('registered player and coach page rails cannot become persistent horizontal scroll owners', () => {
-  assert.match(centering, /\.performance-shell \.player-scroll-container,\s*\n\s*html body #root \.performance-shell \.coach-scroll-container\s*\{[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none\s*!important;/);
+test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
+  assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container,[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
+  assert.match(centering, /touch-action:\s*pan-y pinch-zoom/);
   assert.match(registeredViewportSpec, /REGISTERED_CONTENT_RAIL_SELECTORS/);
   assert.match(registeredViewportSpec, /rail\.scrollLeft = 240/);
   assert.match(registeredViewportSpec, /registered content rail must reject persistent horizontal scrollLeft/);
@@ -58,8 +58,9 @@ test('registered mobile browser contract emulates touch hardware and verifies ro
   assert.match(registeredViewportSpec, /visualViewportOffsetLeft/);
 });
 
-test('Experience Parity executes Chromium and WebKit registered mobile scroll regressions', () => {
+test('Experience Parity executes Chromium, WebKit, and shared Demo/paid mobile scroll regressions', () => {
   assert.match(parityWorkflow, /tests\/e2e\/registered-mobile-viewport-lock\.spec\.mjs/);
   assert.match(parityWorkflow, /tests\/e2e\/registered-mobile-webkit-scroll-lock\.spec\.mjs/);
+  assert.match(parityWorkflow, /tests\/e2e\/mobile-demo-paid-horizontal-lock\.spec\.mjs/);
   assert.match(parityWorkflow, /playwright install --with-deps chromium webkit/);
 });
