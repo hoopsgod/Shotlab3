@@ -30,7 +30,7 @@ test('final mobile axis owns one fixed symmetric 20px visible-page gutter', () =
   assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px;/);
   assert.match(finalAxis, /--layout-gutter:\s*var\(--shotlab-mobile-page-gutter\);/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-page-gutter\);/);
-  assert.match(finalAxis, /coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*secondary-page[\s\S]*inline-size:\s*calc\(100% - \(2 \* var\(--shotlab-mobile-page-gutter\)\)\)\s*!important;[\s\S]*margin-inline:\s*var\(--shotlab-mobile-page-gutter\)\s*!important;/);
+  assert.match(finalAxis, /coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*secondary-page[\s\S]*inline-size:\s*calc\(100% - 40px\)\s*!important;[\s\S]*max-inline-size:\s*calc\(100% - 40px\)\s*!important;[\s\S]*margin-inline:\s*var\(--shotlab-mobile-page-gutter\)\s*!important;/);
   assert.match(finalAxis, /secondary-page[\s\S]*primary-decision[^}]*data-route-kind[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-left:\s*0\s*!important;[\s\S]*margin-right:\s*0\s*!important;/);
 });
 
