@@ -105,6 +105,8 @@ const OVERFLOW_LOCK_SELECTORS = new Set([
   '.shell-main',
   '.content-wrap',
   '.performance-workspace',
+  '.player-scroll-container',
+  '.coach-scroll-container',
   '[data-testid="coach-command-center-full"]',
   '[data-testid="coach-command-center-full"] .missionControl',
 ]);
@@ -117,7 +119,11 @@ const OVERSCROLL_LOCK_SELECTORS = [
   '.shell-main',
   '.content-wrap',
   '.performance-workspace',
+  '.player-scroll-container',
+  '.coach-scroll-container',
 ];
+
+const REGISTERED_CONTENT_RAIL_SELECTORS = ['.coach-scroll-container', '.player-scroll-container'];
 
 /* Coach Home intentionally uses a centered editorial gutter on mobile. The
    regression reported on iOS was asymmetric: a normal left gutter survived
@@ -129,6 +135,41 @@ const COACH_HOME_CENTER_AXIS_SELECTORS = [
   '[data-testid="mission-control-team-header"]',
   '.mcHero[data-team-identity-stage="coach-mission-control"]',
 ];
+
+async function expectRegisteredContentRailLocked(page) {
+  const result = await page.evaluate(async (selectors) => {
+    const rail = selectors.map((selector) => document.querySelector(selector)).find(Boolean);
+    if (!rail) return null;
+    const styles = getComputedStyle(rail);
+    const before = {
+      className: rail.className,
+      clientWidth: rail.clientWidth,
+      scrollWidth: rail.scrollWidth,
+      scrollLeft: rail.scrollLeft,
+      overflowX: styles.overflowX,
+      overscrollBehaviorX: styles.overscrollBehaviorX,
+    };
+    rail.scrollLeft = 240;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const after = {
+      scrollLeft: rail.scrollLeft,
+      windowScrollX: window.scrollX,
+      rootScrollLeft: document.scrollingElement?.scrollLeft || 0,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+    };
+    rail.scrollLeft = 0;
+    return { before, after };
+  }, REGISTERED_CONTENT_RAIL_SELECTORS);
+
+  expect(result, 'registered Coach/Player content rail must exist').not.toBeNull();
+  expect(['clip', 'hidden'], 'registered content rail must not own horizontal scrolling').toContain(result.before.overflowX);
+  expect(result.before.overscrollBehaviorX, 'registered content rail must stop horizontal overscroll chaining').toBe('none');
+  expect(Math.abs(result.before.scrollLeft), 'registered content rail initial scrollLeft').toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.scrollLeft), 'registered content rail must reject persistent horizontal scrollLeft').toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.windowScrollX)).toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.rootScrollLeft)).toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
+}
 
 async function expectRegisteredViewportLocked(page) {
   const geometry = await page.evaluate(async (selectors) => {
@@ -182,6 +223,8 @@ async function expectRegisteredViewportLocked(page) {
     expect(entry.overscrollBehaviorX, `${selector} horizontal overscroll authority`).toBe('none');
   }
 
+  await expectRegisteredContentRailLocked(page);
+
   /* A trusted horizontal wheel gesture is not the same as iOS rubber-band, but
      it catches a live scrollable document that static width checks can miss. */
   const viewport = page.viewportSize();
@@ -193,10 +236,14 @@ async function expectRegisteredViewportLocked(page) {
       windowScrollX: window.scrollX,
       scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      coachRailScrollLeft: document.querySelector('.coach-scroll-container')?.scrollLeft || 0,
+      playerRailScrollLeft: document.querySelector('.player-scroll-container')?.scrollLeft || 0,
     }));
     expect(Math.abs(afterGesture.windowScrollX)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.coachRailScrollLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.playerRailScrollLeft)).toBeLessThanOrEqual(1);
   }
 }
 
