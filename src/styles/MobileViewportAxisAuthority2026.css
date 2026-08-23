@@ -6,16 +6,25 @@
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* Structural rails do not own visible page padding. */
+  /* One structural owner means every Coach and Player route inherits the same
+   * visible 20px left/right rail, including custom pages without a shared root. */
   html body #root .performance-shell.is-mobile :is(
     .coach-scroll-container,
-    .coach-route-scroll-container,
     .player-scroll-container
   ) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-inline: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Nested Coach route owners must not add a second gutter. */
+  html body #root .performance-shell.is-mobile .coach-route-scroll-container {
     padding-inline: 0 !important;
   }
 
-  /* Remove the legacy Coach route wrapper inset before the page rail is applied. */
+  /* Remove the legacy Coach route wrapper inset before the shared rail applies. */
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > :is(
     div:has(> [data-testid="coach-command-center-full"]),
     div[style*="z-index: 1"]
@@ -23,22 +32,13 @@
     padding-inline: 0 !important;
   }
 
-  /* One fixed 20px visual rail for Home and every shared route page. */
-  html body #root .performance-shell.is-mobile :is(
-    [data-testid="coach-command-center-full"],
-    [data-testid="player-daily-command-center"],
-    [data-visual-role="secondary-page"],
-    [data-team-workspace]
-  ) {
-    width: calc(100% - 40px) !important;
-    max-width: calc(100% - 40px) !important;
-    min-width: 0 !important;
-    margin-inline: 20px !important;
-    box-sizing: border-box !important;
-    overflow-x: clip !important;
-  }
-
+  /* SecondaryPageShell previously compensated for older wrapper padding. The
+   * shared role rail now owns that geometry, so route shells stay 100% inside it. */
   html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
     padding-inline: 0 !important;
+    box-sizing: border-box !important;
   }
 }
