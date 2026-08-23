@@ -10,6 +10,7 @@ const COACH = {
   role: 'coach',
   isCoach: true,
 };
+const COACH_RAIL_SELECTOR = '.performance-shell--coach.is-mobile > .shell-main > .content-wrap';
 
 function registeredCoachSeed() {
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -67,9 +68,9 @@ async function createRegisteredCoach(browser, viewport) {
 }
 
 async function collectHorizontalOverflow(page) {
-  return page.evaluate(() => {
+  return page.evaluate((coachRailSelector) => {
     const root = document.scrollingElement || document.documentElement;
-    const rail = document.querySelector('.coach-scroll-container');
+    const rail = document.querySelector(coachRailSelector);
     const viewport = document.documentElement.clientWidth;
     const offenders = Array.from(document.querySelectorAll('body *'))
       .map((node) => {
@@ -109,7 +110,7 @@ async function collectHorizontalOverflow(page) {
       } : null,
       offenders,
     };
-  });
+  }, COACH_RAIL_SELECTOR);
 }
 
 async function expectNoPersistentDocumentOrRailPan(page, label) {
@@ -122,9 +123,9 @@ async function expectNoPersistentDocumentOrRailPan(page, label) {
   expect(before.rail.overscrollBehaviorX, diagnostic).toBe('none');
   expect(Math.abs(before.rail.scrollLeft), diagnostic).toBeLessThanOrEqual(1);
 
-  const shifted = await page.evaluate(async () => {
+  const shifted = await page.evaluate(async (coachRailSelector) => {
     const root = document.scrollingElement || document.documentElement;
-    const rail = document.querySelector('.coach-scroll-container');
+    const rail = document.querySelector(coachRailSelector);
     const y = window.scrollY;
     root.scrollLeft = 240;
     window.scrollTo(240, y);
@@ -136,7 +137,7 @@ async function expectNoPersistentDocumentOrRailPan(page, label) {
       windowScrollX: window.scrollX,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
     };
-  });
+  }, COACH_RAIL_SELECTOR);
   expect(Math.abs(shifted.rootScrollLeft), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(shifted.railScrollLeft), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(shifted.windowScrollX), diagnostic).toBeLessThanOrEqual(1);
