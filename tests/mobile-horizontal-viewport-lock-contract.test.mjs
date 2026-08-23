@@ -63,5 +63,8 @@ test('shared browser certification covers current Demo entry and paid Coach/Play
   assert.match(sharedSpec, /dashboard must have symmetric visual-viewport gutters/);
   assert.match(sharedSpec, /forceInvalidHorizontalState/);
   assert.match(sharedSpec, /Input\.dispatchTouchEvent/);
+  assert.match(sharedSpec, /defaultPrevented/);
+  assert.match(sharedSpec, /preventedCount/);
+  assert.match(sharedSpec, /outer horizontal touchmove must be cancelled while finger is down/);
   assert.match(parityWorkflow, /tests\/e2e\/mobile-demo-paid-horizontal-lock\.spec\.mjs/);
 });
