@@ -95,15 +95,27 @@ async function expectNoHorizontalOverflow(page) {
   expect(geometry.bodyWidth - geometry.viewport).toBeLessThanOrEqual(1);
 }
 
-async function expectPlayerTwentyPixelShellRail(page) {
-  const rail = await page.locator(".player-scroll-container").evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { left: Number.parseFloat(style.paddingLeft), right: Number.parseFloat(style.paddingRight) };
+async function expectPlayerTwentyPixelPageRail(page) {
+  const owner = page.locator(':is([data-testid="player-daily-command-center"], [data-team-workspace], [data-visual-role="secondary-page"]):visible').first();
+  await expect(owner).toBeVisible();
+  const rail = await owner.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const viewportLeft = window.visualViewport?.offsetLeft || 0;
+    const viewportWidth = window.visualViewport?.width || window.innerWidth;
+    const viewportRight = viewportLeft + viewportWidth;
+    return { left: rect.left - viewportLeft, right: viewportRight - rect.right };
   });
   expect(rail.left).toBeGreaterThanOrEqual(19.5);
   expect(rail.left).toBeLessThanOrEqual(20.5);
   expect(rail.right).toBeGreaterThanOrEqual(19.5);
   expect(rail.right).toBeLessThanOrEqual(20.5);
+
+  const structuralPadding = await page.locator(".player-scroll-container").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { left: Number.parseFloat(style.paddingLeft), right: Number.parseFloat(style.paddingRight) };
+  });
+  expect(structuralPadding.left).toBeLessThanOrEqual(0.5);
+  expect(structuralPadding.right).toBeLessThanOrEqual(0.5);
 }
 
 async function capture(page, name) {
@@ -216,7 +228,7 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize(viewport);
     await enterDemo(page, "player");
-    await expectPlayerTwentyPixelShellRail(page);
+    await expectPlayerTwentyPixelPageRail(page);
     await expectPlayerHomeOpticalRails(page);
     if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
       await captureSurface(page, page.getByTestId("player-daily-command-center"), `precision-player-home-full-${viewport.width}.png`);
@@ -225,7 +237,7 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
     if (SCREENSHOT_WIDTHS.has(viewport.width)) await capture(page, `precision-player-home-${viewport.width}.png`);
 
     await navigateByKey(page, "log-drill");
-    await expectPlayerTwentyPixelShellRail(page);
+    await expectPlayerTwentyPixelPageRail(page);
     await expectTrainOpticalRails(page);
     if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
       await captureSurface(page, page.locator('[data-team-workspace="at-home"]'), `precision-player-train-full-${viewport.width}.png`);
@@ -235,7 +247,7 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
 
     if (viewport.width === 390) {
       await navigateByKey(page, "profile");
-      await expectPlayerTwentyPixelShellRail(page);
+      await expectPlayerTwentyPixelPageRail(page);
       await resetScroll(page);
       await capture(page, "precision-player-progress-390.png");
     }
