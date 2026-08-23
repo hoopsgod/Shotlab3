@@ -1,6 +1,13 @@
-/* Final authenticated mobile x-axis authority. Route/component surfaces own
- * their own balanced visual gutters; structural wrappers do not. */
+/* Final authenticated mobile x-axis authority.
+ * Structural wrappers own containment; visible page surfaces own one fixed,
+ * symmetric 20px rail. This file is intentionally loaded last. */
 @media (max-width: 767px) {
+  html body #root .performance-shell.is-mobile {
+    --shotlab-mobile-page-gutter: 20px;
+    --layout-gutter: var(--shotlab-mobile-page-gutter);
+    --phase4e-mobile-gutter: var(--shotlab-mobile-page-gutter);
+  }
+
   html body #root > .screen-fade-in:has(> .app-shell.is-mobile),
   html body #root > .screen-fade-in > .app-shell.is-mobile,
   html body #root .performance-shell.is-mobile,
@@ -19,8 +26,7 @@
   html body #root .performance-shell--coach.is-mobile,
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach,
-  html body #root .performance-shell--coach.is-mobile
-    [data-testid="coach-command-center-full"].mcShellV3 {
+  html body #root .performance-shell--player.is-mobile .performance-workspace--player {
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
@@ -30,9 +36,23 @@
     overflow-x: clip !important;
   }
 
-  /* App.jsx's anonymous Coach route wrapper carries a 20px inline editorial
-   * gutter above every Coach page. That gutter is redundant on mobile because
-   * Home and secondary routes already own their intended inner gutters. */
+  /* Scroll containers are structural. Remove inherited one-sided/duplicate
+   * padding so the visible page owner below is the single gutter authority. */
+  html body #root .performance-shell.is-mobile .coach-scroll-container,
+  html body #root .performance-shell.is-mobile .coach-route-scroll-container,
+  html body #root .performance-shell.is-mobile .player-scroll-container {
+    inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  /* App.jsx's anonymous Coach route wrapper carries legacy inline padding.
+   * Remove it before applying the canonical visible-page rail. */
   html body #root .performance-shell--coach.is-mobile
     .performance-workspace--coach > div:has(> [data-testid="coach-command-center-full"]),
   html body #root .performance-shell--coach.is-mobile
@@ -43,13 +63,62 @@
     box-sizing: border-box !important;
   }
 
-  html body #root .performance-shell--player.is-mobile .player-scroll-container,
-  html body #root .performance-shell--player.is-mobile
-    [data-testid="player-daily-command-center"] {
+  /* Canonical visible page rail: exactly 20px on both sides at every certified
+   * mobile width. Home and secondary pages use the same geometry. */
+  html body #root .performance-shell.is-mobile [data-testid="coach-command-center-full"],
+  html body #root .performance-shell.is-mobile [data-testid="player-daily-command-center"],
+  html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
+    inline-size: calc(100% - (2 * var(--shotlab-mobile-page-gutter))) !important;
+    min-inline-size: 0 !important;
+    max-inline-size: calc(100% - (2 * var(--shotlab-mobile-page-gutter))) !important;
+    margin-inline: var(--shotlab-mobile-page-gutter) !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+  }
+
+  /* SecondaryPageShell previously combined width:100% with horizontal padding,
+   * while a later route rule expanded dark stages beyond that rail. Make the
+   * page shell itself the 20px owner and keep every direct stage inside it. */
+  html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  html body #root .performance-shell.is-mobile
+    [data-visual-role="secondary-page"] > [data-visual-role="page-intro"],
+  html body #root .performance-shell.is-mobile
+    [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"],
+  html body #root .performance-shell.is-mobile
+    [data-visual-role="secondary-page"] > [data-visual-role="supporting-evidence"],
+  html body #root .performance-shell.is-mobile
+    [data-visual-role="secondary-page"] > [data-visual-role="page-tools"],
+  html body #root .performance-shell.is-mobile
+    [data-visual-role="secondary-page"] > [data-layout-role="title-and-operations"] {
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
-    margin-inline: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Explicitly retire the old mobile full-bleed performance breakout. It is the
+   * reason Drills/S&C/Activity/Leaderboards could visually lose the right rail. */
+  html body #root .performance-shell.is-mobile
+    [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"][data-route-kind] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Mission Control can keep its internal safe-area/content padding, but the
+   * dashboard surface itself now obeys the same fixed page rail. */
+  html body #root .performance-shell--coach.is-mobile
+    [data-testid="coach-command-center-full"].mcShellV3,
+  html body #root .performance-shell--player.is-mobile
+    [data-testid="player-daily-command-center"] {
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 }
