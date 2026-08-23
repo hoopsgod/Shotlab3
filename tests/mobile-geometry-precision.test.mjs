@@ -17,15 +17,16 @@ test('mobile geometry authority owns one 20px content rail across current and le
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px/);
-  assert.match(authority, /\.performance-shell \.player-scroll-container[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
+  assert.match(finalAxis, /\.coach-scroll-container,[\s\S]*\.player-scroll-container[\s\S]*padding-inline:\s*20px !important/);
   assert.match(authority, /\.performance-shell--player \.player-quick-actions[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
 });
 
-test('Coach secondary routes compose the canonical 20px rail from one shared wrapper token', () => {
+test('Coach secondary routes inherit the canonical rail without double padding', () => {
   assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
-  assert.match(authority, /\.performance-shell--coach \.secondaryPageShell\s*\{[\s\S]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\) !important/);
-  assert.match(finalAxis, /\[data-visual-role="secondary-page"\][\s\S]*width:\s*calc\(100% - 40px\) !important/);
+  assert.match(finalAxis, /\.coach-route-scroll-container[^}]*\{[^}]*padding-inline:\s*0 !important/);
+  assert.match(finalAxis, /secondary-page[^}]*\{[^}]*width:\s*100% !important;[^}]*margin-inline:\s*0 !important;[^}]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /calc\(100% - 40px\)/);
 });
 
 test('secondary mobile pages land beyond bottom navigation with deliberate breathing room', () => {
