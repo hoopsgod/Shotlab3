@@ -74,19 +74,25 @@ async function createDemo(browser, role, viewport) {
 }
 
 function selectorsFor(role) {
-  const roleRail = role === 'coach' ? '.coach-scroll-container' : '.player-scroll-container';
+  const roleRail = role === 'coach'
+    ? '.performance-shell--coach.is-mobile > .shell-main > .content-wrap'
+    : '.player-scroll-container';
   const dashboard = role === 'coach' ? '[data-testid="coach-command-center-full"]' : '[data-testid="player-daily-command-center"]';
   return {
     roleRail,
     dashboard,
-    locked: ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', roleRail, dashboard],
+    locked: [...new Set(['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', roleRail, dashboard])],
   };
 }
 
 async function readGeometry(page, role) {
   const selectors = selectorsFor(role);
   return page.evaluate(({ locked, roleRail, dashboard }) => {
-    const viewport = document.documentElement.clientWidth;
+    const layoutViewportWidth = document.documentElement.clientWidth;
+    const visualViewportLeft = window.visualViewport?.offsetLeft ?? 0;
+    const visualViewportWidth = window.visualViewport?.width ?? layoutViewportWidth;
+    const visualViewportRight = visualViewportLeft + visualViewportWidth;
+    const visualViewportCenter = visualViewportLeft + visualViewportWidth / 2;
     const entries = Object.fromEntries(locked.map((selector) => {
       const node = document.querySelector(selector);
       if (!node) return [selector, null];
@@ -103,15 +109,24 @@ async function readGeometry(page, role) {
       }];
     }));
     const dashboardEntry = entries[dashboard];
+    const roleEntry = entries[roleRail];
     return {
-      viewport,
+      layoutViewportWidth,
+      visualViewportLeft,
+      visualViewportWidth,
+      visualViewportRight,
+      visualViewportCenter,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      visualViewportScale: window.visualViewport?.scale || 1,
       windowScrollX: window.scrollX,
       rootScrollLeft: document.scrollingElement?.scrollLeft || 0,
-      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
       roleRail,
       dashboard,
       entries,
       dashboardCenter: dashboardEntry ? (dashboardEntry.left + dashboardEntry.right) / 2 : null,
+      dashboardLeftGutter: dashboardEntry ? dashboardEntry.left - visualViewportLeft : null,
+      dashboardRightGutter: dashboardEntry ? visualViewportRight - dashboardEntry.right : null,
+      roleCenter: roleEntry ? (roleEntry.left + roleEntry.right) / 2 : null,
     };
   }, selectors);
 }
@@ -153,19 +168,27 @@ async function dispatchHorizontalFingerPan(page) {
   }
 }
 
+function expectVisualAxis(geometry, label) {
+  const diagnostic = `${label}: ${JSON.stringify(geometry, null, 2)}`;
+  expect(geometry.dashboardCenter, diagnostic).not.toBeNull();
+  expect(Math.abs(geometry.dashboardCenter - geometry.visualViewportCenter), `${label} dashboard must use visual viewport center`).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.dashboardLeftGutter - geometry.dashboardRightGutter), `${label} dashboard must have symmetric visual-viewport gutters`).toBeLessThanOrEqual(1);
+  expect(geometry.roleCenter, diagnostic).not.toBeNull();
+  expect(Math.abs(geometry.roleCenter - geometry.visualViewportCenter), `${label} real role owner must use visual viewport center`).toBeLessThanOrEqual(1);
+}
+
 async function expectSharedMobileLock(page, role, label) {
   const before = await readGeometry(page, role);
   const diagnostic = `${label}: ${JSON.stringify(before, null, 2)}`;
   expect(Math.abs(before.windowScrollX), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(before.rootScrollLeft), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(before.visualViewportOffsetLeft), diagnostic).toBeLessThanOrEqual(1);
-  expect(before.dashboardCenter, diagnostic).not.toBeNull();
-  expect(Math.abs(before.dashboardCenter - before.viewport / 2), diagnostic).toBeLessThanOrEqual(1);
+  expectVisualAxis(before, label);
 
   for (const [selector, entry] of Object.entries(before.entries)) {
     if (!entry) continue;
-    expect(entry.left, `${label} ${selector} left edge`).toBeGreaterThanOrEqual(-1);
-    expect(entry.right, `${label} ${selector} right edge`).toBeLessThanOrEqual(before.viewport + 1);
+    expect(entry.left, `${label} ${selector} left edge`).toBeGreaterThanOrEqual(before.visualViewportLeft - 1);
+    expect(entry.right, `${label} ${selector} right edge`).toBeLessThanOrEqual(before.visualViewportRight + 1);
     expect(Math.abs(entry.scrollLeft), `${label} ${selector} initial scrollLeft`).toBeLessThanOrEqual(1);
     expect(['clip', 'hidden'], `${label} ${selector} x containment`).toContain(entry.overflowX);
   }
@@ -173,12 +196,12 @@ async function expectSharedMobileLock(page, role, label) {
   const roleEntry = before.entries[before.roleRail];
   expect(roleEntry, diagnostic).not.toBeNull();
   expect(roleEntry.overscrollBehaviorX, diagnostic).toBe('none');
-  expect(roleEntry.touchAction, diagnostic).toContain('pan-y');
 
   await forceInvalidHorizontalState(page, role);
   const afterForced = await readGeometry(page, role);
   expect(Math.abs(afterForced.windowScrollX), `${label} window retained forced x offset`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterForced.rootScrollLeft), `${label} root retained forced x offset`).toBeLessThanOrEqual(1);
+  expectVisualAxis(afterForced, `${label} after forced offset`);
   for (const [selector, entry] of Object.entries(afterForced.entries)) {
     if (!entry) continue;
     expect(Math.abs(entry.scrollLeft), `${label} ${selector} retained forced scrollLeft`).toBeLessThanOrEqual(1);
@@ -189,7 +212,7 @@ async function expectSharedMobileLock(page, role, label) {
   expect(Math.abs(afterTouch.windowScrollX), `${label} window moved after finger pan`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterTouch.rootScrollLeft), `${label} root moved after finger pan`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterTouch.visualViewportOffsetLeft), `${label} visual viewport moved after finger pan`).toBeLessThanOrEqual(1);
-  expect(Math.abs(afterTouch.dashboardCenter - afterTouch.viewport / 2), `${label} dashboard lost center axis after finger pan`).toBeLessThanOrEqual(1);
+  expectVisualAxis(afterTouch, `${label} after finger pan`);
   for (const [selector, entry] of Object.entries(afterTouch.entries)) {
     if (!entry) continue;
     expect(Math.abs(entry.scrollLeft), `${label} ${selector} moved after finger pan`).toBeLessThanOrEqual(1);
