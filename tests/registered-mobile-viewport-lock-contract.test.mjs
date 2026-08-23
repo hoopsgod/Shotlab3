@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
-const finalPolish = readFileSync(new URL('../public/shotlab-phase4e-final-polish.css', import.meta.url), 'utf8');
 const finalAxis = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const missionControlLock = readFileSync(new URL('../src/styles/MissionControlCascadeLock2026.css', import.meta.url), 'utf8');
 const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-viewport-lock.spec.mjs', import.meta.url), 'utf8');
@@ -17,21 +16,15 @@ test('mobile viewport authority uses a true non-scrollable x boundary and stops 
   assert.match(centering, /max-width:\s*100%/);
 });
 
-test('registered player and coach content rails size inside the mobile viewport', () => {
-  const block = finalPolish.match(/\.performance-shell \.player-scroll-container,\s*\.performance-shell \.coach-scroll-container\s*\{([^}]*)\}/)?.[1] || '';
-  assert.ok(block, 'shared player/coach mobile rail geometry block must exist');
-  const compact = block.replace(/\s+/g, '');
-  for (const invariant of ['box-sizing:border-box!important;', 'width:100%!important;', 'max-width:100%!important;', 'min-width:0!important;']) {
-    assert.ok(compact.includes(invariant), `shared player/coach mobile rail must preserve ${invariant}`);
-  }
-});
-
-test('final mobile axis owns one fixed symmetric 20px visible-page gutter', () => {
+test('final mobile axis owns one fixed symmetric 20px role rail', () => {
   assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px;/);
   assert.match(finalAxis, /--layout-gutter:\s*20px;/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*20px;/);
-  assert.match(finalAxis, /coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*secondary-page[\s\S]*width:\s*calc\(100% - 40px\)\s*!important;[\s\S]*max-width:\s*calc\(100% - 40px\)\s*!important;[\s\S]*margin-inline:\s*20px\s*!important;/);
-  assert.match(finalAxis, /secondary-page[^}]*\{[^}]*padding-inline:\s*0\s*!important;/);
+  assert.match(finalAxis, /\.coach-scroll-container,[\s\S]*\.player-scroll-container[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*padding-inline:\s*20px\s*!important;[\s\S]*box-sizing:\s*border-box\s*!important;/);
+  assert.match(finalAxis, /\.coach-route-scroll-container[^}]*\{[^}]*padding-inline:\s*0\s*!important;/);
+  assert.match(finalAxis, /secondary-page[^}]*\{[^}]*width:\s*100%\s*!important;[^}]*margin-inline:\s*0\s*!important;[^}]*padding-inline:\s*0\s*!important;/);
+  assert.doesNotMatch(finalAxis, /calc\(100% - 40px\)/);
+  assert.doesNotMatch(finalAxis, /margin-inline:\s*20px\s*!important/);
   assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-left:\s*0\s*!important;[\s\S]*margin-right:\s*0\s*!important;/);
 });
 
