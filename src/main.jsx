@@ -6,8 +6,8 @@ import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './l
 import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
-import { installMobileHorizontalViewportLock } from './lib/mobileHorizontalViewportLock.js'
 import './styles/ExpertVisualPolish.css'
+import { installMobileHorizontalViewportLock } from './lib/mobileHorizontalViewportLock.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -115,8 +115,8 @@ function renderStartupError(message) {
 
 markBoot('main_executed')
 registerRuntimeListeners()
-installMobileHorizontalViewportLock()
 installExpertVisualPolish()
+installMobileHorizontalViewportLock()
 
 window.addEventListener('error', event => {
   const message = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
