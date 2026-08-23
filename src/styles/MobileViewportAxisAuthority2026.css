@@ -1,137 +1,51 @@
-/* Final mobile viewport-axis authority.
- *
- * Authenticated role workspaces are rendered as:
- *   #root > .screen-fade-in > .app-shell.is-mobile > .shell-main > .content-wrap
- *
- * The previous authority assumed `.app-shell.is-mobile` was a direct child of
- * `#root`. That skipped the real authenticated transition wrapper and could
- * leave the complete paid workspace resting one content rail to the right on
- * iOS while every inner surface still reported width:100% and scrollLeft:0.
- *
- * Keep this file last in the authenticated cascade. It owns structural mobile
- * geometry only; page-specific gutters remain component/route owned. */
-
+/* Final authenticated mobile x-axis authority. Route/component surfaces own
+ * their own balanced visual gutters; structural wrappers do not. */
 @media (max-width: 767px) {
-  html,
-  body,
-  #root {
-    width: 100% !important;
-    inline-size: 100% !important;
-    min-inline-size: 0 !important;
-    max-inline-size: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-    overflow-x: clip !important;
-    overscroll-behavior-x: none !important;
-  }
-
-  /* App.jsx wraps authenticated Coach and Player workspaces in screen-fade-in.
-   * Lock that real wrapper and the role shell themselves to the visual viewport
-   * before constraining descendants. Do not depend on a body class or a later
-   * effect for structural geometry: the first painted frame and the settled
-   * frame must have the same x origin. */
   html body #root > .screen-fade-in:has(> .app-shell.is-mobile),
   html body #root > .screen-fade-in > .app-shell.is-mobile,
   html body #root .performance-shell.is-mobile,
   html body #root .performance-shell.is-mobile > .shell-main,
   html body #root .performance-shell.is-mobile > .shell-main > .content-wrap {
-    position: relative !important;
-    inset-inline: 0 !important;
-    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
     margin-inline: 0 !important;
     padding-inline: 0 !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
     overflow-x: clip !important;
     overscroll-behavior-x: none !important;
-    transform: none !important;
-    translate: none !important;
   }
 
-  /* Coach mobile geometry is unconditional. The structural shell never owns an
-   * editorial gutter; route-owned content surfaces provide their own balanced
-   * insets. */
   html body #root .performance-shell--coach.is-mobile,
-  html body #root .performance-shell--coach.is-mobile > .shell-main,
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach,
   html body #root .performance-shell--coach.is-mobile
     [data-testid="coach-command-center-full"].mcShellV3 {
-    position: relative !important;
-    inset-inline: 0 !important;
-    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
     margin-inline: 0 !important;
     padding-inline: 0 !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
     overflow-x: clip !important;
-    overscroll-behavior-x: none !important;
-    transform: none !important;
-    translate: none !important;
   }
 
-  /* App.jsx has one anonymous route-content wrapper immediately inside the Coach
-   * performance workspace. Its inline shorthand still contributes a 20px left
-   * and right editorial rail. Once the no-pan lock clips horizontal overflow,
-   * that wrapper can leave the registered workspace visibly resting one rail to
-   * the right. Retire the OUTER rail on mobile; Home and secondary routes already
-   * own their intended symmetric inner gutters. The :has() selector identifies
-   * Coach Home semantically, while the unique z-index inline marker covers the
-   * same shared wrapper on every Coach route. */
+  /* App.jsx's anonymous Coach route wrapper carries a 20px inline editorial
+   * gutter above every Coach page. That gutter is redundant on mobile because
+   * Home and secondary routes already own their intended inner gutters. */
   html body #root .performance-shell--coach.is-mobile
     .performance-workspace--coach > div:has(> [data-testid="coach-command-center-full"]),
   html body #root .performance-shell--coach.is-mobile
     .performance-workspace--coach > div[style*="z-index: 1"] {
-    position: relative !important;
-    inset-inline: 0 !important;
     width: 100% !important;
-    inline-size: 100% !important;
-    min-inline-size: 0 !important;
-    max-inline-size: 100% !important;
     margin-inline: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
     padding-inline: 0 !important;
     box-sizing: border-box !important;
-    transform: none !important;
-    translate: none !important;
   }
 
-  /* Mission Control is the single Coach Home gutter owner. Its left and right
-   * insets are always equal; no viewport-width breakout or compensating negative
-   * margin is permitted. */
-  html body #root .performance-shell--coach.is-mobile
-    [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
-    position: relative !important;
-    inset-inline: 0 !important;
-    width: 100% !important;
-    inline-size: 100% !important;
-    min-inline-size: 0 !important;
-    max-inline-size: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline-start: max(12px, env(safe-area-inset-left, 0px)) !important;
-    padding-inline-end: max(12px, env(safe-area-inset-right, 0px)) !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-    overflow-x: clip !important;
-    transform: none !important;
-    translate: none !important;
-  }
-
-  /* Player keeps its canonical 20px content rail inside the real scroll owner;
-   * the outer transition wrapper and shell share the same viewport origin. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container,
   html body #root .performance-shell--player.is-mobile
     [data-testid="player-daily-command-center"] {
-    width: 100% !important;
     inline-size: 100% !important;
     min-inline-size: 0 !important;
     max-inline-size: 100% !important;
