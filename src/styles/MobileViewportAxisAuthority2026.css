@@ -28,7 +28,9 @@
 
   /* App.jsx wraps authenticated Coach and Player workspaces in screen-fade-in.
    * Lock that real wrapper and the role shell themselves to the visual viewport
-   * before constraining descendants. No compensating negative margin is used. */
+   * before constraining descendants. Do not depend on a body class or a later
+   * effect for structural geometry: the first painted frame and the settled
+   * frame must have the same x origin. */
   html body #root > .screen-fade-in:has(> .app-shell.is-mobile),
   html body #root > .screen-fade-in > .app-shell.is-mobile,
   html body #root .performance-shell.is-mobile,
@@ -45,21 +47,24 @@
     overflow-x: hidden !important;
     overflow-x: clip !important;
     overscroll-behavior-x: none !important;
+    transform: none !important;
+    translate: none !important;
   }
 
-  /* Coach Home has exactly one horizontal gutter owner: `.missionControl`.
-   * Every structural ancestor starts at the viewport origin and consumes exactly
-   * the viewport width. Secondary-route gutters are intentionally untouched. */
-  html body.mission-control-active #root
-    .performance-shell--coach.is-mobile,
-  html body.mission-control-active #root
-    .performance-shell--coach.is-mobile > .shell-main,
-  html body.mission-control-active #root
-    .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
-  html body.mission-control-active #root
-    .performance-shell--coach.is-mobile .performance-workspace--coach,
-  html body.mission-control-active #root
-    .performance-shell--coach.is-mobile
+  /* Coach mobile geometry is unconditional. Previously this block depended on
+   * body.mission-control-active, which is added from a component effect. On a
+   * real iPhone that allowed the registered workspace to establish a resting
+   * origin with the legacy editorial gutter before the body class became the
+   * cascade authority. Horizontal clipping then froze that wrong origin.
+   *
+   * The outer Coach workspace therefore owns ZERO horizontal gutter on every
+   * mobile Coach route. Home gets its gutter from `.missionControl`; secondary
+   * routes get theirs from their route-owned inner rails. */
+  html body #root .performance-shell--coach.is-mobile,
+  html body #root .performance-shell--coach.is-mobile > .shell-main,
+  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach,
+  html body #root .performance-shell--coach.is-mobile
     [data-testid="coach-command-center-full"].mcShellV3 {
     position: relative !important;
     inset-inline: 0 !important;
@@ -72,10 +77,14 @@
     overflow-x: hidden !important;
     overflow-x: clip !important;
     overscroll-behavior-x: none !important;
+    transform: none !important;
+    translate: none !important;
   }
 
-  html body.mission-control-active #root
-    .performance-shell--coach.is-mobile
+  /* Mission Control is the single Coach Home gutter owner. Its left and right
+   * insets are always equal; no viewport-width breakout or compensating negative
+   * margin is permitted. */
+  html body #root .performance-shell--coach.is-mobile
     [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
     position: relative !important;
     inset-inline: 0 !important;
@@ -88,6 +97,8 @@
     box-sizing: border-box !important;
     overflow-x: hidden !important;
     overflow-x: clip !important;
+    transform: none !important;
+    translate: none !important;
   }
 
   /* Player keeps its canonical 20px content rail inside the real scroll owner;
