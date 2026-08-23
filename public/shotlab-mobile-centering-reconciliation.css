@@ -94,25 +94,14 @@
     box-sizing: border-box;
   }
 
-  /* CoachRoutePerformanceStage intentionally breaks out of the inner editorial
-   * gutter. Expand equally on both sides so the stage remains centered without
-   * turning an ancestor into a horizontal scrolling surface. */
-  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"][data-route-kind] {
-    width: calc(100% + var(--layout-gutter, 18px) + var(--layout-gutter, 18px)) !important;
-    max-width: none !important;
-    margin-left: calc(var(--layout-gutter, 18px) * -1) !important;
-    margin-right: calc(var(--layout-gutter, 18px) * -1) !important;
-    justify-self: stretch;
-    box-sizing: border-box;
-  }
-
-  /* Other decision surfaces that do not use the route-performance component
-   * remain centered inside their normal page gutter. */
-  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"]:not([data-route-kind]) {
-    width: 100%;
-    max-width: 100%;
-    margin-left: auto !important;
-    margin-right: auto !important;
+  /* All mobile decision/performance stages stay inside the shared page rail.
+   * The former negative-margin breakout is intentionally retired so the visual
+   * left and right gutters remain equal on every Coach/Player route. */
+  html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     justify-self: stretch;
     box-sizing: border-box;
   }
