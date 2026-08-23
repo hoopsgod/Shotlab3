@@ -96,26 +96,34 @@ async function expectNoHorizontalOverflow(page) {
 }
 
 async function expectPlayerTwentyPixelPageRail(page) {
-  const owner = page.locator(':is([data-testid="player-daily-command-center"], [data-team-workspace], [data-visual-role="secondary-page"]):visible').first();
-  await expect(owner).toBeVisible();
-  const rail = await owner.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    const viewportLeft = window.visualViewport?.offsetLeft || 0;
-    const viewportWidth = window.visualViewport?.width || window.innerWidth;
-    const viewportRight = viewportLeft + viewportWidth;
-    return { left: rect.left - viewportLeft, right: viewportRight - rect.right };
-  });
-  expect(rail.left).toBeGreaterThanOrEqual(19.5);
-  expect(rail.left).toBeLessThanOrEqual(20.5);
-  expect(rail.right).toBeGreaterThanOrEqual(19.5);
-  expect(rail.right).toBeLessThanOrEqual(20.5);
-
-  const structuralPadding = await page.locator(".player-scroll-container").evaluate((element) => {
+  const rail = page.locator(".player-scroll-container");
+  await expect(rail).toBeVisible();
+  const geometry = await rail.evaluate((element) => {
     const style = getComputedStyle(element);
-    return { left: Number.parseFloat(style.paddingLeft), right: Number.parseFloat(style.paddingRight) };
+    const rect = element.getBoundingClientRect();
+    const paddingLeft = Number.parseFloat(style.paddingLeft);
+    const paddingRight = Number.parseFloat(style.paddingRight);
+    const contentLeft = rect.left + paddingLeft;
+    const contentRight = rect.right - paddingRight;
+    const candidates = [...element.querySelectorAll(':is([data-testid="player-daily-command-center"], [data-team-workspace], [data-testid^="player-commitment-center-"], [data-testid="player-progress-team-title"], [data-testid="player-progress-story"])')]
+      .map((node) => node.getBoundingClientRect())
+      .filter((box) => box.width > 1 && box.height > 1);
+    return {
+      paddingLeft,
+      paddingRight,
+      contentLeft,
+      contentRight,
+      candidates: candidates.map((box) => ({ left: box.left, right: box.right })),
+    };
   });
-  expect(structuralPadding.left).toBeLessThanOrEqual(0.5);
-  expect(structuralPadding.right).toBeLessThanOrEqual(0.5);
+  expect(geometry.paddingLeft).toBeGreaterThanOrEqual(19.5);
+  expect(geometry.paddingLeft).toBeLessThanOrEqual(20.5);
+  expect(geometry.paddingRight).toBeGreaterThanOrEqual(19.5);
+  expect(geometry.paddingRight).toBeLessThanOrEqual(20.5);
+  for (const candidate of geometry.candidates) {
+    expect(candidate.left).toBeGreaterThanOrEqual(geometry.contentLeft - 1);
+    expect(candidate.right).toBeLessThanOrEqual(geometry.contentRight + 1);
+  }
 }
 
 async function capture(page, name) {
