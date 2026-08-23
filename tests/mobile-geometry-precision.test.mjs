@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const authority = read('src/styles/AuthenticatedVisualAuthority2026.css');
+const finalAxis = read('src/styles/MobileViewportAxisAuthority2026.css');
 const metrics = read('src/components/PlayerMetricHierarchy.module.css');
 const secondaryPages = read('src/components/SecondaryPageSystem.css');
 const centering = read('public/shotlab-mobile-centering-reconciliation.css');
@@ -15,6 +16,7 @@ test('mobile geometry authority owns one 20px content rail across current and le
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
+  assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px/);
   assert.match(authority, /\.performance-shell \.player-scroll-container[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
   assert.match(authority, /\.performance-shell--player \.player-quick-actions[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
 });
@@ -23,6 +25,7 @@ test('Coach secondary routes compose the canonical 20px rail from one shared wra
   assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
   assert.match(authority, /\.performance-shell--coach \.secondaryPageShell\s*\{[\s\S]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\) !important/);
+  assert.match(finalAxis, /\[data-visual-role="secondary-page"\][\s\S]*inline-size:\s*calc\(100% - 40px\) !important/);
 });
 
 test('secondary mobile pages land beyond bottom navigation with deliberate breathing room', () => {
@@ -32,10 +35,10 @@ test('secondary mobile pages land beyond bottom navigation with deliberate breat
   assert.match(navigation, /min-height:\s*calc\(var\(--mobile-tab-bar-height\) \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
-test('full-bleed route performance stages still break the rail symmetrically', () => {
-  assert.match(centering, /width:\s*calc\(100% \+ var\(--layout-gutter, 18px\) \+ var\(--layout-gutter, 18px\)\) !important/);
-  assert.match(centering, /margin-left:\s*calc\(var\(--layout-gutter, 18px\) \* -1\) !important/);
-  assert.match(centering, /margin-right:\s*calc\(var\(--layout-gutter, 18px\) \* -1\) !important/);
+test('mobile route performance stages stay inside the canonical page rail', () => {
+  assert.match(centering, /\[data-visual-role="secondary-page"\] > \[data-visual-role="primary-decision"\][\s\S]*width:\s*100% !important;[\s\S]*max-width:\s*100% !important;[\s\S]*margin-left:\s*0 !important;[\s\S]*margin-right:\s*0 !important/);
+  assert.doesNotMatch(centering, /width:\s*calc\(100% \+ var\(--layout-gutter/);
+  assert.doesNotMatch(centering, /margin-left:\s*calc\(var\(--layout-gutter, 18px\) \* -1\)/);
   assert.match(secondaryPages, /\.secondaryPageDecision\s*\{/);
 });
 
