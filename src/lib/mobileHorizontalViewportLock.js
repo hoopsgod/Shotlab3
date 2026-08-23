@@ -1,4 +1,5 @@
 const MOBILE_VIEWPORT_QUERY = '(max-width: 760px)';
+const HORIZONTAL_INTENT_THRESHOLD_PX = 6;
 
 const LOCKED_VERTICAL_OWNER_SELECTORS = [
   '.app-shell.is-mobile',
@@ -14,6 +15,13 @@ const LOCKED_VERTICAL_OWNER_SELECTORS = [
 ];
 
 const LOCKED_VERTICAL_OWNER_SELECTOR = LOCKED_VERTICAL_OWNER_SELECTORS.join(',');
+const INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR = [
+  '.h-scroll',
+  '[data-horizontal-scroll]',
+  '[data-scroll-axis="x"]',
+  '[role="slider"]',
+  'input[type="range"]',
+].join(',');
 
 function isMobileViewport() {
   if (typeof window === 'undefined') return false;
@@ -25,6 +33,36 @@ function resetNodeHorizontalOffset(node) {
   if (Math.abs(node.scrollLeft) <= 0.5) return false;
   node.scrollLeft = 0;
   return true;
+}
+
+function isIntentionalHorizontalGestureOwner(target) {
+  let node = target instanceof Element ? target : target?.parentElement;
+  while (node && node !== document.documentElement) {
+    if (node.matches?.(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR)) return true;
+
+    const style = window.getComputedStyle?.(node);
+    const ownsHorizontalScroll = node.scrollWidth > node.clientWidth + 1
+      && (style?.overflowX === 'auto' || style?.overflowX === 'scroll');
+    if (ownsHorizontalScroll) return true;
+
+    const touchAction = String(style?.touchAction || '').toLowerCase();
+    if (touchAction.includes('pan-x')) return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+
+export function shouldContainRegisteredHorizontalGesture({
+  deltaX,
+  deltaY,
+  targetIsHorizontalOwner = false,
+  minimumHorizontalIntent = HORIZONTAL_INTENT_THRESHOLD_PX,
+} = {}) {
+  const absX = Math.abs(Number(deltaX) || 0);
+  const absY = Math.abs(Number(deltaY) || 0);
+  return !targetIsHorizontalOwner
+    && absX >= minimumHorizontalIntent
+    && absX > absY;
 }
 
 export function resetMobileHorizontalViewport() {
@@ -52,6 +90,8 @@ export function installMobileHorizontalViewportLock() {
   if (typeof document === 'undefined' || typeof window === 'undefined') return () => {};
 
   let rafId = null;
+  let touchStart = null;
+
   const scheduleCorrection = () => {
     if (!isMobileViewport() || rafId != null) return;
     rafId = window.requestAnimationFrame(() => {
@@ -73,11 +113,52 @@ export function installMobileHorizontalViewportLock() {
     }
   };
 
+  const handleTouchStart = (event) => {
+    if (!isMobileViewport() || event.touches?.length !== 1) {
+      touchStart = null;
+      return;
+    }
+    const touch = event.touches[0];
+    touchStart = {
+      x: touch.clientX,
+      y: touch.clientY,
+      target: event.target,
+      targetIsHorizontalOwner: isIntentionalHorizontalGestureOwner(event.target),
+    };
+  };
+
+  const handleTouchMove = (event) => {
+    if (!isMobileViewport() || !touchStart || event.touches?.length !== 1) return;
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+
+    if (!shouldContainRegisteredHorizontalGesture({
+      deltaX,
+      deltaY,
+      targetIsHorizontalOwner: touchStart.targetIsHorizontalOwner,
+    })) return;
+
+    // iOS can visually translate the viewport before scroll/touchend fires. Cancel
+    // only horizontal-dominant outer-page motion while the finger is still down;
+    // vertical scroll, pinch zoom and intentional horizontal controls remain native.
+    if (event.cancelable) event.preventDefault();
+    resetMobileHorizontalViewport();
+  };
+
+  const finishTouch = () => {
+    touchStart = null;
+    scheduleCorrection();
+  };
+
   const observer = new MutationObserver(scheduleCorrection);
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   document.addEventListener('scroll', handleCapturedScroll, true);
-  window.addEventListener('touchend', scheduleCorrection, { passive: true });
+  document.addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
+  document.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
+  document.addEventListener('touchend', finishTouch, { passive: true, capture: true });
+  document.addEventListener('touchcancel', finishTouch, { passive: true, capture: true });
   window.addEventListener('pointerup', scheduleCorrection, { passive: true });
   window.addEventListener('resize', scheduleCorrection, { passive: true });
   window.visualViewport?.addEventListener('resize', scheduleCorrection, { passive: true });
@@ -88,7 +169,10 @@ export function installMobileHorizontalViewportLock() {
   return () => {
     observer.disconnect();
     document.removeEventListener('scroll', handleCapturedScroll, true);
-    window.removeEventListener('touchend', scheduleCorrection);
+    document.removeEventListener('touchstart', handleTouchStart, true);
+    document.removeEventListener('touchmove', handleTouchMove, true);
+    document.removeEventListener('touchend', finishTouch, true);
+    document.removeEventListener('touchcancel', finishTouch, true);
     window.removeEventListener('pointerup', scheduleCorrection);
     window.removeEventListener('resize', scheduleCorrection);
     window.visualViewport?.removeEventListener('resize', scheduleCorrection);
