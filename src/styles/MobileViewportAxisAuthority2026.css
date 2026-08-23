@@ -6,12 +6,9 @@
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* One structural owner means every Coach and Player route inherits the same
-   * visible 20px left/right rail, including custom pages without a shared root. */
-  html body #root .performance-shell.is-mobile :is(
-    .coach-scroll-container,
-    .player-scroll-container
-  ) {
+  /* Player routes share this one scroll shell, including custom pages that do
+   * not expose a common page-root component. */
+  html body #root .performance-shell--player.is-mobile .player-scroll-container {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -19,21 +16,27 @@
     box-sizing: border-box !important;
   }
 
-  /* Nested Coach route owners must not add a second gutter. */
-  html body #root .performance-shell.is-mobile .coach-route-scroll-container {
-    padding-inline: 0 !important;
-  }
-
-  /* Remove the legacy Coach route wrapper inset before the shared rail applies. */
+  /* Coach routes share the direct workspace scroll wrapper. Replace its legacy
+   * 16px inline gutter with the same fixed 20px rail used by Player. */
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > :is(
     div:has(> [data-testid="coach-command-center-full"]),
     div[style*="z-index: 1"]
   ) {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Nested/route-specific owners must not add a second gutter. */
+  html body #root .performance-shell--coach.is-mobile :is(
+    .coach-scroll-container,
+    .coach-route-scroll-container
+  ) {
     padding-inline: 0 !important;
   }
 
-  /* SecondaryPageShell previously compensated for older wrapper padding. The
-   * shared role rail now owns that geometry, so route shells stay 100% inside it. */
+  /* SecondaryPageShell previously compensated for the older 16px Coach wrapper.
+   * The role shell now owns geometry, so route shells remain 100% inside it. */
   html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
     width: 100% !important;
     max-width: 100% !important;
