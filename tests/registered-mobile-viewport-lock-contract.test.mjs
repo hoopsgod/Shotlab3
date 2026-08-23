@@ -17,7 +17,18 @@ test('mobile viewport authority uses a true non-scrollable x boundary and stops 
 });
 
 test('registered player and coach content rails include padding inside the mobile viewport width', () => {
-  assert.match(finalPolish, /\.performance-shell \.player-scroll-container,\s*\n\s*\.performance-shell \.coach-scroll-container\s*\{[^}]*box-sizing:\s*border-box!important;[^}]*width:\s*100%!important;[^}]*max-width:\s*100%!important;[^}]*min-width:\s*0!important;[^}]*margin-inline:\s*auto!important;/);
+  const block = finalPolish.match(/\.performance-shell \.player-scroll-container,\s*\.performance-shell \.coach-scroll-container\s*\{([^}]*)\}/)?.[1] || '';
+  assert.ok(block, 'shared player/coach mobile rail geometry block must exist');
+  const compact = block.replace(/\s+/g, '');
+  for (const invariant of [
+    'box-sizing:border-box!important;',
+    'width:100%!important;',
+    'max-width:100%!important;',
+    'min-width:0!important;',
+    'margin-inline:auto!important;',
+  ]) {
+    assert.ok(compact.includes(invariant), `shared player/coach mobile rail must preserve ${invariant}`);
+  }
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
