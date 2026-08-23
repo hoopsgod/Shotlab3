@@ -23,11 +23,12 @@
     padding-inline: 0 !important;
   }
 
-  /* One fixed 20px visual rail for Home and every secondary page. */
+  /* One fixed 20px visual rail for Home and every shared route page. */
   html body #root .performance-shell.is-mobile :is(
     [data-testid="coach-command-center-full"],
     [data-testid="player-daily-command-center"],
-    [data-visual-role="secondary-page"]
+    [data-visual-role="secondary-page"],
+    [data-team-workspace]
   ) {
     width: calc(100% - 40px) !important;
     max-width: calc(100% - 40px) !important;
