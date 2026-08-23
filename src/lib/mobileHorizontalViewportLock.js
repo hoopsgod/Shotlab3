@@ -6,7 +6,7 @@ const LOCKED_VERTICAL_OWNER_SELECTORS = [
   '.app-shell.is-mobile > .shell-main > .content-wrap',
   '.app-shell.is-mobile .performance-workspace',
   '.app-shell.is-mobile .player-scroll-container',
-  '.app-shell.is-mobile .coach-scroll-container',
+  '.performance-shell--coach.is-mobile > .shell-main > .content-wrap',
   '.app-shell.is-mobile .coach-route-scroll-container',
   '.app-shell.is-mobile .coach-home-dashboard',
   '.app-shell.is-mobile [data-testid="coach-command-center-full"]',
