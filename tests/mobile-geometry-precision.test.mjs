@@ -25,7 +25,7 @@ test('Coach secondary routes compose the canonical 20px rail from one shared wra
   assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
   assert.match(authority, /\.performance-shell--coach \.secondaryPageShell\s*\{[\s\S]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\) !important/);
-  assert.match(finalAxis, /\[data-visual-role="secondary-page"\][\s\S]*inline-size:\s*calc\(100% - 40px\) !important/);
+  assert.match(finalAxis, /\[data-visual-role="secondary-page"\][\s\S]*width:\s*calc\(100% - 40px\) !important/);
 });
 
 test('secondary mobile pages land beyond bottom navigation with deliberate breathing room', () => {
