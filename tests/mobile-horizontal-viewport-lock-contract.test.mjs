@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { shouldContainRegisteredHorizontalGesture } from '../src/lib/mobileHorizontalViewportLock.js';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
@@ -22,6 +23,19 @@ test('final mobile viewport axis authority loads after every authenticated visua
   assert.ok(finalAxis > phase7, 'mobile viewport axis authority must load after Phase 7');
 });
 
+test('runtime blocks horizontal-dominant outer touch movement before Safari can translate the viewport', () => {
+  assert.equal(shouldContainRegisteredHorizontalGesture({ deltaX: 42, deltaY: 5 }), true);
+  assert.equal(shouldContainRegisteredHorizontalGesture({ deltaX: 42, deltaY: 50 }), false);
+  assert.equal(shouldContainRegisteredHorizontalGesture({ deltaX: 5, deltaY: 0 }), false);
+  assert.equal(shouldContainRegisteredHorizontalGesture({ deltaX: 42, deltaY: 5, targetIsHorizontalOwner: true }), false);
+  assert.match(guard, /INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR/);
+  assert.match(guard, /input\[type="range"\]/);
+  assert.match(guard, /touchAction\.includes\('pan-x'\)/);
+  assert.match(guard, /document\.addEventListener\('touchmove', handleTouchMove, \{ passive: false, capture: true \}\)/);
+  assert.match(guard, /event\.cancelable\) event\.preventDefault\(\)/);
+  assert.match(guard, /event\.touches\?\.length !== 1/);
+});
+
 test('runtime installs one shared guard against invalid outer scrollLeft using the real Coach layout owner', () => {
   assert.match(main, /import \{ installMobileHorizontalViewportLock \} from ['"]\.\/lib\/mobileHorizontalViewportLock\.js['"]/);
   assert.match(main, /installMobileHorizontalViewportLock\(\)/);
@@ -36,10 +50,14 @@ test('runtime installs one shared guard against invalid outer scrollLeft using t
   assert.doesNotMatch(guard, /querySelectorAll\(['"]\*['"]\)/);
 });
 
-test('shared browser certification covers Demo and paid Coach/Player at all target widths against the visual viewport axis', () => {
+test('shared browser certification covers current Demo entry and paid Coach/Player at all target widths', () => {
   for (const width of ['320', '375', '390', '430']) assert.match(sharedSpec, new RegExp(`width: ${width}`));
   assert.match(sharedSpec, /for \(const mode of \['demo', 'paid'\]\)/);
   assert.match(sharedSpec, /for \(const role of \['coach', 'player'\]\)/);
+  assert.match(sharedSpec, /page\.goto\('\/\?demo=1'\)/);
+  assert.match(sharedSpec, /Coach demo/);
+  assert.match(sharedSpec, /Player demo/);
+  assert.doesNotMatch(sharedSpec, /\?demo=\$\{role\}/);
   assert.match(sharedSpec, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap/);
   assert.match(sharedSpec, /visualViewportCenter/);
   assert.match(sharedSpec, /dashboard must have symmetric visual-viewport gutters/);
