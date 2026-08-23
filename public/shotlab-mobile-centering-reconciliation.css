@@ -40,6 +40,21 @@
     overscroll-behavior-x: none;
   }
 
+  /* The authenticated content rails are vertical page owners, never horizontal
+   * scrollers. A paid-only descendant used to be able to make one of these rails
+   * retain scrollLeft on iOS even while html/body remained locked. Clip at the
+   * rail itself so the whole registered workspace cannot be finger-panned. Child
+   * controls that intentionally scroll horizontally keep their own overflow. */
+  html body #root .performance-shell .player-scroll-container,
+  html body #root .performance-shell .coach-scroll-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+    overscroll-behavior-x: none !important;
+  }
+
   /* Schedule is an informational operational surface. Preserve the semantic-info
    * token at the final mobile cascade so later brand-lime presentation layers
    * cannot overwrite its route-owned accent contract. */
