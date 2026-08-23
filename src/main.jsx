@@ -6,6 +6,7 @@ import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './l
 import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
+import { installMobileHorizontalViewportLock } from './lib/mobileHorizontalViewportLock.js'
 import './styles/ExpertVisualPolish.css'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
@@ -114,6 +115,7 @@ function renderStartupError(message) {
 
 markBoot('main_executed')
 registerRuntimeListeners()
+installMobileHorizontalViewportLock()
 installExpertVisualPolish()
 
 window.addEventListener('error', event => {
