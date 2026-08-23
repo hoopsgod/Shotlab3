@@ -90,7 +90,9 @@ test("player mobile home presents performance, interpretation, momentum, and one
 });
 
 test("coach mobile home presents populated decision intelligence and a current Schedule", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  const viewportWidth = 390;
+  const expectedPageRail = 20;
+  await page.setViewportSize({ width: viewportWidth, height: 844 });
   await enterDemo(page, "coach");
   const commandCenter = page.getByTestId("coach-command-center-full");
   const objective = page.getByTestId("coach-primary-objective");
@@ -107,9 +109,14 @@ test("coach mobile home presents populated decision intelligence and a current S
     return { left: Number.parseFloat(style.paddingLeft) || 0, right: Number.parseFloat(style.paddingRight) || 0 };
   });
   expect(shellBox).not.toBeNull(); expect(objectiveBox).not.toBeNull(); expect(attentionBox).not.toBeNull();
-  expect(shellBox.x).toBeLessThanOrEqual(1); expect(shellBox.width).toBeGreaterThanOrEqual(388);
-  const stageLeftGap = objectiveBox.x, stageRightGap = 390 - (objectiveBox.x + objectiveBox.width);
-  expect(Math.abs(stageLeftGap)).toBeLessThanOrEqual(1); expect(Math.abs(stageRightGap)).toBeLessThanOrEqual(1);
+  const shellLeftRail = shellBox.x, shellRightRail = viewportWidth - (shellBox.x + shellBox.width);
+  expect(Math.abs(shellLeftRail - expectedPageRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(shellRightRail - expectedPageRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(shellLeftRail - shellRightRail)).toBeLessThanOrEqual(1);
+  const stageLeftRail = objectiveBox.x, stageRightRail = viewportWidth - (objectiveBox.x + objectiveBox.width);
+  expect(Math.abs(stageLeftRail - expectedPageRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageRightRail - expectedPageRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageLeftRail - stageRightRail)).toBeLessThanOrEqual(1);
   expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(20); expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(20); expect(objectiveBox.height).toBeLessThan(520); expect(attentionBox.y).toBeLessThan(844);
   await expectNoHorizontalOverflow(page);
   const dock = page.getByTestId("mobile-navigation-dock"); await expect(dock).toBeVisible(); await dock.getByRole("button", { name: "Schedule", exact: true }).click();
