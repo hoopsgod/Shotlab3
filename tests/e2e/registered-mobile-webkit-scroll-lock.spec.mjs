@@ -27,26 +27,9 @@ function registeredCoachSeed() {
       },
       'sl:supabase-access-token': 'webkit-coach-token',
       'sl:session': { email: coach.email },
-      'sl:teams': [withParityBranding({
-        id: TEAM_ID,
-        name: 'WebKit Viewport Team',
-        ownerCoachId: coach.email,
-        joinCode: 'WK26',
-        createdAt: 1_780_000_000_000,
-      })],
+      'sl:teams': [withParityBranding({ id: TEAM_ID, name: 'WebKit Viewport Team', ownerCoachId: coach.email, joinCode: 'WK26', createdAt: 1_780_000_000_000 })],
       'sl:players': [coach],
-      'sl:player-profiles': [],
-      'sl:scores': [],
-      'sl:program-scores': [],
-      'sl:shotlogs': [],
-      'sl:events': [],
-      'sl:rsvps': [],
-      'sl:sc-sessions': [],
-      'sl:sc-rsvps': [],
-      'sl:sc-logs': [],
-      'sl:challenges': [],
-      'sl:season-archives': [],
-      'sl:team-stores': [],
+      'sl:player-profiles': [], 'sl:scores': [], 'sl:program-scores': [], 'sl:shotlogs': [], 'sl:events': [], 'sl:rsvps': [], 'sl:sc-sessions': [], 'sl:sc-rsvps': [], 'sl:sc-logs': [], 'sl:challenges': [], 'sl:season-archives': [], 'sl:team-stores': [],
     },
   };
 }
@@ -57,22 +40,8 @@ async function installRoutes(target, registeredUser) {
   await target.route('**/v1/coach/players/provision**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, invitations: [] }) }));
   await target.route(`${REGISTERED_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(registeredUser) }));
   await target.route(`${REGISTERED_SUPABASE_ORIGIN}/rest/v1/**`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
-  await target.route('**/v1/legacy-auth/restore', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({
-      ok: true,
-      profile: { email: COACH.email, name: COACH.name, role: 'coach', team_id: TEAM_ID, hide_from_leaderboards: true },
-    }),
-  }));
-  await target.route('**/v1/teams/restore-context', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({
-      ok: true,
-      team: withParityBranding({ id: TEAM_ID, name: 'WebKit Viewport Team', ownerCoachId: COACH.email, joinCode: 'WK26', createdAt: 1_780_000_000_000 }),
-    }),
-  }));
+  await target.route('**/v1/legacy-auth/restore', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, profile: { email: COACH.email, name: COACH.name, role: 'coach', team_id: TEAM_ID, hide_from_leaderboards: true } }) }));
+  await target.route('**/v1/teams/restore-context', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, team: withParityBranding({ id: TEAM_ID, name: 'WebKit Viewport Team', ownerCoachId: COACH.email, joinCode: 'WK26', createdAt: 1_780_000_000_000 }) }) }));
 }
 
 async function createRegisteredCoach(browser, viewport) {
@@ -100,6 +69,7 @@ async function createRegisteredCoach(browser, viewport) {
 async function collectHorizontalOverflow(page) {
   return page.evaluate(() => {
     const root = document.scrollingElement || document.documentElement;
+    const rail = document.querySelector('.coach-scroll-container');
     const viewport = document.documentElement.clientWidth;
     const offenders = Array.from(document.querySelectorAll('body *'))
       .map((node) => {
@@ -111,18 +81,9 @@ async function collectHorizontalOverflow(page) {
         const internallyScrollable = node.scrollWidth > node.clientWidth + 1;
         if (!outsideLeft && !outsideRight && !internallyScrollable) return null;
         return {
-          tag: node.tagName.toLowerCase(),
-          id: node.id || '',
-          classes: typeof node.className === 'string' ? node.className.slice(0, 180) : '',
-          testid: node.getAttribute('data-testid') || '',
-          left: Math.round(rect.left * 10) / 10,
-          right: Math.round(rect.right * 10) / 10,
-          width: Math.round(rect.width * 10) / 10,
-          clientWidth: node.clientWidth,
-          scrollWidth: node.scrollWidth,
-          position: styles.position,
-          overflowX: styles.overflowX,
-          transform: styles.transform,
+          tag: node.tagName.toLowerCase(), id: node.id || '', classes: typeof node.className === 'string' ? node.className.slice(0, 180) : '', testid: node.getAttribute('data-testid') || '',
+          left: Math.round(rect.left * 10) / 10, right: Math.round(rect.right * 10) / 10, width: Math.round(rect.width * 10) / 10,
+          clientWidth: node.clientWidth, scrollWidth: node.scrollWidth, position: styles.position, overflowX: styles.overflowX, transform: styles.transform,
         };
       })
       .filter(Boolean)
@@ -139,30 +100,45 @@ async function collectHorizontalOverflow(page) {
       bodyScrollWidth: document.body.scrollWidth,
       windowScrollX: window.scrollX,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      rail: rail ? {
+        clientWidth: rail.clientWidth,
+        scrollWidth: rail.scrollWidth,
+        scrollLeft: rail.scrollLeft,
+        overflowX: getComputedStyle(rail).overflowX,
+        overscrollBehaviorX: getComputedStyle(rail).overscrollBehaviorX,
+      } : null,
       offenders,
     };
   });
 }
 
-async function expectNoPersistentDocumentPan(page, label) {
+async function expectNoPersistentDocumentOrRailPan(page, label) {
   const before = await collectHorizontalOverflow(page);
   const diagnostic = `${label} horizontal overflow report:\n${JSON.stringify(before, null, 2)}`;
   expect(before.rootScrollWidth, diagnostic).toBeLessThanOrEqual(before.rootClientWidth + 1);
   expect(before.bodyScrollWidth, diagnostic).toBeLessThanOrEqual(before.viewport + 1);
+  expect(before.rail, diagnostic).not.toBeNull();
+  expect(['clip', 'hidden'], diagnostic).toContain(before.rail.overflowX);
+  expect(before.rail.overscrollBehaviorX, diagnostic).toBe('none');
+  expect(Math.abs(before.rail.scrollLeft), diagnostic).toBeLessThanOrEqual(1);
 
   const shifted = await page.evaluate(async () => {
     const root = document.scrollingElement || document.documentElement;
+    const rail = document.querySelector('.coach-scroll-container');
     const y = window.scrollY;
     root.scrollLeft = 240;
     window.scrollTo(240, y);
+    if (rail) rail.scrollLeft = 240;
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return {
       rootScrollLeft: root.scrollLeft,
+      railScrollLeft: rail?.scrollLeft || 0,
       windowScrollX: window.scrollX,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
     };
   });
   expect(Math.abs(shifted.rootScrollLeft), diagnostic).toBeLessThanOrEqual(1);
+  expect(Math.abs(shifted.railScrollLeft), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(shifted.windowScrollX), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(shifted.visualViewportOffsetLeft), diagnostic).toBeLessThanOrEqual(1);
 }
@@ -173,7 +149,7 @@ test('registered Coach Home cannot persist a horizontal pan in mobile WebKit at 
   try {
     const registered = await createRegisteredCoach(browser, { width: 390, height: 844 });
     try {
-      await expectNoPersistentDocumentPan(registered.page, 'registered Coach Home 390px WebKit');
+      await expectNoPersistentDocumentOrRailPan(registered.page, 'registered Coach Home 390px WebKit');
       await registered.page.screenshot({ path: 'parity-evidence/webkit-registered-coach-390.png', fullPage: true });
     } finally {
       await registered.context.close();
