@@ -12,14 +12,16 @@ const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
 const app = read('src/App.jsx');
 
-test('mobile geometry authority owns one 20px content rail across current and legacy mobile owners', () => {
+test('mobile geometry authority owns one 20px content rail at the canonical role shells', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px !important/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\([\s\S]*padding-left:\s*20px !important;[\s\S]*padding-right:\s*20px !important/);
-  assert.match(authority, /\.performance-shell--player \.player-quick-actions[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px !important;[^}]*padding-right:\s*20px !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile :is\([\s\S]*\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[^}]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\(/);
 });
 
 test('Coach secondary routes inherit the canonical rail without double padding', () => {
