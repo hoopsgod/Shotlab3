@@ -3,56 +3,56 @@
  * containers that own that copy so every route shares one centered mobile axis. */
 
 @media (max-width: 760px) {
-  /* iOS Safari applies elastic viewport panning at the root scrolling element.
-   * `overflow-x: clip` is appropriate for inner app shells, but it does not by
-   * itself suppress the browser viewport's horizontal rubber-band. Keep the
-   * viewport itself non-scrollable on the x-axis and stop overscroll chaining at
-   * the actual root authority. Intentional inner horizontal scrollers remain
-   * available because overscroll containment does not disable their own scroll. */
+  /* iOS Safari can retain horizontal scrollLeft when `hidden` creates a scroll
+   * container. Keep hidden as the compatibility fallback, then promote modern
+   * WebKit/Chromium to `clip`, which creates no horizontal scrolling mechanism. */
   html,
-  body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-    overscroll-behavior-x: none;
-  }
-
+  body,
   #root {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: clip;
-    overscroll-behavior-x: none;
-  }
-
-  /* Registered workspaces can render materially different sparse/data-backed
-   * descendants than Demo. Keep those differences inside the visual viewport
-   * instead of allowing an oversized child to turn the authenticated shell into
-   * a horizontally pannable document on iOS Safari. Intentional horizontal
-   * scrollers remain free to own overflow inside this clipped outer hierarchy. */
-  html body #root .app-shell.is-mobile,
-  html body #root .app-shell.is-mobile > .shell-main,
-  html body #root .app-shell.is-mobile > .shell-main > .content-wrap,
-  html body #root .app-shell.is-mobile .performance-workspace {
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    overflow-x: clip;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-x: clip !important;
     overscroll-behavior-x: none;
   }
 
-  /* The authenticated content rails are vertical page owners, never horizontal
-   * scrollers. A paid-only descendant used to be able to make one of these rails
-   * retain scrollLeft on iOS even while html/body remained locked. Clip at the
-   * rail itself so the whole registered workspace cannot be finger-panned. Child
-   * controls that intentionally scroll horizontally keep their own overflow. */
-  html body #root .performance-shell .player-scroll-container,
-  html body #root .performance-shell .coach-scroll-container {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
+  /* Demo and registered sessions share these vertical page owners. None of them
+   * is allowed to own persistent horizontal scroll state. Intentional horizontal
+   * rails remain independent descendants and keep their own overflow behavior. */
+  html body #root .app-shell.is-mobile,
+  html body #root .app-shell.is-mobile > .shell-main,
+  html body #root .app-shell.is-mobile > .shell-main > .content-wrap,
+  html body #root .app-shell.is-mobile .performance-workspace,
+  html body #root .app-shell.is-mobile .player-scroll-container,
+  html body #root .app-shell.is-mobile .coach-scroll-container,
+  html body #root .app-shell.is-mobile .coach-route-scroll-container,
+  html body #root .app-shell.is-mobile .coach-home-dashboard,
+  html body #root .app-shell.is-mobile [data-testid="coach-command-center-full"],
+  html body #root .app-shell.is-mobile [data-testid="player-daily-command-center"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
     overflow-x: clip !important;
-    overscroll-behavior-x: none !important;
+    overscroll-behavior-x: none;
+  }
+
+  /* These are vertical interaction surfaces. On direct page gestures, only
+   * vertical pan/pinch is valid; nested horizontal scrollers can still become
+   * the gesture owner themselves. */
+  html body #root .app-shell.is-mobile .performance-workspace,
+  html body #root .app-shell.is-mobile .player-scroll-container,
+  html body #root .app-shell.is-mobile .coach-scroll-container,
+  html body #root .app-shell.is-mobile .coach-route-scroll-container,
+  html body #root .app-shell.is-mobile .coach-home-dashboard,
+  html body #root .app-shell.is-mobile [data-testid="coach-command-center-full"],
+  html body #root .app-shell.is-mobile [data-testid="player-daily-command-center"] {
+    touch-action: pan-y pinch-zoom;
   }
 
   /* Schedule is an informational operational surface. Preserve the semantic-info
@@ -95,10 +95,8 @@
   }
 
   /* CoachRoutePerformanceStage intentionally breaks out of the inner editorial
-   * gutter. Its legacy mobile rule shifted it left with negative margins but did
-   * not add those gutters back to the width, producing a visible blank strip on
-   * the right of S&C, Activity, and Leaderboards. Expand by both gutters so the
-   * stage is truly full-bleed and geometrically centered. */
+   * gutter. Expand equally on both sides so the stage remains centered without
+   * turning an ancestor into a horizontal scrolling surface. */
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"][data-route-kind] {
     width: calc(100% + var(--layout-gutter, 18px) + var(--layout-gutter, 18px)) !important;
     max-width: none !important;
