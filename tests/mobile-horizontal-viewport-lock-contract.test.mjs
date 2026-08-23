@@ -10,10 +10,11 @@ const main = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.spec.mjs', import.meta.url), 'utf8');
 
-test('mobile document and shared Demo/paid page owners use a non-scrollable x boundary', () => {
+test('mobile document and shared Demo/paid page owners use one split x-axis authority', () => {
   assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(finalAxisAuthority, /#root > \.screen-fade-in:has\(> \.app-shell\.is-mobile\),[\s\S]*#root > \.screen-fade-in > \.app-shell\.is-mobile,[\s\S]*performance-shell\.is-mobile > \.shell-main > \.content-wrap[\s\S]*inline-size:\s*100%\s*!important;[\s\S]*margin-inline:\s*0\s*!important;[\s\S]*padding-inline:\s*0\s*!important;[\s\S]*overflow-x:\s*clip\s*!important;/);
-  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile,[\s\S]*performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap,[\s\S]*coach-command-center-full[\s\S]*inline-size:\s*100%\s*!important;[\s\S]*padding-inline:\s*0\s*!important;/);
+  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
+  assert.match(finalAxisAuthority, /coach-scroll-container,[\s\S]*coach-route-scroll-container,[\s\S]*player-scroll-container[\s\S]*padding-inline:\s*0\s*!important;/);
+  assert.match(finalAxisAuthority, /coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*secondary-page[\s\S]*width:\s*calc\(100% - 40px\)\s*!important;[\s\S]*margin-inline:\s*20px\s*!important;[\s\S]*overflow-x:\s*clip\s*!important;/);
 });
 
 test('final mobile viewport axis authority loads after every authenticated visual layer', () => {
