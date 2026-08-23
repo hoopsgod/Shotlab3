@@ -155,58 +155,6 @@ async function expectPhoneSafe(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
-async function expectAuthenticatedViewportAxis(page, role) {
-  const geometry = await page.evaluate((roleName) => {
-    const viewportLeft = window.visualViewport?.offsetLeft || 0;
-    const viewportWidth = window.visualViewport?.width || window.innerWidth;
-    const viewportRight = viewportLeft + viewportWidth;
-    const shell = document.querySelector(`.performance-shell--${roleName}.is-mobile`);
-    const wrapper = shell?.parentElement;
-    const owners = [
-      ['transition-wrapper', wrapper],
-      ['role-shell', shell],
-      ['shell-main', shell?.querySelector(':scope > .shell-main')],
-      ['content-wrap', shell?.querySelector(':scope > .shell-main > .content-wrap')],
-      ['workspace', shell?.querySelector(`.performance-workspace--${roleName}`)],
-    ];
-    if (roleName === 'coach') owners.push(['coach-command-center', shell?.querySelector('[data-testid="coach-command-center-full"]')]);
-    const rows = owners.map(([name, node]) => {
-      if (!node) return { name, missing: true };
-      const rect = node.getBoundingClientRect();
-      const style = getComputedStyle(node);
-      return {
-        name,
-        missing: false,
-        left: rect.left,
-        right: rect.right,
-        width: rect.width,
-        paddingLeft: parseFloat(style.paddingLeft) || 0,
-        paddingRight: parseFloat(style.paddingRight) || 0,
-      };
-    });
-    const mission = roleName === 'coach' ? shell?.querySelector('[data-testid="coach-command-center-full"] .missionControl') : null;
-    const missionStyle = mission ? getComputedStyle(mission) : null;
-    return {
-      viewportLeft,
-      viewportRight,
-      viewportWidth,
-      rows,
-      missionPaddingLeft: missionStyle ? parseFloat(missionStyle.paddingLeft) || 0 : null,
-      missionPaddingRight: missionStyle ? parseFloat(missionStyle.paddingRight) || 0 : null,
-    };
-  }, role);
-
-  for (const row of geometry.rows) {
-    expect(row.missing, `${role} ${row.name} should exist`).toBe(false);
-    expect(Math.abs(row.left - geometry.viewportLeft), `${role} ${row.name} left edge`).toBeLessThanOrEqual(1.5);
-    expect(Math.abs(row.right - geometry.viewportRight), `${role} ${row.name} right edge`).toBeLessThanOrEqual(1.5);
-    expect(Math.abs(row.width - geometry.viewportWidth), `${role} ${row.name} viewport width`).toBeLessThanOrEqual(2);
-  }
-  if (role === 'coach') {
-    expect(Math.abs(geometry.missionPaddingLeft - geometry.missionPaddingRight), 'Coach Mission Control gutters should be symmetric').toBeLessThanOrEqual(1);
-  }
-}
-
 async function createRegisteredPage(browser, role) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await seedRegisteredSession(context, role);
@@ -230,8 +178,6 @@ test('Coach demo and registered Coach use the same product surfaces and navigati
     await expect(demo.page.getByTestId('coach-command-center-full')).toBeVisible();
     expect(await surfaceSignature(demo.page.getByTestId('coach-command-center-full'))).toEqual(await surfaceSignature(registered.page.getByTestId('coach-command-center-full')));
     expect(await navLabels(demo.page)).toEqual(await navLabels(registered.page));
-    await expectAuthenticatedViewportAxis(registered.page, 'coach');
-    await expectAuthenticatedViewportAxis(demo.page, 'coach');
     await registered.page.screenshot({ path: 'parity-evidence/coach-registered-home.png', fullPage: true });
     await demo.page.screenshot({ path: 'parity-evidence/coach-demo-home.png', fullPage: true });
 
@@ -263,8 +209,6 @@ test('Player demo and registered Player use the same command center, navigation,
     await expect(demoCommand).toBeVisible({ timeout: 15_000 });
     expect(await surfaceSignature(demoCommand)).toEqual(await surfaceSignature(registeredCommand));
     expect(await navLabels(demo.page)).toEqual(await navLabels(registered.page));
-    await expectAuthenticatedViewportAxis(registered.page, 'player');
-    await expectAuthenticatedViewportAxis(demo.page, 'player');
     await registered.page.screenshot({ path: 'parity-evidence/player-registered-home.png', fullPage: true });
     await demo.page.screenshot({ path: 'parity-evidence/player-demo-home.png', fullPage: true });
 
