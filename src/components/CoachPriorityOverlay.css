@@ -81,6 +81,7 @@ body.mission-control-priority-open [data-testid="coach-priority-editor"] {
   max-height: calc(100dvh - max(94px, calc(env(safe-area-inset-top) + 80px)) - env(safe-area-inset-bottom)) !important;
   margin: 0 !important;
   padding: 20px !important;
+  box-sizing: border-box !important;
   overflow: auto !important;
   overscroll-behavior: contain;
   transform: translateX(-50%) !important;
