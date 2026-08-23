@@ -7,6 +7,7 @@ const IDENTITIES = {
   coach: { id: '55555555-5555-4555-8555-555555555555', email: 'viewport.coach@shotlab.test', name: 'Viewport Coach', role: 'coach', isCoach: true },
   player: { id: '66666666-6666-4666-8666-666666666666', email: 'viewport.player@shotlab.test', name: 'Viewport Player', role: 'player', isCoach: false },
 };
+const COACH_RAIL_SELECTOR = '.performance-shell--coach.is-mobile > .shell-main > .content-wrap';
 
 function registeredSeed(role) {
   const current = IDENTITIES[role];
@@ -89,7 +90,7 @@ const VIEWPORT_CONTAINMENT_SELECTORS = [
   '.content-wrap',
   '.performance-workspace',
   '.player-scroll-container',
-  '.coach-scroll-container',
+  COACH_RAIL_SELECTOR,
   '[data-testid="coach-command-center-full"]',
   '[data-testid="coach-command-center-full"] .missionControl',
   '[data-testid="mission-control-team-header"]',
@@ -106,7 +107,7 @@ const OVERFLOW_LOCK_SELECTORS = new Set([
   '.content-wrap',
   '.performance-workspace',
   '.player-scroll-container',
-  '.coach-scroll-container',
+  COACH_RAIL_SELECTOR,
   '[data-testid="coach-command-center-full"]',
   '[data-testid="coach-command-center-full"] .missionControl',
 ]);
@@ -120,10 +121,10 @@ const OVERSCROLL_LOCK_SELECTORS = [
   '.content-wrap',
   '.performance-workspace',
   '.player-scroll-container',
-  '.coach-scroll-container',
+  COACH_RAIL_SELECTOR,
 ];
 
-const REGISTERED_CONTENT_RAIL_SELECTORS = ['.coach-scroll-container', '.player-scroll-container'];
+const REGISTERED_CONTENT_RAIL_SELECTORS = [COACH_RAIL_SELECTOR, '.player-scroll-container'];
 
 /* Coach Home intentionally uses a centered editorial gutter on mobile. The
    regression reported on iOS was asymmetric: a normal left gutter survived
@@ -232,13 +233,13 @@ async function expectRegisteredViewportLocked(page) {
     await page.mouse.move(Math.floor(viewport.width / 2), Math.min(120, Math.floor(viewport.height / 4)));
     await page.mouse.wheel(480, 0);
     await page.waitForTimeout(60);
-    const afterGesture = await page.evaluate(() => ({
+    const afterGesture = await page.evaluate((coachRailSelector) => ({
       windowScrollX: window.scrollX,
       scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
-      coachRailScrollLeft: document.querySelector('.coach-scroll-container')?.scrollLeft || 0,
+      coachRailScrollLeft: document.querySelector(coachRailSelector)?.scrollLeft || 0,
       playerRailScrollLeft: document.querySelector('.player-scroll-container')?.scrollLeft || 0,
-    }));
+    }), COACH_RAIL_SELECTOR);
     expect(Math.abs(afterGesture.windowScrollX)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
