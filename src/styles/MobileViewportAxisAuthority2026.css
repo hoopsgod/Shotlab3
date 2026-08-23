@@ -27,6 +27,13 @@
     box-sizing: border-box !important;
   }
 
+  /* The legacy Coach route wrapper still resolves its inline horizontal
+   * padding from this variable. Once content-wrap owns the canonical rail,
+   * that wrapper must resolve to zero rather than composing another 16px. */
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
+    --shotlab-coach-route-wrapper-gutter: 0px;
+  }
+
   /* Nested/route-specific owners must not add a second gutter. */
   html body #root .performance-shell--coach.is-mobile :is(
     .coach-scroll-container,
