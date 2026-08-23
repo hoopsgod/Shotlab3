@@ -1,14 +1,15 @@
 /* Final mobile viewport-axis authority.
  *
- * The authenticated Coach shell does not have a `.coach-scroll-container`.
- * Its real structural owner is `.shell-main > .content-wrap`.  Older mobile
- * containment layers targeted the former selector, which allowed iOS Safari
- * to settle the Coach workspace on an offset layout origin even when the
- * document itself reported scrollLeft === 0.
+ * Authenticated role workspaces are rendered as:
+ *   #root > .screen-fade-in > .app-shell.is-mobile > .shell-main > .content-wrap
  *
- * Keep this file last in the authenticated cascade.  It owns only structural
- * mobile geometry; page-specific gutters remain owned by the existing
- * workspace/secondary-page rules. */
+ * The previous authority assumed `.app-shell.is-mobile` was a direct child of
+ * `#root`. That skipped the real authenticated transition wrapper and could
+ * leave the complete paid workspace resting one content rail to the right on
+ * iOS while every inner surface still reported width:100% and scrollLeft:0.
+ *
+ * Keep this file last in the authenticated cascade. It owns structural mobile
+ * geometry only; page-specific gutters remain component/route owned. */
 
 @media (max-width: 767px) {
   html,
@@ -25,9 +26,14 @@
     overscroll-behavior-x: none !important;
   }
 
-  html body #root > .app-shell.is-mobile,
-  html body #root > .app-shell.is-mobile > .shell-main,
-  html body #root > .app-shell.is-mobile > .shell-main > .content-wrap {
+  /* App.jsx wraps authenticated Coach and Player workspaces in screen-fade-in.
+   * Lock that real wrapper and the role shell themselves to the visual viewport
+   * before constraining descendants. No compensating negative margin is used. */
+  html body #root > .screen-fade-in:has(> .app-shell.is-mobile),
+  html body #root > .screen-fade-in > .app-shell.is-mobile,
+  html body #root .performance-shell.is-mobile,
+  html body #root .performance-shell.is-mobile > .shell-main,
+  html body #root .performance-shell.is-mobile > .shell-main > .content-wrap {
     position: relative !important;
     inset-inline: 0 !important;
     inline-size: 100% !important;
@@ -42,9 +48,12 @@
   }
 
   /* Coach Home has exactly one horizontal gutter owner: `.missionControl`.
-   * Every structural ancestor must therefore start on the viewport origin and
-   * consume exactly the viewport width.  This neutralizes the legacy `.mcShell`
-   * mobile breakout without changing Coach secondary-route gutters. */
+   * Every structural ancestor starts at the viewport origin and consumes exactly
+   * the viewport width. Secondary-route gutters are intentionally untouched. */
+  html body.mission-control-active #root
+    .performance-shell--coach.is-mobile,
+  html body.mission-control-active #root
+    .performance-shell--coach.is-mobile > .shell-main,
   html body.mission-control-active #root
     .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
   html body.mission-control-active #root
@@ -82,7 +91,7 @@
   }
 
   /* Player keeps its canonical 20px content rail inside the real scroll owner;
-   * the outer shell stays on the same viewport origin as Coach and Demo. */
+   * the outer transition wrapper and shell share the same viewport origin. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container,
   html body #root .performance-shell--player.is-mobile
     [data-testid="player-daily-command-center"] {
