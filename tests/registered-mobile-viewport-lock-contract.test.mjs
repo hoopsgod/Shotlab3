@@ -21,9 +21,11 @@ test('final mobile axis owns one fixed symmetric 20px role rail', () => {
   assert.match(finalAxis, /--layout-gutter:\s*20px;/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*20px;/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\([\s\S]*coach-command-center-full[\s\S]*z-index: 1[\s\S]*padding-left:\s*20px\s*!important;[\s\S]*padding-right:\s*20px\s*!important;/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*\{[^}]*padding-left:\s*20px\s*!important;[^}]*padding-right:\s*20px\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*0px;/);
   assert.match(finalAxis, /\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0\s*!important;/);
   assert.match(finalAxis, /secondary-page[^}]*\{[^}]*width:\s*100%\s*!important;[^}]*margin-inline:\s*0\s*!important;[^}]*padding-inline:\s*0\s*!important;/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\(/);
   assert.doesNotMatch(finalAxis, /calc\(100% - 40px\)/);
   assert.doesNotMatch(finalAxis, /margin-inline:\s*20px\s*!important/);
   assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-left:\s*0\s*!important;[\s\S]*margin-right:\s*0\s*!important;/);
