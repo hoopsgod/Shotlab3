@@ -34,6 +34,15 @@
     --shotlab-coach-route-wrapper-gutter: 0px;
   }
 
+  /* Coach Home carries an inline 20px route inset around Mission Control for
+   * legacy safe-area composition. content-wrap now owns the canonical 20px
+   * horizontal rail, so zero only that Home wrapper's left/right padding while
+   * preserving its inline top safe-area spacing. */
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
   /* Coach Mission Control is mounted inside the same canonical Coach rail.
    * Legacy Mission Control layers predate that owner and add their own mobile
    * page inset. Keep the page wrapper, command-center shell, and primary grid
