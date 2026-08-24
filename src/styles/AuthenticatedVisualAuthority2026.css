@@ -42,9 +42,22 @@
   }
 
   /* Registered Coach routes already arrive inside App.jsx's canonical 20px
-   * route rail. SecondaryPageShell must not compose a second horizontal gutter. */
+   * route rail. SecondaryPageShell must not compose a second horizontal gutter.
+   * Paid empty/onboarding states can mount intrinsically wider children than the
+   * populated Demo state, so the shell must use a zero-minimum grid track. */
   html body #root .performance-shell--coach .secondaryPageShell {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     padding-inline: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .performance-shell--coach .secondaryPageShell > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
