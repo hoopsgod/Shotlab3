@@ -17,9 +17,8 @@
   }
 
   /* Paid Coach routes already compose their canonical 20px rail in App.jsx:
-   * 16px on the route wrapper + 4px on SecondaryPageShell. Do not move that
-   * gutter onto content-wrap; doing so makes iOS Safari clip 100%-wide route
-   * descendants against an inset parent. Keep the outer Coach rail full-width. */
+   * 16px on the route wrapper + 4px on SecondaryPageShell. The shared mobile
+   * centering authority now binds the actual padded route owner directly. */
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap {
     width: 100% !important;
     max-width: 100% !important;
@@ -31,18 +30,6 @@
 
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
     --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
-  }
-
-  /* The registered Coach route scroller is a padded flex child with no stable
-   * class in App.jsx. WebKit can resolve that child as a full content-box width
-   * and then add its 16px inline padding, leaving descendants visually shifted
-   * right while the root overflow lock hides the excess. Bind the actual route
-   * owner by its semantic child and force padding inside the visual viewport. */
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has(> .page.pageShell) {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
   }
 
   /* Coach Home is the one deliberate breakout from the secondary-route rail.
