@@ -34,6 +34,24 @@
     --shotlab-coach-route-wrapper-gutter: 0px;
   }
 
+  /* Coach Mission Control is mounted inside the same canonical Coach rail.
+   * Legacy Mission Control layers predate that owner and add their own mobile
+   * page inset. Keep the page wrapper, command-center shell, and primary grid
+   * on the parent's 20px axis; component-level header/card padding remains
+   * free to style content inside those boxes. */
+  html body.mission-control-active #root .performance-shell--coach.is-mobile .team-brand.coach-mode.page,
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"],
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] > .missionControl {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   /* Nested/route-specific owners must not add a second gutter. */
   html body #root .performance-shell--coach.is-mobile :is(
     .coach-scroll-container,
