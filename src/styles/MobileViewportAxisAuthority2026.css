@@ -55,6 +55,57 @@
     box-sizing: border-box !important;
   }
 
+  /* Definite-width mobile children must size their padding and border inside the
+   * available visual rail. Without border-box, 100% + horizontal padding inflated
+   * the Home grid track and Safari clipped the CTA / setup crest on the right. */
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcHeroContent,
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary {
+    width: 100% !important;
+  }
+
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
+    min-height: 0 !important;
+    max-height: 100% !important;
+  }
+
+  /* The shared Coach title-frame intentionally breaks 20px across the legacy
+   * wrapper, then the title stage must shrink back by the same 40px before its
+   * 20px margins are applied. The Events override had reset this child to 100%,
+   * making the grid track 40px too wide and pulling the calendar off the right. */
+  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
+    max-width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
+    margin-left: var(--shotlab-mobile-content-rail, 20px) !important;
+    margin-right: var(--shotlab-mobile-content-rail, 20px) !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Setup/fallback crests are definite 100% children with their own border and
+   * padding. Keep that decoration inside the crest slot instead of widening it. */
+  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
+  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   /* Player nested surfaces must not compose a second 20px rail. Coach nested
    * route surfaces intentionally keep their existing route-owned geometry. */
   html body #root .performance-shell--player.is-mobile .player-quick-actions {
