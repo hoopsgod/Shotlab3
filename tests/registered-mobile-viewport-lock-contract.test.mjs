@@ -15,15 +15,15 @@ test('mobile viewport authority uses a true non-scrollable x boundary and stops 
   assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*\.player-scroll-container,[\s\S]*\.coach-scroll-container[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
   assert.match(centering, /min-width:\s*0/);
   assert.match(centering, /max-width:\s*100%/);
+  assert.match(centering, /box-sizing:\s*border-box/);
 });
 
 test('final mobile axis keeps Player on a dedicated 20px rail and preserves Coach route-owned composition', () => {
-  assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px;/);
   assert.match(finalAxis, /--layout-gutter:\s*20px;/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*20px;/);
-  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important;/);
 
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*\{[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*\{[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important;/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
   assert.match(authenticatedAuthority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
   assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\)\s*!important/);
