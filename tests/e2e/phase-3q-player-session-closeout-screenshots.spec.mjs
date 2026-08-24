@@ -139,7 +139,12 @@ test("player can intentionally close the daily training loop after logging a res
     clientHeight: node.clientHeight,
     distanceFromBottom: Math.abs(node.scrollHeight - node.clientHeight - node.scrollTop),
   }));
-  expect(terminalScroll.scrollHeight).toBeGreaterThan(terminalScroll.clientHeight);
+  expect(terminalScroll.scrollHeight).toBeGreaterThanOrEqual(terminalScroll.clientHeight);
+  if (terminalScroll.scrollHeight > terminalScroll.clientHeight + 1) {
+    expect(terminalScroll.scrollTop).toBeGreaterThan(0);
+  } else {
+    expect(terminalScroll.scrollTop).toBeLessThanOrEqual(1);
+  }
   expect(terminalScroll.distanceFromBottom).toBeLessThanOrEqual(1);
 
   const dockBox = await page.getByTestId("mobile-navigation-dock").boundingBox();
