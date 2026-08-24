@@ -5,31 +5,23 @@
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* Width/min-width/box sizing for this rail is owned by the shared centering
-   * boundary; this late layer only owns the Player-specific inset. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
     padding-inline: 20px !important;
   }
 
-  /* The shared centering boundary owns Coach rail width and border-box sizing.
-   * This late layer only prevents content-wrap from composing another gutter. */
-  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  /* The shared centering boundary owns width/min-width/box sizing. These two
+   * registered Coach owners only opt out of an extra late inline gutter. */
+  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
+    padding-inline: 0 !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
     --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
   }
 
-  /* Coach Home deliberately opts out of the secondary-route wrapper gutter. */
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
   /* MissionControlCascadeLock owns the Home shell and hero-content viewport
-   * geometry. Keep only the two definite-width children that need local sizing. */
+   * geometry. Keep only definite-width children that need local border-box sizing. */
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
     min-width: 0 !important;
@@ -37,17 +29,11 @@
     box-sizing: border-box !important;
   }
 
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary {
-    width: 100% !important;
-  }
-
-  /* Events must shrink back by the same 40px used by its legacy title-frame
-   * breakout before the canonical 20px margins are applied. */
+  /* Events shrinks back by the same 40px used by its legacy title-frame breakout
+   * before the canonical 20px margins are applied. */
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
     width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
-    margin-left: var(--shotlab-mobile-content-rail, 20px) !important;
-    margin-right: var(--shotlab-mobile-content-rail, 20px) !important;
-    box-sizing: border-box !important;
+    margin-inline: var(--shotlab-mobile-content-rail, 20px) !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
@@ -64,13 +50,12 @@
     box-sizing: border-box !important;
   }
 
-  html body #root .performance-shell--player.is-mobile .player-quick-actions {
+  html body #root .performance-shell--player.is-mobile .player-quick-actions,
+  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
     padding-inline: 0 !important;
   }
 
   html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
-    width: 100% !important;
     margin-inline: 0 !important;
-    padding-inline: 0 !important;
   }
 }
