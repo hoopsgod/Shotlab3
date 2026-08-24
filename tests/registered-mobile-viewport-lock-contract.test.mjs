@@ -33,12 +33,12 @@ test('final mobile axis keeps Player on a dedicated 20px rail and preserves Coac
   assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile :is\([\s\S]*coach-scroll-container[\s\S]*padding-inline:\s*0\s*!important/);
   assert.doesNotMatch(finalAxis, /performance-shell\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0\s*!important/);
   assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-inline:\s*20px\s*!important/);
-  assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-left:\s*0\s*!important;[\s\S]*margin-right:\s*0\s*!important;/);
+  assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-inline:\s*0\s*!important;/);
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
   assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.performance-workspace--coach > div:has\(> \.page\.pageShell\),[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
-  assert.match(centering, /margin-left:\s*auto;[\s\S]*margin-right:\s*auto;/);
+  assert.match(centering, /margin-inline:\s*auto;/);
   assert.match(centering, /touch-action:\s*pan-y pinch-zoom/);
   assert.match(registeredViewportSpec, /REGISTERED_CONTENT_RAIL_SELECTORS/);
   assert.match(registeredViewportSpec, /rail\.scrollLeft = 240/);
