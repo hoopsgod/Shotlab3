@@ -67,6 +67,27 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroScrim{opacity:.18!important}
 }
 
+/* Demo's populated Home does not expose the intrinsic-width failure because its
+   lower panel mix is different. A real paid onboarding/no-roster state mounts
+   additional enhancer hosts into these grids. Use a zero-minimum track so one
+   wide child can never expand the entire lower Home rail past the viewport. */
+@media(max-width:700px){
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcFocusGrid,
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcLowerGrid{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    box-sizing:border-box!important;
+  }
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcFocusGrid>*,
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcLowerGrid>*{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+}
+
 @media(min-width:701px){
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan{grid-template-columns:48px minmax(0, 1fr)!important;align-items:start!important}
   html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan > button{grid-column: 1 / -1 !important;width:100%!important}
