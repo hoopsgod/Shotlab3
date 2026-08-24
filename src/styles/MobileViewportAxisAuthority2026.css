@@ -6,8 +6,8 @@
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* Player routes share this one scroll shell, including custom pages that do
-   * not expose a common page-root component. */
+  /* Player routes share one dedicated scroll-shell rail, including custom pages
+   * that do not expose a common page-root component. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
     width: 100% !important;
     max-width: 100% !important;
@@ -16,37 +16,33 @@
     box-sizing: border-box !important;
   }
 
-  /* The authenticated Coach content-wrap is the shared route rail owner.
-   * Route/workspace descendants fill this box instead of composing gutters. */
+  /* Paid Coach routes already compose their canonical 20px rail in App.jsx:
+   * 16px on the route wrapper + 4px on SecondaryPageShell. Do not move that
+   * gutter onto content-wrap; doing so makes iOS Safari clip 100%-wide route
+   * descendants against an inset parent. Keep the outer Coach rail full-width. */
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
     box-sizing: border-box !important;
   }
 
-  /* The legacy Coach route wrapper still resolves its inline horizontal
-   * padding from this variable. Once content-wrap owns the canonical rail,
-   * that wrapper must resolve to zero rather than composing another 16px. */
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
-    --shotlab-coach-route-wrapper-gutter: 0px;
+    --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
   }
 
-  /* Coach Home carries an inline 20px route inset around Mission Control for
-   * legacy safe-area composition. content-wrap now owns the canonical 20px
-   * horizontal rail, so zero only that Home wrapper's left/right padding while
-   * preserving its inline top safe-area spacing. */
+  /* Coach Home is the one deliberate breakout from the secondary-route rail.
+   * Its Mission Control wrapper owns its own internal 10-12px cinematic inset,
+   * so remove only the App.jsx route-wrapper gutter around that mounted surface. */
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
 
-  /* Coach Mission Control is mounted inside the same canonical Coach rail.
-   * Keep the page wrapper and command-center shell on the parent's 20px axis.
-   * The nested .missionControl intentionally retains its 12px component inset;
-   * the mobile hero bleeds that same 12px back out to the canonical rail. */
+  /* Mission Control stays on the visual viewport without reviving the legacy
+   * 100vw/negative-margin breakout. Its internal component owns the hero inset. */
   html body.mission-control-active #root .performance-shell--coach.is-mobile .team-brand.coach-mode.page,
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] {
     width: 100% !important;
@@ -59,17 +55,13 @@
     box-sizing: border-box !important;
   }
 
-  /* Nested/route-specific owners must not add a second gutter. */
-  html body #root .performance-shell--coach.is-mobile :is(
-    .coach-scroll-container,
-    .coach-route-scroll-container
-  ),
+  /* Player nested surfaces must not compose a second 20px rail. Coach nested
+   * route surfaces intentionally keep their existing route-owned geometry. */
   html body #root .performance-shell--player.is-mobile .player-quick-actions {
     padding-inline: 0 !important;
   }
 
-  /* SecondaryPageShell belongs inside the role shell's rail. */
-  html body #root .performance-shell.is-mobile [data-visual-role="secondary-page"] {
+  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
     width: 100% !important;
     max-width: 100% !important;
     margin-inline: 0 !important;
