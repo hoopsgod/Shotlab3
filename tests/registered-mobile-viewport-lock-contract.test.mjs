@@ -37,7 +37,7 @@ test('final mobile axis keeps Player on a dedicated 20px rail and preserves Coac
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
-  assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container,[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
+  assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.performance-workspace--coach > div:has\(> \.page\.pageShell\),[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
   assert.match(centering, /margin-left:\s*auto;[\s\S]*margin-right:\s*auto;/);
   assert.match(centering, /touch-action:\s*pan-y pinch-zoom/);
   assert.match(registeredViewportSpec, /REGISTERED_CONTENT_RAIL_SELECTORS/);
