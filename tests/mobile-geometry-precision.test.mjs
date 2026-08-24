@@ -12,23 +12,25 @@ const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
 const app = read('src/App.jsx');
 
-test('mobile geometry authority owns one 20px content rail at the canonical role shells', () => {
+test('mobile geometry authority keeps Player on a dedicated 20px rail and Coach on its route-owned rail', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px !important/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px !important;[^}]*padding-right:\s*20px !important/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile :is\([\s\S]*\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*0 !important;[^}]*padding-right:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[^}]*padding-inline:\s*0 !important/);
-  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\(/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px !important/);
 });
 
-test('Coach secondary routes inherit the canonical rail without double padding', () => {
+test('Coach secondary routes compose the canonical 20px rail without clipping or double padding', () => {
   assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
-  assert.match(finalAxis, /\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0 !important/);
-  assert.match(finalAxis, /secondary-page[^}]*\{[^}]*width:\s*100% !important;[^}]*margin-inline:\s*0 !important;[^}]*padding-inline:\s*0 !important/);
+  assert.match(authority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\) !important/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile :is\([\s\S]*coach-scroll-container[\s\S]*padding-inline:\s*0 !important/);
   assert.doesNotMatch(finalAxis, /calc\(100% - 40px\)/);
 });
 
