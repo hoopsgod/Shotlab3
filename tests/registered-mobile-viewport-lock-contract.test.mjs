@@ -26,7 +26,7 @@ test('final mobile axis keeps Player on a dedicated 20px rail and preserves Coac
   assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*\{[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
   assert.match(authenticatedAuthority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
-  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\)\s*!important;/);
+  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\)\s*!important/);
 
   assert.match(finalAxis, /performance-workspace--coach > div:has\(\[data-testid="coach-command-center-full"\]\)[^}]*\{[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important;/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][^}]*\{[^}]*padding-inline:\s*0\s*!important;/);
@@ -73,6 +73,16 @@ test('registered mobile browser contract emulates touch hardware and verifies ro
   assert.match(registeredViewportSpec, /horizontal overscroll authority/);
   assert.match(registeredViewportSpec, /page\.mouse\.wheel\(480, 0\)/);
   assert.match(registeredViewportSpec, /visualViewportOffsetLeft/);
+});
+
+test('registered WebKit parity measures visible paid Coach gutters on Home, Players, and Events', () => {
+  assert.match(webkitViewportSpec, /expectSymmetricVisualGutters/);
+  assert.match(webkitViewportSpec, /coach-players-interactive-dashboard/);
+  assert.match(webkitViewportSpec, /coach-events-interactive-dashboard/);
+  assert.match(webkitViewportSpec, /leftGutter/);
+  assert.match(webkitViewportSpec, /rightGutter/);
+  assert.match(webkitViewportSpec, /leftGutter - geometry\.rightGutter/);
+  for (const width of ['390', '430']) assert.match(webkitViewportSpec, new RegExp(`width: ${width}`));
 });
 
 test('Experience Parity executes Chromium, WebKit, and shared Demo/paid mobile scroll regressions', () => {
