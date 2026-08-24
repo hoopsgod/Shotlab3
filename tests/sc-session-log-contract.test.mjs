@@ -13,7 +13,9 @@ test('S&C top add controls open and focus the coach S&C session form instead of 
   assert.doesNotMatch(source, /<PageHeader title="S&C"[\s\S]*actionLabel=\{showAddSC\?"Close":"Add"\} onAction=\{\(\)=>setShowAddSC\(!showAddSC\)\}/);
   assert.match(source, /const focusCoachScSessionForm=\(\)=>setTimeout\(\(\)=>\{const form=document\.getElementById\("coach-sc-session-form"\);form\?\.scrollIntoView\(\{behavior:"smooth",block:"start"\}\);form\?\.querySelector\("input,select,textarea"\)\?\.focus\?\.\(\{preventScroll:true\}\);\},120\);/);
   assert.match(source, /const openCoachScSessionForm=\(\)=>\{setShowAddSC\(true\);focusCoachScSessionForm\(\);\};/);
-  assert.match(source, /<CoachPageDashboardHeader[^>]*eyebrow="Performance operations"[^>]*title="S&C"[^>]*actions=\{\[\{key:"add",label:"Add Session",onClick:openCoachScSessionForm\}\]\}[^>]*testId="coach-page-dashboard-strength"\/>/);
+  const strengthHeader = source.match(/<CoachPageDashboardHeader eyebrow="Performance operations" title="S&C"[\s\S]*?testId="coach-page-dashboard-strength"\/>/)?.[0] || '';
+  assert.match(strengthHeader, /actions=\{\[\{key:"add",label:"Add Session",onClick:openCoachScSessionForm\}\]\}/);
+  assert.match(strengthHeader, /testId="coach-page-dashboard-strength"/);
   assert.match(source, /<button[\s\S]*className="pageHeaderPill btn-v"[\s\S]*onClick=\{toggleCoachScSessionForm\}/);
   assert.match(source, /\{showAddSC&&<div id="coach-sc-session-form" className="fade-up"/);
 });
