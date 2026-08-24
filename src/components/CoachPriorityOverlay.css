@@ -62,6 +62,7 @@ body.mission-control-priority-open .coach-home-dashboard {
   padding: 0 !important;
   overflow: visible !important;
   pointer-events: none !important;
+  animation: none !important;
   transform: none !important;
 }
 
