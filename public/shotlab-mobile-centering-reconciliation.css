@@ -20,14 +20,17 @@
 
   /* Demo and registered sessions share these vertical page owners. None of them
    * is allowed to own persistent horizontal scroll state. Intentional horizontal
-   * rails remain independent descendants and keep their own overflow behavior. */
+   * rails remain independent descendants and keep their own overflow behavior.
+   * The final Coach selector is the actual padded route owner in App.jsx; keeping
+   * it in this shared boundary forces WebKit to include route padding inside the
+   * visual viewport instead of clipping a content-box-width child on the right. */
   html body #root .app-shell.is-mobile,
   html body #root .app-shell.is-mobile > .shell-main,
   html body #root .app-shell.is-mobile > .shell-main > .content-wrap,
   html body #root .app-shell.is-mobile .performance-workspace,
   html body #root .app-shell.is-mobile .player-scroll-container,
   html body #root .app-shell.is-mobile .coach-scroll-container,
-  html body #root .app-shell.is-mobile .coach-route-scroll-container,
+  html body #root .app-shell.is-mobile .performance-workspace--coach > div:has(> .page.pageShell),
   html body #root .app-shell.is-mobile .coach-home-dashboard,
   html body #root .app-shell.is-mobile [data-testid="coach-command-center-full"],
   html body #root .app-shell.is-mobile [data-testid="player-daily-command-center"] {
@@ -48,7 +51,7 @@
   html body #root .app-shell.is-mobile .performance-workspace,
   html body #root .app-shell.is-mobile .player-scroll-container,
   html body #root .app-shell.is-mobile .coach-scroll-container,
-  html body #root .app-shell.is-mobile .coach-route-scroll-container,
+  html body #root .app-shell.is-mobile .performance-workspace--coach > div:has(> .page.pageShell),
   html body #root .app-shell.is-mobile .coach-home-dashboard,
   html body #root .app-shell.is-mobile [data-testid="coach-command-center-full"],
   html body #root .app-shell.is-mobile [data-testid="player-daily-command-center"] {
