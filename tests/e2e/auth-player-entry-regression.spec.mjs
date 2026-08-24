@@ -76,12 +76,40 @@ test("Player Demo keeps the complete Player presentation system from first paint
 
   const header = page.getByTestId("player-dashboard-identity-header");
   await expect(header).toBeVisible({ timeout: 20_000 });
-  const logo = header.locator("img").first();
+  const logo = header.locator('[data-identity-role="brand-mark"]');
   await expect(logo).toBeVisible();
-  const box = await logo.boundingBox();
-  expect(box).not.toBeNull();
-  expect(box.width).toBeLessThanOrEqual(100);
-  expect(box.height).toBeLessThanOrEqual(100);
+  const logoState = await logo.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const slot = node.closest('[data-identity-role="brand-panel"]')?.getBoundingClientRect();
+    const stage = node.closest('[data-team-identity-stage="true"]')?.getBoundingClientRect();
+    const copy = node.closest('[data-team-identity-stage="true"]')?.querySelector('.teamIdentityTitleStage__copy')?.getBoundingClientRect();
+    const intersectsCopy = Boolean(copy) && rect.left < copy.right && rect.right > copy.left && rect.top < copy.bottom && rect.bottom > copy.top;
+    return {
+      complete: node.complete,
+      naturalWidth: node.naturalWidth,
+      naturalHeight: node.naturalHeight,
+      objectFit: getComputedStyle(node).objectFit,
+      rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      slot: slot ? { left: slot.left, top: slot.top, right: slot.right, bottom: slot.bottom, width: slot.width, height: slot.height } : null,
+      stage: stage ? { left: stage.left, top: stage.top, right: stage.right, bottom: stage.bottom } : null,
+      intersectsCopy,
+    };
+  });
+  expect(logoState.complete).toBe(true);
+  expect(logoState.naturalWidth).toBeGreaterThan(0);
+  expect(logoState.naturalHeight).toBeGreaterThan(0);
+  expect(logoState.objectFit).toBe("contain");
+  expect(logoState.rect.width).toBeGreaterThanOrEqual(96);
+  expect(logoState.rect.height).toBeGreaterThanOrEqual(96);
+  expect(logoState.slot).not.toBeNull();
+  expect(logoState.stage).not.toBeNull();
+  expect(logoState.rect.left).toBeGreaterThanOrEqual(logoState.slot.left - 1);
+  expect(logoState.rect.top).toBeGreaterThanOrEqual(logoState.slot.top - 1);
+  expect(logoState.rect.right).toBeLessThanOrEqual(logoState.slot.right + 1);
+  expect(logoState.rect.bottom).toBeLessThanOrEqual(logoState.slot.bottom + 1);
+  expect(logoState.rect.left).toBeGreaterThanOrEqual(logoState.stage.left - 1);
+  expect(logoState.rect.right).toBeLessThanOrEqual(logoState.stage.right + 1);
+  expect(logoState.intersectsCopy).toBe(false);
 
   const headerStyle = await header.evaluate((node) => {
     const style = getComputedStyle(node);

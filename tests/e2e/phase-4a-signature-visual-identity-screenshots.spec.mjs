@@ -151,7 +151,40 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
   const headerMark = page.locator(".mcHeaderTeamMark").first();
   await expect(headerMark).toBeVisible();
   await expect(headerMark.locator("img")).toBeVisible();
-  await expect(hero.locator(".mcHeroTeamMark")).toBeHidden();
+
+  const heroMark = hero.locator(".mcHeroTeamMark");
+  await expect(heroMark).toBeVisible();
+  const heroMarkImage = heroMark.locator("img");
+  await expect(heroMarkImage).toBeVisible();
+  const markState = await heroMark.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const image = node.querySelector("img");
+    const heroNode = node.closest('[data-testid="coach-primary-objective"]');
+    const heroRect = heroNode?.getBoundingClientRect();
+    const identityCopy = heroNode?.querySelector('.mcHeroIdentityCopy')?.getBoundingClientRect();
+    const overlapsCopy = Boolean(identityCopy) && rect.left < identityCopy.right && rect.right > identityCopy.left && rect.top < identityCopy.bottom && rect.bottom > identityCopy.top;
+    return {
+      complete: image?.complete ?? false,
+      naturalWidth: image?.naturalWidth ?? 0,
+      naturalHeight: image?.naturalHeight ?? 0,
+      objectFit: image ? getComputedStyle(image).objectFit : "",
+      rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      hero: heroRect ? { left: heroRect.left, top: heroRect.top, right: heroRect.right, bottom: heroRect.bottom } : null,
+      overlapsCopy,
+    };
+  });
+  expect(markState.complete).toBe(true);
+  expect(markState.naturalWidth).toBeGreaterThan(0);
+  expect(markState.naturalHeight).toBeGreaterThan(0);
+  expect(markState.objectFit).toBe("contain");
+  expect(markState.rect.width).toBeGreaterThanOrEqual(76);
+  expect(markState.rect.height).toBeGreaterThanOrEqual(76);
+  expect(markState.hero).not.toBeNull();
+  expect(markState.rect.left).toBeGreaterThanOrEqual(markState.hero.left - 1);
+  expect(markState.rect.right).toBeLessThanOrEqual(markState.hero.right + 1);
+  expect(markState.rect.top).toBeGreaterThanOrEqual(markState.hero.top - 1);
+  expect(markState.rect.bottom).toBeLessThanOrEqual(markState.hero.bottom + 1);
+  expect(markState.overlapsCopy).toBe(false);
 
   const courtArtwork = hero.locator(".mcCourtArtwork");
   await expect(courtArtwork).toBeVisible();
