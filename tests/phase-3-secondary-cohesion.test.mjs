@@ -39,16 +39,16 @@ test('Phase 3 is scoped to high-value secondary destinations', () => {
   assert.match(css, /display:none!important/);
 });
 
-test('Player Home is immersive while secondary Player routes use editorial title authority with subordinate team identity', () => {
+test('Player Home is immersive while secondary Player routes use unified title authority with compact team identity', () => {
   assert.match(playerHeader, /<TeamIdentityTitleStage/);
   assert.match(playerHeader, /variant="hero"/);
   assert.match(playerHeader, /surface="dark"/);
   assert.match(playerWorkspace, /<TeamIdentityTitleStage/);
-  assert.match(playerWorkspace, /variant="editorial"/);
+  assert.match(playerWorkspace, /variant="standard"/);
+  assert.match(playerWorkspace, /surface="light"/);
   assert.match(playerWorkspace, /dataMobileStage="editorial"/);
-  assert.match(playerWorkspace, /brandTreatment=\{resolveWorkspaceBrandTreatment\(model\)\}/);
-  assert.match(playerWorkspace, /strength: "watermark"/);
-  assert.match(playerWorkspace, /leaderboards: "none"/);
+  assert.match(playerWorkspace, /brandTreatment="compact"/);
+  assert.doesNotMatch(playerWorkspace, /resolveWorkspaceBrandTreatment/);
   assert.match(titleStage, /data-identity-role="team-name"/);
   assert.match(titleStage, /data-identity-role="page-title"/);
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
@@ -61,7 +61,7 @@ test('Player Home is immersive while secondary Player routes use editorial title
 
 test('Player workspaces own their editorial command and evidence hierarchy', () => {
   assert.match(playerWorkspace, /data-page-hierarchy="editorial"/);
-  assert.match(playerWorkspace, /data-layout-role="editorial-header"/);
+  assert.match(playerWorkspace, /dataLayoutRole="editorial-header"/);
   assert.match(playerWorkspace, /data-layout-role="supporting-evidence"/);
   assert.match(playerWorkspaceCss, /\.commandBar\{[\s\S]*?background:transparent/);
   assert.match(playerWorkspaceCss, /\.metrics\{[\s\S]*?border-block:1px solid/);

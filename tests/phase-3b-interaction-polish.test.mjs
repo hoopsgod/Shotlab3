@@ -9,7 +9,7 @@ const navigationSource = readFileSync('src/components/MobileNavigation.jsx', 'ut
 const expertPolishSource = readFileSync('src/lib/expertVisualPolish.js', 'utf8');
 
 test('Phase 3B gives secondary actions tactile pressed, focus, and reduced-motion states', () => {
-  assert.match(secondaryCss, /secondaryPageAction:active:not\(:disabled\)/);
+  assert.match(secondaryCss, /secondaryPageDecision button:active:not\(:disabled\)/);
   assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]\s*> button\[aria-pressed="true"\]/);
   assert.match(secondaryCss, /secondaryPageDecision button:focus-visible/);
   assert.match(secondaryCss, /prefers-reduced-motion:\s*reduce/);

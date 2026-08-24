@@ -67,12 +67,13 @@ test("Player commitment hero prioritizes unresolved decisions over already-confi
 test("Route status and subtitle summarize the actionable commitment state rather than stale model copy", () => {
   assert.match(component, /const routeStatus = requiresResponse[\s\S]*response[\s\S]*needed/);
   assert.match(component, /const routeSubtitle = requiresResponse[\s\S]*upcoming commitment/);
-  assert.match(component, /<span>{routeStatus}<\/span>/);
-  assert.match(component, /<p>{routeSubtitle}<\/p>/);
+  assert.match(component, /status=\{routeStatus\}/);
+  assert.match(component, /summary=\{routeSubtitle\}/);
 });
 
-test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
-  assert.match(css, /\.routeTitleRow h1[\s\S]*clamp\(/);
+test("Phase 3N visual system keeps unified route-title authority and iPhone containment", () => {
+  assert.match(component, /<TeamIdentityTitleStage[\s\S]*variant="standard"[\s\S]*dataMobileStage="team-identity"/);
+  assert.match(css, /\.heroCopy h2,[\s\S]*clamp\(/);
   assert.match(css, /\.signalStrip[\s\S]*grid-template-columns: repeat\(3/);
   assert.match(css, /\.queue[\s\S]*background: rgba\(255, 255, 255, \.94\)/);
   assert.match(css, /\.details\[open\]/);

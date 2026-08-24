@@ -82,16 +82,17 @@ test('mobile Leaderboards preserves the decision and performance-evidence hierar
   assert.match(routeStage, /data-visual-role="primary-decision"/);
   assert.match(routeStage, /data-visual-role="performance-evidence"/);
   assert.match(routeStage, /data-route-kind=\{routeKind\}/);
-  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#171b18\),\s*var\(--team-brand-surface-deep,\s*#0c0f0d\)\s*72%\)/);
 });
 
 test('mobile Leaderboards readability is owned by the premium route stage rather than legacy route CSS', () => {
   assert.match(routeStage, /aria-label="Current performance signals"/);
   assert.match(routeStage, /"aria-pressed": active/);
   assert.match(routeStageCss, /--stage-accent:\s*#c8ff1a/);
-  assert.match(routeStageCss, /\.title\s*\{[\s\S]*color:\s*#f6f7ef/);
-  assert.match(routeStageCss, /\.metricValue,[\s\S]*color:\s*#f7f8f0/);
-  assert.match(routeStageCss, /min-height:\s*var\(--touch-target, 44px\)/);
+  assert.match(routeStageCss, /\.title\s*\{[\s\S]*color:\s*#f5f8f9/);
+  assert.match(routeStageCss, /\.stage \.metricValue,[\s\S]*color:\s*#f5f8f9/);
+  assert.match(routeStageCss, /\.stage \.action\s*\{[\s\S]*min-height:\s*54px/);
+  assert.match(routeStageCss, /\.stage \.metric\s*\{[\s\S]*min-height:\s*92px/);
   assert.match(routeStageCss, /stage\[data-route-kind="leaderboards"\]\s+\.metricRail\s*\{[\s\S]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(routeStageCss, /stage\[data-route-kind="leaderboards"\]\s+\.metricDetail\s*\{[\s\S]*display:\s*none/);
 });
