@@ -21,6 +21,7 @@ body #root [data-testid="player-session-closeout"] {
     linear-gradient(150deg, #0f120f 0%, #171b16 58%, #101310 100%) !important;
   color: #f8faf5 !important;
   border-color: rgba(255,255,255,.10) !important;
+  min-height: calc(100dvh - var(--bottom-nav-content-padding, 88px) - 56px) !important;
 }
 
 body #root [data-testid="player-session-closeout-hero"],
@@ -68,25 +69,10 @@ body #root [data-testid="player-session-resume"] {
   box-shadow: none !important;
 }
 
-/* The authenticated Player workspace already owns fixed-dock clearance.
-   Terminal closeout removes historical inner reserves so that authority is not stacked. */
-body #root .player-training-session:has([data-testid="player-session-closeout"]) {
-  min-height: calc(100% - 12px) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  box-sizing: border-box !important;
-}
-
+/* The authenticated Player workspace remains the only dock-clearance owner. */
 body #root .player-training-completion-wrap:has([data-testid="player-session-closeout"]) {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
-  flex: 1 1 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-body #root .player-training-completion-wrap:has([data-testid="player-session-closeout"]) > [data-testid="player-session-closeout"] {
-  flex: 1 0 auto !important;
 }
 
 body #root .player-scroll-container:has([data-testid="player-session-closeout"]) {
