@@ -44,13 +44,11 @@
   }
 
   /* Coach Mission Control is mounted inside the same canonical Coach rail.
-   * Legacy Mission Control layers predate that owner and add their own mobile
-   * page inset. Keep the page wrapper, command-center shell, and primary grid
-   * on the parent's 20px axis; component-level header/card padding remains
-   * free to style content inside those boxes. */
+   * Keep the page wrapper and command-center shell on the parent's 20px axis.
+   * The nested .missionControl intentionally retains its 12px component inset;
+   * the mobile hero bleeds that same 12px back out to the canonical rail. */
   html body.mission-control-active #root .performance-shell--coach.is-mobile .team-brand.coach-mode.page,
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"],
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] > .missionControl {
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
