@@ -33,6 +33,18 @@
     --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
   }
 
+  /* The registered Coach route scroller is a padded flex child with no stable
+   * class in App.jsx. WebKit can resolve that child as a full content-box width
+   * and then add its 16px inline padding, leaving descendants visually shifted
+   * right while the root overflow lock hides the excess. Bind the actual route
+   * owner by its semantic child and force padding inside the visual viewport. */
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has(> .page.pageShell) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   /* Coach Home is the one deliberate breakout from the secondary-route rail.
    * Its Mission Control wrapper owns its own internal 10-12px cinematic inset,
    * so remove only the App.jsx route-wrapper gutter around that mounted surface. */
