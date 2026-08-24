@@ -55,7 +55,7 @@ test('Player Home is immersive while secondary Player routes use unified title a
   assert.match(titleCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleCss, /object-fit:\s*contain/);
-  assert.match(brandHierarchyCss, /not\(\[data-brand-treatment="hero"\]\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(brandHierarchyCss, /data-title-stage-family="editorial"[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)\s+var\(--identity-crest\)/);
   assert.doesNotMatch(playerHeader, /width:58px!important|font-size:26px!important/);
 });
 
