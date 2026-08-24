@@ -37,21 +37,18 @@
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto;
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-x: clip !important;
     overscroll-behavior-x: none;
   }
 
-  /* These are vertical interaction surfaces. On direct page gestures, only
-   * vertical pan/pinch is valid; nested horizontal scrollers can still become
-   * the gesture owner themselves. */
+  /* The route wrapper inherits the same vertical gesture boundary from its
+   * performance-workspace ancestor, so it does not need a duplicate selector. */
   html body #root .app-shell.is-mobile .performance-workspace,
   html body #root .app-shell.is-mobile .player-scroll-container,
   html body #root .app-shell.is-mobile .coach-scroll-container,
-  html body #root .app-shell.is-mobile .performance-workspace--coach > div:has(> .page.pageShell),
   html body #root .app-shell.is-mobile .coach-home-dashboard,
   html body #root .app-shell.is-mobile [data-testid="coach-command-center-full"],
   html body #root .app-shell.is-mobile [data-testid="player-daily-command-center"] {
@@ -72,8 +69,7 @@
 
   html body #root [data-visual-role="secondary-page"] {
     max-width: 100%;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-inline: auto !important;
     box-sizing: border-box;
   }
 
@@ -81,8 +77,7 @@
   html body #root [data-mobile-stage] {
     width: 100% !important;
     max-width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-inline: auto !important;
     box-sizing: border-box;
   }
 
@@ -91,8 +86,7 @@
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="page-tools"] {
     width: 100%;
     max-width: 100%;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-inline: auto !important;
     justify-self: stretch;
     box-sizing: border-box;
   }
@@ -103,8 +97,7 @@
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="primary-decision"] {
     width: 100% !important;
     max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    margin-inline: 0 !important;
     justify-self: stretch;
     box-sizing: border-box;
   }
@@ -123,8 +116,7 @@
    * than inheriting a one-sided legacy offset. */
   html body #root [data-visual-role="page-tools"] :is(form, [role="search"], input[type="search"], input[type="text"]) {
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto;
     box-sizing: border-box;
   }
 
