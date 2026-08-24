@@ -1,63 +1,35 @@
 /* Final authenticated mobile x-axis authority. Loaded last. */
 @media (max-width: 767px) {
   html body #root .performance-shell.is-mobile {
-    --shotlab-mobile-page-gutter: 20px;
     --layout-gutter: 20px;
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* Player routes share one dedicated scroll-shell rail, including custom pages
-   * that do not expose a common page-root component. */
+  /* Width/min-width/box sizing for this rail is owned by the shared centering
+   * boundary; this late layer only owns the Player-specific inset. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
     padding-inline: 20px !important;
-    box-sizing: border-box !important;
   }
 
-  /* Paid Coach routes already compose their canonical 20px rail in App.jsx:
-   * 16px on the route wrapper + 4px on SecondaryPageShell. The shared mobile
-   * centering authority now binds the actual padded route owner directly. */
+  /* The shared centering boundary owns Coach rail width and border-box sizing.
+   * This late layer only prevents content-wrap from composing another gutter. */
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
-    box-sizing: border-box !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
     --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
   }
 
-  /* Coach Home is the one deliberate breakout from the secondary-route rail.
-   * Its Mission Control wrapper owns its own internal 10-12px cinematic inset,
-   * so remove only the App.jsx route-wrapper gutter around that mounted surface. */
+  /* Coach Home deliberately opts out of the secondary-route wrapper gutter. */
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
 
-  /* Mission Control stays on the visual viewport without reviving the legacy
-   * 100vw/negative-margin breakout. Its internal component owns the hero inset. */
-  html body.mission-control-active #root .performance-shell--coach.is-mobile .team-brand.coach-mode.page,
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Definite-width mobile children must size their padding and border inside the
-   * available visual rail. Without border-box, 100% + horizontal padding inflated
-   * the Home grid track and Safari clipped the CTA / setup crest on the right. */
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcHeroContent,
+  /* MissionControlCascadeLock owns the Home shell and hero-content viewport
+   * geometry. Keep only the two definite-width children that need local sizing. */
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
     min-width: 0 !important;
@@ -69,18 +41,10 @@
     width: 100% !important;
   }
 
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
-    min-height: 0 !important;
-    max-height: 100% !important;
-  }
-
-  /* The shared Coach title-frame intentionally breaks 20px across the legacy
-   * wrapper, then the title stage must shrink back by the same 40px before its
-   * 20px margins are applied. The Events override had reset this child to 100%,
-   * making the grid track 40px too wide and pulling the calendar off the right. */
+  /* Events must shrink back by the same 40px used by its legacy title-frame
+   * breakout before the canonical 20px margins are applied. */
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
     width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
-    max-width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
     margin-left: var(--shotlab-mobile-content-rail, 20px) !important;
     margin-right: var(--shotlab-mobile-content-rail, 20px) !important;
     box-sizing: border-box !important;
@@ -88,34 +52,25 @@
 
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 0 !important;
     justify-self: stretch !important;
     box-sizing: border-box !important;
   }
 
-  /* Setup/fallback crests are definite 100% children with their own border and
-   * padding. Keep that decoration inside the crest slot instead of widening it. */
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest {
     min-width: 0 !important;
-    min-height: 0 !important;
     max-width: 100% !important;
-    max-height: 100% !important;
     box-sizing: border-box !important;
   }
 
-  /* Player nested surfaces must not compose a second 20px rail. Coach nested
-   * route surfaces intentionally keep their existing route-owned geometry. */
   html body #root .performance-shell--player.is-mobile .player-quick-actions {
     padding-inline: 0 !important;
   }
 
   html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
     width: 100% !important;
-    max-width: 100% !important;
     margin-inline: 0 !important;
     padding-inline: 0 !important;
-    box-sizing: border-box !important;
   }
 }
