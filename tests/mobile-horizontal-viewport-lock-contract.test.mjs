@@ -45,6 +45,19 @@ test('runtime blocks horizontal-dominant outer touch movement before Safari can 
   assert.match(guard, /event\.touches\?\.length !== 1/);
 });
 
+test('runtime normalizes the real Coach route owner without CSS :has discovery', () => {
+  assert.match(guard, /function findCoachRouteOwner\(\)/);
+  assert.match(guard, /Array\.from\(workspace\.children\)/);
+  assert.match(guard, /node\.querySelector\('\[data-testid="coach-command-center-full"\]'\)/);
+  assert.match(guard, /node\.querySelector\('\.secondaryPageShell'\)/);
+  assert.match(guard, /node\.querySelector\('\.page\.pageShell'\)/);
+  assert.match(guard, /routeOwner\.classList\.add\('coach-route-scroll-container'\)/);
+  assert.match(guard, /routeOwner\.style\.setProperty\('box-sizing', 'border-box'\)/);
+  assert.match(guard, /routeOwner\.style\.setProperty\('padding-left', isHome \? '0px' : COACH_MOBILE_RAIL\)/);
+  assert.match(guard, /routeOwner\.style\.setProperty\('padding-right', isHome \? '0px' : COACH_MOBILE_RAIL\)/);
+  assert.match(guard, /normalizeRegisteredCoachRouteGeometry\(\)/);
+});
+
 test('runtime installs one shared guard against invalid outer scrollLeft using the real Coach layout owner', () => {
   assert.match(main, /import \{ installMobileHorizontalViewportLock \} from ['"]\.\/lib\/mobileHorizontalViewportLock\.js['"]/);
   assert.match(main, /installMobileHorizontalViewportLock\(\)/);
