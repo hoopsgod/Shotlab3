@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
+const authenticatedAuthority = readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8');
 const finalAxis = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const missionControlLock = readFileSync(new URL('../src/styles/MissionControlCascadeLock2026.css', import.meta.url), 'utf8');
 const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-viewport-lock.spec.mjs', import.meta.url), 'utf8');
@@ -16,18 +17,22 @@ test('mobile viewport authority uses a true non-scrollable x boundary and stops 
   assert.match(centering, /max-width:\s*100%/);
 });
 
-test('final mobile axis owns one fixed symmetric 20px role rail', () => {
+test('final mobile axis keeps Player on a dedicated 20px rail and preserves Coach route-owned composition', () => {
   assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px;/);
   assert.match(finalAxis, /--layout-gutter:\s*20px;/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*20px;/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*\{[^}]*padding-left:\s*20px\s*!important;[^}]*padding-right:\s*20px\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*0px;/);
-  assert.match(finalAxis, /\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0\s*!important;/);
-  assert.match(finalAxis, /secondary-page[^}]*\{[^}]*width:\s*100%\s*!important;[^}]*margin-inline:\s*0\s*!important;[^}]*padding-inline:\s*0\s*!important;/);
-  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\(/);
-  assert.doesNotMatch(finalAxis, /calc\(100% - 40px\)/);
-  assert.doesNotMatch(finalAxis, /margin-inline:\s*20px\s*!important/);
+
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*\{[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
+  assert.match(authenticatedAuthority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
+  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\)\s*!important;/);
+
+  assert.match(finalAxis, /performance-workspace--coach > div:has\(\[data-testid="coach-command-center-full"\]\)[^}]*\{[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important;/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][^}]*\{[^}]*padding-inline:\s*0\s*!important;/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile :is\([\s\S]*coach-scroll-container[\s\S]*padding-inline:\s*0\s*!important/);
+  assert.doesNotMatch(finalAxis, /performance-shell\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0\s*!important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px\s*!important/);
   assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-left:\s*0\s*!important;[\s\S]*margin-right:\s*0\s*!important;/);
 });
 
