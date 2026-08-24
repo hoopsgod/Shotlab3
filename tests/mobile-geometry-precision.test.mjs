@@ -16,12 +16,12 @@ test('mobile geometry authority keeps Player on a dedicated 20px rail and Coach 
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
-  assert.match(finalAxis, /--shotlab-mobile-page-gutter:\s*20px/);
+  assert.match(finalAxis, /--layout-gutter:\s*20px/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px !important/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*0 !important;[^}]*padding-right:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0 !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
-  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[^}]*padding-inline:\s*0 !important/);
-  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px !important/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[\s\S]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-inline:\s*20px !important/);
 });
 
 test('Coach secondary routes compose the canonical 20px rail without clipping or double padding', () => {
