@@ -144,18 +144,64 @@ async function expectNoPersistentDocumentOrRailPan(page, label) {
   expect(Math.abs(shifted.visualViewportOffsetLeft), diagnostic).toBeLessThanOrEqual(1);
 }
 
-test('registered Coach Home cannot persist a horizontal pan in mobile WebKit at 390px', async () => {
-  test.setTimeout(120_000);
-  const browser = await webkit.launch();
-  try {
-    const registered = await createRegisteredCoach(browser, { width: 390, height: 844 });
+async function expectSymmetricVisualGutters(locator, label, minimumGutter = 12) {
+  await expect(locator, `${label} must be visible`).toBeVisible({ timeout: 20_000 });
+  const geometry = await locator.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const viewport = document.documentElement.clientWidth;
+    return {
+      viewport,
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      leftGutter: rect.left,
+      rightGutter: viewport - rect.right,
+    };
+  });
+  const diagnostic = `${label} visual gutters: ${JSON.stringify(geometry)}`;
+  expect(geometry.leftGutter, diagnostic).toBeGreaterThanOrEqual(minimumGutter);
+  expect(geometry.rightGutter, diagnostic).toBeGreaterThanOrEqual(minimumGutter);
+  expect(Math.abs(geometry.leftGutter - geometry.rightGutter), diagnostic).toBeLessThanOrEqual(2);
+}
+
+async function verifyRegisteredCoachVisualAxis(page, width) {
+  const dock = page.getByTestId('mobile-navigation-dock');
+
+  await expectSymmetricVisualGutters(
+    page.getByTestId('coach-primary-objective').locator('.mcHeroIdentity'),
+    `registered Coach Home ${width}px WebKit identity rail`,
+  );
+
+  await dock.getByRole('button', { name: 'Players', exact: true }).click();
+  await expectSymmetricVisualGutters(
+    page.getByTestId('coach-players-interactive-dashboard'),
+    `registered Coach Players ${width}px WebKit workspace`,
+  );
+  await expectNoPersistentDocumentOrRailPan(page, `registered Coach Players ${width}px WebKit`);
+
+  await dock.getByRole('button', { name: 'Schedule', exact: true }).click();
+  await expectSymmetricVisualGutters(
+    page.getByTestId('coach-events-interactive-dashboard'),
+    `registered Coach Events ${width}px WebKit workspace`,
+  );
+  await expectNoPersistentDocumentOrRailPan(page, `registered Coach Events ${width}px WebKit`);
+}
+
+for (const viewport of [{ width: 390, height: 844 }, { width: 430, height: 932 }]) {
+  test(`registered Coach Home, Players, and Events keep symmetric gutters in mobile WebKit at ${viewport.width}px`, async () => {
+    test.setTimeout(180_000);
+    const browser = await webkit.launch();
     try {
-      await expectNoPersistentDocumentOrRailPan(registered.page, 'registered Coach Home 390px WebKit');
-      await registered.page.screenshot({ path: 'parity-evidence/webkit-registered-coach-390.png', fullPage: true });
+      const registered = await createRegisteredCoach(browser, viewport);
+      try {
+        await expectNoPersistentDocumentOrRailPan(registered.page, `registered Coach Home ${viewport.width}px WebKit`);
+        await verifyRegisteredCoachVisualAxis(registered.page, viewport.width);
+        await registered.page.screenshot({ path: `parity-evidence/webkit-registered-coach-${viewport.width}.png`, fullPage: true });
+      } finally {
+        await registered.context.close();
+      }
     } finally {
-      await registered.context.close();
+      await browser.close();
     }
-  } finally {
-    await browser.close();
-  }
-});
+  });
+}
