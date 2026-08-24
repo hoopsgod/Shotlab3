@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
 const authenticatedAuthority = readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8');
 const finalAxis = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
+const dashboards = readFileSync(new URL('../src/components/CoachInteractiveDashboards.css', import.meta.url), 'utf8');
 const missionControlLock = readFileSync(new URL('../src/styles/MissionControlCascadeLock2026.css', import.meta.url), 'utf8');
 const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-viewport-lock.spec.mjs', import.meta.url), 'utf8');
 const webkitViewportSpec = readFileSync(new URL('./e2e/registered-mobile-webkit-scroll-lock.spec.mjs', import.meta.url), 'utf8');
@@ -18,26 +19,28 @@ test('mobile viewport authority uses a true non-scrollable x boundary and stops 
   assert.match(centering, /box-sizing:\s*border-box/);
 });
 
-test('final mobile axis keeps Player on a dedicated 20px rail and preserves Coach route-owned composition', () => {
+test('final mobile axis keeps Player and Coach on one dedicated 20px rail each', () => {
   assert.match(finalAxis, /--layout-gutter:\s*20px;/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*20px;/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important;/);
 
   assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0\s*!important/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
-  assert.match(authenticatedAuthority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
-  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\)\s*!important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail,\s*20px\);/);
+  assert.match(authenticatedAuthority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail\);/);
+  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*0\s*!important/);
+  assert.doesNotMatch(authenticatedAuthority, /16px wrapper \+ 4px secondary shell/);
 
   assert.match(finalAxis, /performance-workspace--coach > div:has\(\[data-testid="coach-command-center-full"\]\)[\s\S]*padding-inline:\s*0\s*!important/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][\s\S]*padding-inline:\s*0\s*!important/);
-  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile :is\([\s\S]*coach-scroll-container[\s\S]*padding-inline:\s*0\s*!important/);
-  assert.doesNotMatch(finalAxis, /performance-shell\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0\s*!important/);
-  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-inline:\s*20px\s*!important/);
+  assert.match(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);
+  assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
+  assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
   assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-inline:\s*0\s*!important;/);
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
-  assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.performance-workspace--coach > div:has\(> \.page\.pageShell\),[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
+  assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.performance-workspace--coach > div:has\(> \.page\.pageShell\),[\s\S]*\.performance-workspace--coach > div:has\(> \.secondaryPageShell\),[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
   assert.match(centering, /margin-inline:\s*auto;/);
   assert.match(centering, /touch-action:\s*pan-y pinch-zoom/);
   assert.match(registeredViewportSpec, /REGISTERED_CONTENT_RAIL_SELECTORS/);
