@@ -19,8 +19,6 @@ body #root [data-testid="player-session-closeout"] {
   background-image:
     radial-gradient(circle at 86% 8%, rgba(200,255,26,.14), transparent 34%),
     linear-gradient(150deg, #0f120f 0%, #171b16 58%, #101310 100%) !important;
-  color: #f8faf5 !important;
-  border-color: rgba(255,255,255,.10) !important;
   min-height: calc(100dvh - var(--bottom-nav-content-padding, 88px) - 56px) !important;
 }
 
@@ -40,13 +38,6 @@ body #root [data-testid="player-session-closeout-hero"] > div:not(:first-child) 
   border: 0 !important;
 }
 
-body #root [data-testid="player-session-closeout"] h2,
-body #root [data-testid="player-session-closeout"] [data-testid="player-session-best-moment"] strong,
-body #root [data-testid="player-session-closeout"] [data-testid="player-session-next-commitment"] strong {
-  color: #f8faf5 !important;
-  opacity: 1 !important;
-}
-
 body #root [data-testid="player-session-closeout-metrics"] > div,
 body #root [data-testid="player-session-best-moment"],
 body #root [data-testid="player-session-next-commitment"] {
@@ -58,14 +49,6 @@ body #root [data-testid="player-session-done"] {
   background: #c8ff1a !important;
   color: #101310 !important;
   border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-body #root [data-testid="player-session-view-progress"],
-body #root [data-testid="player-session-resume"] {
-  background: rgba(255,255,255,.045) !important;
-  color: rgba(248,250,245,.78) !important;
-  border-color: rgba(255,255,255,.10) !important;
   box-shadow: none !important;
 }
 
