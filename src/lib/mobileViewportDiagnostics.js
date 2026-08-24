@@ -180,7 +180,13 @@ export function installMobileViewportDiagnostics() {
     raf = window.requestAnimationFrame(render);
   };
 
-  const observer = new MutationObserver(schedule);
+  const observer = new MutationObserver((records) => {
+    const externalMutation = records.some((record) => {
+      const target = record.target instanceof Element ? record.target : record.target?.parentElement;
+      return !target?.closest?.(`#${PANEL_ID}`);
+    });
+    if (externalMutation) schedule();
+  });
   observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
   window.addEventListener('resize', schedule, { passive: true });
   window.addEventListener('scroll', schedule, { passive: true, capture: true });
