@@ -135,9 +135,14 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /10-coach-leaderboards/);
   assert.match(screenshots, /coach-player-intelligence-drawer/);
   assert.match(screenshots, /parseCssColor/);
+  assert.match(screenshots, /color\(srgb \.\.\.\)/);
+  assert.match(screenshots, /function relativeLuminance/);
+  assert.match(screenshots, /function contrastRatio/);
+  assert.match(screenshots, /relativeLuminance\(sectionBackground\)\)\.toBeLessThanOrEqual\(0\.12\)/);
+  assert.match(screenshots, /sectionBackground\.a\)\.toBeGreaterThanOrEqual\(0\.9\)/);
+  assert.match(screenshots, /relativeLuminance\(sectionTitleColor\)\)\.toBeGreaterThanOrEqual\(0\.8\)/);
+  assert.match(screenshots, /contrastRatio\(sectionTitleColor, sectionBackground\)\)\.toBeGreaterThanOrEqual\(7\)/);
   assert.match(screenshots, /rgb\(244, 247, 242\)/);
-  assert.match(screenshots, /toBeLessThanOrEqual\(24\)/);
-  assert.match(screenshots, /toBeGreaterThanOrEqual\(0\.9\)/);
   assert.match(screenshots, /rgba\(0, 0, 0, 0\)/);
   assert.match(screenshots, /Weekly makes/);
   assert.match(screenshots, /Development pulse/);
