@@ -8,18 +8,15 @@
     padding-bottom: 0;
   }
 
-  /* Coach routes still arrive through a legacy inline wrapper. Break the title
-     frame back across that wrapper, then inset the actual editorial header on
-     the canonical 20px mobile rail. This prevents both the former 36px double
-     gutter and a full-bleed 0px title edge. */
-  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame {
-    width: calc(100% + (var(--layout-gutter, 20px) * 2));
-    margin-inline: calc(var(--layout-gutter, 20px) * -1);
-  }
-
+  /* Registered Coach routes now own one canonical 20px outer rail. Keep the
+     title frame and title stage inside that rail; no negative-margin breakout,
+     no compensating width arithmetic, and no browser-dependent re-expansion. */
+  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame,
   .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2));
-    margin-inline: var(--shotlab-mobile-content-rail, 20px);
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    box-sizing: border-box;
   }
 
   /* The build-time Phase 4D enhancer assigns this stable class to the shared
