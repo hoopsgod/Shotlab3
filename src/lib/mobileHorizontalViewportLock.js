@@ -1,5 +1,6 @@
 const MOBILE_VIEWPORT_QUERY = '(max-width: 760px)';
 const HORIZONTAL_INTENT_THRESHOLD_PX = 6;
+const COACH_MOBILE_RAIL = 'var(--shotlab-mobile-content-rail, 20px)';
 
 const LOCKED_VERTICAL_OWNER_SELECTORS = [
   '.app-shell.is-mobile',
@@ -26,6 +27,42 @@ const INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR = [
 function isMobileViewport() {
   if (typeof window === 'undefined') return false;
   return window.matchMedia?.(MOBILE_VIEWPORT_QUERY).matches ?? window.innerWidth <= 760;
+}
+
+function findCoachRouteOwner() {
+  if (typeof document === 'undefined') return null;
+  const workspace = document.querySelector('.performance-shell--coach.is-mobile .performance-workspace--coach');
+  if (!workspace) return null;
+
+  return Array.from(workspace.children).find((node) => {
+    if (!(node instanceof Element)) return false;
+    return Boolean(
+      node.querySelector('[data-testid="coach-command-center-full"]')
+      || node.querySelector('.secondaryPageShell')
+      || node.querySelector('.page.pageShell')
+    );
+  }) || null;
+}
+
+export function normalizeRegisteredCoachRouteGeometry() {
+  if (typeof document === 'undefined' || typeof window === 'undefined' || !isMobileViewport()) return false;
+  const routeOwner = findCoachRouteOwner();
+  if (!routeOwner) return false;
+
+  const isHome = Boolean(routeOwner.querySelector('[data-testid="coach-command-center-full"]'));
+  routeOwner.classList.add('coach-route-scroll-container');
+
+  routeOwner.style.setProperty('width', '100%');
+  routeOwner.style.setProperty('min-width', '0');
+  routeOwner.style.setProperty('max-width', '100%');
+  routeOwner.style.setProperty('box-sizing', 'border-box');
+  routeOwner.style.setProperty('overflow-x', 'clip');
+  routeOwner.style.setProperty('margin-left', '0');
+  routeOwner.style.setProperty('margin-right', '0');
+  routeOwner.style.setProperty('padding-left', isHome ? '0px' : COACH_MOBILE_RAIL);
+  routeOwner.style.setProperty('padding-right', isHome ? '0px' : COACH_MOBILE_RAIL);
+
+  return true;
 }
 
 function resetNodeHorizontalOffset(node) {
@@ -68,7 +105,7 @@ export function shouldContainRegisteredHorizontalGesture({
 export function resetMobileHorizontalViewport() {
   if (typeof document === 'undefined' || typeof window === 'undefined' || !isMobileViewport()) return false;
 
-  let corrected = false;
+  let corrected = normalizeRegisteredCoachRouteGeometry();
   const scrollingElement = document.scrollingElement || document.documentElement;
   corrected = resetNodeHorizontalOffset(scrollingElement) || corrected;
   corrected = resetNodeHorizontalOffset(document.documentElement) || corrected;
