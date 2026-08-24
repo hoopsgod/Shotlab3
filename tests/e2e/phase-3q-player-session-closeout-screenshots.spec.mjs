@@ -63,6 +63,7 @@ test("player can intentionally close the daily training loop after logging a res
 
   const closeout = page.getByTestId("player-session-closeout");
   await expect(closeout).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("player-completion-cue")).toBeHidden();
   await expect(closeout.getByText("SESSION COMPLETE", { exact: true })).toBeVisible();
   await expect(closeout.getByText(/TODAY’S WORK IS BANKED/i)).toBeVisible();
   await expect(closeout.getByTestId("player-session-closeout-metrics")).toBeVisible();
@@ -105,6 +106,23 @@ test("player can intentionally close the daily training loop after logging a res
   }));
   expect(doneStyle.backgroundColor).toBe("rgb(200, 255, 26)");
   expect(doneStyle.color).toBe("rgb(16, 19, 16)");
+
+  const dockAuthority = await page.evaluate(() => {
+    const wrap = document.querySelector('.player-training-completion-wrap:has([data-testid="player-session-closeout"])');
+    const scroll = document.querySelector('.player-scroll-container:has([data-testid="player-session-closeout"])');
+    const workspace = document.querySelector('.performance-workspace:has([data-testid="player-session-closeout"])');
+    if (!wrap || !scroll || !workspace) throw new Error("Missing closeout containment authority");
+    return {
+      wrapMarginBottom: parseFloat(getComputedStyle(wrap).marginBottom),
+      wrapPaddingBottom: parseFloat(getComputedStyle(wrap).paddingBottom),
+      scrollPaddingBottom: parseFloat(getComputedStyle(scroll).paddingBottom),
+      workspacePaddingBottom: parseFloat(getComputedStyle(workspace).paddingBottom),
+    };
+  });
+  expect(dockAuthority.wrapMarginBottom).toBe(0);
+  expect(dockAuthority.wrapPaddingBottom).toBe(0);
+  expect(dockAuthority.scrollPaddingBottom).toBe(0);
+  expect(dockAuthority.workspacePaddingBottom).toBeGreaterThan(0);
 
   await noOverflow(page);
   await closeout.scrollIntoViewIfNeeded();

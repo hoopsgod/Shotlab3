@@ -68,10 +68,19 @@ body #root [data-testid="player-session-resume"] {
   box-shadow: none !important;
 }
 
+/* The authenticated Player workspace already owns fixed-dock clearance.
+   Terminal closeout removes historical inner reserves so that authority is not stacked. */
 body #root .player-training-completion-wrap:has([data-testid="player-session-closeout"]) {
-  margin-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 body #root .player-scroll-container:has([data-testid="player-session-closeout"]) {
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: 0 !important;
+}
+
+/* The dedicated closeout is the terminal completion state; the transient cue
+   must not compete with it once the closeout is visible. */
+body #root .performance-workspace:has([data-testid="player-session-closeout"]) [data-testid="player-completion-cue"] {
+  display: none !important;
 }
