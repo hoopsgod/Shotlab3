@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { shouldContainRegisteredHorizontalGesture } from '../src/lib/mobileHorizontalViewportLock.js';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
+const authenticatedAuthority = readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8');
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const guard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const main = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
@@ -14,10 +15,11 @@ test('mobile document and shared Demo/paid role shells use one split x-axis auth
   assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
   assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
   assert.match(finalAxisAuthority, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px\s*!important/);
-  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px\s*!important;[^}]*padding-right:\s*20px\s*!important/);
-  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*0px;/);
-  assert.match(finalAxisAuthority, /\.coach-scroll-container,[\s\S]*\.coach-route-scroll-container[\s\S]*padding-inline:\s*0\s*!important;/);
-  assert.doesNotMatch(finalAxisAuthority, /performance-shell--coach\.is-mobile \.performance-workspace--coach > :is\(/);
+  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*0\s*!important;[^}]*padding-right:\s*0\s*!important/);
+  assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4,\s*16px\);/);
+  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\)\s*!important/);
+  assert.doesNotMatch(finalAxisAuthority, /performance-shell--coach\.is-mobile :is\([\s\S]*coach-scroll-container[\s\S]*padding-inline:\s*0\s*!important/);
+  assert.doesNotMatch(finalAxisAuthority, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-left:\s*20px\s*!important/);
   assert.doesNotMatch(finalAxisAuthority, /calc\(100% - 40px\)/);
   assert.doesNotMatch(finalAxisAuthority, /margin-inline:\s*20px\s*!important/);
 });
