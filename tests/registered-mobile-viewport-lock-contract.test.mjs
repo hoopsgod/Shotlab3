@@ -39,6 +39,13 @@ test('final mobile axis keeps Player and Coach on one dedicated 20px rail each',
   assert.match(centering, /secondary-page[\s\S]*primary-decision[\s\S]*width:\s*100%\s*!important;[\s\S]*max-width:\s*100%\s*!important;[\s\S]*margin-inline:\s*0\s*!important;/);
 });
 
+test('paid Coach onboarding and empty-state grids cannot expand their mobile track', () => {
+  assert.match(missionControlLock, /\.mcFocusGrid,[\s\S]*\.mcLowerGrid\s*\{[^}]*width:100%!important;[^}]*max-width:100%!important;[^}]*min-width:0!important;[^}]*grid-template-columns:minmax\(0,1fr\)!important;/);
+  assert.match(missionControlLock, /\.mcFocusGrid>\*,[\s\S]*\.mcLowerGrid>\*\s*\{[^}]*min-width:0!important;[^}]*max-width:100%!important;[^}]*box-sizing:border-box!important;/);
+  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*width:\s*100%\s*!important;[^}]*max-width:\s*100%\s*!important;[^}]*min-width:\s*0\s*!important;[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important;/);
+  assert.match(authenticatedAuthority, /performance-shell--coach \.secondaryPageShell > \*\s*\{[^}]*min-width:\s*0\s*!important;[^}]*max-width:\s*100%\s*!important;[^}]*box-sizing:\s*border-box\s*!important;/);
+});
+
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
   assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.performance-workspace--coach > div:has\(> \.page\.pageShell\),[\s\S]*\.performance-workspace--coach > div:has\(> \.secondaryPageShell\),[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
   assert.match(centering, /margin-inline:\s*auto;/);
