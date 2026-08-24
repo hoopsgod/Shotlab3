@@ -16,8 +16,10 @@
     padding-inline: 0 !important;
   }
 
+  /* One registered Coach mobile rail. App.jsx consumes this variable directly
+   * for every non-Home route; SecondaryPageShell contributes no second gutter. */
   html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
-    --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
+    --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px);
   }
 
   /* MissionControlCascadeLock owns the Home shell and hero-content viewport
@@ -29,15 +31,19 @@
     box-sizing: border-box !important;
   }
 
-  /* Events shrinks back by the same 40px used by its legacy title-frame breakout
-   * before the canonical 20px margins are applied. */
-  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: calc(100% - (var(--shotlab-mobile-content-rail, 20px) * 2)) !important;
-    margin-inline: var(--shotlab-mobile-content-rail, 20px) !important;
+  /* Secondary Coach title stages stay inside the same outer route rail. Do not
+   * re-expand a title child after its parent has already been inset. */
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
     width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
     justify-self: stretch !important;
     box-sizing: border-box !important;
