@@ -103,6 +103,10 @@ test("Phase 3Q iPhone evidence logs a real score, verifies live streak parity, a
   assert.match(screenshotSpec, /player-completion-cue/);
   assert.match(screenshotSpec, /scrollPaddingBottom/);
   assert.match(screenshotSpec, /workspacePaddingBottom/);
+  assert.match(screenshotSpec, /const terminalScroller = page\.locator/);
+  assert.match(screenshotSpec, /node\.scrollTop = node\.scrollHeight/);
+  assert.match(screenshotSpec, /distanceFromBottom/);
+  assert.doesNotMatch(screenshotSpec, /window\.scrollTo/);
   assert.match(screenshotSpec, /const dockGap/);
   assert.match(screenshotSpec, /dockGap\)\.toBeLessThanOrEqual\(96\)/);
   assert.match(screenshotSpec, /04t-player-session-closeout\.png/);

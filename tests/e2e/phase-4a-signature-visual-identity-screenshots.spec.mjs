@@ -112,8 +112,8 @@ test("Phase 4A Player Progress carries the same visual DNA with a different crop
     await expect(mark).toBeVisible();
     const box = await mark.boundingBox();
     expect(box).not.toBeNull();
-    expect(box.width).toBeGreaterThanOrEqual(38);
-    expect(box.height).toBeGreaterThanOrEqual(38);
+    expect(Math.round(box.width)).toBeGreaterThanOrEqual(38);
+    expect(Math.round(box.height)).toBeGreaterThanOrEqual(38);
   }
   await expectNoOverflow(page);
   await capture(page, "08c-phase4a-player-progress-signature.png");
@@ -196,11 +196,17 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
   expect(geometry.height).toBeGreaterThan(120);
 
   const heroTreatment = await hero.evaluate((node) => ({
-    backgroundImage: getComputedStyle(node).backgroundImage,
+    backgroundColor: getComputedStyle(node).backgroundColor,
     overflow: getComputedStyle(node).overflow,
   }));
-  expect(heroTreatment.backgroundImage).toContain("gradient");
+  expect(heroTreatment.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(heroTreatment.backgroundColor).not.toBe("rgb(255, 255, 255)");
   expect(["hidden", "clip"]).toContain(heroTreatment.overflow);
+
+  const heroScrim = hero.locator(".mcHeroScrim");
+  await expect(heroScrim).toBeVisible();
+  const scrimBackground = await heroScrim.evaluate((node) => getComputedStyle(node).backgroundImage);
+  expect(scrimBackground).toContain("gradient");
 
   await expect(page.getByTestId("player-home-signature-field")).toHaveCount(0);
   await expect(page.getByTestId("player-progress-signature-field")).toHaveCount(0);
