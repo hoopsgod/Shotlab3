@@ -19,7 +19,7 @@
   :root {
     --shotlab-mobile-content-rail: var(--space-5, 20px);
     --shotlab-mobile-content-landing: var(--space-6, 24px);
-    --shotlab-coach-route-wrapper-gutter: var(--space-4, 16px);
+    --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail);
     --layout-gutter: var(--shotlab-mobile-content-rail);
     --phase4e-mobile-gutter: var(--shotlab-mobile-content-rail);
   }
@@ -41,11 +41,10 @@
     ) !important;
   }
 
-  /* Coach route content arrives inside the route wrapper declared in App.jsx.
-   * Both owners use the same gutter token so their composed inset is exactly
-   * the canonical 20px rail: 16px wrapper + 4px secondary shell. */
+  /* Registered Coach routes already arrive inside App.jsx's canonical 20px
+   * route rail. SecondaryPageShell must not compose a second horizontal gutter. */
   html body #root .performance-shell--coach .secondaryPageShell {
-    padding-inline: calc(var(--shotlab-mobile-content-rail) - var(--shotlab-coach-route-wrapper-gutter)) !important;
+    padding-inline: 0 !important;
   }
 
   html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
