@@ -39,9 +39,9 @@
     margin-inline: 0 !important;
   }
 
+  /* SecondaryPageShell > * already owns min-width/max-width/border-box. */
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
     width: 100% !important;
-    min-width: 0 !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
