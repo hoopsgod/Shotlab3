@@ -1,0 +1,66 @@
+name: Phase 1 Final Evidence Gates
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "tests/e2e/phase1-final-evidence.spec.mjs"
+      - "playwright.phase1-evidence.config.mjs"
+      - ".github/workflows/phase1-final-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PHASE1_PRODUCTION_SHA: "beb4c0e4387de405235f432648be79abad2a4493"
+  PHASE1_PRODUCTION_URL: "https://d7b4bcd1.shotlab3.pages.dev"
+
+jobs:
+  final-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out evidence harness
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Install pinned evidence tooling
+        run: npm install --no-save @playwright/test@1.55.1 @axe-core/playwright@4.10.2
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify immutable production target
+        run: |
+          test "$PHASE1_PRODUCTION_SHA" = "beb4c0e4387de405235f432648be79abad2a4493"
+          curl --fail --silent --show-error --location "$PHASE1_PRODUCTION_URL/" --output /tmp/shotlab-auth.html
+          test -s /tmp/shotlab-auth.html
+          echo "Evidence target: $PHASE1_PRODUCTION_SHA @ $PHASE1_PRODUCTION_URL"
+
+      - name: Run wide-screen and accessibility closure gates
+        run: >-
+          npx playwright test
+          tests/e2e/phase1-final-evidence.spec.mjs
+          --config=playwright.phase1-evidence.config.mjs
+          --reporter=line
+
+      - name: Upload Phase 1 final evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-final-evidence-${{ env.PHASE1_PRODUCTION_SHA }}
+          path: |
+            artifacts/phase1-final-evidence/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 30
