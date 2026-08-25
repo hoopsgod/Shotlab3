@@ -15,6 +15,7 @@ const report = {
   wideBaseline: [],
   accessibility: [],
   reflowReducedMotion: [],
+  closureBlockers: [],
 };
 
 function writeReport() {
@@ -34,10 +35,8 @@ async function installSafeRoutes(page) {
 async function enterDemo(page, role) {
   await installSafeRoutes(page);
   await page.goto(`${BASE_URL}/?demo=1`, { waitUntil: 'domcontentloaded' });
-  const label = role === 'coach' ? 'Coach demo' : 'Player demo';
-  await page.getByRole('button', { name: label, exact: true }).click();
-  const homeId = role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center';
-  await expect(page.getByTestId(homeId)).toBeVisible({ timeout: 25_000 });
+  await page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true }).click();
+  await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 25_000 });
 }
 
 async function openMobileDestination(page, name, testId) {
@@ -55,11 +54,9 @@ async function geometry(page) {
   }));
 }
 
-async function expectNoHorizontalOverflow(page, label) {
-  const result = await geometry(page);
-  expect(result.document, `${label}: document overflow`).toBeLessThanOrEqual(result.viewport + 2);
-  expect(result.body, `${label}: body overflow`).toBeLessThanOrEqual(result.viewport + 2);
-  return result;
+async function horizontalContainment(page) {
+  const value = await geometry(page);
+  return { ...value, pass: value.document <= value.viewport + 2 && value.body <= value.viewport + 2 };
 }
 
 async function capture(page, fileName) {
@@ -82,7 +79,6 @@ async function prepareSurface(page, surface) {
   const [role, destination] = surface.split(':');
   await enterDemo(page, role);
   if (!destination || destination === 'home') return;
-
   const routes = {
     'coach:players': ['Players', 'coach-players-interactive-dashboard'],
     'player:train': ['Train', 'player-at-home-workspace'],
@@ -93,7 +89,7 @@ async function prepareSurface(page, surface) {
   await openMobileDestination(page, route[0], route[1]);
 }
 
-async function verifyKeyboardFocus(page) {
+async function keyboardFocusState(page) {
   for (let attempt = 0; attempt < 12; attempt += 1) {
     await page.keyboard.press('Tab');
     const state = await page.evaluate(() => {
@@ -115,15 +111,12 @@ async function verifyKeyboardFocus(page) {
         boxShadow: style.boxShadow,
       };
     });
-    if (state?.visible) {
-      expect(state.hasIndicator, `Focused ${state.tag} ${state.name} should expose a visible focus indicator`).toBeTruthy();
-      return state;
-    }
+    if (state?.visible) return { ...state, pass: Boolean(state.hasIndicator) };
   }
-  throw new Error('Keyboard traversal did not reach a visible focusable element within 12 Tab presses.');
+  return { pass: false, reason: 'No visible focusable element reached within 12 Tab presses.' };
 }
 
-async function axeScan(page, label) {
+async function axeScan(page) {
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -131,11 +124,17 @@ async function axeScan(page, label) {
     id: violation.id,
     impact: violation.impact,
     description: violation.description,
-    nodes: violation.nodes.length,
+    help: violation.help,
+    nodes: violation.nodes.map((node) => ({
+      target: node.target,
+      html: node.html,
+      failureSummary: node.failureSummary,
+    })),
   }));
-  const blockers = violations.filter((violation) => ['serious', 'critical'].includes(violation.impact));
-  expect(blockers, `${label}: no serious/critical axe violations`).toEqual([]);
-  return { violations, blockers };
+  return {
+    violations,
+    blockers: violations.filter((violation) => ['serious', 'critical'].includes(violation.impact)),
+  };
 }
 
 async function reducedMotionState(page) {
@@ -150,6 +149,7 @@ async function reducedMotionState(page) {
       mediaMatches: matchMedia('(prefers-reduced-motion: reduce)').matches,
       runningAnimations: running.length,
       persistentAnimations: persistent.length,
+      pass: matchMedia('(prefers-reduced-motion: reduce)').matches && persistent.length === 0,
     };
   });
 }
@@ -163,20 +163,17 @@ for (const width of [768, 1024, 1280]) {
         await enterDemo(page, role);
         await page.setViewportSize({ width, height: 1000 });
         await page.waitForTimeout(200);
-        const homeGeometry = await expectNoHorizontalOverflow(page, `${role} home ${width}`);
+        const homeGeometry = await horizontalContainment(page);
         const homeFile = await capture(page, `${role}-home-${width}.png`);
         report.wideBaseline.push({ role, surface: 'home', width, geometry: homeGeometry, screenshot: homeFile });
 
         await page.setViewportSize({ width: 430, height: 932 });
-        if (role === 'coach') {
-          await openMobileDestination(page, 'Players', 'coach-players-interactive-dashboard');
-        } else {
-          await openMobileDestination(page, 'Train', 'player-at-home-workspace');
-        }
+        if (role === 'coach') await openMobileDestination(page, 'Players', 'coach-players-interactive-dashboard');
+        else await openMobileDestination(page, 'Train', 'player-at-home-workspace');
         await page.setViewportSize({ width, height: 1000 });
         await page.waitForTimeout(200);
         const destination = role === 'coach' ? 'players' : 'train';
-        const destinationGeometry = await expectNoHorizontalOverflow(page, `${role} ${destination} ${width}`);
+        const destinationGeometry = await horizontalContainment(page);
         const destinationFile = await capture(page, `${role}-${destination}-${width}.png`);
         report.wideBaseline.push({ role, surface: destination, width, geometry: destinationGeometry, screenshot: destinationFile });
       } finally {
@@ -194,9 +191,9 @@ test('formal accessibility baseline on required surfaces', async ({ browser }) =
     const page = await context.newPage();
     try {
       await prepareSurface(page, surface);
-      const focus = await verifyKeyboardFocus(page);
-      const axe = await axeScan(page, surface);
-      const geometryResult = await expectNoHorizontalOverflow(page, `${surface} accessibility`);
+      const focus = await keyboardFocusState(page);
+      const axe = await axeScan(page);
+      const geometryResult = await horizontalContainment(page);
       const file = await capture(page, `a11y-${surface.replace(':', '-')}-390.png`);
       report.accessibility.push({ surface, viewport: '390x844', focus, axe, geometry: geometryResult, screenshot: file });
     } finally {
@@ -209,16 +206,12 @@ test('formal accessibility baseline on required surfaces', async ({ browser }) =
 test('200 percent equivalent reflow and reduced-motion baseline', async ({ browser }) => {
   const surfaces = ['auth', 'coach:home', 'coach:players', 'player:home', 'player:train', 'player:progress'];
   for (const surface of surfaces) {
-    // A 640 CSS-pixel viewport is the reflow-equivalent layout width of a
-    // 1280 CSS-pixel desktop viewport viewed at 200% browser zoom.
     const context = await browser.newContext({ viewport: { width: 640, height: 900 }, reducedMotion: 'reduce' });
     const page = await context.newPage();
     try {
       await prepareSurface(page, surface);
-      const geometryResult = await expectNoHorizontalOverflow(page, `${surface} 200% equivalent reflow`);
+      const geometryResult = await horizontalContainment(page);
       const motion = await reducedMotionState(page);
-      expect(motion.mediaMatches, `${surface}: reduced-motion media query should be active`).toBeTruthy();
-      expect(motion.persistentAnimations, `${surface}: no persistent animation should remain under reduced motion`).toBe(0);
       const file = await capture(page, `reflow-200-${surface.replace(':', '-')}-640.png`);
       report.reflowReducedMotion.push({
         surface,
@@ -234,4 +227,23 @@ test('200 percent equivalent reflow and reduced-motion baseline', async ({ brows
     }
   }
   writeReport();
+});
+
+test('Phase 1 closure verdict', async () => {
+  const blockers = [];
+  for (const entry of report.wideBaseline) {
+    if (!entry.geometry.pass) blockers.push(`wide:${entry.role}:${entry.surface}:${entry.width}: overflow ${entry.geometry.body}/${entry.geometry.viewport}`);
+  }
+  for (const entry of report.accessibility) {
+    if (!entry.focus.pass) blockers.push(`a11y:${entry.surface}: keyboard focus`);
+    if (!entry.geometry.pass) blockers.push(`a11y:${entry.surface}: horizontal overflow`);
+    for (const violation of entry.axe.blockers) blockers.push(`a11y:${entry.surface}:${violation.id}:${violation.nodes.length} nodes`);
+  }
+  for (const entry of report.reflowReducedMotion) {
+    if (!entry.geometry.pass) blockers.push(`reflow:${entry.surface}: horizontal overflow`);
+    if (!entry.motion.pass) blockers.push(`motion:${entry.surface}: persistent animations=${entry.motion.persistentAnimations}`);
+  }
+  report.closureBlockers = blockers;
+  writeReport();
+  expect(blockers, 'Phase 1 closure blockers must be empty').toEqual([]);
 });
