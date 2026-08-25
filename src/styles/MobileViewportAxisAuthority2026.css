@@ -35,7 +35,6 @@
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
     width: 100% !important;
-    max-width: 100% !important;
     margin-inline: 0 !important;
     box-sizing: border-box !important;
   }
