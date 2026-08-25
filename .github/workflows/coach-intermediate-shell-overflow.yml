@@ -1,0 +1,44 @@
+name: Coach Intermediate Shell Overflow
+
+on:
+  pull_request:
+    paths:
+      - 'public/shotlab-mobile-centering-reconciliation.css'
+      - 'tests/e2e/coach-intermediate-shell-overflow.spec.mjs'
+      - '.github/workflows/coach-intermediate-shell-overflow.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coach-1024-shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: 'true'
+      ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Start preview
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/coach-1024-preview.log 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/coach-1024-preview.log
+          exit 1
+      - name: Verify Coach Players at 1024px
+        run: npx playwright test tests/e2e/coach-intermediate-shell-overflow.spec.mjs --config=playwright.acceptance.config.mjs --project=mobile-chromium --reporter=line --timeout=120000 --retries=0
