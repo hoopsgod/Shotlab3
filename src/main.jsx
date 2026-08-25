@@ -8,6 +8,7 @@ import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
 import './styles/ExpertVisualPolish.css'
 import { installMobileHorizontalViewportLock } from './lib/mobileHorizontalViewportLock.js'
+import { installMobileViewportDebug } from './lib/mobileViewportDebug.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -117,6 +118,7 @@ markBoot('main_executed')
 registerRuntimeListeners()
 installExpertVisualPolish()
 installMobileHorizontalViewportLock()
+installMobileViewportDebug()
 
 window.addEventListener('error', event => {
   const message = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
