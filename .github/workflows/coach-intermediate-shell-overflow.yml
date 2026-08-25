@@ -26,6 +26,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Install regression test tooling
+        run: npm install --no-save @playwright/test@1.55.1
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - name: Start preview
