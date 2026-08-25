@@ -291,11 +291,15 @@ async function navigateByKey(page, key) {
 async function openFirstCoachPlayerDetail(page) {
   const roster = page.locator("#coach-roster-operations");
   await expect(roster).toBeVisible({ timeout: 20_000 });
-  const rows = roster.locator('> .fade-up > [role="button"]');
+  const rows = roster.locator('> .fade-up > .phase1RosterRow');
   expect(await rows.count()).toBeGreaterThanOrEqual(1);
   const firstRow = rows.first();
-  const rowName = (await firstRow.locator("span").first().textContent())?.trim() || "Player";
-  await firstRow.click({ position: { x: 18, y: 18 } });
+  await expect(firstRow).not.toHaveAttribute("role", "button");
+  const profileButton = firstRow.locator('[data-phase1-open-profile="true"]');
+  await expect(profileButton).toBeVisible();
+  const profileLabel = await profileButton.getAttribute("aria-label");
+  const rowName = String(profileLabel || "").replace(/^Open\s+/i, "").replace(/\s+profile$/i, "") || "Player";
+  await profileButton.click();
   const drawer = page.getByRole("dialog", { name: rowName });
   await expect(drawer).toBeVisible({ timeout: 10_000 });
   await drawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
