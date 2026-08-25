@@ -29,6 +29,7 @@ function ensureRosterProfileButton(row) {
   const nestedControls = row.querySelectorAll("button, a[href], input, select, textarea");
   if (!nestedControls.length) return false;
 
+  row.classList.add("phase1RosterRow");
   row.removeAttribute("role");
   row.removeAttribute("tabindex");
   row.dataset.phase1RosterRow = "true";
