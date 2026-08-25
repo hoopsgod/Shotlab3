@@ -226,9 +226,14 @@ async function expectSharedMobileLock(page, role, label) {
     expect(['clip', 'hidden'], `${label} ${selector} x containment`).toContain(entry.overflowX);
   }
 
+  for (const selector of ['html', 'body', '#root']) {
+    const rootEntry = before.entries[selector];
+    expect(rootEntry, diagnostic).not.toBeNull();
+    expect(rootEntry.overscrollBehaviorX, `${label} ${selector} must own x overscroll containment`).toBe('none');
+  }
+
   const roleEntry = before.entries[before.roleRail];
   expect(roleEntry, diagnostic).not.toBeNull();
-  expect(roleEntry.overscrollBehaviorX, diagnostic).toBe('none');
 
   await forceInvalidHorizontalState(page, role);
   const afterForced = await readGeometry(page, role);
