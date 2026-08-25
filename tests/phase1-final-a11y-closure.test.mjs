@@ -13,11 +13,8 @@ test("Phase 1 roster closure reaches the actual nested roster rows", () => {
 });
 
 test("explicit roster profile actions carry the actual player name instead of a repeated generic label", () => {
-  assert.match(enhancer, /function resolveRosterPlayerName\(row\)/);
-  assert.match(enhancer, /content = row\.children\?\.\[1\]/);
-  assert.match(enhancer, /details = content instanceof HTMLElement \? content\.children\?\.\[1\]/);
-  assert.match(enhancer, /details\.querySelector\("span"\)/);
-  assert.match(enhancer, /phase1RosterPlayerName = name/);
+  assert.match(enhancer, /row\.children\?\.\[1\]\?\.children\?\.\[1\]/);
+  assert.match(enhancer, /details\?\.querySelector\?\.\("span"\)/);
   assert.match(enhancer, /`Open \$\{name\} profile`/);
   assert.match(enhancer, /data-phase1-open-profile/);
 });
