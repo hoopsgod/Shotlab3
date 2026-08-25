@@ -104,6 +104,7 @@ async function collectHorizontalOverflow(page) {
       rootClientWidth: root.clientWidth,
       rootScrollWidth: root.scrollWidth,
       rootScrollLeft: root.scrollLeft,
+      rootOverscrollBehaviorX: getComputedStyle(document.documentElement).overscrollBehaviorX,
       bodyClientWidth: document.body.clientWidth,
       bodyScrollWidth: document.body.scrollWidth,
       windowScrollX: window.scrollX,
@@ -125,9 +126,9 @@ async function expectNoPersistentDocumentOrRailPan(page, label) {
   const diagnostic = `${label} horizontal overflow report:\n${JSON.stringify(before, null, 2)}`;
   expect(before.rootScrollWidth, diagnostic).toBeLessThanOrEqual(before.rootClientWidth + 1);
   expect(before.bodyScrollWidth, diagnostic).toBeLessThanOrEqual(before.viewport + 1);
+  expect(before.rootOverscrollBehaviorX, diagnostic).toBe('none');
   expect(before.rail, diagnostic).not.toBeNull();
   expect(['clip', 'hidden'], diagnostic).toContain(before.rail.overflowX);
-  expect(before.rail.overscrollBehaviorX, diagnostic).toBe('none');
   expect(Math.abs(before.rail.scrollLeft), diagnostic).toBeLessThanOrEqual(1);
 
   const shifted = await page.evaluate(async (coachRailSelector) => {
