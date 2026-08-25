@@ -42,7 +42,6 @@
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
     width: 100% !important;
     min-width: 0 !important;
-    box-sizing: border-box !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
