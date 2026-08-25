@@ -28,8 +28,9 @@ export function findViewportFailures(report) {
     if (target.left < -1 || target.right > report.viewport.width + 1) {
       failures.push(`${target.selector} escapes viewport (${Math.round(target.left)}..${Math.round(target.right)} of ${report.viewport.width})`);
     }
-    if (target.scrollWidth - target.clientWidth > tolerance && !['auto', 'scroll'].includes(target.overflowX)) {
-      failures.push(`${target.selector} owns hidden horizontal overflow (${target.clientWidth}/${target.scrollWidth}, overflow-x=${target.overflowX})`);
+    const overflowAllowsHorizontalScroll = ['auto', 'scroll'].includes(target.overflowX);
+    if (!overflowAllowsHorizontalScroll && Math.abs(target.persistedScrollLeft || 0) > 1) {
+      failures.push(`${target.selector} retains horizontal scrollLeft=${Math.round(target.persistedScrollLeft)} (${target.clientWidth}/${target.scrollWidth}, overflow-x=${target.overflowX})`);
     }
   }
 
@@ -51,7 +52,7 @@ export function formatViewportDiagnostics(report) {
     `  document ${report.viewport.width}/${report.documentScrollWidth} | body ${report.viewport.width}/${report.bodyScrollWidth} | scrollX ${report.windowScrollX}`,
   ];
   for (const target of report.outerTargets || []) {
-    lines.push(`  ${target.selector}: client=${target.clientWidth} scroll=${target.scrollWidth} x=${Math.round(target.left)}..${Math.round(target.right)} overflow-x=${target.overflowX}`);
+    lines.push(`  ${target.selector}: client=${target.clientWidth} scroll=${target.scrollWidth} persisted=${Math.round(target.persistedScrollLeft || 0)} x=${Math.round(target.left)}..${Math.round(target.right)} overflow-x=${target.overflowX}`);
   }
   if (report.offenders?.length) {
     lines.push('  widest/off-axis elements:');
@@ -73,7 +74,7 @@ export function formatViewportDiagnostics(report) {
 
 export async function collectViewportDiagnostics(page, { role, label, extraSelectors = [], criticalActionLocators = [] }) {
   const selectors = [...new Set([...OUTER_VIEWPORT_SELECTORS, ...extraSelectors])];
-  const report = await page.evaluate(({ selectors, role, label }) => {
+  const report = await page.evaluate(async ({ selectors, role, label }) => {
     const viewport = { width: window.innerWidth, height: window.innerHeight };
     const isVisible = (node) => {
       const style = getComputedStyle(node);
@@ -122,10 +123,18 @@ export async function collectViewportDiagnostics(page, { role, label, extraSelec
       return chain;
     };
 
-    const outerTargets = selectors.flatMap((selector) => {
+    const outerTargets = [];
+    for (const selector of selectors) {
       const node = document.querySelector(selector);
-      return node ? [describe(node, selector)] : [];
-    });
+      if (!node) continue;
+      const entry = describe(node, selector);
+      const originalScrollLeft = node.scrollLeft;
+      node.scrollLeft = 240;
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const persistedScrollLeft = node.scrollLeft;
+      node.scrollLeft = originalScrollLeft;
+      outerTargets.push({ ...entry, persistedScrollLeft });
+    }
 
     const visibleNodes = [...document.querySelectorAll('body *')].filter((node) => isVisible(node));
     const offenders = visibleNodes

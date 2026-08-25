@@ -13,7 +13,7 @@ function healthy(overrides = {}) {
     rootScrollLeft: 0,
     visualViewportOffsetLeft: 0,
     outerTargets: [
-      { selector: '#root', left: 0, right: 390, clientWidth: 390, scrollWidth: 390, overflowX: 'clip' },
+      { selector: '#root', left: 0, right: 390, clientWidth: 390, scrollWidth: 390, persistedScrollLeft: 0, overflowX: 'clip' },
     ],
     fixedActionOffenders: [],
     criticalActions: [],
@@ -25,16 +25,31 @@ test('viewport debugger accepts a centered locked shell', () => {
   assert.deepEqual(findViewportFailures(healthy()), []);
 });
 
-test('viewport debugger reports document and shell overflow with the owning selector', () => {
+test('viewport debugger reports true document overflow', () => {
   const failures = findViewportFailures(healthy({
     documentScrollWidth: 414,
     documentOverflow: 24,
-    outerTargets: [
-      { selector: '.coach-scroll-container', left: 0, right: 414, clientWidth: 390, scrollWidth: 414, overflowX: 'clip' },
-    ],
   }));
   assert.ok(failures.some((message) => message.includes('document overflows viewport by 24px')));
-  assert.ok(failures.some((message) => message.includes('.coach-scroll-container')));
+});
+
+test('clipped decorative overflow is diagnostic-only when horizontal scroll state cannot persist', () => {
+  const failures = findViewportFailures(healthy({
+    outerTargets: [
+      { selector: '.performance-workspace', left: 0, right: 390, clientWidth: 390, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'hidden' },
+      { selector: '[data-testid="player-daily-command-center"]', left: 20, right: 370, clientWidth: 350, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'clip' },
+    ],
+  }));
+  assert.deepEqual(failures, []);
+});
+
+test('locked shell retaining horizontal scroll state is a hard failure', () => {
+  const failures = findViewportFailures(healthy({
+    outerTargets: [
+      { selector: '.coach-scroll-container', left: 0, right: 390, clientWidth: 390, scrollWidth: 430, persistedScrollLeft: 40, overflowX: 'hidden' },
+    ],
+  }));
+  assert.ok(failures.some((message) => message.includes('.coach-scroll-container retains horizontal scrollLeft=40')));
 });
 
 test('viewport debugger treats an unreachable fixed action as a hard failure', () => {
