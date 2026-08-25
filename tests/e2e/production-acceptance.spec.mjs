@@ -146,10 +146,11 @@ test("coach removal creates a hidden tombstone and excludes the player from rost
   await expect(page.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
 
   const candidateRosterRow = page
-    .locator('[role="button"]')
+    .locator("#coach-roster-operations .phase1RosterRow")
     .filter({ hasText: "Removal Candidate" })
     .filter({ has: page.getByRole("button", { name: "REMOVE", exact: true }) })
     .first();
+  await expect(candidateRosterRow).not.toHaveAttribute("role", "button");
   page.once("dialog", async (dialog) => dialog.accept());
   await candidateRosterRow.getByRole("button", { name: "REMOVE", exact: true }).click();
   await expect(page.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
