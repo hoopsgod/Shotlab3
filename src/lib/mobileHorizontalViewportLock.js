@@ -1,5 +1,6 @@
 const MOBILE_VIEWPORT_QUERY = '(max-width: 760px)';
 const HORIZONTAL_INTENT_THRESHOLD_PX = 6;
+const VISUAL_VIEWPORT_ZOOM_EPSILON = 0.01;
 const COACH_MOBILE_RAIL = 'var(--shotlab-mobile-content-rail, 20px)';
 
 const LOCKED_VERTICAL_OWNER_SELECTORS = [
@@ -27,6 +28,15 @@ const INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR = [
 function isMobileViewport() {
   if (typeof window === 'undefined') return false;
   return window.matchMedia?.(MOBILE_VIEWPORT_QUERY).matches ?? window.innerWidth <= 760;
+}
+
+export function isVisualViewportZoomed() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  const visual = window.visualViewport;
+  if (!visual) return false;
+  const layoutWidth = document.documentElement?.clientWidth || window.innerWidth || 0;
+  return Number(visual.scale || 1) > 1 + VISUAL_VIEWPORT_ZOOM_EPSILON
+    || (layoutWidth > 0 && Number(visual.width || layoutWidth) < layoutWidth - 1);
 }
 
 function findCoachRouteOwner() {
@@ -106,6 +116,14 @@ export function resetMobileHorizontalViewport() {
   if (typeof document === 'undefined' || typeof window === 'undefined' || !isMobileViewport()) return false;
 
   let corrected = normalizeRegisteredCoachRouteGeometry();
+
+  // When Safari is pinched or page-zoomed, the visual viewport is intentionally
+  // narrower than the layout viewport. Do not snap its horizontal position back
+  // to zero: that traps the user on the left edge and makes a valid zoomed page
+  // look like a right-clipped layout. Keep the structural Coach normalization,
+  // but let WebKit own zoom/pan geometry natively for accessibility.
+  if (isVisualViewportZoomed()) return corrected;
+
   const scrollingElement = document.scrollingElement || document.documentElement;
   corrected = resetNodeHorizontalOffset(scrollingElement) || corrected;
   corrected = resetNodeHorizontalOffset(document.documentElement) || corrected;
@@ -166,6 +184,8 @@ export function installMobileHorizontalViewportLock() {
 
   const handleTouchMove = (event) => {
     if (!isMobileViewport() || !touchStart || event.touches?.length !== 1) return;
+    if (isVisualViewportZoomed()) return;
+
     const touch = event.touches[0];
     const deltaX = touch.clientX - touchStart.x;
     const deltaY = touch.clientY - touchStart.y;
@@ -176,9 +196,8 @@ export function installMobileHorizontalViewportLock() {
       targetIsHorizontalOwner: touchStart.targetIsHorizontalOwner,
     })) return;
 
-    // iOS can visually translate the viewport before scroll/touchend fires. Cancel
-    // only horizontal-dominant outer-page motion while the finger is still down;
-    // vertical scroll, pinch zoom and intentional horizontal controls remain native.
+    // At the normal 1x visual viewport, contain accidental outer-page horizontal
+    // drift while vertical scroll and intentional horizontal controls remain native.
     if (event.cancelable) event.preventDefault();
     resetMobileHorizontalViewport();
   };
