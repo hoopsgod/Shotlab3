@@ -36,7 +36,8 @@ for (const sourceOwnedIdentityContract of [
   /data-team-identity-stage="coach-mission-control"/,
   /className="mcHeroIdentity"/,
   /className="mcHeroTeamMark"/,
-  /<TeamLogo src=\{heroTeamLogoUrl\} teamName=\{teamName\}/,
+  /const heroTeamLogoUrl = fullTeamLogoUrl;/,
+  /heroTeamLogoUrl \? <img src=\{heroTeamLogoUrl\} alt=\{`\$\{teamName\} logo`\} \/> : <LogoSetupPrompt teamName=\{teamName\} className="mcHeroLogoSetup" \/>/,
 ]) {
   if (!sourceOwnedIdentityContract.test(coachSource)) {
     throw new Error(`Coach Hero identity is missing source-owned DOM contract: ${sourceOwnedIdentityContract}`)
