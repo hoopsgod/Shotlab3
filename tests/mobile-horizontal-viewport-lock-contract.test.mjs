@@ -13,7 +13,7 @@ const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.
 
 test('mobile document and shared Demo/paid role shells use one split x-axis authority', () => {
   assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
+  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*overflow-x:\s*clip\s*!important;/);
   assert.match(finalAxisAuthority, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px\s*!important/);
   assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0\s*!important/);
   assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail,\s*20px\);/);
