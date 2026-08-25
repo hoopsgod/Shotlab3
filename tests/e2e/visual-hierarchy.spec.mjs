@@ -110,8 +110,9 @@ test("coach mobile home presents populated decision intelligence and a current S
   });
   expect(shellBox).not.toBeNull(); expect(objectiveBox).not.toBeNull(); expect(attentionBox).not.toBeNull();
   const shellLeftRail = shellBox.x, shellRightRail = viewportWidth - (shellBox.x + shellBox.width);
-  expect(Math.abs(shellLeftRail - expectedPageRail)).toBeLessThanOrEqual(1);
-  expect(Math.abs(shellRightRail - expectedPageRail)).toBeLessThanOrEqual(1);
+  // Coach Home intentionally uses a full-bleed outer shell; the decision stage owns the 20px visual rail.
+  expect(Math.abs(shellLeftRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(shellRightRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(shellLeftRail - shellRightRail)).toBeLessThanOrEqual(1);
   const stageLeftRail = objectiveBox.x, stageRightRail = viewportWidth - (objectiveBox.x + objectiveBox.width);
   expect(Math.abs(stageLeftRail - expectedPageRail)).toBeLessThanOrEqual(1);
