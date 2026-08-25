@@ -55,8 +55,4 @@
   html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
     padding-inline: 0 !important;
   }
-
-  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
-    margin-inline: 0 !important;
-  }
 }
