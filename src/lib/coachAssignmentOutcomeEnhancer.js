@@ -93,9 +93,11 @@ export function openExactPlayerFollowUp(row = {}) {
     setNativeInputValue(input, query);
 
     retryUntil(() => {
-      const rows = [...document.querySelectorAll('#coach-roster-operations [role="button"]')];
+      const rows = [...document.querySelectorAll('#coach-roster-operations .phase1RosterRow')];
       if (rows.length !== 1) return false;
-      rows[0].click();
+      const profileAction = rows[0].querySelector('[data-phase1-open-profile="true"]');
+      if (!profileAction?.click) return false;
+      profileAction.click();
       return true;
     });
     return true;

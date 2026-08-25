@@ -114,6 +114,22 @@ async function closeTeamStore(page) {
   if (await close.count()) await close.first().click();
 }
 
+async function openFirstCoachPlayerDrawer(page) {
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const row = roster.locator('> .fade-up > .phase1RosterRow').first();
+  await expect(row).toBeVisible();
+  await expect(row).not.toHaveAttribute("role", "button");
+  const profileButton = row.locator('[data-phase1-open-profile="true"]');
+  await expect(profileButton).toBeVisible();
+  const profileLabel = await profileButton.getAttribute("aria-label");
+  const rowName = String(profileLabel || "").replace(/^Open\s+/i, "").replace(/\s+profile$/i, "") || "Player";
+  await profileButton.click();
+  const playerDrawer = page.getByRole("dialog", { name: rowName });
+  await expect(playerDrawer).toBeVisible({ timeout: 10_000 });
+  return { playerDrawer, rowName };
+}
+
 test.describe("Phase 3 release certification — 390x844", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -121,14 +137,7 @@ test.describe("Phase 3 release certification — 390x844", () => {
     await enterDemo(page, "Coach");
 
     await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
-    const roster = page.locator("#coach-roster-operations");
-    await expect(roster).toBeVisible({ timeout: 20_000 });
-    const row = roster.locator('> .fade-up > [role="button"]').first();
-    await expect(row).toBeVisible();
-    const rowName = (await row.locator("span").first().textContent())?.trim() || "Player";
-    await row.click({ position: { x: 18, y: 18 } });
-    const playerDrawer = page.getByRole("dialog", { name: rowName });
-    await expect(playerDrawer).toBeVisible({ timeout: 10_000 });
+    const { playerDrawer } = await openFirstCoachPlayerDrawer(page);
     await capture(page, "11-coach-player-drawer");
     await playerDrawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
     await expect(page.getByTestId("coach-player-detail-workspace")).toBeVisible({ timeout: 10_000 });

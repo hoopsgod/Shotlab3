@@ -221,12 +221,12 @@ test("coach sees the shared career record and can open its immutable archive", a
   await enterDemo(page, "Demo Coach");
   await page.getByRole("button", { name: "Players", exact: true }).first().click();
 
-  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
-
-  await page
-    .locator("#coach-roster-operations")
-    .getByRole("button", { name: /Demo Player/i })
-    .click();
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const demoPlayerRow = roster.locator(".phase1RosterRow").filter({ hasText: "Demo Player" }).first();
+  await expect(demoPlayerRow).toBeVisible();
+  await expect(demoPlayerRow).not.toHaveAttribute("role", "button");
+  await demoPlayerRow.getByRole("button", { name: "Open Demo Player profile", exact: true }).click();
   await page.getByRole("button", { name: "Open Full Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
   await expectCareerSeasons(career, "coach");

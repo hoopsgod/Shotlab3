@@ -31,7 +31,12 @@ async function openDemoPlayerDrawer(page) {
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   const roster = page.locator("#coach-roster-operations");
   await expect(roster).toBeVisible({ timeout: 20_000 });
-  await roster.getByText("Demo Player", { exact: true }).first().click();
+  const row = roster.locator(".phase1RosterRow").filter({ hasText: "Demo Player" }).first();
+  await expect(row).toBeVisible();
+  await expect(row).not.toHaveAttribute("role", "button");
+  const profileAction = row.locator('[data-phase1-open-profile="true"]');
+  await expect(profileAction).toBeVisible();
+  await profileAction.click();
   const drawer = page.getByTestId("coach-player-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 20_000 });
   await expect(drawer.getByTestId("coach-follow-up-ledger")).toBeVisible({ timeout: 20_000 });

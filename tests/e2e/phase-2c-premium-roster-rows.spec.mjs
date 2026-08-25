@@ -65,10 +65,11 @@ test('Coach Players roster matches the Phase 2C mobile hierarchy and preserves p
   expect(sortBox).not.toBeNull();
   expect(sortBox.height).toBeGreaterThanOrEqual(44);
 
-  const rows = roster.locator('> .fade-up > [role="button"]');
+  const rows = roster.locator('> .fade-up > .phase1RosterRow');
   expect(await rows.count()).toBeGreaterThanOrEqual(1);
   const firstRow = rows.first();
   await expect(firstRow).toBeVisible();
+  await expect(firstRow).not.toHaveAttribute('role', 'button');
 
   const layout = await firstRow.evaluate((row) => {
     const rowStyle = getComputedStyle(row);
@@ -101,10 +102,13 @@ test('Coach Players roster matches the Phase 2C mobile hierarchy and preserves p
   expect(removeBox).not.toBeNull();
   expect(removeBox.height).toBeGreaterThanOrEqual(44);
 
-  const rowName = (await firstRow.locator('span').first().textContent())?.trim() || 'Player';
+  const profileButton = firstRow.locator('[data-phase1-open-profile="true"]');
+  await expect(profileButton).toBeVisible();
+  const profileLabel = await profileButton.getAttribute('aria-label');
+  const rowName = String(profileLabel || '').replace(/^Open\s+/i, '').replace(/\s+profile$/i, '') || 'Player';
   await capture(page, '01-coach-players-premium-roster-section', roster);
 
-  await firstRow.click({ position: { x: 18, y: 18 } });
+  await profileButton.click();
   const drawer = page.getByRole('dialog', { name: rowName });
   await expect(drawer).toBeVisible({ timeout: 10_000 });
   await expect(drawer).toContainText(rowName);
