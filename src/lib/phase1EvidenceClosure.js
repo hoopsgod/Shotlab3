@@ -24,19 +24,35 @@ function ensureStyles() {
   return true;
 }
 
+function resolveRosterPlayerName(row) {
+  if (!(row instanceof HTMLElement)) return "";
+  const content = row.children?.[1];
+  const details = content instanceof HTMLElement ? content.children?.[1] : null;
+  const identityName = details instanceof HTMLElement ? cleanText(details.querySelector("span")?.textContent) : "";
+  return identityName
+    || cleanText(row.querySelector('[data-player-name]')?.getAttribute("data-player-name"))
+    || cleanText(row.querySelector("strong")?.textContent)
+    || cleanText(row.querySelector("span")?.textContent);
+}
+
 function ensureRosterProfileButton(row) {
   if (!(row instanceof HTMLElement)) return false;
   const nestedControls = row.querySelectorAll("button, a[href], input, select, textarea");
   if (!nestedControls.length) return false;
 
+  const name = resolveRosterPlayerName(row) || "player";
   row.classList.add("phase1RosterRow");
   row.removeAttribute("role");
   row.removeAttribute("tabindex");
   row.dataset.phase1RosterRow = "true";
+  row.dataset.phase1RosterPlayerName = name;
 
-  if (row.querySelector('[data-phase1-open-profile="true"]')) return true;
+  const existingButton = row.querySelector('[data-phase1-open-profile="true"]');
+  if (existingButton instanceof HTMLButtonElement) {
+    existingButton.setAttribute("aria-label", `Open ${name} profile`);
+    return true;
+  }
 
-  const name = cleanText(row.querySelector("strong")?.textContent) || "player";
   const button = document.createElement("button");
   button.type = "button";
   button.dataset.phase1OpenProfile = "true";
