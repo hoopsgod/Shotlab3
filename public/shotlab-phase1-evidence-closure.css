@@ -1,0 +1,186 @@
+/* Phase 1 evidence-closure authority.
+ * Scope: only defects reproduced by the SHA-bound final evidence gates. */
+
+/* 1024px was the only wide baseline with a 1272px intrinsic desktop shell.
+ * Collapse the decision-support third column into the primary workspace while
+ * preserving the desktop command rail. 768px and 1280px remain untouched. */
+@media (min-width: 900px) and (max-width: 1100px) {
+  html,
+  body,
+  #root,
+  .app-shell.performance-shell,
+  .app-shell.performance-shell .shell-main,
+  .app-shell.performance-shell .content-wrap,
+  .app-shell.performance-shell .player-scroll-container,
+  .app-shell.performance-shell .coach-scroll-container,
+  .app-shell.performance-shell .pageShell,
+  .app-shell.performance-shell .performance-workspace {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-shell.performance-shell {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    grid-template-columns: minmax(190px, 210px) minmax(0, 1fr) !important;
+    overflow-x: clip !important;
+  }
+
+  .app-shell.performance-shell .shell-main,
+  .app-shell.performance-shell .content-wrap,
+  .app-shell.performance-shell .player-scroll-container,
+  .app-shell.performance-shell .coach-scroll-container {
+    width: 100% !important;
+  }
+
+  /* Operational insight rails are supporting desktop evidence. At tablet
+   * widths they collapse rather than creating an implicit third grid track. */
+  .app-shell.performance-shell [data-density="decision-first"] {
+    display: none !important;
+  }
+
+  .app-shell.performance-shell > aside:has([data-density="decision-first"]),
+  .app-shell.performance-shell > div:has(> [data-density="decision-first"]) {
+    display: none !important;
+  }
+}
+
+/* Auth baseline: remove inherited tint/opacity that reduced actual rendered
+ * contrast even where inline tokens appeared darker in source. */
+[data-testid="auth-workspace"] button,
+[data-testid="auth-workspace"] input,
+[data-testid="auth-workspace"] a {
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+[data-testid="auth-workspace"] button[role="tab"] {
+  color: #26323a !important;
+  -webkit-text-fill-color: #26323a !important;
+}
+
+[data-testid="auth-workspace"] input::placeholder {
+  color: #59636a !important;
+  opacity: 1 !important;
+}
+
+[data-testid="auth-workspace"] .cta-primary {
+  background: #c8ff1a !important;
+  color: #0b0d10 !important;
+  -webkit-text-fill-color: #0b0d10 !important;
+}
+
+[data-testid="auth-workspace"] .auth-demo-enter .btn-v:first-child {
+  background: #f8f7f2 !important;
+  color: #26323a !important;
+  -webkit-text-fill-color: #26323a !important;
+}
+
+[data-testid="auth-workspace"] .auth-demo-enter .btn-v:last-child {
+  background: #0d171e !important;
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+[data-testid="auth-workspace"] a[href$="privacy"] {
+  color: #46545d !important;
+  -webkit-text-fill-color: #46545d !important;
+}
+
+/* Coach Home contrast repairs proven by axe on the frozen production build. */
+[data-testid="coach-command-center-full"] .mcSessionSummary strong {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+[data-testid="coach-command-center-full"] .mcSessionSummary small {
+  color: #c5d0d6 !important;
+  -webkit-text-fill-color: #c5d0d6 !important;
+}
+[data-testid="coach-command-center-full"] .mcHealthScore {
+  color: #405a00 !important;
+  -webkit-text-fill-color: #405a00 !important;
+}
+[data-testid="coach-command-center-full"] .mcHealthFacts small {
+  color: #4d5860 !important;
+  -webkit-text-fill-color: #4d5860 !important;
+}
+[data-testid="coach-command-center-full"] .mcTeamHealth .mcTextLink {
+  color: #43515a !important;
+  -webkit-text-fill-color: #43515a !important;
+}
+[data-testid="coach-command-center-full"] [data-shotlab-response-row="true"] time {
+  color: #405a00 !important;
+  -webkit-text-fill-color: #405a00 !important;
+}
+
+/* Coach Players light-surface contrast. */
+[data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action {
+  color: #40556f !important;
+  -webkit-text-fill-color: #40556f !important;
+}
+[data-testid="coach-players-filter-rail"] button[aria-pressed="true"] {
+  color: #405718 !important;
+  -webkit-text-fill-color: #405718 !important;
+}
+[data-testid="coach-players-insight-grid"] [data-visual-role="insight-card"] > div:first-child {
+  color: #4e647d !important;
+  -webkit-text-fill-color: #4e647d !important;
+}
+[data-testid="coach-players-insight-grid"] [data-visual-role="insight-actions"] button {
+  color: #40566c !important;
+  -webkit-text-fill-color: #40566c !important;
+}
+[data-testid="coach-player-invite-dashboard-section"] > div:first-child > div:first-child > div:first-child {
+  color: #4e647d !important;
+  -webkit-text-fill-color: #4e647d !important;
+}
+
+/* A real profile action replaces the old interactive parent row. */
+#coach-roster-operations [data-phase1-roster-row="true"] .phase1RosterProfileAction {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(17,20,17,.16);
+  border-radius: 8px;
+  background: #f5f6f2;
+  color: #29302b;
+  font: 700 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#coach-roster-operations [data-phase1-roster-row="true"] .phase1RosterProfileAction:focus-visible {
+  outline: 3px solid rgba(95,118,0,.45);
+  outline-offset: 2px;
+}
+
+/* Shared mobile navigation labels failed against the dark team-brand dock. */
+[data-testid="mobile-navigation-dock"] button span {
+  color: #f0f5f3 !important;
+  -webkit-text-fill-color: #f0f5f3 !important;
+}
+
+/* Player Train selected filter. */
+[data-player-workspace-filter-rail="true"] button[aria-pressed="true"] span {
+  color: #3f5810 !important;
+  -webkit-text-fill-color: #3f5810 !important;
+}
+
+/* Player Progress light disclosure and coach-focus labels. */
+[data-testid="player-progress-story"] [data-testid="player-progress-next-focus"] > div > span,
+[data-testid="player-progress-story"] [data-testid="player-progress-next-focus"] span:first-child {
+  color: #536800 !important;
+  -webkit-text-fill-color: #536800 !important;
+}
+
+details[data-testid="player-progress-full-profile"] [data-visual-role="disclosure-title"] {
+  color: #26323a !important;
+  -webkit-text-fill-color: #26323a !important;
+}
+details[data-testid="player-progress-full-profile"] [data-visual-role="disclosure-meta"] {
+  color: #52616a !important;
+  -webkit-text-fill-color: #52616a !important;
+}
