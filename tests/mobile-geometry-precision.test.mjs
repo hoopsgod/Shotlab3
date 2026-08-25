@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const authority = read('src/styles/AuthenticatedVisualAuthority2026.css');
+const finalAxis = read('src/styles/MobileViewportAxisAuthority2026.css');
+const dashboards = read('src/components/CoachInteractiveDashboards.css');
 const metrics = read('src/components/PlayerMetricHierarchy.module.css');
 const secondaryPages = read('src/components/SecondaryPageSystem.css');
 const centering = read('public/shotlab-mobile-centering-reconciliation.css');
@@ -11,18 +13,28 @@ const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
 const app = read('src/App.jsx');
 
-test('mobile geometry authority owns one 20px content rail across current and legacy mobile owners', () => {
+test('mobile geometry authority keeps Player and Coach on dedicated 20px rails', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
+  assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--layout-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
-  assert.match(authority, /\.performance-shell \.player-scroll-container[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
-  assert.match(authority, /\.performance-shell--player \.player-quick-actions[\s\S]*padding-inline:\s*var\(--shotlab-mobile-content-rail\) !important/);
+  assert.match(finalAxis, /--layout-gutter:\s*20px/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail, 20px\)/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[\s\S]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-inline:\s*20px !important/);
 });
 
-test('Coach secondary routes compose the canonical 20px rail from one shared wrapper token', () => {
-  assert.match(authority, /--shotlab-coach-route-wrapper-gutter:\s*var\(--space-4, 16px\)/);
+test('Coach secondary routes use one outer rail with no composed inner gutter or title breakout', () => {
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
-  assert.match(authority, /\.performance-shell--coach \.secondaryPageShell\s*\{[\s\S]*padding-inline:\s*calc\(var\(--shotlab-mobile-content-rail\) - var\(--shotlab-coach-route-wrapper-gutter\)\) !important/);
+  assert.match(authority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*0 !important/);
+  assert.match(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100%;[\s\S]*max-width:\s*100%;[\s\S]*margin-inline:\s*0;/);
+  assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
+  assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
+  assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);
+  assert.match(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0 !important/);
 });
 
 test('secondary mobile pages land beyond bottom navigation with deliberate breathing room', () => {
@@ -32,10 +44,10 @@ test('secondary mobile pages land beyond bottom navigation with deliberate breat
   assert.match(navigation, /min-height:\s*calc\(var\(--mobile-tab-bar-height\) \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
-test('full-bleed route performance stages still break the rail symmetrically', () => {
-  assert.match(centering, /width:\s*calc\(100% \+ var\(--layout-gutter, 18px\) \+ var\(--layout-gutter, 18px\)\) !important/);
-  assert.match(centering, /margin-left:\s*calc\(var\(--layout-gutter, 18px\) \* -1\) !important/);
-  assert.match(centering, /margin-right:\s*calc\(var\(--layout-gutter, 18px\) \* -1\) !important/);
+test('mobile route performance stages stay inside the canonical page rail', () => {
+  assert.match(centering, /\[data-visual-role="secondary-page"\] > \[data-visual-role="primary-decision"\][\s\S]*width:\s*100% !important;[\s\S]*max-width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.doesNotMatch(centering, /width:\s*calc\(100% \+ var\(--layout-gutter/);
+  assert.doesNotMatch(centering, /margin-left:\s*calc\(var\(--layout-gutter, 18px\) \* -1\)/);
   assert.match(secondaryPages, /\.secondaryPageDecision\s*\{/);
 });
 

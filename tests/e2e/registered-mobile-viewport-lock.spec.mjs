@@ -7,6 +7,7 @@ const IDENTITIES = {
   coach: { id: '55555555-5555-4555-8555-555555555555', email: 'viewport.coach@shotlab.test', name: 'Viewport Coach', role: 'coach', isCoach: true },
   player: { id: '66666666-6666-4666-8666-666666666666', email: 'viewport.player@shotlab.test', name: 'Viewport Player', role: 'player', isCoach: false },
 };
+const COACH_RAIL_SELECTOR = '.performance-shell--coach.is-mobile > .shell-main > .content-wrap';
 
 function registeredSeed(role) {
   const current = IDENTITIES[role];
@@ -44,7 +45,12 @@ async function installRoutes(target, registeredUser) {
 }
 
 async function createRegistered(browser, role, viewport) {
-  const context = await browser.newContext({ viewport });
+  const context = await browser.newContext({
+    viewport,
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 3,
+  });
   const seed = registeredSeed(role);
   await context.addInitScript(({ storage }) => {
     window.localStorage.clear();
@@ -75,12 +81,96 @@ async function navigateByKey(page, key) {
   await page.waitForTimeout(180);
 }
 
+const VIEWPORT_CONTAINMENT_SELECTORS = [
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.performance-workspace',
+  '.player-scroll-container',
+  COACH_RAIL_SELECTOR,
+  '[data-testid="coach-command-center-full"]',
+  '[data-testid="coach-command-center-full"] .missionControl',
+  '[data-testid="mission-control-team-header"]',
+  '.mcHero[data-team-identity-stage="coach-mission-control"]',
+  '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent',
+];
+
+const OVERFLOW_LOCK_SELECTORS = new Set([
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.performance-workspace',
+  '.player-scroll-container',
+  COACH_RAIL_SELECTOR,
+  '[data-testid="coach-command-center-full"]',
+  '[data-testid="coach-command-center-full"] .missionControl',
+]);
+
+const OVERSCROLL_LOCK_SELECTORS = [
+  'html',
+  'body',
+  '#root',
+];
+
+const REGISTERED_CONTENT_RAIL_SELECTORS = [COACH_RAIL_SELECTOR, '.player-scroll-container'];
+
+/* Coach Home intentionally uses a centered editorial gutter on mobile. The
+   regression reported on iOS was asymmetric: a normal left gutter survived
+   while the stage ran into the right edge. Test the actual visual invariant,
+   not a full-bleed assumption. */
+const COACH_HOME_CENTER_AXIS_SELECTORS = [
+  '[data-testid="coach-command-center-full"]',
+  '[data-testid="coach-command-center-full"] .missionControl',
+  '[data-testid="mission-control-team-header"]',
+  '.mcHero[data-team-identity-stage="coach-mission-control"]',
+];
+
+async function expectRegisteredContentRailLocked(page) {
+  const result = await page.evaluate(async (selectors) => {
+    const rail = selectors.map((selector) => document.querySelector(selector)).find(Boolean);
+    if (!rail) return null;
+    const styles = getComputedStyle(rail);
+    const before = {
+      className: rail.className,
+      clientWidth: rail.clientWidth,
+      scrollWidth: rail.scrollWidth,
+      scrollLeft: rail.scrollLeft,
+      overflowX: styles.overflowX,
+      overscrollBehaviorX: styles.overscrollBehaviorX,
+    };
+    rail.scrollLeft = 240;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const after = {
+      scrollLeft: rail.scrollLeft,
+      windowScrollX: window.scrollX,
+      rootScrollLeft: document.scrollingElement?.scrollLeft || 0,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+    };
+    rail.scrollLeft = 0;
+    return { before, after };
+  }, REGISTERED_CONTENT_RAIL_SELECTORS);
+
+  expect(result, 'registered Coach/Player content rail must exist').not.toBeNull();
+  expect(['clip', 'hidden'], 'registered content rail must not own horizontal scrolling').toContain(result.before.overflowX);
+  expect(Math.abs(result.before.scrollLeft), 'registered content rail initial scrollLeft').toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.scrollLeft), 'registered content rail must reject persistent horizontal scrollLeft').toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.windowScrollX)).toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.rootScrollLeft)).toBeLessThanOrEqual(1);
+  expect(Math.abs(result.after.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
+}
+
 async function expectRegisteredViewportLocked(page) {
-  const geometry = await page.evaluate(async () => {
-    const selectors = ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace'];
+  const geometry = await page.evaluate(async (selectors) => {
     const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
     const before = Object.fromEntries(nodes.map(([selector, node]) => {
       const rect = node.getBoundingClientRect();
+      const styles = getComputedStyle(node);
       return [selector, {
         left: rect.left,
         right: rect.right,
@@ -88,29 +178,89 @@ async function expectRegisteredViewportLocked(page) {
         clientWidth: node.clientWidth,
         scrollWidth: node.scrollWidth,
         scrollLeft: node.scrollLeft,
-        overflowX: getComputedStyle(node).overflowX,
+        overflowX: styles.overflowX,
+        overscrollBehaviorX: styles.overscrollBehaviorX,
       }];
     }));
 
     const y = window.scrollY;
     window.scrollTo(999, y);
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    const result = { viewport: window.innerWidth, windowScrollX: window.scrollX, before };
+    const result = {
+      viewport: window.innerWidth,
+      windowScrollX: window.scrollX,
+      scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      before,
+    };
     window.scrollTo(0, y);
     return result;
-  });
+  }, VIEWPORT_CONTAINMENT_SELECTORS);
 
-  // The product regression is document-level horizontal panning. Both clip and
-  // hidden are valid outer containment results after production CSS optimization;
-  // the decisive invariant is that the viewport cannot move and the shell stays
-  // inside the visual viewport on every registered route.
   expect(Math.abs(geometry.windowScrollX)).toBeLessThanOrEqual(1);
-  for (const selector of ['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace']) {
+  expect(Math.abs(geometry.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
+
+  for (const selector of VIEWPORT_CONTAINMENT_SELECTORS) {
     const entry = geometry.before[selector];
     if (!entry) continue;
-    expect(entry.left).toBeGreaterThanOrEqual(-1);
-    expect(entry.right).toBeLessThanOrEqual(geometry.viewport + 1);
-    expect(['clip', 'hidden']).toContain(entry.overflowX);
+    expect(entry.left, `${selector} left edge`).toBeGreaterThanOrEqual(-1);
+    expect(entry.right, `${selector} right edge`).toBeLessThanOrEqual(geometry.viewport + 1);
+    if (OVERFLOW_LOCK_SELECTORS.has(selector)) {
+      expect(['clip', 'hidden'], `${selector} horizontal overflow`).toContain(entry.overflowX);
+    }
+  }
+
+  for (const selector of OVERSCROLL_LOCK_SELECTORS) {
+    const entry = geometry.before[selector];
+    if (!entry) continue;
+    expect(entry.overscrollBehaviorX, `${selector} horizontal overscroll authority`).toBe('none');
+  }
+
+  await expectRegisteredContentRailLocked(page);
+
+  /* A trusted horizontal wheel gesture is not the same as iOS rubber-band, but
+     it catches a live scrollable document that static width checks can miss. */
+  const viewport = page.viewportSize();
+  if (viewport) {
+    await page.mouse.move(Math.floor(viewport.width / 2), Math.min(120, Math.floor(viewport.height / 4)));
+    await page.mouse.wheel(480, 0);
+    await page.waitForTimeout(60);
+    const afterGesture = await page.evaluate((coachRailSelector) => ({
+      windowScrollX: window.scrollX,
+      scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
+      visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      coachRailScrollLeft: document.querySelector(coachRailSelector)?.scrollLeft || 0,
+      playerRailScrollLeft: document.querySelector('.player-scroll-container')?.scrollLeft || 0,
+    }), COACH_RAIL_SELECTOR);
+    expect(Math.abs(afterGesture.windowScrollX)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.coachRailScrollLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterGesture.playerRailScrollLeft)).toBeLessThanOrEqual(1);
+  }
+}
+
+async function expectCoachHomeCentered(page) {
+  const geometry = await page.evaluate((selectors) => {
+    const before = Object.fromEntries(selectors.map((selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return [selector, null];
+      const rect = node.getBoundingClientRect();
+      return [selector, { left: rect.left, right: rect.right, width: rect.width }];
+    }));
+    return { viewport: window.innerWidth, before };
+  }, COACH_HOME_CENTER_AXIS_SELECTORS);
+
+  for (const selector of COACH_HOME_CENTER_AXIS_SELECTORS) {
+    const entry = geometry.before[selector];
+    expect(entry, `${selector} exists on registered Coach Home`).not.toBeNull();
+    const leftGutter = entry.left;
+    const rightGutter = geometry.viewport - entry.right;
+    expect(leftGutter, `${selector} left mobile gutter`).toBeGreaterThanOrEqual(-1);
+    expect(rightGutter, `${selector} right mobile gutter`).toBeGreaterThanOrEqual(-1);
+    expect(Math.abs(leftGutter - rightGutter), `${selector} must have symmetric mobile gutters`).toBeLessThanOrEqual(2);
+    expect(Math.max(leftGutter, rightGutter), `${selector} must remain on the intended mobile axis`).toBeLessThanOrEqual(24);
   }
 }
 
@@ -119,13 +269,19 @@ const CASES = [
   { role: 'player', routes: ['log-drill', 'program', 'leaderboards', 'profile'] },
 ];
 
-for (const viewport of [{ width: 390, height: 844 }, { width: 430, height: 932 }]) {
+for (const viewport of [
+  { width: 320, height: 740 },
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+]) {
   for (const { role, routes } of CASES) {
     test(`registered ${role} remains viewport-locked across paid routes at ${viewport.width}px`, async ({ browser }) => {
       test.setTimeout(120_000);
       const registered = await createRegistered(browser, role, viewport);
       try {
         await expectRegisteredViewportLocked(registered.page);
+        if (role === 'coach') await expectCoachHomeCentered(registered.page);
         for (const route of routes) {
           await navigateByKey(registered.page, route);
           await expectRegisteredViewportLocked(registered.page);

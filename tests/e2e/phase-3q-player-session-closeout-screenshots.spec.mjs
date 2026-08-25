@@ -63,6 +63,7 @@ test("player can intentionally close the daily training loop after logging a res
 
   const closeout = page.getByTestId("player-session-closeout");
   await expect(closeout).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("player-completion-cue")).toBeHidden();
   await expect(closeout.getByText("SESSION COMPLETE", { exact: true })).toBeVisible();
   await expect(closeout.getByText(/TODAY’S WORK IS BANKED/i)).toBeVisible();
   await expect(closeout.getByTestId("player-session-closeout-metrics")).toBeVisible();
@@ -106,13 +107,46 @@ test("player can intentionally close the daily training loop after logging a res
   expect(doneStyle.backgroundColor).toBe("rgb(200, 255, 26)");
   expect(doneStyle.color).toBe("rgb(16, 19, 16)");
 
+  const dockAuthority = await page.evaluate(() => {
+    const wrap = document.querySelector('.player-training-completion-wrap:has([data-testid="player-session-closeout"])');
+    const scroll = document.querySelector('.player-scroll-container:has([data-testid="player-session-closeout"])');
+    const workspace = document.querySelector('.performance-workspace:has([data-testid="player-session-closeout"])');
+    if (!wrap || !scroll || !workspace) throw new Error("Missing closeout containment authority");
+    return {
+      wrapMarginBottom: parseFloat(getComputedStyle(wrap).marginBottom),
+      wrapPaddingBottom: parseFloat(getComputedStyle(wrap).paddingBottom),
+      scrollPaddingBottom: parseFloat(getComputedStyle(scroll).paddingBottom),
+      workspacePaddingBottom: parseFloat(getComputedStyle(workspace).paddingBottom),
+    };
+  });
+  expect(dockAuthority.wrapMarginBottom).toBe(0);
+  expect(dockAuthority.wrapPaddingBottom).toBe(0);
+  expect(dockAuthority.scrollPaddingBottom).toBe(0);
+  expect(dockAuthority.workspacePaddingBottom).toBeGreaterThan(0);
+
   await noOverflow(page);
   await closeout.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(120);
   await captureViewport(page, "04t-player-session-closeout.png");
 
-  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: "auto" }));
-  await page.waitForTimeout(120);
+  const terminalScroller = page.locator('.player-scroll-container:has([data-testid="player-session-closeout"])');
+  await terminalScroller.evaluate((node) => {
+    node.scrollTop = node.scrollHeight;
+  });
+  await expect.poll(async () => terminalScroller.evaluate((node) => Math.abs(node.scrollHeight - node.clientHeight - node.scrollTop))).toBeLessThanOrEqual(1);
+  const terminalScroll = await terminalScroller.evaluate((node) => ({
+    scrollTop: node.scrollTop,
+    scrollHeight: node.scrollHeight,
+    clientHeight: node.clientHeight,
+    distanceFromBottom: Math.abs(node.scrollHeight - node.clientHeight - node.scrollTop),
+  }));
+  expect(terminalScroll.scrollHeight).toBeGreaterThanOrEqual(terminalScroll.clientHeight);
+  if (terminalScroll.scrollHeight > terminalScroll.clientHeight + 1) {
+    expect(terminalScroll.scrollTop).toBeGreaterThan(0);
+  } else {
+    expect(terminalScroll.scrollTop).toBeLessThanOrEqual(1);
+  }
+  expect(terminalScroll.distanceFromBottom).toBeLessThanOrEqual(1);
+
   const dockBox = await page.getByTestId("mobile-navigation-dock").boundingBox();
   const closeoutBox = await closeout.boundingBox();
   expect(dockBox).not.toBeNull();

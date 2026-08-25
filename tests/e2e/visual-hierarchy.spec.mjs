@@ -90,7 +90,8 @@ test("player mobile home presents performance, interpretation, momentum, and one
 });
 
 test("coach mobile home presents populated decision intelligence and a current Schedule", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  const viewportWidth = 390;
+  await page.setViewportSize({ width: viewportWidth, height: 844 });
   await enterDemo(page, "coach");
   const commandCenter = page.getByTestId("coach-command-center-full");
   const objective = page.getByTestId("coach-primary-objective");
@@ -101,13 +102,22 @@ test("coach mobile home presents populated decision intelligence and a current S
   await expect(objective).toBeVisible(); await expect(objectiveContent).toBeVisible(); await expectThreeMetrics(metrics); await expect(needsAttention).toBeVisible();
   await expect(page.getByTestId("coach-dashboard-identity-header")).not.toBeVisible();
   await expect(page.locator(".coach-home-dashboard")).not.toBeVisible();
-  const shellBox = await commandCenter.boundingBox(), objectiveBox = await objective.boundingBox(), objectiveContentBox = await objectiveContent.boundingBox(), attentionBox = await needsAttention.boundingBox();
-  expect(shellBox).not.toBeNull(); expect(objectiveBox).not.toBeNull(); expect(objectiveContentBox).not.toBeNull(); expect(attentionBox).not.toBeNull();
-  expect(shellBox.x).toBeLessThanOrEqual(1); expect(shellBox.width).toBeGreaterThanOrEqual(388);
-  const stageLeftGap = objectiveBox.x, stageRightGap = 390 - (objectiveBox.x + objectiveBox.width);
-  expect(Math.abs(stageLeftGap)).toBeLessThanOrEqual(1); expect(Math.abs(stageRightGap)).toBeLessThanOrEqual(1);
-  const contentLeftGutter = objectiveContentBox.x - objectiveBox.x, contentRightGutter = objectiveBox.x + objectiveBox.width - (objectiveContentBox.x + objectiveContentBox.width);
-  expect(contentLeftGutter).toBeGreaterThanOrEqual(20); expect(contentRightGutter).toBeGreaterThanOrEqual(20); expect(objectiveBox.height).toBeLessThan(520); expect(attentionBox.y).toBeLessThan(844);
+  const shellBox = await commandCenter.boundingBox(), objectiveBox = await objective.boundingBox(), attentionBox = await needsAttention.boundingBox();
+  const objectiveContentPadding = await objectiveContent.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { left: Number.parseFloat(style.paddingLeft) || 0, right: Number.parseFloat(style.paddingRight) || 0 };
+  });
+  expect(shellBox).not.toBeNull(); expect(objectiveBox).not.toBeNull(); expect(attentionBox).not.toBeNull();
+  const shellLeftRail = shellBox.x, shellRightRail = viewportWidth - (shellBox.x + shellBox.width);
+  // Coach Home intentionally uses a full-bleed outer shell and objective; mcHeroContent owns the visual inset.
+  expect(Math.abs(shellLeftRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(shellRightRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(shellLeftRail - shellRightRail)).toBeLessThanOrEqual(1);
+  const stageLeftRail = objectiveBox.x, stageRightRail = viewportWidth - (objectiveBox.x + objectiveBox.width);
+  expect(Math.abs(stageLeftRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageRightRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageLeftRail - stageRightRail)).toBeLessThanOrEqual(1);
+  expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(20); expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(20); expect(objectiveBox.height).toBeLessThan(520); expect(attentionBox.y).toBeLessThan(844);
   await expectNoHorizontalOverflow(page);
   const dock = page.getByTestId("mobile-navigation-dock"); await expect(dock).toBeVisible(); await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.getByTestId("coach-events-mobile-page"), eventsHeader = page.getByTestId("coach-events-command-bar"), createEvent = visibleCreateEventButton(page);

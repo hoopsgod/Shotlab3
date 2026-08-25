@@ -69,13 +69,17 @@ test("assignment mutation controls expose busy state and recover in finally", ()
 
 test("team branding form meets practical touch and duplicate-submit contracts", () => {
   const source = fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx", import.meta.url), "utf8");
+  const styles = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
 
-  assert.match(source, /minHeight: 44/);
-  assert.doesNotMatch(source, /minHeight: (?:40|42)/);
+  assert.match(styles, /\.team-branding-form__palette,[\s\S]*?min-height:\s*46px;/);
+  assert.match(styles, /\.team-branding-form__field input\s*\{[\s\S]*?min-height:\s*48px;/);
+  assert.match(styles, /\.team-branding-form__save-action\s*\{[\s\S]*?min-height:\s*48px;/);
+  assert.doesNotMatch(styles, /min-height:\s*(?:40|42)px;/);
   assert.match(source, /if \(saving \|\| cleaning \|\| submitInFlightRef\.current\) return/);
   assert.match(source, /submitInFlightRef\.current = true/);
   assert.match(source, /submitInFlightRef\.current = false/);
-  assert.match(source, /aria-busy=\{saving \|\| cleaning \|\| submitting\}/);
+  assert.match(source, /const isBusy = saving \|\| cleaning \|\| submitting;/);
+  assert.match(source, /aria-busy=\{isBusy\}/);
   assert.match(source, /role="alert"/);
 });
 

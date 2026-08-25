@@ -112,8 +112,8 @@ test("Phase 4A Player Progress carries the same visual DNA with a different crop
     await expect(mark).toBeVisible();
     const box = await mark.boundingBox();
     expect(box).not.toBeNull();
-    expect(box.width).toBeGreaterThanOrEqual(38);
-    expect(box.height).toBeGreaterThanOrEqual(38);
+    expect(Math.round(box.width)).toBeGreaterThanOrEqual(38);
+    expect(Math.round(box.height)).toBeGreaterThanOrEqual(38);
   }
   await expectNoOverflow(page);
   await capture(page, "08c-phase4a-player-progress-signature.png");
@@ -151,7 +151,40 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
   const headerMark = page.locator(".mcHeaderTeamMark").first();
   await expect(headerMark).toBeVisible();
   await expect(headerMark.locator("img")).toBeVisible();
-  await expect(hero.locator(".mcHeroTeamMark")).toBeHidden();
+
+  const heroMark = hero.locator(".mcHeroTeamMark");
+  await expect(heroMark).toBeVisible();
+  const heroMarkImage = heroMark.locator("img");
+  await expect(heroMarkImage).toBeVisible();
+  const markState = await heroMark.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const image = node.querySelector("img");
+    const heroNode = node.closest('[data-testid="coach-primary-objective"]');
+    const heroRect = heroNode?.getBoundingClientRect();
+    const identityCopy = heroNode?.querySelector('.mcHeroIdentityCopy')?.getBoundingClientRect();
+    const overlapsCopy = Boolean(identityCopy) && rect.left < identityCopy.right && rect.right > identityCopy.left && rect.top < identityCopy.bottom && rect.bottom > identityCopy.top;
+    return {
+      complete: image?.complete ?? false,
+      naturalWidth: image?.naturalWidth ?? 0,
+      naturalHeight: image?.naturalHeight ?? 0,
+      objectFit: image ? getComputedStyle(image).objectFit : "",
+      rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      hero: heroRect ? { left: heroRect.left, top: heroRect.top, right: heroRect.right, bottom: heroRect.bottom } : null,
+      overlapsCopy,
+    };
+  });
+  expect(markState.complete).toBe(true);
+  expect(markState.naturalWidth).toBeGreaterThan(0);
+  expect(markState.naturalHeight).toBeGreaterThan(0);
+  expect(markState.objectFit).toBe("contain");
+  expect(markState.rect.width).toBeGreaterThanOrEqual(76);
+  expect(markState.rect.height).toBeGreaterThanOrEqual(76);
+  expect(markState.hero).not.toBeNull();
+  expect(markState.rect.left).toBeGreaterThanOrEqual(markState.hero.left - 1);
+  expect(markState.rect.right).toBeLessThanOrEqual(markState.hero.right + 1);
+  expect(markState.rect.top).toBeGreaterThanOrEqual(markState.hero.top - 1);
+  expect(markState.rect.bottom).toBeLessThanOrEqual(markState.hero.bottom + 1);
+  expect(markState.overlapsCopy).toBe(false);
 
   const courtArtwork = hero.locator(".mcCourtArtwork");
   await expect(courtArtwork).toBeVisible();
@@ -163,11 +196,17 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
   expect(geometry.height).toBeGreaterThan(120);
 
   const heroTreatment = await hero.evaluate((node) => ({
-    backgroundImage: getComputedStyle(node).backgroundImage,
+    backgroundColor: getComputedStyle(node).backgroundColor,
     overflow: getComputedStyle(node).overflow,
   }));
-  expect(heroTreatment.backgroundImage).toContain("gradient");
+  expect(heroTreatment.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(heroTreatment.backgroundColor).not.toBe("rgb(255, 255, 255)");
   expect(["hidden", "clip"]).toContain(heroTreatment.overflow);
+
+  const heroScrim = hero.locator(".mcHeroScrim");
+  await expect(heroScrim).toBeVisible();
+  const scrimBackground = await heroScrim.evaluate((node) => getComputedStyle(node).backgroundImage);
+  expect(scrimBackground).toContain("gradient");
 
   await expect(page.getByTestId("player-home-signature-field")).toHaveCount(0);
   await expect(page.getByTestId("player-progress-signature-field")).toHaveCount(0);

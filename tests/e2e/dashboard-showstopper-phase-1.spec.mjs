@@ -211,7 +211,7 @@ test("375px athlete credential survives long player and team names without clipp
   await page.setViewportSize({ width: 375, height: 844 });
   await enterPlayerDemo(page);
   const contract = await page.getByTestId("player-dashboard-identity-header").evaluate((node) => {
-    const name = node.querySelector('[data-identity-role="name"]');
+    const name = node.querySelector('[data-identity-role="page-title"]');
     const team = node.querySelector('[data-identity-role="team-name"]');
     if (name) name.textContent = "Alexandria Montgomery-Washington";
     if (team) team.textContent = "Webster Thomas Elite Player Development Program";

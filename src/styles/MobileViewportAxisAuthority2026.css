@@ -1,0 +1,58 @@
+/* Final authenticated mobile x-axis authority. Loaded last. */
+@media (max-width: 767px) {
+  html body #root .performance-shell.is-mobile {
+    --layout-gutter: 20px;
+    --phase4e-mobile-gutter: 20px;
+  }
+
+  html body #root .performance-shell--player.is-mobile .player-scroll-container {
+    padding-inline: 20px !important;
+  }
+
+  /* The shared centering boundary owns width/min-width/box sizing. These two
+   * registered Coach owners only opt out of an extra late inline gutter. */
+  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
+    padding-inline: 0 !important;
+  }
+
+  /* One registered Coach mobile rail. App.jsx consumes this variable directly
+   * for every non-Home route; SecondaryPageShell contributes no second gutter. */
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
+    --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px);
+  }
+
+  /* MissionControlCascadeLock owns the Home shell and hero-content viewport
+   * geometry. Keep only definite-width children that need local border-box sizing. */
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Secondary Coach title stages stay inside the same outer route rail. Do not
+   * re-expand a title child after its parent has already been inset. */
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
+    width: 100% !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
+  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest {
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .performance-shell--player.is-mobile .player-quick-actions,
+  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
+    padding-inline: 0 !important;
+  }
+}

@@ -47,7 +47,7 @@ test('Leaderboard hero cannot claim the top spot for a lower displayed rank', ()
   assert.match(workspaceSource, /model\?\.id !== "leaderboards"/);
   assert.match(workspaceSource, /rank <= 1/);
   assert.match(workspaceSource, /You are tied on makes with the position ahead\./);
-  assert.match(workspaceSource, /<p className=\{styles\.subtitle\}>\{subtitle\}<\/p>/);
+  assert.match(workspaceSource, /summary=\{subtitle\}/);
 });
 
 test('Secondary route focus behavior remains explicit after Phase 7 reconciliation', () => {

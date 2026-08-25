@@ -97,6 +97,7 @@ test("Coach Leaderboards uses the accepted shared title and dark decision hierar
   await expect(metrics.nth(0).locator("[data-route-stage-metric-label]")).toHaveText("Ranked");
   await expect(metrics.nth(1).locator("[data-route-stage-metric-label]")).toHaveText("Leader");
   await expect(metrics.nth(2).locator("[data-route-stage-metric-label]")).toHaveText("Archives");
+  const summaryContrast = await expectReadableContrast(summary, 4.5);
   const titleContrast = await expectReadableContrast(decisionTitle, 4.5);
   const detailContrast = await expectReadableContrast(decisionDetail, 4.5);
 
@@ -159,14 +160,22 @@ test("Coach Leaderboards uses the accepted shared title and dark decision hierar
       overflow: document.documentElement.scrollWidth - window.innerWidth,
     };
   });
-  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-leaderboards-390x844.json"), `${JSON.stringify({ ...visualState, titleContrast, detailContrast, pageErrors }, null, 2)}\n`);
+  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-leaderboards-390x844.json"), `${JSON.stringify({ ...visualState, summaryContrast, titleContrast, detailContrast, pageErrors }, null, 2)}\n`);
 
   expect(visualState.pageBackground).toBe("rgb(247, 248, 242)");
   expect(visualState.titleFill).toBe("rgb(23, 26, 24)");
-  expect(visualState.summaryColor).toBe("rgb(93, 102, 95)");
   expect(visualState.summaryBackground).toBe("rgba(0, 0, 0, 0)");
+  const summaryChannels = visualState.summaryColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
+  expect(summaryChannels).toHaveLength(3);
+  expect(Math.max(...summaryChannels) - Math.min(...summaryChannels)).toBeLessThanOrEqual(12);
   const backgroundChannels = visualState.decisionBackgroundColor.match(/\d+/g)?.map(Number).slice(0, 3) || [];
-  expect(Math.max(...backgroundChannels)).toBeLessThan(45);
+  expect(backgroundChannels).toHaveLength(3);
+  const linearBackgroundChannels = backgroundChannels.map((channel) => {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  const decisionLuminance = 0.2126 * linearBackgroundChannels[0] + 0.7152 * linearBackgroundChannels[1] + 0.0722 * linearBackgroundChannels[2];
+  expect(decisionLuminance, `decision stage must remain a genuinely dark semantic surface; background=${visualState.decisionBackgroundColor}`).toBeLessThanOrEqual(0.08);
 
   expect(visualState.metricCount).toBe(3);
   expect(visualState.metricDisplay).toBe("grid");

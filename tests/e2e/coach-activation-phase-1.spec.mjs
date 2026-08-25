@@ -51,15 +51,18 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test("fresh Coach Demo receives one truthful next action and lands in team branding", async ({ page }) => {
+test("fresh Coach Demo preserves its confirmed team identity and keeps branding reachable", async ({ page }) => {
   await enterFreshCoachDemo(page);
 
-  const activation = page.getByTestId("coach-onboarding-state");
-  await expect(activation).toBeVisible({ timeout: 20_000 });
-  await expect(activation.getByText("Set your team identity", { exact: true })).toBeVisible();
-  await expect(activation).toContainText(/Coach activation · [0-5]\/5/);
+  // Demo Titans ships with a confirmed custom identity, so the old first-run
+  // activation card must not reappear for a fresh browser session.
+  await expect(page.getByTestId("coach-onboarding-state")).toHaveCount(0);
+  const objective = page.getByTestId("coach-primary-objective");
+  await expect(objective.getByText("Demo Titans", { exact: true })).toBeVisible();
+  await expect(objective).toContainText("1 decision before practice");
 
-  await activation.getByRole("button", { name: /Open team branding/i }).click();
+  const teamHeader = page.getByTestId("mission-control-team-header");
+  await teamHeader.getByRole("button", { name: "Customize Demo Titans team identity", exact: true }).click();
 
   await expectTeamBrandingWorkspace(page);
   await expectNoHorizontalOverflow(page);
@@ -76,7 +79,8 @@ test("Coach Inbox turns the notification bell into an actionable mobile workflow
   const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
   await expect(inbox).toBeVisible();
   await expect(bell).toHaveAttribute("aria-expanded", "true");
-  await expect(inbox.getByText("Set your team identity", { exact: true })).toBeVisible();
+  await expect(inbox.getByText("Team Practice", { exact: true })).toBeVisible();
+  await expect(inbox.getByText("Micah Santos", { exact: true })).toBeVisible();
   await expect(inbox.getByText("Only current team actions appear here.", { exact: true })).toBeVisible();
 
   await page.keyboard.press("Escape");
@@ -84,8 +88,9 @@ test("Coach Inbox turns the notification bell into an actionable mobile workflow
   await expect(bell).toHaveAttribute("aria-expanded", "false");
 
   await bell.click();
-  await inbox.getByRole("button", { name: /Set your team identity/i }).click();
-
-  await expectTeamBrandingWorkspace(page);
+  const currentAction = inbox.getByRole("button").filter({ hasText: "Team Practice" });
+  await expect(currentAction).toBeVisible();
+  await currentAction.click();
+  await expect(inbox).toBeHidden();
   await expectNoHorizontalOverflow(page);
 });

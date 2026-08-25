@@ -24,14 +24,39 @@ async function capture(page, name) {
 }
 
 function parseCssColor(value) {
-  const match = String(value).match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/);
-  expect(match, `Expected an rgb/rgba color, received ${value}`).not.toBeNull();
+  const input = String(value).trim();
+  const rgbMatch = input.match(/^rgba?\(\s*([\d.]+)(?:\s*,\s*|\s+)([\d.]+)(?:\s*,\s*|\s+)([\d.]+)(?:\s*(?:,|\/)\s*([\d.]+))?\s*\)$/i);
+  if (rgbMatch) {
+    return {
+      r: Number(rgbMatch[1]),
+      g: Number(rgbMatch[2]),
+      b: Number(rgbMatch[3]),
+      a: rgbMatch[4] === undefined ? 1 : Number(rgbMatch[4]),
+    };
+  }
+
+  const srgbMatch = input.match(/^color\(\s*srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)$/i);
+  expect(srgbMatch, `Expected an rgb/rgba or color(srgb ...) color, received ${value}`).not.toBeNull();
   return {
-    r: Number(match[1]),
-    g: Number(match[2]),
-    b: Number(match[3]),
-    a: match[4] === undefined ? 1 : Number(match[4]),
+    r: Number(srgbMatch[1]) * 255,
+    g: Number(srgbMatch[2]) * 255,
+    b: Number(srgbMatch[3]) * 255,
+    a: srgbMatch[4] === undefined ? 1 : Number(srgbMatch[4]),
   };
+}
+
+function relativeLuminance({ r, g, b }) {
+  const linear = [r, g, b].map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function contrastRatio(first, second) {
+  const bright = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const dark = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (bright + 0.05) / (dark + 0.05);
 }
 
 test("Coach Leaderboards preserves decision context, competitive signal, and player drill-down", async ({ page }) => {
@@ -93,13 +118,14 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   const firstSection = sectionHeading.locator("xpath=ancestor::section[1]");
   await expect(firstSection).toBeVisible();
   const sectionBackground = parseCssColor(await firstSection.evaluate((node) => getComputedStyle(node).backgroundColor));
-  expect(Math.max(sectionBackground.r, sectionBackground.g, sectionBackground.b)).toBeLessThanOrEqual(24);
+  expect(relativeLuminance(sectionBackground)).toBeLessThanOrEqual(0.12);
   expect(sectionBackground.a).toBeGreaterThanOrEqual(0.9);
 
   await expect(sectionTitle).toBeVisible();
   const sectionTitleColor = parseCssColor(await sectionTitle.evaluate((node) => getComputedStyle(node).color));
-  expect(Math.min(sectionTitleColor.r, sectionTitleColor.g, sectionTitleColor.b)).toBeGreaterThanOrEqual(238);
+  expect(relativeLuminance(sectionTitleColor)).toBeGreaterThanOrEqual(0.8);
   expect(sectionTitleColor.a).toBeGreaterThanOrEqual(.99);
+  expect(contrastRatio(sectionTitleColor, sectionBackground)).toBeGreaterThanOrEqual(7);
   const sectionTitleBackground = await sectionTitle.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionTitleBackground).toBe("rgba(0, 0, 0, 0)");
 

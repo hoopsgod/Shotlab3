@@ -76,14 +76,17 @@ test("session closeout uses a compact premium hierarchy with mobile and reduced-
   assert.match(closeoutCss, /prefers-reduced-motion: reduce/);
 });
 
-test("Phase 3Q owns its late visual authority and uses compact safe dock clearance", () => {
+test("Phase 3Q defers terminal dock clearance to the authenticated Player shell", () => {
   assert.match(html, /shotlab-phase3p-player-training-completion\.css[\s\S]*shotlab-phase3q-player-session-closeout\.css/);
   assert.match(authority, /player-training-finish-session/);
   assert.match(authority, /body #root \[data-testid="player-session-closeout"\][\s\S]*background-color: #0f120f !important/);
   assert.match(authority, /player-session-closeout-hero/);
   assert.match(authority, /player-session-done/);
-  assert.match(authority, /margin-bottom: calc\(28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
-  assert.match(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: calc\(12px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(authority, /player-training-completion-wrap:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*margin-bottom: 0 !important;[\s\S]*padding-bottom: 0 !important/);
+  assert.match(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: 0 !important/);
+  assert.match(authority, /performance-workspace:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*player-completion-cue[\s\S]*display: none !important/);
+  assert.doesNotMatch(authority, /margin-bottom: calc\(28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.doesNotMatch(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: calc\(12px \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
 test("Phase 3Q iPhone evidence logs a real score, verifies live streak parity, and constrains dock gap", () => {
@@ -97,6 +100,13 @@ test("Phase 3Q iPhone evidence logs a real score, verifies live streak parity, a
   assert.match(screenshotSpec, /player-session-next-commitment/);
   assert.match(screenshotSpec, /player-session-done/);
   assert.match(screenshotSpec, /player-session-view-progress/);
+  assert.match(screenshotSpec, /player-completion-cue/);
+  assert.match(screenshotSpec, /scrollPaddingBottom/);
+  assert.match(screenshotSpec, /workspacePaddingBottom/);
+  assert.match(screenshotSpec, /const terminalScroller = page\.locator/);
+  assert.match(screenshotSpec, /node\.scrollTop = node\.scrollHeight/);
+  assert.match(screenshotSpec, /distanceFromBottom/);
+  assert.doesNotMatch(screenshotSpec, /window\.scrollTo/);
   assert.match(screenshotSpec, /const dockGap/);
   assert.match(screenshotSpec, /dockGap\)\.toBeLessThanOrEqual\(96\)/);
   assert.match(screenshotSpec, /04t-player-session-closeout\.png/);

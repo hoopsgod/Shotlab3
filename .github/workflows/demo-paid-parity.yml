@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "src/**"
+      - "public/**"
       - "functions/**"
       - "tests/**"
       - ".github/workflows/**"
@@ -43,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Enforce shared UI, capability, isolation, and registered leaderboard contracts
+      - name: Enforce shared UI, capability, isolation, and mobile viewport contracts
         run: >-
           node --test
           tests/demo-visual-parity-contract.test.mjs
@@ -54,12 +55,14 @@ jobs:
           tests/demo-invitation-safety.test.mjs
           tests/home-shots-leaderboard-route.test.mjs
           tests/remote-leaderboard-roster-parity.test.mjs
+          tests/registered-mobile-viewport-lock-contract.test.mjs
+          tests/mobile-horizontal-viewport-lock-contract.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Verify production build
         run: npm run build
@@ -70,6 +73,8 @@ jobs:
           tests/e2e/demo-paid-parity.spec.mjs
           tests/e2e/demo-paid-responsive-parity.spec.mjs
           tests/e2e/registered-mobile-viewport-lock.spec.mjs
+          tests/e2e/registered-mobile-webkit-scroll-lock.spec.mjs
+          tests/e2e/mobile-demo-paid-horizontal-lock.spec.mjs
           tests/e2e/demo-sandbox-safety.spec.mjs
           --config=playwright.acceptance.config.mjs
           --reporter=line

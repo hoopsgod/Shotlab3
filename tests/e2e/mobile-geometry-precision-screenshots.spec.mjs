@@ -95,15 +95,35 @@ async function expectNoHorizontalOverflow(page) {
   expect(geometry.bodyWidth - geometry.viewport).toBeLessThanOrEqual(1);
 }
 
-async function expectPlayerTwentyPixelShellRail(page) {
-  const rail = await page.locator(".player-scroll-container").evaluate((element) => {
+async function expectPlayerTwentyPixelPageRail(page) {
+  const rail = page.locator(".player-scroll-container");
+  await expect(rail).toBeVisible();
+  const geometry = await rail.evaluate((element) => {
     const style = getComputedStyle(element);
-    return { left: Number.parseFloat(style.paddingLeft), right: Number.parseFloat(style.paddingRight) };
+    const rect = element.getBoundingClientRect();
+    const paddingLeft = Number.parseFloat(style.paddingLeft);
+    const paddingRight = Number.parseFloat(style.paddingRight);
+    const contentLeft = rect.left + paddingLeft;
+    const contentRight = rect.right - paddingRight;
+    const candidates = [...element.querySelectorAll(':is([data-testid="player-daily-command-center"], [data-team-workspace], [data-testid^="player-commitment-center-"], [data-testid="player-progress-team-title"], [data-testid="player-progress-story"])')]
+      .map((node) => node.getBoundingClientRect())
+      .filter((box) => box.width > 1 && box.height > 1);
+    return {
+      paddingLeft,
+      paddingRight,
+      contentLeft,
+      contentRight,
+      candidates: candidates.map((box) => ({ left: box.left, right: box.right })),
+    };
   });
-  expect(rail.left).toBeGreaterThanOrEqual(19.5);
-  expect(rail.left).toBeLessThanOrEqual(20.5);
-  expect(rail.right).toBeGreaterThanOrEqual(19.5);
-  expect(rail.right).toBeLessThanOrEqual(20.5);
+  expect(geometry.paddingLeft).toBeGreaterThanOrEqual(19.5);
+  expect(geometry.paddingLeft).toBeLessThanOrEqual(20.5);
+  expect(geometry.paddingRight).toBeGreaterThanOrEqual(19.5);
+  expect(geometry.paddingRight).toBeLessThanOrEqual(20.5);
+  for (const candidate of geometry.candidates) {
+    expect(candidate.left).toBeGreaterThanOrEqual(geometry.contentLeft - 1);
+    expect(candidate.right).toBeLessThanOrEqual(geometry.contentRight + 1);
+  }
 }
 
 async function capture(page, name) {
@@ -216,7 +236,7 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize(viewport);
     await enterDemo(page, "player");
-    await expectPlayerTwentyPixelShellRail(page);
+    await expectPlayerTwentyPixelPageRail(page);
     await expectPlayerHomeOpticalRails(page);
     if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
       await captureSurface(page, page.getByTestId("player-daily-command-center"), `precision-player-home-full-${viewport.width}.png`);
@@ -225,7 +245,7 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
     if (SCREENSHOT_WIDTHS.has(viewport.width)) await capture(page, `precision-player-home-${viewport.width}.png`);
 
     await navigateByKey(page, "log-drill");
-    await expectPlayerTwentyPixelShellRail(page);
+    await expectPlayerTwentyPixelPageRail(page);
     await expectTrainOpticalRails(page);
     if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
       await captureSurface(page, page.locator('[data-team-workspace="at-home"]'), `precision-player-train-full-${viewport.width}.png`);
@@ -235,7 +255,7 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
 
     if (viewport.width === 390) {
       await navigateByKey(page, "profile");
-      await expectPlayerTwentyPixelShellRail(page);
+      await expectPlayerTwentyPixelPageRail(page);
       await resetScroll(page);
       await capture(page, "precision-player-progress-390.png");
     }

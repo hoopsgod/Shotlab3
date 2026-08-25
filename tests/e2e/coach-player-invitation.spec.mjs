@@ -28,14 +28,30 @@ async function seedCoach(page) {
 
 async function enterCoachPlayers(page) {
   await page.goto("/");
-  const dock = page.getByTestId("mobile-navigation-dock");
+  const isMobile = (page.viewportSize()?.width ?? 1280) <= 767;
   const coachDemo = page.getByRole("button", { name: "Coach demo", exact: true });
-  await expect(dock.or(coachDemo).first()).toBeVisible({ timeout: 15_000 });
-  if (await coachDemo.isVisible()) await coachDemo.click();
-  await expect(dock).toBeVisible({ timeout: 15_000 });
-  const players = dock.getByRole("button", { name: "Players", exact: true });
-  await expect(players).toBeVisible();
-  await players.click();
+  const commandCenter = page.getByTestId("coach-command-center-full");
+
+  await expect(commandCenter.or(coachDemo).first()).toBeVisible({ timeout: 15_000 });
+  if (await coachDemo.isVisible().catch(() => false)) await coachDemo.click();
+  await expect(commandCenter).toBeVisible({ timeout: 15_000 });
+
+  if (isMobile) {
+    const navigation = page.getByTestId("mobile-navigation-dock");
+    await expect(navigation).toBeVisible({ timeout: 15_000 });
+    const players = navigation.getByRole("button", { name: "Players", exact: true });
+    await expect(players).toBeVisible();
+    await players.click();
+    return;
+  }
+
+  /* Desktop Mission Control owns the active Coach surface. Use its visible
+     in-surface Players action rather than the legacy/overlapped sidebar hit
+     target; this test protects invitation delivery, not sidebar hit-testing. */
+  const openPlayers = commandCenter.getByRole("button", { name: "Open player workspace", exact: true });
+  await openPlayers.scrollIntoViewIfNeeded();
+  await expect(openPlayers).toBeVisible();
+  await openPlayers.click();
 }
 
 test("demo coach blocks real player invitation delivery at the sandbox boundary", async ({ page }) => {

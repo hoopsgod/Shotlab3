@@ -7,6 +7,7 @@ import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleas
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
 import './styles/ExpertVisualPolish.css'
+import { installMobileHorizontalViewportLock } from './lib/mobileHorizontalViewportLock.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -115,6 +116,7 @@ function renderStartupError(message) {
 markBoot('main_executed')
 registerRuntimeListeners()
 installExpertVisualPolish()
+installMobileHorizontalViewportLock()
 
 window.addEventListener('error', event => {
   const message = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
@@ -168,6 +170,13 @@ window.addEventListener('shotlab:app-ready', () => {
     // Load it after the broader authenticated authority so its intentionally narrow rules
     // are the final cascade authority in both development and optimized production builds.
     await import('./components/Phase7AuthenticatedChrome.css')
+    // The production CSS optimizer can otherwise discard the priority modal's
+    // body/data-testid selectors from the Coach chunk. Load a dedicated late copy so
+    // the editor remains viewport-bound in the optimized build, not just in dev.
+    await import('./components/CoachPriorityOverlay.css?priority-overlay-authority')
+    // Structural mobile geometry must load after every authenticated visual layer so
+    // Demo and paid workspaces resolve to the same physical viewport origin on iOS.
+    await import('./styles/MobileViewportAxisAuthority2026.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 
