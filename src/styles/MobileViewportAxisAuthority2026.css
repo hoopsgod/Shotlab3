@@ -31,12 +31,12 @@
   }
 
   /* Secondary Coach title stages stay inside the same outer route rail. Do not
-   * re-expand a title child after its parent has already been inset. */
+   * re-expand a title child after its parent has already been inset. Shared
+   * centering authority already supplies border-box sizing to these children. */
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
     width: 100% !important;
     margin-inline: 0 !important;
-    box-sizing: border-box !important;
   }
 
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
