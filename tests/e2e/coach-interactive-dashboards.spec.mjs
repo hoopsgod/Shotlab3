@@ -179,7 +179,7 @@ test("Coach Events exposes one premium schedule hierarchy, creation entry point,
   await expect(commandBar.getByRole("heading", { name: "Events", exact: true })).toBeVisible();
   await expect(calendar).toBeVisible();
   await expect(calendar.getByTestId("coach-events-calendar-month")).toBeVisible();
-  await expect(decisionBrief.getByText("NEXT TEAM MOMENT", { exact: true })).toBeVisible();
+  await expect(decisionBrief.getByText("Decision brief", { exact: true })).toBeVisible();
   await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
   await expect(performanceRail.getByRole("button")).toHaveCount(3);
   const hierarchy = await page.evaluate(() => {
