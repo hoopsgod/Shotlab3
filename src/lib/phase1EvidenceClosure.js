@@ -1,5 +1,3 @@
-import "../styles/Phase1EvidenceClosure.css";
-
 const ROSTER_ROOT = "#coach-roster-operations";
 const ROSTER_ROW = `${ROSTER_ROOT} > div[role="button"]`;
 const QUEUED_INDEX = '[aria-label^="Queued action "]';
@@ -25,12 +23,16 @@ function ensureRosterProfileButton(row) {
   button.dataset.phase1OpenProfile = "true";
   button.className = "phase1RosterProfileAction";
   button.setAttribute("aria-label", `Open ${name} profile`);
-  button.textContent = "Open profile";
+  button.textContent = "PROFILE";
   button.addEventListener("click", (event) => {
     event.stopPropagation();
     row.click();
   });
-  row.appendChild(button);
+
+  const content = row.lastElementChild;
+  const actionColumn = content instanceof HTMLElement ? content.lastElementChild : null;
+  if (actionColumn instanceof HTMLElement && actionColumn.querySelector("button")) actionColumn.appendChild(button);
+  else row.appendChild(button);
   return true;
 }
 
