@@ -13,6 +13,32 @@
   --sl-font-display: -apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif;
 }
 
+/* The legacy authenticated shell only fits all three desktop columns once its
+ * 240px navigation rail, 640px minimum workspace, 320px insight rail, gaps,
+ * and outer padding have 1320 CSS pixels available. Between 1024 and 1319px,
+ * keep the primary navigation and workspace, and collapse only the supplemental
+ * insight rail so the document itself never becomes a horizontal scroller. */
+@media (min-width: 1024px) and (max-width: 1319px) {
+  html body #root .performance-shell.app-shell.is-desktop {
+    grid-template-columns: 240px minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body #root .performance-shell.app-shell.is-desktop > .insights-panel {
+    display: none !important;
+  }
+
+  html body #root .performance-shell.app-shell.is-desktop > .shell-main,
+  html body #root .performance-shell.app-shell.is-desktop > .shell-main > .content-wrap,
+  html body #root .performance-shell.app-shell.is-desktop .performance-workspace {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
 /* Mobile geometry authority: meaningful content shares one 20px rail while
  * full-bleed surfaces continue to opt out through their existing breakout rules. */
 @media (max-width: 767px) {
