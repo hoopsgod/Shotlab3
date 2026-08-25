@@ -38,7 +38,6 @@
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    margin-inline: auto;
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-x: clip !important;
@@ -80,8 +79,6 @@
   html body #root [data-visual-role="secondary-page"] > [data-visual-role="page-tools"] {
     width: 100%;
     max-width: 100%;
-    margin-inline: auto !important;
-    justify-self: stretch;
     box-sizing: border-box;
   }
 
@@ -92,7 +89,6 @@
     width: 100% !important;
     max-width: 100% !important;
     margin-inline: 0 !important;
-    justify-self: stretch;
     box-sizing: border-box;
   }
 
