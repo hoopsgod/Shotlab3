@@ -5,7 +5,8 @@ const STYLE_ID = "shotlab-coach-response-loop-styles";
 const ACTIVITY_SELECTOR = '[data-testid="coach-live-activity"]';
 const ROW_SELECTOR = `${ACTIVITY_SELECTOR} .mcTimeline > div`;
 const PLAYER_DRAWER_SELECTOR = '[data-testid="coach-player-intelligence-drawer"]';
-const PLAYER_STATS_ROW_SELECTOR = '#coach-roster-operations [role="button"]';
+const PLAYER_STATS_ROW_SELECTOR = '#coach-roster-operations .phase1RosterRow';
+const PLAYER_PROFILE_ACTION_SELECTOR = '[data-phase1-open-profile="true"]';
 const PLAYER_DRAWER_RECOVERY_DELAYS = [650, 1500, 2800, 4500];
 
 const styles = `
@@ -68,6 +69,15 @@ export function findPlayerStatsRow(root, playerName) {
   }) || null;
 }
 
+export function openPlayerStatsRow(row) {
+  const action = row?.querySelector?.(PLAYER_PROFILE_ACTION_SELECTOR);
+  if (action?.click) {
+    action.click();
+    return true;
+  }
+  return false;
+}
+
 export function ensurePlayerStatsDrawerOpens(playerName, target = window, root = document) {
   if (!target?.setTimeout || !root?.querySelector || !root?.body) return false;
   if (root.querySelector(PLAYER_DRAWER_SELECTOR)) return true;
@@ -91,7 +101,7 @@ export function ensurePlayerStatsDrawerOpens(playerName, target = window, root =
       finish();
       return;
     }
-    findPlayerStatsRow(root, playerName)?.click?.();
+    openPlayerStatsRow(findPlayerStatsRow(root, playerName));
   };
 
   for (const delay of PLAYER_DRAWER_RECOVERY_DELAYS) timers.push(target.setTimeout(recover, delay));
