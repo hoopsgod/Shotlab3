@@ -121,28 +121,3 @@
     box-sizing: border-box;
   }
 }
-
-/* The desktop shell needs all three columns only once the viewport can actually
- * contain them. At the intermediate desktop width, preserve the primary Coach
- * navigation and workspace, but collapse the supplemental insights rail. This
- * avoids converting the document itself into a horizontal scroller at 1024px. */
-@media (min-width: 761px) and (max-width: 1100px) {
-  html body #root .performance-shell--coach.app-shell.is-desktop {
-    grid-template-columns: 240px minmax(0, 1fr) !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  html body #root .performance-shell--coach.app-shell.is-desktop > .insights-panel {
-    display: none !important;
-  }
-
-  html body #root .performance-shell--coach.app-shell.is-desktop > .shell-main,
-  html body #root .performance-shell--coach.app-shell.is-desktop > .shell-main > .content-wrap,
-  html body #root .performance-shell--coach.app-shell.is-desktop .performance-workspace--coach {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-}
