@@ -1,0 +1,39 @@
+/* Phase 1 final evidence closure: scoped accessibility corrections only.
+   This file is temporary baseline debt and must be retired as the owning
+   surfaces migrate to the Phase 2 product system. */
+
+[data-testid="auth-workspace"] > .fade-up,
+[data-testid="auth-workspace"] .auth-card-enter {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+[data-testid="auth-workspace"] button,
+[data-testid="auth-workspace"] input,
+[data-testid="auth-workspace"] a {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+[data-testid="auth-workspace"] input::placeholder {
+  color: #465159 !important;
+  opacity: 1 !important;
+}
+
+[data-testid="auth-workspace"] a[href$="privacy"] {
+  color: #35434c !important;
+  -webkit-text-fill-color: #35434c !important;
+}
+
+[data-testid="coach-command-center-full"] .mcHealthFacts small {
+  color: #24313a !important;
+  -webkit-text-fill-color: #24313a !important;
+  opacity: 1 !important;
+}
+
+[data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary {
+  color: #f8fbf6 !important;
+  -webkit-text-fill-color: #f8fbf6 !important;
+}
