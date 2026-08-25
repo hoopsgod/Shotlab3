@@ -1,6 +1,8 @@
+import "../styles/Phase1FinalA11yClosure.css";
+
 const STYLE_ID = "shotlab-phase1-evidence-closure";
 const ROSTER_ROOT = "#coach-roster-operations";
-const ROSTER_ROW = `${ROSTER_ROOT} > div[role="button"]`;
+const ROSTER_ROW = `${ROSTER_ROOT} > .fade-up > div[role="button"], ${ROSTER_ROOT} > div[role="button"]`;
 const QUEUED_INDEX = '[aria-label^="Queued action "]';
 
 function cleanText(value) {
