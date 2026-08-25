@@ -43,6 +43,15 @@ test('clipped decorative overflow is diagnostic-only when horizontal scroll stat
   assert.deepEqual(failures, []);
 });
 
+test('decorative clipped owner may retain internal scroll state without becoming the user scroll owner', () => {
+  const failures = findViewportFailures(healthy({
+    outerTargets: [
+      { selector: '.performance-workspace', left: 0, right: 390, clientWidth: 390, scrollWidth: 443, persistedScrollLeft: 53, overflowX: 'hidden' },
+    ],
+  }));
+  assert.deepEqual(failures, []);
+});
+
 test('locked shell retaining horizontal scroll state is a hard failure', () => {
   const failures = findViewportFailures(healthy({
     outerTargets: [

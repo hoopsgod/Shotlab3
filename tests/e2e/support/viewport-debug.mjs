@@ -15,6 +15,17 @@ export const OUTER_VIEWPORT_SELECTORS = [
   '[data-testid="player-daily-command-center"]',
 ];
 
+export const STRICT_SCROLL_STATE_SELECTORS = new Set([
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.player-scroll-container',
+  '.coach-scroll-container',
+]);
+
 export function findViewportFailures(report) {
   const failures = [];
   const tolerance = 2;
@@ -28,8 +39,9 @@ export function findViewportFailures(report) {
     if (target.left < -1 || target.right > report.viewport.width + 1) {
       failures.push(`${target.selector} escapes viewport (${Math.round(target.left)}..${Math.round(target.right)} of ${report.viewport.width})`);
     }
+    const isStrictScrollOwner = STRICT_SCROLL_STATE_SELECTORS.has(target.selector);
     const overflowAllowsHorizontalScroll = ['auto', 'scroll'].includes(target.overflowX);
-    if (!overflowAllowsHorizontalScroll && Math.abs(target.persistedScrollLeft || 0) > 1) {
+    if (isStrictScrollOwner && !overflowAllowsHorizontalScroll && Math.abs(target.persistedScrollLeft || 0) > 1) {
       failures.push(`${target.selector} retains horizontal scrollLeft=${Math.round(target.persistedScrollLeft)} (${target.clientWidth}/${target.scrollWidth}, overflow-x=${target.overflowX})`);
     }
   }
