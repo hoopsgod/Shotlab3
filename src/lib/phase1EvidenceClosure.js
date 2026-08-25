@@ -1,9 +1,15 @@
-import "../styles/Phase1FinalA11yClosure.css";
-
 const STYLE_ID = "shotlab-phase1-evidence-closure";
 const ROSTER_ROOT = "#coach-roster-operations";
 const ROSTER_ROW = `${ROSTER_ROOT} > .fade-up > div[role="button"], ${ROSTER_ROOT} > div[role="button"]`;
 const QUEUED_INDEX = '[aria-label^="Queued action "]';
+const FINAL_A11Y_MARKER = "/* phase1-final-a11y */";
+const FINAL_A11Y_CSS = `${FINAL_A11Y_MARKER}
+[data-testid="auth-workspace"]>.fade-up,[data-testid="auth-workspace"] .auth-card-enter{animation:none!important;transition:none!important;opacity:1!important;transform:none!important;filter:none!important}
+[data-testid="auth-workspace"] button,[data-testid="auth-workspace"] input,[data-testid="auth-workspace"] a{opacity:1!important;filter:none!important}
+[data-testid="auth-workspace"] input::placeholder{color:#465159!important;opacity:1!important}
+[data-testid="auth-workspace"] a[href$="privacy"]{color:#35434c!important;-webkit-text-fill-color:#35434c!important}
+[data-testid="coach-command-center-full"] .mcHealthFacts small{color:#24313a!important;-webkit-text-fill-color:#24313a!important;opacity:1!important}
+[data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary{color:#f8fbf6!important;-webkit-text-fill-color:#f8fbf6!important}`;
 
 function cleanText(value) {
   return String(value || "").trim().replace(/\s+/g, " ");
@@ -13,6 +19,7 @@ function ensureStyles() {
   if (!document.head) return false;
   const style = document.getElementById(STYLE_ID);
   if (!style) return false;
+  if (!style.textContent.includes(FINAL_A11Y_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS}\n`;
   if (document.head.lastElementChild !== style) document.head.appendChild(style);
   return true;
 }
