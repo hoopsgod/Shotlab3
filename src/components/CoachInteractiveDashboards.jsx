@@ -37,8 +37,15 @@ const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
   return undefined;
 };
 
+const resolveEventAction = (action, { onCreateEvent, onOpenEvent, onStatusChange }) => {
+  if (!action) return undefined;
+  if (action.kind === "create-event" && typeof onCreateEvent === "function") return { label: action.label, onClick: onCreateEvent };
+  if (action.kind === "open-event" && typeof onOpenEvent === "function" && action.id != null) return { label: action.label, onClick: () => onOpenEvent(action.id) };
+  if (action.kind === "status-filter" && typeof onStatusChange === "function") return { label: action.label, onClick: () => onStatusChange(action.value) };
+  return undefined;
+};
+
 const safeCount = (value) => Math.max(0, Number(value) || 0);
-const eventTypeLabel = (value) => ({ run: "Practice", game: "Game", clinic: "Camp", recovery: "Meeting", challenge: "Challenge" }[value] || "Team event");
 
 export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
@@ -83,16 +90,6 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
 export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], status, type, query, onStatusChange, onTypeChange, onQueryChange, onCreateEvent, onOpenEvent }) {
   const briefing = buildCoachEventActionBriefing({ metrics, rows });
   const next = briefing.next;
-  const nextEvent = next?.event || next;
-  const nextResponded = safeCount(next?.responded ?? next?.rsvpConfirmed ?? next?.confirmed);
-  const nextAwaiting = safeCount(next?.awaitingResponse ?? next?.missing);
-  const nextRoster = safeCount(next?.rosterCount || (nextResponded + nextAwaiting));
-  const nextMomentDetail = next
-    ? `${eventTypeLabel(next.type || nextEvent?.type)} · ${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"} · ${next.location || "Location TBD"} · ${nextResponded} / ${nextRoster || nextResponded} responded`
-    : "Create the next team event to begin RSVP tracking and player communication.";
-  const nextMomentAction = next && typeof onOpenEvent === "function" && nextEvent?.id != null
-    ? { label: "View Event", onClick: () => onOpenEvent(nextEvent.id) }
-    : undefined;
   const metricItems = [
     { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
     { key: "gaps", label: "Awaiting RSVP", displayLabel: "RSVP Gaps", value: briefing.missing, detail: briefing.missing ? `${briefing.gapEvents.length} event${briefing.gapEvents.length === 1 ? "" : "s"} affected` : "No response gaps", tone: briefing.missing ? "attention" : "positive" },
@@ -113,11 +110,11 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
       <CoachEventsMonthCalendar rows={rows} onOpenEvent={onOpenEvent} />
       <CoachRoutePerformanceStage
         kind="schedule"
-        eyebrow="NEXT TEAM MOMENT"
-        title={next ? next.title || "Next team event" : "Calendar is open"}
-        detail={nextMomentDetail}
-        tone={!next ? "info" : nextAwaiting ? "attention" : "positive"}
-        action={nextMomentAction}
+        eyebrow="Decision brief"
+        title={briefing.decision.title}
+        detail={briefing.decision.detail}
+        tone={briefing.decision.tone}
+        action={resolveEventAction(briefing.decision.action, { onCreateEvent, onOpenEvent, onStatusChange })}
         metrics={metricItems}
         activeMetric={status}
         onMetricSelect={onStatusChange}
