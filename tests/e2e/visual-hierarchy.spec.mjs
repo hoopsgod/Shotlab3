@@ -91,7 +91,6 @@ test("player mobile home presents performance, interpretation, momentum, and one
 
 test("coach mobile home presents populated decision intelligence and a current Schedule", async ({ page }) => {
   const viewportWidth = 390;
-  const expectedPageRail = 20;
   await page.setViewportSize({ width: viewportWidth, height: 844 });
   await enterDemo(page, "coach");
   const commandCenter = page.getByTestId("coach-command-center-full");
@@ -110,13 +109,13 @@ test("coach mobile home presents populated decision intelligence and a current S
   });
   expect(shellBox).not.toBeNull(); expect(objectiveBox).not.toBeNull(); expect(attentionBox).not.toBeNull();
   const shellLeftRail = shellBox.x, shellRightRail = viewportWidth - (shellBox.x + shellBox.width);
-  // Coach Home intentionally uses a full-bleed outer shell; the decision stage owns the 20px visual rail.
+  // Coach Home intentionally uses a full-bleed outer shell and objective; mcHeroContent owns the visual inset.
   expect(Math.abs(shellLeftRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(shellRightRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(shellLeftRail - shellRightRail)).toBeLessThanOrEqual(1);
   const stageLeftRail = objectiveBox.x, stageRightRail = viewportWidth - (objectiveBox.x + objectiveBox.width);
-  expect(Math.abs(stageLeftRail - expectedPageRail)).toBeLessThanOrEqual(1);
-  expect(Math.abs(stageRightRail - expectedPageRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageLeftRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageRightRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(stageLeftRail - stageRightRail)).toBeLessThanOrEqual(1);
   expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(20); expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(20); expect(objectiveBox.height).toBeLessThan(520); expect(attentionBox.y).toBeLessThan(844);
   await expectNoHorizontalOverflow(page);
