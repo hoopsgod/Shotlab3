@@ -33,10 +33,11 @@ async function removeInactiveDemoPlayerThroughUi(page) {
   await expect(page.getByText("Micah Santos", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 
   const micahRow = page
-    .locator('[role="button"]')
+    .locator("#coach-roster-operations .phase1RosterRow")
     .filter({ hasText: "Micah Santos" })
     .filter({ has: page.getByRole("button", { name: "REMOVE", exact: true }) })
     .first();
+  await expect(micahRow).not.toHaveAttribute("role", "button");
   page.once("dialog", async (dialog) => dialog.accept());
   await micahRow.getByRole("button", { name: "REMOVE", exact: true }).click();
   await expect(page.getByText("Micah Santos", { exact: true })).toHaveCount(0);
