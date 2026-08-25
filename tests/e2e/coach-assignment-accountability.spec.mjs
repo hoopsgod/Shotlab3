@@ -129,7 +129,10 @@ test("Mission Control shows team-wide assignment accountability and opens the ex
   const rail = page.getByTestId("coach-players-filter-rail");
   await expect(rail).toBeVisible({ timeout: 20_000 });
   await expect(rail.locator('input[type="search"]')).toHaveValue("ack@example.test");
-  await expect(page.locator('#coach-roster-operations [role="button"]')).toHaveCount(1);
+  const filteredRosterRows = page.locator("#coach-roster-operations .phase1RosterRow");
+  await expect(filteredRosterRows).toHaveCount(1);
+  await expect(filteredRosterRows.first()).not.toHaveAttribute("role", "button");
+  await expect(filteredRosterRows.first().locator('[data-phase1-open-profile="true"]')).toBeVisible();
   await expect(page.getByTestId("coach-player-intelligence-drawer")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole("dialog", { name: "Acknowledged Player", exact: true })).toBeVisible();
 
