@@ -45,16 +45,9 @@
     overscroll-behavior-x: none;
   }
 
-  /* The route wrapper inherits the same vertical gesture boundary from its
-   * performance-workspace ancestor, so it does not need a duplicate selector. */
-  html body #root .app-shell.is-mobile .performance-workspace,
-  html body #root .app-shell.is-mobile .player-scroll-container,
-  html body #root .app-shell.is-mobile .coach-scroll-container,
-  html body #root .app-shell.is-mobile .coach-home-dashboard,
-  html body #root .app-shell.is-mobile [data-testid="coach-command-center-full"],
-  html body #root .app-shell.is-mobile [data-testid="player-daily-command-center"] {
-    touch-action: pan-y pinch-zoom;
-  }
+  /* Do not set touch-action on shared workspace ancestors. Nested filter/chip
+   * rails legitimately own horizontal gestures; ancestor pan-y restrictions
+   * would cause the browser to reject those gestures before JS can exempt them. */
 
   /* Schedule is an informational operational surface. Preserve the semantic-info
    * token at the final mobile cascade so later brand-lime presentation layers
