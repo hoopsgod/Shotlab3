@@ -167,7 +167,7 @@ async function expectRegisteredContentRailLocked(page) {
 
 async function expectRegisteredViewportLocked(page) {
   const geometry = await page.evaluate(async (selectors) => {
-    const nodes = selectors.map((selector) => [selector, document.querySelector(selector]).filter(([, node]) => node);
+    const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
     const before = Object.fromEntries(nodes.map(([selector, node]) => {
       const rect = node.getBoundingClientRect();
       const styles = getComputedStyle(node);
@@ -236,7 +236,7 @@ async function expectRegisteredViewportLocked(page) {
     expect(Math.abs(afterGesture.windowScrollX)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.scrollingElementScrollLeft)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
-    expect(Math.abs(afterGesture.coachRailScrollLeft)).toBelessThanOrEqual(1);
+    expect(Math.abs(afterGesture.coachRailScrollLeft)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterGesture.playerRailScrollLeft)).toBeLessThanOrEqual(1);
   }
 }
@@ -259,7 +259,7 @@ async function expectCoachHomeCentered(page) {
     const rightGutter = geometry.viewport - entry.right;
     expect(leftGutter, `${selector} left mobile gutter`).toBeGreaterThanOrEqual(-1);
     expect(rightGutter, `${selector} right mobile gutter`).toBeGreaterThanOrEqual(-1);
-    expect(Math.abs(leftGutter - rightGutter), `${selector} must have symmetric mobile gutters`).toBelessThanOrEqual(2);
+    expect(Math.abs(leftGutter - rightGutter), `${selector} must have symmetric mobile gutters`).toBeLessThanOrEqual(2);
     expect(Math.max(leftGutter, rightGutter), `${selector} must remain on the intended mobile axis`).toBeLessThanOrEqual(24);
   }
 }
