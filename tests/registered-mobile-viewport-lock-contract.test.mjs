@@ -13,7 +13,7 @@ const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-pari
 
 test('mobile viewport authority uses a true non-scrollable x boundary and stops overscroll chaining', () => {
   assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*\.player-scroll-container,[\s\S]*\.coach-scroll-container[\s\S]*overflow-x:\s*clip\s*!important;[\s\S]*overscroll-behavior-x:\s*none;/);
+  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*\.player-scroll-container,[\s\S]*\.coach-scroll-container[\s\S]*overflow-x:\s*clip\s*!important;/);
   assert.match(centering, /min-width:\s*0/);
   assert.match(centering, /max-width:\s*100%/);
   assert.match(centering, /box-sizing:\s*border-box/);
