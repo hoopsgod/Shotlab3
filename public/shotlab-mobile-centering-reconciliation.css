@@ -42,6 +42,14 @@
     overflow-x: clip !important;
   }
 
+  /* The priority editor is a fixed viewport dialog. Release Coach Home overflow
+   * only while that dialog is open so keyboard users, mobile browsers, and E2E
+   * automation can reach the complete editor without weakening the normal shell lock. */
+  html body.mission-control-priority-open #root .app-shell.is-mobile .coach-home-dashboard,
+  html body.mission-control-priority-open #root .app-shell.is-mobile [data-testid="coach-command-center-full"] {
+    overflow: visible !important;
+  }
+
   /* Do not set touch-action on shared workspace ancestors. Nested filter/chip
    * rails legitimately own horizontal gestures; ancestor pan-y restrictions
    * would cause the browser to reject those gestures before JS can exempt them. */
