@@ -78,9 +78,10 @@
   outline-offset: 2px !important;
 }
 
-/* Direct role=button children are the legacy CoachRoster player rows. The stable
-   container ID lets this layer override inline legacy presentation without touching logic. */
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] {
+/* Phase 1 evidence closure removes the legacy role=button from each row to eliminate
+   nested interactive controls. The semantic row class preserves the existing visual
+   presentation while PROFILE becomes the explicit accessible row action. */
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow {
   min-height: 104px !important;
   margin-bottom: 10px !important;
   border: 1px solid var(--phase2c-line) !important;
@@ -94,25 +95,19 @@
   transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:hover,
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:focus-visible {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow:hover {
   border-color: color-mix(in srgb, var(--phase2c-accent) 22%, var(--phase2c-line)) !important;
   box-shadow: 0 12px 28px rgba(29, 38, 31, .065) !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--phase2c-accent) 24%, transparent) !important;
-  outline-offset: 2px !important;
-}
-
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:first-child {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:first-child {
   width: 3px !important;
   opacity: .72 !important;
 }
 
 /* Reflow each row into a calm two-column mobile composition: identity beside details,
    with administrative actions below the information instead of squeezing it. */
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) {
   width: 100% !important;
   min-width: 0 !important;
   padding: 14px 14px 13px !important;
@@ -126,17 +121,17 @@
   box-sizing: border-box !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(1) {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(1) {
   grid-area: avatar !important;
   align-self: start !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(2) {
   grid-area: details !important;
   min-width: 0 !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(3) {
   grid-area: actions !important;
   min-width: 0 !important;
   width: 100% !important;
@@ -148,7 +143,7 @@
 }
 
 /* Player identity gets proper editorial hierarchy instead of condensed micro-copy. */
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) > div:first-child span:first-child {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(2) > div:first-child span:first-child {
   color: var(--phase2c-ink) !important;
   -webkit-text-fill-color: var(--phase2c-ink) !important;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
@@ -158,7 +153,7 @@
   letter-spacing: -.012em !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) {
   margin-top: 5px !important;
   color: var(--phase2c-muted) !important;
   -webkit-text-fill-color: var(--phase2c-muted) !important;
@@ -169,14 +164,14 @@
   letter-spacing: -.002em !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) span {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) span {
   color: var(--phase2c-accent) !important;
   -webkit-text-fill-color: var(--phase2c-accent) !important;
   font-weight: 730 !important;
 }
 
 /* Administrative row actions remain available but no longer dominate the player record. */
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(3) button {
   width: auto !important;
   min-width: 78px !important;
   min-height: 44px !important;
@@ -192,32 +187,32 @@
   touch-action: manipulation;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(3) button:last-child {
   border-color: rgba(35, 45, 37, .11) !important;
   background: #fafbf8 !important;
   color: #727a74 !important;
   -webkit-text-fill-color: #727a74 !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child:hover,
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child:focus-visible {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(3) button:last-child:hover,
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(3) button:last-child:focus-visible {
   border-color: rgba(195, 59, 73, .22) !important;
   background: rgba(195, 59, 73, .045) !important;
   color: #a93643 !important;
   -webkit-text-fill-color: #a93643 !important;
 }
 
-.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:focus-visible {
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) > div:nth-child(3) button:focus-visible {
   outline: 3px solid rgba(113, 133, 31, .2) !important;
   outline-offset: 2px !important;
 }
 
 @media (max-width: 480px) {
-  .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] {
+  .performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow {
     min-height: 108px !important;
   }
 
-  .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) {
+  .performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow > div:nth-child(2) {
     padding-inline: 13px !important;
     grid-template-columns: 44px minmax(0, 1fr) !important;
     gap: 9px 10px !important;
@@ -225,7 +220,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] {
+  .performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow {
     transition: none !important;
   }
 }
