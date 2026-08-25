@@ -43,9 +43,7 @@
 
   html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 0 !important;
-    justify-self: stretch !important;
     box-sizing: border-box !important;
   }
 
