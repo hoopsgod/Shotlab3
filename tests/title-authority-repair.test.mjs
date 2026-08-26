@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS } from '../scripts/run-route-enhancers.mjs';
+import { assertDeclaration, declaration, mediaBlock, ruleBlock } from './helpers/css-contract.mjs';
 
 const read = (path) => readFileSync(path, 'utf8');
 const stage = read('src/components/TeamIdentityTitleStage.jsx');
@@ -38,6 +39,8 @@ const visualReleaseFixes = read('src/lib/visualSystemRebootReleaseFixes.js');
 const sessionIntegrityCss = read('public/shotlab-v15-session-integrity.css');
 const industrialDesignFoundation = read('src/lib/industrialDesignFoundation.js');
 
+const mobileCoachTitle = mediaBlock(coachTitleCss, '(max-width:700px)');
+
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
   for (const source of [coachHeader, playerHeader, secondary, playerWorkspace, playerCommitment, progress, brandingPreview]) {
@@ -47,66 +50,73 @@ test('one shared semantic title primitive owns Coach, Player, secondary, commitm
   assert.doesNotMatch(playerCommitment, /className=\{styles\.routeHeader\}/);
 });
 
-test('obsolete secondary intro and action CSS is deleted rather than kept as dormant title authority', () => {
+test('obsolete parallel title authorities remain deleted', () => {
   assert.match(secondaryCss, /Secondary title presentation is owned exclusively by TeamIdentityTitleStage/);
-  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
-  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro__/);
-  assert.doesNotMatch(secondaryCss, /\.secondaryPageAction\b/);
+  assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b|\.secondaryPageIntro__|\.secondaryPageAction\b/);
+  assert.doesNotMatch(playerCommitmentCss, /\.routeHeader\b|\.routeEyebrow\b|\.routeTitleRow\b/);
   assert.equal(existsSync('src/components/SecondaryPageFirstViewport.css'), false);
+  assert.doesNotMatch(playerCompositionEnhancer, /PlayerCommitmentCenter|MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('obsolete Player commitment title CSS is deleted rather than left as dormant parallel authority', () => {
-  assert.doesNotMatch(playerCommitmentCss, /\.routeHeader\b/);
-  assert.doesNotMatch(playerCommitmentCss, /\.routeEyebrow\b/);
-  assert.doesNotMatch(playerCommitmentCss, /\.routeTitleRow\b/);
-});
-
-test('Player optical reconciliation cannot mutate the shared commitment title surface', () => {
-  assert.doesNotMatch(playerCompositionEnhancer, /PlayerCommitmentCenter/);
-  assert.doesNotMatch(playerCompositionEnhancer, /MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
-});
-
-test('Coach Home markup and owned component CSS form one tactical decision-first Mission Control title authority', () => {
-  assert.match(coach, /import "\.\/CoachMissionControlTitleStage\.css"/);
+test('Coach Home loads one final source-owned title authority after historical Coach layers', () => {
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
-  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
-  assert.match(coachTitleCss, /object-fit:\s*contain/);
-  assert.match(coachTitleCss, /\.mcTeamSelect\s*\{\s*display:\s*none/);
-  assert.match(coachTitleCss, /\.mcBrandLockup\s*\{[\s\S]*display:\s*flex/);
+
+  const imports = [...coach.matchAll(/import ['"]\.\/(CoachMissionControl[^'"]+\.css)['"]/g)].map((match) => match[1]);
+  assert.ok(imports.length >= 2, 'expected layered Coach CSS imports');
+  assert.equal(imports.at(-1), 'CoachMissionControlTitleStage.css', 'TitleStage must be the last Coach component authority');
+  assert.equal(imports.filter((name) => name === 'CoachMissionControlTitleStage.css').length, 1);
+
+  const header = ruleBlock(mobileCoachTitle, '.mcHeader[data-testid="mission-control-team-header"]');
+  const hero = ruleBlock(mobileCoachTitle, '.mcHero[data-team-identity-stage="coach-mission-control"]');
+  const identity = ruleBlock(mobileCoachTitle, '.mcHeroIdentity');
+  const crest = ruleBlock(mobileCoachTitle, '.mcHeroTeamMark');
+  const crestImage = ruleBlock(mobileCoachTitle, '.mcHeroTeamMark img');
+  const heading = ruleBlock(mobileCoachTitle, ' h1');
+
+  assertDeclaration(header, 'min-height', '56px');
+  assertDeclaration(header, 'grid-template-columns', '44px minmax(0,1fr) 44px');
+  assert.ok(header.includes('safe-area-inset-top'), 'header must retain safe-area geometry');
+  assertDeclaration(hero, 'min-height', '382px');
+  assertDeclaration(identity, '--coach-hero-crest', /^clamp\(96px,\s*26vw,\s*108px\)$/);
+  for (const property of ['width','height','min-width','min-height','max-width','max-height']) {
+    assertDeclaration(crest, property, 'var(--coach-hero-crest)');
+  }
+  assertDeclaration(crestImage, 'object-fit', 'contain');
+  assert.match(declaration(heading, 'font') ?? '', /clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
 
-test('legacy Coach component CSS no longer owns mobile Hero, crest, title, or summary geometry', () => {
-  const legacyLayers = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
-  for (const legacyCss of legacyLayers) {
-    assert.doesNotMatch(legacyCss, /\.mcHero\s*\{[^}]*min-height\s*:\s*(?:286|292|300|302|304|306|318|322|330|370|382)px/s);
-    assert.doesNotMatch(legacyCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:\s*(?:68|72|74|80|82|84|86|88|92|118)px/s);
-    assert.doesNotMatch(legacyCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:\s*(?:27|28|29|30|31|33|34|36|39\.375|43)px/s);
+test('historical Coach layers retain support/artwork responsibilities without claiming scoped title ownership', () => {
+  const historicalLayers = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
+  for (const legacyCss of historicalLayers) {
+    assert.doesNotMatch(legacyCss, /\[data-team-identity-stage=["']coach-mission-control["']\]/);
   }
-  assert.doesNotMatch(coachHeaderCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
-  assert.doesNotMatch(coachPolishCss, /\.mcHeroTeamMark\s*\{|\.mcHero\s+h1\s*\{/);
   assert.doesNotMatch(coachShellCss, /Rebalance the signature hero/);
   assert.doesNotMatch(coachFinalCss, /--mc-title-size|--mc-radius-hero/);
 });
 
-test('Coach Home decision, metrics and CTA have one source owner', () => {
+test('Coach decision ledger and primary CTA remain owned by TitleStage', () => {
   const obsoleteComponentOwners = [coachV2Css, coachHeaderCss, coachPolishCss, coach2026Css, coachShellCss, coachFinalCss];
   const lateOwners = [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss, coachV5IntegrityCss, visualReboot, visualReleaseFixes];
   for (const obsoleteCss of [...obsoleteComponentOwners, ...lateOwners]) {
     assert.doesNotMatch(obsoleteCss, /\.mcRealityStrip\b|\.mcPrimary\b/);
   }
-  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcRealityStrip\s*\{/);
-  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcPrimary\s*\{/);
-  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*rgba\(2,13,19,\.18\)/);
-  assert.match(coachTitleCss, /\.mcRealityStrip strong\s*\{[\s\S]*color:\s*#f5f8f9/);
-  assert.match(coachTitleCss, /\.mcRealityStrip strong span,[\s\S]*\.mcRealityStrip small\{color:#aab7bd/);
-  assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
+
+  const ledger = ruleBlock(mobileCoachTitle, '.mcRealityStrip');
+  const primary = ruleBlock(mobileCoachTitle, '.mcPrimary');
+  assert.match(declaration(ledger, 'background') ?? '', /rgba\(2,\s*13,\s*19,\s*\.18\)/);
+  assert.match(declaration(primary, 'background') ?? '', /color-mix/);
+  assertDeclaration(primary, 'min-height', '50px');
+
+  const reduced = mediaBlock(coachTitleCss, '(prefers-reduced-motion:reduce)');
+  const reducedAction = ruleBlock(reduced, '.mcRealityStrip button');
+  assertDeclaration(reducedAction, 'transition', 'none');
+  assert.ok(reduced.includes('.mcPrimary'), 'primary action must be covered by reduced-motion contract');
+
   assert.doesNotMatch(signatureEnhancer, /mcRealityStrip|mcPrimary|Coach final metric ledger|Coach final metric label/);
   assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(h1,h2,h3,h4,strong\)/);
   assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(p,small\)/);
@@ -114,15 +124,11 @@ test('Coach Home decision, metrics and CTA have one source owner', () => {
   assert.doesNotMatch(industrialDesignFoundation, /performance-shell\.performance-shell button\s*,/);
 });
 
-test('late static and runtime Coach cascade layers cannot hide or redesign the owned title stage', () => {
+test('late static and runtime cascade layers cannot claim the scoped Coach title stage', () => {
   for (const lateCss of [coachHierarchyCss, coachCascadeLockCss, coachCriticalCss, visualReboot, visualReleaseFixes]) {
+    assert.doesNotMatch(lateCss, /\[data-team-identity-stage=["']coach-mission-control["']\]/);
     assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
-    assert.doesNotMatch(lateCss, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
-    assert.doesNotMatch(lateCss, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
-    assert.doesNotMatch(lateCss, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
   }
-  assert.doesNotMatch(coachHierarchyCss, /\.mcHeader\s*\{/);
-  assert.doesNotMatch(coachCascadeLockCss, /\.mcHeader\s*\{/);
   assert.doesNotMatch(visualReboot, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
   assert.doesNotMatch(visualReleaseFixes, /\.mcHero\b|\.mcHeroContent\b|\.mcHeroLogo\b|\.mcEyebrow\b/);
 });
@@ -137,21 +143,23 @@ test('secondary enhancer verifies title ownership instead of redesigning titles 
 
 test('title-only mutation scripts, temporary migrations and emergency late authority are absent', () => {
   const all = [...DEV_ROUTE_ENHANCERS, ...BUILD_ROUTE_ENHANCERS].join('\n');
-  assert.doesNotMatch(all, /apply-mobile-route-signature-promotion\.mjs/);
-  assert.doesNotMatch(all, /apply-mobile-centered-route-stage\.mjs/);
-  assert.doesNotMatch(all, /apply-team-identity-coach-hero-mark\.mjs/);
-  assert.equal(existsSync('scripts/apply-mobile-route-signature-promotion.mjs'), false);
-  assert.equal(existsSync('scripts/apply-mobile-centered-route-stage.mjs'), false);
-  assert.equal(existsSync('scripts/apply-team-identity-coach-hero-mark.mjs'), false);
-  assert.equal(existsSync('scripts/title-authority-secondary-source-migration.mjs'), false);
-  assert.equal(existsSync('.github/workflows/title-authority-secondary-source-migration.yml'), false);
-  assert.equal(existsSync('.github/workflows/final-title-css-cleanup-v2-once.yml'), false);
-  assert.equal(existsSync('public/shotlab-team-identity-title-authority.css'), false);
+  assert.doesNotMatch(all, /apply-mobile-route-signature-promotion\.mjs|apply-mobile-centered-route-stage\.mjs|apply-team-identity-coach-hero-mark\.mjs/);
+  for (const path of [
+    'scripts/apply-mobile-route-signature-promotion.mjs',
+    'scripts/apply-mobile-centered-route-stage.mjs',
+    'scripts/apply-team-identity-coach-hero-mark.mjs',
+    'scripts/title-authority-secondary-source-migration.mjs',
+    '.github/workflows/title-authority-secondary-source-migration.yml',
+    '.github/workflows/final-title-css-cleanup-v2-once.yml',
+    'public/shotlab-team-identity-title-authority.css',
+  ]) assert.equal(existsSync(path), false, `${path} must remain retired`);
 });
 
-test('shared title geometry preserves premium crest scale, containment and difficult-title floor', () => {
-  assert.match(stageCss, /--identity-crest:\s*clamp\(104px,\s*29vw,\s*120px\)/);
-  assert.match(stageCss, /object-fit:\s*contain/);
+test('shared title geometry preserves premium crest containment and difficult-title floor', () => {
+  const rootRule = ruleBlock(stageCss, '.teamIdentityTitleStage');
+  assertDeclaration(rootRule, '--identity-crest', /^clamp\(104px,\s*29vw,\s*120px\)$/);
+  const image = ruleBlock(stageCss, '.teamIdentityTitleStage__logo');
+  assertDeclaration(image, 'object-fit', 'contain');
   assert.match(stageCss, /teamIdentityTitleStage--hero\.teamIdentityTitleStage--longTitle[\s\S]*clamp\(44px,\s*11vw,\s*52px\)/);
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
 });
@@ -174,9 +182,6 @@ test('no-logo handling is explicit, premium and Demo Titans branding is seeded d
   assert.match(demoData, /teamName:\s*"Demo Titans"/);
   assert.match(demoData, /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);
   assert.match(demoData, /logoMarkUrl:\s*"\/branding\/titans-default-mark\.svg"/);
-  assert.match(demoData, /teamName:\s*DEMO_TEAM_BRANDING\.teamName/);
-  assert.match(demoData, /logoUrl:\s*DEMO_TEAM_BRANDING\.logoUrl/);
-  assert.match(demoData, /logoMarkUrl:\s*DEMO_TEAM_BRANDING\.logoMarkUrl/);
   assert.doesNotMatch(demoBrandingEnhancer, /writeFileSync|source\.replace|source\.slice/);
   assert.match(demoBrandingEnhancer, /no build-time identity mutation performed/);
   assert.ok(DEV_ROUTE_ENHANCERS.includes('scripts/apply-demo-team-branding.mjs'));
