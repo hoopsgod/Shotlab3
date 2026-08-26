@@ -13,4 +13,6 @@ The Phase 3 Coach Home candidate is not complete merely because source tests pas
 - production build and performance-budget checks;
 - visual inspection of the Coach Home hierarchy.
 
+Program Pulse certification is bound to the existing Coach player-row / player-metrics pipeline and the Coach-assigned `weeklyMakesTarget`; no parallel roster, weekly-activity, or Program Pulse data path is permitted.
+
 The candidate must remain Coach Home only. Evidence from other routes is regression evidence, not permission to redesign those routes.
