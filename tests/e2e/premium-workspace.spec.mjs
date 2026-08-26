@@ -84,7 +84,9 @@ async function expectPremiumTitleStage(page) {
 }
 
 async function expectCoachPerformanceRail(page) {
-  const stage = page.locator('[data-visual-role="primary-decision"]').first();
+  // Multiple responsive variants can coexist in the DOM; certification must
+  // bind to the active decision surface, not the first hidden variant.
+  const stage = page.locator('[data-visual-role="primary-decision"]:visible').first();
   await expect(stage).toBeVisible({ timeout: 20_000 });
   await expect(stage).toHaveAttribute("data-surface", "dark");
   const rail = stage.locator('[data-visual-role="performance-evidence"]');
