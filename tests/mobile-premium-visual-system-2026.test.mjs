@@ -115,9 +115,9 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
-  assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(coachTitleCss, /min-height:\s*488px/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
+  assert.match(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
+  assert.match(coachTitleCss, /min-height:\s*382px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);

@@ -160,9 +160,9 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
   });
 
   expect(metrics.teamName.startsWith(teamName)).toBe(true);
-  // 478px is the stable current difficult-branding result; the former 480px floor encoded the retired giant-identity composition.
-  expect(metrics.hero.height).toBeGreaterThanOrEqual(460);
-  expect(metrics.hero.height).toBeLessThanOrEqual(580);
+  // Phase 4 keeps difficult branding decision-first without restoring the retired giant-identity composition.
+  expect(metrics.hero.height).toBeGreaterThanOrEqual(382);
+  expect(metrics.hero.height).toBeLessThanOrEqual(500);
   expect(metrics.identity.height).toBeGreaterThanOrEqual(96);
   expect(metrics.identity.height).toBeLessThanOrEqual(160);
   expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
@@ -173,8 +173,8 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
   expect(metrics.decisionTitle.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
   expect(metrics.decisionTitle.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
   expect(metrics.realityTop).toBeGreaterThanOrEqual(metrics.decisionTitle.bottom);
-  expect(metrics.crest.width).toBeGreaterThanOrEqual(104);
-  expect(metrics.crest.height).toBeGreaterThanOrEqual(104);
+  expect(metrics.crest.width).toBeGreaterThanOrEqual(96);
+  expect(metrics.crest.height).toBeGreaterThanOrEqual(96);
   expect(metrics.hero.left).toBeGreaterThanOrEqual(-1);
   expect(metrics.hero.right).toBeLessThanOrEqual(metrics.viewport.width + 1);
   expect(metrics.overflow.document).toBeLessThanOrEqual(1);

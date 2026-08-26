@@ -37,8 +37,9 @@ test("Mission Control keeps activity, Program Pulse, attention, and schedule as 
   assert.match(source,/totalPlayers/);
   assert.match(source,/nextEventDateFormatted/);
   assert.match(source,/programPulse = null/);
-  assert.match(source,/value == null \? "—"/);
-  assert.match(source,/value == null \? <div className="mcAllClear"/);
+  assert.match(source,/available \? `\$\{value\}%` : "—"/);
+  assert.match(source,/role="progressbar"/);
+  assert.match(source,/data-pulse-state=\{state\}/);
   assert.match(source,/No weekly goal data/);
   assert.match(source,/<small>Active<\/small>/);
   assert.match(source,/<small>Follow-up<\/small>/);
@@ -64,8 +65,8 @@ test("Coach identity chapter and tactical court use one visible source-owned ful
   assert.match(source,/cleanFullLogoUrl/);
   assert.match(source,/const heroTeamLogoUrl = fullTeamLogoUrl/);
   assert.doesNotMatch(source,/cleanMarkLogoUrl|configuredMarkSource/);
-  assert.match(source,/mcTacticalWash/);
-  assert.match(source,/mcTacticalGlow/);
+  assert.match(source,/mcCourtLines/);
+  assert.match(source,/mcCourtRoute/);
   assert.match(source,/mcCourtArtwork/);
   assert.match(source,/openBrandingSettings/);
   assert.match(source,/mcHeroTeamMark/);
@@ -74,7 +75,7 @@ test("Coach identity chapter and tactical court use one visible source-owned ful
   assert.match(source,/data-team-identity-stage="coach-mission-control"/);
   assert.match(source,/CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(source,/MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
   assert.match(titleCss,/\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\);[\s\S]*height:\s*var\(--coach-hero-crest\)/);
   assert.match(titleCss,/\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
   assert.match(titleCss,/\.mcCourtArtwork\s*\{[\s\S]*display:\s*block/);
@@ -149,10 +150,10 @@ test("responsive CSS creates a native-feeling mobile operating system with Playe
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*488px/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*382px/);
   assert.doesNotMatch(titleCss,/\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
-  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*clamp\(39px,\s*10\.5vw,\s*45px\)/);
+  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
   assert.match(titleCss,/\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
   assert.doesNotMatch(titleCss,/!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
@@ -172,13 +173,13 @@ test("responsive CSS creates a native-feeling mobile operating system with Playe
 
 test("Mission Control uses the modern native support system while title and decision geometry remain component-owned",()=>{
   assert.match(finalCss,/--mc-native:/);
-  assert.match(finalCss,/--mc-radius-card:/);
+  assert.match(finalCss,/--mc-light:/);
   assert.match(finalCss,/font-family:\s*var\(--mc-native\)/);
-  assert.match(finalCss,/\.mcSectionHead h2\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
+  assert.match(finalCss,/\.mcSectionHead h2,[\s\S]*font:\s*760 25px\/1\.04 var\(--mc-native\)/);
   assert.doesNotMatch(finalCss,/--mc-title-size|--mc-radius-hero/);
   assert.doesNotMatch(finalCss,/\.mcHero\s+h1\s*\{|\.mcHeroTeamMark\s*\{|\.mcHeroContent\s*>\s*p\s*\{/);
   assert.match(headerCss,/@media\(max-width:700px\)[\s\S]*\.mcHeader\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) 44px/);
   assert.doesNotMatch(titleCss,/\.mcHeroIdentity::after\s*\{/);
-  assert.match(titleCss,/\.mcHeroContent\s*>\s*p\s*\{[\s\S]*font-size:\s*12\.5px/);
-  assert.match(finalCss,/\.mcSection\s*\{[\s\S]*border-radius:\s*var\(--mc-radius-card\)/);
+  assert.match(titleCss,/\.mcHeroContent>p\s*\{[\s\S]*12px/);
+  assert.match(finalCss,/\.mcSection\{[\s\S]*border-radius:0[\s\S]*box-shadow:none/);
 });

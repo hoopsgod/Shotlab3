@@ -20,7 +20,7 @@ test('Coach title authority is no longer rewritten by the signature enhancer', (
 test('obsolete secondary-title mutation scripts are not orchestrated', () => {
   assert.doesNotMatch(routeEnhancers, /apply-mobile-route-signature-promotion\.mjs/);
   assert.doesNotMatch(routeEnhancers, /apply-mobile-centered-route-stage\.mjs/);
-  assert.match(routeEnhancers, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-phase4c-coach-event-manage-hit-area\.mjs/);
+  assert.doesNotMatch(routeEnhancers, /apply-mobile-coach-signature-stage\.mjs/);
 });
 
 test('Coach Home source owns integrated program identity, premium crest and actionable no-logo fallback', () => {
@@ -35,10 +35,10 @@ test('Coach Home source owns integrated program identity, premium crest and acti
   assert.doesNotMatch(command, /mcHeroTeamMark\{display:none/);
 });
 
-test('supporting Coach reconciliation remains idempotent and does not touch title geometry', () => {
+test('historical Coach reconciliation is retired and remains an identity transform', () => {
   assert.equal(promoteCoachFinalCss(promotedCss), promotedCss);
-  assert.match(promotedCss, /\.mcSection \{\n    overflow: visible;\n    border: 0;\n    border-top: 1px solid var\(--mc-hairline-modern\);/);
-  assert.match(promotedCss, /\.mcTodayPlan > button \{[\s\S]*min-height: 44px;/);
+  assert.equal(promotedCss, finalCss);
+  assert.doesNotMatch(enhancer, /replaceOnce|writeFileSync/);
 });
 
 test('supporting Coach reconciliation cannot rewrite a historical metric ledger', () => {

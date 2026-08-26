@@ -29,7 +29,7 @@ test("Coach Home uses the full uploaded custom logo for every visible and tactic
 test("Coach mobile Home keeps the tactical court visible and brand-driven", () => {
   assert.doesNotMatch(coachHomeCss, /\.mcCourtArtwork,[\s\S]*?\.mcHeroScrim\s*\{\s*display:\s*none;/);
   assert.doesNotMatch(missionControlHierarchyCss, /\.mcCourtArtwork,[\s\S]*?\.mcHeroScrim\s*\{[\s\S]*?display:\s*none\s*!important/);
-  assert.match(coachHomeCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*background:\s*var\(--team-brand-surface-deep/);
+  assert.match(coachHomeCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.match(coachHomeCss, /\.mcHeroContent\s*\{[\s\S]*background:\s*transparent/);
   assert.doesNotMatch(coachHomeCss, /\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
 });
@@ -44,7 +44,7 @@ test("Coach Home contains the full custom logo at desktop and mobile widths", ()
 test("legacy compatibility cannot enlarge or recolor the compact Coach utility lockup", () => {
   assert.doesNotMatch(legacyFoundationCss, /body\.mission-control-active \.mcBrandCopy/);
   assert.match(coachHomeCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*\.mcBrandCopy small\s*\{[\s\S]*font-size:\s*9px/);
-  assert.match(coachHomeCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*\.mcBrandCopy strong\s*\{[\s\S]*color:\s*#f5f8f9;[\s\S]*font-size:\s*15px/);
+  assert.match(coachHomeCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*\.mcBrandCopy strong\s*\{[\s\S]*color:\s*#f5f8f9;[\s\S]*font-size:\s*14px/);
 });
 
 test("team palettes derive accessible branded atmosphere and secondary-action tokens", () => {

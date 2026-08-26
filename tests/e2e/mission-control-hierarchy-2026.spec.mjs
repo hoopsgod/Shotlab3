@@ -143,8 +143,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(heroChannels).toHaveLength(3);
   expect(Math.max(...heroChannels)).toBeLessThan(100);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
-  expect(presentation.heroHeight).toBeGreaterThanOrEqual(488);
-  expect(presentation.heroHeight).toBeLessThanOrEqual(560);
+  expect(presentation.heroHeight).toBeGreaterThanOrEqual(382);
+  expect(presentation.heroHeight).toBeLessThanOrEqual(460);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
   expect(presentation.courtDisplay).toBe("block");
   expect(presentation.scrimDisplay).toBe("block");
@@ -154,17 +154,17 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.identityBackgroundImage).toBe("none");
   expect(presentation.identityHeight).toBeGreaterThanOrEqual(104);
   expect(presentation.identityHeight).toBeLessThanOrEqual(120);
-  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(44);
-  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(50);
+  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(39);
+  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(45);
   expect(presentation.decisionTitleTop).toBeGreaterThanOrEqual(presentation.identityBottom - 1);
   expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 48);
 
   expect(presentation.headerMarkDisplay).toBe("grid");
-  expect(presentation.headerMarkWidth).toBeGreaterThanOrEqual(38);
-  expect(presentation.headerMarkHeight).toBeGreaterThanOrEqual(38);
+  expect(presentation.headerMarkWidth).toBeGreaterThanOrEqual(36);
+  expect(presentation.headerMarkHeight).toBeGreaterThanOrEqual(36);
   expect(presentation.heroMarkDisplay).not.toBe("none");
-  expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(104);
-  expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(104);
+  expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(96);
+  expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(96);
   if (presentation.heroLogoObjectFit !== "fallback") expect(presentation.heroLogoObjectFit).toBe("contain");
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
   expect(presentation.primaryBackground).not.toBe("rgb(32, 36, 33)");
@@ -189,7 +189,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     expect(Math.min(...supportingChannels)).toBeGreaterThanOrEqual(230);
   }
   expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
-  expect(presentation.attentionShadow).toBe("none");
+  expect(presentation.attentionShadow).not.toBe("none");
   expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
   const attentionChannels = rgbChannels(presentation.attentionBackground);
   if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) {

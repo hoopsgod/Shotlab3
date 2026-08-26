@@ -140,7 +140,7 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   expect(home.identityBackground).toBe("none");
   expect(home.decisionBackground).toBe("none");
   expect(home.titleColor).toBe("rgb(245, 248, 249)");
-  expect(home.crestWidth).toBeGreaterThanOrEqual(104);
+  expect(home.crestWidth).toBeGreaterThanOrEqual(96);
   await expectNoHorizontalOverflow(page);
 
   for (const key of ["players", "events", "drills", "sc", "activity", "leaderboards"]) {

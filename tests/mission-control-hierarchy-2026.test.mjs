@@ -53,18 +53,18 @@ test("Phase 2 source owns one shared-grammar Coach identity chapter plus a domin
   assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
   assert.match(commandCenter, /mcHeroIdentity/);
   assert.doesNotMatch(commandCenter, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(titleCss, /Coach Home mobile identity \+ decision authority/);
-  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*488px/);
+  assert.match(titleCss, /Phase 4 Coach Home title-stage authority/);
+  assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*382px/);
   assert.match(titleCss, /\.mcHeroContent[\s\S]*width:\s*100%[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
-  assert.match(titleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
+  assert.match(titleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
   assert.match(titleCss, /\.mcHeroTeamMark[\s\S]*width:\s*var\(--coach-hero-crest\)[\s\S]*height:\s*var\(--coach-hero-crest\)/);
   assert.match(titleCss, /\.mcHeroTeamMark img[\s\S]*object-fit:\s*contain/);
   assert.doesNotMatch(titleCss, /\.mcHeroIdentity::after[\s\S]*content:\s*"Mission Control"/);
-  assert.match(titleCss, /\sh1[\s\S]*font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(titleCss, /\sh1[\s\S]*clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assert.doesNotMatch(titleCss, /!important|html\s+body\s+#root/);
   assert.match(titleCss, /\.mcRealityStrip\s*\{/);
-  assert.match(titleCss, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
+  assert.match(titleCss, /grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(titleCss, /\.mcPrimary\s*\{/);
   assert.doesNotMatch(css, /\.mcRealityStrip\b|\.mcPrimary\b/);
   assert.match(css, /\.mcSection,/);
@@ -108,9 +108,9 @@ test("light support tokens cannot inherit legacy dark shell variables", () => {
 test("mobile hierarchy preserves safe controls while Coach title composition stays source-owned", () => {
   assert.match(titleCss, /@media \(max-width:\s*700px\)/);
   assert.match(titleCss, /\.mcMobileMenu,[\s\S]*\.mcBell\s*\{[\s\S]*width:\s*44px;[\s\S]*height:\s*44px;/);
-  assert.match(titleCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*grid-template-columns:\s*44px minmax\(0, 1fr\) 44px/);
-  assert.match(titleCss, /\.mcHeroContent[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
-  assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) var\(--coach-hero-crest\)/);
+  assert.match(titleCss, /\.mcHeader\[data-testid="mission-control-team-header"\][\s\S]*grid-template-columns:\s*44px minmax\(0,1fr\) 44px/);
+  assert.match(titleCss, /\.mcHeroContent[\s\S]*grid-template-columns:\s*minmax\(0,1fr\)/);
+  assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,1fr\) var\(--coach-hero-crest\)/);
   assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*max-height:\s*none/);
   assert.match(titleCss, /\.mcHeaderTeamMark\s*\{[\s\S]*display:\s*grid/);
   assert.match(titleCss, /\.mcTeamSelect\s*\{\s*display:\s*none/);

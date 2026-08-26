@@ -72,8 +72,8 @@ test('Coach Home markup and owned component CSS form one tactical decision-first
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/);
-  assert.match(coachTitleCss, /font-size:\s*clamp\(44px,\s*11\.3vw,\s*48px\)/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
+  assert.match(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcTeamSelect\s*\{\s*display:\s*none/);
@@ -103,9 +103,9 @@ test('Coach Home decision, metrics and CTA have one source owner', () => {
   }
   assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcRealityStrip\s*\{/);
   assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*\.mcPrimary\s*\{/);
-  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--team-brand-surface-deep/);
+  assert.match(coachTitleCss, /\.mcRealityStrip\s*\{[\s\S]*background:\s*rgba\(2,13,19,\.18\)/);
   assert.match(coachTitleCss, /\.mcRealityStrip strong\s*\{[\s\S]*color:\s*#f5f8f9/);
-  assert.match(coachTitleCss, /\.mcRealityStrip small\s*\{[\s\S]*color:\s*#9ba7ae/);
+  assert.match(coachTitleCss, /\.mcRealityStrip strong span,[\s\S]*\.mcRealityStrip small\{color:#aab7bd/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcRealityStrip|mcPrimary|Coach final metric ledger|Coach final metric label/);
   assert.match(sessionIntegrityCss, /:not\(\[data-testid="coach-primary-objective"\]\) :is\(h1,h2,h3,h4,strong\)/);

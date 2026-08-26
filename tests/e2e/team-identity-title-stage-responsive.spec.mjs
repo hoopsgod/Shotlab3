@@ -201,10 +201,10 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
-    expect(result.crestWidth).toBeGreaterThanOrEqual(104);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(104);
-    expect(result.height).toBeGreaterThanOrEqual(460);
-    expect(result.height).toBeLessThanOrEqual(580);
+    expect(result.crestWidth).toBeGreaterThanOrEqual(96);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(96);
+    expect(result.height).toBeGreaterThanOrEqual(382);
+    expect(result.height).toBeLessThanOrEqual(500);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
     return;
