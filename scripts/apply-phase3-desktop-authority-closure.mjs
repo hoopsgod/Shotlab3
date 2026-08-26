@@ -5,7 +5,6 @@ const BASE_SHA = 'fb4f254c53ecb1d9f11e430307ff4eb7d4e0f122';
 const hierarchyPath = 'src/styles/MissionControlHierarchy2026.css';
 const legacyV2Path = 'src/components/CoachMissionControlV2.css';
 const titlePath = 'src/components/CoachMissionControlTitleStage.css';
-const scopeTestPath = 'tests/phase3-coach-home-scope.test.mjs';
 
 const readFrozenBase = (path) => execFileSync(
   'git',
@@ -13,56 +12,35 @@ const readFrozenBase = (path) => execFileSync(
   { encoding: 'utf8' },
 );
 
-// Late support CSS and the legacy V2 foundation are not Phase 3 ownership
-// surfaces. Restore both exactly to the frozen production baseline first.
+// Restore the late support hierarchy and desktop/base V2 foundation first.
+// Phase 3 should not add a parallel cascade authority.
 fs.writeFileSync(hierarchyPath, readFrozenBase(hierarchyPath));
 fs.writeFileSync(legacyV2Path, readFrozenBase(legacyV2Path));
 
-let title = fs.readFileSync(titlePath, 'utf8');
+let v2 = fs.readFileSync(legacyV2Path, 'utf8');
 
-// Remove the interrupted specificity-based desktop repair. The frozen V2 shell
-// already supplies white hero text and the lime eyebrow, so re-declaring those
-// colors would only add duplicate CSS. Keep only the computed desktop deltas.
-const temporaryMarker = '/* Desktop Coach Home authority closure.';
-const temporaryStart = title.indexOf(temporaryMarker);
-if (temporaryStart >= 0) {
-  const mobile = title.indexOf('@media (max-width: 700px) {', temporaryStart);
-  if (mobile < 0) throw new Error('Could not locate mobile title-stage boundary while removing temporary desktop authority');
-  title = `${title.slice(0, temporaryStart)}${title.slice(mobile)}`;
-}
+// Desktop Coach Home lives on the light editorial canvas. Reuse the existing
+// desktop/base control rule rather than adding a duplicate late override.
+const darkControls = ".mcTeamSelect,.mcBell{height:45px;border:1px solid var(--mc-line);border-radius:13px;background:rgba(6,10,12,.82);color:#eef2f4;cursor:pointer}";
+const lightControls = ".mcTeamSelect,.mcBell{height:45px;border:1px solid var(--mc-line);border-radius:13px;background:#fff;color:#111a21;cursor:pointer}";
+if (!v2.includes(darkControls)) throw new Error('Frozen Coach desktop control authority changed');
+v2 = v2.replace(darkControls, lightControls);
 
-const desktopMarker = '/* Canonical desktop Coach Home authority: computed deltas only. */';
-if (!title.includes(desktopMarker)) {
-  const mobileMarker = '@media (max-width: 700px) {';
-  const mobileIndex = title.indexOf(mobileMarker);
-  if (mobileIndex < 0) throw new Error('Could not locate mobile title-stage marker');
+// One inherited color on the existing hero-content owner fixes the desktop
+// program identity and headline. The eyebrow and supporting copy already own
+// their explicit accent/muted colors. Mobile title-stage rules remain untouched.
+const heroContent = ".mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px}";
+const heroContentWithColor = ".mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px;color:#f4f7f8}";
+if (!v2.includes(heroContent)) throw new Error('Frozen Coach hero-content authority changed');
+v2 = v2.replace(heroContent, heroContentWithColor);
 
-  const desktopAuthority = `/* Canonical desktop Coach Home authority: computed deltas only. */
-@media (min-width:981px){
-.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:none;letter-spacing:normal}
-.mcShellV3 .mcHeader[data-testid="mission-control-team-header"] :is(.mcTeamSelect,.mcBell){background:#fff;color:#111a21;border-color:rgba(17,26,33,.15)}
-}
+fs.writeFileSync(legacyV2Path, v2.endsWith('\n') ? v2 : `${v2}\n`);
 
-`;
-  title = `${title.slice(0, mobileIndex)}${desktopAuthority}${title.slice(mobileIndex)}`;
-}
-
+// The canonical title stage remains the mobile identity/title authority and
+// must never need specificity escalation to coexist with this desktop base.
+const title = fs.readFileSync(titlePath, 'utf8');
 if (/!important|html\s+body\s+#root/.test(title)) {
   throw new Error('Canonical Coach title authority must not escalate specificity');
 }
-fs.writeFileSync(titlePath, title.endsWith('\n') ? title : `${title}\n`);
 
-const testMarker = 'Phase 3 desktop Coach Home keeps hero identity and controls in the source-owned title stage';
-let scopeTest = fs.readFileSync(scopeTestPath, 'utf8');
-if (!scopeTest.includes(testMarker)) {
-  const declarationNeedle = 'const commandSource = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");';
-  if (!scopeTest.includes(declarationNeedle)) throw new Error('Could not locate Phase 3 scope declarations');
-  scopeTest = scopeTest.replace(
-    declarationNeedle,
-    `${declarationNeedle}\nconst titleStageCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");\nconst hierarchyCss = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");\nconst legacyV2Css = fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css", import.meta.url), "utf8");`,
-  );
-  scopeTest += `\n\ntest("${testMarker}", () => {\n  assert.match(titleStageCss, /Canonical desktop Coach Home authority: computed deltas only/);\n  assert.match(titleStageCss, /@media \\(min-width:981px\\)[\\s\\S]*mcHero\\[data-team-identity-stage="coach-mission-control"\\] h1\\{max-width:none;letter-spacing:normal\\}/);\n  assert.match(titleStageCss, /:is\\(\\.mcTeamSelect,\\.mcBell\\)\\{background:#fff;color:#111a21;border-color:rgba\\(17,26,33,\\.15\\)\\}/);\n  assert.match(legacyV2Css, /\\.mcShellV3\\{[^}]*color:#f4f7f8/);\n  assert.match(legacyV2Css, /\\.mcEyebrow\\{[^}]*color:var\\(--mc\\)/);\n  assert.doesNotMatch(titleStageCss, /!important|html\\s+body\\s+#root/);\n  assert.doesNotMatch(hierarchyCss, /\\.mcHeader\\s*\\{/);\n});\n`;
-  fs.writeFileSync(scopeTestPath, scopeTest.endsWith('\n') ? scopeTest : `${scopeTest}\n`);
-}
-
-console.log('Phase 3 Coach Home restored to canonical source-owned title authority.');
+console.log('Phase 3 Coach Home reduced to existing source-owned desktop/base declarations.');
