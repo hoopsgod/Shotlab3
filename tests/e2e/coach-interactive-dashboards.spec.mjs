@@ -1,10 +1,11 @@
 import { mkdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredCoach } from "./registered-coach-fixture.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-dashboard-e2e";
-const COACH_EMAIL = "coach.demo@shotlab.app";
+const COACH_EMAIL = "dashboard.coach@shotlab.test";
 const SCREENSHOT_DIR = "artifacts/coach-events-mobile";
 const dateOffset = (days) => {
   const date = new Date();
@@ -41,7 +42,7 @@ const seedData = {
     },
   }],
   "sl:players": [
-    { id: "coach-dashboard", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "coach-dashboard", email: COACH_EMAIL, name: "Dashboard Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "active-player", playerId: "active-player", email: "active@example.com", name: "Active Player", role: "player", teamId: TEAM_ID },
     { id: "quiet-player", playerId: "quiet-player", email: "quiet@example.com", name: "Quiet Player", role: "player", teamId: TEAM_ID },
     { id: "new-player", playerId: "new-player", email: "new@example.com", name: "New Player", role: "player", teamId: TEAM_ID },
@@ -108,17 +109,16 @@ async function waitForSeedAuthority(page, payload) {
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
-async function enterSeededDemoCoach(page, payload = seedData) {
-  await page.addInitScript((data) => {
-    for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
-  }, payload);
-  await page.goto("/?bootDebug=1");
-  await waitForSeedAuthority(page, payload);
+async function enterSeededCoach(page, payload = seedData) {
+  await enterSeededRegisteredCoach(page, {
+    storage: payload,
+    coachEmail: COACH_EMAIL,
+    coachName: "Dashboard Coach",
+    teamId: TEAM_ID,
+    path: "/?bootDebug=1",
+  });
   const bootPanel = page.locator('[aria-label="ShotLab boot debug"]');
   if (await bootPanel.isVisible().catch(() => false)) await bootPanel.evaluate((element) => element.remove());
-  const coachDemo = page.getByRole("button", { name: /Coach demo/i });
-  await expect(coachDemo).toBeVisible({ timeout: 20_000 });
-  await coachDemo.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await waitForSeedAuthority(page, payload);
 }
@@ -164,7 +164,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("Coach Players behaves as an interactive operational dashboard", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
 
   const rosterResults = page.locator("#coach-roster-operations");
@@ -189,7 +189,7 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
 });
 
 test("Coach Events exposes one premium schedule hierarchy, creation entry point, RSVP gaps, and searchable controls", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededCoach(page);
   await openSchedule(page);
 
   const scheduleResults = page.getByTestId("coach-events-mobile-page");
@@ -240,7 +240,7 @@ test("Coach Events exposes one premium schedule hierarchy, creation entry point,
 test("Coach Events keeps the zero-event mobile page short and overflow-safe on narrow iPhone widths", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   const emptyScheduleSeed = { ...seedData, "sl:events": [], "sl:rsvps": [] };
-  await enterSeededDemoCoach(page, emptyScheduleSeed);
+  await enterSeededCoach(page, emptyScheduleSeed);
   await openSchedule(page);
 
   const commandBar = page.getByTestId("coach-events-command-bar");
@@ -263,7 +263,7 @@ test("Coach Events keeps the zero-event mobile page short and overflow-safe on n
 });
 
 test("Coach Inbox routes the next-event RSVP risk into exact attendance management", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededCoach(page);
 
   const bell = page.getByRole("button", { name: /Open Coach Inbox/i });
   await expect(bell).toBeVisible({ timeout: 20_000 });
@@ -294,7 +294,7 @@ test("Coach Inbox routes the next-event RSVP risk into exact attendance manageme
 });
 
 test("remaining coach pages inherit the reusable dashboard control layer", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededCoach(page);
 
   await openMoreDestination(page, "drills");
   await expect(page.getByTestId("coach-page-dashboard-drills")).toBeVisible({ timeout: 20_000 });
@@ -317,7 +317,7 @@ test("remaining coach pages inherit the reusable dashboard control layer", async
 });
 
 test("Mission Control Analytics opens rankings instead of duplicating Players", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededCoach(page);
 
   await page.getByRole("button", { name: "Open navigation", exact: true }).click();
   const drawer = page.locator(".mcMobileDrawer");
