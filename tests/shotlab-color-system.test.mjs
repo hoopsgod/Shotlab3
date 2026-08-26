@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { assertDeclaration, declaration, mediaBlock, ruleBlock } from "./helpers/css-contract.mjs";
 
 const css = fs.readFileSync(new URL("../public/shotlab-v3-foundation.css", import.meta.url), "utf8");
 const corrections = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
@@ -42,12 +43,19 @@ test("Mission Control uses one dark component-owned identity hierarchy plus rest
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*382px/);
+
+  const mobile = mediaBlock(coachTitleCss, "(max-width:700px)");
+  const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]');
+  const heading = ruleBlock(mobile, " h1");
+  const identity = ruleBlock(mobile, ".mcHeroIdentity");
+  const image = ruleBlock(mobile, ".mcHeroTeamMark img");
+  const content = ruleBlock(mobile, ".mcHeroContent");
+  assertDeclaration(hero, "min-height", "382px");
+  assert.match(declaration(heading, "font") ?? "", /clamp\(39px,\s*10\.5vw,\s*45px\)/);
+  assertDeclaration(identity, "--coach-hero-crest", /^clamp\(96px,\s*26vw,\s*108px\)$/);
+  assertDeclaration(image, "object-fit", "contain");
+  assertDeclaration(content, "width", "100%");
   assert.doesNotMatch(coachTitleCss, /\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
-  assert.match(coachTitleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*clamp\(39px,\s*10\.5vw,\s*45px\)/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(coachTitleCss, /\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
-  assert.match(coachTitleCss, /\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
   assert.doesNotMatch(coachTitleCss, /!important/);
   assert.match(corrections, /Title and team-identity composition are intentionally excluded/);
   assert.doesNotMatch(corrections, /coach-primary-objective|\.mcHero\s*\{|max-height:\s*310px/);
