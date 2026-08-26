@@ -68,14 +68,13 @@ test("leaderboards keep rankings ahead of archive context",()=>{
 
 test("Mission Control declares desktop and mobile layout boundaries",()=>{
   // Structural breakpoints belong to the authenticated shell bridge; mounted page
-  // composition belongs to CoachMissionControlTitleStage.css. Retired V2/2026
-  // presentation files must not be required to regain authority.
+  // composition belongs to CoachMissionControlTitleStage.css. Shared navigation is
+  // independently certified and must not be re-owned by Coach title-stage CSS.
   assert.match(coachShellCss,/\.mcShellV3/);
   mediaBlock(coachShellCss,"(max-width:980px)");
   mediaBlock(coachShellCss,"(max-width:700px)");
   assert.match(coachShellCss,/mission-control-active/);
   assert.match(coachShellCss,/safe-area-inset-bottom/);
-  assert.match(coachTitleCss,/mobile-navigation-dock/);
   assert.match(coachTitleCss,/Canonical Coach Home prototype-composition authority/);
 
   const mobileTitle=mediaBlock(coachTitleCss,"(max-width:700px)");
