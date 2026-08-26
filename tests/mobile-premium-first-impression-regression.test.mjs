@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { mediaBlock } from "./helpers/css-contract.mjs";
 
 const finalMobileCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
 const enhancer = fs.readFileSync(new URL("../scripts/apply-mobile-premium-secondary-page-system.mjs", import.meta.url), "utf8");
@@ -120,13 +121,18 @@ test("Player Home is the immersive Hero variant while Coach Home follows the app
   assert.match(coachCommand, /mcHeroIdentity/);
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /@media \(min-width:701px\) and \(max-width:980px\)/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(88px,\s*24vw,\s*100px\)/);
-  assert.match(coachTitleCss, /clamp\(25px,\s*7\.2vw,\s*31px\)\/\.88 "Barlow Condensed"/);
-  assert.match(coachTitleCss, /clamp\(31px,\s*9\.1vw,\s*37px\)\/\.94 Inter/);
-  assert.match(coachTitleCss, /min-height:\s*352px/);
-  assert.match(coachTitleCss, /object-fit:\s*contain/);
-  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
+
+  const tablet = mediaBlock(coachTitleCss, "(min-width:701px) and (max-width:980px)");
+  const mobile = mediaBlock(coachTitleCss, "(max-width:700px)");
+  assert.match(tablet, /min-height:354px/);
+  assert.match(tablet, /clamp\(36px,5\.5vw,49px\)\/\.88 "Barlow Condensed"/);
+  assert.match(tablet, /clamp\(112px,17vw,142px\)/);
+  assert.match(mobile, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
+  assert.match(mobile, /clamp\(36px,10\.2vw,45px\)\/\.86 "Barlow Condensed"/);
+  assert.match(mobile, /clamp\(28px,7\.6vw,33px\)\/\.96 var\(--mc-native\)/);
+  assert.match(mobile, /min-height:382px/);
+  assert.match(coachTitleCss, /object-fit:contain/);
+  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:100%/);
   assert.doesNotMatch(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assert.doesNotMatch(coachTitleCss, /!important/);
   assert.doesNotMatch(playerHeader, /!important|data-mobile-chrome="native-identity"/);
