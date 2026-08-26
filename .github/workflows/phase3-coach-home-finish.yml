@@ -1,0 +1,67 @@
+name: Phase 3 Coach Home Finish
+
+on:
+  push:
+    branches:
+      - agent/phase-3-coach-dashboard
+    paths:
+      - scripts/apply-phase3-coach-home-finish.mjs
+      - .github/workflows/phase3-coach-home-finish.yml
+
+permissions:
+  contents: write
+
+jobs:
+  stabilize-coach-home:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact Phase 3 branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-3-coach-dashboard
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Apply scoped Coach Home architecture repair
+        run: node scripts/apply-phase3-coach-home-finish.mjs
+
+      - name: Validate diff discipline
+        run: |
+          git diff --check
+          git status --short
+          git diff -- src/App.jsx src/components/CoachCommandCenter.jsx src/lib/coachOperationalDashboard.js tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs
+
+      - name: Run focused Coach Home contracts
+        run: node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
+
+      - name: Install pinned viewport debugger
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify viewport debugger contracts
+        run: node --test tests/viewport-debug-tooling.test.mjs
+
+      - name: Run Coach Home mobile viewport fast loop
+        run: npm run debug:viewport -- --widths=320,375,390,430
+
+      - name: Enforce production performance budget
+        run: npm run build:performance
+
+      - name: Commit stabilized Phase 3 candidate
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fold Program Pulse into Coach metrics pipeline"
+          git push origin HEAD:agent/phase-3-coach-dashboard
