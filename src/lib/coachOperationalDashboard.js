@@ -114,6 +114,14 @@ export function buildCoachPlayerDashboardMetrics(rows = []) {
   };
 }
 
+export function buildCoachProgramPulse(rows = [], weeklyGoal) {
+  const safeRows = safeArray(rows), goal = safeNumber(weeklyGoal), totalGoal = goal * safeRows.length;
+  if (!totalGoal) return { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes: safeRows.length, creditedMakes: 0, totalGoal: 0 };
+  const creditedMakes = safeRows.reduce((sum, row) => sum + Math.min(safeNumber(row.weeklyMakes), goal), 0);
+  const value = Math.round((creditedMakes / totalGoal) * 100);
+  return { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} goal-adjusted makes`, eligibleAthletes: safeRows.length, creditedMakes, totalGoal };
+}
+
 export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster = [], today = "" } = {}) {
   const rosterCount = safeArray(roster).filter((player) => !isCoachIdentity(player)).length;
   return safeArray(events).map((event) => {
