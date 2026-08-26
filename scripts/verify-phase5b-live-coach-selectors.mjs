@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { assertDeclaration, mediaBlock, ruleBlock } from '../tests/helpers/css-contract.mjs'
 
 const assetsDir = path.resolve('dist/assets')
 const coachSourcePath = path.resolve('src/components/CoachCommandCenter.jsx')
@@ -36,8 +37,8 @@ for (const sourceOwnedIdentityContract of [
   /data-team-identity-stage="coach-mission-control"/,
   /className="mcHeroIdentity"/,
   /className="mcHeroTeamMark"/,
-  /const heroTeamLogoUrl = fullTeamLogoUrl;/,
-  /heroTeamLogoUrl \? <img src=\{heroTeamLogoUrl\} alt=\{`\$\{teamName\} logo`\} \/> : <LogoSetupPrompt teamName=\{teamName\} className="mcHeroLogoSetup" \/>/,
+  /const\s+heroTeamLogoUrl\s*=\s*fullTeamLogoUrl/,
+  /heroTeamLogoUrl\s*\?\s*<img[^>]*src=\{heroTeamLogoUrl\}[^>]*>\s*:\s*<LogoSetupPrompt[^>]*className="mcHeroLogoSetup"/s,
 ]) {
   if (!sourceOwnedIdentityContract.test(coachSource)) {
     throw new Error(`Coach Hero identity is missing source-owned DOM contract: ${sourceOwnedIdentityContract}`)
@@ -45,14 +46,22 @@ for (const sourceOwnedIdentityContract of [
 }
 
 const coachTitleCss = fs.readFileSync(coachTitleCssPath, 'utf8')
-for (const sourceOwnedGeometryContract of [
-  /--coach-hero-crest:\s*clamp\(104px,\s*27vw,\s*112px\)/,
-  /\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\);[\s\S]*height:\s*var\(--coach-hero-crest\)/,
-  /\.mcHeroTeamMark img\s*\{[\s\S]*width:\s*100%;[\s\S]*height:\s*100%;[\s\S]*object-fit:\s*contain/,
-]) {
-  if (!sourceOwnedGeometryContract.test(coachTitleCss)) {
-    throw new Error(`Coach Hero identity is missing source-owned geometry contract: ${sourceOwnedGeometryContract}`)
-  }
-}
+const mobile = mediaBlock(coachTitleCss, '(max-width:700px)')
+const header = ruleBlock(mobile, '.mcHeader[data-testid="mission-control-team-header"]')
+const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]')
+const identity = ruleBlock(mobile, '.mcHeroIdentity')
+const crest = ruleBlock(mobile, '.mcHeroTeamMark')
+const crestImage = ruleBlock(mobile, '.mcHeroTeamMark img')
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork and source-owned Hero identity contracts verified`)
+assertDeclaration(header, 'min-height', '56px')
+assertDeclaration(header, 'grid-template-columns', '44px minmax(0,1fr) 44px')
+assertDeclaration(hero, 'min-height', '382px')
+assertDeclaration(identity, '--coach-hero-crest', /^clamp\(96px,\s*26vw,\s*108px\)$/)
+for (const property of ['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height']) {
+  assertDeclaration(crest, property, 'var(--coach-hero-crest)')
+}
+assertDeclaration(crestImage, 'width', '100%')
+assertDeclaration(crestImage, 'height', '100%')
+assertDeclaration(crestImage, 'object-fit', 'contain')
+
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, mobile header geometry, and source-owned crest containment verified`)
