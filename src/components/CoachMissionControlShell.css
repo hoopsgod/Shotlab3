@@ -56,7 +56,6 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
     order: 0 !important;
   }
 
-  .mcShellV3 .mcFocusGrid > .mcTodayLaunch,
   .mcShellV3 .mcFocusGrid > .mcTodayPlan {
     order: 1 !important;
   }
@@ -109,67 +108,7 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
     mask-image: radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 62%,transparent 82%) !important;
   }
 
-  /* Legacy launch treatment is kept compact for any cached component state. */
-  body.mission-control-active .mcShellV3 .mcTodayLaunch {
-    min-height: 0 !important;
-    margin-top: 8px !important;
-    padding: 17px 16px 16px !important;
-    border: 1px solid rgba(217,228,235,.1) !important;
-    border-radius: 16px !important;
-    background:
-      radial-gradient(circle at 96% 8%,color-mix(in srgb,var(--mc) 8%,transparent),transparent 34%),
-      linear-gradient(145deg,rgba(10,17,20,.92),rgba(4,8,10,.88)) !important;
-    box-shadow: 0 16px 36px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.02) !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcTodayLaunchGlow {
-    width: 150px !important;
-    height: 150px !important;
-    right: -70px !important;
-    bottom: -88px !important;
-    opacity: .7 !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcTodayLaunchEyebrow {
-    color: #89949b !important;
-    font-size: 8px !important;
-    letter-spacing: .13em !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcTodayLaunch h2 {
-    max-width: none !important;
-    margin-top: 7px !important;
-    font-size: 26px !important;
-    line-height: .98 !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcTodayLaunch > p {
-    max-width: 315px !important;
-    margin-top: 8px !important;
-    color: #8f9aa2 !important;
-    font-size: 10.5px !important;
-    line-height: 1.42 !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcLaunchPath,
-  body.mission-control-active .mcShellV3 .mcLaunchSecondary {
-    display: none !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcLaunchActions {
-    display: block !important;
-    margin-top: 13px !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcLaunchPrimary {
-    width: 100% !important;
-    min-height: 43px !important;
-    padding: 0 15px !important;
-    justify-content: space-between !important;
-    border-radius: 11px !important;
-  }
-
-  /* Truthful native-feeling Today row replaces the generic setup stepper. */
+  /* Truthful native-feeling Today row replaces the retired generic setup stepper. */
   body.mission-control-active .mcShellV3 .mcTodayPlan {
     position: relative;
     isolation: isolate;
