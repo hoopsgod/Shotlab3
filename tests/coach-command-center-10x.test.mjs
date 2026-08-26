@@ -141,8 +141,8 @@ test("Mission Control keeps Players and Analytics as distinct destinations",()=>
 
 test("responsive CSS creates a native-feeling mobile operating system with Player-level identity and decision geometry",()=>{
   assert.match(css,/grid-template-columns:112px minmax\(0,1fr\)/);
-  assert.match(css,/\.mcHero h1\{[^}]*color:#f4f7f8/);
-  assert.match(css,/\.mcHero \.mcProgramIdentity\{color:#f4f7f8\}/);
+  assert.match(css,/\.mcHeroContent\{[^}]*color:#f4f7f8/);
+  assert.match(css,/\.mcEyebrow\{[^}]*color:var\(--mc\)/);
   assert.match(css,/@media\(max-width:980px\)/);
   assert.match(css,/@media\(max-width:700px\)/);
   assert.match(css,/mission-control-active/);
