@@ -1,0 +1,87 @@
+name: Phase 3 Final Headline Owner Closure
+
+on:
+  push:
+    branches: [agent/phase-3-coach-dashboard]
+    paths:
+      - '.github/workflows/phase3-final-headline-owner-closure.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-3-coach-dashboard
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Move headline color to its explicit source owner
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'src/components/CoachMissionControlV2.css';
+          let css = fs.readFileSync(path, 'utf8');
+          const parent = '.mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px;color:#f4f7f8}';
+          const parentFixed = '.mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px}';
+          const heading = ".mcHero h1{max-width:610px;margin:12px 0 0;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}";
+          const headingFixed = ".mcHero h1{max-width:610px;margin:12px 0 0;color:#f4f7f8;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}";
+          if (!css.includes(parent) || !css.includes(heading)) throw new Error('Expected Coach hero authority changed');
+          css = css.replace(parent, parentFixed).replace(heading, headingFixed);
+          fs.writeFileSync(path, css);
+          NODE
+
+      - name: Verify focused Coach and title authority contracts
+        run: >-
+          node --test
+          tests/coach-command-center-10x.test.mjs
+          tests/title-authority-repair.test.mjs
+          tests/coach-mobile-identity-authority.test.mjs
+          tests/mobile-coach-signature-stage.test.mjs
+          tests/mission-control-hierarchy-2026.test.mjs
+          tests/phase3-coach-home-scope.test.mjs
+          tests/coach-program-pulse.test.mjs
+
+      - name: Install pinned viewport debugger
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify viewport debugger unit contracts
+        run: node --test tests/viewport-debug-tooling.test.mjs
+
+      - name: Run Viewport Debug fast loop
+        run: npm run debug:viewport -- --widths=320,375,390,430
+
+      - name: Enforce production performance budget
+        run: npm run build:performance
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Restore generated support hierarchy and commit only verified source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout fb4f254c53ecb1d9f11e430307ff4eb7d4e0f122 -- src/styles/MissionControlHierarchy2026.css
+          git rm .github/workflows/phase3-final-headline-owner-closure.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/CoachMissionControlV2.css src/styles/MissionControlHierarchy2026.css
+          git diff --cached --check
+          git commit -m "Lock Coach hero headline color to source owner"
+          git push origin HEAD:agent/phase-3-coach-dashboard
