@@ -54,7 +54,7 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 .mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px;color:#f4f7f8}
 .mcEyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--mc);font:900 10px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.12em;text-transform:uppercase}
 .mcEyebrow:before{content:"";width:18px;height:2px;background:var(--mc);box-shadow:0 0 10px color-mix(in srgb,var(--mc) 55%,transparent)}
-.mcHero h1{max-width:610px;margin:12px 0 0;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}
+.mcHero h1{max-width:610px;margin:12px 0 0;color:#f4f7f8;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}
 .mcHeroContent>p{max-width:490px;margin:12px 0 0;color:#9ba5ad;font:700 14px/1.45 'Barlow Condensed','Arial Narrow',sans-serif}
 .mcFocusGrid,.mcLowerGrid{display:grid;gap:16px}
 .mcFocusGrid{grid-template-columns:1.25fr .75fr}
