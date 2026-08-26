@@ -38,18 +38,19 @@ test("demo bundle populates the real product surfaces with one coherent sandbox 
   const bundle = buildDemoDataBundle({ coachEmail: "coach.demo@shotlab.app" });
   const teamId = bundle.demoMeta.teamId;
   assert.equal(teamId, "team-demo-titans");
-  assert.ok(bundle.players.length >= 5, "coach plus populated player roster expected");
-  assert.ok(bundle.events.length >= 4, "upcoming and recent events expected");
-  assert.ok(bundle.rsvps.length >= 3, "attendance/RSVP data expected");
-  assert.ok(bundle.scores.length >= 3, "at-home activity expected");
-  assert.ok(bundle.programScores.length >= 3, "program training results expected");
-  assert.ok(bundle.shotLogs.length >= 2, "shooting activity expected");
-  assert.ok(bundle.challenges.length >= 2, "commitment/duel activity expected");
-  assert.ok(bundle.scSessions.length >= 3, "strength and conditioning schedule expected");
-  assert.ok(bundle.scRsvps.length >= 3, "strength attendance expected");
-  assert.ok(bundle.scLogs.length >= 2, "strength history expected");
+  assert.equal(bundle.players.filter((row) => row.role === "player").length, 12, "full player roster expected");
+  assert.equal(bundle.events.length, 9, "dense recent and upcoming schedule expected");
+  assert.ok(bundle.rsvps.length >= 60, "team-wide attendance/RSVP data expected");
+  assert.ok(bundle.scores.length >= 24, "at-home activity expected across the roster");
+  assert.ok(bundle.programScores.length >= 24, "program training results expected across the roster");
+  assert.ok(bundle.shotLogs.length >= 36, "shooting activity expected across the roster");
+  assert.ok(bundle.challenges.length >= 1, "commitment/duel activity expected");
+  assert.ok(bundle.scSessions.length >= 2, "strength and conditioning schedule expected");
+  assert.ok(bundle.scRsvps.length >= 12, "strength attendance expected across the roster");
+  assert.deepEqual(bundle.scLogs, [], "redundant demo S&C completion logs stay omitted from startup payload");
+  assert.ok(bundle.progressSnapshots.length >= 12, "progress snapshots expected across the roster");
   assert.ok(bundle.coachPriorities?.todayFocusText, "coach priorities expected");
-  for (const collection of [bundle.players, bundle.events, bundle.rsvps, bundle.scores, bundle.programScores, bundle.shotLogs, bundle.challenges, bundle.scSessions, bundle.scRsvps, bundle.scLogs]) {
+  for (const collection of [bundle.players, bundle.events, bundle.rsvps, bundle.scores, bundle.programScores, bundle.shotLogs, bundle.challenges, bundle.scSessions, bundle.scRsvps, bundle.progressSnapshots]) {
     assert.ok(collection.every((row) => row.teamId === teamId), "every seeded row must remain explicitly tenant-scoped");
   }
 });
