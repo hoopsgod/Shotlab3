@@ -17,10 +17,13 @@ const cascadeLockCss=fs.readFileSync(new URL("../src/styles/MissionControlCascad
 const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js",import.meta.url),"utf8");
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
 
-test("coach dashboard answers the 30-second workflow questions without repeating the attention headline",()=>{
-  ["Mission Control","Today at a glance","Needs attention","Activity today","Recent activity","Next session"].forEach(label=>assert.match(source,new RegExp(label)));
+test("coach dashboard answers the 30-second workflow questions with the Phase 3 evidence hierarchy",()=>{
+  ["Mission Control","Today at a glance","Needs Attention","Program Pulse","Recent Activity","Upcoming Event"].forEach(label=>assert.match(source,new RegExp(label)));
   assert.match(source,/data-testid="coach-primary-objective"/);
   assert.match(source,/data-testid="coach-primary-metrics"/);
+  assert.match(source,/data-testid="coach-program-pulse"/);
+  assert.match(source,/data-testid="coach-athlete-attention"/);
+  assert.match(source,/data-testid="coach-upcoming-event"/);
   assert.match(source,/primaryCommand/);
   assert.match(source,/attentionCount > 0/);
   assert.match(source,/hasScheduledSession/);
@@ -29,15 +32,18 @@ test("coach dashboard answers the 30-second workflow questions without repeating
   assert.doesNotMatch(source,/title: `\$\{attentionCount\} player/);
 });
 
-test("Mission Control uses real roster and schedule signals instead of placeholder analytics",()=>{
+test("Mission Control keeps activity, Program Pulse, attention, and schedule as distinct truthful signals",()=>{
   assert.match(source,/activeTodayCount/);
   assert.match(source,/totalPlayers/);
   assert.match(source,/nextEventDateFormatted/);
-  assert.match(source,/activeRate/);
+  assert.match(source,/programPulse = null/);
+  assert.match(source,/model\?\.displayValue \|\| "—"/);
+  assert.match(source,/model\?\.detail \|\| "No weekly goal data"/);
   assert.match(source,/<small>Active<\/small>/);
   assert.match(source,/<small>Follow-up<\/small>/);
   assert.match(source,/<small>Next<\/small>/);
   assert.match(source,/hasScheduledSession \? "Set" : "—"/);
+  assert.doesNotMatch(source,/Team pulse/);
   assert.doesNotMatch(source,/92%/);
   assert.doesNotMatch(source,/85%/);
   assert.doesNotMatch(source,/Game Speed Shooting/);
