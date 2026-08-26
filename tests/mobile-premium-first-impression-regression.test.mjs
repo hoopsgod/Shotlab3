@@ -111,7 +111,7 @@ test("Schedule disclosure is structurally limited to two non-overlapping informa
   assert.doesNotMatch(scheduleCss, /!important/);
 });
 
-test("Player Home is the immersive Hero variant while Coach Home integrates compact identity into Mission Control", () => {
+test("Player Home is the immersive Hero variant while Coach Home follows the approved brand-first Mission Control prototype", () => {
   assert.match(playerHeader, /variant="hero"/);
   assert.match(playerHeader, /surface="dark"/);
   assert.match(playerHeader, /role="Player Mode"/);
@@ -120,11 +120,14 @@ test("Player Home is the immersive Hero variant while Coach Home integrates comp
   assert.match(coachCommand, /mcHeroIdentity/);
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
-  assert.match(coachTitleCss, /min-height:\s*382px/);
+  assert.match(coachTitleCss, /@media \(min-width:701px\) and \(max-width:980px\)/);
+  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(88px,\s*24vw,\s*100px\)/);
+  assert.match(coachTitleCss, /clamp\(25px,\s*7\.2vw,\s*31px\)\/\.88 "Barlow Condensed"/);
+  assert.match(coachTitleCss, /clamp\(31px,\s*9\.1vw,\s*37px\)\/\.94 Inter/);
+  assert.match(coachTitleCss, /min-height:\s*352px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
+  assert.doesNotMatch(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assert.doesNotMatch(coachTitleCss, /!important/);
   assert.doesNotMatch(playerHeader, /!important|data-mobile-chrome="native-identity"/);
 });
