@@ -1,5 +1,6 @@
 name: Viewport Debug Preflight
 
+# Phase 4 exact-head visual certification trigger. No workflow logic change.
 on:
   pull_request:
     paths:
