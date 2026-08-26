@@ -24,6 +24,7 @@ const viteConfig=read("../vite.phase5b.config.js");
 const authorityVerifier=read("../scripts/enforce-coach-mobile-identity-authority.mjs");
 const viewportSpec=read("./e2e/viewport-debug.spec.mjs");
 const viewportWorkflow=read("../.github/workflows/viewport-debug-preflight.yml");
+const stripComments=(value)=>value.replace(/\/\*[\s\S]*?\*\//g,"");
 
 const mobileTitle=mediaBlock(titleCss,"(max-width:700px)");
 const desktopTitle=mediaBlock(titleCss,"(min-width:981px)");
@@ -75,8 +76,9 @@ test("component responsibilities are separated instead of layered by override",(
   assert.match(interactionsCss,/\.mcMobileDrawer/);
   assert.doesNotMatch(interactionsCss,/\.mcHero\s*\{|\.missionControl\s*\{|\.mcTeamHealth\s*\{/);
 
-  assert.match(shellCss,/legacy app-shell bridge only/i);
+  assert.match(shellCss,/legacy app-shell bridge and desktop rail containment/i);
   assert.match(shellCss,/body\.mission-control-active \.app-shell/);
+  assert.match(shellCss,/\.mcShellV3>\.mcRail\{display:flex!important;flex-direction:column/);
   assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{|\.mcProgramIdentity\s*\{|\.mcTeamHealth\s*\{/);
 
   assert.match(finalCss,/support/i);
@@ -84,11 +86,13 @@ test("component responsibilities are separated instead of layered by override",(
 });
 
 test("late shared styles cannot reclaim Coach Home visual authority",()=>{
-  assert.doesNotMatch(hierarchyCss,/\.mcShellV3|\.missionControl|\.mcHero|\.mcTeamHealth|\.mcActivity|\.mcAttention|\.mcNextSession/);
-  assert.doesNotMatch(cascadeLockCss,/\.mcShellV3|\.missionControl|\.mcHero|\.mcTeamHealth|\.mcActivity|\.mcAttention|\.mcNextSession/);
-  assert.match(hierarchyCss,/coach-assignment-accountability/);
-  assert.match(hierarchyCss,/coach-follow-up-queue/);
-  assert.match(cascadeLockCss,/performance-workspace--coach/);
+  const hierarchyRules=stripComments(hierarchyCss);
+  const cascadeRules=stripComments(cascadeLockCss);
+  assert.doesNotMatch(hierarchyRules,/\.mcShellV3|\.missionControl|\.mcHero|\.mcTeamHealth|\.mcActivity|\.mcAttention|\.mcNextSession/);
+  assert.doesNotMatch(cascadeRules,/\.mcShellV3|\.missionControl|\.mcHero|\.mcTeamHealth|\.mcActivity|\.mcAttention|\.mcNextSession/);
+  assert.match(hierarchyRules,/coach-assignment-accountability/);
+  assert.match(hierarchyRules,/coach-follow-up-queue/);
+  assert.match(cascadeRules,/performance-workspace--coach/);
 });
 
 test("desktop Coach Home follows the prototype command-stage anatomy",()=>{
