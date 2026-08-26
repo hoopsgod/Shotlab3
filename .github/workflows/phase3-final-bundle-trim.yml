@@ -28,17 +28,19 @@ jobs:
       - run: node scripts/apply-phase3-final-bundle-trim.mjs
       - run: |
           cp src/components/CoachCommandCenter.jsx /tmp/CoachCommandCenter.jsx
+          cp src/lib/coachOperationalDashboard.js /tmp/coachOperationalDashboard.js
           cp tests/coach-command-center-10x.test.mjs /tmp/coach-command-center-10x.test.mjs
           git diff --check
           node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
       - run: npm run build:performance
       - run: |
           cp /tmp/CoachCommandCenter.jsx src/components/CoachCommandCenter.jsx
+          cp /tmp/coachOperationalDashboard.js src/lib/coachOperationalDashboard.js
           cp /tmp/coach-command-center-10x.test.mjs tests/coach-command-center-10x.test.mjs
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/phase3-final-bundle-trim.yml scripts/apply-phase3-final-bundle-trim.mjs
-          git add src/components/CoachCommandCenter.jsx tests/coach-command-center-10x.test.mjs
+          git add src/components/CoachCommandCenter.jsx src/lib/coachOperationalDashboard.js tests/coach-command-center-10x.test.mjs
           git diff --cached --check
-          git commit -m "Trim redundant Program Pulse presentation cost"
+          git commit -m "Finalize Phase 3 Coach Home budget fit"
           git push origin HEAD:agent/phase-3-coach-dashboard
