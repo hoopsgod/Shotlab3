@@ -1,1 +1,7 @@
-[data-testid="coach-player-invite-dashboard-section"]>div:first-child>button{min-height:44px !important;box-sizing:border-box !important;touch-action:manipulation !important}
+/* Phase 4E.11 — remaining measured Coach invite touch-target correction.
+   Premium route stages own their action and metric geometry directly. */
+[data-testid="coach-player-invite-dashboard-section"] > div:first-child > button {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}

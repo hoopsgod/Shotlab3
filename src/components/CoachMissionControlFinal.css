@@ -292,12 +292,13 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
   }
 
   body.mission-control-active .mcShellV3 .mcSection {
-    overflow: visible;
-    border: 0;
-    border-top: 1px solid var(--mc-hairline-modern);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    overflow: hidden;
+    border: 1px solid var(--mc-hairline-modern);
+    border-radius: var(--mc-radius-card);
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, .02), transparent 42%),
+      var(--mc-material);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .18), inset 0 1px rgba(255, 255, 255, .018);
   }
 
   body.mission-control-active .mcShellV3 .mcSectionHead {
@@ -310,7 +311,7 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
   }
 
   body.mission-control-active .mcShellV3 .mcSectionHead small {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   body.mission-control-active .mcShellV3 .mcSectionHead h2 {
@@ -329,7 +330,7 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
     grid-template-columns: 7px 44px minmax(0, 1fr) !important;
     min-height: 88px !important;
     padding: 12px !important;
-    border-radius: 14px;
+    border-radius: 17px;
   }
 
   body.mission-control-active .mcShellV3 .mcAttentionCopy strong {
@@ -341,7 +342,7 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
   }
 
   body.mission-control-active .mcShellV3 .mcAttentionMeta {
-    font-size: 11px !important;
+    font-size: 10px !important;
   }
 
   body.mission-control-active .mcShellV3 .mcRowAction {
@@ -372,7 +373,7 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
   }
 
   body.mission-control-active .mcShellV3 .mcTodayPlanCopy small {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   body.mission-control-active .mcShellV3 .mcTodayPlanCopy strong {
@@ -388,7 +389,7 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
     grid-row: auto;
     justify-self: start;
     width: auto;
-    min-height: 44px;
+    min-height: 34px;
     padding: 0;
     border: 0;
     background: transparent;

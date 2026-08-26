@@ -20,7 +20,6 @@ import {
   ReferenceLine,
   Cell,
 } from "recharts";
-import ShotLabIcon from "./ShotLabIcon";
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -1196,7 +1195,7 @@ function SeasonGoal({ current = 2847, goal = 5000 }) {
             {remaining.toLocaleString()} more makes
           </div>
         </div>
-        <div aria-hidden="true" style={{ color: T.lime, display: "grid", placeItems: "center" }}><ShotLabIcon name="target" size={26} /></div>
+        <div style={{ fontSize: 28 }}>🎯</div>
       </div>
     </Card>
   );
@@ -1267,10 +1266,10 @@ function WeeklyVolume({
 
 // ── MAIN PAGE ─────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "progress", label: "Progress", icon: "chart" },
-  { id: "skills", label: "Skills", icon: "target" },
-  { id: "streaks", label: "Streaks", icon: "streak" },
-  { id: "goals", label: "Goals", icon: "trophy" },
+  { id: "progress", label: "PROGRESS", icon: "📈" },
+  { id: "skills", label: "SKILLS", icon: "🕸️" },
+  { id: "streaks", label: "STREAKS", icon: "🔥" },
+  { id: "goals", label: "GOALS", icon: "🎯" },
 ];
 
 export default function ShotLabCharts({
@@ -1375,9 +1374,6 @@ export default function ShotLabCharts({
 
   return (
     <div
-      data-testid="player-analytics-workspace"
-      data-analytics-tab={tab}
-      data-analytics-context={context}
       style={{
         minHeight: "100vh",
         background: T.bg,
@@ -1397,29 +1393,48 @@ export default function ShotLabCharts({
         }}
       >
         <div
-          data-testid="player-analytics-heading"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 12,
           }}
         >
           <div>
-            <div style={{ fontSize: 9, letterSpacing: 2.2, color: T.muted, fontWeight: 800 }}>TRAINING ANALYTICS</div>
-            <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 1.2, color: T.white, lineHeight: 1.1 }}>
-              PERFORMANCE <span style={{ color: T.lime }}>INTELLIGENCE</span>
+            <div style={{ fontSize: 9, letterSpacing: 3, color: T.muted }}>
+              {(user?.name || "PLAYER").toUpperCase()} · MY DATA
+            </div>
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 900,
+                letterSpacing: 2,
+                color: T.white,
+                lineHeight: 1.1,
+              }}
+            >
+              MY <span style={{ color: T.lime }}>PROGRESS</span>
             </div>
           </div>
-          <div aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 12, background: "#2a3a1a", border: `1px solid ${T.lime}66`, display: "grid", placeItems: "center", color: T.lime }}>
-            <ShotLabIcon name="chart" size={19} />
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "#2a3a1a",
+              border: `2px solid ${T.lime}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 16,
+              fontWeight: 900,
+              color: T.lime,
+            }}
+          >
+            {(user?.name || "P")[0].toUpperCase()}
           </div>
         </div>
 
         <div
-          id="player-profile-analytics-sections" data-testid="player-analytics-sections"
-          role="group"
-          aria-label="Analytics category"
           style={{
             display: "flex",
             gap: 0,
@@ -1433,9 +1448,6 @@ export default function ShotLabCharts({
           {TABS.map((t) => (
             <button
               key={t.id}
-              type="button"
-              aria-pressed={tab === t.id}
-              data-analytics-section={t.id}
               onClick={() => setTab(t.id)}
               style={{
                 flex: 1,
@@ -1450,13 +1462,12 @@ export default function ShotLabCharts({
                 fontFamily: T.font,
                 transition: "all 0.15s",
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                gap: 5,
+                gap: 2,
               }}
             >
-              <ShotLabIcon name={t.icon} size={15} />
+              <span>{t.icon}</span>
               <span>{t.label}</span>
             </button>
           ))}
@@ -1474,7 +1485,7 @@ export default function ShotLabCharts({
         {tab === "progress" && (
           <>
             <Card style={{ padding: 12 }}>
-              <div data-testid="player-analytics-contexts" role="group" aria-label="Training source" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
                 {[
                   {
                     id: "home",
@@ -1496,9 +1507,6 @@ export default function ShotLabCharts({
                   return (
                     <button
                       key={option.id}
-                      type="button"
-                      aria-pressed={activeOption}
-                      data-analytics-context-option={option.id}
                       onClick={() => setContext(option.id)}
                       style={{
                         flex: 1,
@@ -1542,16 +1550,13 @@ export default function ShotLabCharts({
                 })}
               </div>
               {drillOptions.length > 0 ? (
-                <div data-testid="player-analytics-drills" role="group" aria-label="Drill filter" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {drillOptions.map((drill) => {
                     const active =
                       String(selectedDrill?.id) === String(drill.id);
                     return (
                       <button
                         key={`${context}-${drill.id}`}
-                        type="button"
-                        aria-pressed={active}
-                        data-analytics-drill={drill.id}
                         onClick={() => setSelectedDrillId(drill.id)}
                         style={{
                           borderRadius: 999,

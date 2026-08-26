@@ -1,1 +1,37 @@
-:root{--v5-canvas:#f4f3ef;--v5-surface:#fffefa;--v5-surface-2:#ecebe5;--v5-ink:#101310;--v5-copy:#4a514c;--v5-muted:#6d746f;--v5-line:rgba(16,19,16,.12);--v5-accent:#a8ca2a;--v5-dark:#151916}body.mission-control-active .mcAttentionRow{background:var(--v5-surface-2)!important;border:1px solid var(--v5-line)!important;color:var(--v5-ink)!important}body.mission-control-active .mcAttentionRow,body.mission-control-active .mcAttentionRow *{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}body.mission-control-active .mcAttentionCopy strong{color:var(--v5-ink)!important;-webkit-text-fill-color:var(--v5-ink)!important}body.mission-control-active .mcAttentionCopy small,body.mission-control-active .mcAttentionMeta,body.mission-control-active .mcRowAction{color:var(--v5-copy)!important;-webkit-text-fill-color:var(--v5-copy)!important}
+/* ShotLab V5 coach integrity compatibility layer.
+   Title, Hero identity, crest, and page-purpose composition are source-owned and are
+   intentionally excluded from this historical public stylesheet. */
+:root{
+  --v5-canvas:#f4f3ef;
+  --v5-surface:#fffefa;
+  --v5-surface-2:#ecebe5;
+  --v5-ink:#101310;
+  --v5-copy:#4a514c;
+  --v5-muted:#6d746f;
+  --v5-line:rgba(16,19,16,.12);
+  --v5-accent:#a8ca2a;
+  --v5-dark:#151916;
+}
+
+/* Non-title Mission Control compatibility only. */
+body.mission-control-active .mcAttentionRow{
+  background:var(--v5-surface-2)!important;
+  border:1px solid var(--v5-line)!important;
+  color:var(--v5-ink)!important;
+}
+body.mission-control-active .mcAttentionRow,
+body.mission-control-active .mcAttentionRow *{
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+body.mission-control-active .mcAttentionCopy strong{
+  color:var(--v5-ink)!important;
+  -webkit-text-fill-color:var(--v5-ink)!important;
+}
+body.mission-control-active .mcAttentionCopy small,
+body.mission-control-active .mcAttentionMeta,
+body.mission-control-active .mcRowAction{
+  color:var(--v5-copy)!important;
+  -webkit-text-fill-color:var(--v5-copy)!important;
+}

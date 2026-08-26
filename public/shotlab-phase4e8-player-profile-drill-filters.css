@@ -1,1 +1,7 @@
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-drills"] button[data-analytics-drill]{min-height:44px !important;box-sizing:border-box !important;touch-action:manipulation !important}
+/* Phase 4E.8 — Player Profile drill-filter physical targets.
+   Phase 3F owns semantics and Phase 3D owns presentation; this layer changes only touch geometry. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-drills"] button[data-analytics-drill] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}

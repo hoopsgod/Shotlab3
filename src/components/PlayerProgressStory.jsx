@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { PLAYER_DAILY_SHOT_TARGET } from "../lib/appDataModels.js";
 import { derivePlayerProgressStory } from "../lib/playerProgressStory.js";
 import styles from "./PlayerProgressStory.module.css";
-import ShotLabSignatureField from "./ShotLabSignatureField.jsx";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
@@ -35,7 +34,6 @@ export default function PlayerProgressStory({
     <TeamIdentityTitleStage variant="standard" brandTreatment="compact" surface="light" role="Development" title="Progress" status={`${trendWord} · ${story.activeDays7}/7 active days`} testId="player-progress-team-title" className="playerProgressTeamTitle" dataLayoutRole="editorial-header" dataVisualRole="page-intro" dataPageKind="progress" dataMobileStage="editorial" ariaLabel="Team development and Progress" />
     <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend} data-page-hierarchy="command-story">
       <div className={styles.hero} data-testid="player-progress-story-hero" data-layout-role="command-story-header">
-        <ShotLabSignatureField variant="trajectoryVariant" testId="player-progress-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />
         <div className={styles.heroTopline} data-testid="player-progress-story-topline"><span>DEVELOPMENT STORY</span><span data-testid="player-progress-trend-badge">{trendWord}</span></div>
         <div className={styles.heroGrid} data-testid="player-progress-story-hero-grid">
           <div className={styles.heroCopy} data-testid="player-progress-story-copy"><span className={styles.playerLabel}>{firstName.toUpperCase()} · LAST 14 DAYS</span><h2>{story.headline}</h2><p>{story.trendDetail}</p></div>

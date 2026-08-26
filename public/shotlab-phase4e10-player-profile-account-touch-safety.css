@@ -1,1 +1,21 @@
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-privacy"] button[data-player-profile-privacy-toggle],.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] a[data-player-profile-legal-link]{min-height:44px !important;box-sizing:border-box !important;touch-action:manipulation !important;color:#465717 !important;-webkit-text-fill-color:#465717 !important}.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-privacy"] button[data-player-profile-privacy-toggle]{border-color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 34%,rgba(23,26,24,.16)) !important;background:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 8%,#fff) !important}.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] a[data-player-profile-legal-link]{border-color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 28%,rgba(23,26,24,.14)) !important;background:rgba(255,255,255,.72) !important}
+/* Phase 4E.10 — reconciled Player Profile account controls.
+   These selectors bind to semantic attributes added by the production route enhancer,
+   so geometry and light-surface foreground safety remain stable in the built app. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-privacy"] button[data-player-profile-privacy-toggle],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] a[data-player-profile-legal-link] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+  color: #465717 !important;
+  -webkit-text-fill-color: #465717 !important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-privacy"] button[data-player-profile-privacy-toggle] {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 34%, rgba(23, 26, 24, .16)) !important;
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 8%, #fff) !important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] a[data-player-profile-legal-link] {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 28%, rgba(23, 26, 24, .14)) !important;
+  background: rgba(255, 255, 255, .72) !important;
+}

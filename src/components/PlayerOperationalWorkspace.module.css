@@ -272,7 +272,3 @@
   .metric,.metric::after,.filterButton,.primaryAction{transition:none}
   .metricInteractive:active,.filterButton:active,.primaryAction:active{transform:none}
 }
-
-/* Phase-close mobile optical composition reconciliation. */
-@media(max-width:700px){
-.commandBar{text-align:center;justify-items:center}.primaryAction{max-width:360px;margin-inline:auto}}

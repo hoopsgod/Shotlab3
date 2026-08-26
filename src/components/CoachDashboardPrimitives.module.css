@@ -387,12 +387,3 @@
   .progressTrack span { transition: none; }
   .metricStrip { scroll-behavior: auto; }
 }
-
-.metricSparkline { width: 100%; height: 32px; margin-top: auto; overflow: visible; }
-.metricSparklineTrack { fill: none; stroke: rgba(255,255,255,.18); stroke-width: 1; }
-.metricSparklinePath { fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.tone_positive .metricSparklinePath { color: var(--semantic-positive, #62d98b); }
-.tone_attention .metricSparklinePath { color: var(--semantic-warning, #ffbd66); }
-.tone_info .metricSparklinePath { color: var(--semantic-info, #78d7ff); }
-.progressTrack { min-height: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1) !important; }
-.progressTrack > span { min-height: 100%; }

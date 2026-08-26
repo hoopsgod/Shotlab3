@@ -1,1 +1,7 @@
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"] button[data-analytics-context-option]{min-height:44px !important;box-sizing:border-box !important;touch-action:manipulation !important}
+/* Phase 4E.7 — Player Profile source-filter physical targets.
+   Phase 3F owns semantics and Phase 3D owns presentation; this layer changes only touch geometry. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"] button[data-analytics-context-option] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}

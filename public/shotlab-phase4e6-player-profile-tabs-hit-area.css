@@ -1,1 +1,7 @@
-.performance-shell--player[data-workspace-tab="profile"] #player-profile-analytics-sections button[data-analytics-section]{min-height:44px !important;box-sizing:border-box !important;touch-action:manipulation !important}
+/* Phase 4E.6 — Player Profile analytics-tab physical target.
+   Phase 3D remains the visual authority; this later layer changes only touch geometry. */
+.performance-shell--player[data-workspace-tab="profile"] #player-profile-analytics-sections button[data-analytics-section] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}

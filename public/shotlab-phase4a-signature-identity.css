@@ -1,1 +1,23 @@
-:root{--p4a-lime:var(--team-brand-primary,var(--accent,#c8ff1a))}[data-testid="auth-workspace"],[data-testid="player-daily-command-center"],[data-testid="player-progress-story-hero"]{isolation:isolate}[data-testid="auth-workspace"]>[data-testid="auth-signature-field"]{z-index:0!important}[data-testid="auth-workspace"] .fade-up{z-index:1!important}[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"],[data-testid="player-progress-story-hero"]>[data-testid="player-progress-signature-field"]{z-index:0!important}[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"]~*,[data-testid="player-progress-story-hero"]>[data-testid="player-progress-signature-field"]~*{position:relative;z-index:1}[data-testid="premium-leaderboards-hub"]>header{position:relative;overflow:hidden}[data-testid="premium-leaderboards-hub"]>header::after{content:"";position:absolute;width:112px;height:112px;border-radius:999px;right:-42px;top:-62px;border:1px solid color-mix(in srgb,var(--p4a-lime) 24%,transparent);pointer-events:none}@media(prefers-reduced-motion:reduce){[data-testid="auth-signature-field"],[data-testid="player-home-signature-field"],[data-testid="player-progress-signature-field"]{animation:none!important;transition:none!important}}
+/* Phase 4A — signature-field compatibility plumbing.
+   Visual ornament now lives in the shared Phase 4 authorities and CSS module. */
+:root{--p4a-lime:var(--team-brand-primary,var(--accent,#c8ff1a))}
+
+[data-testid="auth-workspace"],
+[data-testid="player-daily-command-center"],
+[data-testid="player-progress-story-hero"]{isolation:isolate}
+[data-testid="auth-workspace"]>[data-testid="auth-signature-field"]{z-index:0!important}
+[data-testid="auth-workspace"] .fade-up{z-index:1!important}
+[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"],
+[data-testid="player-progress-story-hero"]>[data-testid="player-progress-signature-field"]{z-index:0!important}
+[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"]~*,
+[data-testid="player-progress-story-hero"]>[data-testid="player-progress-signature-field"]~*{position:relative;z-index:1}
+
+/* Rankings keeps one restrained competitive signature rather than stacked ornament. */
+[data-testid="premium-leaderboards-hub"]>header{position:relative;overflow:hidden}
+[data-testid="premium-leaderboards-hub"]>header::after{content:"";position:absolute;width:112px;height:112px;border-radius:999px;right:-42px;top:-62px;border:1px solid color-mix(in srgb,var(--p4a-lime) 24%,transparent);pointer-events:none}
+
+@media(prefers-reduced-motion:reduce){
+  [data-testid="auth-signature-field"],
+  [data-testid="player-home-signature-field"],
+  [data-testid="player-progress-signature-field"]{animation:none!important;transition:none!important}
+}
