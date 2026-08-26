@@ -40,6 +40,8 @@ const sessionIntegrityCss = read('public/shotlab-v15-session-integrity.css');
 const industrialDesignFoundation = read('src/lib/industrialDesignFoundation.js');
 
 const mobileCoachTitle = mediaBlock(coachTitleCss, '(max-width:700px)');
+const baseCoachHeroLogo = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
+const baseCoachPrimary = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary');
 
 test('one shared semantic title primitive owns Coach, Player, secondary, commitment, progress and branding preview surfaces', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -73,7 +75,6 @@ test('Coach Home loads one final source-owned title authority after historical C
   const hero = ruleBlock(mobileCoachTitle, '.mcHero[data-team-identity-stage="coach-mission-control"]');
   const identity = ruleBlock(mobileCoachTitle, '.mcHeroIdentity');
   const crest = ruleBlock(mobileCoachTitle, '.mcHeroTeamMark');
-  const crestImage = ruleBlock(mobileCoachTitle, '.mcHeroTeamMark img');
   const heading = ruleBlock(mobileCoachTitle, ' h1');
 
   assertDeclaration(header, 'min-height', '56px');
@@ -84,7 +85,9 @@ test('Coach Home loads one final source-owned title authority after historical C
   for (const property of ['width','height','min-width','min-height','max-width','max-height']) {
     assertDeclaration(crest, property, 'var(--coach-hero-crest)');
   }
-  assertDeclaration(crestImage, 'object-fit', 'contain');
+  assertDeclaration(baseCoachHeroLogo, 'object-fit', 'contain');
+  assertDeclaration(baseCoachHeroLogo, 'width', '100%');
+  assertDeclaration(baseCoachHeroLogo, 'height', '100%');
   assert.match(declaration(heading, 'font') ?? '', /clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
@@ -109,7 +112,8 @@ test('Coach decision ledger and primary CTA remain owned by TitleStage', () => {
   const ledger = ruleBlock(mobileCoachTitle, '.mcRealityStrip');
   const primary = ruleBlock(mobileCoachTitle, '.mcPrimary');
   assert.match(declaration(ledger, 'background') ?? '', /rgba\(2,\s*13,\s*19,\s*\.18\)/);
-  assert.match(declaration(primary, 'background') ?? '', /color-mix/);
+  assert.match(declaration(baseCoachPrimary, 'background') ?? '', /color-mix/);
+  assert.match(declaration(baseCoachPrimary, 'color') ?? '', /--team-brand-on-primary/);
   assertDeclaration(primary, 'min-height', '50px');
 
   const reduced = mediaBlock(coachTitleCss, '(prefers-reduced-motion:reduce)');
@@ -157,7 +161,9 @@ test('title-only mutation scripts, temporary migrations and emergency late autho
 
 test('shared title geometry preserves premium crest containment and difficult-title floor', () => {
   const rootRule = ruleBlock(stageCss, '.teamIdentityTitleStage');
-  assertDeclaration(rootRule, '--identity-crest', /^clamp\(104px,\s*29vw,\s*120px\)$/);
+  const heroRule = ruleBlock(stageCss, '.teamIdentityTitleStage--hero');
+  assertDeclaration(rootRule, '--identity-crest', /^clamp\(96px,\s*25vw,\s*108px\)$/);
+  assertDeclaration(heroRule, '--identity-crest', /^clamp\(104px,\s*29vw,\s*120px\)$/);
   const image = ruleBlock(stageCss, '.teamIdentityTitleStage__logo');
   assertDeclaration(image, 'object-fit', 'contain');
   assert.match(stageCss, /teamIdentityTitleStage--hero\.teamIdentityTitleStage--longTitle[\s\S]*clamp\(44px,\s*11vw,\s*52px\)/);
