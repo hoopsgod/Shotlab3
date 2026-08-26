@@ -80,24 +80,47 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
+async function waitForSeedAuthority(page, payload) {
+  const seededTeam = payload["sl:teams"]?.[0];
+  const seededPlayer = payload["sl:players"]?.find((player) => player?.role === "player");
+  await expect.poll(() => page.evaluate(({ teamId, teamName, coachEmail, playerEmail }) => {
+    const parse = (key) => {
+      try { return JSON.parse(window.localStorage.getItem(key) || "[]"); }
+      catch { return []; }
+    };
+    const teams = parse("sl:teams");
+    const players = parse("sl:players");
+    const profiles = parse("sl:player-profiles");
+    const drills = parse("sl:drills");
+    const programDrills = parse("sl:program-drills");
+    return drills.length > 0
+      && programDrills.length > 0
+      && teams.some((team) => team?.id === teamId && team?.name === teamName)
+      && players.some((player) => player?.email === coachEmail && player?.teamId === teamId)
+      && (!playerEmail || players.some((player) => player?.email === playerEmail && player?.teamId === teamId))
+      && (!playerEmail || profiles.some((profile) => (profile?.userId === playerEmail || profile?.email === playerEmail) && profile?.teamId === teamId));
+  }, {
+    teamId: seededTeam?.id,
+    teamName: seededTeam?.name,
+    coachEmail: COACH_EMAIL,
+    playerEmail: seededPlayer?.email || null,
+  }), { timeout: 20_000 }).toBe(true);
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+}
+
 async function enterSeededDemoCoach(page, payload = seedData) {
   await page.addInitScript((data) => {
     for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
   }, payload);
   await page.goto("/?bootDebug=1");
+  await waitForSeedAuthority(page, payload);
   const bootPanel = page.locator('[aria-label="ShotLab boot debug"]');
-  await expect(bootPanel).toContainText("hydration_completed", { timeout: 20_000 });
-  await bootPanel.evaluate((element) => element.remove());
+  if (await bootPanel.isVisible().catch(() => false)) await bootPanel.evaluate((element) => element.remove());
   const coachDemo = page.getByRole("button", { name: /Coach demo/i });
   await expect(coachDemo).toBeVisible({ timeout: 20_000 });
   await coachDemo.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
-  const seededTeam = payload["sl:teams"]?.[0];
-  const fixtureAuthority = await page.evaluate(({ teamId, teamName }) => {
-    const teams = JSON.parse(window.localStorage.getItem("sl:teams") || "[]");
-    return teams.some((team) => team?.id === teamId && team?.name === teamName);
-  }, { teamId: seededTeam?.id, teamName: seededTeam?.name });
-  expect(fixtureAuthority).toBe(true);
+  await waitForSeedAuthority(page, payload);
 }
 
 async function openSchedule(page) {
