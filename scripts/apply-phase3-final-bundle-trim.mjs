@@ -7,7 +7,7 @@ const end = source.indexOf("\nfunction LiveActivityPanel", start);
 if (start < 0 || end < 0) throw new Error("Program Pulse panel seam not found");
 const replacement = `function ProgramPulsePanel({ model }) {
   const value = model?.value;
-  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly goal</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{value == null ? "—" : \`${value}%\`}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: \`${value || 0}%\` }} /></div>{value == null ? <div className="mcAllClear"><div><small>No weekly goal data</small></div></div> : null}</article>;
+  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly goal</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{value == null ? "—" : \`\${value}%\`}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: \`\${value || 0}%\` }} /></div>{value == null ? <div className="mcAllClear"><div><small>No weekly goal data</small></div></div> : null}</article>;
 }`;
 source = source.slice(0, start) + replacement + source.slice(end);
 source = source
