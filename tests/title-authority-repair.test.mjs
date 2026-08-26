@@ -60,21 +60,27 @@ test('obsolete parallel title authorities remain deleted', () => {
   assert.doesNotMatch(playerCompositionEnhancer, /PlayerCommitmentCenter|MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home loads one final source-owned title authority after historical Coach layers', () => {
+test('Coach Home loads consolidated responsibilities with one final source-owned title authority', () => {
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
 
   const imports = [...coach.matchAll(/import ['"]\.\/(CoachMissionControl[^'"]+\.css)['"]/g)].map((match) => match[1]);
-  assert.ok(imports.length >= 2, 'expected layered Coach CSS imports');
-  assert.equal(imports.at(-1), 'CoachMissionControlTitleStage.css', 'TitleStage must be the last Coach component authority');
+  assert.deepEqual(imports, [
+    'CoachMissionControlInteractions.css',
+    'CoachMissionControlShell.css',
+    'CoachMissionControlFinal.css',
+    'CoachMissionControlTitleStage.css',
+  ]);
+  assert.equal(imports.at(-1), 'CoachMissionControlTitleStage.css', 'TitleStage must remain the final Coach Home visual authority');
   assert.equal(imports.filter((name) => name === 'CoachMissionControlTitleStage.css').length, 1);
 
   const header = ruleBlock(mobileCoachTitle, '.mcHeader[data-testid="mission-control-team-header"]');
   const hero = ruleBlock(mobileCoachTitle, '.mcHero[data-team-identity-stage="coach-mission-control"]');
   const identity = ruleBlock(mobileCoachTitle, '.mcHeroIdentity');
   const crest = ruleBlock(mobileCoachTitle, '.mcHeroTeamMark');
+  const programIdentity = ruleBlock(mobileCoachTitle, '.mcProgramIdentity');
   const heading = ruleBlock(mobileCoachTitle, ' h1');
 
   assertDeclaration(header, 'min-height', '56px');
@@ -88,7 +94,11 @@ test('Coach Home loads one final source-owned title authority after historical C
   assertDeclaration(baseCoachHeroLogo, 'object-fit', 'contain');
   assertDeclaration(baseCoachHeroLogo, 'width', '100%');
   assertDeclaration(baseCoachHeroLogo, 'height', '100%');
-  assert.match(declaration(heading, 'font') ?? '', /clamp\(39px,\s*10\.5vw,\s*45px\)/);
+  assert.match(declaration(programIdentity, 'font') ?? '', /clamp\(36px,\s*10\.2vw,\s*45px\)/);
+  assert.match(declaration(heading, 'font') ?? '', /clamp\(28px,\s*7\.6vw,\s*33px\)/);
+  assert.match(declaration(heading, 'font') ?? '', /var\(--mc-native\)/);
+  assertDeclaration(heading, 'text-transform', 'none');
+  assert.doesNotMatch(declaration(heading, 'font') ?? '', /Barlow Condensed/);
   assert.doesNotMatch(coachTitleCss, /!important|html\s+body\s+#root/);
   assert.doesNotMatch(signatureEnhancer, /mcHeroTeamMark|mcProgramIdentity|mcHero h1|Coach mobile hero mark/);
 });
