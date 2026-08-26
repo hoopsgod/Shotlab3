@@ -1,32 +1,22 @@
 /* Coach workspace chrome. Desktop follows the approved prototype; mobile title
    geometry remains owned by CoachMissionControlTitleStage.css. */
 .mcShellV3{grid-template-columns:184px minmax(0,1fr);background:#f4f1e9;color:#101820}
-.mcShellV3 .mcRail{align-items:stretch;border-right:1px solid rgba(255,255,255,.08);background:radial-gradient(circle at 28% 8%,color-mix(in srgb,var(--mc) 7%,transparent),transparent 26%),linear-gradient(180deg,var(--team-brand-surface-deep,#061827),#03111d);box-shadow:10px 0 30px rgba(4,17,29,.08)}
+.mcShellV3 .mcRail{align-items:stretch;border-right:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,var(--team-brand-surface-deep,#061827),#03111d)}
 .mcShellV3 .mcRailBrand{width:auto;min-height:76px;margin:0;padding:0 18px;place-items:center start;border:0;border-bottom:1px solid rgba(255,255,255,.08);background:transparent;cursor:pointer}
 .mcShellV3 .mcRailBrand:after{content:"SHOTLAB";color:#f5f7f3;font:italic 900 24px/.9 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.035em}
 .mcShellV3 .mcRailBrand .mcRailLogo,.mcShellV3 .mcRailBrand .mcRailLogoSetup{display:none}
 .mcShellV3 .mcRail nav{display:grid;width:100%;gap:4px;padding:20px 10px}
 .mcShellV3 .mcRail nav button{min-height:46px;padding:0 12px;border:0;border-radius:8px;display:grid;grid-template-columns:22px minmax(0,1fr);place-items:center start;align-content:center;column-gap:10px;background:transparent;color:#e8edf0}
-.mcShellV3 .mcRail nav button svg{width:18px;height:18px}
-.mcShellV3 .mcRail nav button span{font:620 13px/1.1 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);letter-spacing:-.01em}
-.mcShellV3 .mcRail nav button.is-active{color:color-mix(in srgb,var(--mc) 86%,white);border:0;background:rgba(255,255,255,.055);box-shadow:inset 3px 0 0 var(--mc)}
+.mcShellV3 .mcRail nav button svg{width:18px;height:18px}.mcShellV3 .mcRail nav button span{font-size:13px;font-weight:620;letter-spacing:-.01em}
+.mcShellV3 .mcRail nav button.is-active{color:color-mix(in srgb,var(--mc) 86%,white);background:rgba(255,255,255,.055);box-shadow:inset 3px 0 0 var(--mc)}
 .mcShellV3 .mcCoachIdentity{width:auto;margin:0 10px 10px;padding:14px 8px;border-top:1px solid rgba(255,255,255,.08)}
-.mcShellV3 .mcCoachIdentity small{color:#f0f3f4}.mcShellV3 .mcCoachIdentity strong{color:#aab5bd;font:560 10px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif)}
+.mcShellV3 .mcCoachIdentity small{color:#f0f3f4}.mcShellV3 .mcCoachIdentity strong{color:#aab5bd;font-size:10px;font-weight:560}
 
 .mcShellV3 .mcHeader{position:relative;min-height:62px;padding:0 28px;border:0;border-bottom:1px solid rgba(16,24,32,.1);border-radius:0;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f7f3ea;color:#101820;box-shadow:none}
-.mcShellV3 .mcHeader:after{display:none}
-.mcShellV3 .mcBrandLockup{min-width:0;display:flex;align-items:center;gap:10px;color:inherit}
-.mcShellV3 .mcBrandCopy{min-width:0;display:block}
-.mcShellV3 .mcBrandCopy small{display:block;overflow:hidden;color:#7d8589;font:700 8px/1 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);letter-spacing:.08em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
-.mcShellV3 .mcBrandCopy strong{display:block;margin-top:3px;color:#101820;font:680 13px/1.05 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);letter-spacing:-.015em;text-transform:none;white-space:nowrap}
-.mcShellV3 .mcHeaderActions{display:flex;align-items:center;gap:9px}
-.mcShellV3 .mcTeamSelect,.mcShellV3 .mcBell,.mcShellV3 .mcMobileMenu{border:1px solid rgba(16,24,32,.12);border-radius:7px;background:#f7f3ea;color:#101820;box-shadow:none}
-.mcShellV3 .mcTeamSelect{min-width:144px;height:36px;padding:0 12px;font:650 11px/1 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif)}
-.mcShellV3 .mcBell{width:36px;height:36px;min-width:36px;min-height:36px}.mcShellV3 .mcBell b{width:17px;height:17px;right:-5px;top:-5px;box-shadow:0 0 0 2px #f7f3ea}
-.mcShellV3 .mcMobileMenu{display:none}
-.mcShellV3 .mcCourtArtwork{background:radial-gradient(circle at 78% 26%,color-mix(in srgb,var(--mc) 14%,transparent),transparent 26%),linear-gradient(180deg,#0a1114,#030607)}
-.mcShellV3 .mcHeroScrim{background:linear-gradient(90deg,rgba(3,6,7,.98),rgba(3,6,7,.91) 48%,rgba(3,6,7,.52) 72%,rgba(3,6,7,.12)),linear-gradient(180deg,transparent 58%,rgba(3,6,7,.72))}
-.mcShellV3 .mcDrawerLogo{width:60px!important;height:60px!important;padding:0!important;border:0!important;background:transparent!important}.mcShellV3 .mcDrawerLogo img{width:60px!important;height:60px!important;object-fit:contain}
+.mcShellV3 .mcHeader:after{display:none}.mcShellV3 .mcBrandLockup{min-width:0;display:flex;align-items:center;gap:10px;color:inherit}.mcShellV3 .mcBrandCopy{min-width:0;display:block}
+.mcShellV3 .mcBrandCopy small{display:block;overflow:hidden;color:#7d8589;font-size:8px;font-weight:700;letter-spacing:.08em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}.mcShellV3 .mcBrandCopy strong{display:block;margin-top:3px;color:#101820;font-size:13px;font-weight:680;letter-spacing:-.015em;text-transform:none;white-space:nowrap}
+.mcShellV3 .mcHeaderActions{display:flex;align-items:center;gap:9px}.mcShellV3 .mcTeamSelect,.mcShellV3 .mcBell,.mcShellV3 .mcMobileMenu{border:1px solid rgba(16,24,32,.12);border-radius:7px;background:#f7f3ea;color:#101820;box-shadow:none}
+.mcShellV3 .mcTeamSelect{min-width:144px;height:36px;padding:0 12px;font-size:11px;font-weight:650}.mcShellV3 .mcBell{width:36px;height:36px;min-width:36px;min-height:36px}.mcShellV3 .mcBell b{width:17px;height:17px;right:-5px;top:-5px;box-shadow:0 0 0 2px #f7f3ea}.mcShellV3 .mcMobileMenu{display:none}
 
 @media(max-width:980px){
   .mcShellV3{width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important;overflow-x:clip;box-sizing:border-box;background:linear-gradient(180deg,#030607,#010203);color:#f4f7f8}
@@ -36,6 +26,5 @@
   .mcShellV3 .mcBrandCopy strong{color:#f3f6f7;font-size:25px}.mcShellV3 .mcBrandCopy small{color:#7e8991;font-size:9px}
   .mcShellV3 .mcTeamSelect{display:none}.mcShellV3 .mcBell{width:44px;height:44px;min-width:44px;min-height:44px;background:rgba(8,13,16,.78);color:#edf2f4;border-color:rgba(255,255,255,.12);border-radius:12px}
 }
-
 @media(max-width:700px){.mcShellV3 .missionControl{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:calc(88px + env(safe-area-inset-bottom))}}
 @media(max-width:390px){.mcShellV3 .missionControl{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}}
