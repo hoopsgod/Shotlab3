@@ -4,6 +4,8 @@ import path from 'node:path'
 const DIST_ASSETS = path.resolve(process.cwd(), 'dist', 'assets')
 const AUTHORITATIVE_STAGE = /\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]/
 const AUTHORITATIVE_HEADER = /\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]/
+const COMPONENT_HEADER_AUTHORITY = /^\.mcShellV3\s+(?:\.mcHeader(?:\s|[.:])|\.mcBrandLockup(?:\s|[.:]|$)|\.mcBrandCopy(?:\s|[.:]|$)|\.mcHeaderActions(?:\s|[.:]|$)|\.mcTeamSelect(?:[.:]|$)|\.mcBell(?:[.:]|$)|\.mcMobileMenu(?:[.:]|$))/
+const COMPONENT_FALLBACK_AUTHORITY = /^\.mcShellV3\s+\.mc(?:Hero|Header)TeamMark\s+\.mcTeamFallback\b/
 
 const GEOMETRY = new Set([
   'width','height','min-width','min-height','max-width','max-height',
@@ -22,21 +24,37 @@ function stripDeclarations(body, blocked) {
   })
 }
 
+function arms(selector) {
+  return selector.split(',').map((arm) => arm.replace(/\s+/g, ' ').trim()).filter(Boolean)
+}
+
+function everyArmIsCurrentComponentAuthority(selector) {
+  const selectorArms = arms(selector)
+  return selectorArms.length > 0 && selectorArms.every((arm) =>
+    AUTHORITATIVE_STAGE.test(arm)
+    || AUTHORITATIVE_HEADER.test(arm)
+    || COMPONENT_HEADER_AUTHORITY.test(arm)
+    || COMPONENT_FALLBACK_AUTHORITY.test(arm),
+  )
+}
+
+function directlyTargets(selector, className) {
+  return arms(selector).some((arm) => new RegExp(`\\.${className}(?:[.:][\\w-]+)*$`).test(arm))
+}
+
 function reconcileRule(selector, body) {
   const normalized = selector.replace(/\s+/g, ' ').trim()
-  const isAuthoritativeStage = AUTHORITATIVE_STAGE.test(normalized)
-  const isAuthoritativeHeader = AUTHORITATIVE_HEADER.test(normalized)
-  if (isAuthoritativeStage || isAuthoritativeHeader) return body
+  if (everyArmIsCurrentComponentAuthority(normalized)) return body
 
-  if (normalized.includes('.mcHeroTeamMark')) return stripDeclarations(body, GEOMETRY)
+  if (directlyTargets(normalized, 'mcHeroTeamMark')) return stripDeclarations(body, GEOMETRY)
   if (normalized.includes('[data-testid="coach-primary-objective"]')) {
     if (/\bh1\b/.test(normalized)) return stripDeclarations(body, new Set([...GEOMETRY, ...IDENTITY_COPY]))
     return stripDeclarations(body, GEOMETRY)
   }
-  if (normalized.includes('.mcProgramIdentity') || normalized.includes('.mcEyebrow')) return stripDeclarations(body, IDENTITY_COPY)
-  if (normalized.includes('.mcHeader') && !normalized.includes('.mcHeaderActions')) return stripDeclarations(body, HEADER_SURFACE)
-  if (normalized.includes('.mcMobileMenu') || normalized.includes('.mcBell') || normalized.includes('.mcTeamSelect')) return stripDeclarations(body, HEADER_CONTROL)
-  if (normalized.includes('.mcBrandLockup') || normalized.includes('.mcBrandCopy') || normalized.includes('.mcHeaderTeamMark')) return stripDeclarations(body, new Set(['display', ...IDENTITY_COPY]))
+  if (directlyTargets(normalized, 'mcProgramIdentity') || directlyTargets(normalized, 'mcEyebrow')) return stripDeclarations(body, IDENTITY_COPY)
+  if (directlyTargets(normalized, 'mcHeader')) return stripDeclarations(body, HEADER_SURFACE)
+  if (directlyTargets(normalized, 'mcMobileMenu') || directlyTargets(normalized, 'mcBell') || directlyTargets(normalized, 'mcTeamSelect')) return stripDeclarations(body, HEADER_CONTROL)
+  if (directlyTargets(normalized, 'mcBrandLockup') || directlyTargets(normalized, 'mcBrandCopy') || directlyTargets(normalized, 'mcHeaderTeamMark')) return stripDeclarations(body, new Set(['display', ...IDENTITY_COPY]))
   return body
 }
 
