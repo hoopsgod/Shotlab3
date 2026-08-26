@@ -13,75 +13,38 @@ const readFrozenBase = (path) => execFileSync(
   { encoding: 'utf8' },
 );
 
-// The late support hierarchy and the legacy V2 foundation are not Phase 3
-// ownership surfaces. Restore both exactly to the frozen production baseline;
-// the canonical title-stage stylesheet will carry the intentional presentation.
+// Late support CSS and the legacy V2 foundation are not Phase 3 ownership
+// surfaces. Restore both exactly to the frozen production baseline first.
 fs.writeFileSync(hierarchyPath, readFrozenBase(hierarchyPath));
 fs.writeFileSync(legacyV2Path, readFrozenBase(legacyV2Path));
 
 let title = fs.readFileSync(titlePath, 'utf8');
 
-// Remove either temporary desktop closure variant if a prior interrupted run
-// left one in the worktree. The final source uses a different, normal-specificity
-// marker below.
-for (const oldMarker of [
-  '/* Desktop Coach Home authority closure. */',
-  '/* Desktop Coach Home authority closure.',
-]) {
-  const start = title.indexOf(oldMarker);
-  if (start >= 0) {
-    const mobile = title.indexOf('@media (max-width: 700px) {', start);
-    if (mobile < 0) throw new Error('Could not locate mobile title-stage boundary while removing temporary desktop authority');
-    title = `${title.slice(0, start)}${title.slice(mobile)}`;
-    break;
-  }
+// Remove the interrupted specificity-based desktop repair. The frozen V2 shell
+// already supplies white hero text and the lime eyebrow, so re-declaring those
+// colors would only add duplicate CSS. Keep only the computed desktop deltas.
+const temporaryMarker = '/* Desktop Coach Home authority closure.';
+const temporaryStart = title.indexOf(temporaryMarker);
+if (temporaryStart >= 0) {
+  const mobile = title.indexOf('@media (max-width: 700px) {', temporaryStart);
+  if (mobile < 0) throw new Error('Could not locate mobile title-stage boundary while removing temporary desktop authority');
+  title = `${title.slice(0, temporaryStart)}${title.slice(mobile)}`;
 }
 
-const heroAuthorityMarker = '/* Canonical Coach Home hero identity authority across tablet and desktop. */';
-if (!title.includes(heroAuthorityMarker)) {
-  const heroMarkNeedle = '.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark {';
-  const heroMarkIndex = title.indexOf(heroMarkNeedle);
-  if (heroMarkIndex < 0) throw new Error('Could not locate Coach hero mark insertion point');
-
-  const heroAuthority = `/* Canonical Coach Home hero identity authority across tablet and desktop. */
-.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity {
-  color: #f4f7f8;
-  -webkit-text-fill-color: currentColor;
-}
-
-.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcEyebrow {
-  color: var(--mc, #c8ff1a);
-  -webkit-text-fill-color: currentColor;
-}
-
-.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1 {
-  max-width: none;
-  color: #f4f7f8;
-  letter-spacing: normal;
-}
-
-`;
-  title = `${title.slice(0, heroMarkIndex)}${heroAuthority}${title.slice(heroMarkIndex)}`;
-}
-
-const desktopControlMarker = '/* Canonical desktop Coach Home control authority. */';
-if (!title.includes(desktopControlMarker)) {
+const desktopMarker = '/* Canonical desktop Coach Home authority: computed deltas only. */';
+if (!title.includes(desktopMarker)) {
   const mobileMarker = '@media (max-width: 700px) {';
   const mobileIndex = title.indexOf(mobileMarker);
   if (mobileIndex < 0) throw new Error('Could not locate mobile title-stage marker');
 
-  const desktopControlAuthority = `/* Canonical desktop Coach Home control authority. */
-@media (min-width: 981px) {
-  .mcShellV3 .mcHeader[data-testid="mission-control-team-header"] .mcTeamSelect,
-  .mcShellV3 .mcHeader[data-testid="mission-control-team-header"] .mcBell {
-    background: #fff;
-    color: #111a21;
-    border-color: rgba(17,26,33,.15);
-  }
+  const desktopAuthority = `/* Canonical desktop Coach Home authority: computed deltas only. */
+@media (min-width:981px){
+.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:none;letter-spacing:normal}
+.mcShellV3 .mcHeader[data-testid="mission-control-team-header"] :is(.mcTeamSelect,.mcBell){background:#fff;color:#111a21;border-color:rgba(17,26,33,.15)}
 }
 
 `;
-  title = `${title.slice(0, mobileIndex)}${desktopControlAuthority}${title.slice(mobileIndex)}`;
+  title = `${title.slice(0, mobileIndex)}${desktopAuthority}${title.slice(mobileIndex)}`;
 }
 
 if (/!important|html\s+body\s+#root/.test(title)) {
@@ -96,9 +59,9 @@ if (!scopeTest.includes(testMarker)) {
   if (!scopeTest.includes(declarationNeedle)) throw new Error('Could not locate Phase 3 scope declarations');
   scopeTest = scopeTest.replace(
     declarationNeedle,
-    `${declarationNeedle}\nconst titleStageCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");\nconst hierarchyCss = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");`,
+    `${declarationNeedle}\nconst titleStageCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");\nconst hierarchyCss = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");\nconst legacyV2Css = fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css", import.meta.url), "utf8");`,
   );
-  scopeTest += `\n\ntest("${testMarker}", () => {\n  assert.match(titleStageCss, /Canonical Coach Home hero identity authority/);\n  assert.match(titleStageCss, /mcProgramIdentity[\\s\\S]*color:\\s*#f4f7f8/);\n  assert.match(titleStageCss, /mcEyebrow[\\s\\S]*color:\\s*var\\(--mc, #c8ff1a\\)/);\n  assert.match(titleStageCss, /mcHero\\[data-team-identity-stage="coach-mission-control"\\] h1[\\s\\S]*max-width:\\s*none/);\n  assert.match(titleStageCss, /@media \\(min-width:\\s*981px\\)[\\s\\S]*mcTeamSelect,[\\s\\S]*mcBell[\\s\\S]*background:\\s*#fff/);\n  assert.doesNotMatch(titleStageCss, /!important|html\\s+body\\s+#root/);\n  assert.doesNotMatch(hierarchyCss, /\\.mcHeader\\s*\\{/);\n});\n`;
+  scopeTest += `\n\ntest("${testMarker}", () => {\n  assert.match(titleStageCss, /Canonical desktop Coach Home authority: computed deltas only/);\n  assert.match(titleStageCss, /@media \\(min-width:981px\\)[\\s\\S]*mcHero\\[data-team-identity-stage="coach-mission-control"\\] h1\\{max-width:none;letter-spacing:normal\\}/);\n  assert.match(titleStageCss, /:is\\(\\.mcTeamSelect,\\.mcBell\\)\\{background:#fff;color:#111a21;border-color:rgba\\(17,26,33,\\.15\\)\\}/);\n  assert.match(legacyV2Css, /\\.mcShellV3\\{[^}]*color:#f4f7f8/);\n  assert.match(legacyV2Css, /\\.mcEyebrow\\{[^}]*color:var\\(--mc\\)/);\n  assert.doesNotMatch(titleStageCss, /!important|html\\s+body\\s+#root/);\n  assert.doesNotMatch(hierarchyCss, /\\.mcHeader\\s*\\{/);\n});\n`;
   fs.writeFileSync(scopeTestPath, scopeTest.endsWith('\n') ? scopeTest : `${scopeTest}\n`);
 }
 
