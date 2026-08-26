@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { mediaBlock } from './helpers/css-contract.mjs';
 import { promoteCoachCommandCenter, promoteCoachFinalCss } from '../scripts/apply-mobile-coach-signature-stage.mjs';
 
 const command = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
@@ -39,24 +40,26 @@ test('Coach Home source owns integrated program identity, premium crest and acti
 });
 
 test('Coach prototype hierarchy is brand-first and intentionally responsive', () => {
-  const desktop = titleCss.split('@media (min-width:981px){')[1]?.split('@media (min-width:701px) and (max-width:980px){')[0] ?? '';
-  const tablet = titleCss.split('@media (min-width:701px) and (max-width:980px){')[1]?.split('@media (max-width:700px){')[0] ?? '';
-  const mobile = titleCss.split('@media (max-width:700px){')[1]?.split('@media (max-width:380px){')[0] ?? '';
+  const desktop = mediaBlock(titleCss, '(min-width:981px)');
+  const tablet = mediaBlock(titleCss, '(min-width:701px) and (max-width:980px)');
+  const mobile = mediaBlock(titleCss, '(max-width:700px)');
 
   assert.match(desktop, /grid-column:1\/10/);
-  assert.match(desktop, /min-height:312px/);
-  assert.match(desktop, /"Barlow Condensed"/);
+  assert.match(desktop, /min-height:330px/);
+  assert.match(desktop, /clamp\(42px,4\.1vw,62px\)\/\.86 "Barlow Condensed"/);
+  assert.match(desktop, /clamp\(128px,12vw,168px\)/);
 
-  assert.match(tablet, /min-height:352px/);
-  assert.match(tablet, /clamp\(36px,5\.4vw,48px\)\/\.88 "Barlow Condensed"/);
-  assert.match(tablet, /clamp\(116px,17vw,142px\)/);
+  assert.match(tablet, /min-height:354px/);
+  assert.match(tablet, /clamp\(36px,5\.5vw,49px\)\/\.88 "Barlow Condensed"/);
+  assert.match(tablet, /clamp\(112px,17vw,142px\)/);
+  assert.match(tablet, /font:760 28px\/1 var\(--mc-native\)/);
 
-  assert.match(mobile, /min-height:352px/);
-  assert.match(mobile, /--coach-hero-crest:clamp\(88px,24vw,100px\)/);
-  assert.match(mobile, /clamp\(25px,7\.2vw,31px\)\/\.88 "Barlow Condensed"/);
-  assert.match(mobile, /clamp\(31px,9\.1vw,37px\)\/\.94 Inter/);
-  assert.match(mobile, /min-height:44px/);
-  assert.match(mobile, /min-height:48px/);
+  assert.match(mobile, /min-height:382px/);
+  assert.match(mobile, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
+  assert.match(mobile, /clamp\(36px,10\.2vw,45px\)\/\.86 "Barlow Condensed"/);
+  assert.match(mobile, /clamp\(28px,7\.6vw,33px\)\/\.96 var\(--mc-native\)/);
+  assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px/);
   assert.doesNotMatch(mobile, /clamp\(39px,10\.5vw,45px\)/);
 });
 
@@ -65,11 +68,10 @@ test('legacy V2 cannot reorder Program Pulse behind athlete attention on mobile'
   assert.doesNotMatch(v2Css, /\.mcAttention\s*\{[^}]*order\s*:/);
 });
 
-test('production V2 rewrite contract requires only live retained overlap', () => {
-  const rewriteContract = phase5bConfig.split('const V2_PRODUCTION_REWRITES = [')[1]?.split(']\n\nfunction normalizeModuleId')[0] ?? '';
-  assert.match(rewriteContract, /mcDrawerBrand img/);
-  assert.doesNotMatch(rewriteContract, /mcBrandLockup|mcRailLogo/);
-  assert.match(phase5bConfig, /font:italic 900 24px\/\.9 'Barlow Condensed','Arial Narrow',sans-serif/);
+test('production build no longer carries a V2 Coach visual rewrite contract', () => {
+  assert.doesNotMatch(phase5bConfig, /V2_PRODUCTION_REWRITES|mcDrawerBrand img|mcBrandLockup|mcRailLogo/);
+  assert.doesNotMatch(phase5bConfig, /Barlow Condensed|Arial Narrow/);
+  assert.match(phase5bConfig, /ownCoachInteractiveStylesInWorkspace/);
 });
 
 test('historical Coach reconciliation is retired and remains an identity transform', () => {
