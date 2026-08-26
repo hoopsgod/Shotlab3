@@ -34,7 +34,7 @@ jobs:
       - name: Apply scoped Coach Home architecture repair
         run: node scripts/apply-phase3-coach-home-finish.mjs
 
-      - name: Trim Program Pulse runtime payload to rendered fields
+      - name: Minimize Program Pulse runtime model to rendered fields
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -50,14 +50,19 @@ jobs:
           patch('src/lib/coachOperationalDashboard.js', [
             ['  const eligibleAthletes = safeRows.length;\n', ''],
             ['  const totalGoal = goal > 0 ? goal * eligibleAthletes : 0;', '  const totalGoal = goal > 0 ? goal * safeRows.length : 0;'],
+            ['  const creditedMakes = totalGoal ? safeRows.reduce((total, row) => total + Math.min(Math.max(0, safeNumber(row.weeklyMakes)), goal), 0) : 0;', '  const creditedMakes = totalGoal ? safeRows.reduce((total, row) => total + Math.min(row.weeklyMakes, goal), 0) : 0;'],
             ['    total: eligibleAthletes,', '    total: safeRows.length,'],
-            ['? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes, creditedMakes, totalGoal }', '? { available: true, value, displayValue: `${value}%`, detail: `${creditedMakes} of ${totalGoal} weekly makes` }'],
-            [': { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes, creditedMakes: 0, totalGoal: 0 },', ': { available: false, value: null, displayValue: "—", detail: "No weekly goal data" },'],
+            ['? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes, creditedMakes, totalGoal }', '? { value, detail: `${creditedMakes}/${totalGoal} weekly makes` }'],
+            [': { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes, creditedMakes: 0, totalGoal: 0 },', ': { value: null, detail: "No weekly goal data" },'],
           ]);
           patch('src/components/CoachCommandCenter.jsx', [
             ['  const available = Boolean(model?.available);\n', ''],
+            ['{model?.displayValue || "—"}', '{model?.value == null ? "—" : `${model.value}%`}'],
             ['`${available ? model?.value : 0}%`', '`${model?.value || 0}%`'],
             ['<strong>{available ? "Weekly goal progress" : "Goal data unavailable"}</strong>', '<strong>Weekly goal progress</strong>'],
+          ]);
+          patch('tests/coach-command-center-10x.test.mjs', [
+            ['  assert.match(source,/model\\?\\.displayValue \\|\\| "—"/);', '  assert.match(source,/model\\?\\.value == null \\? "—"/);'],
           ]);
           NODE
 
@@ -81,7 +86,7 @@ jobs:
               { email: "ava@example.com", made: 650, date: "2026-08-24" },
               { email: "jordan@example.com", made: 250, date: "2026-08-25" },
             ]);
-            assert.deepEqual({ value: model.value, display: model.displayValue, detail: model.detail }, { value: 75, display: "75%", detail: "750 of 1000 weekly makes" });
+            assert.deepEqual(model, { value: 75, detail: "750/1000 weekly makes" });
           });
 
           test("one over-goal athlete cannot compensate past 100% for another athlete", () => {
@@ -89,16 +94,12 @@ jobs:
               { email: "ava@example.com", made: 900, date: "2026-08-24" },
               { email: "jordan@example.com", made: 100, date: "2026-08-25" },
             ]);
-            assert.equal(model.value, 60);
-            assert.equal(model.detail, "600 of 1000 weekly makes");
+            assert.deepEqual(model, { value: 60, detail: "600/1000 weekly makes" });
           });
 
           test("Program Pulse reports zero when a valid weekly goal exists but the week has no makes", () => {
             const model = pulseFor([], 500);
-            assert.equal(model.available, true);
-            assert.equal(model.value, 0);
-            assert.equal(model.displayValue, "0%");
-            assert.equal(model.detail, "0 of 1000 weekly makes");
+            assert.deepEqual(model, { value: 0, detail: "0/1000 weekly makes" });
           });
 
           test("Program Pulse is unavailable for missing, zero, negative, or rosterless goal denominators", () => {
@@ -108,12 +109,7 @@ jobs:
               pulseFor([], -25),
               pulseFor([], 500, []),
             ];
-            for (const model of models) {
-              assert.equal(model.available, false);
-              assert.equal(model.value, null);
-              assert.equal(model.displayValue, "—");
-              assert.equal(model.detail, "No weekly goal data");
-            }
+            for (const model of models) assert.deepEqual(model, { value: null, detail: "No weekly goal data" });
           });
 
           test("out-of-week activity does not inflate Program Pulse", () => {
@@ -121,8 +117,7 @@ jobs:
               { email: "ava@example.com", made: 100, date: "2026-08-23" },
               { email: "ava@example.com", made: 500, date: "2026-08-16" },
             ], 400);
-            assert.equal(model.value, 13);
-            assert.equal(model.detail, "100 of 800 weekly makes");
+            assert.deepEqual(model, { value: 13, detail: "100/800 weekly makes" });
           });
 
           test("non-roster activity does not inflate Program Pulse", () => {
@@ -130,8 +125,7 @@ jobs:
               { email: "ava@example.com", made: 100, date: "2026-08-23" },
               { email: "not-on-roster@example.com", made: 999, date: "2026-08-25" },
             ], 400);
-            assert.equal(model.value, 13);
-            assert.equal(model.detail, "100 of 800 weekly makes");
+            assert.deepEqual(model, { value: 13, detail: "100/800 weekly makes" });
           });
 
           test("Coach identity never counts as an eligible Program Pulse athlete", () => {
@@ -141,9 +135,7 @@ jobs:
               { email: "coach@example.com", made: 999, date: "2026-08-25" },
             ], players);
             assert.equal(rows.length, 2);
-            const model = buildCoachPlayerDashboardMetrics(rows, 400).programPulse;
-            assert.equal(model.value, 13);
-            assert.equal(model.detail, "100 of 800 weekly makes");
+            assert.deepEqual(buildCoachPlayerDashboardMetrics(rows, 400).programPulse, { value: 13, detail: "100/800 weekly makes" });
           });
           EOF
 
