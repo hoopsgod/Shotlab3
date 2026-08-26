@@ -42,18 +42,23 @@ function reconcileRule(selector, body) {
 
 export function enforceCoachMobileIdentityAuthority(css) {
   let changed = 0
+  const selectors = []
   const output = css.replace(/([^{}]+)\{([^{}]*)\}/g, (match, selector, body) => {
     const next = reconcileRule(selector, body)
-    if (next !== body) changed += 1
+    if (next !== body) {
+      changed += 1
+      selectors.push(selector.replace(/\s+/g, ' ').trim())
+    }
     return `${selector}{${next}}`
   })
-  return { css: output, changed }
+  return { css: output, changed, selectors }
 }
 
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
   let violatingFiles = 0
   let violatingRules = 0
+  const violations = []
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('.css')) continue
     const file = path.join(DIST_ASSETS, entry.name)
@@ -62,10 +67,12 @@ async function main() {
     if (result.css === source) continue
     violatingFiles += 1
     violatingRules += result.changed
+    for (const selector of result.selectors) violations.push(`${entry.name}: ${selector}`)
   }
 
   if (violatingRules) {
-    throw new Error(`Coach mobile identity authority verification failed: ${violatingRules} competing declaration set(s) remain across ${violatingFiles} production CSS asset(s). Fix the source authority instead of rewriting dist.`)
+    const detail = violations.slice(0, 24).map((item) => `\n - ${item}`).join('')
+    throw new Error(`Coach mobile identity authority verification failed: ${violatingRules} competing declaration set(s) remain across ${violatingFiles} production CSS asset(s). Fix the source authority instead of rewriting dist.${detail}`)
   }
   console.log('Coach mobile identity authority verified: production CSS requires no post-build Coach rewrite.')
 }
