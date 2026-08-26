@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { assertDeclaration, mediaBlock, ruleBlock } from "./helpers/css-contract.mjs";
 
 const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8");
 const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy.jsx",import.meta.url),"utf8");
@@ -68,14 +69,17 @@ test("leaderboards keep rankings ahead of archive context",()=>{
 
 test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(missionControlCss,/\.mcShellV3/);
-  assert.match(missionControlCss,/@media\(max-width:980px\)/);
-  assert.match(missionControlCss,/@media\(max-width:700px\)/);
+  mediaBlock(missionControlCss,"(max-width:980px)");
+  mediaBlock(missionControlCss,"(max-width:700px)");
   assert.match(missionControlCss,/mission-control-active/);
   assert.match(missionControlCss,/safe-area-inset-bottom/);
   assert.match(premiumMissionControlCss,/mobile-navigation-dock/);
   assert.match(premiumMissionControlCss,/Hero identity geometry is source-owned/);
-  assert.match(coachTitleCss,/@media \(max-width: 700px\)/);
-  assert.match(coachTitleCss,/\.mcShellV3\s+\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*382px/);
-  assert.match(coachTitleCss,/safe-area-inset-top/);
+
+  const mobileTitle=mediaBlock(coachTitleCss,"(max-width:700px)");
+  const hero=ruleBlock(mobileTitle,'.mcHero[data-team-identity-stage="coach-mission-control"]');
+  const header=ruleBlock(mobileTitle,'.mcHeader[data-testid="mission-control-team-header"]');
+  assertDeclaration(hero,"min-height","382px");
+  assert.ok(header.includes("safe-area-inset-top"),"mobile header must preserve safe-area geometry");
   assert.equal((playerCommandCenterSource.match(/data-testid="player-daily-command-center"/g)||[]).length,1);
 });
