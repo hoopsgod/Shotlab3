@@ -115,9 +115,7 @@ export function buildCoachPlayerDashboardMetrics(rows = [], weeklyGoal) {
     weeklyMakes: safeRows.reduce((total, row) => total + row.weeklyMakes, 0),
     weeklyActions: safeRows.reduce((total, row) => total + row.weeklyActivityCount, 0),
     leader: safeRows[0] || null,
-    programPulse: totalGoal
-      ? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes: safeRows.length, creditedMakes, totalGoal }
-      : { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes: safeRows.length, creditedMakes: 0, totalGoal: 0 },
+    programPulse: { value },
   };
 }
 

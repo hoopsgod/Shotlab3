@@ -18,7 +18,7 @@ const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js"
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
 
 test("coach dashboard answers the 30-second workflow questions with the Phase 3 evidence hierarchy",()=>{
-  ["Mission Control","Today at a glance","Needs Attention","Program Pulse","Recent Activity","Upcoming Event"].forEach(label=>assert.match(source,new RegExp(label)));
+  ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Upcoming Event"].forEach(label=>assert.match(source,new RegExp(label)));
   assert.match(source,/data-testid="coach-primary-objective"/);
   assert.match(source,/data-testid="coach-primary-metrics"/);
   assert.match(source,/data-testid="coach-program-pulse"/);
@@ -37,8 +37,9 @@ test("Mission Control keeps activity, Program Pulse, attention, and schedule as 
   assert.match(source,/totalPlayers/);
   assert.match(source,/nextEventDateFormatted/);
   assert.match(source,/programPulse = null/);
-  assert.match(source,/model\?\.value == null \? "—"/);
-  assert.match(source,/model\?\.value == null \? "No weekly goal data"/);
+  assert.match(source,/value == null \? "—"/);
+  assert.match(source,/value == null \? <div className="mcAllClear"/);
+  assert.match(source,/No weekly goal data/);
   assert.match(source,/<small>Active<\/small>/);
   assert.match(source,/<small>Follow-up<\/small>/);
   assert.match(source,/<small>Next<\/small>/);
