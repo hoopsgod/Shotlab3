@@ -1,4 +1,5 @@
 import { isDemoPlayerSessionShotLog } from "./demoMode.js";
+
 const STORAGE_KEYS = Object.freeze({
   teams: "sl:teams",
   players: "sl:players",
@@ -18,6 +19,7 @@ const STORAGE_KEYS = Object.freeze({
 });
 
 const DEMO_TEAM_ID = "team-demo-titans";
+const DEMO_DATA_VERSION = 4;
 const DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");
 const DEMO_TEAM_BRANDING = Object.freeze({
   teamName: "Demo Titans",
@@ -45,20 +47,23 @@ const relativeTimestamp = (days = 0, hour = 18, minute = 0) => {
   return date.getTime();
 };
 
-// Demo-only roster. These identities never leave local demo storage or touch Supabase.
-// The spread intentionally includes leaders, steady contributors, and a few athletes
-// who need attention so populated Coach/Player views tell a believable story.
+// A complete boys basketball roster for the public demo. Every athlete has enough
+// activity to populate Coach Home, Players, Leaderboards, Events, Progress, and S&C.
+// The spread intentionally includes leaders, steady contributors, and athletes who
+// need attention so the demo communicates the value of a populated ShotLab program.
 const demoRoster = [
-  { slug: "ava-brooks", email: "ava.brooks@demo.shotlab.app", firstName: "Ava", lastName: "Brooks", jerseyNumber: "3", weeklyMakes: 742, streakDays: 8, attendance: [true, true, true, true, true, true], warmup: 14, form: 24, program: [34, 38] },
-  { slug: "jordan-lee", email: "jordan.lee@demo.shotlab.app", firstName: "Jordan", lastName: "Lee", jerseyNumber: "11", weeklyMakes: 681, streakDays: 6, attendance: [true, true, true, true, false, true], warmup: 12, form: 22, program: [31, 35] },
-  { slug: "micah-santos", email: "micah.santos@demo.shotlab.app", firstName: "Micah", lastName: "Santos", jerseyNumber: "24", weeklyMakes: 615, streakDays: 5, attendance: [true, true, false, true, true, true], warmup: 11, form: 21, program: [29, 33] },
-  { slug: "maya-chen", email: "maya.chen@demo.shotlab.app", firstName: "Maya", lastName: "Chen", jerseyNumber: "5", weeklyMakes: 588, streakDays: 4, attendance: [true, true, true, true, true, false], warmup: 10, form: 20, program: [28, 32] },
-  { slug: "riley-carter", email: "riley.carter@demo.shotlab.app", firstName: "Riley", lastName: "Carter", jerseyNumber: "14", weeklyMakes: 544, streakDays: 4, attendance: [true, false, true, true, true, true], warmup: 10, form: 19, program: [27, 31] },
-  { slug: "sofia-martinez", email: "sofia.martinez@demo.shotlab.app", firstName: "Sofia", lastName: "Martinez", jerseyNumber: "21", weeklyMakes: 497, streakDays: 3, attendance: [true, true, true, false, true, true], warmup: 9, form: 18, program: [26, 30] },
-  { slug: "harper-johnson", email: "harper.johnson@demo.shotlab.app", firstName: "Harper", lastName: "Johnson", jerseyNumber: "32", weeklyMakes: 431, streakDays: 2, attendance: [true, true, false, true, false, true], warmup: 8, form: 17, program: [24, 28] },
-  { slug: "nia-williams", email: "nia.williams@demo.shotlab.app", firstName: "Nia", lastName: "Williams", jerseyNumber: "1", weeklyMakes: 362, streakDays: 1, attendance: [true, false, true, false, true, false], warmup: 7, form: 16, program: [23, 26] },
-  { slug: "chloe-bennett", email: "chloe.bennett@demo.shotlab.app", firstName: "Chloe", lastName: "Bennett", jerseyNumber: "20", weeklyMakes: 284, streakDays: 0, attendance: [false, true, false, true, false, false], warmup: 6, form: 15, program: [21, 24] },
-  { slug: "primary", email: "demo@shotlab.app", firstName: "Taylor", lastName: "Morgan", jerseyNumber: "12", weeklyMakes: 526, streakDays: 4, attendance: [true, true, true, true, false, true], warmup: 10, form: 20, program: [27, 31], primary: true },
+  { slug: "marcus-reed", email: "marcus.reed@demo.shotlab.app", firstName: "Marcus", lastName: "Reed", jerseyNumber: "3", position: "PG", grade: "12", weeklyMakes: 782, streakDays: 9, attendance: [true, true, true, true, true, true, true], warmup: 15, form: 24, program: [36, 40] },
+  { slug: "jordan-mitchell", email: "jordan.mitchell@demo.shotlab.app", firstName: "Jordan", lastName: "Mitchell", jerseyNumber: "11", position: "SG", grade: "11", weeklyMakes: 714, streakDays: 7, attendance: [true, true, true, true, true, false, true], warmup: 14, form: 23, program: [34, 38] },
+  { slug: "micah-santos", email: "micah.santos@demo.shotlab.app", firstName: "Micah", lastName: "Santos", jerseyNumber: "24", position: "SF", grade: "12", weeklyMakes: 661, streakDays: 6, attendance: [true, true, false, true, true, true, true], warmup: 13, form: 22, program: [32, 36] },
+  { slug: "isaiah-brooks", email: "isaiah.brooks@demo.shotlab.app", firstName: "Isaiah", lastName: "Brooks", jerseyNumber: "5", position: "PG", grade: "10", weeklyMakes: 623, streakDays: 5, attendance: [true, true, true, true, true, true, false], warmup: 12, form: 21, program: [31, 35] },
+  { slug: "cameron-hayes", email: "cameron.hayes@demo.shotlab.app", firstName: "Cameron", lastName: "Hayes", jerseyNumber: "14", position: "SG", grade: "11", weeklyMakes: 579, streakDays: 5, attendance: [true, false, true, true, true, true, true], warmup: 11, form: 20, program: [29, 34] },
+  { slug: "noah-bennett", email: "noah.bennett@demo.shotlab.app", firstName: "Noah", lastName: "Bennett", jerseyNumber: "21", position: "PF", grade: "12", weeklyMakes: 531, streakDays: 4, attendance: [true, true, true, false, true, true, true], warmup: 11, form: 20, program: [28, 32] },
+  { slug: "devin-walker", email: "devin.walker@demo.shotlab.app", firstName: "Devin", lastName: "Walker", jerseyNumber: "32", position: "C", grade: "11", weeklyMakes: 486, streakDays: 3, attendance: [true, true, false, true, true, false, true], warmup: 10, form: 19, program: [27, 31] },
+  { slug: "miles-thompson", email: "miles.thompson@demo.shotlab.app", firstName: "Miles", lastName: "Thompson", jerseyNumber: "1", position: "G", grade: "10", weeklyMakes: 428, streakDays: 2, attendance: [true, false, true, true, false, true, true], warmup: 9, form: 18, program: [25, 29] },
+  { slug: "jalen-price", email: "jalen.price@demo.shotlab.app", firstName: "Jalen", lastName: "Price", jerseyNumber: "20", position: "F", grade: "10", weeklyMakes: 371, streakDays: 2, attendance: [true, true, false, false, true, true, false], warmup: 8, form: 17, program: [24, 27] },
+  { slug: "caleb-foster", email: "caleb.foster@demo.shotlab.app", firstName: "Caleb", lastName: "Foster", jerseyNumber: "23", position: "F", grade: "9", weeklyMakes: 304, streakDays: 1, attendance: [true, false, true, false, true, false, true], warmup: 7, form: 16, program: [22, 25] },
+  { slug: "andre-lewis", email: "andre.lewis@demo.shotlab.app", firstName: "Andre", lastName: "Lewis", jerseyNumber: "34", position: "C", grade: "9", weeklyMakes: 218, streakDays: 0, attendance: [false, true, false, true, false, false, true], warmup: 6, form: 15, program: [20, 23] },
+  { slug: "primary", email: "demo@shotlab.app", firstName: "Taylor", lastName: "Morgan", jerseyNumber: "12", position: "G", grade: "11", weeklyMakes: 552, streakDays: 4, attendance: [true, true, true, true, false, true, true], warmup: 11, form: 20, program: [29, 33], primary: true },
 ];
 
 const playerName = (player) => `${player.firstName} ${player.lastName}`;
@@ -77,24 +82,29 @@ const basePlayers = demoRoster.map((player, index) => ({
 const basePlayerProfiles = demoRoster.map((player, index) => ({
   id: player.primary ? "profile-demo-primary" : `profile-demo-${player.slug}`,
   userId: player.email,
+  email: player.email,
   teamId: DEMO_TEAM_ID,
   firstName: player.firstName,
   lastName: player.lastName,
   jerseyNumber: player.jerseyNumber,
+  position: player.position,
+  grade: player.grade,
   createdAt: DEMO_TIMESTAMP + index,
 }));
 
 const baseEvents = [
-  { id: "event-demo-foundation-shooting", teamId: DEMO_TEAM_ID, title: "Foundation Shooting Block", date: relativeDate(-28), time: "5:30 PM", location: "Main Gym", desc: "Footwork prep, paint finishes, and game-speed catch-and-shoot volume.", type: "workout" },
-  { id: "event-demo-advantage-reads", teamId: DEMO_TEAM_ID, title: "Advantage Reads Lab", date: relativeDate(-21), time: "9:00 AM", location: "Aux Gym", desc: "Ball-screen reads, two-dribble counters, and weak-side decision reps.", type: "clinic" },
-  { id: "event-demo-recovery-lab", teamId: DEMO_TEAM_ID, title: "Reset + Mobility Session", date: relativeDate(-14), time: "11:15 AM", location: "Training Room", desc: "Hip/ankle mobility and soft-tissue recovery between training blocks.", type: "recovery" },
+  { id: "event-demo-open-gym", teamId: DEMO_TEAM_ID, title: "Open Gym + Competitive Shooting", date: relativeDate(-24), time: "5:30 PM", location: "Main Gym", desc: "Competitive shooting, advantage games, and live five-on-five.", type: "workout" },
+  { id: "event-demo-advantage-reads", teamId: DEMO_TEAM_ID, title: "Advantage Reads Lab", date: relativeDate(-16), time: "6:00 PM", location: "Aux Gym", desc: "Ball-screen reads, two-dribble counters, and weak-side decisions.", type: "clinic" },
+  { id: "event-demo-team-practice-past", teamId: DEMO_TEAM_ID, title: "Team Practice", date: relativeDate(-9), time: "6:15 PM", location: "Main Gym", desc: "Transition standards, half-court execution, and competitive shooting.", type: "practice" },
+  { id: "event-demo-lift-past", teamId: DEMO_TEAM_ID, title: "Team Lift + Recovery", date: relativeDate(-4), time: "6:30 AM", location: "Weight Room", desc: "Lower-body strength, landing quality, and recovery work.", type: "strength" },
   { id: "evt-upcoming-1", teamId: DEMO_TEAM_ID, title: "Team Practice", date: relativeDate(1), time: "6:00 PM", location: "Main Gym", desc: "Team shooting standards, transition decisions, and controlled five-on-five.", type: "practice" },
-  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Rim Pressure Finishes", date: relativeDate(3), time: "6:15 PM", location: "Main Gym Court 2", desc: "Paint touch creation, contact finishes, and late-clock reads.", type: "workout" },
+  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Rim Pressure", date: relativeDate(3), time: "6:15 PM", location: "Main Gym Court 2", desc: "Paint-touch creation, contact finishes, and late-clock reads.", type: "workout" },
   { id: "event-demo-shooting-club", teamId: DEMO_TEAM_ID, title: "Early Work 300", date: relativeDate(5), time: "6:30 AM", location: "Aux Gym", desc: "High-volume catch-and-shoot and relocation threes before school.", type: "shooting" },
-  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film + Recovery Reset", date: relativeDate(8), time: "4:45 PM", location: "Team Room", desc: "Possession review, spacing corrections, and recovery circuit.", type: "recovery" },
+  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film + Recovery Reset", date: relativeDate(7), time: "4:45 PM", location: "Team Room", desc: "Possession review, spacing corrections, and recovery circuit.", type: "recovery" },
+  { id: "event-demo-scrimmage", teamId: DEMO_TEAM_ID, title: "Blue / White Scrimmage", date: relativeDate(10), time: "10:00 AM", location: "Main Gym", desc: "Controlled scrimmage with shot-quality and transition benchmarks.", type: "game" },
 ];
 
-const baseRsvps = baseEvents.slice(0, 6).flatMap((event, eventIndex) => demoRoster.map((player, playerIndex) => ({
+const baseRsvps = baseEvents.slice(0, 7).flatMap((event, eventIndex) => demoRoster.map((player, playerIndex) => ({
   id: `rsvp-demo-${eventIndex + 1}-${player.slug}`,
   email: player.email,
   playerId: player.email,
@@ -103,70 +113,77 @@ const baseRsvps = baseEvents.slice(0, 6).flatMap((event, eventIndex) => demoRost
   teamId: DEMO_TEAM_ID,
   attended: Boolean(player.attendance[eventIndex]),
   status: player.attendance[eventIndex] ? "going" : "not-going",
-  ts: relativeTimestamp(eventIndex - 5, 16, playerIndex * 3),
+  ts: relativeTimestamp(eventIndex - 6, 16, playerIndex * 2),
 })));
 
 const demoPrimaryScores = demoRoster.flatMap((player, index) => [
-  { id: `score-${player.slug}-warmup-current`, email: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: player.warmup, date: relativeDate(index % 3 === 0 ? 0 : -1), ts: relativeTimestamp(index % 3 === 0 ? 0 : -1, 18, index * 2), src: "home" },
-  { id: `score-${player.slug}-form-current`, email: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-form-shooting", score: player.form, date: relativeDate(-2 - (index % 2)), ts: relativeTimestamp(-2 - (index % 2), 18, index * 2 + 1), src: "home" },
-  { id: `score-${player.slug}-warmup-prior`, email: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: Math.max(4, player.warmup - 2), date: relativeDate(-6 - (index % 3)), ts: relativeTimestamp(-6 - (index % 3), 18, index * 2 + 2), src: "home" },
+  { id: `score-${player.slug}-warmup-current`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", drillName: "4-Minute Warm-Up Shooting", score: player.warmup, date: relativeDate(index % 3 === 0 ? 0 : -1), ts: relativeTimestamp(index % 3 === 0 ? 0 : -1, 18, index * 2), src: "home" },
+  { id: `score-${player.slug}-form-current`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-form-shooting", drillName: "Form Shooting Ladder", score: player.form, date: relativeDate(-2 - (index % 2)), ts: relativeTimestamp(-2 - (index % 2), 18, index * 2 + 1), src: "home" },
+  { id: `score-${player.slug}-warmup-prior`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", drillName: "4-Minute Warm-Up Shooting", score: Math.max(4, player.warmup - 2), date: relativeDate(-6 - (index % 3)), ts: relativeTimestamp(-6 - (index % 3), 18, index * 2 + 2), src: "home" },
+  { id: `score-${player.slug}-ft`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-free-throws-20", drillName: "Pressure Free Throws", score: Math.min(20, 11 + Math.round(player.form / 3)), date: relativeDate(-4 - (index % 3)), ts: relativeTimestamp(-4 - (index % 3), 19, index), src: "home" },
 ]);
 
 const demoShotLogs = demoRoster.flatMap((player, index) => {
-  const dayOne = Math.round(player.weeklyMakes * 0.42);
-  const dayTwo = Math.round(player.weeklyMakes * 0.33);
-  const dayThree = player.weeklyMakes - dayOne - dayTwo;
+  const dayOne = Math.round(player.weeklyMakes * 0.36);
+  const dayTwo = Math.round(player.weeklyMakes * 0.27);
+  const dayThree = Math.round(player.weeklyMakes * 0.21);
+  const dayFour = player.weeklyMakes - dayOne - dayTwo - dayThree;
   return [
     { id: `shotlog-${player.slug}-01`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, name: playerName(player), made: dayOne, date: relativeDate(index % 2 === 0 ? 0 : -1), ts: relativeTimestamp(index % 2 === 0 ? 0 : -1, 19, index) },
-    { id: `shotlog-${player.slug}-02`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, name: playerName(player), made: dayTwo, date: relativeDate(-3), ts: relativeTimestamp(-3, 19, index + 10) },
-    { id: `shotlog-${player.slug}-03`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, name: playerName(player), made: dayThree, date: relativeDate(-6), ts: relativeTimestamp(-6, 19, index + 20) },
+    { id: `shotlog-${player.slug}-02`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, name: playerName(player), made: dayTwo, date: relativeDate(-2), ts: relativeTimestamp(-2, 19, index + 12) },
+    { id: `shotlog-${player.slug}-03`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, name: playerName(player), made: dayThree, date: relativeDate(-4), ts: relativeTimestamp(-4, 19, index + 24) },
+    { id: `shotlog-${player.slug}-04`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, name: playerName(player), made: dayFour, date: relativeDate(-6), ts: relativeTimestamp(-6, 19, index + 36) },
   ];
 });
 
 const demoProgressSnapshots = demoRoster.flatMap((player, index) => [
   { id: `progress-${player.slug}-makes`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, label: "7-day makes", value: player.weeklyMakes, date: relativeDate(0), ts: relativeTimestamp(0, 20, index) },
   { id: `progress-${player.slug}-streak`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, label: "Training streak", value: player.streakDays, date: relativeDate(0), ts: relativeTimestamp(0, 20, index + 15) },
+  { id: `progress-${player.slug}-prior`, email: player.email, playerId: player.email, teamId: DEMO_TEAM_ID, label: "Prior 7-day makes", value: Math.max(120, player.weeklyMakes - 72 + index * 3), date: relativeDate(-7), ts: relativeTimestamp(-7, 20, index) },
 ]);
 
 const demoProgramScores = demoRoster.flatMap((player, index) => [
-  { id: `program-${player.slug}-01`, email: player.email, playerId: player.email, name: playerName(player), drillId: "demo-program-230s", drillName: "2:30 Shooting", score: player.program[0], date: relativeDate(-6 - (index % 2)), ts: relativeTimestamp(-6 - (index % 2), 18, 10 + index), src: "program" },
-  { id: `program-${player.slug}-02`, email: player.email, playerId: player.email, name: playerName(player), drillId: "demo-program-230s", drillName: "2:30 Shooting", score: player.program[1], date: relativeDate(-2 - (index % 3)), ts: relativeTimestamp(-2 - (index % 3), 18, 25 + index), src: "program" },
+  { id: `program-${player.slug}-01`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-program-230s", drillName: "2:30 Shooting", score: player.program[0], date: relativeDate(-7 - (index % 2)), ts: relativeTimestamp(-7 - (index % 2), 18, 10 + index), src: "program" },
+  { id: `program-${player.slug}-02`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-program-230s", drillName: "2:30 Shooting", score: player.program[1], date: relativeDate(-2 - (index % 3)), ts: relativeTimestamp(-2 - (index % 3), 18, 25 + index), src: "program" },
+  { id: `program-${player.slug}-03`, email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, drillId: "demo-program-corner-3s", drillName: "Corner-to-Corner 3s", score: Math.max(12, player.program[1] - 8), date: relativeDate(-5 - (index % 2)), ts: relativeTimestamp(-5 - (index % 2), 17, index), src: "program" },
 ]);
 
 const demoChallenges = [
-  { id: "challenge-demo-pending", teamId: DEMO_TEAM_ID, playerId: "ava.brooks@demo.shotlab.app", from: "ava.brooks@demo.shotlab.app", fromName: "Ava Brooks", to: "demo@shotlab.app", toName: "Taylor Morgan", drillId: "demo-home-warm-up-shooting-4-minute", score: 14, max: 25, status: "pending", ts: relativeTimestamp(-1, 20, 5) },
-  { id: "challenge-demo-complete", teamId: DEMO_TEAM_ID, playerId: "demo@shotlab.app", from: "demo@shotlab.app", fromName: "Taylor Morgan", to: "jordan.lee@demo.shotlab.app", toName: "Jordan Lee", drillId: "demo-home-warm-up-shooting-4-minute", score: 13, respScore: 11, max: 25, status: "won", ts: relativeTimestamp(-5, 19, 10), respTs: relativeTimestamp(-4, 19, 10) },
-  { id: "challenge-demo-tight", teamId: DEMO_TEAM_ID, playerId: "maya.chen@demo.shotlab.app", from: "maya.chen@demo.shotlab.app", fromName: "Maya Chen", to: "micah.santos@demo.shotlab.app", toName: "Micah Santos", drillId: "demo-form-shooting", score: 21, respScore: 22, max: 25, status: "lost", ts: relativeTimestamp(-8, 18, 20), respTs: relativeTimestamp(-7, 18, 20) },
+  { id: "challenge-demo-pending", teamId: DEMO_TEAM_ID, playerId: "marcus.reed@demo.shotlab.app", from: "marcus.reed@demo.shotlab.app", fromName: "Marcus Reed", to: "demo@shotlab.app", toName: "Taylor Morgan", drillId: "demo-home-warm-up-shooting-4-minute", score: 15, max: 25, status: "pending", ts: relativeTimestamp(-1, 20, 5) },
+  { id: "challenge-demo-complete", teamId: DEMO_TEAM_ID, playerId: "demo@shotlab.app", from: "demo@shotlab.app", fromName: "Taylor Morgan", to: "jordan.mitchell@demo.shotlab.app", toName: "Jordan Mitchell", drillId: "demo-home-warm-up-shooting-4-minute", score: 14, respScore: 13, max: 25, status: "won", ts: relativeTimestamp(-5, 19, 10), respTs: relativeTimestamp(-4, 19, 10) },
+  { id: "challenge-demo-tight", teamId: DEMO_TEAM_ID, playerId: "isaiah.brooks@demo.shotlab.app", from: "isaiah.brooks@demo.shotlab.app", fromName: "Isaiah Brooks", to: "micah.santos@demo.shotlab.app", toName: "Micah Santos", drillId: "demo-form-shooting", score: 21, respScore: 22, max: 25, status: "lost", ts: relativeTimestamp(-8, 18, 20), respTs: relativeTimestamp(-7, 18, 20) },
+  { id: "challenge-demo-shootout", teamId: DEMO_TEAM_ID, playerId: "cameron.hayes@demo.shotlab.app", from: "cameron.hayes@demo.shotlab.app", fromName: "Cameron Hayes", to: "miles.thompson@demo.shotlab.app", toName: "Miles Thompson", drillId: "demo-free-throws-20", score: 18, respScore: 16, max: 20, status: "won", ts: relativeTimestamp(-3, 18, 40), respTs: relativeTimestamp(-3, 19, 10) },
 ];
 
 const demoScSessions = [
-  { id: "sc-demo-recovery", title: "Recovery + Mobility", sport: "Recovery", date: relativeDate(-3), time: "6:30 AM", location: "Performance Center", desc: "Ankles, hips, trunk control, and recovery work.", sessionType: "Program" },
-  { id: "sc-demo-power", title: "Lower Body Power", sport: "Strength", date: relativeDate(2), time: "6:15 AM", location: "Weight Room", desc: "Trap-bar power, split squat strength, and landing control.", sessionType: "Program" },
-  { id: "sc-demo-speed", title: "Acceleration + Change of Direction", sport: "Performance", date: relativeDate(6), time: "7:00 AM", location: "Turf", desc: "First-step acceleration, deceleration, and reactive change of direction.", sessionType: "Program" },
+  { id: "sc-demo-recovery", teamId: DEMO_TEAM_ID, title: "Recovery + Mobility", sport: "Recovery", date: relativeDate(-6), time: "6:30 AM", location: "Performance Center", desc: "Ankles, hips, trunk control, and recovery work.", sessionType: "Program" },
+  { id: "sc-demo-power-past", teamId: DEMO_TEAM_ID, title: "Lower Body Power", sport: "Strength", date: relativeDate(-2), time: "6:15 AM", location: "Weight Room", desc: "Trap-bar power, split squat strength, and landing control.", sessionType: "Program" },
+  { id: "sc-demo-power", teamId: DEMO_TEAM_ID, title: "Total Body Strength", sport: "Strength", date: relativeDate(2), time: "6:15 AM", location: "Weight Room", desc: "Strength, trunk control, and shoulder durability.", sessionType: "Program" },
+  { id: "sc-demo-speed", teamId: DEMO_TEAM_ID, title: "Acceleration + Change of Direction", sport: "Performance", date: relativeDate(6), time: "7:00 AM", location: "Turf", desc: "First-step acceleration, deceleration, and reactive change of direction.", sessionType: "Program" },
 ];
 
-const demoScRsvps = demoRoster.slice(0, 8).flatMap((player, index) => [
-  { id: `scrsvp-demo-power-${player.slug}`, sessionId: "sc-demo-power", email: player.email, playerId: player.email, name: playerName(player), ts: relativeTimestamp(0, 12, index * 3) },
-  ...(index < 6 ? [{ id: `scrsvp-demo-recovery-${player.slug}`, sessionId: "sc-demo-recovery", email: player.email, playerId: player.email, name: playerName(player), ts: relativeTimestamp(-4, 12, index * 3 + 1) }] : []),
-]);
-
-const demoScLogs = demoRoster.slice(0, 7).map((player, index) => ({
-  id: `sclog-demo-${player.slug}`,
-  sessionId: "sc-demo-recovery",
+const demoScRsvps = demoScSessions.flatMap((session, sessionIndex) => demoRoster.map((player, playerIndex) => ({
+  id: `scrsvp-${sessionIndex}-${player.slug}`,
+  sessionId: session.id,
   email: player.email,
   playerId: player.email,
   name: playerName(player),
-  sport: "Recovery",
-  date: relativeDate(-3),
-  duration: 38 + index,
-  notes: index < 4 ? "Full session completed." : "Mobility and recovery block completed.",
-}));
+  teamId: DEMO_TEAM_ID,
+  status: player.attendance[(sessionIndex + 2) % player.attendance.length] ? "going" : "not-going",
+  attended: sessionIndex < 2 ? Boolean(player.attendance[(sessionIndex + 2) % player.attendance.length]) : undefined,
+  ts: relativeTimestamp(-7 + sessionIndex * 2, 12, playerIndex),
+})));
+
+const demoScLogs = demoRoster.flatMap((player, index) => [
+  { id: `sclog-${player.slug}-recovery`, sessionId: "sc-demo-recovery", email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, sport: "Recovery", date: relativeDate(-6), duration: 38 + (index % 4) * 3, notes: index < 7 ? "Completed full recovery block." : "Modified recovery block." },
+  ...(index < 9 ? [{ id: `sclog-${player.slug}-power`, sessionId: "sc-demo-power-past", email: player.email, playerId: player.email, name: playerName(player), teamId: DEMO_TEAM_ID, sport: "Strength", date: relativeDate(-2), duration: 46 + (index % 3) * 4, notes: "Completed programmed strength session." }] : []),
+]);
 
 const demoCoachPriorities = {
-  todayFocusText: "Create paint pressure, then finish the day with 150 game-speed makes.",
+  todayFocusText: "Win the week: raise team shooting volume and close the RSVP gaps before tomorrow's practice.",
   focusEmphasis: "Consistency",
   priorityDrillText: "2:30 Shooting",
-  challengeText: "Win today's skill block, log your makes, and close with 20 pressure free throws.",
+  challengeText: "Get 10 players over 500 weekly makes and bring every active streak into tomorrow's practice.",
   weeklyMakesTarget: 650,
   weeklyCheckinsTarget: 3,
 };
@@ -191,10 +208,7 @@ function buildDemoTeam(teamId, coachEmail, team) {
         teamName: DEMO_TEAM_BRANDING.teamName,
         logoUrl: DEMO_TEAM_BRANDING.logoUrl,
         logoMarkUrl: DEMO_TEAM_BRANDING.logoMarkUrl,
-        branding: {
-          ...(existing.branding || {}),
-          ...DEMO_TEAM_BRANDING,
-        },
+        branding: { ...(existing.branding || {}), ...DEMO_TEAM_BRANDING },
       } : {}),
       ownerCoachId: coachEmail || existing.ownerCoachId || existing.coachEmail || null,
       updatedAt: Date.now(),
@@ -262,7 +276,8 @@ export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, 
       teamId: resolvedTeam.id,
       coachEmail,
       source: "demo-data",
-      rosterVersion: 2,
+      version: DEMO_DATA_VERSION,
+      rosterSize: demoRoster.length,
     },
   };
 }
@@ -344,19 +359,19 @@ export async function applyDemoData(bundle) {
   const teamId = String(payload.demoMeta?.teamId || payload.teams?.[0]?.id || "");
   const managedIdentities = demoIdentitySet(payload);
   const collections = [
-    ["sl:teams", payload.teams || [], { teamsOnly: true }],
-    ["sl:players", payload.players || []],
-    ["sl:player-profiles", payload.playerProfiles || []],
-    ["sl:events", payload.events || []],
-    ["sl:rsvps", payload.rsvps || []],
-    ["sl:scores", payload.scores || []],
-    ["sl:program-scores", payload.programScores || []],
-    ["sl:shotlogs", payload.shotLogs || []],
-    ["sl:challenges", payload.challenges || []],
-    ["sl:sc-sessions", payload.scSessions || []],
-    ["sl:sc-rsvps", payload.scRsvps || []],
-    ["sl:sc-logs", payload.scLogs || []],
-    ["sl:progress-snapshots", payload.progressSnapshots || []],
+    [STORAGE_KEYS.teams, payload.teams || [], { teamsOnly: true }],
+    [STORAGE_KEYS.players, payload.players || []],
+    [STORAGE_KEYS.playerProfiles, payload.playerProfiles || []],
+    [STORAGE_KEYS.events, payload.events || []],
+    [STORAGE_KEYS.rsvps, payload.rsvps || []],
+    [STORAGE_KEYS.scores, payload.scores || []],
+    [STORAGE_KEYS.programScores, payload.programScores || []],
+    [STORAGE_KEYS.shotLogs, payload.shotLogs || []],
+    [STORAGE_KEYS.challenges, payload.challenges || []],
+    [STORAGE_KEYS.scSessions, payload.scSessions || []],
+    [STORAGE_KEYS.scRsvps, payload.scRsvps || []],
+    [STORAGE_KEYS.scLogs, payload.scLogs || []],
+    [STORAGE_KEYS.progressSnapshots, payload.progressSnapshots || []],
   ];
 
   for (const [key, incoming, options = {}] of collections) {
@@ -364,10 +379,11 @@ export async function applyDemoData(bundle) {
     const merged = mergeDemoCollection(existing, incoming, { teamId, managedIdentities, ...options });
     await writeStored(key, merged);
   }
+
   const existingPriorities = await readStored(STORAGE_KEYS.coachPriorities, {});
   const priorityMap = existingPriorities && typeof existingPriorities === "object" && !Array.isArray(existingPriorities) ? existingPriorities : {};
   await writeStored(STORAGE_KEYS.coachPriorities, { ...priorityMap, [teamId]: payload.coachPriorities || demoCoachPriorities });
-  await writeStored("sl:demo-data-meta", payload.demoMeta || {});
+  await writeStored(STORAGE_KEYS.demoMeta, payload.demoMeta || {});
 }
 
 export async function clearDemoData(bundle) {
@@ -416,3 +432,43 @@ export async function clearDemoData(bundle) {
   }
   await writeStored(STORAGE_KEYS.demoMeta, {});
 }
+
+// Legacy demo sessions created before the richer seed could contain a Demo Team and
+// one Demo Player but no managed-data marker. App.jsx intentionally avoids overwriting
+// tenant data unless that marker is present. Mark only the hard-coded demo identities
+// on the explicit demo-login event, so the existing reconciliation path can safely
+// replace stale one-player sandboxes with the current full roster on the same sign-in.
+function installLegacyDemoMigrationMarker() {
+  if (typeof window === "undefined" || typeof window.addEventListener !== "function") return;
+  window.addEventListener("shotlab:demo-session-started", (event) => {
+    try {
+      const detail = event?.detail || {};
+      const accountEmail = normalizeIdentity(detail.email);
+      if (accountEmail !== "coach.demo@shotlab.app" && accountEmail !== "demo@shotlab.app") return;
+
+      const players = parseStored(window.localStorage?.getItem(STORAGE_KEYS.players), []);
+      const teams = parseStored(window.localStorage?.getItem(STORAGE_KEYS.teams), []);
+      const demoPlayer = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === "demo@shotlab.app" && row?.teamId);
+      const demoCoach = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === "coach.demo@shotlab.app" && row?.teamId);
+      const ownedTeam = (Array.isArray(teams) ? teams : []).find((row) => normalizeIdentity(row?.ownerCoachId || row?.coachEmail) === "coach.demo@shotlab.app");
+      const teamId = String(demoPlayer?.teamId || demoCoach?.teamId || ownedTeam?.id || "").trim();
+      if (!teamId) return;
+
+      const meta = {
+        seededAt: Date.now(),
+        teamId,
+        coachEmail: "coach.demo@shotlab.app",
+        source: "demo-data",
+        version: DEMO_DATA_VERSION,
+        migration: "legacy-demo-session",
+      };
+      const json = JSON.stringify(meta);
+      window.localStorage?.setItem(STORAGE_KEYS.demoMeta, json);
+      if (window.storage && typeof window.storage.set === "function") {
+        Promise.resolve(window.storage.set(STORAGE_KEYS.demoMeta, json, true)).catch(() => {});
+      }
+    } catch {}
+  });
+}
+
+installLegacyDemoMigrationMarker();
