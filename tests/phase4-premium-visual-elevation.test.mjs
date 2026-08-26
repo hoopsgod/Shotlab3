@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { assertDeclaration, declaration, mediaBlock, ruleBlock } from './helpers/css-contract.mjs';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
@@ -31,15 +32,33 @@ test('Phase 4 title stage is compact, logo-safe, and motion-safe without specifi
   assert.match(source, /className="mcCourtLines"/);
   assert.match(source, /className="mcCourtRoute"/);
   assert.doesNotMatch(source, /<defs>|mcTacticalWash/);
-  assert.match(css, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:382px/);
-  assert.match(css, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
-  assert.match(css, /object-fit:contain/);
-  assert.match(css, /\.mcRealityStrip button\{[^}]*appearance:none/);
-  assert.match(css, /\.mcRealityStrip button\{[^}]*background:transparent/);
-  assert.match(css, /\.mcPrimary\{[^}]*background:color-mix/);
-  assert.match(css, /\.mcPrimary\{[^}]*border:1px solid/);
-  assert.match(css, /min-height:50px/);
-  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/);
+
+  const mobile = mediaBlock(css, '(max-width:700px)');
+  const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]');
+  const identity = ruleBlock(mobile, '.mcHeroIdentity');
+  const crest = ruleBlock(mobile, '.mcHeroTeamMark');
+  const crestImage = ruleBlock(mobile, '.mcHeroTeamMark img');
+  const realityAction = ruleBlock(mobile, '.mcRealityStrip button');
+  const primary = ruleBlock(mobile, '.mcPrimary');
+
+  assertDeclaration(hero, 'min-height', '382px');
+  assertDeclaration(identity, '--coach-hero-crest', /^clamp\(96px,\s*26vw,\s*108px\)$/);
+  for (const property of ['width','height','min-width','min-height','max-width','max-height']) {
+    assertDeclaration(crest, property, 'var(--coach-hero-crest)');
+  }
+  assertDeclaration(crestImage, 'object-fit', 'contain');
+  assertDeclaration(crestImage, 'width', '100%');
+  assertDeclaration(crestImage, 'height', '100%');
+  assertDeclaration(realityAction, 'appearance', 'none');
+  assertDeclaration(realityAction, 'background', 'transparent');
+  assert.match(declaration(primary, 'background') ?? '', /color-mix/);
+  assert.match(declaration(primary, 'border') ?? '', /1px\s+solid/);
+  assertDeclaration(primary, 'min-height', '50px');
+
+  const reducedMotion = mediaBlock(css, '(prefers-reduced-motion:reduce)');
+  const reducedAction = ruleBlock(reducedMotion, '.mcRealityStrip button');
+  assertDeclaration(reducedAction, 'transition', 'none');
+  assert.ok(reducedMotion.includes('.mcPrimary'), 'reduced-motion contract must include the primary action');
   assert.doesNotMatch(css, /!important/);
 });
 
@@ -70,10 +89,16 @@ test('Phase 4 supporting intelligence is flat, progressive, and owned by the exi
   assert.match(css, /\.mcPulseRail/);
   assert.match(css, /repeating-linear-gradient/);
   assert.match(css, /\.mcAttentionRow\.is-priority/);
-  assert.match(css, /border-radius:0/);
-  assert.match(css, /box-shadow:none/);
-  assert.match(css, /\.mcAttentionRow\{[^}]*min-height:74px/);
-  assert.match(css, /@media \(prefers-reduced-motion:reduce\)/);
+
+  const section = ruleBlock(css, '.mcSection');
+  const attention = ruleBlock(css, '.mcAttentionRow');
+  assertDeclaration(section, 'border-radius', '0');
+  assertDeclaration(section, 'box-shadow', 'none');
+  const rowHeight = Number.parseFloat(declaration(attention, 'min-height') ?? '0');
+  assert.ok(rowHeight >= 72, `attention row must retain deliberate scan/tap geometry; got ${rowHeight}px`);
+
+  const reducedMotion = mediaBlock(css, '(prefers-reduced-motion:reduce)');
+  assert.ok(reducedMotion.includes('.mcAttentionRow'), 'supporting intelligence must honor reduced motion');
   assert.doesNotMatch(css, /!important/);
   assert.doesNotMatch(css, /\.mcHeroTeamMark|\.mcRealityStrip|\.mcPrimary|mobile-navigation-dock/);
 });
