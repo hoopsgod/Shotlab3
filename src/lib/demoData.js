@@ -2,7 +2,7 @@ import { isDemoPlayerSessionShotLog } from "./demoMode.js";
 
 const STORAGE_KEYS=Object.freeze({teams:"sl:teams",players:"sl:players",playerProfiles:"sl:player-profiles",events:"sl:events",rsvps:"sl:rsvps",scores:"sl:scores",programScores:"sl:program-scores",shotLogs:"sl:shotlogs",challenges:"sl:challenges",scSessions:"sl:sc-sessions",scRsvps:"sl:sc-rsvps",scLogs:"sl:sc-logs",coachPriorities:"sl:coach-priorities",progressSnapshots:"sl:progress-snapshots",demoMeta:"sl:demo-data-meta"});
 const DEMO_TEAM_ID="team-demo-titans";
-const DEMO_DATA_VERSION=6;
+const DEMO_DATA_VERSION=7;
 const DEMO_TIMESTAMP=Date.parse("2026-03-20T12:00:00.000Z");
 const DEMO_TEAM_BRANDING=Object.freeze({teamName:"Demo Titans",logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"});
 
@@ -35,7 +35,6 @@ const demoChallenges=[{id:"challenge-demo-pending",playerId:"marcus.reed@demo.sh
 
 const demoScSessions=rows("sc-demo-recovery|Recovery + Mobility|Recovery|-6|6:30 AM|Performance Center;sc-demo-power|Total Body Strength|Strength|2|6:15 AM|Weight Room").map(([id,title,sport,days,time,location])=>({id,title,sport,date:relativeDate(+days),time,location,sessionType:"Program"}));
 const demoScRsvps=demoScSessions.flatMap((session,sessionIndex)=>demoRoster.map((player,playerIndex)=>({id:`scrsvp-${sessionIndex}-${player.slug}`,sessionId:session.id,email:player.email,playerId:player.email,name:playerName(player),status:attended(player,(sessionIndex+2)%7)?"going":"not-going",attended:sessionIndex===0?attended(player,2):undefined,ts:relativeTimestamp(-7+sessionIndex*4,12,playerIndex)})));
-const demoScLogs=demoRoster.map((player,index)=>({id:`sclog-${player.slug}`,sessionId:"sc-demo-recovery",email:player.email,playerId:player.email,name:playerName(player),sport:"Recovery",date:relativeDate(-6),duration:38+(index%4)*3}));
 const demoCoachPriorities={todayFocusText:"Raise team shooting volume and close tomorrow's RSVP gaps.",focusEmphasis:"Consistency",priorityDrillText:"2:30 Shooting",challengeText:"Get 10 players over 500 weekly makes.",weeklyMakesTarget:650,weeklyCheckinsTarget:3};
 
 function clone(value){return JSON.parse(JSON.stringify(value));}
@@ -48,7 +47,7 @@ const withTeam=(rows,teamId)=>rows.map((row)=>({...row,teamId}));
 
 export function buildDemoDataBundle({teamId=DEMO_TEAM_ID,coachEmail=null,team}={}){
   const resolvedTeam=buildDemoTeam(teamId,coachEmail,team),playerRows=withTeam(basePlayers,resolvedTeam.id),coachRow=coachEmail?{id:"coach-demo-primary",email:coachEmail,name:"Demo Coach",role:"coach",isCoach:true,teamId:resolvedTeam.id,hideFromLeaderboards:true,createdAt:DEMO_TIMESTAMP-1}:null;
-  return {teams:[resolvedTeam],players:coachRow?[coachRow,...playerRows]:playerRows,playerProfiles:withTeam(basePlayerProfiles,resolvedTeam.id),events:withTeam(baseEvents,resolvedTeam.id),rsvps:withTeam(baseRsvps,resolvedTeam.id),scores:withTeam(demoPrimaryScores,resolvedTeam.id),programScores:withTeam(demoProgramScores,resolvedTeam.id),shotLogs:withTeam(demoShotLogs,resolvedTeam.id),challenges:withTeam(demoChallenges,resolvedTeam.id),scSessions:withTeam(demoScSessions,resolvedTeam.id).map((session)=>({...session,ownerCoachId:coachEmail||"coach.demo@shotlab.app"})),scRsvps:withTeam(demoScRsvps,resolvedTeam.id),scLogs:withTeam(demoScLogs,resolvedTeam.id),coachPriorities:{...demoCoachPriorities,updatedAt:new Date().toISOString()},progressSnapshots:withTeam(demoProgressSnapshots,resolvedTeam.id),demoMeta:{seededAt:Date.now(),teamId:resolvedTeam.id,coachEmail,source:"demo-data",version:DEMO_DATA_VERSION,rosterSize:demoRoster.length}};
+  return {teams:[resolvedTeam],players:coachRow?[coachRow,...playerRows]:playerRows,playerProfiles:withTeam(basePlayerProfiles,resolvedTeam.id),events:withTeam(baseEvents,resolvedTeam.id),rsvps:withTeam(baseRsvps,resolvedTeam.id),scores:withTeam(demoPrimaryScores,resolvedTeam.id),programScores:withTeam(demoProgramScores,resolvedTeam.id),shotLogs:withTeam(demoShotLogs,resolvedTeam.id),challenges:withTeam(demoChallenges,resolvedTeam.id),scSessions:withTeam(demoScSessions,resolvedTeam.id).map((session)=>({...session,ownerCoachId:coachEmail||"coach.demo@shotlab.app"})),scRsvps:withTeam(demoScRsvps,resolvedTeam.id),scLogs:[],coachPriorities:{...demoCoachPriorities,updatedAt:new Date().toISOString()},progressSnapshots:withTeam(demoProgressSnapshots,resolvedTeam.id),demoMeta:{seededAt:Date.now(),teamId:resolvedTeam.id,coachEmail,source:"demo-data",version:DEMO_DATA_VERSION,rosterSize:demoRoster.length}};
 }
 
 function parseStored(value,fallback){if(value==null)return fallback;if(typeof value!=="string")return value;try{return JSON.parse(value);}catch{return fallback;}}
