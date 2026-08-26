@@ -47,10 +47,9 @@ test("demo bundle populates the real product surfaces with one coherent sandbox 
   assert.ok(bundle.challenges.length >= 1, "commitment/duel activity expected");
   assert.ok(bundle.scSessions.length >= 2, "strength and conditioning schedule expected");
   assert.ok(bundle.scRsvps.length >= 12, "strength attendance expected across the roster");
-  assert.deepEqual(bundle.scLogs, [], "redundant demo S&C completion logs stay omitted from startup payload");
-  assert.ok(bundle.progressSnapshots.length >= 12, "progress snapshots expected across the roster");
+  assert.equal(bundle.scLogs, undefined, "redundant demo S&C completion logs stay out of startup payload");
   assert.ok(bundle.coachPriorities?.todayFocusText, "coach priorities expected");
-  for (const collection of [bundle.players, bundle.events, bundle.rsvps, bundle.scores, bundle.programScores, bundle.shotLogs, bundle.challenges, bundle.scSessions, bundle.scRsvps, bundle.progressSnapshots]) {
+  for (const collection of [bundle.players, bundle.events, bundle.rsvps, bundle.scores, bundle.programScores, bundle.shotLogs, bundle.challenges, bundle.scSessions, bundle.scRsvps]) {
     assert.ok(collection.every((row) => row.teamId === teamId), "every seeded row must remain explicitly tenant-scoped");
   }
 });
@@ -81,7 +80,6 @@ test("demo reset replaces only demo-owned rows and preserves another tenant acro
     "sl:sc-rsvps": [realScRsvp],
     "sl:sc-logs": [realScLog],
     "sl:coach-priorities": { [realTeam.id]: realPriorities },
-    "sl:progress-snapshots": [],
   };
 
   await withBrowserStorage(seed, async (storage) => {
