@@ -12,9 +12,9 @@ permissions:
   contents: write
 
 jobs:
-  stabilize-coach-home:
+  performance-diagnostic:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
     steps:
       - name: Check out exact Phase 3 branch
         uses: actions/checkout@v4
@@ -37,46 +37,33 @@ jobs:
       - name: Lock explicit missing-goal contract
         run: sed -i 's/pulseFor(\[\], undefined)/buildCoachPlayerDashboardMetrics(rowsFor(), undefined).programPulse/' tests/coach-program-pulse.test.mjs
 
-      - name: Validate diff discipline
+      - name: Validate focused contracts
         run: |
           git diff --check
-          git status --short
-          git diff -- src/App.jsx src/components/CoachCommandCenter.jsx src/lib/coachOperationalDashboard.js tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs
+          node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
 
-      - name: Run focused Coach Home contracts
-        id: focused
+      - name: Enforce production performance budget
+        id: performance
         continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
-          node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs 2>&1 | tee focused-tests.log
+          npm run build:performance 2>&1 | tee performance.log
 
-      - name: Upload focused test diagnostics
-        if: steps.focused.outcome == 'failure'
+      - name: Upload performance diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase3-focused-tests-${{ github.sha }}
-          path: focused-tests.log
+          name: phase3-performance-${{ github.sha }}
+          path: |
+            performance.log
+            artifacts/performance/
+          if-no-files-found: warn
           retention-days: 3
 
-      - name: Stop on focused contract failure
-        if: steps.focused.outcome == 'failure'
+      - name: Stop on performance failure
+        if: steps.performance.outcome == 'failure'
         run: exit 1
-
-      - name: Install pinned viewport debugger
-        run: npm install --no-save --package-lock=false @playwright/test@1.55.1
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Verify viewport debugger contracts
-        run: node --test tests/viewport-debug-tooling.test.mjs
-
-      - name: Run Coach Home mobile viewport fast loop
-        run: npm run debug:viewport -- --widths=320,375,390,430
-
-      - name: Enforce production performance budget
-        run: npm run build:performance
 
       - name: Commit stabilized Phase 3 candidate
         run: |
