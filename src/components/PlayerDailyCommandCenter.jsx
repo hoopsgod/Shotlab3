@@ -3,6 +3,7 @@ import { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer
 import { derivePlayerPerformanceNarrative } from "../lib/playerPerformanceNarrative.js";
 import { ExperienceSignal, ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
+import ShotLabSignatureField from "./ShotLabSignatureField.jsx";
 import styles from "./PlayerDailyCommandCenter.module.css";
 
 const rankLabel = (rank = 0) => (Number(rank) > 0 ? `#${Number(rank)}` : "—");
@@ -64,6 +65,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
 
   return (
     <section className={styles.root} data-testid="player-daily-command-center" data-phase="dashboard-showstopper-phase-2" data-page-hierarchy="performance-command-center" data-mobile-product-reset="phase-1" aria-label="Daily training command center">
+      <ShotLabSignatureField variant="court" testId="player-home-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />
       <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary" data-layout-role="primary-decision">
         <div className={styles.heroKicker}>
           <span>Today</span>

@@ -122,7 +122,7 @@ const playerInterfaceLoaded = (page) => routeChunkLoaded(
 
 const playerProfileLoaded = (page) => routeChunkLoaded(
   page,
-  ['PlayerProfileWorkspaces', 'ShotLabCharts', 'PlayerCareerHistory', 'PlayerCoachAssignmentCard'],
+  ['PlayerProfileWorkspaces', 'ShotLabCharts', 'PlayerCareerHistory'],
   ['DeferredShotLabCharts', 'DeferredPlayerCareerHistory'],
 )
 

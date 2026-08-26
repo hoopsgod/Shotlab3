@@ -17,7 +17,6 @@ import { isDemoPersistenceSession } from "../lib/demoMode.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
-const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
 const normalizedName = (value = "") => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 const isDefaultTitansLogo = (value = "") => [
@@ -81,9 +80,7 @@ function AttentionRow({ item, onFallback }) {
 }
 
 function ProgramPulsePanel({ model, onOpen }) {
-  const available = Boolean(model?.available);
-  const value = available ? clamp(model?.value, 0, 100) : 0;
-  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly standard</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{model?.displayValue || "—"}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: `${value}%` }} /></div><div className="mcHealthFacts"><div><strong>{available ? model?.eligibleAthletes ?? 0 : "—"}</strong><small>Athletes</small></div><div><strong>{available ? Math.round(model?.creditedMakes || 0).toLocaleString() : "—"}</strong><small>Credited</small></div><div><strong>{available ? Math.round(model?.totalGoal || 0).toLocaleString() : "—"}</strong><small>Goal</small></div></div><div className="mcAllClear"><div><strong>{available ? "Weekly goal progress" : "Goal data unavailable"}</strong><small>{model?.detail || "No weekly goal data"}</small></div></div>{onOpen ? <button type="button" className="mcTextLink" onClick={onOpen}>Review weekly progress <Icon name="arrow" size={15} /></button> : null}</article>;
+  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly standard</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{model?.value == null ? "—" : `${model.value}%`}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: `${model?.value || 0}%` }} /></div><div className="mcAllClear"><div><strong>Weekly goal progress</strong><small>{model?.value == null ? "No weekly goal data" : "Weekly makes target"}</small></div></div>{onOpen ? <button type="button" className="mcTextLink" onClick={onOpen}>Review weekly progress <Icon name="arrow" size={15} /></button> : null}</article>;
 }
 function LiveActivityPanel({ items }) {
   return <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity"><div className="mcSectionHead"><span><small>Team evidence</small><h2 id="mc-activity-heading">Recent Activity</h2></span></div><div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div></article>;
@@ -191,7 +188,7 @@ export default function CoachCommandCenter({
   if (variant === "compact") return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
 
   return <>
-    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-3" style={{ "--mc": accent, "--mc-secondary": secondary }}>
+    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
         <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>

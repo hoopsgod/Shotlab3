@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-08-26T00:45:46.299Z",
+  "modules": [
+    {
+      "file": "src/components/PlayerOperationalWorkspace.module.css",
+      "importers": [
+        "src/components/PlayerOperationalWorkspace.jsx"
+      ],
+      "usedClasses": [
+        "emptyState",
+        "filterActive",
+        "filterButton",
+        "filterRail",
+        "metric",
+        "metricActive",
+        "metricDetail",
+        "metricInteractive",
+        "metricLabel",
+        "metricValue",
+        "metrics",
+        "root",
+        "teamTitleStage"
+      ],
+      "removedArms": 26,
+      "removedRules": 22,
+      "rawBytesSavedBeforeMinification": 3128
+    }
+  ],
+  "totals": {
+    "transformedModules": 1,
+    "removedArms": 26,
+    "removedRules": 22,
+    "rawBytesSavedBeforeMinification": 3128
+  }
+}

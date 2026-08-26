@@ -7,6 +7,7 @@ import {
   DashboardSection,
 } from "./CoachDashboardPrimitives.jsx";
 import styles from "./CoachDashboardPhase2.module.css";
+import "./Phase2PremiumEmptyStateLanguage.css";
 
 const formatDelta = (value) => {
   const number = Number(value) || 0;
@@ -14,8 +15,13 @@ const formatDelta = (value) => {
   return String(number);
 };
 
-function EmptyState({ children }) {
-  return <div className={styles.emptyState}>{children}</div>;
+function EmptyState({ children, label = "Current state", tone = "neutral", kind = "status" }) {
+  return (
+    <div className={styles.emptyState} data-phase2-empty-state data-phase2-empty-tone={tone} data-phase2-empty-kind={kind}>
+      <span className="phase2-empty-state-label">{label}</span>
+      <span className="phase2-empty-state-message">{children}</span>
+    </div>
+  );
 }
 
 function MetricGrid({ items = [] }) {
@@ -38,7 +44,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
       onClose={onClose}
       eyebrow="Player intelligence"
       title={model?.name || "Player"}
-      meta={model ? `${model.statusLabel} · ${model.lastActivityDate || "No activity recorded"}` : ""}
+      meta={model ? (model.lastActivityDate ? `${model.statusLabel} · ${model.lastActivityDate}` : model.statusLabel === "No activity yet" ? "New roster profile · Awaiting first logged session" : `${model.statusLabel} · Awaiting first logged session`) : ""}
       testId="coach-player-intelligence-drawer"
     >
       {model ? (
@@ -46,7 +52,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
           <MetricGrid items={[
             { label: "Weekly makes", value: model.weeklyMakes },
             { label: "Weekly actions", value: model.weeklyActions },
-            { label: "Event readiness", value: `${model.attendanceRate}%` },
+            { label: "Upcoming RSVPs", value: `${model.rsvpRate}%` },
             { label: "S&C completion", value: `${model.scCompletionRate}%` },
           ]} />
           <div className={styles.drawerActions}>
@@ -54,7 +60,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
             <button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} onClick={onShowActivity}>Show Activity</button>
           </div>
           <DashboardSection eyebrow="Current week" title="Development pulse" summary="A decision-ready summary of volume, attendance, and training compliance." compact>
-            <DashboardProgress value={model.attendanceRate} max={100} label="Event readiness" detail={`${model.attendanceConfirmed} of ${model.attendancePossible}`} />
+            <DashboardProgress value={model.rsvpRate} max={100} label="Upcoming RSVP coverage" detail={`${model.rsvpResponded} of ${model.rsvpPossible}`} />
             <div style={{ height: 10 }} />
             <DashboardProgress value={model.scCompletionRate} max={100} label="S&C completion" detail={`${model.scCompleted} of ${model.scCommitted}`} />
             <div className={styles.compactMetricGrid}>
@@ -73,7 +79,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
                   </div>
                 ))}
               </div>
-            ) : <EmptyState>No player activity has been recorded yet.</EmptyState>}
+            ) : <EmptyState label="Activity status" kind="activity">No player activity recorded yet.</EmptyState>}
           </DashboardSection>
         </>
       ) : null}
@@ -94,8 +100,8 @@ export function CoachEventIntelligenceDrawer({ model, onClose, onManageAttendanc
       {model ? (
         <>
           <MetricGrid items={[
-            { label: "Confirmed", value: model.confirmed.length },
-            { label: "Missing", value: model.missing.length },
+            { label: "RSVP'd", value: model.respondedPlayers.length },
+            { label: "Awaiting RSVP", value: model.awaitingResponse.length },
             { label: "Response rate", value: `${model.responseRate}%` },
             { label: "Walk-ins", value: model.walkIns.length },
           ]} />
@@ -103,14 +109,14 @@ export function CoachEventIntelligenceDrawer({ model, onClose, onManageAttendanc
             <button type="button" className={styles.drawerAction} onClick={onManageAttendance}>Manage Attendance</button>
             <button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} onClick={onOpenSchedule}>Open Schedule</button>
           </div>
-          <DashboardSection eyebrow="Readiness" title="Attendance response" summary={model.description} compact>
-            <DashboardProgress value={model.responseRate} max={100} label="Roster response" detail={`${model.confirmed.length} confirmed`} />
+          <DashboardSection eyebrow="Practice readiness" title="Next-session RSVP coverage" summary={model.description} compact>
+            <DashboardProgress value={model.responseRate} max={100} label="Roster response" detail={`${model.respondedPlayers.length} RSVP'd`} />
           </DashboardSection>
-          <DashboardSection eyebrow="Confirmed" title="Available players" summary="Players currently attached to this event." compact>
-            {model.confirmed.length ? <div className={styles.personList}>{model.confirmed.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>Ready</em></div>)}</div> : <EmptyState>No confirmed players yet.</EmptyState>}
+          <DashboardSection eyebrow="RSVP'd" title="Responses received" summary="Rostered players with an RSVP recorded for this event." compact>
+            {model.respondedPlayers.length ? <div className={styles.personList}>{model.respondedPlayers.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>RSVP'd</em></div>)}</div> : <EmptyState label="Response status" kind="attendance">No rostered players have RSVP'd yet.</EmptyState>}
           </DashboardSection>
-          <DashboardSection eyebrow="Follow-up" title="Missing responses" summary="Players who still need an RSVP touchpoint." compact>
-            {model.missing.length ? <div className={styles.personList}>{model.missing.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>Follow up</em></div>)}</div> : <EmptyState>Every rostered player has responded.</EmptyState>}
+          <DashboardSection eyebrow="Follow-up" title="Awaiting RSVP" summary="Players who still need an RSVP touchpoint." compact>
+            {model.awaitingResponse.length ? <div className={styles.personList}>{model.awaitingResponse.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>Follow up</em></div>)}</div> : <EmptyState label="Follow-up cleared" tone="positive" kind="complete">Every rostered player has responded.</EmptyState>}
           </DashboardSection>
         </>
       ) : null}
@@ -169,19 +175,56 @@ export function CoachStrengthOperationalPanel({ rows = [], scope, query, onScope
         onFilterChange={onScopeChange}
         testId="coach-strength-operational-filters"
       />
-      <DashboardInsightGrid>
-        <DashboardInsightCard eyebrow="Team compliance" title={`${rate}% completion`} body={`${completions} completed logs from ${commitments} committed session responses.`} tone={rate >= 75 ? "positive" : "attention"}><DashboardProgress value={rate} max={100} label="S&C compliance" /></DashboardInsightCard>
-        <DashboardInsightCard eyebrow="Overdue work" title={overdue.length ? `${overdue.length} sessions need follow-up` : "No overdue sessions"} body={overdue.length ? "Open the overdue view to identify committed players without a completion log." : "Current commitments and completion records are aligned."} tone={overdue.length ? "attention" : "positive"} action={overdue.length ? { label: "Show Overdue", onClick: () => onScopeChange("overdue") } : undefined} />
-        <DashboardInsightCard eyebrow="Next session" title={rows.find((row) => row.statusKey === "upcoming")?.title || "No upcoming session"} body={rows.find((row) => row.statusKey === "upcoming") ? `${rows.find((row) => row.statusKey === "upcoming").date} · ${rows.find((row) => row.statusKey === "upcoming").time}` : "Add the next S&C session to restore the compliance cadence."} tone="info" action={rows.find((row) => row.statusKey === "upcoming") && onOpenSession ? { label: "Open Session", onClick: () => onOpenSession(rows.find((row) => row.statusKey === "upcoming").session) } : undefined} />
-      </DashboardInsightGrid>
+      <details
+        className="coachStrengthSupportingIntelligence"
+        data-testid="coach-strength-supporting-intelligence"
+        open={typeof window !== "undefined" && window.innerWidth > 760}
+      >
+        <summary className="coachStrengthSupportingSummary">
+          <span className="coachStrengthSupportingSummaryCopy">
+            <span>Compliance insights</span>
+            <strong>Readiness & follow-up</strong>
+            <small>{rate}% completion · {overdue.length} overdue</small>
+          </span>
+          <span className="coachStrengthSupportingChevron" aria-hidden="true">›</span>
+        </summary>
+        <div className="coachStrengthSupportingBody" data-testid="coach-strength-insight-grid">
+          <DashboardInsightGrid>
+            <DashboardInsightCard eyebrow="Team compliance" title={`${rate}% completion`} body={`${completions} completed logs from ${commitments} committed session responses.`} tone={rate >= 75 ? "positive" : "attention"}><DashboardProgress value={rate} max={100} label="S&C compliance" /></DashboardInsightCard>
+            <DashboardInsightCard eyebrow="Overdue work" title={overdue.length ? `${overdue.length} sessions need follow-up` : "No overdue sessions"} body={overdue.length ? "Open the overdue view to identify committed players without a completion log." : "Current commitments and completion records are aligned."} tone={overdue.length ? "attention" : "positive"} action={overdue.length ? { label: "Show Overdue", onClick: () => onScopeChange("overdue") } : undefined} />
+            <DashboardInsightCard eyebrow="Next session" title={rows.find((row) => row.statusKey === "upcoming")?.title || "No upcoming session"} body={rows.find((row) => row.statusKey === "upcoming") ? `${rows.find((row) => row.statusKey === "upcoming").date} · ${rows.find((row) => row.statusKey === "upcoming").time}` : "Add the next S&C session to restore the compliance cadence."} tone="info" action={rows.find((row) => row.statusKey === "upcoming") && onOpenSession ? { label: "Open Session", onClick: () => onOpenSession(rows.find((row) => row.statusKey === "upcoming").session) } : undefined} />
+          </DashboardInsightGrid>
+        </div>
+      </details>
     </div>
   );
 }
 
 export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onScopeChange, onQueryChange, onOpenPlayer }) {
   const risers = rows.filter((row) => row.improvement > 0).length;
+  const weeklyLeader = [...rows].sort((a, b) => b.weekly - a.weekly || a.rank - b.rank)[0];
+  const activeThisWeek = rows.filter((row) => row.weekly > 0).length;
   return (
     <div className={styles.phasePanel} data-testid="coach-leaderboard-operational-panel">
+      <section className="coachLeaderboardPulse" data-testid="coach-leaderboard-pulse" aria-label="Leaderboard performance pulse">
+        <div className="coachLeaderboardPulseCopy">
+          <span>This week</span>
+          <strong>{weeklyLeader?.weekly > 0 ? weeklyLeader.name : "The weekly race is open"}</strong>
+          <small>{weeklyLeader?.weekly > 0 ? weeklyLeader.weekly + " verified makes this week · " + activeThisWeek + " active" : "New verified activity will establish the weekly pace."}</small>
+        </div>
+        <div className="coachLeaderboardPulseMetrics">
+          <div>
+            <span>Risers</span>
+            <strong>{risers}</strong>
+            <small>{risers === 1 ? "player moving up" : "players moving up"}</small>
+          </div>
+          <div>
+            <span>Ranked</span>
+            <strong>{rows.length}</strong>
+            <small>{activeThisWeek} active this week</small>
+          </div>
+        </div>
+      </section>
       <DashboardFilterRail
         searchValue={query}
         onSearchChange={onQueryChange}
@@ -198,14 +241,29 @@ export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onSc
       />
       {rows.length ? (
         <div className={styles.operationalList} data-testid="coach-leaderboard-operational-results">
-          {rows.map((row) => (
-            <button type="button" className={styles.operationalRow} key={row.key} onClick={() => onOpenPlayer?.(row.row)}>
-              <div><strong>#{row.rank} {row.name}</strong><span>{row.total} total · {row.weekly} this week · last active {row.lastActivity || "unknown"}</span></div>
-              <em className={row.improvement > 0 ? styles.deltaPositive : row.improvement < 0 ? styles.deltaNegative : styles.deltaNeutral}>{formatDelta(row.improvement)}</em>
+          {rows.slice(0,3).map((row) => (
+            <button
+              type="button"
+              className={styles.operationalRow + " coachLeaderboardRow"}
+              data-rank={row.rank}
+              data-trend={row.improvement > 0 ? "up" : row.improvement < 0 ? "down" : "flat"}
+              key={row.key}
+              onClick={() => onOpenPlayer?.(row.row)}
+            >
+              <span className="coachLeaderboardRank" aria-hidden="true">#{row.rank}</span>
+              <div className="coachLeaderboardRowCopy">
+                <strong>{row.name}</strong>
+                <span>{row.total} total · last active {row.lastActivity || "unknown"}</span>
+              </div>
+              <span className="coachLeaderboardWeek">
+                <small>This week</small>
+                <strong>{row.weekly}</strong>
+                <em className={row.improvement > 0 ? styles.deltaPositive : row.improvement < 0 ? styles.deltaNegative : styles.deltaNeutral}>{formatDelta(row.improvement)}</em>
+              </span>
             </button>
           ))}
         </div>
-      ) : <EmptyState>No leaderboard players match the selected view.</EmptyState>}
+      ) : <EmptyState label="Filtered view" kind="filter">No leaderboard players match the selected view.</EmptyState>}
     </div>
   );
 }
@@ -229,14 +287,31 @@ export function CoachActivityIntelligencePanel({ rows = [], scope, query, onScop
         onFilterChange={onScopeChange}
         testId="coach-activity-intelligence-filters"
       />
-      <div className={styles.activityList} data-testid="coach-activity-intelligence-results">
-        {rows.slice(0, 12).map((row) => (
-          <button type="button" className={styles.activityRow} key={row.id} onClick={() => onOpenItem?.(row)}>
-            <div><strong>{row.title}</strong><span>{row.type.toUpperCase()} · {row.detail}</span></div>
-            <time>{row.date}</time>
-          </button>
-        ))}
-      </div>
+      {rows.length ? (
+        <div className={styles.activityList} data-testid="coach-activity-intelligence-results" data-parity-slot-count="6">
+          {rows.slice(0, 6).map((row) => (
+            <button type="button" className={styles.activityRow} key={row.id} onClick={() => onOpenItem?.(row)}>
+              <div><strong>{row.title}</strong><span>{row.type.toUpperCase()} · {row.detail}</span></div>
+              <time>{row.date}</time>
+            </button>
+          ))}
+          {Array.from({ length: Math.max(0, 6 - rows.length) }, (_, index) => (
+            <div className={styles.activityRow} data-activity-placeholder="true" key={"coach-open-activity-" + index}>
+              <div><strong>Open activity slot</strong><span>New team activity will appear here.</span></div>
+              <time>—</time>
+            </div>
+          ))}
+        </div>
+      ) : (
+                <div className={styles.activityList} data-testid="coach-activity-intelligence-results" data-parity-slot-count="6">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div className={styles.activityRow} data-activity-placeholder="true" key={"coach-open-activity-empty-" + index}>
+              <div><strong>Open activity slot</strong><span>New team activity will appear here.</span></div>
+              <time>—</time>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -264,7 +339,7 @@ export function CoachSeasonComparisonPanel({ model, selectedArchiveId, onArchive
           </div>
           {onOpenArchive ? <div className={styles.drawerActions} style={{ marginTop: 10, marginBottom: 0 }}><button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} onClick={() => onOpenArchive(selected?.id)}>Open Archived Season</button></div> : null}
         </>
-      ) : <EmptyState>Create the first season archive to unlock current-versus-previous comparisons.</EmptyState>}
+      ) : <EmptyState label="Season history" kind="history">Create the first season archive to unlock current-versus-previous comparisons.</EmptyState>}
     </div>
   );
 }

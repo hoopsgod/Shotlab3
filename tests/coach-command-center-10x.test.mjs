@@ -37,8 +37,8 @@ test("Mission Control keeps activity, Program Pulse, attention, and schedule as 
   assert.match(source,/totalPlayers/);
   assert.match(source,/nextEventDateFormatted/);
   assert.match(source,/programPulse = null/);
-  assert.match(source,/model\?\.displayValue \|\| "—"/);
-  assert.match(source,/model\?\.detail \|\| "No weekly goal data"/);
+  assert.match(source,/model\?\.value == null \? "—"/);
+  assert.match(source,/model\?\.value == null \? "No weekly goal data"/);
   assert.match(source,/<small>Active<\/small>/);
   assert.match(source,/<small>Follow-up<\/small>/);
   assert.match(source,/<small>Next<\/small>/);
