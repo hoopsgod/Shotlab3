@@ -7,6 +7,7 @@ const command = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
 const finalCss = readFileSync('src/components/CoachMissionControlFinal.css', 'utf8');
 const titleCss = readFileSync('src/components/CoachMissionControlTitleStage.css', 'utf8');
 const v2Css = readFileSync('src/components/CoachMissionControlV2.css', 'utf8');
+const phase5bConfig = readFileSync('vite.phase5b.config.js', 'utf8');
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const enhancer = readFileSync('scripts/apply-mobile-coach-signature-stage.mjs', 'utf8');
 const promotedCss = promoteCoachFinalCss(finalCss);
@@ -62,6 +63,13 @@ test('Coach prototype hierarchy is brand-first and intentionally responsive', ()
 test('legacy V2 cannot reorder Program Pulse behind athlete attention on mobile', () => {
   assert.doesNotMatch(v2Css, /\.mcTeamHealth\s*\{[^}]*order\s*:/);
   assert.doesNotMatch(v2Css, /\.mcAttention\s*\{[^}]*order\s*:/);
+});
+
+test('production V2 rewrite contract requires only live retained overlap', () => {
+  const rewriteContract = phase5bConfig.split('const V2_PRODUCTION_REWRITES = [')[1]?.split(']\n\nfunction normalizeModuleId')[0] ?? '';
+  assert.match(rewriteContract, /mcDrawerBrand img/);
+  assert.doesNotMatch(rewriteContract, /mcBrandLockup|mcRailLogo/);
+  assert.match(phase5bConfig, /font:italic 900 24px\/\.9 'Barlow Condensed','Arial Narrow',sans-serif/);
 });
 
 test('historical Coach reconciliation is retired and remains an identity transform', () => {
