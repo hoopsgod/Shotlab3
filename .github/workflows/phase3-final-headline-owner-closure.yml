@@ -29,18 +29,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Move headline color to its explicit source owner
+      - name: Give the Coach headline explicit color ownership
         run: |
           node <<'NODE'
           const fs = require('node:fs');
           const path = 'src/components/CoachMissionControlV2.css';
           let css = fs.readFileSync(path, 'utf8');
           const parent = '.mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px;color:#f4f7f8}';
-          const parentFixed = '.mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px}';
           const heading = ".mcHero h1{max-width:610px;margin:12px 0 0;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}";
           const headingFixed = ".mcHero h1{max-width:610px;margin:12px 0 0;color:#f4f7f8;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}";
           if (!css.includes(parent) || !css.includes(heading)) throw new Error('Expected Coach hero authority changed');
-          css = css.replace(parent, parentFixed).replace(heading, headingFixed);
+          css = css.replace(heading, headingFixed);
           fs.writeFileSync(path, css);
           NODE
 
@@ -83,5 +82,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/components/CoachMissionControlV2.css src/styles/MissionControlHierarchy2026.css
           git diff --cached --check
-          git commit -m "Lock Coach hero headline color to source owner"
+          git commit -m "Lock Coach hero colors to source owners"
           git push origin HEAD:agent/phase-3-coach-dashboard
