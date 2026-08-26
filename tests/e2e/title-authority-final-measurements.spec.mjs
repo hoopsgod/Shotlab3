@@ -160,16 +160,16 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
   });
 
   expect(metrics.teamName.startsWith(teamName)).toBe(true);
-  // Phase 4 keeps difficult branding decision-first without restoring the retired giant-identity composition.
+  // Phase 4 keeps difficult branding identity-first without restoring an oversized decorative void.
   expect(metrics.hero.height).toBeGreaterThanOrEqual(382);
   expect(metrics.hero.height).toBeLessThanOrEqual(500);
   expect(metrics.identity.height).toBeGreaterThanOrEqual(96);
   expect(metrics.identity.height).toBeLessThanOrEqual(160);
-  expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
-  expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
-  expect(metrics.decisionTitle.size).toBeGreaterThanOrEqual(30);
-  expect(metrics.decisionTitle.size).toBeLessThanOrEqual(48);
-  expect(metrics.decisionTitle.size - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
+  expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(30);
+  expect(metrics.teamIdentitySize).toBeLessThanOrEqual(50);
+  expect(metrics.decisionTitle.size).toBeGreaterThanOrEqual(16);
+  expect(metrics.decisionTitle.size).toBeLessThanOrEqual(28);
+  expect(metrics.teamIdentitySize - metrics.decisionTitle.size).toBeGreaterThanOrEqual(8);
   expect(metrics.decisionTitle.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
   expect(metrics.decisionTitle.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
   expect(metrics.realityTop).toBeGreaterThanOrEqual(metrics.decisionTitle.bottom);
