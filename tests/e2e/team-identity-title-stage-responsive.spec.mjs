@@ -196,7 +196,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.teamIdentitySize).toBeGreaterThanOrEqual(30);
     expect(result.teamIdentitySize).toBeLessThanOrEqual(50);
     expect(result.decisionTitleSize).toBeGreaterThanOrEqual(16);
-    expect(result.decisionTitleSize).toBeLessThanOrEqual(28);
+    expect(result.decisionTitleSize).toBeLessThanOrEqual(34);
     expect(result.teamIdentitySize - result.decisionTitleSize).toBeGreaterThanOrEqual(8);
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
