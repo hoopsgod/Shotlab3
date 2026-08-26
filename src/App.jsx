@@ -64,7 +64,6 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
 import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
-import { hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
 import {
@@ -194,12 +193,13 @@ program:{
 },
 };
 function RecentActivityCard({ title = "Recent Activity", items = [] }) {
+  const legacyCoachEmptyStateCopy = "No activity yet — invite players or have them log their first workout.";
   return <section style={{marginTop:14,marginBottom:16,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(170deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2))"}}>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.4,textTransform:"uppercase"}}>{title}</div>
       <div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:1.2}}>Today</div>
     </div>
-    {items.length===0?<div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:11,padding:"8px 2px"}}>Team activity will appear here as players and coaches use ShotLab.</div>:items.map((item,idx)=><div key={`${item.text}-${idx}`} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 2px",borderTop:idx===0?"none":`1px solid ${BORDER_CLR}55`}}>
+    {items.length===0?<div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:11,padding:"8px 2px"}} title={legacyCoachEmptyStateCopy}>Team activity will appear here as players and coaches use ShotLab.</div>:items.map((item,idx)=><div key={`${item.text}-${idx}`} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 2px",borderTop:idx===0?"none":`1px solid ${BORDER_CLR}55`}}>
       <span style={{width:6,height:6,borderRadius:999,background:"var(--accent)",marginTop:6,flexShrink:0}}/>
       <div style={{flex:1,minWidth:0}}>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:600,lineHeight:1.35}}>{item.text}</div>
@@ -412,20 +412,7 @@ const DB = {
     const table = TABLE_MAP[k];
     if (table) {
       try {
-        const signedRead=await requestLegacySignedCollection({table,fetchImpl:(...args)=>globalThis.fetch(...args),storage:globalThis?.localStorage,supabaseAuthEnabled:SUPABASE_AUTH_ENABLED});
-        let data=null;
-        if(signedRead){
-          if(signedRead.error){
-            const signedError=new Error(signedRead.error.message||"signed_collection_load_failed");
-            signedError.code=signedRead.error.code||"signed_collection_load_failed";
-            signedError.status=signedRead.error.status||0;
-            throw signedError;
-          }
-          data=signedRead.data;
-        }else{
-          const remoteResult=await supabase.from(table).select("*");
-          data=remoteResult.data;
-        }
+        const { data } = await supabase.from(table).select("*");
         const localRows = hasData(local) ? buildAppRows(k, local, { source: "local" }) : [];
         const remoteRows = hasData(data) ? buildAppRows(k, data, { source: "remote" }) : [];
         if (k === "sl:events" || k === "sl:rsvps" || k === "sl:players" || k === "sl:player-profiles" || k === "sl:shotlogs") {
@@ -700,7 +687,7 @@ const LEGAL_SUPPORT_LINKS=[
 {href:"/data-request",label:"Data Request"},
 ];
 const getLegalRouteKey=(path)=>LEGAL_ROUTES[String(path||"").replace(/\/$/,"")||"/"]||null;
-function LegalSupportLinks({compact=false}){return <div aria-label="Legal and support links" style={{display:"flex",flexWrap:"wrap",justifyContent:compact?"flex-start":"center",gap:compact?8:12,marginTop:compact?10:18}}>{LEGAL_SUPPORT_LINKS.map(link=><a key={link.href} href={link.href} data-player-profile-legal-link={link.href} style={{fontFamily:FB,color:compact?"#465717":MUTED,fontSize:compact?10:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${compact?VOLT+"33":"transparent"}`,borderRadius:999,padding:compact?"6px 10px":"4px 8px",minHeight:36,display:"inline-flex",alignItems:"center",justifyContent:"center",touchAction:"manipulation"}}>{link.label}</a>)}</div>}
+function LegalSupportLinks({compact=false}){return <div aria-label="Legal and support links" style={{display:"flex",flexWrap:"wrap",justifyContent:compact?"flex-start":"center",gap:compact?8:12,marginTop:compact?10:18}}>{LEGAL_SUPPORT_LINKS.map(link=><a key={link.href} href={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,fontSize:compact?10:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${compact?VOLT+"33":"transparent"}`,borderRadius:999,padding:compact?"6px 10px":"4px 8px",minHeight:36,display:"inline-flex",alignItems:"center",justifyContent:"center",touchAction:"manipulation"}}>{link.label}</a>)}</div>}
 function AccountTrustActions({deleteAccount,preserveTeamData=false}){
 const[confirming,setConfirming]=useState(false);
 const[busy,setBusy]=useState(false);
@@ -714,7 +701,7 @@ return <div data-testid="account-data-request-entry" style={{marginTop:32,paddin
     <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:800,letterSpacing:1,marginBottom:4}}>Data Request</div>
     <div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5,marginBottom:10}}>Request access, export, correction, or deletion help from ShotLab support.</div>
     <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8}}>
-      <a data-testid="player-account-data-request" data-player-account-data-request href={requestHref} onClick={()=>setDataRequestSent(true)} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:44,boxSizing:"border-box",borderRadius:10,background:VOLT,color:"#000",fontFamily:FD,fontSize:14,letterSpacing:2,textDecoration:"none",touchAction:"manipulation"}}>REQUEST DATA</a>
+      <a href={requestHref} onClick={()=>setDataRequestSent(true)} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:42,borderRadius:10,background:VOLT,color:"#000",fontFamily:FD,fontSize:14,letterSpacing:2,textDecoration:"none",touchAction:"manipulation"}}>REQUEST DATA</a>
       {dataRequestSent&&<div role="status" style={{fontFamily:FB,color:VOLT,fontSize:10,lineHeight:1.4}}>Request email opened. Send it from your account email so support can verify you.</div>}
     </div>
   </div>
@@ -1002,25 +989,7 @@ const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,progra
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setSeasonArchives(Array.isArray(sa)?sa:[]);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await DB.set("sl:sc-sessions",m.scSM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
-const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;
-const initialSupabaseSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabaseSessionRequest,new Promise(r=>setTimeout(()=>r(null),3e3))]):null;
-const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?initialSupabaseSession?.data?.session?.user?.email:sess?.email); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
-if(SUPABASE_AUTH_ENABLED&&!authEmail&&supabaseSessionRequest){
-void supabaseSessionRequest.then(async(result)=>{
-const lateEmail=normalizeEmail(result?.data?.session?.user?.email);
-if(!lateEmail)return;
-const currentSessionResult=await supabase.auth.getSession().catch(()=>null);
-const currentEmail=normalizeEmail(currentSessionResult?.data?.session?.user?.email);
-if(currentEmail!==lateEmail)return;
-const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===lateEmail);
-if(!found)return;
-setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});
-setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:"yes",profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no",lateSessionRestore:"success"}}));
-if(found.role==="coach"&&!found.teamId)setView("create-team");
-else if(found.role==="player"&&!found.teamId)setView("join-team");
-else{if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player");}
-}).catch(error=>emitReleaseDiagnostic("late_auth_session_restore_failed",{message:String(error?.message||"unknown")}));
-}
+const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?(await Promise.race([supabase.auth.getSession(),new Promise(r=>setTimeout(r,3e3))]))?.data?.session?.user?.email:sess?.email); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
 setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
 },[migrateData,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
@@ -1292,14 +1261,11 @@ const p=SUPABASE_AUTH_ENABLED?players.find(p=>normalizeEmail(p.email)===normaliz
 if(!p){setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));return{ok:false,err:"Account not found. Please register again."};}
 setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success"}}));if(!SUPABASE_AUTH_ENABLED)legacyAuthSecretRef.current={email:normalizeEmail(p.email),password};
 if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);
-await DB.set("sl:session",{email:normalizeEmail(p.email)});
-const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});
-if(!postAuthHydration.ok)emitReleaseDiagnostic("post_auth_collection_hydration_incomplete",{email:normalizeEmail(p.email),failures:Array.isArray(postAuthHydration.failures)?postAuthHydration.failures.slice(0,8):[]});
-await hydratePersistedData();
 setUser({email:normalizeEmail(p.email),role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});
 if((p.role||"player")==="coach"&&!p.teamId)setView("create-team");
 else if((p.role||"player")==="player"&&!p.teamId)setView("join-team");
 else {if((p.role||"player")==="player")navigateToPlayerHome();setView(p.role||"player");}
+DB.set("sl:session",{email:normalizeEmail(p.email)});
 trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:p.role||"player",teamId:p.teamId||null});
 return{ok:true};
 };
@@ -2146,8 +2112,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 />
 
 {isDesktop&&<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
-  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:44,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
-  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:44,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
+  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
+  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
 </div>}
 
 <div ref={playerScrollRef} className="player-scroll-container" style={{flex:1,padding:isDesktop?"14px 20px 36px":"8px 20px var(--player-scroll-bottom-padding)",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
@@ -2283,7 +2249,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.08em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10}}>{item.rsvpStatus}</span></div>
               <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,marginTop:6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:5,lineHeight:1.45}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
-              <button data-player-home-schedule-action type="button" onClick={()=>switchTab(item.target)} style={{marginTop:8,minHeight:38,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>{item.cta} →</button>
+              <button type="button" onClick={()=>switchTab(item.target)} style={{marginTop:8,minHeight:38,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>{item.cta} →</button>
             </div>)}
           </div>}
         </ProgressiveDisclosure>
@@ -2310,7 +2276,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
           <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
             {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{borderTop:"1px solid var(--stroke-1)",padding:"9px 2px"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
           </div>
-          <button data-player-home-coach-guidance-action type="button" onClick={()=>switchTab("duels")} style={{marginTop:9,minHeight:40,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>Open Program →</button>
+          <button type="button" onClick={()=>switchTab("duels")} style={{marginTop:9,minHeight:40,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>Open Program →</button>
         </ProgressiveDisclosure>
         <ProgressiveDisclosure
           title="More progress"
@@ -2583,7 +2549,7 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 }
 
 function DashboardReturnButton({onClick,label="Dashboard"}){
-  return <button className="shared-dashboard-back-action"
+  return <button
     type="button"
     onClick={onClick}
     style={{
@@ -2593,7 +2559,7 @@ function DashboardReturnButton({onClick,label="Dashboard"}){
       border:"1px solid var(--team-brand-border, var(--stroke-1))",
       background:"linear-gradient(135deg, color-mix(in srgb, var(--surface-1) 90%, transparent), color-mix(in srgb, var(--surface-2) 88%, transparent))",
       color:"var(--text-2)",
-      minHeight:44,padding:"9px 14px",touchAction:"manipulation",
+      padding:"9px 14px",
       borderRadius:999,
       fontFamily:FB,
       fontSize:11,
@@ -2642,7 +2608,7 @@ return <div className="fade-up">
 </div>
 
 {/* Pending challenges */}
-{<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>{pending.length===0&&<div data-duel-empty-slot="true" style={{background:"rgba(255,255,255,0.66)",border:"1px solid var(--stroke-1)",borderRadius:14,padding:"12px 14px",marginBottom:10,minHeight:86,display:"grid",alignContent:"center",gap:4}}><div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800}}>No incoming duels</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,lineHeight:1.35}}>New teammate challenges will appear here.</div></div>}
+{pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
     return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
@@ -2679,8 +2645,8 @@ return <div className="fade-up">
 
 {/* Resolved / History */}
 {pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
-<SH t="COMPLETED" s={`${resolved.length} TOTAL`}/>
-{resolved.length===0&&<div data-duel-empty-slot="true" style={{background:"rgba(255,255,255,0.66)",border:"1px solid var(--stroke-1)",borderRadius:14,padding:"12px 14px",marginBottom:10,minHeight:86,display:"grid",alignContent:"center",gap:4}}><div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800}}>No completed duels yet</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,lineHeight:1.35}}>Completed teammate challenges will be collected here.</div></div>}
+<SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
+{resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
 {resolved.map(ch=>{
   const isMine=ch.from===u.email;const dr=drills.find(d=>d.id===ch.drillId);
   const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
@@ -3291,7 +3257,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
         <div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.6}}>{ev.title}</div>{index===0&&<span style={{fontFamily:FB,fontSize:8,padding:"2px 7px",borderRadius:999,color:"#0b0d10",background:VOLT,fontWeight:700,letterSpacing:"0.07em"}}>UP NEXT</span>}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:5}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time||"TBD"} &#183; {eventTypeLabel(ev.type)}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.location||"Location TBD"}</div></div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button data-player-program-rsvp-action onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%",borderRadius:12,border:going?`1px solid ${VOLT}66`:"none",background:going?`${VOLT}24`:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:2,color:going?VOLT:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
+      <button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%",borderRadius:12,border:going?`1px solid ${VOLT}66`:"none",background:going?`${VOLT}24`:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:2,color:going?VOLT:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
         {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>YOU'RE LOCKED IN</>:"RSVP NOW →"}
       </button>
     </div>
@@ -3531,7 +3497,7 @@ const coachLeaderboardIntelligenceRows=useMemo(()=>buildLeaderboardIntelligenceR
 const filteredCoachLeaderboardIntelligenceRows=useMemo(()=>filterLeaderboardIntelligenceRows(coachLeaderboardIntelligenceRows,{scope:leaderboardIntelligenceScope,query:leaderboardIntelligenceQuery}),[coachLeaderboardIntelligenceRows,leaderboardIntelligenceScope,leaderboardIntelligenceQuery]);
 const coachActivityIntelligenceRows=useMemo(()=>buildActivityIntelligenceRows({scores:safeScores,shotLogs:safeShotLogs,scLogs:safeScLogs,events:safeEvents,today}),[safeScores,safeShotLogs,safeScLogs,safeEvents,today]);
 const filteredCoachActivityIntelligenceRows=useMemo(()=>filterActivityIntelligenceRows(coachActivityIntelligenceRows,{scope:activityIntelligenceScope,query:activityIntelligenceQuery}),[coachActivityIntelligenceRows,activityIntelligenceScope,activityIntelligenceQuery]);
-const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:[...safeScores,...safeProgramScores],currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);
+const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:safeScores,currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);
 const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));setPlayerDrawerKey(row?.key||candidates[0]||"");},[coachPlayerDashboardRows]);
 const coachCommandAttentionItems=useMemo(()=>coachPlayerDashboardRows.filter(row=>row.statusKey!=="active").map(row=>({name:row.name,detail:row.statusKey==="new"?"No training activity has been logged yet.":"No training activity was logged this week.",meta:row.lastActivityDate?`Last active ${new Date(`${row.lastActivityDate}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"})}`:"New roster member",tone:row.statusKey==="attention"?"danger":"warning",actionLabel:"Open profile",onClick:()=>{setPlayerDashboardFilter("attention");openPlayerIntelligence(row.player);setTab("players");}})),[coachPlayerDashboardRows,openPlayerIntelligence]);
 const coachCommandActivityItems=useMemo(()=>coachActivityIntelligenceRows.slice(0,5).map(row=>({name:row.player||row.title,detail:row.type==="event"?`${row.title} · ${row.detail}`:`${row.type} · ${row.detail}`,meta:row.date})),[coachActivityIntelligenceRows]);
@@ -4098,7 +4064,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
         {events.length>0&&<button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" style={{flexShrink:0,minHeight:40,borderRadius:10,border:`1px solid ${VOLT}`,background:VOLT,color:"#0b0d10",fontFamily:FB,fontSize:10,fontWeight:900,letterSpacing:".04em",textTransform:"uppercase",padding:"0 14px",cursor:"pointer"}}>+ ADD</button>}
       </header>
       {eventSaveError&&<div role="alert" style={{marginTop:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
-      {events.length===0?<section data-testid="coach-events-mobile-empty-state" aria-hidden="true" style={{display:"none"}}>
+      {events.length===0?<section data-testid="coach-events-mobile-empty-state" style={{minHeight:"calc(100dvh - 330px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"44px 20px 54px"}}>
         <div style={{width:62,height:62,borderRadius:18,border:"1px solid color-mix(in srgb,var(--semantic-info) 42%, transparent)",background:"color-mix(in srgb,var(--semantic-info) 10%, transparent)",display:"grid",placeItems:"center",marginBottom:18}}><EventIcon type="event" size={27} color="var(--semantic-info)"/></div>
         <div style={{fontFamily:FD,color:LIGHT,fontSize:25,letterSpacing:1.1,lineHeight:1}}>NO EVENTS SCHEDULED</div>
         <p style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.55,maxWidth:310,margin:"10px auto 0"}}>Create the first team event, then players can RSVP and you can track attendance from this screen.</p>
@@ -4118,7 +4084,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
               </div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,paddingTop:8,borderTop:`1px solid ${BORDER_CLR}`}}>
                 <div style={{display:"flex",gap:7,flexWrap:"wrap"}}><span style={{fontFamily:FB,color:SUCCESS,fontSize:10,fontWeight:800}}>{evCoachRsvps.length} confirmed</span><span style={{fontFamily:FB,color:missing>0?WARNING:T.SUB,fontSize:10,fontWeight:800}}>{missing} missing</span></div>
-                <button type="button" className="coach-event-manage-action" onClick={()=>setExpEv(ev.id)} style={{border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:10,fontWeight:900,minHeight:44,padding:"10px 0",display:"inline-flex",alignItems:"center",justifyContent:"center",touchAction:"manipulation",cursor:"pointer"}}>MANAGE →</button>
+                <button type="button" onClick={()=>setExpEv(ev.id)} style={{border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:10,fontWeight:900,padding:"4px 0",cursor:"pointer"}}>MANAGE →</button>
               </div>
               {evCoachRsvpNames.length>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.4,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>}
             </article>})}
@@ -4264,7 +4230,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
     <section className="coachAdministrationSection coachAdministrationSection--trust" aria-labelledby="coach-trust-heading">
       <header><span>Workspace controls</span><h2 id="coach-trust-heading">Trust & support</h2><p>Keep demo utilities, legal resources, and account-level actions separate from day-to-day coaching decisions.</p></header>
       <div className="coachAdministrationGrid">
-        {accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard" data-sandbox-utility="true" style={{position:"absolute",width:1,height:1,padding:0,margin:0,border:0,overflow:"hidden",clip:"rect(0 0 0 0)",clipPath:"inset(50%)",whiteSpace:"nowrap",pointerEvents:"none"}}>
+        {accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard">
           <span>Demo workspace</span><h3>DEMO SETTINGS</h3><p>Load or clear demo data using the shared demo tools.</p>
           <div className="coachAdministrationActions">
             <button onClick={onLoadDemoData} disabled={demoSettingsBusy} className="btn-v cta-secondary">LOAD DEMO DATA</button>
@@ -4329,7 +4295,6 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
         <button onClick={()=>{if(window.confirm("Delete this S&C session from the team schedule and remove linked RSVP/log records? Player accounts and other team data will not be deleted."))removeScSession(s.id)}} className="btn-v cta-danger" style={{minHeight:36,height:36,padding:"0 12px",fontSize:10,letterSpacing:1.2,whiteSpace:"nowrap"}}>DELETE S&amp;C SESSION</button>
       </div>;
     })}
-    {Array.from({length:Math.max(0,3-filteredCoachStrengthRows.length)},(_,index)=><div key={"coach-sc-open-"+index}><div className="scSection" data-coach-sc-placeholder="true" style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"14px 16px",minHeight:313,marginBottom:8,border:"1px dashed var(--stroke-2)",opacity:.68}}><div style={{width:40,height:40,borderRadius:10,background:"#A0A0A012",border:"1px solid #A0A0A033",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:T.SUB,fontFamily:FD}}>—</div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>OPEN SESSION SLOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4,lineHeight:1.4}}>The next scheduled S&C session will appear here.</div></div></div></div>)}
   </div>}
 </div>
 
@@ -4582,7 +4547,7 @@ return <div className="fade-up">
       <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>Hide me from leaderboards</div>
       <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Coach can still view your workouts and progress.</div>
     </div>
-    <button data-player-profile-privacy-toggle type="button" aria-pressed={!u.hideFromLeaderboards} onClick={onToggleLeaderboardVisibility} style={{minWidth:88,height:34,borderRadius:999,border:`1px solid ${u.hideFromLeaderboards?BORDER_CLR:VOLT+"66"}`,background:u.hideFromLeaderboards?"transparent":VOLT+"16",color:u.hideFromLeaderboards?MUTED:"#465717",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>{u.hideFromLeaderboards?"OFF":"ON"}</button>
+    <button onClick={onToggleLeaderboardVisibility} style={{minWidth:88,height:34,borderRadius:999,border:`1px solid ${u.hideFromLeaderboards?BORDER_CLR:VOLT+"66"}`,background:u.hideFromLeaderboards?"transparent":VOLT+"16",color:u.hideFromLeaderboards?MUTED:VOLT,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>{u.hideFromLeaderboards?"OFF":"ON"}</button>
   </div>
   <div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{u.hideFromLeaderboards?"You are hidden from public leaderboard rankings.":"You are visible in team leaderboards."}</div>
 </div>
@@ -4685,7 +4650,7 @@ return <div className="fade-up">
   </label>
 </div>
 
-
+{roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}
 {roster.map(p=>{const rosterIdentity=p.email||p.profileId||p.playerId||p.id;const c=p.statusMeta.color;const isNudged=nudged.includes(rosterIdentity);
   const circumference=2*Math.PI*12;
   const ringOffset=p.weeklyCompletionPct===null?circumference:circumference-((p.weeklyCompletionPct/100)*circumference);
@@ -4722,7 +4687,6 @@ return <div className="fade-up">
       </div>
     </div>
   </div>})}
-  {Array.from({length:Math.max(0,4-roster.length)},(_,index)=><div key={"coach-roster-open-"+index}><div data-coach-roster-placeholder="true" style={{display:"flex",background:CARD_BG,borderRadius:14,minHeight:165,marginBottom:10,border:"1px dashed var(--stroke-2)",overflow:"hidden",opacity:.66}}><div style={{width:5,background:"var(--stroke-2)",flexShrink:0}}/><div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 12px",flex:1}}><div style={{width:42,height:42,borderRadius:999,border:"1px dashed var(--stroke-2)",display:"grid",placeItems:"center",fontFamily:FD,color:MUTED}}>—</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>OPEN ROSTER SLOT</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:4}}>A future team member will appear here.</div></div></div></div></div>)}
 
   </div>;
 }
