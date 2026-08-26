@@ -78,6 +78,108 @@ body.mission-control-active .mcShellV3 .mcAttentionCopy small,
 body.mission-control-active .mcShellV3 .mcAttentionMeta,
 body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
 
+/* Desktop Coach Home stays on the light editorial page, while the hero keeps
+   its own dark identity palette. Lock both seams here because this is the late
+   support-hierarchy authority and therefore the correct place to reconcile them. */
+@media (min-width: 981px) {
+  body.mission-control-active .mcShellV3 .mcHeader {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 64px !important;
+    padding: 8px 0 10px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--mc-line) !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeader::after {
+    display: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcMobileMenu {
+    display: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcBrandLockup {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcBrandCopy {
+    min-width: 0 !important;
+    display: block !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcBrandCopy small {
+    display: block !important;
+    color: var(--mc-muted) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcBrandCopy strong {
+    display: block !important;
+    margin-top: 2px !important;
+    color: var(--mc-ink) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeaderActions {
+    min-width: 0 !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTeamSelect {
+    min-width: 176px !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+    border: 1px solid var(--mc-line-strong) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+    background: var(--mc-surface) !important;
+    color: var(--mc-ink) !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcBell {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border: 1px solid var(--mc-line-strong) !important;
+    border-radius: 12px !important;
+    display: grid !important;
+    place-items: center !important;
+    background: var(--mc-surface) !important;
+    color: var(--mc-ink) !important;
+    box-shadow: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHero .mcProgramIdentity {
+    color: #f4f7f8 !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHero .mcEyebrow {
+    color: var(--mc) !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+}
+
 /* Registered onboarding/sparse state uses a dark activation surface. Lock its
    copy to the dark-material palette here because this late hierarchy authority
    otherwise makes inherited Coach text use the light editorial ink token. */
