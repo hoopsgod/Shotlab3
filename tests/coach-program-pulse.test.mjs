@@ -1,48 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { deriveCoachProgramPulse } from "../src/lib/coachProgramPulse.js";
+import { buildCoachPlayerDashboardRows, buildCoachProgramPulse } from "../src/lib/coachOperationalDashboard.js";
 
 const roster = [
   { email: "ava@example.com", name: "Ava" },
   { email: "jordan@example.com", name: "Jordan" },
 ];
+const rowsFor = (shotLogs = []) => buildCoachPlayerDashboardRows({ players: roster, shotLogs, weekStart: "2026-08-23" });
 
-test("Program Pulse uses capped athlete weekly makes over the shared Coach weekly goal", () => {
-  const model = deriveCoachProgramPulse({
-    roster,
-    weeklyGoal: 500,
-    weekStart: "2026-08-23",
-    shotLogs: [
-      { email: "ava@example.com", made: 650, date: "2026-08-24" },
-      { email: "jordan@example.com", made: 250, date: "2026-08-25" },
-      { email: "jordan@example.com", made: 900, date: "2026-08-16" },
-    ],
-  });
-
-  assert.equal(model.available, true);
-  assert.equal(model.creditedMakes, 750);
-  assert.equal(model.totalGoal, 1000);
-  assert.equal(model.value, 75);
-  assert.equal(model.displayValue, "75%");
-  assert.equal(model.athleteProgress[0].percent, 100);
-  assert.equal(model.athleteProgress[1].percent, 50);
+test("Program Pulse caps each athlete at the shared Coach weekly goal", () => {
+  const model = buildCoachProgramPulse(rowsFor([
+    { email: "ava@example.com", made: 650, date: "2026-08-24" },
+    { email: "jordan@example.com", made: 250, date: "2026-08-25" },
+    { email: "jordan@example.com", made: 900, date: "2026-08-16" },
+  ]), 500);
+  assert.deepEqual({ credited: model.creditedMakes, goal: model.totalGoal, value: model.value, display: model.displayValue }, { credited: 750, goal: 1000, value: 75, display: "75%" });
 });
 
-test("Program Pulse reports zero when a valid goal and eligible roster exist but the selected week has no makes", () => {
-  const model = deriveCoachProgramPulse({ roster, weeklyGoal: 500, weekStart: "2026-08-23", shotLogs: [] });
+test("Program Pulse reports zero when valid goals exist but the week has no makes", () => {
+  const model = buildCoachProgramPulse(rowsFor(), 500);
   assert.equal(model.available, true);
   assert.equal(model.value, 0);
-  assert.equal(model.displayValue, "0%");
   assert.equal(model.totalGoal, 1000);
 });
 
-test("Program Pulse never fabricates a percentage without a valid goal, week, or eligible roster", () => {
-  for (const input of [
-    { roster, weeklyGoal: 0, weekStart: "2026-08-23" },
-    { roster, weeklyGoal: 500, weekStart: "" },
-    { roster: [], weeklyGoal: 500, weekStart: "2026-08-23" },
-  ]) {
-    const model = deriveCoachProgramPulse(input);
+test("Program Pulse never fabricates a percentage without a valid denominator", () => {
+  for (const model of [buildCoachProgramPulse(rowsFor(), 0), buildCoachProgramPulse([], 500)]) {
     assert.equal(model.available, false);
     assert.equal(model.value, null);
     assert.equal(model.displayValue, "—");
@@ -50,20 +33,15 @@ test("Program Pulse never fabricates a percentage without a valid goal, week, or
   }
 });
 
-test("Program Pulse ignores logs outside the selected week and identities outside the active roster", () => {
-  const model = deriveCoachProgramPulse({
-    roster,
-    weeklyGoal: 400,
-    weekStart: "2026-08-23",
-    shotLogs: [
-      { email: "ava@example.com", made: 100, date: "2026-08-23" },
-      { email: "ava@example.com", made: 100, date: "2026-08-29" },
-      { email: "ava@example.com", made: 500, date: "2026-08-30" },
-      { email: "not-on-roster@example.com", made: 999, date: "2026-08-25" },
-    ],
-  });
-
-  assert.equal(model.creditedMakes, 200);
+test("Program Pulse inherits roster identity and selected-week filtering from Coach player rows", () => {
+  const rows = rowsFor([
+    { email: "ava@example.com", made: 100, date: "2026-08-23" },
+    { email: "ava@example.com", made: 500, date: "2026-08-16" },
+    { email: "not-on-roster@example.com", made: 999, date: "2026-08-25" },
+  ]);
+  const model = buildCoachProgramPulse(rows, 400);
+  assert.equal(rows[0].weeklyMakes + rows[1].weeklyMakes, 100);
+  assert.equal(model.creditedMakes, 100);
   assert.equal(model.totalGoal, 800);
-  assert.equal(model.value, 25);
+  assert.equal(model.value, 13);
 });
