@@ -32,23 +32,6 @@
     linear-gradient(180deg,#0a1114 0%,#020405 91%);
   animation:mcArenaBreath 8s ease-in-out infinite alternate;
 }
-.mcShellV3 .mcArenaLights span{
-  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--mc) 58%,white),rgba(255,255,255,.72),transparent);
-  box-shadow:0 0 21px color-mix(in srgb,var(--mc) 48%,transparent);
-}
-.mcShellV3 .mcRafters{opacity:.47}
-.mcShellV3 .mcHoop{opacity:.82;filter:drop-shadow(0 0 16px color-mix(in srgb,var(--mc) 21%,transparent))}
-.mcShellV3 .mcCourtFloor{
-  opacity:.98;
-  box-shadow:inset 0 0 44px rgba(0,0,0,.36);
-}
-.mcShellV3 .mcCourtFloor img{
-  opacity:.32!important;
-  mix-blend-mode:screen;
-  -webkit-mask-image:radial-gradient(ellipse at center,#000 44%,rgba(0,0,0,.92) 61%,transparent 80%);
-  mask-image:radial-gradient(ellipse at center,#000 44%,rgba(0,0,0,.92) 61%,transparent 80%);
-  filter:saturate(1.14) contrast(1.12) drop-shadow(0 0 18px color-mix(in srgb,var(--mc) 24%,transparent));
-}
 .mcShellV3 .mcHeroScrim{
   background:
     linear-gradient(90deg,rgba(2,5,6,.995) 0%,rgba(2,5,6,.96) 45%,rgba(2,5,6,.53) 71%,rgba(2,5,6,.06) 100%),
@@ -98,106 +81,6 @@
   border-color:rgba(217,228,235,.09);
 }
 
-/* Adaptive no-data state replaces three empty dashboard modules */
-.mcShellV3 .mcTodayLaunch{
-  position:relative;
-  isolation:isolate;
-  overflow:hidden;
-  min-height:100%;
-  padding:24px;
-  border:1px solid rgba(217,228,235,.11);
-  border-radius:18px;
-  background:
-    radial-gradient(circle at 90% 10%,color-mix(in srgb,var(--mc) 11%,transparent),transparent 34%),
-    linear-gradient(145deg,rgba(12,19,23,.94),rgba(4,8,10,.86));
-  box-shadow:0 20px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.025);
-}
-.mcShellV3 .mcTodayLaunchGlow{
-  position:absolute;
-  z-index:-1;
-  width:230px;
-  height:230px;
-  right:-90px;
-  bottom:-110px;
-  border-radius:50%;
-  background:color-mix(in srgb,var(--mc) 11%,transparent);
-  filter:blur(32px);
-}
-.mcShellV3 .mcTodayLaunchEyebrow{
-  display:block;
-  color:#8d98a0;
-  font:760 9px/1 var(--mc-body-2026);
-  letter-spacing:.13em;
-  text-transform:uppercase;
-}
-.mcShellV3 .mcTodayLaunch h2{
-  max-width:360px;
-  margin:9px 0 0;
-  color:#f2f5f6;
-  font:400 36px/.96 var(--mc-display-2026);
-  letter-spacing:.012em;
-  text-transform:uppercase;
-}
-.mcShellV3 .mcTodayLaunch>p{
-  max-width:440px;
-  margin:12px 0 0;
-  color:#8f9aa2;
-  font:540 12px/1.5 var(--mc-body-2026);
-}
-.mcShellV3 .mcLaunchPath{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-  margin-top:21px;
-}
-.mcShellV3 .mcLaunchPath span{
-  min-width:0;
-  padding:12px 10px;
-  border:1px solid rgba(217,228,235,.08);
-  border-radius:12px;
-  background:rgba(3,7,9,.5);
-}
-.mcShellV3 .mcLaunchPath b{
-  width:24px;
-  height:24px;
-  display:grid;
-  place-items:center;
-  border:1px solid rgba(217,228,235,.14);
-  border-radius:50%;
-  color:#7b8790;
-  font:700 10px var(--mc-body-2026);
-}
-.mcShellV3 .mcLaunchPath em{
-  display:block;
-  margin-top:9px;
-  color:#7f8a92;
-  font:650 9px/1.25 var(--mc-body-2026);
-  font-style:normal;
-}
-.mcShellV3 .mcLaunchPath .is-complete b{border-color:rgba(89,220,144,.3);background:rgba(89,220,144,.08);color:#64df98}
-.mcShellV3 .mcLaunchPath .is-complete em{color:#aeb7bd}
-.mcShellV3 .mcLaunchPath .is-next{border-color:color-mix(in srgb,var(--mc) 24%,transparent);background:color-mix(in srgb,var(--mc) 5%,rgba(3,7,9,.5))}
-.mcShellV3 .mcLaunchPath .is-next b{border-color:color-mix(in srgb,var(--mc) 34%,transparent);color:var(--mc)}
-.mcShellV3 .mcLaunchActions{display:flex;align-items:center;gap:9px;margin-top:18px}
-.mcShellV3 .mcLaunchActions button{
-  min-height:43px;
-  border-radius:11px;
-  font:760 10px var(--mc-body-2026);
-  cursor:pointer;
-}
-.mcShellV3 .mcLaunchPrimary{
-  padding:0 15px;
-  border:0;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:17px;
-  background:var(--mc);
-  color:#020405;
-  box-shadow:0 12px 28px color-mix(in srgb,var(--mc) 13%,transparent);
-}
-.mcShellV3 .mcLaunchSecondary{padding:0 14px;border:1px solid rgba(217,228,235,.11);background:rgba(255,255,255,.025);color:#bcc5ca}
-
 /* Tools exist in the command menu, not as permanent dashboard furniture */
 .mcShellV3 .mcTools{margin-top:0}
 .mcShellV3 .mcActionSheet{
@@ -225,10 +108,6 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] button{
     gap:9px;
     padding-bottom:calc(88px + env(safe-area-inset-bottom));
   }
-  .mcShellV3 .mcArenaLights{right:-8%;top:9px;width:76%;opacity:.94}
-  .mcShellV3 .mcHoop{right:-1%;top:67px;opacity:.78}
-  .mcShellV3 .mcCourtFloor{right:-19%;bottom:-15%;width:112%;height:72%}
-  .mcShellV3 .mcCourtFloor img{left:45%;bottom:13%;width:30%;height:30%;opacity:.29!important}
   .mcShellV3 .mcHeroScrim{background:linear-gradient(90deg,rgba(2,5,6,.998) 0%,rgba(2,5,6,.95) 53%,rgba(2,5,6,.48) 81%,rgba(2,5,6,.06) 100%),linear-gradient(180deg,transparent 51%,rgba(2,5,6,.92))}
 
   .mcShellV3 .mcFocusGrid,
@@ -247,32 +126,12 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] button{
   .mcShellV3 .mcAttentionRow{background:rgba(5,9,11,.68)}
   .mcShellV3 .mcTextLink{margin-left:2px;margin-right:2px}
 
-  .mcShellV3 .mcTodayLaunch{
-    min-height:auto;
-    margin-top:10px;
-    padding:20px 17px 18px;
-    border-radius:17px;
-  }
-  .mcShellV3 .mcTodayLaunch h2{max-width:260px;font-size:31px}
-  .mcShellV3 .mcTodayLaunch>p{max-width:310px;font-size:11px}
-  .mcShellV3 .mcLaunchPath{gap:6px;margin-top:18px}
-  .mcShellV3 .mcLaunchPath span{padding:10px 8px;border-radius:11px}
-  .mcShellV3 .mcLaunchPath em{font-size:8px}
-  .mcShellV3 .mcLaunchActions{align-items:stretch;flex-direction:column}
-  .mcShellV3 .mcLaunchActions button{width:100%}
-  .mcShellV3 .mcLaunchPrimary{min-height:44px}
-  .mcShellV3 .mcLaunchSecondary{min-height:39px}
-
   .mcShellV3 .mcHealthBar{margin-left:2px;margin-right:2px}
   .mcShellV3 .mcHealthFacts{margin-left:0;margin-right:0}
   .mcShellV3 .mcTimeline{padding-left:0;padding-right:0}
   .mcShellV3 .mcSessionSummary{margin-left:0;margin-right:0}
   .mcShellV3 .mcSecondaryAction{margin-left:0;margin-right:0;width:100%}
   .mcShellV3 .mcTools{border:1px solid rgba(217,228,235,.1);border-radius:14px;background:rgba(8,13,16,.72)}
-}
-
-@media(max-width:390px){
-  .mcShellV3 .mcLaunchPath em{font-size:7.5px}
 }
 
 @keyframes mcArenaBreath{
