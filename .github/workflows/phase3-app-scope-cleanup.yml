@@ -1,0 +1,62 @@
+name: Phase 3 App Scope Cleanup
+
+on:
+  push:
+    branches:
+      - agent/phase-3-coach-dashboard
+    paths:
+      - .github/workflows/phase3-app-scope-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  narrow-app-diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out exact Phase 3 branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-3-coach-dashboard
+          fetch-depth: 0
+
+      - name: Restore frozen App source and apply only Phase 3 integration
+        shell: bash
+        run: |
+          git checkout fb4f254c53ecb1d9f11e430307ff4eb7d4e0f122 -- src/App.jsx
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const path = 'src/App.jsx';
+          let source = readFileSync(path, 'utf8');
+          const replacements = [
+            [
+              'const coachPlayerDashboardMetrics=useMemo(()=>buildCoachPlayerDashboardMetrics(coachPlayerDashboardRows),[coachPlayerDashboardRows]);',
+              'const coachPlayerDashboardMetrics=useMemo(()=>buildCoachPlayerDashboardMetrics(coachPlayerDashboardRows,persistedCoachPriorities?.weeklyMakesTarget),[coachPlayerDashboardRows,persistedCoachPriorities?.weeklyMakesTarget]);'
+            ],
+            [
+              '  activityItems={coachCommandActivityItems}\n  eventReadiness={coachEventDashboardMetrics.next}',
+              '  activityItems={coachCommandActivityItems}\n  programPulse={coachPlayerDashboardMetrics.programPulse}\n  eventReadiness={coachEventDashboardMetrics.next}'
+            ]
+          ];
+          for (const [before, after] of replacements) {
+            const count = source.split(before).length - 1;
+            if (count !== 1) throw new Error(`Expected exactly one App seam, found ${count}: ${before}`);
+            source = source.replace(before, after);
+          }
+          writeFileSync(path, source);
+          NODE
+
+      - name: Verify focused Phase 3 contracts
+        run: |
+          git diff --check
+          node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
+
+      - name: Remove temporary cleanup workflow and commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/phase3-app-scope-cleanup.yml
+          git add src/App.jsx
+          git commit -m "Narrow Phase 3 App integration"
+          git push origin HEAD:agent/phase-3-coach-dashboard
