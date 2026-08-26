@@ -12,9 +12,9 @@ permissions:
   contents: write
 
 jobs:
-  performance-diagnostic:
+  stabilize-coach-home:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - name: Check out exact Phase 3 branch
         uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
           const patch = (path, pairs) => {
             let source = readFileSync(path, 'utf8');
             for (const [before, after] of pairs) {
-              if (!source.includes(before)) throw new Error(`Missing optimization seam in ${path}: ${before}`);
+              if (!source.includes(before)) throw new Error(`Missing final seam in ${path}: ${before}`);
               source = source.replace(before, after);
             }
             writeFileSync(path, source);
@@ -50,10 +50,9 @@ jobs:
           patch('src/lib/coachOperationalDashboard.js', [
             ['  const eligibleAthletes = safeRows.length;\n', ''],
             ['  const totalGoal = goal > 0 ? goal * eligibleAthletes : 0;', '  const totalGoal = goal > 0 ? goal * safeRows.length : 0;'],
-            ['  const creditedMakes = totalGoal ? safeRows.reduce((total, row) => total + Math.min(Math.max(0, safeNumber(row.weeklyMakes)), goal), 0) : 0;', '  const creditedMakes = totalGoal ? safeRows.reduce((total, row) => total + Math.min(row.weeklyMakes, goal), 0) : 0;'],
+            ['  const creditedMakes = totalGoal ? safeRows.reduce((total, row) => total + Math.min(Math.max(0, safeNumber(row.weeklyMakes)), goal), 0) : 0;\n  const value = totalGoal ? Math.round((creditedMakes / totalGoal) * 100) : null;', '  const value = totalGoal ? Math.round((safeRows.reduce((total, row) => total + Math.min(row.weeklyMakes, goal), 0) / totalGoal) * 100) : null;'],
             ['    total: eligibleAthletes,', '    total: safeRows.length,'],
-            ['? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes, creditedMakes, totalGoal }', '? { value }'],
-            [': { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes, creditedMakes: 0, totalGoal: 0 },', ': { value: null },'],
+            ['    programPulse: totalGoal\n      ? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes, creditedMakes, totalGoal }\n      : { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes, creditedMakes: 0, totalGoal: 0 },', '    programPulse: { value },'],
           ]);
           patch('src/components/CoachCommandCenter.jsx', [
             ['  const available = Boolean(model?.available);\n', ''],
@@ -81,48 +80,43 @@ jobs:
             { email: "jordan@example.com", name: "Jordan" },
           ];
           const rowsFor = (shotLogs = [], players = roster) => buildCoachPlayerDashboardRows({ players, shotLogs, weekStart: "2026-08-23" });
-          const pulseFor = (shotLogs = [], weeklyGoal = 500, players = roster) => buildCoachPlayerDashboardMetrics(rowsFor(shotLogs, players), weeklyGoal).programPulse;
+          const pulseFor = (shotLogs = [], weeklyGoal = 500, players = roster) => buildCoachPlayerDashboardMetrics(rowsFor(shotLogs, players), weeklyGoal).programPulse.value;
 
-          test("Program Pulse caps each athlete at the shared Coach weekly goal", () => {
-            assert.deepEqual(pulseFor([
+          test("Program Pulse caps every athlete at the shared Coach weekly goal", () => {
+            assert.equal(pulseFor([
               { email: "ava@example.com", made: 650, date: "2026-08-24" },
               { email: "jordan@example.com", made: 250, date: "2026-08-25" },
-            ]), { value: 75 });
+            ]), 75);
           });
 
-          test("one over-goal athlete cannot compensate past 100% for another athlete", () => {
-            assert.deepEqual(pulseFor([
+          test("one over-goal athlete cannot compensate beyond that athlete's capped 100 percent", () => {
+            assert.equal(pulseFor([
               { email: "ava@example.com", made: 900, date: "2026-08-24" },
               { email: "jordan@example.com", made: 100, date: "2026-08-25" },
-            ]), { value: 60 });
+            ]), 60);
           });
 
-          test("Program Pulse reports zero when a valid weekly goal exists but the week has no makes", () => {
-            assert.deepEqual(pulseFor([], 500), { value: 0 });
-          });
+          test("valid weekly goal with zero weekly makes produces zero percent", () => assert.equal(pulseFor([], 500), 0));
 
-          test("Program Pulse is unavailable for missing, zero, negative, or rosterless goal denominators", () => {
-            const models = [
-              buildCoachPlayerDashboardMetrics(rowsFor(), undefined).programPulse,
-              pulseFor([], 0),
-              pulseFor([], -25),
-              pulseFor([], 500, []),
-            ];
-            for (const model of models) assert.deepEqual(model, { value: null });
+          test("missing, zero, negative, or rosterless weekly goals are unavailable", () => {
+            assert.deepEqual([
+              buildCoachPlayerDashboardMetrics(rowsFor(), undefined).programPulse.value,
+              pulseFor([], 0), pulseFor([], -25), pulseFor([], 500, []),
+            ], [null, null, null, null]);
           });
 
           test("out-of-week activity does not inflate Program Pulse", () => {
-            assert.deepEqual(pulseFor([
+            assert.equal(pulseFor([
               { email: "ava@example.com", made: 100, date: "2026-08-23" },
               { email: "ava@example.com", made: 500, date: "2026-08-16" },
-            ], 400), { value: 13 });
+            ], 400), 13);
           });
 
           test("non-roster activity does not inflate Program Pulse", () => {
-            assert.deepEqual(pulseFor([
+            assert.equal(pulseFor([
               { email: "ava@example.com", made: 100, date: "2026-08-23" },
               { email: "not-on-roster@example.com", made: 999, date: "2026-08-25" },
-            ], 400), { value: 13 });
+            ], 400), 13);
           });
 
           test("Coach identity never counts as an eligible Program Pulse athlete", () => {
@@ -132,47 +126,41 @@ jobs:
               { email: "coach@example.com", made: 999, date: "2026-08-25" },
             ], players);
             assert.equal(rows.length, 2);
-            assert.deepEqual(buildCoachPlayerDashboardMetrics(rows, 400).programPulse, { value: 13 });
+            assert.equal(buildCoachPlayerDashboardMetrics(rows, 400).programPulse.value, 13);
           });
           EOF
 
-      - name: Validate focused contracts
+      - name: Run focused Coach Home contracts
         run: |
           git diff --check
           node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
 
+      - name: Install pinned viewport debugger
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify viewport debugger contracts
+        run: node --test tests/viewport-debug-tooling.test.mjs
+
+      - name: Run Coach Home viewport fast loop
+        run: npm run debug:viewport -- --role=coach --widths=320,375,390,430
+
       - name: Enforce production performance budget
-        id: performance
-        continue-on-error: true
-        shell: bash
+        run: npm run build:performance
+
+      - name: Verify final tree discipline
         run: |
-          set -o pipefail
-          npm run build:performance 2>&1 | tee performance.log
-
-      - name: Upload performance diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase3-performance-${{ github.sha }}
-          path: |
-            performance.log
-            artifacts/performance/
-          if-no-files-found: warn
-          retention-days: 3
-
-      - name: Stop on performance failure
-        if: steps.performance.outcome == 'failure'
-        run: exit 1
+          git diff --check
+          test ! -e scripts/apply-phase3-coach-home-finish.mjs
+          test ! -e .github/workflows/phase3-coach-home-finish.yml
+          git status --short
 
       - name: Commit stabilized Phase 3 candidate
-        if: steps.performance.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet || git commit -m "Fold Program Pulse into Coach metrics pipeline"
+          git commit -m "Fold Program Pulse into Coach metrics pipeline"
           git push origin HEAD:agent/phase-3-coach-dashboard
-
-      - name: Performance diagnostic passed
-        if: steps.performance.outcome == 'success'
-        run: echo "Phase 3 source is inside the production JS budget; final viewport gate is next."
