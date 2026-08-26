@@ -51,7 +51,7 @@ const header = ruleBlock(mobile, '.mcHeader[data-testid="mission-control-team-he
 const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]')
 const identity = ruleBlock(mobile, '.mcHeroIdentity')
 const crest = ruleBlock(mobile, '.mcHeroTeamMark')
-const crestImage = ruleBlock(mobile, '.mcHeroTeamMark img')
+const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img')
 
 assertDeclaration(header, 'min-height', '56px')
 assertDeclaration(header, 'grid-template-columns', '44px minmax(0,1fr) 44px')
@@ -64,4 +64,4 @@ assertDeclaration(crestImage, 'width', '100%')
 assertDeclaration(crestImage, 'height', '100%')
 assertDeclaration(crestImage, 'object-fit', 'contain')
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, mobile header geometry, and source-owned crest containment verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, mobile header geometry, and base-owned crest containment verified`)
