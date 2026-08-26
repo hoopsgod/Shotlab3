@@ -18,7 +18,7 @@ const builtCss = fs.readdirSync(assetsDir)
 const requiredSelectors = [
   '.mcCourtArtwork',
   '.mcRailBrand',
-  '.mcRailBrand .mcRailLogo',
+  '.mcRailBrand img',
   '.mcDrawerLogo',
   '.mcDrawerLogo img',
 ]
@@ -31,6 +31,9 @@ if (missing.length) {
 const coachSource = fs.readFileSync(coachSourcePath, 'utf8')
 if (!/function CourtArtwork\(/.test(coachSource) || !/className="mcCourtArtwork"/.test(coachSource)) {
   throw new Error('Phase 5B could not verify the live Coach court artwork component contract')
+}
+if (!/className="mcRailLogo"/.test(coachSource)) {
+  throw new Error('Phase 5B could not verify the live Coach rail logo DOM contract')
 }
 
 for (const sourceOwnedIdentityContract of [
@@ -64,4 +67,4 @@ assertDeclaration(crestImage, 'width', '100%')
 assertDeclaration(crestImage, 'height', '100%')
 assertDeclaration(crestImage, 'object-fit', 'contain')
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, mobile header geometry, and base-owned crest containment verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, mobile header geometry, and base-owned crest containment verified`)
