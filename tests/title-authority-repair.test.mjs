@@ -194,7 +194,7 @@ test('no-logo handling is explicit, premium and Demo Titans branding is seeded d
   assert.match(coach, /data-team-logo-fallback=\{mark\}/);
   assert.match(coach, /<small>Add logo<\/small>/);
   assert.doesNotMatch(coach, /Click here to add your custom team logo/);
-  assert.match(demoData, /const DEMO_TEAM_BRANDING = Object\.freeze\(\{/);
+  assert.match(demoData, /const\s+DEMO_TEAM_BRANDING\s*=\s*Object\.freeze\(\{/);
   assert.match(demoData, /teamName:\s*"Demo Titans"/);
   assert.match(demoData, /logoUrl:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);
   assert.match(demoData, /logoMarkUrl:\s*"\/branding\/titans-default-mark\.svg"/);
