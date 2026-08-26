@@ -208,13 +208,17 @@ async function verifyRegisteredCoachVisualAxis(page, width) {
     page.getByTestId('coach-primary-objective').locator('.mcHeroIdentity'),
     `registered Coach Home ${width}px WebKit identity rail`,
   );
+  /* Program Pulse is an intentional full-bleed operational band. It must stay
+     symmetric and viewport-contained, but it does not own card-style gutters. */
   await expectSymmetricVisualGutters(
     page.locator('[data-testid="coach-command-center-full"] .mcFocusGrid'),
     `registered Coach Home ${width}px WebKit lower focus grid`,
+    0,
   );
   await expectVisibleDirectChildrenCentered(
     page.locator('[data-testid="coach-command-center-full"] .mcFocusGrid'),
     `registered Coach Home ${width}px WebKit lower focus grid`,
+    0,
   );
   const lowerGrid = page.locator('[data-testid="coach-command-center-full"] .mcLowerGrid');
   if (await lowerGrid.count()) {
