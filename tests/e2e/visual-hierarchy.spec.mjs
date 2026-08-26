@@ -76,8 +76,14 @@ test("player mobile home presents performance, interpretation, momentum, and one
   if (!(await progressDisclosure.evaluate((element) => element.open))) await progressDisclosure.locator("summary").click();
   const momentumSignal = page.getByTestId("player-daily-momentum-signal");
   await expect(momentumSignal).toBeVisible();
-  const signalText = [momentumSignal.getByText("Momentum", { exact: true }), momentumSignal.getByText("Daily target complete", { exact: true })];
-  for (const locator of signalText) {
+  // Momentum title is data-dependent. Certify the semantic states rather than
+  // pinning the demo to one completion phrase.
+  const signalCopy = momentumSignal.locator(":scope > div").first();
+  const signalEyebrow = signalCopy.locator(":scope > div").nth(0);
+  const signalTitle = signalCopy.locator(":scope > div").nth(1);
+  await expect(signalEyebrow).toHaveText("Momentum");
+  await expect(signalTitle).toHaveText(/^(Daily target complete|\d+ makes from today’s target|Your next action is ready)$/);
+  for (const locator of [signalEyebrow, signalTitle]) {
     await expect(locator).toBeVisible();
     const color = await locator.evaluate((element) => getComputedStyle(element).color);
     expect(color).not.toBe("rgb(245, 242, 234)");
@@ -117,7 +123,12 @@ test("coach mobile home presents populated decision intelligence and a current S
   expect(Math.abs(stageLeftRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(stageRightRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(stageLeftRail - stageRightRail)).toBeLessThanOrEqual(1);
-  expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(20); expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(20); expect(objectiveBox.height).toBeLessThan(520); expect(attentionBox.y).toBeLessThan(844);
+  // The approved Phase 4 hero composition uses a deliberate 16px inner rail.
+  expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(16);
+  expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(16);
+  expect(Math.abs(objectiveContentPadding.left - objectiveContentPadding.right)).toBeLessThanOrEqual(1);
+  expect(objectiveBox.height).toBeLessThan(520);
+  expect(attentionBox.y).toBeLessThan(844);
   await expectNoHorizontalOverflow(page);
   const dock = page.getByTestId("mobile-navigation-dock"); await expect(dock).toBeVisible(); await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.getByTestId("coach-events-mobile-page"), eventsHeader = page.getByTestId("coach-events-command-bar"), createEvent = visibleCreateEventButton(page);
