@@ -1,1 +1,0 @@
-Implementation progress: Program Pulse model, Coach Home hierarchy composition, live App wiring, and focused contracts are present. Full CI and visual certification still pending.
