@@ -20,7 +20,7 @@
 .performance-shell--coach [data-testid="coach-players-insight-grid"]{display:none}
 .performance-shell--coach [data-testid="coach-players-toolbar"]{margin:0;padding:15px 0;border:0;border-bottom:1px solid rgba(16,24,32,.12);background:transparent;box-shadow:none}
 .performance-shell--coach [data-testid="coach-players-filter-rail"]{border:0;border-radius:0;background:transparent;box-shadow:none}
-.performance-shell--coach [data-testid="coach-players-filter-rail"] button{min-height:42px;border-radius:0;box-shadow:none}
+.performance-shell--coach [data-testid="coach-players-filter-rail"] button{min-height:44px;border-radius:0;box-shadow:none}
 .performance-shell--coach [data-testid="coach-players-filter-rail"] button[aria-pressed="true"]{border-color:transparent;border-bottom:2px solid var(--page-accent,var(--accent));background:transparent;box-shadow:none}
 .performance-shell--coach:has([data-testid="coach-players-interactive-dashboard"]) [data-testid="coach-player-invite-dashboard-section"]{margin-top:22px;border:0!important;border-top:1px solid rgba(16,24,32,.12)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 .performance-shell--coach:has([data-testid="coach-players-interactive-dashboard"]) [data-testid="coach-player-invite-dashboard-section"] [class*="sectionSummary"]{margin-top:8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#69736d!important}
