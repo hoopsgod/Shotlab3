@@ -7,16 +7,25 @@ const demoData = fs.readFileSync("src/lib/demoData.js", "utf8");
 const expertReview = fs.readFileSync("scripts/apply-expert-app-review-v2.mjs", "utf8");
 const screenshotSpec = fs.readFileSync("tests/e2e/app-store-screenshots.spec.mjs", "utf8");
 
+const relativeLocalDate = (days) => {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return localDateKey(date);
+};
+
 test("demo content uses rolling local-calendar dates instead of expiring or UTC-shifted fixtures", () => {
   assert.match(demoData, /const relativeDate = \(days = 0\)/);
   assert.match(demoData, /date\.setHours\(12, 0, 0, 0\)/);
   assert.match(demoData, /date\.setDate\(date\.getDate\(\) \+ days\)/);
   assert.doesNotMatch(demoData, /setUTCHours|setUTCDate|toISOString\(\)\.slice\(0, 10\)/);
   assert.equal(localDateKey(new Date(2026, 7, 10, 23, 45)), "2026-08-10");
-  assert.match(demoData, /title: "Team Practice", date: relativeDate\(1\)/);
-  assert.match(demoData, /date: relativeDate\(3\)/);
-  assert.match(demoData, /date: relativeDate\(5\)/);
-  assert.match(demoData, /date: relativeDate\(8\)/);
+
+  const bundle = buildDemoDataBundle();
+  const dates = new Set(bundle.events.map((event) => event.date));
+  assert.equal(bundle.events.find((event) => event.id === "evt-upcoming-1")?.date, relativeLocalDate(1));
+  for (const days of [3, 5, 8]) assert.ok(dates.has(relativeLocalDate(days)), `demo schedule must include a rolling +${days} day event`);
+  assert.equal(bundle.events.length, 9, "public demo keeps a meaningfully populated schedule");
   assert.doesNotMatch(demoData, /date: "2026-0[34]-/);
 });
 
@@ -33,6 +42,9 @@ test("demo bundle preserves both role identities", () => {
   assert.match(demoData, /name: "Demo Coach"/);
   assert.match(demoData, /role: "coach"/);
   assert.match(demoData, /const players = coachRow \? \[coachRow, \.\.\.playerRows\] : playerRows/);
+  const bundle = buildDemoDataBundle({ coachEmail: "coach.demo@shotlab.app" });
+  assert.equal(bundle.players.filter((row) => row.role === "player").length, 12);
+  assert.equal(bundle.players.find((row) => row.email === "demo@shotlab.app")?.name, "Demo Player");
 });
 
 test("demo entry refreshes managed demos without overwriting scoped custom data", () => {
