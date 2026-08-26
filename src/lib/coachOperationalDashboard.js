@@ -106,7 +106,8 @@ export function buildCoachPlayerDashboardMetrics(rows = [], weeklyGoal) {
   const safeRows = safeArray(rows);
   const goal = safeNumber(weeklyGoal);
   const totalGoal = goal > 0 ? goal * safeRows.length : 0;
-  const value = totalGoal ? Math.round((safeRows.reduce((total, row) => total + Math.min(row.weeklyMakes, goal), 0) / totalGoal) * 100) : null;
+  const creditedMakes = totalGoal ? safeRows.reduce((total, row) => total + Math.min(Math.max(0, safeNumber(row.weeklyMakes)), goal), 0) : 0;
+  const value = totalGoal ? Math.round((creditedMakes / totalGoal) * 100) : null;
   return {
     total: safeRows.length,
     active: safeRows.filter((row) => row.statusKey === "active").length,
@@ -114,7 +115,9 @@ export function buildCoachPlayerDashboardMetrics(rows = [], weeklyGoal) {
     weeklyMakes: safeRows.reduce((total, row) => total + row.weeklyMakes, 0),
     weeklyActions: safeRows.reduce((total, row) => total + row.weeklyActivityCount, 0),
     leader: safeRows[0] || null,
-    programPulse: { value },
+    programPulse: totalGoal
+      ? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes: safeRows.length, creditedMakes, totalGoal }
+      : { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes: safeRows.length, creditedMakes: 0, totalGoal: 0 },
   };
 }
 
@@ -129,22 +132,9 @@ export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster =
     const date = String(event.date || "");
     const statusKey = date && today && date < today ? "past" : "upcoming";
     return {
-      key: String(event.id || `${event.title}-${date}`),
-      event,
-      title: event.title || "Team Event",
-      type: normalizeEventType(event.type),
-      date,
-      time: event.time || "TBD",
-      location: event.location || "Location TBD",
-      rosterCount,
-      responded,
-      rsvpConfirmed: responded,
-      awaitingResponse,
-      confirmed: responded,
-      missing: awaitingResponse,
-      responseRate,
-      attendanceRecorded,
-      statusKey,
+      key: String(event.id || `${event.title}-${date}`), event, title: event.title || "Team Event", type: normalizeEventType(event.type), date,
+      time: event.time || "TBD", location: event.location || "Location TBD", rosterCount, responded, rsvpConfirmed: responded,
+      awaitingResponse, confirmed: responded, missing: awaitingResponse, responseRate, attendanceRecorded, statusKey,
       needsResponse: statusKey === "upcoming" && awaitingResponse > 0,
     };
   }).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
@@ -173,17 +163,9 @@ export function buildCoachEventDashboardMetrics(rows = []) {
   const responseRate = rosterSlots ? Math.round((responded / rosterSlots) * 100) : 0;
   const attendanceRecorded = safeRows.filter((row) => row.statusKey === "past").reduce((total, row) => total + safeNumber(row.attendanceRecorded), 0);
   return {
-    total: safeRows.length,
-    upcoming: upcoming.length,
-    past: safeRows.filter((row) => row.statusKey === "past").length,
-    responded,
-    rsvpConfirmed: responded,
-    awaitingResponse,
-    confirmed: responded,
-    missing: awaitingResponse,
-    responseRate,
-    attendanceRecorded,
-    next: upcoming[0] || null,
+    total: safeRows.length, upcoming: upcoming.length, past: safeRows.filter((row) => row.statusKey === "past").length,
+    responded, rsvpConfirmed: responded, awaitingResponse, confirmed: responded, missing: awaitingResponse, responseRate,
+    attendanceRecorded, next: upcoming[0] || null,
   };
 }
 
