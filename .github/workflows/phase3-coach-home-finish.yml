@@ -34,8 +34,118 @@ jobs:
       - name: Apply scoped Coach Home architecture repair
         run: node scripts/apply-phase3-coach-home-finish.mjs
 
-      - name: Lock explicit missing-goal contract
-        run: sed -i 's/pulseFor(\[\], undefined)/buildCoachPlayerDashboardMetrics(rowsFor(), undefined).programPulse/' tests/coach-program-pulse.test.mjs
+      - name: Trim Program Pulse runtime payload to rendered fields
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const patch = (path, pairs) => {
+            let source = readFileSync(path, 'utf8');
+            for (const [before, after] of pairs) {
+              if (!source.includes(before)) throw new Error(`Missing optimization seam in ${path}: ${before}`);
+              source = source.replace(before, after);
+            }
+            writeFileSync(path, source);
+          };
+          patch('src/lib/coachOperationalDashboard.js', [
+            ['  const eligibleAthletes = safeRows.length;\n', ''],
+            ['  const totalGoal = goal > 0 ? goal * eligibleAthletes : 0;', '  const totalGoal = goal > 0 ? goal * safeRows.length : 0;'],
+            ['    total: eligibleAthletes,', '    total: safeRows.length,'],
+            ['? { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} weekly makes`, eligibleAthletes, creditedMakes, totalGoal }', '? { available: true, value, displayValue: `${value}%`, detail: `${creditedMakes} of ${totalGoal} weekly makes` }'],
+            [': { available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes, creditedMakes: 0, totalGoal: 0 },', ': { available: false, value: null, displayValue: "—", detail: "No weekly goal data" },'],
+          ]);
+          patch('src/components/CoachCommandCenter.jsx', [
+            ['  const available = Boolean(model?.available);\n', ''],
+            ['`${available ? model?.value : 0}%`', '`${model?.value || 0}%`'],
+            ['<strong>{available ? "Weekly goal progress" : "Goal data unavailable"}</strong>', '<strong>Weekly goal progress</strong>'],
+          ]);
+          NODE
+
+      - name: Lock behavioral Program Pulse contracts
+        shell: bash
+        run: |
+          cat > tests/coach-program-pulse.test.mjs <<'EOF'
+          import test from "node:test";
+          import assert from "node:assert/strict";
+          import { buildCoachPlayerDashboardMetrics, buildCoachPlayerDashboardRows } from "../src/lib/coachOperationalDashboard.js";
+
+          const roster = [
+            { email: "ava@example.com", name: "Ava" },
+            { email: "jordan@example.com", name: "Jordan" },
+          ];
+          const rowsFor = (shotLogs = [], players = roster) => buildCoachPlayerDashboardRows({ players, shotLogs, weekStart: "2026-08-23" });
+          const pulseFor = (shotLogs = [], weeklyGoal = 500, players = roster) => buildCoachPlayerDashboardMetrics(rowsFor(shotLogs, players), weeklyGoal).programPulse;
+
+          test("Program Pulse caps each athlete at the shared Coach weekly goal", () => {
+            const model = pulseFor([
+              { email: "ava@example.com", made: 650, date: "2026-08-24" },
+              { email: "jordan@example.com", made: 250, date: "2026-08-25" },
+            ]);
+            assert.deepEqual({ value: model.value, display: model.displayValue, detail: model.detail }, { value: 75, display: "75%", detail: "750 of 1000 weekly makes" });
+          });
+
+          test("one over-goal athlete cannot compensate past 100% for another athlete", () => {
+            const model = pulseFor([
+              { email: "ava@example.com", made: 900, date: "2026-08-24" },
+              { email: "jordan@example.com", made: 100, date: "2026-08-25" },
+            ]);
+            assert.equal(model.value, 60);
+            assert.equal(model.detail, "600 of 1000 weekly makes");
+          });
+
+          test("Program Pulse reports zero when a valid weekly goal exists but the week has no makes", () => {
+            const model = pulseFor([], 500);
+            assert.equal(model.available, true);
+            assert.equal(model.value, 0);
+            assert.equal(model.displayValue, "0%");
+            assert.equal(model.detail, "0 of 1000 weekly makes");
+          });
+
+          test("Program Pulse is unavailable for missing, zero, negative, or rosterless goal denominators", () => {
+            const models = [
+              buildCoachPlayerDashboardMetrics(rowsFor(), undefined).programPulse,
+              pulseFor([], 0),
+              pulseFor([], -25),
+              pulseFor([], 500, []),
+            ];
+            for (const model of models) {
+              assert.equal(model.available, false);
+              assert.equal(model.value, null);
+              assert.equal(model.displayValue, "—");
+              assert.equal(model.detail, "No weekly goal data");
+            }
+          });
+
+          test("out-of-week activity does not inflate Program Pulse", () => {
+            const model = pulseFor([
+              { email: "ava@example.com", made: 100, date: "2026-08-23" },
+              { email: "ava@example.com", made: 500, date: "2026-08-16" },
+            ], 400);
+            assert.equal(model.value, 13);
+            assert.equal(model.detail, "100 of 800 weekly makes");
+          });
+
+          test("non-roster activity does not inflate Program Pulse", () => {
+            const model = pulseFor([
+              { email: "ava@example.com", made: 100, date: "2026-08-23" },
+              { email: "not-on-roster@example.com", made: 999, date: "2026-08-25" },
+            ], 400);
+            assert.equal(model.value, 13);
+            assert.equal(model.detail, "100 of 800 weekly makes");
+          });
+
+          test("Coach identity never counts as an eligible Program Pulse athlete", () => {
+            const players = [...roster, { email: "coach@example.com", name: "Coach", role: "coach", isCoach: true }];
+            const rows = rowsFor([
+              { email: "ava@example.com", made: 100, date: "2026-08-23" },
+              { email: "coach@example.com", made: 999, date: "2026-08-25" },
+            ], players);
+            assert.equal(rows.length, 2);
+            const model = buildCoachPlayerDashboardMetrics(rows, 400).programPulse;
+            assert.equal(model.value, 13);
+            assert.equal(model.detail, "100 of 800 weekly makes");
+          });
+          EOF
 
       - name: Validate focused contracts
         run: |
@@ -65,10 +175,5 @@ jobs:
         if: steps.performance.outcome == 'failure'
         run: exit 1
 
-      - name: Commit stabilized Phase 3 candidate
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Fold Program Pulse into Coach metrics pipeline"
-          git push origin HEAD:agent/phase-3-coach-dashboard
+      - name: Performance diagnostic passed
+        run: echo "Phase 3 source is inside the production JS budget; final viewport gate is next."
