@@ -15,9 +15,9 @@ const relativeLocalDate = (days) => {
 };
 
 test("demo content uses rolling local-calendar dates instead of expiring or UTC-shifted fixtures", () => {
-  assert.match(demoData, /const relativeDate = \(days = 0\)/);
-  assert.match(demoData, /date\.setHours\(12, 0, 0, 0\)/);
-  assert.match(demoData, /date\.setDate\(date\.getDate\(\) \+ days\)/);
+  assert.match(demoData, /const\s+relativeDate\s*=\s*\(days\s*=\s*0\)/);
+  assert.match(demoData, /date\.setHours\(12\s*,\s*0\s*,\s*0\s*,\s*0\)/);
+  assert.match(demoData, /date\.setDate\(date\.getDate\(\)\s*\+\s*days\)/);
   assert.doesNotMatch(demoData, /setUTCHours|setUTCDate|toISOString\(\)\.slice\(0, 10\)/);
   assert.equal(localDateKey(new Date(2026, 7, 10, 23, 45)), "2026-08-10");
 
@@ -26,22 +26,22 @@ test("demo content uses rolling local-calendar dates instead of expiring or UTC-
   assert.equal(bundle.events.find((event) => event.id === "evt-upcoming-1")?.date, relativeLocalDate(1));
   for (const days of [3, 5, 8]) assert.ok(dates.has(relativeLocalDate(days)), `demo schedule must include a rolling +${days} day event`);
   assert.equal(bundle.events.length, 9, "public demo keeps a meaningfully populated schedule");
-  assert.doesNotMatch(demoData, /date: "2026-0[34]-/);
+  assert.doesNotMatch(demoData, /date\s*:\s*"2026-0[34]-/);
 });
 
 test("managed storage wrappers preserve null so localStorage can remain the fallback", () => {
   assert.equal(unwrapManagedStorageValue({ value: null }), null);
   assert.equal(unwrapManagedStorageValue({ value: "[]" }), "[]");
   assert.equal(unwrapManagedStorageValue("[]"), "[]");
-  assert.match(demoData, /Object\.prototype\.hasOwnProperty\.call\(result, "value"\)/);
-  assert.doesNotMatch(demoData, /result\?\.value \?\? result/);
+  assert.match(demoData, /Object\.prototype\.hasOwnProperty\.call\(result\s*,\s*"value"\)/);
+  assert.doesNotMatch(demoData, /result\?\.value\s*\?\?\s*result/);
 });
 
 test("demo bundle preserves both role identities", () => {
-  assert.match(demoData, /const coachRow = coachEmail \?/);
-  assert.match(demoData, /name: "Demo Coach"/);
-  assert.match(demoData, /role: "coach"/);
-  assert.match(demoData, /const players = coachRow \? \[coachRow, \.\.\.playerRows\] : playerRows/);
+  assert.match(demoData, /coachRow\s*=\s*coachEmail\s*\?/);
+  assert.match(demoData, /name\s*:\s*"Demo Coach"/);
+  assert.match(demoData, /role\s*:\s*"coach"/);
+  assert.match(demoData, /players\s*:\s*coachRow\s*\?\s*\[coachRow,\s*\.\.\.playerRows\]\s*:\s*playerRows/);
   const bundle = buildDemoDataBundle({ coachEmail: "coach.demo@shotlab.app" });
   assert.equal(bundle.players.filter((row) => row.role === "player").length, 12);
   assert.equal(bundle.players.find((row) => row.email === "demo@shotlab.app")?.name, "Demo Player");
@@ -57,7 +57,7 @@ test("demo entry refreshes managed demos without overwriting scoped custom data"
   assert.match(expertReview, /await applyDemoData\(demoBundle\)/);
   assert.match(expertReview, /await hydratePersistedData\(\)/);
   assert.match(expertReview, /np=demoBundle\.players/);
-  assert.match(demoData, /mergeDemoCollection\(existing, incoming/);
+  assert.match(demoData, /mergeDemoCollection\(existing\s*,\s*incoming/);
 });
 
 test("demo collection refresh replaces only managed demo rows and preserves unrelated local data", () => {
