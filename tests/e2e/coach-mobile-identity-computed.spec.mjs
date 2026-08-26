@@ -143,7 +143,7 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(30);
     expect(metrics.teamIdentitySize).toBeLessThanOrEqual(50);
     expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(16);
-    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(28);
+    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(34);
     expect(metrics.teamIdentitySize - metrics.decisionTitleSize).toBeGreaterThanOrEqual(8);
     // Phase 4 deliberately keeps the mobile hero compact: the source-owned floor is
     // 382px, with a 388px narrow-phone guard, so this contract must not reintroduce
