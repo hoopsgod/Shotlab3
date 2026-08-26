@@ -34,6 +34,9 @@ jobs:
       - name: Apply scoped Coach Home architecture repair
         run: node scripts/apply-phase3-coach-home-finish.mjs
 
+      - name: Lock explicit missing-goal contract
+        run: sed -i 's/pulseFor(\[\], undefined)/buildCoachPlayerDashboardMetrics(rowsFor(), undefined).programPulse/' tests/coach-program-pulse.test.mjs
+
       - name: Validate diff discipline
         run: |
           git diff --check
@@ -41,7 +44,24 @@ jobs:
           git diff -- src/App.jsx src/components/CoachCommandCenter.jsx src/lib/coachOperationalDashboard.js tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs
 
       - name: Run focused Coach Home contracts
-        run: node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
+        id: focused
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs 2>&1 | tee focused-tests.log
+
+      - name: Upload focused test diagnostics
+        if: steps.focused.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3-focused-tests-${{ github.sha }}
+          path: focused-tests.log
+          retention-days: 3
+
+      - name: Stop on focused contract failure
+        if: steps.focused.outcome == 'failure'
+        run: exit 1
 
       - name: Install pinned viewport debugger
         run: npm install --no-save --package-lock=false @playwright/test@1.55.1
