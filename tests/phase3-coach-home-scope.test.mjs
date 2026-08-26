@@ -5,9 +5,9 @@ import fs from "node:fs";
 const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const commandSource = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 
-test("Phase 3 Coach Home wires the truthful Program Pulse model into Mission Control", () => {
-  assert.match(appSource, /deriveCoachProgramPulse/);
-  assert.match(appSource, /const coachProgramPulse=useMemo\(\(\)=>deriveCoachProgramPulse\(\{roster:coachRosterPlayers,shotLogs:safeShotLogs,weeklyGoal:persistedCoachPriorities\?\.weeklyMakesTarget,weekStart:weekStr\}\)/);
+test("Phase 3 Coach Home wires truthful Program Pulse through the existing Coach player-row model", () => {
+  assert.match(appSource, /buildCoachProgramPulse/);
+  assert.match(appSource, /const coachProgramPulse=useMemo\(\(\)=>buildCoachProgramPulse\(coachPlayerDashboardRows,persistedCoachPriorities\?\.weeklyMakesTarget\)/);
   assert.match(appSource, /programPulse=\{coachProgramPulse\}/);
   assert.match(commandSource, /data-testid="coach-program-pulse"/);
   assert.match(commandSource, /data-testid="coach-athlete-attention"/);
