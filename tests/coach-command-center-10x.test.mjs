@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { assertDeclaration, declaration, mediaBlock, ruleBlock } from "./helpers/css-contract.mjs";
 
 const source=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
 const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8");
@@ -16,6 +17,14 @@ const activationCss=fs.readFileSync(new URL("../src/components/CoachActivationPa
 const cascadeLockCss=fs.readFileSync(new URL("../src/styles/MissionControlCascadeLock2026.css",import.meta.url),"utf8");
 const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js",import.meta.url),"utf8");
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
+
+const mobileTitle=mediaBlock(titleCss,"(max-width:700px)");
+const mobileHero=ruleBlock(mobileTitle,'.mcHero[data-team-identity-stage="coach-mission-control"]');
+const mobileHeroContent=ruleBlock(mobileTitle,".mcHeroContent");
+const mobileHeroIdentity=ruleBlock(mobileTitle,".mcHeroIdentity");
+const mobileHeroMark=ruleBlock(mobileTitle,".mcHeroTeamMark");
+const mobileHeroMarkImage=ruleBlock(mobileTitle,".mcHeroTeamMark img");
+const mobileTitleHeading=ruleBlock(mobileTitle," h1");
 
 test("coach dashboard answers the 30-second workflow questions with the Phase 3 evidence hierarchy",()=>{
   ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Upcoming Event"].forEach(label=>assert.match(source,new RegExp(label)));
@@ -75,10 +84,15 @@ test("Coach identity chapter and tactical court use one visible source-owned ful
   assert.match(source,/data-team-identity-stage="coach-mission-control"/);
   assert.match(source,/CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(source,/MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(titleCss,/\.mcHeroTeamMark\s*\{[\s\S]*width:\s*var\(--coach-hero-crest\);[\s\S]*height:\s*var\(--coach-hero-crest\)/);
-  assert.match(titleCss,/\.mcHeroTeamMark img\s*\{[\s\S]*object-fit:\s*contain/);
-  assert.match(titleCss,/\.mcCourtArtwork\s*\{[\s\S]*display:\s*block/);
+
+  assertDeclaration(mobileHeroIdentity,"--coach-hero-crest",/^clamp\(96px,\s*26vw,\s*108px\)$/);
+  for (const property of ["width","height","min-width","min-height","max-width","max-height"]) {
+    assertDeclaration(mobileHeroMark,property,"var(--coach-hero-crest)");
+  }
+  assertDeclaration(mobileHeroMarkImage,"object-fit","contain");
+  assertDeclaration(mobileHeroMarkImage,"width","100%");
+  assertDeclaration(mobileHeroMarkImage,"height","100%");
+  assert.ok(mobileTitle.includes(".mcCourtArtwork"),"mobile title stage must retain court artwork ownership");
   assert.doesNotMatch(titleCss,/!important/);
   assert.match(premiumCss,/mix-blend-mode:screen/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
@@ -112,7 +126,7 @@ test("one truthful activation path replaces generic onboarding and exposes only 
   assert.doesNotMatch(source,/Practice plan/);
   assert.match(activationCss,/\.mcActivationPlan/);
   assert.match(activationCss,/\.mcActivationProgressTrack/);
-  assert.match(activationCss,/@media\(max-width:700px\)/);
+  mediaBlock(activationCss,"(max-width:700px)");
 });
 
 test("coach tools remain available without permanent dashboard clutter",()=>{
@@ -144,17 +158,17 @@ test("responsive CSS creates a native-feeling mobile operating system with Playe
   assert.match(css,/grid-template-columns:112px minmax\(0,1fr\)/);
   assert.match(css,/\.mcHeroContent\{[^}]*color:#f4f7f8/);
   assert.match(css,/\.mcEyebrow\{[^}]*color:var\(--mc\)/);
-  assert.match(css,/@media\(max-width:980px\)/);
-  assert.match(css,/@media\(max-width:700px\)/);
+  mediaBlock(css,"(max-width:980px)");
+  mediaBlock(css,"(max-width:700px)");
   assert.match(css,/mission-control-active/);
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s*\{[\s\S]*min-height:\s*382px/);
+  assertDeclaration(mobileHero,"min-height","382px");
   assert.doesNotMatch(titleCss,/\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
-  assert.match(titleCss,/\.mcHero\[data-team-identity-stage="coach-mission-control"\]\s+h1\s*\{[\s\S]*clamp\(39px,\s*10\.5vw,\s*45px\)/);
-  assert.match(titleCss,/--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(titleCss,/\.mcHeroContent\s*\{[\s\S]*width:\s*100%/);
+  assert.match(declaration(mobileTitleHeading,"font") ?? "",/clamp\(39px,\s*10\.5vw,\s*45px\)/);
+  assertDeclaration(mobileHeroIdentity,"--coach-hero-crest",/^clamp\(96px,\s*26vw,\s*108px\)$/);
+  assertDeclaration(mobileHeroContent,"width","100%");
   assert.doesNotMatch(titleCss,/!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
@@ -166,9 +180,12 @@ test("responsive CSS creates a native-feeling mobile operating system with Playe
   assert.match(navigationCss,/\.dockItem\s*\{[\s\S]*?min-height:\s*48px/);
   assert.match(navigationCss,/\.dockLabelText\s*\{[\s\S]*?font-size:\s*var\(--type-micro, 11px\)/);
   assert.doesNotMatch(navigationCss,/\.dock\s*\{[^}]*translateX\(-50%\)/s);
-  assert.match(titleCss,/\.mcPrimary:active/);
-  assert.match(titleCss,/@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
+  assert.ok(mobileTitle.includes(".mcPrimary:active"),"mobile primary action must retain pressed feedback");
+
+  const reducedMotion=mediaBlock(titleCss,"(prefers-reduced-motion:reduce)");
+  const reducedAction=ruleBlock(reducedMotion,".mcRealityStrip button");
+  assertDeclaration(reducedAction,"transition","none");
+  mediaBlock(activationCss,"(prefers-reduced-motion:reduce)");
 });
 
 test("Mission Control uses the modern native support system while title and decision geometry remain component-owned",()=>{
@@ -178,8 +195,13 @@ test("Mission Control uses the modern native support system while title and deci
   assert.match(finalCss,/\.mcSectionHead h2,[\s\S]*font:\s*760 25px\/1\.04 var\(--mc-native\)/);
   assert.doesNotMatch(finalCss,/--mc-title-size|--mc-radius-hero/);
   assert.doesNotMatch(finalCss,/\.mcHero\s+h1\s*\{|\.mcHeroTeamMark\s*\{|\.mcHeroContent\s*>\s*p\s*\{/);
-  assert.match(headerCss,/@media\(max-width:700px\)[\s\S]*\.mcHeader\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) 44px/);
+
+  const compactHeader=mediaBlock(titleCss,"(max-width:700px)");
+  const header=ruleBlock(compactHeader,'.mcHeader[data-testid="mission-control-team-header"]');
+  assertDeclaration(header,"grid-template-columns","44px minmax(0,1fr) 44px");
+  assertDeclaration(header,"min-height","56px");
   assert.doesNotMatch(titleCss,/\.mcHeroIdentity::after\s*\{/);
-  assert.match(titleCss,/\.mcHeroContent>p\s*\{[\s\S]*12px/);
+  const bodyCopy=ruleBlock(compactHeader,".mcHeroContent>p");
+  assert.match(declaration(bodyCopy,"font") ?? "",/12px/);
   assert.match(finalCss,/\.mcSection\{[\s\S]*border-radius:0[\s\S]*box-shadow:none/);
 });
