@@ -5,6 +5,7 @@ on:
     branches:
       - agent/phase-3-coach-dashboard
     paths:
+      - scripts/apply-phase3-final-bundle-trim.mjs
       - .github/workflows/phase3-final-bundle-trim.yml
 
 permissions:
@@ -15,72 +16,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Check out exact branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: agent/phase-3-coach-dashboard
           fetch-depth: 0
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Remove redundant Program Pulse presentation cost
-        shell: bash
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync } from 'node:fs';
-          const path = 'src/components/CoachCommandCenter.jsx';
-          let source = readFileSync(path, 'utf8');
-          const before = `function ProgramPulsePanel({ model, onOpen }) {
-  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly standard</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{model?.value == null ? "—" : \`${'${model.value}'}%\`}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: \`${'${model?.value || 0}'}%\` }} /></div><div className="mcAllClear"><div><strong>Weekly goal progress</strong><small>{model?.value == null ? "No weekly goal data" : "Weekly makes target"}</small></div></div>{onOpen ? <button type="button" className="mcTextLink" onClick={onOpen}>Review weekly progress <Icon name="arrow" size={15} /></button> : null}</article>;
-}`;
-          const after = `function ProgramPulsePanel({ model }) {
-  const value = model?.value;
-  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly goal</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{value == null ? "—" : \`${'${value}'}%\`}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: \`${'${value || 0}'}%\` }} /></div>{value == null ? <div className="mcAllClear"><div><small>No weekly goal data</small></div></div> : null}</article>;
-}`;
-          if (!source.includes(before)) throw new Error('Program Pulse panel seam not found');
-          source = source.replace(before, after)
-            .replace('  const hasTeamActivity = activeCount > 0;\n', '')
-            .replace('  const pulsePanel = <ProgramPulsePanel model={programPulse} onOpen={onPlayersClick} />;', '  const pulsePanel = <ProgramPulsePanel model={programPulse} />;');
-          writeFileSync(path, source);
-
-          const testPath = 'tests/coach-command-center-10x.test.mjs';
-          let testSource = readFileSync(testPath, 'utf8');
-          testSource = testSource
-            .replace('assert.match(source,/model\\?\\.value == null \\? "—"/);', 'assert.match(source,/value == null \\? "—"/);')
-            .replace('assert.match(source,/model\\?\\.value == null \\? "No weekly goal data"/);', 'assert.match(source,/value == null \\? <div className="mcAllClear"/);\n  assert.match(source,/No weekly goal data/);');
-          writeFileSync(testPath, testSource);
-          NODE
+      - run: npm ci
+      - run: node scripts/apply-phase3-final-bundle-trim.mjs
+      - run: |
           cp src/components/CoachCommandCenter.jsx /tmp/CoachCommandCenter.jsx
           cp tests/coach-command-center-10x.test.mjs /tmp/coach-command-center-10x.test.mjs
-
-      - name: Run focused Coach Home contracts
-        run: |
           git diff --check
           node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs
-
-      - name: Enforce production performance budget
-        shell: bash
-        run: npm run build:performance
-
-      - name: Restore source-owned candidate after build tooling
-        if: success()
-        run: |
+      - run: npm run build:performance
+      - run: |
           cp /tmp/CoachCommandCenter.jsx src/components/CoachCommandCenter.jsx
           cp /tmp/coach-command-center-10x.test.mjs tests/coach-command-center-10x.test.mjs
-
-      - name: Commit only the scoped source repair
-        if: success()
-        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/phase3-final-bundle-trim.yml
+          git rm .github/workflows/phase3-final-bundle-trim.yml scripts/apply-phase3-final-bundle-trim.mjs
           git add src/components/CoachCommandCenter.jsx tests/coach-command-center-10x.test.mjs
           git diff --cached --check
           git commit -m "Trim redundant Program Pulse presentation cost"
