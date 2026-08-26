@@ -103,7 +103,6 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 @media(max-width:700px){
   /* Final + TitleStage own mobile Coach Home composition; these rules retain
      only V2 values that still affect the effective cascade. */
-  .mcTeamHealth{order:2}
   .mcTextLink{margin:14px 16px 17px}
   .mcRowAction{grid-column:3;justify-self:start;margin-top:-5px}
   .mcTimeline{padding:10px 12px 5px}.mcTimeline time{grid-column:2;margin-top:-4px}
