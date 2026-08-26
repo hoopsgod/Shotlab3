@@ -1,89 +1,9 @@
+/* Historical Mission Control cascade lock reduced to external compatibility.
+   Mounted Coach Home geometry and composition must not be repaired from a late
+   global stylesheet; CoachMissionControlShell.css owns the legacy parent-shell
+   bridge and CoachMissionControlTitleStage.css owns the page itself. */
 html body #root .performance-workspace--coach.page{animation-fill-mode:none!important}
 
-/* Late compatibility is intentionally shell/support-only. Coach mobile header,
-   identity, decision, metrics, CTA and Athlete Attention are component-owned. */
 @media(max-width:980px){
   html body.mission-control-active #root .ts-launcher{display:none!important}
-
-  /* Coach Home is not a secondary page. The shared registered Coach rail carries
-     the normal 16-20px editorial gutter for secondary routes; on Home that gutter
-     must be retired before Mission Control mounts or the whole full-bleed stage
-     starts one gutter inside the left edge. Keep secondary-route gutters intact by
-     scoping this reset to the mounted mission-control body state only. */
-  html body.mission-control-active #root .performance-workspace--coach,
-  html body.mission-control-active #root .performance-shell--coach .coach-scroll-container{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    margin-left:0!important;
-    margin-right:0!important;
-    padding-left:0!important;
-    padding-right:0!important;
-    box-sizing:border-box!important;
-    overflow-x:clip!important;
-  }
-
-  /* The authenticated Coach shell is already full-width on mobile. Do not break
-     Mission Control back out with 100vw/negative viewport margins: iOS Safari can
-     resolve that legacy pattern against a wider layout viewport. Once the paid
-     Coach parent gutter above is removed, every Home layer can stay on a simple
-     100% visual-viewport axis. */
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    margin-left:0!important;
-    margin-right:0!important;
-    overflow-x:clip!important;
-    box-sizing:border-box!important;
-    box-shadow:0 -36px 0 #082731!important;
-  }
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    margin:0!important;
-    padding-left:max(12px,env(safe-area-inset-left))!important;
-    padding-right:max(12px,env(safe-area-inset-right))!important;
-    overflow-x:clip!important;
-    box-sizing:border-box!important;
-  }
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeader,
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero{
-    box-sizing:border-box!important;
-  }
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroContent{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-  }
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcCourtArtwork{opacity:.99!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroScrim{opacity:.18!important}
-}
-
-/* Demo's populated Home does not expose the intrinsic-width failure because its
-   lower panel mix is different. A real paid onboarding/no-roster state mounts
-   additional enhancer hosts into these grids. Use a zero-minimum track so one
-   wide child can never expand the entire lower Home rail past the viewport. */
-@media(max-width:700px){
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcFocusGrid,
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcLowerGrid{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    grid-template-columns:minmax(0,1fr)!important;
-    box-sizing:border-box!important;
-  }
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcFocusGrid>*,
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcLowerGrid>*{
-    min-width:0!important;
-    max-width:100%!important;
-    box-sizing:border-box!important;
-  }
-}
-
-@media(min-width:701px){
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan{grid-template-columns:48px minmax(0, 1fr)!important;align-items:start!important}
-  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan > button{grid-column: 1 / -1 !important;width:100%!important}
 }
