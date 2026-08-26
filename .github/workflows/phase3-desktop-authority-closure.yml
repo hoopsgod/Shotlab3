@@ -41,11 +41,11 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Move desktop authority to source-owned title stage
+      - name: Restore canonical Coach Home authority
         run: node scripts/apply-phase3-desktop-authority-closure.mjs
 
-      - name: Verify hierarchy ownership and Phase 3 scope
-        run: node --test tests/mission-control-hierarchy-2026.test.mjs tests/phase3-coach-home-scope.test.mjs
+      - name: Verify hierarchy and title ownership contracts
+        run: node --test tests/mission-control-hierarchy-2026.test.mjs tests/title-authority-repair.test.mjs tests/phase3-coach-home-scope.test.mjs
 
       - name: Run Viewport Debug fast loop
         run: npm run debug:viewport -- --widths=320,375,390,430
@@ -59,9 +59,9 @@ jobs:
       - name: Commit only verified source repair
         run: |
           git rm .github/workflows/phase3-desktop-authority-closure.yml scripts/apply-phase3-desktop-authority-closure.mjs
-          git add src/styles/MissionControlHierarchy2026.css src/components/CoachMissionControlTitleStage.css tests/phase3-coach-home-scope.test.mjs
+          git add src/styles/MissionControlHierarchy2026.css src/components/CoachMissionControlV2.css src/components/CoachMissionControlTitleStage.css tests/phase3-coach-home-scope.test.mjs
           git diff --cached --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Finalize Coach Home desktop authority closure"
+          git commit -m "Finalize Coach Home canonical authority"
           git push origin HEAD:agent/phase-3-coach-dashboard
