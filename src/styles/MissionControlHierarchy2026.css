@@ -68,15 +68,10 @@ body.mission-control-active .mcShellV3 .mcSection p,
 body.mission-control-active .mcShellV3 .mcSection small,
 body.mission-control-active [data-testid="coach-assignment-accountability"] small,
 body.mission-control-active [data-testid="coach-follow-up-queue"] small { color: var(--mc-muted) !important; letter-spacing: 0 !important; text-transform: none !important; }
-body.mission-control-active .mcShellV3 .mcAttentionRow,
 body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow,
 body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityEmpty,
 body.mission-control-active [data-testid="coach-follow-up-queue"] button { border-color: var(--mc-line) !important; background: var(--mc-surface-quiet) !important; color: var(--mc-ink) !important; box-shadow: none !important; }
-body.mission-control-active .mcShellV3 .mcAttentionCopy strong,
 body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow strong { color: var(--mc-ink) !important; }
-body.mission-control-active .mcShellV3 .mcAttentionCopy small,
-body.mission-control-active .mcShellV3 .mcAttentionMeta,
-body.mission-control-active .mcShellV3 .mcRowAction { color: var(--mc-muted) !important; }
 
 /* Registered onboarding/sparse state uses a dark activation surface. Lock its
    copy to the dark-material palette here because this late hierarchy authority

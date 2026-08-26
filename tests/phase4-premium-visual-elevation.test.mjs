@@ -34,9 +34,32 @@ test('Phase 4 title stage is compact, logo-safe, and motion-safe without specifi
   assert.match(css, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:382px/);
   assert.match(css, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
   assert.match(css, /object-fit:contain/);
+  assert.match(css, /\.mcRealityStrip button\{[^}]*appearance:none/);
+  assert.match(css, /\.mcRealityStrip button\{[^}]*background:transparent/);
+  assert.match(css, /\.mcPrimary\{[^}]*background:color-mix/);
+  assert.match(css, /\.mcPrimary\{[^}]*border:1px solid/);
   assert.match(css, /min-height:50px/);
   assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/);
   assert.doesNotMatch(css, /!important/);
+});
+
+test('Phase 4 retires legacy button and Athlete Attention visual authorities', async () => {
+  const legacyPaths = [
+    'src/styles/MissionControlCascadeLock2026.css',
+    'src/styles/MissionControlHierarchy2026.css',
+    'src/components/CoachMissionControlShell.css',
+    'public/shotlab-v3-foundation.css',
+    'public/shotlab-v3-mobile-corrections.css',
+    'public/shotlab-v5-coach-integrity.css',
+    'public/shotlab-v6-decision-workspaces.css',
+    'public/shotlab-v7-page-authority.css',
+    'public/shotlab-v9-secondary-polish.css',
+    'public/shotlab-phase2-critical.css',
+  ];
+  const legacyCss = (await Promise.all(legacyPaths.map(read))).join('\n');
+
+  assert.doesNotMatch(legacyCss, /mcAttentionRow/);
+  assert.doesNotMatch(legacyCss, /coach-primary-objective[^}]*mcPrimary/);
 });
 
 test('Phase 4 supporting intelligence is flat, progressive, and owned by the existing layer', async () => {

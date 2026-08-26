@@ -30,9 +30,8 @@ body.mission-control-active .missionControl{width:min(100%,760px)!important;marg
 body.mission-control-active .mcSection,body.mission-control-active [data-testid="coach-assignment-accountability"]{border:1px solid var(--v3-line)!important;border-radius:20px!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important;overflow:hidden!important}
 body.mission-control-active .mcSection h2,body.mission-control-active .mcSection h3,body.mission-control-active [data-testid="coach-assignment-accountability"] h2{color:var(--v3-ink)!important;letter-spacing:-.035em!important;text-transform:none!important}
 body.mission-control-active .mcSection p,body.mission-control-active .mcSection small,body.mission-control-active [data-testid="coach-assignment-accountability"] p,body.mission-control-active [data-testid="coach-assignment-accountability"] small{color:var(--v3-muted)!important;letter-spacing:0!important;text-transform:none!important}
-body.mission-control-active .mcAttentionRow,body.mission-control-active .mcAssignmentAccountabilityRow,body.mission-control-active .mcAssignmentAccountabilityEmpty{background:var(--v3-surface-subtle)!important;color:var(--v3-ink)!important;border-color:var(--v3-line)!important;box-shadow:none!important}
-body.mission-control-active .mcAttentionCopy strong,body.mission-control-active .mcAssignmentAccountabilityRow strong{color:var(--v3-ink)!important}
-body.mission-control-active .mcAttentionCopy small,body.mission-control-active .mcAttentionMeta,body.mission-control-active .mcRowAction{color:var(--v3-muted)!important}
+body.mission-control-active .mcAssignmentAccountabilityRow,body.mission-control-active .mcAssignmentAccountabilityEmpty{background:var(--v3-surface-subtle)!important;color:var(--v3-ink)!important;border-color:var(--v3-line)!important;box-shadow:none!important}
+body.mission-control-active .mcAssignmentAccountabilityRow strong{color:var(--v3-ink)!important}
 
 /* Team Store: same product, not a separate serif admin panel. */
 .ts-overlay{background:rgba(20,24,21,.42)!important;color:var(--v3-ink)!important;backdrop-filter:blur(12px)!important}

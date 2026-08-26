@@ -181,24 +181,6 @@ body:has([data-testid="coach-events-interactive-dashboard"]) #root>*{background-
   box-shadow:none!important;
 }
 
-/* Mission Control: preserve one focal card and remove muddy inherited effects. */
-[data-testid="coach-command-center-full"] .mcAttentionRow,
-html.shotlab-demo [data-testid="coach-command-center-full"] .mcAttentionRow{
-  background:#eef1eb!important;
-  border:1px solid rgba(17,20,17,.08)!important;
-  color:var(--v9-ink)!important;
-  -webkit-text-fill-color:var(--v9-ink)!important;
-  box-shadow:none!important;
-}
-[data-testid="coach-command-center-full"] .mcAttentionRow *,
-html.shotlab-demo [data-testid="coach-command-center-full"] .mcAttentionRow *{
-  opacity:1!important;
-  filter:none!important;
-  color:inherit!important;
-  -webkit-text-fill-color:currentColor!important;
-}
-[data-testid="coach-command-center-full"] button{box-shadow:none!important}
-
 /* Shared interaction restraint across upgraded pages. */
 [data-testid="coach-players-interactive-dashboard"] button,
 [data-testid="coach-events-interactive-dashboard"] button,

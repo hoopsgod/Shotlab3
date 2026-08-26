@@ -261,26 +261,6 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
     cursor: pointer;
   }
 
-  /* Refine the player follow-up surface so it reads as a native row rather
-     than another dashboard card. */
-  body.mission-control-active .mcShellV3 .mcAttention {
-    padding-bottom: 2px !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcAttentionRow {
-    min-height: 62px !important;
-    border-radius: 14px !important;
-    background: rgba(5,9,11,.76) !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcAttentionCopy strong {
-    font-size: 13px !important;
-  }
-
-  body.mission-control-active .mcShellV3 .mcAttentionCopy small {
-    font-size: 10px !important;
-  }
-
   body.mission-control-active .mcShellV3 .missionControl {
     padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important;
   }

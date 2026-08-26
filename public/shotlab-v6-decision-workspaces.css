@@ -248,37 +248,6 @@
   box-shadow:none!important;
 }
 
-/* Mission Control: correct the remaining contrast defects. */
-[data-testid="coach-primary-objective"] .mcPrimary{
-  background:#f5f3ec!important;
-  color:#121513!important;
-  -webkit-text-fill-color:#121513!important;
-  opacity:1!important;
-  filter:none!important;
-}
-[data-testid="coach-primary-objective"] .mcPrimary *{
-  color:#121513!important;
-  -webkit-text-fill-color:#121513!important;
-}
-[data-testid="coach-command-center-full"] .mcAttentionRow{
-  background:#edf0ea!important;
-  color:#121513!important;
-  -webkit-text-fill-color:#121513!important;
-  opacity:1!important;
-  filter:none!important;
-  mix-blend-mode:normal!important;
-}
-[data-testid="coach-command-center-full"] .mcAttentionRow *{
-  color:inherit!important;
-  -webkit-text-fill-color:currentColor!important;
-  opacity:1!important;
-}
-[data-testid="coach-command-center-full"] .mcAttentionRow small,
-[data-testid="coach-command-center-full"] .mcAttentionMeta{
-  color:#4f5752!important;
-  -webkit-text-fill-color:#4f5752!important;
-}
-
 @media(max-width:700px){
   [data-testid="coach-players-interactive-dashboard"],
   [data-testid="coach-events-interactive-dashboard"]{padding-top:12px!important}

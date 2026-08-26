@@ -87,12 +87,12 @@ test("late hierarchy and compatibility layers cannot redesign Coach Home identit
   assert.doesNotMatch(criticalCss, /\[data-testid="coach-primary-objective"\]/);
   assert.doesNotMatch(criticalCss, /\.mcHero\s*,|\.mcHeroContent\s*\{/);
   assert.match(criticalCss, /Coach Home identity, decision, metrics and CTA are intentionally excluded[\s\S]*source-owned by CoachMissionControlTitleStage\.css/);
-  assert.match(cascadeLock, /Coach mobile header,[\s\S]*identity,[\s\S]*decision,[\s\S]*metrics and CTA are component-owned/);
+  assert.match(cascadeLock, /Coach mobile header,[\s\S]*identity,[\s\S]*decision,[\s\S]*metrics,[\s\S]*CTA and Athlete Attention are component-owned/);
 });
 
 test("critical cascade remains narrowly scoped to support rows", () => {
-  assert.doesNotMatch(criticalCss, /\.mcRealityStrip\b|\.mcPrimary\b/);
-  assert.match(criticalCss, /\.mcAttentionRow/);
+  assert.doesNotMatch(criticalCss, /\.mcRealityStrip\b|\.mcPrimary\b|\.mcAttentionRow\b/);
+  assert.match(criticalCss, /\.mcAssignmentAccountabilityRow/);
   assert.match(criticalCss, /mobile-navigation-sheet/);
 });
 

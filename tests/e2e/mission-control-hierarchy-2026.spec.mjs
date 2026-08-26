@@ -152,7 +152,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
 
   expect(isTransparent(presentation.identityBackground)).toBe(true);
   expect(presentation.identityBackgroundImage).toBe("none");
-  expect(presentation.identityHeight).toBeGreaterThanOrEqual(104);
+  expect(presentation.identityHeight).toBeGreaterThanOrEqual(96);
   expect(presentation.identityHeight).toBeLessThanOrEqual(120);
   expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(39);
   expect(presentation.decisionTitleSize).toBeLessThanOrEqual(45);

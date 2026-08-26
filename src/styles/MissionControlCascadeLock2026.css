@@ -1,12 +1,7 @@
 html body #root .performance-workspace--coach.page{animation-fill-mode:none!important}
-html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionRow{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#111a21!important}
-html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionCopy strong{color:#111a21!important;-webkit-text-fill-color:#111a21!important}
-html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionCopy small,
-html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionMeta,
-html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcRowAction{color:#44515b!important;-webkit-text-fill-color:#44515b!important}
 
 /* Late compatibility is intentionally shell/support-only. Coach mobile header,
-   identity, decision, metrics and CTA are component-owned. */
+   identity, decision, metrics, CTA and Athlete Attention are component-owned. */
 @media(max-width:980px){
   html body.mission-control-active #root .ts-launcher{display:none!important}
 
