@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const DIST_ASSETS = path.resolve(process.cwd(), 'dist', 'assets')
@@ -52,19 +52,22 @@ export function enforceCoachMobileIdentityAuthority(css) {
 
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
-  let changedFiles = 0
-  let changedRules = 0
+  let violatingFiles = 0
+  let violatingRules = 0
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('.css')) continue
     const file = path.join(DIST_ASSETS, entry.name)
     const source = await readFile(file, 'utf8')
     const result = enforceCoachMobileIdentityAuthority(source)
     if (result.css === source) continue
-    await writeFile(file, result.css)
-    changedFiles += 1
-    changedRules += result.changed
+    violatingFiles += 1
+    violatingRules += result.changed
   }
-  console.log(`Coach mobile identity authority enforced across ${changedFiles} CSS asset(s); retired ${changedRules} competing rule declaration set(s).`)
+
+  if (violatingRules) {
+    throw new Error(`Coach mobile identity authority verification failed: ${violatingRules} competing declaration set(s) remain across ${violatingFiles} production CSS asset(s). Fix the source authority instead of rewriting dist.`)
+  }
+  console.log('Coach mobile identity authority verified: production CSS requires no post-build Coach rewrite.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })
