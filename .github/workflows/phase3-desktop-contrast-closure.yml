@@ -1,0 +1,47 @@
+name: Phase 3 Desktop Contrast Closure
+
+on:
+  push:
+    branches:
+      - agent/phase-3-coach-dashboard
+    paths:
+      - scripts/apply-phase3-desktop-contrast-closure.mjs
+      - .github/workflows/phase3-desktop-contrast-closure.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/phase-3-coach-dashboard
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false @playwright/test@1.55.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/apply-phase3-desktop-contrast-closure.mjs
+      - run: |
+          cp src/components/CoachMissionControlV2.css /tmp/CoachMissionControlV2.css
+          cp tests/coach-command-center-10x.test.mjs /tmp/coach-command-center-10x.test.mjs
+          git diff --check
+          node --test tests/coach-program-pulse.test.mjs tests/phase3-coach-home-scope.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-operational-dashboard.test.mjs tests/viewport-debug-tooling.test.mjs
+      - run: npm run debug:viewport -- --widths=320,375,390,430
+      - run: npm run build:performance
+      - run: |
+          cp /tmp/CoachMissionControlV2.css src/components/CoachMissionControlV2.css
+          cp /tmp/coach-command-center-10x.test.mjs tests/coach-command-center-10x.test.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/phase3-desktop-contrast-closure.yml scripts/apply-phase3-desktop-contrast-closure.mjs
+          git add src/components/CoachMissionControlV2.css tests/coach-command-center-10x.test.mjs
+          git diff --cached --check
+          git commit -m "Restore Coach Home desktop contrast"
+          git push origin HEAD:agent/phase-3-coach-dashboard
