@@ -23,7 +23,7 @@ const mobileHero=ruleBlock(mobileTitle,'.mcHero[data-team-identity-stage="coach-
 const mobileHeroContent=ruleBlock(mobileTitle,".mcHeroContent");
 const mobileHeroIdentity=ruleBlock(mobileTitle,".mcHeroIdentity");
 const mobileHeroMark=ruleBlock(mobileTitle,".mcHeroTeamMark");
-const mobileHeroMarkImage=ruleBlock(mobileTitle,".mcHeroTeamMark img");
+const baseHeroMarkImage=ruleBlock(titleCss,'.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
 const mobileTitleHeading=ruleBlock(mobileTitle," h1");
 
 test("coach dashboard answers the 30-second workflow questions with the Phase 3 evidence hierarchy",()=>{
@@ -89,9 +89,9 @@ test("Coach identity chapter and tactical court use one visible source-owned ful
   for (const property of ["width","height","min-width","min-height","max-width","max-height"]) {
     assertDeclaration(mobileHeroMark,property,"var(--coach-hero-crest)");
   }
-  assertDeclaration(mobileHeroMarkImage,"object-fit","contain");
-  assertDeclaration(mobileHeroMarkImage,"width","100%");
-  assertDeclaration(mobileHeroMarkImage,"height","100%");
+  assertDeclaration(baseHeroMarkImage,"object-fit","contain");
+  assertDeclaration(baseHeroMarkImage,"width","100%");
+  assertDeclaration(baseHeroMarkImage,"height","100%");
   assert.ok(mobileTitle.includes(".mcCourtArtwork"),"mobile title stage must retain court artwork ownership");
   assert.doesNotMatch(titleCss,/!important/);
   assert.match(premiumCss,/mix-blend-mode:screen/);
