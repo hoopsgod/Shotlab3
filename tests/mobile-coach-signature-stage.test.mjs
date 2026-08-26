@@ -5,6 +5,7 @@ import { promoteCoachCommandCenter, promoteCoachFinalCss } from '../scripts/appl
 
 const command = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
 const finalCss = readFileSync('src/components/CoachMissionControlFinal.css', 'utf8');
+const titleCss = readFileSync('src/components/CoachMissionControlTitleStage.css', 'utf8');
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const enhancer = readFileSync('scripts/apply-mobile-coach-signature-stage.mjs', 'utf8');
 const promotedCss = promoteCoachFinalCss(finalCss);
@@ -33,6 +34,28 @@ test('Coach Home source owns integrated program identity, premium crest and acti
   assert.match(command, /data-team-identity-stage="coach-mission-control"/);
   assert.match(command, /className="mcHeroTeamMark"/);
   assert.doesNotMatch(command, /mcHeroTeamMark\{display:none/);
+});
+
+test('Coach prototype hierarchy is brand-first and intentionally responsive', () => {
+  const desktop = titleCss.split('@media (min-width:981px){')[1]?.split('@media (min-width:701px) and (max-width:980px){')[0] ?? '';
+  const tablet = titleCss.split('@media (min-width:701px) and (max-width:980px){')[1]?.split('@media (max-width:700px){')[0] ?? '';
+  const mobile = titleCss.split('@media (max-width:700px){')[1]?.split('@media (max-width:380px){')[0] ?? '';
+
+  assert.match(desktop, /grid-column:1\/10/);
+  assert.match(desktop, /min-height:312px/);
+  assert.match(desktop, /"Barlow Condensed"/);
+
+  assert.match(tablet, /min-height:352px/);
+  assert.match(tablet, /clamp\(36px,5\.4vw,48px\)\/\.88 "Barlow Condensed"/);
+  assert.match(tablet, /clamp\(116px,17vw,142px\)/);
+
+  assert.match(mobile, /min-height:352px/);
+  assert.match(mobile, /--coach-hero-crest:clamp\(88px,24vw,100px\)/);
+  assert.match(mobile, /clamp\(25px,7\.2vw,31px\)\/\.88 "Barlow Condensed"/);
+  assert.match(mobile, /clamp\(31px,9\.1vw,37px\)\/\.94 Inter/);
+  assert.match(mobile, /min-height:44px/);
+  assert.match(mobile, /min-height:48px/);
+  assert.doesNotMatch(mobile, /clamp\(39px,10\.5vw,45px\)/);
 });
 
 test('historical Coach reconciliation is retired and remains an identity transform', () => {
