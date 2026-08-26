@@ -190,14 +190,14 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    // Mission Control's identity row is intentionally compact; hierarchy belongs to the decision headline.
+    // Phase 4 makes program/team identity dominant while the daily decision stays subordinate.
     expect(result.identityHeight).toBeGreaterThanOrEqual(96);
     expect(result.identityHeight).toBeLessThanOrEqual(160);
-    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(14);
-    expect(result.teamIdentitySize).toBeLessThanOrEqual(20);
-    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(30);
-    expect(result.decisionTitleSize).toBeLessThanOrEqual(48);
-    expect(result.decisionTitleSize - result.teamIdentitySize).toBeGreaterThanOrEqual(12);
+    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(30);
+    expect(result.teamIdentitySize).toBeLessThanOrEqual(50);
+    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(16);
+    expect(result.decisionTitleSize).toBeLessThanOrEqual(28);
+    expect(result.teamIdentitySize - result.decisionTitleSize).toBeGreaterThanOrEqual(8);
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
@@ -242,7 +242,6 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   } else {
     expect(result.crestWidth).toBeGreaterThanOrEqual(80);
     expect(result.crestHeight).toBeGreaterThanOrEqual(80);
-    // Browser layout can resolve fractional pixels; preserve the 300px ceiling with a 1px measurement tolerance.
     expect(result.height).toBeLessThanOrEqual(301);
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
