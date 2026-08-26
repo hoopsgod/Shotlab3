@@ -1,0 +1,1 @@
+This directory contains temporary human-readable Phase 3 Coach Home scope/certification notes. Product authority remains source code plus exact-head CI and visual evidence.
