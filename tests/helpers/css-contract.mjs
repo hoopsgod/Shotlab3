@@ -4,60 +4,103 @@ function normalize(value) {
   return String(value ?? "").replace(/\s+/g, "");
 }
 
-function matchingBlock(source, openBraceIndex, label) {
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function closingBraceIndex(source, openBraceIndex, label) {
   assert.ok(openBraceIndex >= 0, `Missing opening brace for ${label}`);
   let depth = 1;
+  let quote = null;
+  let escaped = false;
+
   for (let index = openBraceIndex + 1; index < source.length; index += 1) {
-    if (source[index] === "{") depth += 1;
-    if (source[index] === "}") {
+    const char = source[index];
+
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (char === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (char === quote) quote = null;
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === "{") depth += 1;
+    if (char === "}") {
       depth -= 1;
-      if (depth === 0) return source.slice(openBraceIndex + 1, index);
+      if (depth === 0) return index;
     }
   }
+
   assert.fail(`Unclosed CSS block for ${label}`);
+}
+
+function blockBody(source, openBraceIndex, label) {
+  const closeBraceIndex = closingBraceIndex(source, openBraceIndex, label);
+  return {
+    body: source.slice(openBraceIndex + 1, closeBraceIndex),
+    closeBraceIndex,
+  };
+}
+
+function headerMatches(header, selectorFragment) {
+  const fragment = String(selectorFragment).trim();
+  if (/^\.[A-Za-z0-9_-]+$/.test(fragment)) {
+    return new RegExp(`${escapeRegExp(fragment)}(?![A-Za-z0-9_-])`).test(header);
+  }
+  return header.includes(fragment);
 }
 
 export function mediaBlock(source, condition) {
   const wanted = normalize(condition);
   let cursor = 0;
+
   while (cursor < source.length) {
     const mediaIndex = source.indexOf("@media", cursor);
     if (mediaIndex < 0) break;
     const openBraceIndex = source.indexOf("{", mediaIndex);
     assert.ok(openBraceIndex >= 0, `Malformed @media block near ${condition}`);
     const header = source.slice(mediaIndex + "@media".length, openBraceIndex);
-    if (normalize(header) === wanted) {
-      return matchingBlock(source, openBraceIndex, `@media ${condition}`);
-    }
-    cursor = openBraceIndex + 1;
+    const { body, closeBraceIndex } = blockBody(source, openBraceIndex, `@media ${header.trim()}`);
+    if (normalize(header) === wanted) return body;
+    cursor = closeBraceIndex + 1;
   }
+
   assert.fail(`Missing @media ${condition}`);
 }
 
 export function ruleBlock(source, selectorFragment, occurrence = 0) {
   let cursor = 0;
   let seen = 0;
+
   while (cursor < source.length) {
-    const selectorIndex = source.indexOf(selectorFragment, cursor);
-    if (selectorIndex < 0) break;
-    const openBraceIndex = source.indexOf("{", selectorIndex);
+    const openBraceIndex = source.indexOf("{", cursor);
     if (openBraceIndex < 0) break;
-    const nextClose = source.indexOf("}", selectorIndex);
-    if (nextClose >= 0 && nextClose < openBraceIndex) {
-      cursor = selectorIndex + selectorFragment.length;
-      continue;
+    const header = source.slice(cursor, openBraceIndex).trim();
+    const { body, closeBraceIndex } = blockBody(source, openBraceIndex, header || selectorFragment);
+
+    if (!header.startsWith("@") && headerMatches(header, selectorFragment)) {
+      if (seen === occurrence) return body;
+      seen += 1;
     }
-    if (seen === occurrence) {
-      return matchingBlock(source, openBraceIndex, selectorFragment);
-    }
-    seen += 1;
-    cursor = openBraceIndex + 1;
+
+    cursor = closeBraceIndex + 1;
   }
+
   assert.fail(`Missing CSS rule containing ${selectorFragment}`);
 }
 
 export function declaration(block, property) {
-  const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escaped = escapeRegExp(property);
   const match = block.match(new RegExp(`(?:^|;)\\s*${escaped}\\s*:\\s*([^;}]+)`, "i"));
   return match?.[1]?.trim() ?? null;
 }
