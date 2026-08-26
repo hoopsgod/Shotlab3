@@ -23,7 +23,12 @@
   }
 
   /* MissionControlCascadeLock owns the Home shell and hero-content viewport
-   * geometry. Global/shared centering authority already owns border-box sizing. */
+   * geometry. The final x-axis authority prevents the inner composition rail
+   * from becoming a horizontal scroll owner while preserving full-bleed bands. */
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .missionControl {
+    overflow-x: hidden !important;
+  }
+
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
     min-width: 0 !important;
