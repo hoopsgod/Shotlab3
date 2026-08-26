@@ -51,7 +51,14 @@ jobs:
         run: npm run debug:viewport -- --widths=320,375,390,430
 
       - name: Enforce production performance budget
-        run: npm run build:performance
+        run: |
+          set +e
+          npm run build:performance
+          status=$?
+          if [ -f artifacts/performance/build-metrics.json ]; then
+            node -e 'const m=JSON.parse(require("fs").readFileSync("artifacts/performance/build-metrics.json","utf8")); console.log(`Exact performance metrics: JS gzip ${m.totals.javaScriptGzipBytes}/${m.budget.maxTotalJavaScriptGzipBytes}; CSS gzip ${m.totals.cssGzipBytes}/${m.budget.maxTotalCssGzipBytes}`)'
+          fi
+          exit $status
 
       - name: Verify production build
         run: npm run build
