@@ -49,7 +49,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(metrics).toBeVisible();
 
   await expect(page.locator(".mcHeader")).toBeVisible();
-  await expect(page.locator(".mcHeaderTeamMark")).toBeVisible();
+  // Mobile identity is intentionally singular: the compact header suppresses
+  // its duplicate crest while the large hero mark remains the identity anchor.
+  await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
   await expect(page.locator(".mcCourtArtwork")).toBeVisible();
   await expect(page.locator(".mcHeroScrim")).toBeVisible();
@@ -159,9 +161,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.decisionTitleTop).toBeGreaterThanOrEqual(presentation.identityBottom - 1);
   expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 48);
 
-  expect(presentation.headerMarkDisplay).toBe("grid");
-  expect(presentation.headerMarkWidth).toBeGreaterThanOrEqual(36);
-  expect(presentation.headerMarkHeight).toBeGreaterThanOrEqual(36);
+  expect(presentation.headerMarkDisplay).toBe("none");
+  expect(presentation.headerMarkWidth).toBe(0);
+  expect(presentation.headerMarkHeight).toBe(0);
   expect(presentation.heroMarkDisplay).not.toBe("none");
   expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(96);
   expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(96);
