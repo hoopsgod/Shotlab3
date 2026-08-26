@@ -39,7 +39,7 @@ test("V3 palette stays light, restrained, and meets core contrast targets", () =
   assert.doesNotMatch(css, /hue-rotate|sepia\(1\) saturate\(5\)/i);
 });
 
-test("Mission Control uses one dark component-owned identity hierarchy plus restrained decision typography", () => {
+test("Mission Control uses one dark component-owned program identity hierarchy plus restrained decision typography", () => {
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /CoachMissionControlTitleStage\.css/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
@@ -47,11 +47,13 @@ test("Mission Control uses one dark component-owned identity hierarchy plus rest
   const mobile = mediaBlock(coachTitleCss, "(max-width:700px)");
   const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]');
   const heading = ruleBlock(mobile, " h1");
+  const programIdentity = ruleBlock(mobile, ".mcProgramIdentity");
   const identity = ruleBlock(mobile, ".mcHeroIdentity");
   const image = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
   const content = ruleBlock(mobile, ".mcHeroContent");
   assertDeclaration(hero, "min-height", "382px");
-  assert.match(declaration(heading, "font") ?? "", /clamp\(39px,\s*10\.5vw,\s*45px\)/);
+  assert.match(declaration(programIdentity, "font") ?? "", /clamp\(36px,\s*10\.2vw,\s*45px\).*Barlow Condensed/);
+  assert.match(declaration(heading, "font") ?? "", /clamp\(28px,\s*7\.6vw,\s*33px\).*var\(--mc-native\)/);
   assertDeclaration(identity, "--coach-hero-crest", /^clamp\(96px,\s*26vw,\s*108px\)$/);
   assertDeclaration(image, "object-fit", "contain");
   assertDeclaration(image, "width", "100%");
