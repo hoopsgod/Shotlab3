@@ -6,6 +6,7 @@ import { promoteCoachCommandCenter, promoteCoachFinalCss } from '../scripts/appl
 const command = readFileSync('src/components/CoachCommandCenter.jsx', 'utf8');
 const finalCss = readFileSync('src/components/CoachMissionControlFinal.css', 'utf8');
 const titleCss = readFileSync('src/components/CoachMissionControlTitleStage.css', 'utf8');
+const v2Css = readFileSync('src/components/CoachMissionControlV2.css', 'utf8');
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const enhancer = readFileSync('scripts/apply-mobile-coach-signature-stage.mjs', 'utf8');
 const promotedCss = promoteCoachFinalCss(finalCss);
@@ -56,6 +57,11 @@ test('Coach prototype hierarchy is brand-first and intentionally responsive', ()
   assert.match(mobile, /min-height:44px/);
   assert.match(mobile, /min-height:48px/);
   assert.doesNotMatch(mobile, /clamp\(39px,10\.5vw,45px\)/);
+});
+
+test('legacy V2 cannot reorder Program Pulse behind athlete attention on mobile', () => {
+  assert.doesNotMatch(v2Css, /\.mcTeamHealth\s*\{[^}]*order\s*:/);
+  assert.doesNotMatch(v2Css, /\.mcAttention\s*\{[^}]*order\s*:/);
 });
 
 test('historical Coach reconciliation is retired and remains an identity transform', () => {
