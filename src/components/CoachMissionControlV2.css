@@ -26,7 +26,7 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 .mcBrandLockup small{color:#8a949c;font:800 11px 'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.1em}
 .mcBrandLockup strong{margin-top:2px;font-family:'Bebas Neue','Impact',sans-serif;font-size:40px;line-height:.94;letter-spacing:.025em;text-transform:uppercase}
 .mcHeaderActions{display:flex;align-items:center;gap:10px}
-.mcTeamSelect,.mcBell{height:45px;border:1px solid var(--mc-line);border-radius:13px;background:rgba(6,10,12,.82);color:#eef2f4;cursor:pointer}
+.mcTeamSelect,.mcBell{height:45px;border:1px solid var(--mc-line);border-radius:13px;background:#fff;color:#111a21;cursor:pointer}
 .mcTeamSelect{min-width:176px;padding:0 15px;display:flex;align-items:center;justify-content:space-between;gap:20px;font:800 12px 'Barlow Condensed','Arial Narrow',sans-serif}
 .mcBell{position:relative;width:45px;display:grid;place-items:center}
 .mcBell b{position:absolute;right:-6px;top:-7px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mc);color:#030506;font:900 10px sans-serif}
@@ -51,10 +51,10 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 .mcThreePoint{position:absolute;right:8%;bottom:8%;width:58%;height:64%;border:2px solid color-mix(in srgb,var(--mc) 42%,transparent);border-radius:50% 50% 0 0}
 .mcCourtFloor img{position:absolute;left:27%;bottom:17%;width:37%;height:37%;object-fit:contain;opacity:.84;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--mc) 30%,transparent))}
 .mcHeroScrim{position:absolute;z-index:3;inset:0;background:linear-gradient(90deg,#05090b 0%,rgba(5,9,11,.97) 42%,rgba(5,9,11,.46) 68%,rgba(5,9,11,.03) 100%)}
-.mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px}
+.mcHeroContent{position:relative;z-index:4;width:55%;padding:34px 32px 30px;color:#f4f7f8}
 .mcEyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--mc);font:900 10px 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.12em;text-transform:uppercase}
 .mcEyebrow:before{content:"";width:18px;height:2px;background:var(--mc);box-shadow:0 0 10px color-mix(in srgb,var(--mc) 55%,transparent)}
-.mcHero h1{max-width:610px;margin:12px 0 0;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}
+.mcHero h1{max-width:610px;margin:12px 0 0;color:#f4f7f8;font-family:'Bebas Neue','Impact',sans-serif;font-size:50px;line-height:.96;letter-spacing:.012em;text-transform:uppercase}
 .mcHeroContent>p{max-width:490px;margin:12px 0 0;color:#9ba5ad;font:700 14px/1.45 'Barlow Condensed','Arial Narrow',sans-serif}
 .mcFocusGrid,.mcLowerGrid{display:grid;gap:16px}
 .mcFocusGrid{grid-template-columns:1.25fr .75fr}

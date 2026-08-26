@@ -3474,7 +3474,7 @@ const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
 const highlightPlayersAttention=inactivePlayersCount>0;
 const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
 const coachPlayerDashboardRows=useMemo(()=>buildCoachPlayerDashboardRows({players:coachRosterPlayers,scores:safeScores,shotLogs,rsvps:safeRsvps,scLogs:safeScLogs,weekStart:weekStr}),[coachRosterPlayers,safeScores,shotLogs,safeRsvps,safeScLogs,weekStr]);
-const coachPlayerDashboardMetrics=useMemo(()=>buildCoachPlayerDashboardMetrics(coachPlayerDashboardRows),[coachPlayerDashboardRows]);
+const coachPlayerDashboardMetrics=useMemo(()=>buildCoachPlayerDashboardMetrics(coachPlayerDashboardRows,persistedCoachPriorities?.weeklyMakesTarget),[coachPlayerDashboardRows,persistedCoachPriorities?.weeklyMakesTarget]);
 const filteredCoachPlayerDashboardRows=useMemo(()=>filterCoachPlayerDashboardRows(coachPlayerDashboardRows,{filter:playerDashboardFilter,query:playerDashboardQuery}),[coachPlayerDashboardRows,playerDashboardFilter,playerDashboardQuery]);
 const filteredCoachRosterPlayers=useMemo(()=>filteredCoachPlayerDashboardRows.map(row=>row.player),[filteredCoachPlayerDashboardRows]);
 const coachEventDashboardRows=useMemo(()=>buildCoachEventDashboardRows({events:safeEvents,rsvps:safeRsvps,roster:coachRosterPlayers,today}),[safeEvents,safeRsvps,coachRosterPlayers,today]);
@@ -3671,6 +3671,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   codeErr={codeErr}
   attentionItems={coachCommandAttentionItems}
   activityItems={coachCommandActivityItems}
+  programPulse={coachPlayerDashboardMetrics.programPulse}
   eventReadiness={coachEventDashboardMetrics.next}
   onEventReadinessClick={(eventId)=>setEventDrawerId(eventId)}
 />
