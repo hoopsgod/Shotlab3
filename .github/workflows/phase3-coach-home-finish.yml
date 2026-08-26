@@ -167,5 +167,15 @@ jobs:
         if: steps.performance.outcome == 'failure'
         run: exit 1
 
+      - name: Commit stabilized Phase 3 candidate
+        if: steps.performance.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Fold Program Pulse into Coach metrics pipeline"
+          git push origin HEAD:agent/phase-3-coach-dashboard
+
       - name: Performance diagnostic passed
+        if: steps.performance.outcome == 'success'
         run: echo "Phase 3 source is inside the production JS budget; final viewport gate is next."
