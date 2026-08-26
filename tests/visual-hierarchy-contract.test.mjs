@@ -8,8 +8,7 @@ const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy
 const hierarchyCss=fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css",import.meta.url),"utf8");
 const commandCenterSource=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
 const playerCommandCenterSource=fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx",import.meta.url),"utf8");
-const missionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
-const premiumMissionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
+const coachShellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
 const coachTitleCss=fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css",import.meta.url),"utf8");
 const leaderboardSource=fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx",import.meta.url),"utf8");
 
@@ -68,13 +67,16 @@ test("leaderboards keep rankings ahead of archive context",()=>{
 });
 
 test("Mission Control declares desktop and mobile layout boundaries",()=>{
-  assert.match(missionControlCss,/\.mcShellV3/);
-  mediaBlock(missionControlCss,"(max-width:980px)");
-  mediaBlock(missionControlCss,"(max-width:700px)");
-  assert.match(missionControlCss,/mission-control-active/);
-  assert.match(missionControlCss,/safe-area-inset-bottom/);
-  assert.match(premiumMissionControlCss,/mobile-navigation-dock/);
-  assert.match(premiumMissionControlCss,/Hero identity geometry is source-owned/);
+  // Structural breakpoints belong to the authenticated shell bridge; mounted page
+  // composition belongs to CoachMissionControlTitleStage.css. Retired V2/2026
+  // presentation files must not be required to regain authority.
+  assert.match(coachShellCss,/\.mcShellV3/);
+  mediaBlock(coachShellCss,"(max-width:980px)");
+  mediaBlock(coachShellCss,"(max-width:700px)");
+  assert.match(coachShellCss,/mission-control-active/);
+  assert.match(coachShellCss,/safe-area-inset-bottom/);
+  assert.match(coachTitleCss,/mobile-navigation-dock/);
+  assert.match(coachTitleCss,/Canonical Coach Home prototype-composition authority/);
 
   const mobileTitle=mediaBlock(coachTitleCss,"(max-width:700px)");
   const hero=ruleBlock(mobileTitle,'.mcHero[data-team-identity-stage="coach-mission-control"]');
