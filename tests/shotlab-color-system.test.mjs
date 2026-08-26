@@ -48,12 +48,14 @@ test("Mission Control uses one dark component-owned identity hierarchy plus rest
   const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]');
   const heading = ruleBlock(mobile, " h1");
   const identity = ruleBlock(mobile, ".mcHeroIdentity");
-  const image = ruleBlock(mobile, ".mcHeroTeamMark img");
+  const image = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
   const content = ruleBlock(mobile, ".mcHeroContent");
   assertDeclaration(hero, "min-height", "382px");
   assert.match(declaration(heading, "font") ?? "", /clamp\(39px,\s*10\.5vw,\s*45px\)/);
   assertDeclaration(identity, "--coach-hero-crest", /^clamp\(96px,\s*26vw,\s*108px\)$/);
   assertDeclaration(image, "object-fit", "contain");
+  assertDeclaration(image, "width", "100%");
+  assertDeclaration(image, "height", "100%");
   assertDeclaration(content, "width", "100%");
   assert.doesNotMatch(coachTitleCss, /\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
   assert.doesNotMatch(coachTitleCss, /!important/);
