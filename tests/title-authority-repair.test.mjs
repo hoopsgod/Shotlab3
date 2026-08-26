@@ -174,7 +174,7 @@ test('shared title geometry preserves premium crest containment and difficult-ti
   const heroRule = ruleBlock(stageCss, '.teamIdentityTitleStage--hero');
   assertDeclaration(rootRule, '--identity-crest', /^clamp\(96px,\s*25vw,\s*108px\)$/);
   assertDeclaration(heroRule, '--identity-crest', /^clamp\(104px,\s*29vw,\s*120px\)$/);
-  const image = ruleBlock(stageCss, '.teamIdentityTitleStage__logo');
+  const image = ruleBlock(stageCss, '.teamIdentityTitleStage__crest');
   assertDeclaration(image, 'object-fit', 'contain');
   assert.match(stageCss, /teamIdentityTitleStage--hero\.teamIdentityTitleStage--longTitle[\s\S]*clamp\(44px,\s*11vw,\s*52px\)/);
   assert.doesNotMatch(stageCss, /html\s+body\s+#root/);
