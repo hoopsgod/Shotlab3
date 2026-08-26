@@ -1,112 +1,38 @@
-const normalizeIdentity = (value = "") => String(value || "").trim().toLowerCase();
-
-const rosterIdentity = (player = {}) => normalizeIdentity(
-  player.email
-  || player.player_email
-  || player.playerEmail
-  || player.playerId
-  || player.player_id
-  || player.userId
-  || player.user_id
-  || player.id,
-);
-
-const logIdentity = (log = {}) => normalizeIdentity(
-  log.email
-  || log.player_email
-  || log.playerEmail
-  || log.playerId
-  || log.player_id
-  || log.userId
-  || log.user_id,
-);
-
-const toDateKey = (value) => {
-  const raw = String(value || "").trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+const identityOf = (row = {}) => String(
+  row.email || row.player_email || row.playerEmail || row.playerId || row.player_id || row.userId || row.user_id || row.id || "",
+).trim().toLowerCase();
 
 const addDays = (dateKey, days) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateKey || ""))) return "";
   const date = new Date(`${dateKey}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return "";
   date.setDate(date.getDate() + days);
-  return toDateKey(date);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 };
 
-const safeMakes = (value) => {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 ? number : 0;
-};
-
-export function deriveCoachProgramPulse({
-  roster = [],
-  shotLogs = [],
-  weeklyGoal,
-  weekStart,
-} = {}) {
+export function deriveCoachProgramPulse({ roster = [], shotLogs = [], weeklyGoal, weekStart } = {}) {
   const goal = Number(weeklyGoal);
-  const start = toDateKey(weekStart);
-  const end = start ? addDays(start, 6) : "";
-  const eligible = (Array.isArray(roster) ? roster : [])
-    .map((player) => ({ player, identity: rosterIdentity(player) }))
-    .filter((entry) => entry.identity);
+  const start = /^\d{4}-\d{2}-\d{2}$/.test(String(weekStart || "")) ? String(weekStart) : "";
+  const stop = addDays(start, 7);
+  const eligible = (Array.isArray(roster) ? roster : []).map((player) => [player, identityOf(player)]).filter(([, id]) => id);
+  const unavailable = () => ({ available: false, value: null, displayValue: "—", detail: "No weekly goal data", eligibleAthletes: eligible.length, creditedMakes: 0, totalGoal: 0, athleteProgress: [] });
+  if (!start || !stop || !Number.isFinite(goal) || goal <= 0 || !eligible.length) return unavailable();
 
-  if (!start || !end || !Number.isFinite(goal) || goal <= 0 || eligible.length === 0) {
-    return {
-      available: false,
-      value: null,
-      displayValue: "—",
-      detail: "No weekly goal data",
-      eligibleAthletes: eligible.length,
-      creditedMakes: 0,
-      totalGoal: 0,
-      weekStart: start,
-      weekEnd: end,
-      athleteProgress: [],
-    };
-  }
-
-  const makesByIdentity = new Map();
+  const makesByPlayer = new Map();
   for (const log of Array.isArray(shotLogs) ? shotLogs : []) {
-    const identity = logIdentity(log);
-    const date = toDateKey(log?.date || log?.createdAt || log?.created_at || log?.ts);
-    if (!identity || !date || date < start || date > end) continue;
-    makesByIdentity.set(identity, (makesByIdentity.get(identity) || 0) + safeMakes(log?.made ?? log?.makes));
+    const id = identityOf(log);
+    const date = String(log?.date || "").slice(0, 10);
+    const makes = Number(log?.made ?? log?.makes);
+    if (!id || date < start || date >= stop || !Number.isFinite(makes) || makes <= 0) continue;
+    makesByPlayer.set(id, (makesByPlayer.get(id) || 0) + makes);
   }
 
-  const athleteProgress = eligible.map(({ player, identity }) => {
-    const makes = makesByIdentity.get(identity) || 0;
+  const athleteProgress = eligible.map(([, identity]) => {
+    const makes = makesByPlayer.get(identity) || 0;
     const creditedMakes = Math.min(makes, goal);
-    return {
-      identity,
-      name: String(player?.name || player?.displayName || player?.email || "Athlete"),
-      makes,
-      creditedMakes,
-      goal,
-      percent: Math.round((creditedMakes / goal) * 100),
-    };
+    return { identity, makes, creditedMakes, goal, percent: Math.round((creditedMakes / goal) * 100) };
   });
-
-  const creditedMakes = athleteProgress.reduce((total, row) => total + row.creditedMakes, 0);
+  const creditedMakes = athleteProgress.reduce((sum, row) => sum + row.creditedMakes, 0);
   const totalGoal = goal * athleteProgress.length;
-  const value = totalGoal > 0 ? Math.round((creditedMakes / totalGoal) * 100) : null;
-
-  return {
-    available: value !== null,
-    value,
-    displayValue: value === null ? "—" : `${value}%`,
-    detail: `${Math.round(creditedMakes).toLocaleString()} of ${Math.round(totalGoal).toLocaleString()} goal-adjusted makes`,
-    eligibleAthletes: athleteProgress.length,
-    creditedMakes,
-    totalGoal,
-    weekStart: start,
-    weekEnd: end,
-    athleteProgress,
-  };
+  const value = Math.round((creditedMakes / totalGoal) * 100);
+  return { available: true, value, displayValue: `${value}%`, detail: `${Math.round(creditedMakes)} of ${Math.round(totalGoal)} goal-adjusted makes`, eligibleAthletes: athleteProgress.length, creditedMakes, totalGoal, athleteProgress };
 }
