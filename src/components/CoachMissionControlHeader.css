@@ -1,203 +1,41 @@
-.mcShellV3 .mcHeader{
-  position:relative;
-  min-height:68px;
-  padding:8px 4px 10px;
-  border:0;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  border-radius:0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  background:transparent;
-  box-shadow:none;
-}
-.mcShellV3 .mcHeader:after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:-1px;
-  height:1px;
-  background:linear-gradient(90deg,color-mix(in srgb,var(--mc) 42%,transparent),rgba(255,255,255,.04) 36%,transparent 88%);
-}
-.mcShellV3 .mcBrandLockup{min-width:0;display:block;color:inherit}
-.mcShellV3 .mcBrandCopy{min-width:0;display:block}
-.mcShellV3 .mcBrandCopy small{
-  display:block;
-  overflow:hidden;
-  color:#7e8991;
-  font:900 10px 'Barlow Condensed','Arial Narrow',sans-serif;
-  letter-spacing:.11em;
-  text-overflow:ellipsis;
-  text-transform:uppercase;
-  white-space:nowrap;
-}
-.mcShellV3 .mcBrandCopy strong{
-  display:block;
-  margin-top:2px;
-  color:#f3f6f7;
-  font-family:'Bebas Neue','Impact',sans-serif;
-  font-size:30px;
-  font-weight:400;
-  letter-spacing:.035em;
-  line-height:.92;
-  text-transform:uppercase;
-  white-space:nowrap;
-}
-.mcShellV3 .mcHeaderActions{display:flex;align-items:center;gap:9px}
-.mcShellV3 .mcTeamSelect{
-  min-width:164px;
-  height:42px;
-  border:1px solid rgba(255,255,255,.11);
-  border-radius:12px;
-  background:rgba(7,11,13,.72);
-  box-shadow:inset 0 1px rgba(255,255,255,.025);
-}
-.mcShellV3 .mcBell,
-.mcShellV3 .mcMobileMenu{
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:12px;
-  background:rgba(8,13,16,.78);
-  box-shadow:inset 0 1px rgba(255,255,255,.03);
-}
-.mcShellV3 .mcBell b{box-shadow:0 0 0 3px #05090b,0 0 15px color-mix(in srgb,var(--mc) 35%,transparent)}
+/* Coach workspace chrome. Desktop follows the approved prototype; mobile title
+   geometry remains owned by CoachMissionControlTitleStage.css. */
+.mcShellV3{grid-template-columns:184px minmax(0,1fr);background:#f4f1e9;color:#101820}
+.mcShellV3 .mcRail{align-items:stretch;border-right:1px solid rgba(255,255,255,.08);background:radial-gradient(circle at 28% 8%,color-mix(in srgb,var(--mc) 7%,transparent),transparent 26%),linear-gradient(180deg,var(--team-brand-surface-deep,#061827),#03111d);box-shadow:10px 0 30px rgba(4,17,29,.08)}
+.mcShellV3 .mcRailBrand{width:auto;min-height:76px;margin:0;padding:0 18px;place-items:center start;border:0;border-bottom:1px solid rgba(255,255,255,.08);background:transparent;cursor:pointer}
+.mcShellV3 .mcRailBrand:after{content:"SHOTLAB";color:#f5f7f3;font:italic 900 24px/.9 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.035em}
+.mcShellV3 .mcRailBrand .mcRailLogo,.mcShellV3 .mcRailBrand .mcRailLogoSetup{display:none}
+.mcShellV3 .mcRail nav{display:grid;width:100%;gap:4px;padding:20px 10px}
+.mcShellV3 .mcRail nav button{min-height:46px;padding:0 12px;border:0;border-radius:8px;display:grid;grid-template-columns:22px minmax(0,1fr);place-items:center start;align-content:center;column-gap:10px;background:transparent;color:#e8edf0}
+.mcShellV3 .mcRail nav button svg{width:18px;height:18px}
+.mcShellV3 .mcRail nav button span{font:620 13px/1.1 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);letter-spacing:-.01em}
+.mcShellV3 .mcRail nav button.is-active{color:color-mix(in srgb,var(--mc) 86%,white);border:0;background:rgba(255,255,255,.055);box-shadow:inset 3px 0 0 var(--mc)}
+.mcShellV3 .mcCoachIdentity{width:auto;margin:0 10px 10px;padding:14px 8px;border-top:1px solid rgba(255,255,255,.08)}
+.mcShellV3 .mcCoachIdentity small{color:#f0f3f4}.mcShellV3 .mcCoachIdentity strong{color:#aab5bd;font:560 10px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif)}
 
-/* Header layer may tint the court/support system, but never sizes Hero identity. */
-.mcShellV3 .mcCourtArtwork{
-  background:
-    radial-gradient(circle at 78% 26%,color-mix(in srgb,var(--mc) 14%,transparent),transparent 26%),
-    linear-gradient(180deg,#0a1114 0%,#030607 100%);
-}
-.mcShellV3 .mcCourtArtwork:after{
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.015),transparent 28%),
-    radial-gradient(circle at 70% 44%,color-mix(in srgb,var(--mc) 10%,transparent),transparent 34%);
-}
-.mcShellV3 .mcHeroScrim{
-  background:
-    linear-gradient(90deg,rgba(3,6,7,.98) 0%,rgba(3,6,7,.91) 48%,rgba(3,6,7,.52) 72%,rgba(3,6,7,.12) 100%),
-    linear-gradient(180deg,transparent 58%,rgba(3,6,7,.72));
-}
-.mcShellV3 .mcRailBrand{
-  width:96px;
-  min-height:104px;
-  margin:10px auto 5px;
-  padding:7px 4px;
-  border:0;
-  display:grid;
-  place-items:center;
-  background:transparent;
-  cursor:pointer;
-}
-.mcShellV3 .mcRailBrand .mcRailLogo{width:86px;height:86px;margin:0;object-fit:contain;filter:drop-shadow(0 0 13px color-mix(in srgb,var(--mc) 24%,transparent))}
-.mcShellV3 .mcDrawerLogo{width:60px!important;height:60px!important;padding:0!important;border:0!important;background:transparent!important}
-.mcShellV3 .mcDrawerLogo img{width:60px!important;height:60px!important;object-fit:contain}
+.mcShellV3 .mcHeader{position:relative;min-height:62px;padding:0 28px;border:0;border-bottom:1px solid rgba(16,24,32,.1);border-radius:0;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f7f3ea;color:#101820;box-shadow:none}
+.mcShellV3 .mcHeader:after{display:none}
+.mcShellV3 .mcBrandLockup{min-width:0;display:flex;align-items:center;gap:10px;color:inherit}
+.mcShellV3 .mcBrandCopy{min-width:0;display:block}
+.mcShellV3 .mcBrandCopy small{display:block;overflow:hidden;color:#7d8589;font:700 8px/1 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);letter-spacing:.08em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.mcShellV3 .mcBrandCopy strong{display:block;margin-top:3px;color:#101820;font:680 13px/1.05 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);letter-spacing:-.015em;text-transform:none;white-space:nowrap}
+.mcShellV3 .mcHeaderActions{display:flex;align-items:center;gap:9px}
+.mcShellV3 .mcTeamSelect,.mcShellV3 .mcBell,.mcShellV3 .mcMobileMenu{border:1px solid rgba(16,24,32,.12);border-radius:7px;background:#f7f3ea;color:#101820;box-shadow:none}
+.mcShellV3 .mcTeamSelect{min-width:144px;height:36px;padding:0 12px;font:650 11px/1 var(--mc-native,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif)}
+.mcShellV3 .mcBell{width:36px;height:36px;min-width:36px;min-height:36px}.mcShellV3 .mcBell b{width:17px;height:17px;right:-5px;top:-5px;box-shadow:0 0 0 2px #f7f3ea}
+.mcShellV3 .mcMobileMenu{display:none}
+.mcShellV3 .mcCourtArtwork{background:radial-gradient(circle at 78% 26%,color-mix(in srgb,var(--mc) 14%,transparent),transparent 26%),linear-gradient(180deg,#0a1114,#030607)}
+.mcShellV3 .mcHeroScrim{background:linear-gradient(90deg,rgba(3,6,7,.98),rgba(3,6,7,.91) 48%,rgba(3,6,7,.52) 72%,rgba(3,6,7,.12)),linear-gradient(180deg,transparent 58%,rgba(3,6,7,.72))}
+.mcShellV3 .mcDrawerLogo{width:60px!important;height:60px!important;padding:0!important;border:0!important;background:transparent!important}.mcShellV3 .mcDrawerLogo img{width:60px!important;height:60px!important;object-fit:contain}
 
 @media(max-width:980px){
-  /* The authenticated mobile shell owns the viewport. Mission Control stays on
-     that 100% axis instead of breaking out with 100vw/negative margins, which can
-     resolve against iOS Safari's wider layout viewport and shift paid sessions. */
-  .mcShellV3{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    margin-left:0!important;
-    margin-right:0!important;
-    overflow-x:clip;
-    box-sizing:border-box;
-  }
-  .mcShellV3 .missionControl{
-    width:100%;
-    max-width:100%;
-    min-width:0;
-    box-sizing:border-box;
-    padding-left:max(12px,env(safe-area-inset-left));
-    padding-right:max(12px,env(safe-area-inset-right));
-  }
-  .mcShellV3 .mcHeader{min-height:64px;display:grid;grid-template-columns:42px minmax(0,1fr) 44px;gap:10px;padding:7px 0 9px}
-  .mcShellV3 .mcMobileMenu{display:grid;width:40px;height:40px;padding:0;place-items:center}
-  .mcShellV3 .mcBrandCopy strong{font-size:28px}
-  .mcShellV3 .mcBrandCopy small{font-size:9px}
-  .mcShellV3 .mcTeamSelect{display:none}
-  .mcShellV3 .mcBell{width:42px;height:42px}
+  .mcShellV3{width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important;overflow-x:clip;box-sizing:border-box;background:linear-gradient(180deg,#030607,#010203);color:#f4f7f8}
+  .mcShellV3 .missionControl{width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .mcShellV3 .mcHeader{min-height:64px;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:10px;padding:7px 0 9px;background:transparent;color:#f4f7f8;border-bottom:1px solid rgba(255,255,255,.08)}
+  .mcShellV3 .mcMobileMenu{display:grid;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;place-items:center;background:rgba(8,13,16,.78);color:#edf2f4;border-color:rgba(255,255,255,.12);border-radius:12px}
+  .mcShellV3 .mcBrandCopy strong{color:#f3f6f7;font-size:25px}.mcShellV3 .mcBrandCopy small{color:#7e8991;font-size:9px}
+  .mcShellV3 .mcTeamSelect{display:none}.mcShellV3 .mcBell{width:44px;height:44px;min-width:44px;min-height:44px;background:rgba(8,13,16,.78);color:#edf2f4;border-color:rgba(255,255,255,.12);border-radius:12px}
 }
 
-@media(max-width:700px){
-  .mcShellV3 .missionControl{
-    padding-top:8px;
-    padding-left:max(12px,env(safe-area-inset-left));
-    padding-right:max(12px,env(safe-area-inset-right));
-    padding-bottom:calc(142px + env(safe-area-inset-bottom));
-    gap:9px;
-  }
-  .mcShellV3 .mcHeader{
-    min-height:62px;
-    grid-template-columns:38px minmax(0,1fr) 40px;
-    gap:9px;
-    padding:6px 0 8px;
-  }
-  .mcShellV3 .mcMobileMenu{width:38px;height:38px;border-radius:11px}
-  .mcShellV3 .mcBell{width:40px;height:40px;border-radius:11px}
-  .mcShellV3 .mcBrandCopy small{font-size:8px;letter-spacing:.1em}
-  .mcShellV3 .mcBrandCopy strong{font-size:25px;letter-spacing:.026em}
-
-  .mcShellV3 .mcArenaLights{right:-9%;top:14px;width:67%;transform:skewX(-18deg) scale(.66);transform-origin:top right;opacity:.72}
-  .mcShellV3 .mcHoop{right:5%;top:81px;transform:scale(.54);transform-origin:top right;opacity:.58}
-  .mcShellV3 .mcCourtFloor{right:-12%;bottom:-13%;width:92%;height:63%;opacity:.76}
-  .mcShellV3 .mcCourtFloor img{left:38%;bottom:14%;width:34%;height:34%;opacity:.42}
-  .mcShellV3 .mcHeroScrim{
-    background:
-      linear-gradient(90deg,rgba(3,6,7,.99) 0%,rgba(3,6,7,.93) 55%,rgba(3,6,7,.48) 79%,rgba(3,6,7,.12) 100%),
-      linear-gradient(180deg,transparent 54%,rgba(3,6,7,.82));
-  }
-  .mcShellV3 .mcFocusGrid,
-  .mcShellV3 .mcLowerGrid{gap:0}
-  .mcShellV3 .mcSection{
-    border:0;
-    border-top:1px solid rgba(255,255,255,.1);
-    border-radius:0;
-    background:transparent;
-    box-shadow:none;
-  }
-  .mcShellV3 .mcSectionHead{padding:18px 2px 0}
-  .mcShellV3 .mcSectionHead small{font-size:8px}
-  .mcShellV3 .mcSectionHead h2{margin-top:3px;font-size:22px}
-  .mcShellV3 .mcSectionHead>b{min-width:26px;height:26px;margin-top:0}
-  .mcShellV3 .mcAttentionList{padding:12px 0 0}
-  .mcShellV3 .mcAttentionRow{
-    min-height:62px;
-    grid-template-columns:7px auto minmax(0,1fr) auto;
-    padding:8px 10px;
-    border-radius:12px;
-    background:rgba(7,12,15,.88);
-  }
-  .mcShellV3 .mcAttentionCopy strong{font-size:12px}
-  .mcShellV3 .mcAttentionCopy small{font-size:9px;line-height:1.2;white-space:normal}
-  .mcShellV3 .mcRowAction{grid-column:auto;align-self:center;margin:0;font-size:8px}
-  .mcShellV3 .mcTextLink{margin:12px 2px 17px}
-  .mcShellV3 .mcHealthBar{margin:17px 2px 0;height:7px}
-  .mcShellV3 .mcHealthFacts{margin:14px 0 0}
-  .mcShellV3 .mcHealthFacts strong{font-size:22px}
-  .mcShellV3 .mcHealthFacts small{font-size:8px}
-  .mcShellV3 .mcTimeline{padding:10px 0 6px}
-  .mcShellV3 .mcEmptyActivity{min-height:118px;padding:18px 2px}
-  .mcShellV3 .mcSessionSummary{margin:13px 0 0;padding:13px;border-radius:12px}
-  .mcShellV3 .mcSecondaryAction{width:100%;margin:11px 0 17px}
-  .mcShellV3 .mcToolsRow{padding-top:4px}
-}
-
-@media(max-width:390px){
-  .mcShellV3 .missionControl{
-    padding-left:max(10px,env(safe-area-inset-left));
-    padding-right:max(10px,env(safe-area-inset-right));
-  }
-  .mcShellV3 .mcBrandCopy strong{font-size:23px}
-}
-
-/* Phase 1 interaction floor: mobile shell controls remain 44px. */
-.mcShellV3 .mcMobileMenu,.mcShellV3 .mcBell{min-width:44px;min-height:44px}
-@media(max-width:700px){
-  .mcShellV3 .mcHeader{grid-template-columns:44px minmax(0,1fr) 44px}
-  .mcShellV3 .mcMobileMenu,.mcShellV3 .mcBell{width:44px;height:44px}
-}
+@media(max-width:700px){.mcShellV3 .missionControl{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:calc(88px + env(safe-area-inset-bottom))}}
+@media(max-width:390px){.mcShellV3 .missionControl{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}}
