@@ -10,23 +10,6 @@ const FINAL_A11Y_CSS = `${FINAL_A11Y_MARKER}
 [data-testid="auth-workspace"] a[href$="privacy"]{color:#35434c!important;-webkit-text-fill-color:#35434c!important}
 [data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary{color:#f8fbf6!important;-webkit-text-fill-color:#f8fbf6!important}`;
 
-const OBSOLETE_COACH_HOME_RULES = Object.freeze([
-  /\[data-testid="coach-command-center-full"\]\s+\.mcSessionSummary\s+strong\{[^}]*\}/g,
-  /\[data-testid="coach-command-center-full"\]\s+\.mcSessionSummary\s+small\{[^}]*\}/g,
-  /\[data-testid="coach-command-center-full"\]\s+\.mcHealthFacts\s+small\{[^}]*\}/g,
-  /\[data-testid="coach-command-center-full"\]\s+\.mcTeamHealth\s+\.mcTextLink\{[^}]*\}/g,
-]);
-
-function retireObsoleteCoachHomeEvidenceStyles(value) {
-  let css = String(value || "");
-  for (const pattern of OBSOLETE_COACH_HOME_RULES) css = css.replace(pattern, "");
-  css = css.replace(
-    /\[data-testid="coach-command-center-full"\]\s+\.mcHealthScore,\s*\[data-testid="coach-command-center-full"\]\s+\[data-shotlab-response-row="true"\]\s+time\{([^}]*)\}/g,
-    '[data-testid="coach-command-center-full"] [data-shotlab-response-row="true"] time{$1}',
-  );
-  return css;
-}
-
 function cleanText(value) {
   return String(value || "").trim().replace(/\s+/g, " ");
 }
@@ -35,8 +18,6 @@ function ensureStyles() {
   if (!document.head) return false;
   const style = document.getElementById(STYLE_ID);
   if (!style) return false;
-  const reconciled = retireObsoleteCoachHomeEvidenceStyles(style.textContent);
-  if (reconciled !== style.textContent) style.textContent = reconciled;
   if (!style.textContent.includes(FINAL_A11Y_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS}\n`;
   if (document.head.lastElementChild !== style) document.head.appendChild(style);
   return true;
