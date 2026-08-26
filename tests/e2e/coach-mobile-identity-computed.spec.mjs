@@ -84,6 +84,7 @@ for (const viewport of VIEWPORTS) {
         header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), attention: rect(attention), dock: rect(dock), menu: rect(menu), bell: rect(bell),
         teamIdentitySize: teamStyle ? Number.parseFloat(teamStyle.fontSize) : 0,
         decisionTitleSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
+        decisionTitleLineHeight: titleStyle ? Number.parseFloat(titleStyle.lineHeight) : 0,
         imageStyle: image ? { objectFit: getComputedStyle(image).objectFit, width: getComputedStyle(image).width, height: getComputedStyle(image).height, position: getComputedStyle(image).position } : null,
         teamColor: team ? getComputedStyle(team).color : '',
         eyebrowColor: eyebrow ? getComputedStyle(eyebrow).color : '',
@@ -143,12 +144,20 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
     expect(metrics.decisionTitleSize).toBeLessThanOrEqual(48);
     expect(metrics.decisionTitleSize - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
-    expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
+    // Phase 4 deliberately keeps the mobile hero compact: the source-owned floor is
+    // 382px, with a 388px narrow-phone guard, so this contract must not reintroduce
+    // the older 400px dead-space requirement.
+    expect(metrics.hero.height).toBeGreaterThanOrEqual(382);
     expect(metrics.hero.height).toBeLessThanOrEqual(580);
     expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
     expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
     expect(metrics.detail.top).toBeGreaterThanOrEqual(metrics.title.top);
-    expect(metrics.title.height).toBeLessThanOrEqual(90);
+    // The decision headline is an editorial lockup, not a fixed two-line label.
+    // Bound it to three rendered lines so long/large mobile copy remains intentional
+    // without allowing clipping or an unbounded title stage.
+    expect(metrics.decisionTitleLineHeight).toBeGreaterThan(0);
+    const decisionTitleLines = metrics.title.height / metrics.decisionTitleLineHeight;
+    expect(decisionTitleLines).toBeLessThanOrEqual(3.05);
     expect(Math.abs(metrics.title.left - metrics.detail.left)).toBeLessThanOrEqual(1);
     // The current decision-first composition deliberately lets the Coach headline
     // use the full canonical content rail while supporting body copy stays narrower.
@@ -209,7 +218,7 @@ for (const viewport of VIEWPORTS) {
     expect(contrast(parseRgb(metrics.teamColor), heroBg)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(parseRgb(metrics.eyebrowColor), heroBg)).toBeGreaterThanOrEqual(4.5);
 
-    fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight }, null, 2)}\n`);
+    fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight, decisionTitleLines }, null, 2)}\n`);
     if (viewport.width === 390) {
       await page.screenshot({ path: path.join(OUTPUT, 'coach-demo-390x844-initial.png'), animations: 'disabled', fullPage: false });
       await page.screenshot({ path: path.join(OUTPUT, 'coach-demo-390x844-full.png'), animations: 'disabled', fullPage: true });
