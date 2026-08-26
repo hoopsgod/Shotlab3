@@ -114,12 +114,11 @@ import {
   deriveCultureReadinessLabels,
   deriveCoachInsightSummary,
 } from "./lib/coachDashboardSelectors.js";
-import { buildCoachEventDashboardMetrics, buildCoachEventDashboardRows, buildCoachPageDashboardSummary, buildCoachPlayerDashboardMetrics, buildCoachPlayerDashboardRows, filterCoachEventDashboardRows, filterCoachPlayerDashboardRows } from "./lib/coachOperationalDashboard.js";
+import { buildCoachEventDashboardMetrics, buildCoachEventDashboardRows, buildCoachPageDashboardSummary, buildCoachPlayerDashboardMetrics, buildCoachPlayerDashboardRows, buildCoachProgramPulse, filterCoachEventDashboardRows, filterCoachPlayerDashboardRows } from "./lib/coachOperationalDashboard.js";
 import { buildActivityIntelligenceRows, buildDrillIntelligenceRows, buildEventIntelligenceModel, buildLeaderboardIntelligenceRows, buildPlayerIntelligenceModel, buildSeasonComparisonModel, buildStrengthIntelligenceRows, filterActivityIntelligenceRows, filterDrillIntelligenceRows, filterLeaderboardIntelligenceRows, filterStrengthIntelligenceRows } from "./lib/coachOperationalIntelligence.js";
 import { derivePlayerDailyCommandCenter } from "./lib/playerDailyCommandCenter.js";
 import { buildAtHomeWorkspaceModel, buildEventsWorkspaceModel, buildLeaderboardWorkspaceModel, buildProfileWorkspaceModel, buildProgramWorkspaceModel, buildStrengthWorkspaceModel, filterAtHomeDrills, filterProgramSessionBlocks } from "./lib/playerOperationalWorkspaces.js";
 import { buildCoachOperationalInsightRail, buildPlayerOperationalInsightRail } from "./lib/operationalInsightRails.js";
-import { deriveCoachProgramPulse } from "./lib/coachProgramPulse.js";
 import { buildCoachVerifiedProgramScoreRow } from "./lib/coachProgramScoreEntry.js";
 import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
 import { createTrainingCatalogPersistenceService } from "./lib/trainingCatalogPersistenceService.js";
@@ -3470,12 +3469,12 @@ const highlightAddDrill=drills.length===0;
 const highlightScheduleEvent=events.length===0||!nextEvent;
 const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
 const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-const coachProgramPulse=useMemo(()=>deriveCoachProgramPulse({roster:coachRosterPlayers,shotLogs:safeShotLogs,weeklyGoal:persistedCoachPriorities?.weeklyMakesTarget,weekStart:weekStr}),[coachRosterPlayers,safeShotLogs,persistedCoachPriorities?.weeklyMakesTarget,weekStr]);
 const activeThisWeek=new Set(safeScores.filter(s=>s.date>=weekStr).map(s=>s.email));
 const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
 const highlightPlayersAttention=inactivePlayersCount>0;
 const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
 const coachPlayerDashboardRows=useMemo(()=>buildCoachPlayerDashboardRows({players:coachRosterPlayers,scores:safeScores,shotLogs,rsvps:safeRsvps,scLogs:safeScLogs,weekStart:weekStr}),[coachRosterPlayers,safeScores,shotLogs,safeRsvps,safeScLogs,weekStr]);
+const coachProgramPulse=useMemo(()=>buildCoachProgramPulse(coachPlayerDashboardRows,persistedCoachPriorities?.weeklyMakesTarget),[coachPlayerDashboardRows,persistedCoachPriorities?.weeklyMakesTarget]);
 const coachPlayerDashboardMetrics=useMemo(()=>buildCoachPlayerDashboardMetrics(coachPlayerDashboardRows),[coachPlayerDashboardRows]);
 const filteredCoachPlayerDashboardRows=useMemo(()=>filterCoachPlayerDashboardRows(coachPlayerDashboardRows,{filter:playerDashboardFilter,query:playerDashboardQuery}),[coachPlayerDashboardRows,playerDashboardFilter,playerDashboardQuery]);
 const filteredCoachRosterPlayers=useMemo(()=>filteredCoachPlayerDashboardRows.map(row=>row.player),[filteredCoachPlayerDashboardRows]);
