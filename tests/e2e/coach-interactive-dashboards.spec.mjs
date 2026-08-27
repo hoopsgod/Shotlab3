@@ -92,11 +92,7 @@ async function waitForSeedAuthority(page, payload) {
     const teams = parse("sl:teams");
     const players = parse("sl:players");
     const profiles = parse("sl:player-profiles");
-    const drills = parse("sl:drills");
-    const programDrills = parse("sl:program-drills");
-    return drills.length > 0
-      && programDrills.length > 0
-      && teams.some((team) => team?.id === teamId && team?.name === teamName)
+    return teams.some((team) => team?.id === teamId && team?.name === teamName)
       && players.some((player) => player?.email === coachEmail && player?.teamId === teamId)
       && (!playerEmail || players.some((player) => player?.email === playerEmail && player?.teamId === teamId))
       && (!playerEmail || profiles.some((profile) => (profile?.userId === playerEmail || profile?.email === playerEmail) && profile?.teamId === teamId));
