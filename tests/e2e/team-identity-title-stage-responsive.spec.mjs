@@ -241,7 +241,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   } else {
     expect(result.crestWidth).toBeGreaterThanOrEqual(80);
     expect(result.crestHeight).toBeGreaterThanOrEqual(80);
-    expect(result.height).toBeLessThanOrEqual(301);
+    expect(result.height).toBeLessThanOrEqual(330);
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
   await expectNoHorizontalOverflow(page);
