@@ -88,9 +88,9 @@ test("shared authenticated surfaces consume the brand atmosphere instead of fixe
   assert.match(coachPhase2Css, /coach-event-intelligence-drawer[\s\S]*aside section[\s\S]*var\(--team-brand-surface-deep/);
   assert.doesNotMatch(coachPhase2Css, /rgba\(18,\s*23,\s*26,\s*\.95\)|#0a0e10|#0f1214/);
   assert.match(playerMetricCss, /metricPrimary[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
-  assert.match(playerMetricCss, /metricPrimary \[class\*=\"metricLabel\"\][\s\S]*color:#dfe7e2!important/);
-  assert.match(playerMetricCss, /metricPrimary \[class\*=\"metricValue\"\][\s\S]*color:#f7faf5!important/);
-  assert.match(playerMetricCss, /metricPrimary \[class\*=\"metricDetail\"\][\s\S]*color:#dfe7e2!important/);
+  assert.match(playerMetricCss, /\.metricPrimary>span:first-child,[\s\S]*\.metricPrimary>span:last-child\{color:#dfe7e2!important/);
+  assert.match(playerMetricCss, /\.metricPrimary>span:nth-child\(2\)\{color:#f7faf5!important/);
+  assert.doesNotMatch(playerMetricCss, /\[class\*="metric(?:Label|Value|Detail)"\]/);
   assert.match(playerProgressCss, /\.hero\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.match(insightRailCss, /\.primaryCard\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.doesNotMatch(playerMetricCss, /#061923|#082430|#0b2d37|rgba\(17,19,20,.94\)/);
