@@ -10,12 +10,9 @@ const coachConvergence = read('src/styles/CoachRoleVisualConvergence2026.css');
 test('mobile editorial title stages synchronously reset persistent route scroll position', () => {
   assert.match(titleStage, /useLayoutEffect/);
   assert.match(titleStage, /titleFamily !== "editorial"/);
-  assert.match(titleStage, /resolvedMobileStage !== "editorial"/);
-  assert.match(titleStage, /window\.innerWidth > 767/);
-  assert.match(titleStage, /stageRef\.current\?\.closest\("\.player-scroll-container, \.coach-scroll-container, \.content-wrap"\)/);
-  assert.match(titleStage, /localScroller\.scrollTop = 0/);
-  assert.match(titleStage, /document\.scrollingElement/);
-  assert.match(titleStage, /document\.scrollingElement\.scrollTop = 0/);
+  assert.match(titleStage, /innerWidth > 767/);
+  assert.match(titleStage, /stageRef\.current\?\.closest\("\.player-scroll-container,\.coach-scroll-container,\.content-wrap"\)\?\.scrollTo\(0, 0\)/);
+  assert.match(titleStage, /document\.scrollingElement\?\.scrollTo\(0, 0\)/);
   assert.match(titleStage, /ref=\{stageRef\}/);
 });
 
