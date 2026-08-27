@@ -172,7 +172,7 @@ export function installMobileHorizontalViewportLock() {
   let rafId = null;
   let touchStart = null;
   let routeKey = '';
-  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  history.scrollRestoration = 'manual';
 
   const resetRouteTop = () => {
     const shell = document.querySelector('.performance-shell.is-mobile[data-workspace-tab]');
@@ -191,7 +191,6 @@ export function installMobileHorizontalViewportLock() {
       resetRouteTop();
     });
   };
-  const forceRouteTop = () => { routeKey = ''; scheduleCorrection(); };
 
   const handleCapturedScroll = (event) => {
     if (!isMobileViewport()) return;
@@ -256,7 +255,7 @@ export function installMobileHorizontalViewportLock() {
   window.addEventListener('pointerup', scheduleCorrection, { passive: true });
   window.addEventListener('resize', scheduleCorrection, { passive: true });
   window.visualViewport?.addEventListener('resize', scheduleCorrection, { passive: true });
-  window.addEventListener('shotlab:app-ready', forceRouteTop);
+  window.addEventListener('shotlab:app-ready', scheduleCorrection);
 
   scheduleCorrection();
 
@@ -270,7 +269,7 @@ export function installMobileHorizontalViewportLock() {
     window.removeEventListener('pointerup', scheduleCorrection);
     window.removeEventListener('resize', scheduleCorrection);
     window.visualViewport?.removeEventListener('resize', scheduleCorrection);
-    window.removeEventListener('shotlab:app-ready', forceRouteTop);
+    window.removeEventListener('shotlab:app-ready', scheduleCorrection);
     if (rafId != null) window.cancelAnimationFrame(rafId);
     clearRegisteredCoachRouteGeometry();
   };
