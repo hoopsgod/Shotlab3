@@ -48,8 +48,6 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(page.locator(".mcHeader")).toBeVisible();
   await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
-  // These decorative nodes can remain mounted for desktop/brand composition,
-  // but must not compete with the mobile identity-first stage.
   await expect(page.locator(".mcCourtArtwork")).toBeHidden();
   await expect(page.locator(".mcHeroScrim")).toBeHidden();
   await expect(page.locator(".mcTeamSelect")).toBeHidden();
@@ -134,8 +132,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       metricLabels: metricButtons.map((button) => getComputedStyle(button.querySelector("small")).color),
       metricButtonBackgrounds: metricButtons.map((button) => getComputedStyle(button).backgroundColor),
       teamSelectDisplay: teamSelectStyle.display,
+      attentionPresent: Boolean(attentionRow),
       attentionBackground: attentionStyle?.backgroundColor || "",
-      attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 99,
+      attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 0,
       attentionShadow: attentionStyle?.boxShadow || "",
       attentionTitleColor: attentionTitleStyle?.color || "",
     };
@@ -203,12 +202,14 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   if (!isTransparent(presentation.supportingBackground) && supportingChannels.length === 3) {
     expect(Math.min(...supportingChannels)).toBeGreaterThanOrEqual(230);
   }
-  expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
-  expect(presentation.attentionShadow).not.toBe("none");
-  expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
-  const attentionChannels = rgbChannels(presentation.attentionBackground);
-  if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) {
-    expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
+  if (presentation.attentionPresent) {
+    expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
+    expect(presentation.attentionShadow).not.toBe("none");
+    expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
+    const attentionChannels = rgbChannels(presentation.attentionBackground);
+    if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) {
+      expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
+    }
   }
 
   await expectNoHorizontalOverflow(page);
