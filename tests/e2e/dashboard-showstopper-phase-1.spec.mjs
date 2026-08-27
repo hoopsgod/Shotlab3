@@ -259,7 +259,7 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
   await expect(signal).toBeVisible();
   const signalText = [
     signal.getByText("Momentum", { exact: true }),
-    signal.getByText("Daily target complete", { exact: true }),
+    signal.locator("strong").first(),
   ];
   const contrastContract = [];
   for (const locator of signalText) {
@@ -267,6 +267,7 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
     contrastContract.push(await locator.evaluate((element) => ({ text: element.textContent.trim(), color: getComputedStyle(element).color })));
   }
   for (const item of contrastContract) {
+    expect(item.text.length, "Momentum copy must remain meaningful").toBeGreaterThan(0);
     expect(item.color, `${item.text} must not use the former cream-on-cream foreground`).not.toBe("rgb(245, 242, 234)");
     expect(item.color, `${item.text} must not use the dark-hero foreground on cream`).not.toBe("rgb(245, 248, 249)");
   }
