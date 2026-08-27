@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredPlayer } from "./registered-coach-fixture.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-player-phase-two";
-const PLAYER_EMAIL = "demo@shotlab.app";
-const COACH_EMAIL = "coach.demo@shotlab.app";
+const PLAYER_EMAIL = "player.phase2@shotlab.test";
+const COACH_EMAIL = "coach.phase2@shotlab.test";
 
 const isoOffset = (days) => {
   const date = new Date();
@@ -16,10 +17,10 @@ const isoOffset = (days) => {
 const seedData = {
   "sl:teams": [{ id: TEAM_ID, name: "Player Phase Two Team", ownerCoachId: COACH_EMAIL, joinCode: "PLAYER2", createdAt: Date.now() - 86400000 }],
   "sl:players": [
-    { id: "coach-phase-two", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-    { id: "player-phase-two", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Demo Player", role: "player", teamId: TEAM_ID },
+    { id: "coach-phase-two", email: COACH_EMAIL, name: "Phase Two Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "player-phase-two", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Phase Two Player", role: "player", teamId: TEAM_ID },
   ],
-  "sl:player-profiles": [{ id: "profile-phase-two", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Demo", lastName: "Player" }],
+  "sl:player-profiles": [{ id: "profile-phase-two", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Phase Two", lastName: "Player" }],
   "sl:drills": [
     { id: "form-shooting", name: "Form Shooting", desc: "Clean mechanics and balanced feet", max: 50, icon: "ft" },
     { id: "corner-threes", name: "Corner Threes", desc: "Build repeatable corner volume", max: 40, icon: "3p" },
@@ -35,12 +36,12 @@ const seedData = {
     { id: "team-practice", teamId: TEAM_ID, title: "Team Practice", type: "practice", date: isoOffset(1), time: "6:00 PM", location: "Main Gym", desc: "Team practice" },
     { id: "film-session", teamId: TEAM_ID, title: "Film Session", type: "meeting", date: isoOffset(2), time: "5:00 PM", location: "Film Room", desc: "Prepare for the next opponent" },
   ],
-  "sl:rsvps": [{ id: "practice-rsvp", eventId: "team-practice", email: PLAYER_EMAIL, name: "Demo Player", teamId: TEAM_ID }],
+  "sl:rsvps": [{ id: "practice-rsvp", eventId: "team-practice", email: PLAYER_EMAIL, name: "Phase Two Player", teamId: TEAM_ID }],
   "sl:sc-sessions": [
     { id: "team-lift", teamId: TEAM_ID, sport: "Team Lift", date: isoOffset(2), time: "8:00 AM", sessionType: "School" },
     { id: "speed-session", teamId: TEAM_ID, sport: "Speed Session", date: isoOffset(3), time: "9:00 AM", sessionType: "School" },
   ],
-  "sl:sc-rsvps": [{ id: "lift-rsvp", sessionId: "team-lift", email: PLAYER_EMAIL, name: "Demo Player", teamId: TEAM_ID }],
+  "sl:sc-rsvps": [{ id: "lift-rsvp", sessionId: "team-lift", email: PLAYER_EMAIL, name: "Phase Two Player", teamId: TEAM_ID }],
   "sl:sc-logs": [],
   "sl:season-archives": [],
   "sl:coach-priorities": { [TEAM_ID]: { todayFocusText: "Clean mechanics before volume", priorityDrillText: "Game Speed Reads", weeklyMakesTarget: 500, weeklyCheckinsTarget: 2 } },
@@ -53,15 +54,13 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function enterSeededDemoPlayer(page) {
-  await page.addInitScript((payload) => {
-    if (window.sessionStorage.getItem("player-phase-two-seeded") === "1") return;
-    for (const [storageKey, value] of Object.entries(payload)) window.localStorage.setItem(storageKey, JSON.stringify(value));
-    window.sessionStorage.setItem("player-phase-two-seeded", "1");
-  }, seedData);
-  await page.goto("/");
-  await page.getByRole("button", { name: "Player demo", exact: true }).click();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+async function enterSeededPlayer(page) {
+  await enterSeededRegisteredPlayer(page, {
+    storage: seedData,
+    playerEmail: PLAYER_EMAIL,
+    playerName: "Phase Two Player",
+    teamId: TEAM_ID,
+  });
 }
 
 async function openMoreDestination(page, key) {
@@ -102,7 +101,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("At Home workspace filters drills and routes the Today metric to shot entry", async ({ page }) => {
-  await enterSeededDemoPlayer(page);
+  await enterSeededPlayer(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
 
   await expectWorkspaceTouchTargets(page, "player-at-home-workspace");
@@ -122,7 +121,7 @@ test("At Home workspace filters drills and routes the Today metric to shot entry
 });
 
 test("Program workspace filters the plan and launches the exact coach-priority drill", async ({ page }) => {
-  await enterSeededDemoPlayer(page);
+  await enterSeededPlayer(page);
   await openMoreDestination(page, "duels");
 
   await expectWorkspaceTouchTargets(page, "player-program-workspace");
@@ -139,7 +138,7 @@ test("Program workspace filters the plan and launches the exact coach-priority d
 });
 
 test("Events and S&C commitment centers reveal the exact unresolved commitment", async ({ page }) => {
-  await enterSeededDemoPlayer(page);
+  await enterSeededPlayer(page);
 
   await openMoreDestination(page, "program");
   const eventCenter = page.getByTestId("player-commitment-center-events");
@@ -170,7 +169,7 @@ test("Events and S&C commitment centers reveal the exact unresolved commitment",
 });
 
 test("Leaderboards and Progress retain the current operational hierarchy", async ({ page }) => {
-  await enterSeededDemoPlayer(page);
+  await enterSeededPlayer(page);
 
   await openMoreDestination(page, "leaderboards");
   await expectWorkspaceTouchTargets(page, "player-leaderboards-workspace");
