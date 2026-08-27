@@ -1,0 +1,72 @@
+name: Player Secondary Visual Evidence
+run-name: Player secondary visual evidence · ${{ github.event.pull_request.number || github.ref_name }}
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - src/components/PlayerOperationalWorkspace.jsx
+      - src/components/PlayerProgressStory.jsx
+      - src/components/PlayerSecondaryVisualSystem.css
+      - tests/e2e/player-secondary-visual-evidence.spec.mjs
+      - .github/workflows/player-secondary-visual-evidence.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: player-secondary-visual-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact prototype head
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture SHA-bound before and after evidence
+        env:
+          PLAYER_SECONDARY_BASELINE_ORIGIN: https://b9c8e0be.shotlab3.pages.dev
+        run: npx playwright test tests/e2e/player-secondary-visual-evidence.spec.mjs --project=chromium-desktop --reporter=line
+
+      - name: Upload Player secondary visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-secondary-visual-evidence-${{ github.sha }}
+          path: artifacts/player-secondary-visual-evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-secondary-visual-evidence-failure-${{ github.sha }}
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 7
