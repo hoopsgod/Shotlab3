@@ -108,6 +108,8 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   expect(contrast.supportTitleColor).toBe("rgb(23, 28, 24)");
   expect(contrast.supportMetaColor).toBe("rgb(104, 113, 106)");
 
+  const progress = page.getByTestId("player-progress-disclosure");
+  if (!(await progress.evaluate((node) => node.open))) await progress.locator("summary").click();
   const momentum = page.getByTestId("player-daily-momentum-signal");
   await expect(momentum).toBeVisible();
   const momentumContrast = await momentum.evaluate((node) => {
