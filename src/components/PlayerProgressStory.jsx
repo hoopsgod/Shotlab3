@@ -5,7 +5,6 @@ import styles from "./PlayerProgressStory.module.css";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
-import "./PlayerSecondaryVisualSystem.css";
 
 function SignalCard({ eyebrow, title, detail, testId }) {
   return <article className={styles.signalCard} data-testid={testId}><span>{eyebrow}</span><strong>{title}</strong><p>{detail}</p></article>;
