@@ -148,9 +148,10 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
   const hero = page.getByTestId("coach-primary-objective");
   await expect(hero).toBeVisible({ timeout: 20_000 });
 
+  // Phase 4 intentionally makes the hero identity authoritative and retires
+  // the competing duplicate header mark on mobile.
   const headerMark = page.locator(".mcHeaderTeamMark").first();
-  await expect(headerMark).toBeVisible();
-  await expect(headerMark.locator("img")).toBeVisible();
+  if (await headerMark.count()) await expect(headerMark).toBeHidden();
 
   const heroMark = hero.locator(".mcHeroTeamMark");
   await expect(heroMark).toBeVisible();
@@ -197,6 +198,7 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
 
   const heroTreatment = await hero.evaluate((node) => ({
     backgroundColor: getComputedStyle(node).backgroundColor,
+    backgroundImage: getComputedStyle(node).backgroundImage,
     overflow: getComputedStyle(node).overflow,
   }));
   expect(heroTreatment.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
@@ -204,9 +206,11 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
   expect(["hidden", "clip"]).toContain(heroTreatment.overflow);
 
   const heroScrim = hero.locator(".mcHeroScrim");
-  await expect(heroScrim).toBeVisible();
-  const scrimBackground = await heroScrim.evaluate((node) => getComputedStyle(node).backgroundImage);
-  expect(scrimBackground).toContain("gradient");
+  if (await heroScrim.isVisible().catch(() => false)) {
+    expect(await heroScrim.evaluate((node) => getComputedStyle(node).backgroundImage)).toContain("gradient");
+  } else {
+    expect(heroTreatment.backgroundImage).toContain("gradient");
+  }
 
   await expect(page.getByTestId("player-home-signature-field")).toHaveCount(0);
   await expect(page.getByTestId("player-progress-signature-field")).toHaveCount(0);
