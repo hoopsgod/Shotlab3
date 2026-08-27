@@ -90,7 +90,15 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const teamSelect = document.querySelector(".mcTeamSelect");
     const attentionRow = document.querySelector(".mcAttentionRow");
     const attentionTitle = attentionRow?.querySelector(".mcAttentionCopy strong");
-    const workspaceStyle = workspace ? getComputedStyle(workspace) : null;
+    const effectiveBackground = (element) => {
+      let current = element;
+      while (current) {
+        const value = getComputedStyle(current).backgroundColor;
+        if (value && value !== "transparent" && value !== "rgba(0, 0, 0, 0)") return value;
+        current = current.parentElement;
+      }
+      return getComputedStyle(document.body).backgroundColor;
+    };
     const heroStyle = getComputedStyle(hero);
     const heroContentStyle = getComputedStyle(heroContent);
     const identityStyle = getComputedStyle(identity);
@@ -108,7 +116,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const attentionStyle = attentionRow ? getComputedStyle(attentionRow) : null;
     const attentionTitleStyle = attentionTitle ? getComputedStyle(attentionTitle) : null;
     return {
-      workspaceBackground: workspaceStyle?.backgroundColor || "",
+      workspaceBackground: effectiveBackground(workspace),
       heroBackgroundImage: heroStyle.backgroundImage,
       heroBackgroundColor: heroStyle.backgroundColor,
       heroMaxHeight: heroStyle.maxHeight,
