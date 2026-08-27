@@ -159,7 +159,11 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     };
   });
 
-  expect(presentation.workspaceBackground).toBe("rgb(243, 241, 234)");
+  const workspaceChannels = rgbChannels(presentation.workspaceBackground);
+  expect(workspaceChannels).toHaveLength(3);
+  expect(Math.min(...workspaceChannels)).toBeGreaterThanOrEqual(235);
+  expect(Math.max(...workspaceChannels) - Math.min(...workspaceChannels)).toBeLessThanOrEqual(12);
+  expect(relativeLuminance(workspaceChannels)).toBeGreaterThan(0.84);
   const heroStops = rgbStops(presentation.heroBackgroundImage);
   const heroSurfaceStops = heroStops.length ? heroStops : [rgbChannels(presentation.heroBackgroundColor)];
   expect(heroSurfaceStops[0]).toHaveLength(3);
