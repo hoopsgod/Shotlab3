@@ -70,6 +70,24 @@ async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
   await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
+  await page.route("**/v1/home-shots/log", async (route) => {
+    const payload = route.request().postDataJSON();
+    const shotLog = {
+      id: payload.id || "player-phase-one-home-shot",
+      team_id: TEAM_ID,
+      player_id: PLAYER_EMAIL,
+      email: PLAYER_EMAIL,
+      name: "Phase One Player",
+      made: Number(payload.made),
+      date: payload.date,
+      ts: new Date().toISOString(),
+    };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true, shot_log: shotLog, diagnostic: { shot_logs_insert_success: "yes" } }),
+    });
+  });
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
