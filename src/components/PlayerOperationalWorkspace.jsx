@@ -23,12 +23,18 @@ function resolveWorkspaceIdentityLabel(model) {
   return labels[model?.id] || model?.eyebrow || "Player";
 }
 
-function WorkspaceTitleStage({ model, subtitle, primaryAction, backAction, titleSize, testId }) {
+export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", backAction = null, titleSize = "auto", testId }) {
+  if (!model) return null;
+  const runAction = (action) => { onAction?.(action); scheduleWorkspaceActionReveal(action); };
+  const runMetric = (metric) => { onMetric?.(metric); if (metric?.action) scheduleWorkspaceActionReveal(metric.action); };
+  const metrics = model.metrics || [];
+  const subtitle = resolveWorkspaceSubtitle(model);
+  const primaryAction = model.primaryAction ? [{ key: `workspace-${model.id}-primary`, label: model.primaryAction.label, onClick: () => runAction(model.primaryAction), ariaLabel: model.primaryAction.label }] : [];
   const stageTestId = `${testId || `player-workspace-${model.id}`}-title-stage`;
   const identityLabel = resolveWorkspaceIdentityLabel(model);
 
-  if (model.id === "at-home") {
-    return <SecondaryPageIntro
+  return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id} data-title-stage-family="editorial">
+    {model.id === "at-home" ? <SecondaryPageIntro
       eyebrow={identityLabel}
       title={model.title}
       summary={subtitle}
@@ -37,50 +43,27 @@ function WorkspaceTitleStage({ model, subtitle, primaryAction, backAction, title
       backAction={backAction}
       titleSize={titleSize}
       testId={stageTestId}
-      icon="training"
-    />;
-  }
-
-  return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
-    <TeamIdentityTitleStage
-      variant="standard"
-      surface="light"
-      role={identityLabel}
-      title={model.title}
-      summary={subtitle}
-      status={model.status}
-      actions={primaryAction}
-      backAction={backAction}
-      titleSize={titleSize}
-      brandTreatment="compact"
-      testId={stageTestId}
-      className={styles.teamTitleStage || ""}
-      dataLayoutRole="editorial-header"
-      dataVisualRole="player-team-workspace-title"
-      dataPageKind={model.id}
-      dataMobileStage="editorial"
-      ariaLabel={`${model.title} team identity and page title`}
-    />
-  </div>;
-}
-
-export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", backAction = null, titleSize = "auto", testId }) {
-  if (!model) return null;
-  const runAction = (action) => { onAction?.(action); scheduleWorkspaceActionReveal(action); };
-  const runMetric = (metric) => { onMetric?.(metric); if (metric?.action) scheduleWorkspaceActionReveal(metric.action); };
-  const metrics = model.metrics || [];
-  const subtitle = resolveWorkspaceSubtitle(model);
-  const primaryAction = model.primaryAction ? [{ key: `workspace-${model.id}-primary`, label: model.primaryAction.label, onClick: () => runAction(model.primaryAction), ariaLabel: model.primaryAction.label }] : [];
-
-  return <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial" data-team-workspace={model.id} data-title-stage-family="editorial">
-    <WorkspaceTitleStage
-      model={model}
-      subtitle={subtitle}
-      primaryAction={primaryAction}
-      backAction={backAction}
-      titleSize={titleSize}
-      testId={testId}
-    />
+    /> : <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations">
+      <TeamIdentityTitleStage
+        variant="standard"
+        surface="light"
+        role={identityLabel}
+        title={model.title}
+        summary={subtitle}
+        status={model.status}
+        actions={primaryAction}
+        backAction={backAction}
+        titleSize={titleSize}
+        brandTreatment="compact"
+        testId={stageTestId}
+        className={styles.teamTitleStage || ""}
+        dataLayoutRole="editorial-header"
+        dataVisualRole="player-team-workspace-title"
+        dataPageKind={model.id}
+        dataMobileStage="editorial"
+        ariaLabel={`${model.title} team identity and page title`}
+      />
+    </div>}
     <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
       {metrics.map((metric, index) => {
         const interactive = Boolean(metric?.filter || metric?.action);
