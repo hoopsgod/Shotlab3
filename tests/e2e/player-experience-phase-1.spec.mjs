@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredPlayer } from "./registered-coach-fixture.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-player-phase-one";
-const PLAYER_EMAIL = "demo@shotlab.app";
-const COACH_EMAIL = "coach.demo@shotlab.app";
+const PLAYER_EMAIL = "player.phase1@shotlab.test";
+const COACH_EMAIL = "coach.phase1@shotlab.test";
 
 const isoOffset = (days) => {
   const date = new Date();
@@ -35,10 +36,10 @@ const seedData = {
     },
   }],
   "sl:players": [
-    { id: "coach-player-phase-one", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-    { id: "demo-player-phase-one", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Demo Player", role: "player", teamId: TEAM_ID },
+    { id: "coach-player-phase-one", email: COACH_EMAIL, name: "Phase One Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "player-phase-one", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Phase One Player", role: "player", teamId: TEAM_ID },
   ],
-  "sl:player-profiles": [{ id: "profile-player-phase-one", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Demo", lastName: "Player" }],
+  "sl:player-profiles": [{ id: "profile-player-phase-one", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Phase One", lastName: "Player" }],
   "sl:drills": [
     { id: "form-shooting", name: "Form Shooting", desc: "Clean mechanics and balanced feet", max: 50, icon: "ft" },
     { id: "corner-threes", name: "Corner Threes", desc: "Build repeatable corner volume", max: 40, icon: "3p" },
@@ -72,15 +73,13 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function enterSeededDemoPlayer(page) {
-  await page.addInitScript((payload) => {
-    if (window.sessionStorage.getItem("player-phase-one-seeded") === "1") return;
-    for (const [storageKey, value] of Object.entries(payload)) window.localStorage.setItem(storageKey, JSON.stringify(value));
-    window.sessionStorage.setItem("player-phase-one-seeded", "1");
-  }, seedData);
-  await page.goto("/");
-  await page.getByRole("button", { name: "Player demo", exact: true }).click();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+async function enterSeededPlayer(page) {
+  await enterSeededRegisteredPlayer(page, {
+    storage: seedData,
+    playerEmail: PLAYER_EMAIL,
+    playerName: "Phase One Player",
+    teamId: TEAM_ID,
+  });
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -95,7 +94,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("daily command center resolves urgent commitment then launches one bounded first result", async ({ page }) => {
-  await enterSeededDemoPlayer(page);
+  await enterSeededPlayer(page);
 
   const commandCenter = page.getByTestId("player-daily-command-center");
   await expect(commandCenter.getByText(/First-week activation/)).toContainText("1/3 complete");
@@ -128,7 +127,7 @@ test("daily command center resolves urgent commitment then launches one bounded 
 });
 
 test("logging the first result activates progress and confirms the baseline", async ({ page }) => {
-  await enterSeededDemoPlayer(page);
+  await enterSeededPlayer(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await page.getByRole("spinbutton").first().fill("33");
@@ -146,9 +145,9 @@ test("logging the first result activates progress and confirms the baseline", as
   await expect(commandCenter.getByText(/First-week activation/)).toContainText("2/3 complete");
   await expect(page.getByTestId("player-today-performance")).toContainText("33");
   await expect(page.getByTestId("player-target-interpretation")).toHaveText("67 TO TARGET");
-  await expect.poll(() => page.evaluate(() => {
+  await expect.poll(() => page.evaluate((email) => {
     const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    return rows.some((row) => Number(row.made) === 33 && String(row.email || "").toLowerCase() === "demo@shotlab.app");
-  })).toBe(true);
+    return rows.some((row) => Number(row.made) === 33 && String(row.email || "").toLowerCase() === email);
+  }, PLAYER_EMAIL)).toBe(true);
   await expectNoHorizontalOverflow(page);
 });
