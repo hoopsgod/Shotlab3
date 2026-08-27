@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredCoach } from "./registered-coach-fixture.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-phase-two-e2e";
-const COACH_EMAIL = "coach.demo@shotlab.app";
+const COACH_EMAIL = "coach.phase2@shotlab.test";
 const dateOffset = (days) => {
   const date = new Date();
   date.setHours(12, 0, 0, 0);
@@ -26,7 +27,7 @@ const ARCHIVE = {
   seasonStartDate: "2025-11-01",
   seasonEndDate: "2026-03-15",
   createdAt: "2026-03-20T12:00:00.000Z",
-  archivedBy: { email: COACH_EMAIL, name: "Demo Coach", role: "coach" },
+  archivedBy: { email: COACH_EMAIL, name: "Phase Two Coach", role: "coach" },
   summary: {
     rosterCount: 2,
     homeScoreCount: 4,
@@ -62,7 +63,7 @@ const seedData = {
     },
   }],
   "sl:players": [
-    { id: "coach-phase-two", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "coach-phase-two", email: COACH_EMAIL, name: "Phase Two Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "active-player", playerId: "active-player", email: "active@example.com", name: "Active Player", role: "player", teamId: TEAM_ID },
     { id: "quiet-player", playerId: "quiet-player", email: "quiet@example.com", name: "Quiet Player", role: "player", teamId: TEAM_ID },
     { id: "new-player", playerId: "new-player", email: "new@example.com", name: "New Player", role: "player", teamId: TEAM_ID },
@@ -133,14 +134,13 @@ async function installSafeRoutes(page) {
   }));
 }
 
-async function enterSeededDemoCoach(page) {
-  await page.addInitScript((payload) => {
-    if (window.sessionStorage.getItem("coach-phase-two-seeded") === "1") return;
-    for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
-    window.sessionStorage.setItem("coach-phase-two-seeded", "1");
-  }, seedData);
-  await page.goto("/");
-  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
+async function enterSeededPhaseTwoCoach(page) {
+  await enterSeededRegisteredCoach(page, {
+    storage: seedData,
+    coachEmail: COACH_EMAIL,
+    coachName: "Phase Two Coach",
+    teamId: TEAM_ID,
+  });
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -167,7 +167,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("player intelligence drawer summarizes development and hands off to the full profile", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededPhaseTwoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
 
   const roster = page.locator("#coach-roster-operations");
@@ -189,7 +189,7 @@ test("player intelligence drawer summarizes development and hands off to the ful
 });
 
 test("event intelligence drawer identifies missing responses and returns to attendance management", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededPhaseTwoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
 
   const decisionBrief = page.getByTestId("coach-events-decision-brief");
@@ -209,7 +209,7 @@ test("event intelligence drawer identifies missing responses and returns to atte
 });
 
 test("drills and strength dashboards support decision-ready filtering", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededPhaseTwoCoach(page);
 
   await openMoreDestination(page, "drills");
   const drillPanel = page.getByTestId("coach-drills-operational-panel");
@@ -237,7 +237,7 @@ test("drills and strength dashboards support decision-ready filtering", async ({
 });
 
 test("leaderboard, activity, and season comparison use the shared intelligence layer", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterSeededPhaseTwoCoach(page);
 
   await openMoreDestination(page, "leaderboards");
   const leaderboardPanel = page.getByTestId("coach-leaderboard-operational-panel");
