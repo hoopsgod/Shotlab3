@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import ShotLabIcon from "./ShotLabIcon";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import "./SecondaryPageSystem.css";
@@ -15,7 +16,22 @@ const TITLE_LABELS=new Map([
 ]);
 const normalizeTitle=value=>TITLE_LABELS.get(String(value||""))||value;
 
-export function SecondaryPageShell({children,testId,className=""}){return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>}
+export function SecondaryPageShell({children,testId,className=""}){
+  const shellRef=useRef(null);
+  useLayoutEffect(()=>{
+    if(typeof window==="undefined"||!window.matchMedia?.("(max-width: 767px)").matches)return undefined;
+    const shell=shellRef.current;
+    if(!shell)return undefined;
+    const frame=window.requestAnimationFrame(()=>{
+      const localScroller=shell.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
+      if(localScroller&&localScroller.scrollTop!==0)localScroller.scrollTop=0;
+      const documentScroller=document.scrollingElement;
+      if(documentScroller&&documentScroller.scrollTop!==0)documentScroller.scrollTop=0;
+    });
+    return()=>window.cancelAnimationFrame(frame);
+  },[testId]);
+  return <section ref={shellRef} className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>
+}
 
 export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],backAction=null,titleSize="auto",testId,icon}){
   const displayTitle=normalizeTitle(title);
