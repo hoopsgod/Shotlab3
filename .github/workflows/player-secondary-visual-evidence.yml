@@ -7,8 +7,9 @@ on:
       - march-3-reset-85393dd
     paths:
       - src/components/PlayerOperationalWorkspace.jsx
+      - src/components/PlayerOperationalWorkspace.module.css
       - src/components/PlayerProgressStory.jsx
-      - src/components/PlayerSecondaryVisualSystem.css
+      - src/components/PlayerProgressStory.module.css
       - tests/e2e/player-secondary-visual-evidence.spec.mjs
       - .github/workflows/player-secondary-visual-evidence.yml
   workflow_dispatch:
@@ -54,6 +55,18 @@ jobs:
           npm ci
           npm run build
 
+      - name: Start exact prototype production preview
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/player-secondary-prototype.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/player-secondary-prototype.log
+          exit 1
+
       - name: Start exact production baseline preview
         working-directory: baseline
         run: |
@@ -75,7 +88,9 @@ jobs:
 
       - name: Capture exact-SHA before and after evidence
         env:
+          CI: ""
           PLAYER_SECONDARY_BASELINE_ORIGIN: http://127.0.0.1:4174
+          PLAYER_SECONDARY_PROTOTYPE_ORIGIN: http://127.0.0.1:4173
           PLAYER_SECONDARY_PROTOTYPE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: npx playwright test tests/e2e/player-secondary-visual-evidence.spec.mjs --project=chromium-desktop --reporter=line
 
