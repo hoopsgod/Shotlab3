@@ -147,7 +147,7 @@ async function expectNoHorizontalOverflow(page) {
 }
 
 async function currentPerformanceRail(page) {
-  const stage = page.locator('[data-visual-role="primary-decision"]').first();
+  const stage = page.locator('[data-visual-role="primary-decision"]:visible').first();
   await expect(stage).toBeVisible({ timeout: 20_000 });
   const rail = stage.locator('[data-visual-role="performance-evidence"]');
   await expect(rail).toBeVisible();
@@ -271,8 +271,8 @@ test("Coach Inbox routes the next-event RSVP risk into exact attendance manageme
 
   const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
   const readiness = inbox.getByRole("button", { name: /Event readiness Team Practice/i });
-  await expect(readiness).toContainText("3 of 4 players still need to RSVP.");
-  await expect(readiness).toContainText("25% responded");
+  await expect(readiness).toContainText("2 of 3 players still need to RSVP.");
+  await expect(readiness).toContainText("33% responded");
   await readiness.click();
 
   const eventDrawer = page.getByTestId("coach-event-intelligence-drawer");
