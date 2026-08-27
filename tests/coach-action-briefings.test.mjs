@@ -99,6 +99,11 @@ test("schedule formatting and dashboard integration remain stable", () => {
   assert.equal(formatCoachScheduleDate("2026-08-08"), "Aug 8");
   assert.match(formatCoachScheduleDate("2026-08-08", { weekday: true }), /Sat, Aug 8/);
   assert.match(dashboardSource, /buildCoachEventActionBriefing\(\{ metrics, rows \}\)/);
+  assert.match(dashboardSource, /title=\{briefing\.decision\.title\}/);
+  assert.match(dashboardSource, /detail=\{briefing\.decision\.detail\}/);
+  assert.match(dashboardSource, /action=\{resolveEventAction\(briefing\.decision\.action/);
+  assert.match(dashboardSource, /action\.kind === "open-event" && typeof onOpenEvent === "function" && action\.id != null/);
+  assert.doesNotMatch(dashboardSource, /label: "View Event"/);
   assert.match(enhancerSource, /path === "src\/components\/CoachInteractiveDashboards\.jsx"/);
   assert.match(phase5bSource, /Awaiting RSVP/);
   assert.match(phase5bSource, /Next-session RSVP coverage/);
