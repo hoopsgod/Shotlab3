@@ -190,7 +190,7 @@
   }
 
   .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
-    --identity-crest: clamp(84px, 23vw, 100px);
+    --identity-crest: clamp(96px, 25vw, 108px);
     padding-inline-start: 15px;
   }
 
