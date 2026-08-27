@@ -143,12 +143,20 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   expect(home.crestWidth).toBeGreaterThanOrEqual(96);
   await expectNoHorizontalOverflow(page);
 
-  for (const key of ["players", "events", "drills", "sc", "activity", "leaderboards"]) {
+  // These five operational routes explicitly own the shared branded performance stage.
+  for (const key of ["players", "events", "drills", "sc", "leaderboards"]) {
     await navigateByKey(page, key);
     await expectEditorialTitle(page);
     await expectDarkDecision(page);
     await expectNoHorizontalOverflow(page);
   }
+
+  // Activity is an intelligence/evidence destination, not a primary-decision route.
+  // It still must preserve the converged editorial title and mobile containment.
+  await navigateByKey(page, "activity");
+  await expectEditorialTitle(page);
+  await expect(page.getByTestId("coach-activity-intelligence-panel")).toBeVisible({ timeout: 10_000 });
+  await expectNoHorizontalOverflow(page);
 
   await navigateByKey(page, "players");
   await openFirstCoachPlayerDetail(page);
