@@ -172,20 +172,15 @@ export function installMobileHorizontalViewportLock() {
   let rafId = null;
   let touchStart = null;
   let routeKey = '';
-  if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
   const resetRouteTop = () => {
-    if (!isMobileViewport()) return;
     const shell = document.querySelector('.performance-shell.is-mobile[data-workspace-tab]');
-    const nextRoute = shell?.getAttribute('data-workspace-tab') || '';
+    const nextRoute = shell?.dataset.workspaceTab;
     if (!nextRoute || nextRoute === routeKey) return;
     routeKey = nextRoute;
-    const root = document.scrollingElement || document.documentElement;
-    root.scrollTop = 0;
-    document.body.scrollTop = 0;
-    shell.querySelector('.player-scroll-container')?.scrollTo(0, 0);
-    shell.querySelector(':scope > .shell-main > .content-wrap')?.scrollTo(0, 0);
     window.scrollTo(0, 0);
+    shell.querySelector('.player-scroll-container, :scope > .shell-main > .content-wrap')?.scrollTo(0, 0);
   };
 
   const scheduleCorrection = () => {
