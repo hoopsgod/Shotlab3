@@ -272,3 +272,99 @@
   .metric,.metric::after,.filterButton,.primaryAction{transition:none}
   .metricInteractive:active,.filterButton:active,.primaryAction:active{transform:none}
 }
+
+/* Player secondary operational authority stays inside this existing CSS module.
+   Keeping these rules on the already-loaded module avoids changing global
+   stylesheet ordering for the Player Home control. */
+.root[data-page-hierarchy="editorial"][data-team-workspace] {
+  gap:11px;
+  margin-bottom:28px;
+}
+.root[data-page-hierarchy="editorial"][data-team-workspace] > .metrics {
+  border-block-color:color-mix(in srgb,var(--team-brand-primary,#71851f) 14%,rgba(17,25,21,.11));
+  background:linear-gradient(90deg,color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 5%,#fff) 0%,rgba(255,255,255,.68) 44%,rgba(255,255,255,.28) 100%);
+}
+.root[data-page-hierarchy="editorial"][data-team-workspace] .metric {
+  min-height:96px;
+  padding-block:15px;
+}
+.root[data-page-hierarchy="editorial"][data-team-workspace] .metric:first-child {
+  box-shadow:inset 3px 0 0 color-mix(in srgb,var(--team-brand-primary,#71851f) 64%,transparent);
+  background:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 4%,transparent);
+}
+.root[data-page-hierarchy="editorial"][data-team-workspace] .metricLabel {
+  color:#68736c;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.085em;
+}
+.root[data-page-hierarchy="editorial"][data-team-workspace] .metricValue {
+  margin-top:6px;
+  color:#172019;
+  font-family:"Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+  font-size:32px;
+  font-weight:800;
+  letter-spacing:-.018em;
+}
+.root[data-page-hierarchy="editorial"][data-team-workspace] .metricDetail {
+  margin-top:6px;
+  color:#707a73;
+  font-size:10px;
+}
+.filterRail[data-player-workspace-filter-rail="true"] {
+  gap:18px;
+  padding:0 1px;
+  border-bottom:1px solid rgba(17,25,21,.10);
+}
+.filterRail[data-player-workspace-filter-rail="true"] > .filterButton {
+  position:relative;
+  min-height:44px;
+  padding-inline:1px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#69736d;
+  font-size:11px;
+  font-weight:720;
+  letter-spacing:.025em;
+  text-transform:uppercase;
+}
+.filterRail[data-player-workspace-filter-rail="true"] > .filterButton::after {
+  content:"";
+  position:absolute;
+  right:0;
+  bottom:-1px;
+  left:0;
+  height:2px;
+  border-radius:999px 999px 0 0;
+  background:var(--team-brand-primary,#71851f);
+  opacity:0;
+  transform:scaleX(.5);
+  transform-origin:center;
+  transition:opacity .16s ease,transform .16s ease;
+}
+.filterRail[data-player-workspace-filter-rail="true"] > .filterButton:hover {
+  background:transparent;
+  color:#1d2821;
+}
+.filterRail[data-player-workspace-filter-rail="true"] > .filterButton[aria-pressed="true"] {
+  border:0;
+  background:transparent;
+  color:color-mix(in srgb,var(--team-brand-primary,#71851f) 58%,#263429);
+}
+.filterRail[data-player-workspace-filter-rail="true"] > .filterButton[aria-pressed="true"]::after {
+  opacity:1;
+  transform:scaleX(1);
+}
+@media(max-width:760px){
+  .root[data-page-hierarchy="editorial"][data-team-workspace]{gap:9px;margin-bottom:22px}
+  .root[data-page-hierarchy="editorial"][data-team-workspace] .metric{min-height:84px;padding:12px 13px}
+  .root[data-page-hierarchy="editorial"][data-team-workspace] .metricValue{font-size:29px}
+  .filterRail[data-player-workspace-filter-rail="true"]{gap:16px}
+}
+@media(max-width:420px){
+  .filterRail[data-player-workspace-filter-rail="true"]{gap:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .filterRail[data-player-workspace-filter-rail="true"] > .filterButton::after{transition:none}
+}
