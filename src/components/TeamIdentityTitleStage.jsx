@@ -12,7 +12,7 @@ const initialsFor = (value) => {
 };
 
 export function TeamIdentitySupportRail({ status = null, actions = [], external = false, className = "", ariaLabel = "Page status and actions" }) {
-  const actionItems = actions?.filter(Boolean) || [];
+  const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
   if (!status && !actionItems.length) return null;
 
   return (
@@ -69,7 +69,7 @@ export default function TeamIdentityTitleStage({
   const displayTitle = tidy(title, personName || "ShotLab");
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
-  const titleWords = displayTitle.split(/\s+/);
+  const titleWords = displayTitle.split(/\s+/).filter(Boolean);
   const singleWordTitle = titleWords.length === 1;
   const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
   const longSingleWord = singleWordTitle && longestWordLength >= 11;
@@ -88,18 +88,27 @@ export default function TeamIdentityTitleStage({
     ? fallbackBrandTreatment
     : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : fallbackBrandTreatment);
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
-  const brandingAction = actions?.find?.((action) => action?.key === "branding");
+  const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
-  const hasUsableLogo = cleanedLogo && !logoFailed;
-  const showLogoSetupAction = isCoachStage && !hasUsableLogo;
+  const showLogoSetupAction = isCoachStage && (!cleanedLogo || logoFailed);
+  const hasUsableLogo = Boolean(cleanedLogo && !logoFailed);
   const openBrandingSettings = () => {
-    if (brandingAction?.onClick) return brandingAction.onClick();
+    if (brandingAction?.onClick) {
+      brandingAction.onClick();
+      return;
+    }
     const destination = document.querySelector('[data-nav-key="branding"]');
-    if (destination) return destination.click();
+    if (destination instanceof HTMLElement) {
+      destination.click();
+      return;
+    }
     const more = document.querySelector('[data-testid="mobile-navigation-more"]');
-    if (more) {
+    if (more instanceof HTMLElement) {
       more.click();
-      setTimeout(() => document.querySelector('[data-nav-key="branding"]')?.click());
+      setTimeout(() => {
+        const brandingDestination = document.querySelector('[data-nav-key="branding"]');
+        if (brandingDestination instanceof HTMLElement) brandingDestination.click();
+      }, 0);
       return;
     }
     document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click();
