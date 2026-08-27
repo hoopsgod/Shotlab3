@@ -126,17 +126,17 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
     const identity = element.querySelector('.mcHeroIdentity');
     const title = element.querySelector('h1');
     const crest = element.querySelector('.mcHeroTeamMark');
+    const computed = getComputedStyle(element);
     return {
-      heroBackground: getComputedStyle(element).backgroundColor,
+      heroBackgroundImage: computed.backgroundImage,
+      heroBackgroundColor: computed.backgroundColor,
       identityBackground: identity ? getComputedStyle(identity).backgroundImage : "missing",
       decisionBackground: title ? getComputedStyle(title).backgroundImage : "missing",
       titleColor: title ? getComputedStyle(title).color : "missing",
       crestWidth: crest?.getBoundingClientRect().width || 0,
     };
   });
-  const [homeSurface] = rgbStops(home.heroBackground);
-  expect(homeSurface).toBeDefined();
-  expect(Math.max(...homeSurface)).toBeLessThan(112);
+  expectDarkBrandedBackground(home.heroBackgroundImage, home.heroBackgroundColor);
   expect(home.identityBackground).toBe("none");
   expect(home.decisionBackground).toBe("none");
   expect(home.titleColor).toBe("rgb(245, 248, 249)");
