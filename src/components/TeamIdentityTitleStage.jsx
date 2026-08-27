@@ -120,23 +120,10 @@ export default function TeamIdentityTitleStage({
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
   useLayoutEffect(() => {
-    if (
-      titleFamily !== "editorial"
-      || resolvedMobileStage !== "editorial"
-      || typeof window === "undefined"
-      || !window.matchMedia?.("(max-width: 767px)").matches
-    ) return undefined;
-
-    const frame = window.requestAnimationFrame(() => {
-      const stage = stageRef.current;
-      if (!stage) return;
-      const localScroller = stage.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
-      if (localScroller instanceof HTMLElement && localScroller.scrollTop !== 0) localScroller.scrollTop = 0;
-      const documentScroller = document.scrollingElement;
-      if (documentScroller && documentScroller.scrollTop !== 0) documentScroller.scrollTop = 0;
-    });
-
-    return () => window.cancelAnimationFrame(frame);
+    if (titleFamily !== "editorial" || resolvedMobileStage !== "editorial" || window.innerWidth > 767) return;
+    const localScroller = stageRef.current?.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
+    if (localScroller) localScroller.scrollTop = 0;
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
   }, [displayTitle, resolvedMobileStage, titleFamily]);
 
   const fullCrestBrand = (
