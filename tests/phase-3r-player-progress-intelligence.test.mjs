@@ -120,7 +120,8 @@ test("Progress Story presents a premium decision-first hierarchy with explicit d
     "Open full progress profile",
   ]) assert.ok(component.includes(seam), `missing Progress Story seam: ${seam}`);
   assert.match(component, /fake overall rating/);
-  assert.match(css, /linear-gradient\(150deg, #0f1412/);
+  assert.match(css, /\.hero\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.doesNotMatch(css, /linear-gradient\(150deg,\s*#0f1412/);
   assert.match(css, /border-radius: 30px/);
   assert.match(css, /\.signalGrid[\s\S]*repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /\.nextFocus[\s\S]*background: #f7f8f4/);
@@ -128,10 +129,13 @@ test("Progress Story presents a premium decision-first hierarchy with explicit d
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
-test("Phase 3R owns late visual authority after Phase 3Q and prevents demo washout", () => {
+test("Phase 3R owns late visual authority after Phase 3Q without overriding team atmosphere", () => {
   assert.match(html, /shotlab-phase3q-player-session-closeout\.css[\s\S]*shotlab-phase3r-player-progress-story\.css/);
   assert.match(authority, /body #root \[data-testid=\"player-progress-story-hero\"\]/);
-  assert.match(authority, /background-color: #0f1412 !important/);
+  assert.match(authority, /background-color:\s*var\(--team-brand-surface-deep/);
+  assert.match(authority, /var\(--team-brand-surface-elevated/);
+  assert.match(authority, /var\(--team-brand-surface-deep/);
+  assert.doesNotMatch(authority, /linear-gradient\(150deg,\s*#0f1412/);
   assert.match(authority, /player-progress-story-topline/);
   assert.match(authority, /player-progress-story-copy/);
   assert.match(authority, /player-progress-trend-summary/);
