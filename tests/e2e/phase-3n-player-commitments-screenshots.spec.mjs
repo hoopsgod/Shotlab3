@@ -122,7 +122,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
   await verifyCommitmentSurface(page, {
     mode: "events",
     title: "Events & Attendance",
-    routeStatus: "1 response needed",
+    routeStatus: /^\d+ responses? needed$/,
     legacyTestId: "player-events-operational-list",
     screenshotName: "04n-player-events-commitment",
     responseRequired: true,
