@@ -30,9 +30,9 @@ test("historical bundled Titans defaults cannot leak into registered team brandi
 });
 
 test("Demo Titans owns its logo as explicit demo data instead of a global fallback", () => {
-  assert.match(demoDataSource, /teamName: "Demo Titans"/);
-  assert.match(demoDataSource, /logoUrl: "\/branding\/titans-exact-logo\.png\.PNG"/);
-  assert.match(demoDataSource, /logoMarkUrl: "\/branding\/titans-default-mark\.svg"/);
+  assert.match(demoDataSource, /teamName\s*:\s*"Demo Titans"/);
+  assert.match(demoDataSource, /logoUrl\s*:\s*"\/branding\/titans-exact-logo\.png\.PNG"/);
+  assert.match(demoDataSource, /logoMarkUrl\s*:\s*"\/branding\/titans-default-mark\.svg"/);
   const branding = resolveTeamBranding({
     teamName: "Demo Titans",
     logoUrl: DEFAULT_BRANDING.logoUrl,
