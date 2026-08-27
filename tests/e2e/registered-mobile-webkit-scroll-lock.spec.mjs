@@ -222,8 +222,8 @@ async function verifyRegisteredCoachVisualAxis(page, width) {
   );
   const lowerGrid = page.locator('[data-testid="coach-command-center-full"] .mcLowerGrid');
   if (await lowerGrid.count()) {
-    await expectSymmetricVisualGutters(lowerGrid, `registered Coach Home ${width}px WebKit lower panel grid`);
-    await expectVisibleDirectChildrenCentered(lowerGrid, `registered Coach Home ${width}px WebKit lower panel grid`);
+    await expectSymmetricVisualGutters(lowerGrid, `registered Coach Home ${width}px WebKit lower panel grid`, 0);
+    await expectVisibleDirectChildrenCentered(lowerGrid, `registered Coach Home ${width}px WebKit lower panel grid`, 0);
   }
   await page.screenshot({ path: `parity-evidence/webkit-paid-coach-home-${width}.png`, fullPage: true });
 
