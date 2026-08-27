@@ -4,10 +4,10 @@ body #root [data-testid="player-progress-story"] {
 }
 
 body #root [data-testid="player-progress-story-hero"] {
-  background-color: #0f1412 !important;
+  background-color: var(--team-brand-surface-deep, #071820) !important;
   background-image:
-    radial-gradient(circle at 88% 10%, rgba(200,255,26,.15), transparent 34%),
-    linear-gradient(150deg, #0f1412 0%, #151b17 55%, #0f1412 100%) !important;
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 15%, transparent), transparent 34%),
+    linear-gradient(145deg, var(--team-brand-surface-elevated, #0b2633), var(--team-brand-surface-deep, #071820) 72%) !important;
   border-color: rgba(255,255,255,.10) !important;
   color: #f8faf5 !important;
 }
