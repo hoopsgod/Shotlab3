@@ -23,12 +23,18 @@ concurrency:
 jobs:
   evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Check out exact prototype head
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Check out exact production baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 4bb11be8da71989a1d5935185ddeebd75e03ade4
+          path: baseline
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -36,11 +42,30 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install application dependencies
+      - name: Install prototype dependencies
         run: npm ci
 
-      - name: Verify production build
+      - name: Verify prototype production build
         run: npm run build
+
+      - name: Install baseline dependencies and build
+        working-directory: baseline
+        run: |
+          npm ci
+          npm run build
+
+      - name: Start exact production baseline preview
+        working-directory: baseline
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/player-secondary-baseline.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4174/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/player-secondary-baseline.log
+          exit 1
 
       - name: Install pinned Playwright runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
@@ -48,9 +73,9 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Capture SHA-bound before and after evidence
+      - name: Capture exact-SHA before and after evidence
         env:
-          PLAYER_SECONDARY_BASELINE_ORIGIN: https://b9c8e0be.shotlab3.pages.dev
+          PLAYER_SECONDARY_BASELINE_ORIGIN: http://127.0.0.1:4174
           PLAYER_SECONDARY_PROTOTYPE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: npx playwright test tests/e2e/player-secondary-visual-evidence.spec.mjs --project=chromium-desktop --reporter=line
 
