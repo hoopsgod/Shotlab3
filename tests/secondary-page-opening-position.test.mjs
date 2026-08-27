@@ -7,15 +7,15 @@ const titleStage = read('src/components/TeamIdentityTitleStage.jsx');
 const visualAuthority = read('src/styles/AuthenticatedVisualAuthority2026.css');
 const coachConvergence = read('src/styles/CoachRoleVisualConvergence2026.css');
 
-test('mobile editorial title stages reset the persistent route scroll position on mount', () => {
+test('mobile editorial title stages synchronously reset persistent route scroll position', () => {
   assert.match(titleStage, /useLayoutEffect/);
   assert.match(titleStage, /titleFamily !== "editorial"/);
   assert.match(titleStage, /resolvedMobileStage !== "editorial"/);
-  assert.match(titleStage, /matchMedia\?\.\("\(max-width: 767px\)"\)/);
-  assert.match(titleStage, /stage\.closest\("\.player-scroll-container, \.coach-scroll-container, \.content-wrap"\)/);
+  assert.match(titleStage, /window\.innerWidth > 767/);
+  assert.match(titleStage, /stageRef\.current\?\.closest\("\.player-scroll-container, \.coach-scroll-container, \.content-wrap"\)/);
   assert.match(titleStage, /localScroller\.scrollTop = 0/);
   assert.match(titleStage, /document\.scrollingElement/);
-  assert.match(titleStage, /documentScroller\.scrollTop = 0/);
+  assert.match(titleStage, /document\.scrollingElement\.scrollTop = 0/);
   assert.match(titleStage, /ref=\{stageRef\}/);
 });
 
@@ -25,7 +25,7 @@ test('mobile secondary pages retain a safe top landing instead of collapsing und
   assert.doesNotMatch(visualAuthority, /shared-dashboard-back-action \+ \.secondaryPageShell\s*\{[^}]*padding-top:\s*0\s*!important/);
 });
 
-test('Coach secondary titles now own the same premium editorial hierarchy without touching Coach Home', () => {
+test('Coach secondary titles own premium editorial hierarchy without touching Coach Home', () => {
   assert.match(coachConvergence, /intentionally does not style or reposition[\s\S]*shared title primitive/);
   assert.match(visualAuthority, /performance-shell--coach \[data-visual-role="page-intro"\]\[data-title-stage-family="editorial"\]/);
   assert.match(visualAuthority, /font-family:\s*"Barlow Condensed",\s*"Arial Narrow"/);
