@@ -10,6 +10,7 @@ const titleCss = read("src/components/TeamIdentityTitleStage.css");
 const secondaryCss = read("src/components/SecondaryPageSystem.css");
 const coachConvergenceCss = read("src/styles/CoachRoleVisualConvergence2026.css");
 const coachRouteCss = read("src/components/CoachRoutePerformanceStage.module.css");
+const coachPhase2Css = read("src/components/CoachDashboardPhase2.module.css");
 const playerMetricCss = read("src/components/PlayerMetricHierarchy.module.css");
 const playerProgressCss = read("src/components/PlayerProgressStory.module.css");
 const insightRailCss = read("src/components/OperationalInsightRail.module.css");
@@ -82,6 +83,10 @@ test("shared authenticated surfaces consume the brand atmosphere instead of fixe
   assert.match(coachConvergenceCss, /--coach-2026-navy-2:\s*var\(--team-brand-surface-elevated/);
   assert.match(coachRouteCss, /var\(--team-brand-surface-elevated/);
   assert.match(coachRouteCss, /var\(--team-brand-surface-deep/);
+  assert.match(coachPhase2Css, /\.drawerMetric\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.match(coachPhase2Css, /\.archiveSelect\s*\{[\s\S]*var\(--team-brand-surface-deep/);
+  assert.match(coachPhase2Css, /coach-event-intelligence-drawer[\s\S]*aside section[\s\S]*var\(--team-brand-surface-deep/);
+  assert.doesNotMatch(coachPhase2Css, /rgba\(18,\s*23,\s*26,\s*\.95\)|#0a0e10|#0f1214/);
   assert.match(playerMetricCss, /metricPrimary[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.match(playerProgressCss, /\.hero\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.match(insightRailCss, /\.primaryCard\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
