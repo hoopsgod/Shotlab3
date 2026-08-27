@@ -169,19 +169,19 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
 
   const rosterResults = page.locator("#coach-roster-operations");
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible({ timeout: 20_000 });
-  const performanceRail = await currentPerformanceRail(page);
-  await expect(page.getByTestId("coach-players-filter-rail")).toBeVisible();
+  const playerFilterRail = page.getByTestId("coach-players-filter-rail");
+  await expect(playerFilterRail).toBeVisible();
   await expect(rosterResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
 
-  const needsAttention = performanceRail.getByRole("button", { name: /^Needs Attention:/i });
+  const needsAttention = playerFilterRail.getByRole("button", { name: /^Attention/i });
   await needsAttention.click();
   await expect(needsAttention).toHaveAttribute("aria-pressed", "true");
   await expect(rosterResults.getByText("Active Player", { exact: true })).toHaveCount(0);
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("New Player", { exact: true }).first()).toBeVisible();
 
-  const search = page.getByTestId("coach-players-filter-rail").getByRole("searchbox");
+  const search = playerFilterRail.getByRole("searchbox");
   await search.fill("Quiet");
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("New Player", { exact: true })).toHaveCount(0);
