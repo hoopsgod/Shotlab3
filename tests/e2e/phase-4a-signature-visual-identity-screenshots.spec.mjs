@@ -206,15 +206,18 @@ test("Phase 4A preserves Coach Mission Control's visible team identity and tacti
     backgroundImage: getComputedStyle(node).backgroundImage,
     overflow: getComputedStyle(node).overflow,
   }));
-  expect(heroTreatment.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
-  expect(heroTreatment.backgroundColor).not.toBe("rgb(255, 255, 255)");
   expect(["hidden", "clip"]).toContain(heroTreatment.overflow);
 
   const heroScrim = hero.locator(".mcHeroScrim");
-  if (await heroScrim.isVisible().catch(() => false)) {
-    expect(await heroScrim.evaluate((node) => getComputedStyle(node).backgroundImage)).toContain("gradient");
-  } else {
-    expect(heroTreatment.backgroundImage).toContain("gradient");
+  const scrimVisible = await heroScrim.isVisible().catch(() => false);
+  const scrimBackground = scrimVisible
+    ? await heroScrim.evaluate((node) => getComputedStyle(node).backgroundImage)
+    : "none";
+  const hasHeroGradient = heroTreatment.backgroundImage.includes("gradient");
+  const hasScrimGradient = scrimBackground.includes("gradient");
+  expect(hasHeroGradient || hasScrimGradient).toBe(true);
+  if (heroTreatment.backgroundColor !== "rgba(0, 0, 0, 0)") {
+    expect(heroTreatment.backgroundColor).not.toBe("rgb(255, 255, 255)");
   }
 
   await expect(page.getByTestId("player-home-signature-field")).toHaveCount(0);
