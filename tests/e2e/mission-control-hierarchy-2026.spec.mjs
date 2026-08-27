@@ -53,7 +53,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   // its duplicate crest while the large hero mark remains the identity anchor.
   await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
-  await expect(page.locator(".mcCourtArtwork")).toBeVisible();
+  // Phase 4's identity-first composition intentionally retires the decorative
+  // court layer; certification protects that simplification rather than
+  // resurrecting obsolete visual chrome.
+  await expect(page.locator(".mcCourtArtwork")).toBeHidden();
   await expect(page.locator(".mcHeroScrim")).toBeVisible();
   await expect(page.locator(".mcTeamSelect")).toBeHidden();
   await expect(page.locator(".mcBell")).toBeVisible();
@@ -103,7 +106,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       heroMaxHeight: heroStyle.maxHeight,
       heroHeight: hero.getBoundingClientRect().height,
       heroRadius: parseFloat(heroStyle.borderRadius),
-      courtDisplay: getComputedStyle(court).display,
+      courtDisplay: court ? getComputedStyle(court).display : "none",
       scrimDisplay: getComputedStyle(scrim).display,
       heroContentBackground: heroContentStyle.backgroundColor,
       identityBackground: identityStyle.backgroundColor,
@@ -148,7 +151,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.heroHeight).toBeGreaterThanOrEqual(382);
   expect(presentation.heroHeight).toBeLessThanOrEqual(460);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
-  expect(presentation.courtDisplay).toBe("block");
+  expect(presentation.courtDisplay).toBe("none");
   expect(presentation.scrimDisplay).toBe("block");
   expect(isTransparent(presentation.heroContentBackground)).toBe(true);
 
