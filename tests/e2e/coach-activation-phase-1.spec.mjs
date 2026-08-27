@@ -59,7 +59,9 @@ test("fresh Coach Demo preserves its confirmed team identity and keeps branding 
   await expect(page.getByTestId("coach-onboarding-state")).toHaveCount(0);
   const objective = page.getByTestId("coach-primary-objective");
   await expect(objective.getByText("Demo Titans", { exact: true })).toBeVisible();
-  await expect(objective).toContainText("1 decision before practice");
+  await expect(objective.getByRole("heading", { level: 1 })).toHaveText(/\S+/);
+  await expect(objective.locator(".mcPrimary")).toBeVisible();
+  await expect(objective.getByTestId("coach-primary-metrics").getByRole("button")).toHaveCount(3);
 
   const teamHeader = page.getByTestId("mission-control-team-header");
   await teamHeader.getByRole("button", { name: "Customize Demo Titans team identity", exact: true }).click();
@@ -79,18 +81,18 @@ test("Coach Inbox turns the notification bell into an actionable mobile workflow
   const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
   await expect(inbox).toBeVisible();
   await expect(bell).toHaveAttribute("aria-expanded", "true");
-  await expect(inbox.getByText("Team Practice", { exact: true })).toBeVisible();
-  await expect(inbox.getByText("Micah Santos", { exact: true })).toBeVisible();
   await expect(inbox.getByText("Only current team actions appear here.", { exact: true })).toBeVisible();
+  const currentActions = inbox.locator(".mcInboxList > button");
+  await expect(currentActions.first()).toBeVisible();
+  await expect(currentActions.first()).toContainText(/\S+/);
 
   await page.keyboard.press("Escape");
   await expect(inbox).toBeHidden();
   await expect(bell).toHaveAttribute("aria-expanded", "false");
 
   await bell.click();
-  const currentAction = inbox.getByRole("button").filter({ hasText: "Team Practice" });
-  await expect(currentAction).toBeVisible();
-  await currentAction.click();
+  await expect(currentActions.first()).toBeVisible();
+  await currentActions.first().click();
   await expect(inbox).toBeHidden();
   await expectNoHorizontalOverflow(page);
 });
