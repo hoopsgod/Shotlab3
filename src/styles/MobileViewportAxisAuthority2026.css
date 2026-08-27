@@ -5,6 +5,16 @@
     --phase4e-mobile-gutter: 20px;
   }
 
+  /* iOS/WebKit may otherwise re-anchor the persistent app scroller after route
+   * hydration, font settling, or browser-chrome viewport changes. Route changes
+   * are explicitly reset by the mobile viewport controller instead. */
+  html,
+  body,
+  html body #root .performance-shell--player.is-mobile .player-scroll-container,
+  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap {
+    overflow-anchor: none !important;
+  }
+
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
     padding-inline: 20px !important;
   }
