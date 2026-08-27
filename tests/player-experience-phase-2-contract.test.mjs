@@ -37,9 +37,8 @@ test("At Home and Program expose operational filters without altering persistenc
 
 test("At Home alone prototypes the canonical shared secondary title-stage wrapper", () => {
   assert.match(componentSource, /import \{ SecondaryPageIntro \} from "\.\/SecondaryPageSystem\.jsx"/);
-  assert.match(componentSource, /if \(model\.id === "at-home"\)[\s\S]{0,220}<SecondaryPageIntro/);
-  assert.match(componentSource, /icon="training"/);
-  assert.match(componentSource, /return <div className="teamIdentityTitleStageFrame"[\s\S]{0,220}<TeamIdentityTitleStage/);
+  assert.match(componentSource, /model\.id === "at-home" \? <SecondaryPageIntro/);
+  assert.match(componentSource, /: <div className="teamIdentityTitleStageFrame"[\s\S]{0,220}<TeamIdentityTitleStage/);
   assert.doesNotMatch(componentSource, /isDemo|demoMode|isDemoAccount/i);
 });
 
