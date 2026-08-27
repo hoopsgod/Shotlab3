@@ -143,11 +143,19 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   expect(home.crestWidth).toBeGreaterThanOrEqual(96);
   await expectNoHorizontalOverflow(page);
 
-  // These five operational routes explicitly own the shared branded performance stage.
-  for (const key of ["players", "events", "drills", "sc", "leaderboards"]) {
+  const operationalRoutes = [
+    ["players", "coach-players-decision-brief"],
+    ["events", "coach-events-decision-brief"],
+    ["drills", "coach-page-dashboard-drills-decision-brief"],
+    ["sc", "coach-page-dashboard-strength-decision-brief"],
+    ["leaderboards", "coach-page-dashboard-leaderboards-decision-brief"],
+  ];
+  for (const [key, decisionTestId] of operationalRoutes) {
     await navigateByKey(page, key);
     await expectEditorialTitle(page);
-    await expectDarkDecision(page);
+    const decision = page.getByTestId(decisionTestId);
+    await expect(decision).toHaveAttribute("data-visual-role", "primary-decision", { timeout: 10_000 });
+    await expectDarkDecision(page, decision);
     await expectNoHorizontalOverflow(page);
   }
 
