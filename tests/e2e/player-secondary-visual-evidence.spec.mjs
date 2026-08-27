@@ -6,6 +6,7 @@ const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/player-secondary-visua
 const BASELINE_SHA = "4bb11be8da71989a1d5935185ddeebd75e03ade4";
 const BASELINE_ORIGIN = process.env.PLAYER_SECONDARY_BASELINE_ORIGIN || "https://b9c8e0be.shotlab3.pages.dev";
 const PROTOTYPE_ORIGIN = process.env.PLAYER_SECONDARY_PROTOTYPE_ORIGIN || "http://127.0.0.1:4173";
+const PROTOTYPE_SHA = process.env.PLAYER_SECONDARY_PROTOTYPE_SHA || process.env.GITHUB_SHA || "local-checkout";
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 test.use({ viewport: { width: 390, height: 844 } });
@@ -112,7 +113,7 @@ test("capture immutable production before and exact-checkout prototype after at 
   fs.writeFileSync(path.join(OUTPUT_DIR, "evidence-manifest.json"), JSON.stringify({
     viewport: { width: 390, height: 844 },
     baseline: { sha: BASELINE_SHA, origin: BASELINE_ORIGIN },
-    prototype: { sha: process.env.GITHUB_SHA || "local-checkout", origin: PROTOTYPE_ORIGIN },
+    prototype: { sha: PROTOTYPE_SHA, origin: PROTOTYPE_ORIGIN },
     surfaces: ["Player Dashboard/Home", "At Home Training", "Program Training", "Progress"],
   }, null, 2));
 });
