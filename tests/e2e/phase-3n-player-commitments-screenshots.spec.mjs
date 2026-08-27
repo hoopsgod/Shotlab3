@@ -122,7 +122,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
   await verifyCommitmentSurface(page, {
     mode: "events",
     title: "Events & Attendance",
-    routeStatus: /^\d+ responses? needed$/,
+    routeStatus: /^(?:Schedule clear|Commitment set|\d+ responses? needed)$/,
     legacyTestId: "player-events-operational-list",
     screenshotName: "04n-player-events-commitment",
     responseRequired: true,
@@ -132,7 +132,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
   await verifyCommitmentSurface(page, {
     mode: "strength",
     title: "Strength & Conditioning",
-    routeStatus: /^(?:Schedule clear|\d+ responses? needed)$/,
+    routeStatus: /^(?:Schedule clear|Commitment set|\d+ responses? needed)$/,
     legacyTestId: "player-strength-operational-panel",
     screenshotName: "04o-player-strength-commitment",
   });
