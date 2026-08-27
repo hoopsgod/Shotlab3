@@ -171,14 +171,32 @@ export function installMobileHorizontalViewportLock() {
 
   let rafId = null;
   let touchStart = null;
+  let routeKey = '';
+  if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+
+  const resetRouteTop = () => {
+    if (!isMobileViewport()) return;
+    const shell = document.querySelector('.performance-shell.is-mobile[data-workspace-tab]');
+    const nextRoute = shell?.getAttribute('data-workspace-tab') || '';
+    if (!nextRoute || nextRoute === routeKey) return;
+    routeKey = nextRoute;
+    const root = document.scrollingElement || document.documentElement;
+    root.scrollTop = 0;
+    document.body.scrollTop = 0;
+    shell.querySelector('.player-scroll-container')?.scrollTo(0, 0);
+    shell.querySelector(':scope > .shell-main > .content-wrap')?.scrollTo(0, 0);
+    window.scrollTo(0, 0);
+  };
 
   const scheduleCorrection = () => {
     if (rafId != null) return;
     rafId = window.requestAnimationFrame(() => {
       rafId = null;
       resetMobileHorizontalViewport();
+      resetRouteTop();
     });
   };
+  const forceRouteTop = () => { routeKey = ''; scheduleCorrection(); };
 
   const handleCapturedScroll = (event) => {
     if (!isMobileViewport()) return;
@@ -243,7 +261,8 @@ export function installMobileHorizontalViewportLock() {
   window.addEventListener('pointerup', scheduleCorrection, { passive: true });
   window.addEventListener('resize', scheduleCorrection, { passive: true });
   window.visualViewport?.addEventListener('resize', scheduleCorrection, { passive: true });
-  window.addEventListener('shotlab:app-ready', scheduleCorrection);
+  window.addEventListener('pageshow', forceRouteTop);
+  window.addEventListener('shotlab:app-ready', forceRouteTop);
 
   scheduleCorrection();
 
@@ -257,7 +276,8 @@ export function installMobileHorizontalViewportLock() {
     window.removeEventListener('pointerup', scheduleCorrection);
     window.removeEventListener('resize', scheduleCorrection);
     window.visualViewport?.removeEventListener('resize', scheduleCorrection);
-    window.removeEventListener('shotlab:app-ready', scheduleCorrection);
+    window.removeEventListener('pageshow', forceRouteTop);
+    window.removeEventListener('shotlab:app-ready', forceRouteTop);
     if (rafId != null) window.cancelAnimationFrame(rafId);
     clearRegisteredCoachRouteGeometry();
   };
