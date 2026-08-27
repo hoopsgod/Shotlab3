@@ -75,15 +75,16 @@ export default function TeamIdentityTitleStage({
   const longSingleWord = singleWordTitle && longestWordLength >= 11;
   const longTitle = displayTitle.length > 22 || longestWordLength > 12;
   const isHero = variant === "hero" || variant === "identity";
+  const isDark = surface === "dark";
   const heroClass = isHero ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
-  const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
+  const surfaceClass = isDark ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
   const titleFamily = isHero ? "identity" : "editorial";
   const requestedMobileStage = tidy(dataMobileStage);
   const resolvedMobileStage = titleFamily === "editorial" && requestedMobileStage === "team-identity"
     ? "editorial"
     : requestedMobileStage || (isHero ? "team-identity" : "editorial");
   const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
-  const fallbackBrandTreatment = isHero ? "hero" : "compact";
+  const fallbackBrandTreatment = titleFamily === "identity" ? "hero" : "compact";
   const resolvedBrandTreatment = requestedBrandTreatment === "auto"
     ? fallbackBrandTreatment
     : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : fallbackBrandTreatment);
@@ -171,7 +172,7 @@ export default function TeamIdentityTitleStage({
       data-brand-treatment={resolvedBrandTreatment}
       data-title-size={titleSize}
       data-title-word-count={titleWords.length}
-      data-surface={surface === "dark" ? "dark" : "light"}
+      data-surface={isDark ? "dark" : "light"}
       data-layout-role={dataLayoutRole}
       data-visual-role={dataVisualRole}
       data-page-kind={dataPageKind}
