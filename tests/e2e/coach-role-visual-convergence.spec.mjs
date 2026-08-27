@@ -95,7 +95,10 @@ async function expectDarkDecision(page, locator = page.locator('[data-visual-rol
     };
   });
   expectDarkBrandedBackground(style.backgroundImage, style.backgroundColor);
-  expect(style.radius).toBeGreaterThanOrEqual(18);
+  // Phase 4 supports both integrated full-bleed stages (square) and bounded
+  // card-like stages (intentionally rounded). Reject accidental small radii,
+  // not the deliberate zero-radius integrated composition.
+  expect(style.radius === 0 || style.radius >= 18).toBe(true);
   if (style.actionHeight) expect(style.actionHeight).toBeGreaterThanOrEqual(44);
 }
 
