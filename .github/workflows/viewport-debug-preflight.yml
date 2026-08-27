@@ -1,5 +1,8 @@
 name: Viewport Debug Preflight
 
+# Coach Home is the Phase 4 visual migration gate. The implementation may not
+# spread to additional product surfaces until this workflow emits rendered
+# Coach Home evidence at both the primary mobile and desktop comparison widths.
 on:
   pull_request:
     paths:
@@ -17,9 +20,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  mobile-viewport-preflight:
+  coach-home-visual-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Check out exact candidate
         uses: actions/checkout@v4
@@ -44,14 +47,17 @@ jobs:
       - name: Verify viewport debugger unit contracts
         run: node --test tests/viewport-debug-tooling.test.mjs
 
-      - name: Run fast Coach and Player viewport preflight
-        run: npm run debug:viewport -- --widths=320,390,430
+      - name: Render Coach Home comparison gate at 390px and 1440px
+        run: npm run debug:viewport -- --role=coach --widths=390,1440
 
-      - name: Upload viewport diagnostics
+      - name: Run remaining mobile containment regression
+        run: npm run debug:viewport -- --widths=320,430
+
+      - name: Upload rendered viewport evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: viewport-debug-${{ github.event.pull_request.head.sha || github.sha }}
+          name: coach-home-rendered-gate-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/viewport-debug/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7

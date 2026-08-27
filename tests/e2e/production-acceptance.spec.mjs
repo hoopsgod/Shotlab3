@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredCoach } from "./registered-coach-fixture.mjs";
 
 const TEAM_ID = "team-e2e-production-acceptance";
 const COACH_EMAIL = "coach.demo@shotlab.app";
+const REGISTERED_COACH_EMAIL = "acceptance.coach@shotlab.test";
 const PLAYER_EMAIL = "acceptance.player@example.com";
 const REMOVAL_EMAIL = "removal.candidate@example.com";
 const FULL_LOGO_URL = "https://example.test/shotlab-acceptance-full.svg";
@@ -51,6 +53,14 @@ const seedData = {
   "sl:season-archives": [],
 };
 
+const registeredRemovalSeedData = {
+  ...seedData,
+  "sl:teams": seedData["sl:teams"].map((team) => ({ ...team, ownerCoachId: REGISTERED_COACH_EMAIL })),
+  "sl:players": seedData["sl:players"].map((player) => player.role === "coach"
+    ? { ...player, email: REGISTERED_COACH_EMAIL, name: "Acceptance Coach" }
+    : player),
+};
+
 const TEST_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#2563EB"/><path d="M28 54h44M50 28v44" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>';
 
 async function installSafeRoutes(page) {
@@ -71,6 +81,16 @@ async function enterSeededDemoCoach(page) {
   const demoButton = page.getByRole("button", { name: "Coach demo", exact: true });
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
   await demoButton.click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function enterRegisteredRemovalCoach(page) {
+  await enterSeededRegisteredCoach(page, {
+    storage: registeredRemovalSeedData,
+    coachEmail: REGISTERED_COACH_EMAIL,
+    coachName: "Acceptance Coach",
+    teamId: TEAM_ID,
+  });
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -138,12 +158,13 @@ test("coach branding save persists and renders a cleaned prominent logo", async 
 });
 
 test("coach removal creates a hidden tombstone and excludes the player from roster and leaderboards", async ({ page }) => {
-  await enterSeededDemoCoach(page);
+  await enterRegisteredRemovalCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
-  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  await expect(roster.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+  await expect(roster.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
 
   const candidateRosterRow = page
     .locator("#coach-roster-operations .phase1RosterRow")
@@ -153,7 +174,7 @@ test("coach removal creates a hidden tombstone and excludes the player from rost
   await expect(candidateRosterRow).not.toHaveAttribute("role", "button");
   page.once("dialog", async (dialog) => dialog.accept());
   await candidateRosterRow.getByRole("button", { name: "REMOVE", exact: true }).click();
-  await expect(page.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
+  await expect(roster.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
 
   await expect.poll(() => page.evaluate((email) => {
     const rows = JSON.parse(window.localStorage.getItem("sl:players") || "[]");

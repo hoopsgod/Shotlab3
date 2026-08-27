@@ -1,13 +1,14 @@
 import { test, expect } from "@playwright/test";
 
 const TEAM_ID = "team-follow-up-queue";
+const COACH_EMAIL = "followup.coach@example.test";
 const now = new Date().toISOString();
 let followUps = [];
 
 const seed = {
-  "sl:teams": [{ id: TEAM_ID, name: "Follow-Up Team", ownerCoachId: "coach.demo@shotlab.app", joinCode: "FOLLOW" }],
+  "sl:teams": [{ id: TEAM_ID, name: "Follow-Up Team", ownerCoachId: COACH_EMAIL, joinCode: "FOLLOW" }],
   "sl:players": [
-    { id: "coach", email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "coach", email: COACH_EMAIL, name: "Follow-Up Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "open", email: "open@example.test", name: "Open Player", role: "player", teamId: TEAM_ID },
     { id: "complete", email: "complete@example.test", name: "Complete Player", role: "player", teamId: TEAM_ID },
     { id: "removed", email: "removed@example.test", name: "Removed Player", role: "player", teamId: null, removedFromTeamId: TEAM_ID, rosterStatus: "removed", rosterAction: "coach_remove_from_team", hideFromLeaderboards: true },
@@ -38,7 +39,7 @@ async function installRoutes(page) {
       createdAt: now,
       updatedAt: now,
       completedAt: "",
-      updatedBy: "coach.demo@shotlab.app",
+      updatedBy: COACH_EMAIL,
     },
     {
       teamId: TEAM_ID,
@@ -49,7 +50,7 @@ async function installRoutes(page) {
       createdAt: now,
       updatedAt: now,
       completedAt: now,
-      updatedBy: "coach.demo@shotlab.app",
+      updatedBy: COACH_EMAIL,
     },
     {
       teamId: TEAM_ID,
@@ -60,9 +61,32 @@ async function installRoutes(page) {
       createdAt: now,
       updatedAt: now,
       completedAt: "",
-      updatedBy: "coach.demo@shotlab.app",
+      updatedBy: COACH_EMAIL,
     },
   ];
+
+  await page.route("**/v1/legacy-auth/restore", async (route) => {
+    const body = JSON.parse(route.request().postData() || "{}");
+    const email = String(body?.email || "").trim().toLowerCase();
+    if (email !== COACH_EMAIL) {
+      await route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: "profile_not_found" }) });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        profile: {
+          email: COACH_EMAIL,
+          name: "Follow-Up Coach",
+          role: "coach",
+          teamId: TEAM_ID,
+          hideFromLeaderboards: false,
+        },
+      }),
+    });
+  });
 
   await page.route("**/v1/coach-follow-ups**", async (route) => {
     const request = route.request();
@@ -78,7 +102,7 @@ async function installRoutes(page) {
         createdAt: body.created_at || updatedAt,
         updatedAt,
         completedAt: body.state === "completed" ? updatedAt : "",
-        updatedBy: "coach.demo@shotlab.app",
+        updatedBy: COACH_EMAIL,
       };
       followUps = [...followUps.filter((row) => !(row.teamId === next.teamId && row.playerIdentity === next.playerIdentity)), next];
       await route.fulfill({
@@ -94,32 +118,36 @@ async function installRoutes(page) {
       body: JSON.stringify({ ok: true, storage_mode: "team_remote", follow_ups: followUps }),
     });
   });
-  await page.route("**/v1/team-priorities", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "demo_local", priorities_by_team: {} }) }));
+  await page.route("**/v1/player-assignments**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", assignments: [] }) }));
+  await page.route("**/v1/team-priorities", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", priorities_by_team: {} }) }));
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
+  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-test("Mission Control closes the exact player follow-up loop", async ({ page }) => {
+test("Player Intelligence closes the exact player follow-up loop", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
-  await page.addInitScript((payload) => {
+  await page.addInitScript(({ payload, email }) => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
     for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
-  }, seed);
+    window.localStorage.setItem("sl:session", JSON.stringify({ email }));
+  }, { payload: seed, email: COACH_EMAIL });
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
 
-  const queue = page.getByTestId("coach-follow-up-queue");
-  await expect(queue).toBeVisible({ timeout: 20_000 });
-  await expect(queue).toHaveAttribute("data-open-count", "1");
-  await expect(queue).toHaveAttribute("data-storage-mode", "team_remote");
-  await expect(queue.getByText("1 OPEN", { exact: true })).toBeVisible();
-  await expect(queue.getByText("Open Player", { exact: true })).toBeVisible();
-  await expect(queue).not.toContainText("Removed Player");
-  await expect(queue).not.toContainText(/message sent|player notified/i);
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toBeVisible({ timeout: 20_000 });
+  await dock.getByRole("button", { name: "Players", exact: true }).click();
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  await expect(roster).not.toContainText("Removed Player");
 
-  await queue.getByRole("button", { name: "Open Open Player follow-up", exact: true }).click();
+  const openProfile = roster.getByRole("button", { name: "Open Open Player profile", exact: true });
+  await expect(openProfile).toBeVisible();
+  await openProfile.click();
 
   const drawer = page.getByTestId("coach-player-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 20_000 });
@@ -135,23 +163,17 @@ test("Mission Control closes the exact player follow-up loop", async ({ page }) 
   await expect(ledger).toHaveAttribute("data-follow-up-state", "completed");
   await expect(ledger.getByRole("status")).toContainText("Follow-up record synced");
 
-  // The player drawer is modal and correctly blocks the mobile dock. Close it
-  // through the existing drawer control before returning to Mission Control.
+  expect(followUps.find((row) => row.playerIdentity === "open@example.test")?.state).toBe("completed");
+  expect(followUps.find((row) => row.playerIdentity === "complete@example.test")?.state).toBe("completed");
+  expect(followUps.find((row) => row.playerIdentity === "removed@example.test")?.state).toBe("planned");
+
   await drawer.getByRole("button", { name: "Close details", exact: true }).last().click();
   await expect(drawer).toHaveCount(0);
-
-  const dock = page.getByTestId("mobile-navigation-dock");
-  await dock.getByRole("button", { name: "Home", exact: true }).click();
-
-  await expect(queue).toBeVisible({ timeout: 20_000 });
-  await expect(queue).toHaveAttribute("data-open-count", "0");
-  await expect(queue.getByText("CLEAR", { exact: true })).toBeVisible();
-  await expect(queue.getByText("0 planned · 2 completed records", { exact: true })).toBeVisible();
-
-  const history = queue.locator("details.mcFollowUpQueueHistory");
-  await history.locator("summary").click();
-  await expect(history.getByText("Open Player", { exact: true })).toBeVisible();
-  await expect(history.getByText("Complete Player", { exact: true })).toBeVisible();
+  await openProfile.click();
+  const reopenedLedger = page.getByTestId("coach-follow-up-ledger");
+  await expect(reopenedLedger).toBeVisible({ timeout: 20_000 });
+  await expect(reopenedLedger).toHaveAttribute("data-follow-up-state", "completed");
+  await expect(reopenedLedger.getByRole("textbox", { name: "Private coach note" })).toHaveValue("Check in after practice.");
 
   const widths = await page.evaluate(() => ({
     viewport: window.innerWidth,

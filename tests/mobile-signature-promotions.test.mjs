@@ -16,7 +16,8 @@ const secondary = readFileSync('src/components/SecondaryPageSystem.jsx', 'utf8')
 const titleStageCss = readFileSync('src/components/TeamIdentityTitleStage.css', 'utf8');
 
 test('final enhancer pipeline keeps title mutators retired and ends with canonical minification', () => {
-  assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-coach-signature-stage\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
+  assert.match(routePipeline, /apply-mobile-premium-secondary-page-system\.mjs[\s\S]*apply-mobile-coach-cascade-reconciliation\.mjs/);
+  assert.doesNotMatch(routePipeline, /apply-mobile-coach-signature-stage\.mjs/);
   assert.match(routePipeline, /apply-phase4e11-coach-residual-touch-safety\.mjs[\s\S]*apply-mobile-player-coach-signal-signature\.mjs[\s\S]*apply-mobile-player-composition-reconciliation\.mjs[\s\S]*apply-mobile-auth-signature-stage\.mjs[\s\S]*minify-visual-authority-css\.mjs/);
   assert.doesNotMatch(routePipeline, /apply-mobile-route-signature-promotion\.mjs|apply-mobile-centered-route-stage\.mjs|apply-team-identity-coach-hero-mark\.mjs/);
   assert.equal(existsSync('scripts/apply-mobile-route-signature-promotion.mjs'), false);
@@ -29,6 +30,7 @@ test('Coach Home signature enhancer leaves title identity source-owned while ret
   const finalCss = promoteCoachFinalCss(coachFinal);
   const hierarchy = reconcileCoachHierarchy(coachHierarchy);
   assert.equal(command, coachCommand);
+  assert.equal(finalCss, coachFinal);
   assert.doesNotMatch(finalCss, /\.mcHeroTeamMark|\.mcHero\s+h1|\.mcProgramIdentity|\.mcHeroIdentity/);
   assert.doesNotMatch(hierarchy, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);

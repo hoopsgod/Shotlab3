@@ -96,10 +96,13 @@ test("fresh iPhone evidence covers both commitment routes and verifies legacy co
   assert.match(screenshotConfig, /phase-3n-player-commitments-screenshots\.spec\.mjs/);
   assert.match(screenshots, /04n-player-events-commitment/);
   assert.match(screenshots, /04o-player-strength-commitment/);
-  assert.match(screenshots, /routeStatus: "1 response needed"/);
   assert.ok(
-    screenshots.includes('routeStatus: /^(?:Schedule clear|\\d+ responses? needed)$/'),
-    "S&C screenshot evidence must accept the truthful actionable status rather than stale fixed copy",
+    screenshots.includes('routeStatus: /^(?:Schedule clear|Commitment set|\\d+ responses? needed)$/'),
+    "Events screenshot evidence must accept all truthful live commitment states rather than one fixed demo count",
+  );
+  assert.ok(
+    screenshots.split('routeStatus: /^(?:Schedule clear|Commitment set|\\d+ responses? needed)$/').length >= 3,
+    "Both Events and S&C screenshot evidence must accept the truthful live commitment state",
   );
   assert.match(screenshots, /compositionStyle\.backgroundColor/);
   assert.match(screenshots, /scrollWidth - window\.innerWidth/);

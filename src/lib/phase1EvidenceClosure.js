@@ -8,7 +8,6 @@ const FINAL_A11Y_CSS = `${FINAL_A11Y_MARKER}
 [data-testid="auth-workspace"] button,[data-testid="auth-workspace"] input,[data-testid="auth-workspace"] a{opacity:1!important;filter:none!important}
 [data-testid="auth-workspace"] input::placeholder{color:#465159!important;opacity:1!important}
 [data-testid="auth-workspace"] a[href$="privacy"]{color:#35434c!important;-webkit-text-fill-color:#35434c!important}
-[data-testid="coach-command-center-full"] .mcHealthFacts small{color:#24313a!important;-webkit-text-fill-color:#24313a!important;opacity:1!important}
 [data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary{color:#f8fbf6!important;-webkit-text-fill-color:#f8fbf6!important}`;
 
 function cleanText(value) {

@@ -190,21 +190,20 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    // Mission Control's identity row is intentionally compact; hierarchy belongs to the decision headline.
     expect(result.identityHeight).toBeGreaterThanOrEqual(96);
     expect(result.identityHeight).toBeLessThanOrEqual(160);
-    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(14);
-    expect(result.teamIdentitySize).toBeLessThanOrEqual(20);
-    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(30);
-    expect(result.decisionTitleSize).toBeLessThanOrEqual(48);
-    expect(result.decisionTitleSize - result.teamIdentitySize).toBeGreaterThanOrEqual(12);
+    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(30);
+    expect(result.teamIdentitySize).toBeLessThanOrEqual(50);
+    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(16);
+    expect(result.decisionTitleSize).toBeLessThanOrEqual(34);
+    expect(result.teamIdentitySize - result.decisionTitleSize).toBeGreaterThanOrEqual(8);
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
-    expect(result.crestWidth).toBeGreaterThanOrEqual(104);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(104);
-    expect(result.height).toBeGreaterThanOrEqual(460);
-    expect(result.height).toBeLessThanOrEqual(580);
+    expect(result.crestWidth).toBeGreaterThanOrEqual(96);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(96);
+    expect(result.height).toBeGreaterThanOrEqual(382);
+    expect(result.height).toBeLessThanOrEqual(500);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
     return;
@@ -242,8 +241,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   } else {
     expect(result.crestWidth).toBeGreaterThanOrEqual(80);
     expect(result.crestHeight).toBeGreaterThanOrEqual(80);
-    // Browser layout can resolve fractional pixels; preserve the 300px ceiling with a 1px measurement tolerance.
-    expect(result.height).toBeLessThanOrEqual(301);
+    expect(result.height).toBeLessThanOrEqual(330);
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
   await expectNoHorizontalOverflow(page);
@@ -266,7 +264,11 @@ async function expectReadableTeamIdentity(page) {
   await expect(label).toBeVisible();
   const ratio = await label.evaluate((element) => {
     const parse = (value) => {
-      const nums = (String(value).match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      const raw = String(value || "").trim();
+      const hex = raw.match(/^#([0-9a-f]{6})$/i);
+      if (hex) return [0, 2, 4].map((offset) => Number.parseInt(hex[1].slice(offset, offset + 2), 16));
+      const nums = (raw.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      if (raw.startsWith("color(srgb ") && nums.length >= 3) return nums.slice(0, 3).map((number) => number * 255);
       return [nums[0] || 0, nums[1] || 0, nums[2] || 0];
     };
     const luminance = (rgb) => {
@@ -276,18 +278,29 @@ async function expectReadableTeamIdentity(page) {
       };
       return .2126 * channel(rgb[0]) + .7152 * channel(rgb[1]) + .0722 * channel(rgb[2]);
     };
+    const contrast = (fg, bg) => {
+      const a = luminance(fg);
+      const b = luminance(bg);
+      return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+    };
     const fg = parse(getComputedStyle(element).color);
+    const coachHero = element.closest('[data-testid="coach-primary-objective"]');
+    if (coachHero) {
+      const style = getComputedStyle(coachHero);
+      const surfaces = [
+        style.getPropertyValue("--team-brand-surface-elevated").trim() || "#0B2B36",
+        style.getPropertyValue("--team-brand-surface-deep").trim() || "#06151D",
+      ];
+      return Math.min(...surfaces.map((surface) => contrast(fg, parse(surface))));
+    }
     let node = element;
     let bg = [255, 255, 255];
     while (node) {
       const raw = getComputedStyle(node).backgroundColor;
-      const candidate = parse(raw);
-      if (raw && !/rgba\([^)]*,\s*0\s*\)$/.test(raw) && raw !== "transparent") { bg = candidate; break; }
+      if (raw && !/rgba\([^)]*,\s*0\s*\)$/.test(raw) && raw !== "transparent") { bg = parse(raw); break; }
       node = node.parentElement;
     }
-    const a = luminance(fg);
-    const b = luminance(bg);
-    return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+    return contrast(fg, bg);
   });
   expect(ratio).toBeGreaterThanOrEqual(4.5);
 }

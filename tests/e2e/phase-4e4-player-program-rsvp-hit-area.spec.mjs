@@ -69,10 +69,11 @@ test("Phase 4E.4 keeps reachable Program RSVP/status actions touch-safe", async 
   await enterExpandedProgram(page);
 
   const actions = page.locator('button[data-player-program-rsvp-action]:visible');
-  await expect(actions).toHaveCount(4);
+  const actionCount = await actions.count();
+  expect(actionCount, "populated Program should expose multiple RSVP/status actions").toBeGreaterThanOrEqual(4);
 
   const evidence = [];
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < actionCount; index += 1) {
     const action = actions.nth(index);
     const box = await action.boundingBox();
     const presentation = await action.evaluate((node) => {
@@ -125,17 +126,19 @@ test("Phase 4E.4 keeps reachable Program RSVP/status actions touch-safe", async 
   expect(viewport.bodyWidth - viewport.innerWidth, "Program body overflow").toBeLessThanOrEqual(1);
 
   const lockedBefore = await actions.filter({ hasText: /YOU'RE LOCKED IN/ }).count();
+  const unlockedBefore = await actions.filter({ hasText: /RSVP NOW/ }).count();
+  expect(unlockedBefore, "populated Program should retain at least one RSVP opportunity").toBeGreaterThan(0);
   const unlocked = actions.filter({ hasText: /RSVP NOW/ }).first();
   await expect(unlocked).toBeVisible();
   await unlocked.click();
   await settle(page);
 
   const refreshedActions = page.locator('button[data-player-program-rsvp-action]:visible');
-  await expect(refreshedActions).toHaveCount(4);
+  await expect(refreshedActions).toHaveCount(actionCount);
   await expect(refreshedActions.filter({ hasText: /YOU'RE LOCKED IN/ })).toHaveCount(lockedBefore + 1);
-  await expect(refreshedActions.filter({ hasText: /RSVP NOW/ })).toHaveCount(0);
+  await expect(refreshedActions.filter({ hasText: /RSVP NOW/ })).toHaveCount(unlockedBefore - 1);
 
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < actionCount; index += 1) {
     const box = await refreshedActions.nth(index).boundingBox();
     expect(box?.height || 0, `post-RSVP action ${index + 1} physical height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
   }
@@ -151,7 +154,7 @@ test("Phase 4E.4 keeps reachable Program RSVP/status actions touch-safe", async 
   });
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "player-program-rsvp-family.json"),
-    JSON.stringify({ viewport, evidence, lockedBefore, lockedAfter: lockedBefore + 1 }, null, 2),
+    JSON.stringify({ viewport, evidence, actionCount, lockedBefore, lockedAfter: lockedBefore + 1 }, null, 2),
   );
   expect(pageErrors).toEqual([]);
 });

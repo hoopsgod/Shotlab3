@@ -2,21 +2,9 @@
    Coach Home identity, decision, metrics and CTA are intentionally excluded
    and source-owned by CoachMissionControlTitleStage.css. */
 
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow,
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAssignmentAccountabilityRow,
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAssignmentAccountabilityEmpty {
   background-color: #f5f4ef !important;
-  color: #111a21 !important;
-}
-
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow strong,
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow small,
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionMeta,
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcRowAction {
-  color: #44515b !important;
-}
-
-html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow strong {
   color: #111a21 !important;
 }
 

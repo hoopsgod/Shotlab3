@@ -84,7 +84,14 @@ async function expectPremiumTitleStage(page) {
 }
 
 async function expectCoachPerformanceRail(page) {
-  const stage = page.locator('[data-visual-role="primary-decision"]').first();
+  // Route-owned secondary pages may intentionally use the shared title stage
+  // without duplicating a dark primary-decision block. If a decision surface
+  // exists, certify its evidence controls; otherwise certify title authority.
+  const stage = page.locator('[data-visual-role="primary-decision"]:visible').first();
+  if (!(await stage.count())) {
+    await expectPremiumTitleStage(page);
+    return;
+  }
   await expect(stage).toBeVisible({ timeout: 20_000 });
   await expect(stage).toHaveAttribute("data-surface", "dark");
   const rail = stage.locator('[data-visual-role="performance-evidence"]');

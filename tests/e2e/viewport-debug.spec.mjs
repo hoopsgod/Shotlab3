@@ -46,8 +46,11 @@ async function enterDemo(page, role) {
 async function capture(page, role, label, options = {}) {
   const report = await collectViewportDiagnostics(page, { role, label, ...options });
   const outputPath = writeViewportDiagnostics(report);
+  const screenshotPath = outputPath.replace(/\.json$/i, '.png');
+  await page.screenshot({ path: screenshotPath, fullPage: true, animations: 'disabled' });
   console.log(formatViewportDiagnostics(report));
-  console.log(`  evidence: ${outputPath}`);
+  console.log(`  diagnostics: ${outputPath}`);
+  console.log(`  screenshot: ${screenshotPath}`);
   const failures = findViewportFailures(report);
   expect(failures, failures.join('\n')).toEqual([]);
 }

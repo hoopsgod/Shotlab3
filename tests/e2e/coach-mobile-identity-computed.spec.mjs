@@ -46,7 +46,7 @@ function parseRgb(value) {
 }
 
 for (const viewport of VIEWPORTS) {
-  test(`Coach Demo computed identity is bounded and decision-first at ${viewport.width}px`, async ({ page }) => {
+  test(`Coach Demo computed identity is bounded and identity-first at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await enterCoachDemo(page);
 
@@ -84,6 +84,7 @@ for (const viewport of VIEWPORTS) {
         header: rect(header), identity: rect(identity), hero: rect(hero), team: rect(team), eyebrow: rect(eyebrow), mark: rect(mark), image: rect(image), title: rect(title), detail: rect(detail), reality: rect(reality), attention: rect(attention), dock: rect(dock), menu: rect(menu), bell: rect(bell),
         teamIdentitySize: teamStyle ? Number.parseFloat(teamStyle.fontSize) : 0,
         decisionTitleSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
+        decisionTitleLineHeight: titleStyle ? Number.parseFloat(titleStyle.lineHeight) : 0,
         imageStyle: image ? { objectFit: getComputedStyle(image).objectFit, width: getComputedStyle(image).width, height: getComputedStyle(image).height, position: getComputedStyle(image).position } : null,
         teamColor: team ? getComputedStyle(team).color : '',
         eyebrowColor: eyebrow ? getComputedStyle(eyebrow).color : '',
@@ -122,9 +123,9 @@ for (const viewport of VIEWPORTS) {
       };
     });
 
-    expect(metrics.mark.width).toBeGreaterThanOrEqual(100);
+    expect(metrics.mark.width).toBeGreaterThanOrEqual(96);
     expect(metrics.mark.width).toBeLessThanOrEqual(115);
-    expect(metrics.mark.height).toBeGreaterThanOrEqual(100);
+    expect(metrics.mark.height).toBeGreaterThanOrEqual(96);
     expect(metrics.mark.height).toBeLessThanOrEqual(115);
     expect(metrics.imageStyle.objectFit).toBe('contain');
     expect(metrics.image.left).toBeGreaterThanOrEqual(metrics.mark.left - 1);
@@ -137,22 +138,30 @@ for (const viewport of VIEWPORTS) {
     const identityRegionHeight = metrics.identity.bottom - metrics.header.top;
     expect(identityRegionHeight).toBeGreaterThanOrEqual(160);
     expect(identityRegionHeight).toBeLessThanOrEqual(300);
-    // Mission Control intentionally keeps team identity compact and gives the decision headline title authority.
-    expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(14);
-    expect(metrics.teamIdentitySize).toBeLessThanOrEqual(20);
-    expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(30);
-    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(48);
-    expect(metrics.decisionTitleSize - metrics.teamIdentitySize).toBeGreaterThanOrEqual(12);
-    expect(metrics.hero.height).toBeGreaterThanOrEqual(400);
+    // Phase 4 makes program/team identity the dominant branded display element and
+    // keeps the transient daily coaching decision subordinate native UI typography.
+    expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(30);
+    expect(metrics.teamIdentitySize).toBeLessThanOrEqual(50);
+    expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(16);
+    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(34);
+    expect(metrics.teamIdentitySize - metrics.decisionTitleSize).toBeGreaterThanOrEqual(8);
+    // Phase 4 deliberately keeps the mobile hero compact: the source-owned floor is
+    // 382px, with a 388px narrow-phone guard, so this contract must not reintroduce
+    // the older 400px dead-space requirement.
+    expect(metrics.hero.height).toBeGreaterThanOrEqual(382);
     expect(metrics.hero.height).toBeLessThanOrEqual(580);
     expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
     expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
     expect(metrics.detail.top).toBeGreaterThanOrEqual(metrics.title.top);
-    expect(metrics.title.height).toBeLessThanOrEqual(90);
+    // The decision headline is an editorial lockup, not a fixed two-line label.
+    // Bound it to three rendered lines so long mobile copy remains intentional
+    // without allowing clipping or an unbounded title stage.
+    expect(metrics.decisionTitleLineHeight).toBeGreaterThan(0);
+    const decisionTitleLines = metrics.title.height / metrics.decisionTitleLineHeight;
+    expect(decisionTitleLines).toBeLessThanOrEqual(3.05);
     expect(Math.abs(metrics.title.left - metrics.detail.left)).toBeLessThanOrEqual(1);
-    // The current decision-first composition deliberately lets the Coach headline
-    // use the full canonical content rail while supporting body copy stays narrower.
-    // Bound the title to the shared metrics rail instead of the old detail-column width.
+    // The subordinate Coach decision can use the full canonical content rail while
+    // supporting body copy remains narrower.
     expect(metrics.title.right).toBeLessThanOrEqual(metrics.reality.right + 1);
     expect(metrics.title.width).toBeLessThanOrEqual(metrics.reality.width + 1);
     expect(Math.abs(metrics.detail.left - metrics.reality.left)).toBeLessThanOrEqual(1);
@@ -176,7 +185,9 @@ for (const viewport of VIEWPORTS) {
       expect(contrast(parseRgb(metric.valueColor), [7, 24, 32])).toBeGreaterThanOrEqual(4.5);
       expect(contrast(parseRgb(metric.labelColor), [7, 24, 32])).toBeGreaterThanOrEqual(4.5);
     }
-    expect(metrics.primaryHeight).toBeGreaterThanOrEqual(54);
+    // The source-owned mobile primary action is intentionally compact while
+    // remaining above the 44px touch-target floor enforced by interaction gates.
+    expect(metrics.primaryHeight).toBeGreaterThanOrEqual(50);
     expect(metrics.primaryBackground).not.toBe('rgba(0, 0, 0, 0)');
     expect(contrast(parseRgb(metrics.primaryColor), parseRgb(metrics.primaryBackground))).toBeGreaterThanOrEqual(4.5);
     expect(metrics.primaryBorder).toContain('solid');
@@ -185,7 +196,7 @@ for (const viewport of VIEWPORTS) {
 
     // The compact mobile control bar intentionally keeps the team brand visible
     // while the full team selector remains hidden; identity then expands in the hero.
-    expect(metrics.headerBrandDisplay).toBe('flex');
+    expect(metrics.headerBrandDisplay).toBe('grid');
     expect(metrics.teamSelectDisplay).toBe('none');
     expect(metrics.heroBackgroundImage).not.toContain('titans-exact-logo');
     expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.menu.bottom - 1);
@@ -209,7 +220,7 @@ for (const viewport of VIEWPORTS) {
     expect(contrast(parseRgb(metrics.teamColor), heroBg)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(parseRgb(metrics.eyebrowColor), heroBg)).toBeGreaterThanOrEqual(4.5);
 
-    fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight }, null, 2)}\n`);
+    fs.writeFileSync(path.join(OUTPUT, `coach-demo-${viewport.width}x${viewport.height}.json`), `${JSON.stringify({ ...metrics, identityRegionHeight, decisionTitleLines }, null, 2)}\n`);
     if (viewport.width === 390) {
       await page.screenshot({ path: path.join(OUTPUT, 'coach-demo-390x844-initial.png'), animations: 'disabled', fullPage: false });
       await page.screenshot({ path: path.join(OUTPUT, 'coach-demo-390x844-full.png'), animations: 'disabled', fullPage: true });

@@ -23,10 +23,10 @@ test('Phase 3B makes insight actions deliberate rather than a loose button clust
 
 test('Coach management empty states remain on the light native secondary system', () => {
   assert.match(coachCss, /coachDashboardNoResults/);
-  assert.match(coachCss, /background: linear-gradient\(145deg, #ffffff, #f7f8f4\)/);
-  assert.match(coachCss, /border: 1px dashed rgba\(23, 28, 24, \.16\)/);
+  assert.match(coachCss, /\.coachDashboardNoResults\{[^}]*border:0;[^}]*border-bottom:1px solid rgba\(16,24,32,\.12\);[^}]*border-radius:0;[^}]*background:transparent;[^}]*box-shadow:none/s);
   assert.match(coachCss, /coachDashboardOperationalContent::before/);
-  assert.match(coachCss, /display: none/);
+  assert.match(coachCss, /coachDashboardOperationalContent::after\{display:none\}/);
+  assert.doesNotMatch(coachCss, /coachDashboardNoResults\{[^}]*linear-gradient/s);
 });
 
 test('More sheet handoff visibly subordinates the native edge dock while preserving accessibility behavior', () => {
@@ -47,9 +47,7 @@ test('Expert visual polish never converts the full Players decision into a dupli
 
 test('Add Player activation copy cannot inherit a legacy paragraph box and its roster action remains intentional', () => {
   assert.match(coachCss, /coach-player-invite-dashboard-section/);
-  assert.match(coachCss, /\[class\*="sectionSummary"\]/);
-  assert.match(coachCss, /border: 0 !important/);
-  assert.match(coachCss, /background: transparent !important/);
-  assert.match(coachCss, /\[class\*="sectionAction"\]/);
-  assert.match(coachCss, /width: 100% !important/);
+  assert.match(coachCss, /\[class\*="sectionSummary"\]\{[^}]*border:0!important;[^}]*border-radius:0!important;[^}]*background:transparent!important;[^}]*box-shadow:none!important/s);
+  assert.match(coachCss, /\[class\*="sectionAction"\]\{[^}]*min-height:44px!important;[^}]*background:#fff!important;[^}]*font-weight:720!important/s);
+  assert.doesNotMatch(coachCss, /\[class\*="sectionSummary"\]\{[^}]*background:(?!transparent)/s);
 });

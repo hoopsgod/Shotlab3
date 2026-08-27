@@ -93,6 +93,17 @@ async function readStoredCollections(page, keys = LIVE_DATA_KEYS) {
   })), keys);
 }
 
+function expectedArchiveSummary(collections) {
+  const scoped = (key) => (collections[key] || []).filter((row) => row.teamId === TEAM_ID);
+  return {
+    rosterCount: scoped("sl:players").filter((row) => row.role !== "coach").length,
+    homeScoreCount: scoped("sl:scores").length,
+    programScoreCount: scoped("sl:program-scores").length,
+    eventCount: scoped("sl:events").length,
+    scSessionCount: scoped("sl:sc-sessions").length,
+  };
+}
+
 async function waitForHydration(page) {
   await expect.poll(() => page.evaluate(({ teamId, coachEmail, playerEmail }) => {
     const parse = (key) => { try { return JSON.parse(window.localStorage.getItem(key) || "[]"); } catch { return []; } };
@@ -198,7 +209,7 @@ test("coach archive survives refresh and a second browser while live data stays 
   expect(remoteArchives[0]).toMatchObject({
     seasonName: archiveName,
     teamId: TEAM_ID,
-    summary: { rosterCount: 1, homeScoreCount: 1, programScoreCount: 1, eventCount: 1, scSessionCount: 1 },
+    summary: expectedArchiveSummary(liveDataBeforeArchive),
   });
 
   await archivePanel.getByTestId("season-archive-view-button").click();

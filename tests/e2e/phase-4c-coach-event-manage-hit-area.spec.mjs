@@ -92,10 +92,11 @@ test("Coach Events MANAGE micro-actions stay visually quiet while becoming touch
   await enterCoachEvents(page);
 
   const actions = page.locator("button.coach-event-manage-action");
-  await expect(actions).toHaveCount(4);
+  const actionCount = await actions.count();
+  expect(actionCount, "populated Coach Events should expose multiple MANAGE actions").toBeGreaterThanOrEqual(4);
 
   const evidence = [];
-  for (let index = 0; index < await actions.count(); index += 1) {
+  for (let index = 0; index < actionCount; index += 1) {
     const action = actions.nth(index);
     await expect(action).toBeVisible();
     const box = await action.boundingBox();
@@ -148,7 +149,7 @@ test("Coach Events MANAGE micro-actions stay visually quiet while becoming touch
   await page.waitForTimeout(60);
   await page.screenshot({ path: path.join(OUTPUT_DIR, "coach-events-manage-actions.png"), animations: "disabled" });
   await first.screenshot({ path: path.join(OUTPUT_DIR, "coach-event-manage-control.png"), animations: "disabled" });
-  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-event-manage-actions.json"), JSON.stringify({ evidence, viewport, searchDiagnostics }, null, 2));
+  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-event-manage-actions.json"), JSON.stringify({ evidence, viewport, actionCount, searchDiagnostics }, null, 2));
 
   await first.click();
   await page.waitForTimeout(80);

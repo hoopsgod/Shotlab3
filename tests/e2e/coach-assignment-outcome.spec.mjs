@@ -1,14 +1,16 @@
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredCoach } from "./registered-coach-fixture.mjs";
 
 const TEAM_ID = "team-assignment-outcome";
+const COACH_EMAIL = "coach.assignment@shotlab.test";
 const today = new Date().toISOString().slice(0, 10);
 const DAY_MS = 24 * 60 * 60 * 1000;
 const dateOffset = (days) => new Date(Date.now() + (days * DAY_MS)).toISOString().slice(0, 10);
 
 const makeSeed = (updatedAt) => ({
-  "sl:teams": [{ id: TEAM_ID, name: "Assignment Outcome Team", ownerCoachId: "coach.demo@shotlab.app", joinCode: "OUTCOME" }],
+  "sl:teams": [{ id: TEAM_ID, name: "Assignment Outcome Team", ownerCoachId: COACH_EMAIL, joinCode: "OUTCOME" }],
   "sl:players": [
-    { id: "coach", email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "coach", email: COACH_EMAIL, name: "Assignment Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "one", email: "one@example.test", name: "Complete Player", role: "player", teamId: TEAM_ID },
     { id: "two", email: "two@example.test", name: "Other Work", role: "player", teamId: TEAM_ID },
     { id: "three", email: "three@example.test", name: "Open Player", role: "player", teamId: TEAM_ID },
@@ -33,7 +35,7 @@ const makeSeed = (updatedAt) => ({
 
 async function openCoachWithSeed(page, seed) {
   let followUpRecord = null;
-  await page.route("**/v1/team-priorities", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "demo_local", priorities_by_team: seed["sl:coach-priorities"] }) }));
+  await page.route("**/v1/team-priorities", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", priorities_by_team: seed["sl:coach-priorities"] }) }));
   await page.route("**/v1/coach-follow-ups*", async (route) => {
     if (route.request().method() === "GET") {
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", follow_ups: followUpRecord ? [followUpRecord] : [] }) });
@@ -49,17 +51,19 @@ async function openCoachWithSeed(page, seed) {
       created_at: body.created_at || now,
       updated_at: now,
       completed_at: body.state === "completed" ? now : null,
-      updated_by: "coach.demo@shotlab.app",
+      updated_by: COACH_EMAIL,
     };
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", follow_up: followUpRecord }) });
   });
+  await page.route("**/v1/player-assignments**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", assignments: [] }) }));
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
-  await page.addInitScript((payload) => {
-    for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
-  }, seed);
-  await page.goto("/");
-  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
+  await enterSeededRegisteredCoach(page, {
+    storage: seed,
+    coachEmail: COACH_EMAIL,
+    coachName: "Assignment Coach",
+    teamId: TEAM_ID,
+  });
   return { getFollowUpRecord: () => followUpRecord };
 }
 
@@ -73,20 +77,17 @@ test("Mission Control reports post-publication completion, opens exact player in
   await expect(panel).toHaveAttribute("data-measurement-mode", "published");
   await expect(panel.getByRole("heading", { name: "Form Shooting", exact: true })).toBeVisible();
 
-  // Coach Demo adds its own active Demo Player to the three seeded players.
-  // The truthful team result is therefore one completion across four rostered players.
-  await expect(panel.getByLabel("25% assignment completion")).toBeVisible();
-  await expect(panel.getByText("1 of 4 completed since published", { exact: true })).toBeVisible();
+  await expect(panel.getByLabel("33% assignment completion")).toBeVisible();
+  await expect(panel.getByText("1 of 3 completed since published", { exact: true })).toBeVisible();
   await expect(panel.getByText(/counting results from \d{4}-\d{2}-\d{2}/i)).toBeVisible();
   await expect(panel.getByLabel("Assignment response summary")).toContainText("1Completed");
   await expect(panel.getByLabel("Assignment response summary")).toContainText("1Other work");
-  await expect(panel.getByLabel("Assignment response summary")).toContainText("2Not started");
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("1Not started");
 
-  // The three-row preview intentionally prioritizes players who still need action.
-  await expect(panel.getByText("Demo Player", { exact: true })).toBeVisible();
-  await expect(panel.getByText("Other Work", { exact: true })).toBeVisible();
+  // The preview prioritizes players who still need action, then includes the completed row.
   await expect(panel.getByText("Open Player", { exact: true })).toBeVisible();
-  await expect(panel.getByText("Complete Player", { exact: true })).not.toBeVisible();
+  await expect(panel.getByText("Other Work", { exact: true })).toBeVisible();
+  await expect(panel.getByText("Complete Player", { exact: true })).toBeVisible();
   await expect(panel).not.toContainText(/viewed|read receipt/i);
 
   const followUpButtons = panel.locator("button.mcAssignmentOutcomeRow");
@@ -154,10 +155,10 @@ test("Mission Control excludes a matching completion logged before publication",
   await expect(panel).toBeVisible({ timeout: 20_000 });
   await expect(panel).toHaveAttribute("data-measurement-mode", "published");
   await expect(panel.getByLabel("0% assignment completion")).toBeVisible();
-  await expect(panel.getByText("0 of 4 completed since published", { exact: true })).toBeVisible();
+  await expect(panel.getByText("0 of 3 completed since published", { exact: true })).toBeVisible();
   await expect(panel.getByLabel("Assignment response summary")).toContainText("0Completed");
   await expect(panel.getByLabel("Assignment response summary")).toContainText("1Other work");
-  await expect(panel.getByLabel("Assignment response summary")).toContainText("3Not started");
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("2Not started");
 
   const priorCompletionRow = panel.getByRole("button", { name: "Open Complete Player player intelligence", exact: true });
   await expect(priorCompletionRow).toBeVisible();

@@ -1,9 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./CoachMissionControlV2.css";
+import "./CoachMissionControlInteractions.css";
 import "./CoachMissionControlShell.css";
-import "./CoachMissionControlHeader.css";
-import "./CoachMissionControlPolish.css";
-import "./CoachMissionControl2026.css";
 import "./CoachMissionControlFinal.css";
 import "./CoachMissionControlTitleStage.css";
 import "./CoachActivationPath.css";
@@ -54,17 +51,14 @@ function Avatar({ item, size = 44 }) {
 
 function CourtArtwork({ logoUrl }) {
   return <div className="mcCourtArtwork" aria-hidden="true">
-    <svg viewBox="0 0 390 370" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-      <defs>
-        <linearGradient id="mcTacticalWash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="var(--team-brand-surface-elevated, #0b3840)" stopOpacity=".22" /><stop offset=".52" stopColor="var(--mc-secondary, #0b5a58)" stopOpacity=".15" /><stop offset="1" stopColor="var(--mc, #c8ff1a)" stopOpacity=".06" /></linearGradient>
-        <radialGradient id="mcTacticalGlow" cx="74%" cy="48%" r="58%"><stop offset="0" stopColor="var(--mc, #c8ff1a)" stopOpacity=".16" /><stop offset=".5" stopColor="var(--mc-secondary, #0f7a70)" stopOpacity=".08" /><stop offset="1" stopColor="var(--team-brand-surface-deep, #071c28)" stopOpacity="0" /></radialGradient>
-      </defs>
-      <rect width="390" height="370" fill="url(#mcTacticalWash)" /><rect width="390" height="370" fill="url(#mcTacticalGlow)" />
-      <g transform="translate(208 22) rotate(-4 86 163)" fill="none" stroke="rgba(220,235,241,.23)" strokeWidth="2" vectorEffect="non-scaling-stroke">
-        <rect x="0" y="0" width="172" height="326" rx="18" /><line x1="0" y1="0" x2="0" y2="326" opacity=".72" /><line x1="172" y1="0" x2="172" y2="326" opacity=".52" /><rect x="105" y="116" width="67" height="94" /><circle cx="105" cy="163" r="47" strokeDasharray="3 5" opacity=".72" /><path d="M172 48h-17C87 58 63 108 63 163s24 105 92 115h17" /><line x1="155" y1="48" x2="172" y2="48" /><line x1="155" y1="278" x2="172" y2="278" /><line x1="151" y1="142" x2="151" y2="184" /><circle cx="143" cy="163" r="6" stroke="var(--mc, #c8ff1a)" strokeOpacity=".62" /><path d="M137 163h12" stroke="var(--mc, #c8ff1a)" strokeOpacity=".52" /><circle cx="1" cy="163" r="44" opacity=".4" />
+    <svg viewBox="0 0 390 360" preserveAspectRatio="xMidYMid slice">
+      <g className="mcCourtLines" transform="translate(221 12) rotate(-5 80 164)">
+        <path d="M0 0h160v328H0zM160 76h-62v176h62M98 121a44 44 0 1 0 0 88M160 37c-64 8-91 54-91 127s27 119 91 127M0 164h34" />
+        <circle cx="134" cy="164" r="7" />
       </g>
-      <g opacity=".58"><circle cx="294" cy="82" r="4" fill="var(--mc, #c8ff1a)" /><circle cx="267" cy="191" r="4" fill="var(--mc, #c8ff1a)" /><circle cx="319" cy="266" r="4" fill="var(--mc, #c8ff1a)" /><path d="M294 82C272 108 263 145 267 191s24 59 52 75" fill="none" stroke="var(--mc, #c8ff1a)" strokeOpacity=".28" strokeWidth="1.5" strokeDasharray="4 7" /></g>
-      {logoUrl ? <image href={logoUrl} x="214" y="127" width="76" height="76" preserveAspectRatio="xMidYMid meet" opacity=".16" /> : null}
+      <path className="mcCourtRoute" d="M286 65c-28 36-30 91-7 128 14 24 35 45 61 67" />
+      <g className="mcCourtSignals"><circle cx="286" cy="65" r="4" /><circle cx="279" cy="193" r="4" /><circle cx="340" cy="260" r="4" /></g>
+      {logoUrl ? <image className="mcCourtGhostMark" href={logoUrl} x="226" y="132" width="72" height="72" preserveAspectRatio="xMidYMid meet" /> : null}
     </svg>
   </div>;
 }
@@ -74,20 +68,29 @@ function LogoSetupPrompt({ teamName, className = "" }) {
   return <span className={["mcTeamFallback", className].filter(Boolean).join(" ")} data-team-logo-fallback={mark} aria-hidden="true"><strong>{mark}</strong><small>Add logo</small></span>;
 }
 
-function AttentionRow({ item, onFallback }) {
+function AttentionRow({ item, onFallback, priority = 0 }) {
   const tone = item?.tone === "danger" ? "danger" : item?.tone === "success" ? "success" : "warning";
-  return <button type="button" className="mcAttentionRow" onClick={item?.onClick || onFallback}><span className={`mcStatusDot is-${tone}`} /><Avatar item={item} /><span className="mcAttentionCopy"><strong>{item?.name || item?.title || "Player follow-up"}</strong><small>{item?.detail || "Review player status"}</small>{item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}</span><span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span></button>;
+  return <button type="button" className={`mcAttentionRow is-${tone} ${priority === 0 ? "is-priority" : ""}`} data-attention-priority={priority + 1} onClick={item?.onClick || onFallback}><span className={`mcStatusDot is-${tone}`} /><Avatar item={item} /><span className="mcAttentionCopy"><strong>{item?.name || item?.title || "Player follow-up"}</strong><small>{item?.detail || "Review player status"}</small>{item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}</span><span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span></button>;
 }
 
 function ProgramPulsePanel({ model }) {
   const value = model?.value;
-  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse"><div className="mcSectionHead"><span><small>Weekly goal</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{value == null ? "—" : `${value}%`}</strong></div><div className="mcHealthBar" aria-hidden="true"><span style={{ width: `${value || 0}%` }} /></div>{value == null ? <div className="mcAllClear"><div><small>No weekly goal data</small></div></div> : null}</article>;
+  const available = value != null && Number.isFinite(Number(value));
+  const progress = available ? Math.max(0, Math.min(100, Number(value))) : 0;
+  const state = !available ? "missing" : progress === 0 ? "zero" : progress >= 100 ? "complete" : "active";
+  const summary = !available ? "No weekly goal data" : progress === 0 ? "No credited makes yet" : progress >= 100 ? "Weekly target met" : "Weekly target in progress";
+  return <article className="mcSection mcTeamHealth" aria-labelledby="mc-program-pulse-heading" data-testid="coach-program-pulse" data-pulse-state={state}>
+    <div className="mcPulseLead"><span><small>Weekly team target</small><h2 id="mc-program-pulse-heading">Program Pulse</h2></span><strong className="mcHealthScore">{available ? `${value}%` : "—"}</strong></div>
+    <div className="mcPulseRail" role="progressbar" aria-label="Program Pulse weekly progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={available ? progress : undefined} aria-valuetext={summary}><span style={{ width: `${progress}%` }} /></div>
+    <div className="mcPulseCaption"><span>{summary}</span><small>{available ? "Roster makes credited to the shared goal" : "Set a weekly makes goal to activate Pulse"}</small></div>
+  </article>;
 }
 function LiveActivityPanel({ items }) {
-  return <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity"><div className="mcSectionHead"><span><small>Team evidence</small><h2 id="mc-activity-heading">Recent Activity</h2></span></div><div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div></article>;
+  return <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity"><div className="mcSectionHead"><span><small>Team evidence</small><h2 id="mc-activity-heading">Recent Activity</h2></span></div>{items.length ? <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div> : <div className="mcEvidenceEmpty"><strong>No recent activity</strong><small>Team training evidence will appear here.</small></div>}</article>;
 }
 function NextSessionPanel({ date, onOpen }) {
-  return <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading" data-testid="coach-upcoming-event"><div className="mcSectionHead"><span><small>Coming up</small><h2 id="mc-session-heading">Upcoming Event</h2></span></div><div className="mcSessionSummary"><span className="mcSessionIcon is-ready"><Icon name="calendar" /></span><div><strong>Team event ready</strong><small>{String(date)}</small></div></div><button type="button" className="mcSecondaryAction" onClick={onOpen}>Open event<Icon name="arrow" size={17} /></button></article>;
+  const hasEvent = Boolean(date);
+  return <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading" data-testid="coach-upcoming-event" data-event-state={hasEvent ? "scheduled" : "empty"}><div className="mcSectionHead"><span><small>Coming up</small><h2 id="mc-session-heading">Upcoming Event</h2></span></div><div className="mcSessionSummary"><span className={`mcSessionIcon ${hasEvent ? "is-ready" : ""}`}><Icon name="calendar" /></span><div><strong>{hasEvent ? "Team event ready" : "No upcoming event"}</strong><small>{hasEvent ? String(date) : "Create the next team touchpoint when you’re ready."}</small></div></div><button type="button" className="mcSecondaryAction" onClick={onOpen}>{hasEvent ? "Open event" : "Open schedule"}<Icon name="arrow" size={17} /></button></article>;
 }
 function TodayPlan({ activation, onAction }) {
   const next = activation?.next;
@@ -179,16 +182,15 @@ export default function CoachCommandCenter({
   const quickActions = useMemo(() => [{ label: "Add Player", icon: "users", onClick: onAddPlayer }, { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent }, { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor }, { label: "Build Mission", icon: "target", onClick: onAddDrill }, { label: "Record Result", icon: "score", onClick: onLogScore }, { label: "Review Players", icon: "message", onClick: onPlayersClick }, { label: "Team Code", icon: "settings", onClick: openTeamTools }], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
   const navigation = [{ label: "Mission Control", icon: "home", active: true }, { label: "Players", icon: "users", onClick: onPlayersClick }, { label: "Sessions", icon: "calendar", onClick: onNextEventClick }, { label: "Drills", icon: "target", onClick: onAddDrill }, { label: "Analytics", icon: "chart", onClick: onAnalyticsClick }, { label: "Coach Tools", icon: "plus", onClick: () => setActionsOpen(true) }];
 
-  const attentionPanel = <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading" data-testid="coach-athlete-attention"><div className="mcSectionHead"><span><small>Athlete attention</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>{attentionCount > 0 ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} />)}</div> : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}<button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button></article>;
+  const attentionPanel = <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading" data-testid="coach-athlete-attention"><div className="mcSectionHead"><span><small>Who needs you now</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>{attentionCount > 0 ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} priority={index} />)}</div> : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}<button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button></article>;
   const pulsePanel = <ProgramPulsePanel model={programPulse} />;
-  const livePanel = hasLiveActivity ? <LiveActivityPanel items={resolvedActivity} /> : null;
-  const sessionPanel = hasScheduledSession ? <NextSessionPanel date={nextEventDateFormatted} onOpen={onNextEventClick} /> : null;
-  const lowerPanels = [sessionPanel, livePanel].filter(Boolean);
+  const livePanel = <LiveActivityPanel items={resolvedActivity} />;
+  const sessionPanel = <NextSessionPanel date={hasScheduledSession ? nextEventDateFormatted : ""} onOpen={onNextEventClick} />;
 
   if (variant === "compact") return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
 
   return <>
-    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" style={{ "--mc": accent, "--mc-secondary": secondary }}>
+    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" data-visual-system="phase-4-premium" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
         <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
@@ -215,9 +217,9 @@ export default function CoachCommandCenter({
           </div>
         </section>
 
-        <section className={`mcFocusGrid ${onboardingMode ? "is-onboarding-grid" : ""}`}>{attentionPanel}{onboardingMode ? <TodayPlan activation={activationPath} onAction={runActivationAction} /> : pulsePanel}</section>
-        {onboardingMode ? <section className="mcLowerGrid has-1-panels">{pulsePanel}</section> : null}
-        {lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}
+        <section className="mcFocusGrid" data-layout-role="program-intelligence">{pulsePanel}{attentionPanel}</section>
+        {onboardingMode ? <section className="mcActivationChapter"><TodayPlan activation={activationPath} onAction={runActivationAction} /></section> : null}
+        <section className="mcLowerGrid has-2-panels" data-layout-role="supporting-evidence">{sessionPanel}{livePanel}</section>
         {toolsOpen ? <section className="mcSection mcTools" data-testid="coach-secondary-tools"><div><small>Team code</small><strong>{joinCode || "—"}</strong>{codeErr ? <span>{codeErr}</span> : null}</div><div><button type="button" onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }}>{copied ? "Copied" : "Copy code"}</button><button type="button" onClick={onRegenerateJoinCode}>New code</button><button type="button" onClick={() => setToolsOpen(false)}>Close</button></div><span data-testid="coach-team-code-bar" /></section> : null}
       </main>
 

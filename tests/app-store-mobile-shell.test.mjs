@@ -69,7 +69,9 @@ test("More navigation is a floating modal sheet with keyboard focus containment"
 test("mobile shell preserves current touch targets, safe areas, contrast, reduced motion, and no legacy title authority", () => {
   assert.match(foundationCss, /color-scheme:light/);
   assert.match(navigationCss, /\.dockItem\s*\{[^}]*min-height:\s*48px/s);
-  assert.match(foundationCss, /env\(safe-area-inset-bottom/);
+  // Safe-area ownership moved with the native edge navigation component. Requiring
+  // it in the generic foundation would restore duplicate global layout authority.
+  assert.match(navigationCss, /env\(safe-area-inset-bottom/);
   assert.match(foundationCss, /prefers-reduced-motion:\s*reduce/);
   assert.match(correctionsCss, /Title and team-identity composition are intentionally excluded/);
   assert.doesNotMatch(correctionsCss, /teamIdentityTitleStage|mcHeroTeamMark/);

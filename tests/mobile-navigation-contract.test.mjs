@@ -7,7 +7,7 @@ const legacyStylesSource = fs.readFileSync(new URL("../src/styles/appLegacyStyle
 const navigationSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navigationCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const architectureCss = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
-const coachMissionControlCss = fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css", import.meta.url), "utf8");
+const retiredCoachMissionControlCss = fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css", import.meta.url), "utf8");
 
 test("mobile dock limits persistent navigation to three destinations plus More", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
@@ -58,10 +58,10 @@ test("notification semantics add descriptions without renaming controls", () => 
 });
 
 test("shared navigation remains authoritative inside coach Mission Control", () => {
-  assert.match(coachMissionControlCss, /Mission Control inherits the shared native navigation surface/);
-  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
-  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
-  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
+  assert.match(retiredCoachMissionControlCss, /RETIRED Coach Home visual layer/);
+  assert.match(retiredCoachMissionControlCss, /canonical CoachMissionControlTitleStage\.css composition/);
+  assert.doesNotMatch(retiredCoachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]/);
+  assert.doesNotMatch(retiredCoachMissionControlCss, /\.mcRail\s*\{/);
   assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--team-brand-surface-deep[^}]*!important/s);
   assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });

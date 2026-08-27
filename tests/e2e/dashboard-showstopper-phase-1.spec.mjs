@@ -82,7 +82,7 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
   await page.evaluate(({ makes, coachCurrent, weeklyTarget, demoEmail, demoTeamId }) => {
     const date = new Date();
     const pad = (value) => String(value).padStart(2, "0");
-    const dateKey = (value) => `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+    const dateKey = (value) => `${value.getFullYear()}-${pad(value.getMonth() + 1, "0")}-${pad(value.getDate(), "0")}`;
     const today = dateKey(date);
     const existingLogs = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
     const otherPlayers = existingLogs.filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
@@ -257,16 +257,13 @@ test("Player Home keeps one dominant action, readable light chapter, and bottom-
   if (!(await progress.evaluate((node) => node.open))) await progress.locator("summary").click();
   const signal = page.getByTestId("player-daily-momentum-signal");
   await expect(signal).toBeVisible();
-  const signalText = [
-    signal.getByText("Momentum", { exact: true }),
-    signal.getByText("Daily target complete", { exact: true }),
-  ];
-  const contrastContract = [];
-  for (const locator of signalText) {
-    await expect(locator).toBeVisible();
-    contrastContract.push(await locator.evaluate((element) => ({ text: element.textContent.trim(), color: getComputedStyle(element).color })));
-  }
+  const contrastContract = await signal.evaluate((element) => [...element.querySelectorAll("div")]
+    .filter((node) => node.children.length === 0 && node.textContent.trim().length > 0)
+    .map((node) => ({ text: node.textContent.trim(), color: getComputedStyle(node).color })));
+  expect(contrastContract.length, "Momentum signal must expose readable eyebrow/title/detail copy").toBeGreaterThanOrEqual(2);
+  expect(contrastContract.some((item) => item.text === "Momentum"), "Momentum eyebrow must remain visible").toBe(true);
   for (const item of contrastContract) {
+    expect(item.text.length, "Momentum copy must remain meaningful").toBeGreaterThan(0);
     expect(item.color, `${item.text} must not use the former cream-on-cream foreground`).not.toBe("rgb(245, 242, 234)");
     expect(item.color, `${item.text} must not use the dark-hero foreground on cream`).not.toBe("rgb(245, 248, 249)");
   }

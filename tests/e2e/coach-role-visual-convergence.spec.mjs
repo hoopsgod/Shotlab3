@@ -95,7 +95,10 @@ async function expectDarkDecision(page, locator = page.locator('[data-visual-rol
     };
   });
   expectDarkBrandedBackground(style.backgroundImage, style.backgroundColor);
-  expect(style.radius).toBeGreaterThanOrEqual(18);
+  // Phase 4 supports both integrated full-bleed stages (square) and bounded
+  // card-like stages (intentionally rounded). Reject accidental small radii,
+  // not the deliberate zero-radius integrated composition.
+  expect(style.radius === 0 || style.radius >= 18).toBe(true);
   if (style.actionHeight) expect(style.actionHeight).toBeGreaterThanOrEqual(44);
 }
 
@@ -126,29 +129,54 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
     const identity = element.querySelector('.mcHeroIdentity');
     const title = element.querySelector('h1');
     const crest = element.querySelector('.mcHeroTeamMark');
+    const computed = getComputedStyle(element);
     return {
-      heroBackground: getComputedStyle(element).backgroundColor,
+      heroBackgroundImage: computed.backgroundImage,
+      heroBackgroundColor: computed.backgroundColor,
       identityBackground: identity ? getComputedStyle(identity).backgroundImage : "missing",
       decisionBackground: title ? getComputedStyle(title).backgroundImage : "missing",
       titleColor: title ? getComputedStyle(title).color : "missing",
       crestWidth: crest?.getBoundingClientRect().width || 0,
     };
   });
-  const [homeSurface] = rgbStops(home.heroBackground);
-  expect(homeSurface).toBeDefined();
-  expect(Math.max(...homeSurface)).toBeLessThan(112);
+  expectDarkBrandedBackground(home.heroBackgroundImage, home.heroBackgroundColor);
   expect(home.identityBackground).toBe("none");
   expect(home.decisionBackground).toBe("none");
   expect(home.titleColor).toBe("rgb(245, 248, 249)");
-  expect(home.crestWidth).toBeGreaterThanOrEqual(104);
+  expect(home.crestWidth).toBeGreaterThanOrEqual(96);
   await expectNoHorizontalOverflow(page);
 
-  for (const key of ["players", "events", "drills", "sc", "activity", "leaderboards"]) {
+  // Phase 4 deliberately retires the stacked Players decision card on mobile.
+  // Verify the live editorial/filter/roster hierarchy there; the other
+  // operational routes retain a visible branded decision stage.
+  await navigateByKey(page, "players");
+  await expectEditorialTitle(page);
+  await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("coach-players-filter-rail")).toBeVisible();
+  await expect(page.locator("#coach-roster-operations")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  const operationalRoutes = [
+    ["events", "coach-events-decision-brief"],
+    ["drills", "coach-page-dashboard-drills-decision-brief"],
+    ["sc", "coach-page-dashboard-strength-decision-brief"],
+    ["leaderboards", "coach-page-dashboard-leaderboards-decision-brief"],
+  ];
+  for (const [key, decisionTestId] of operationalRoutes) {
     await navigateByKey(page, key);
     await expectEditorialTitle(page);
-    await expectDarkDecision(page);
+    const decision = page.getByTestId(decisionTestId);
+    await expect(decision).toHaveAttribute("data-visual-role", "primary-decision", { timeout: 10_000 });
+    await expectDarkDecision(page, decision);
     await expectNoHorizontalOverflow(page);
   }
+
+  // Activity is an intelligence/evidence destination, not a primary-decision route.
+  // It still must preserve the converged editorial title and mobile containment.
+  await navigateByKey(page, "activity");
+  await expectEditorialTitle(page);
+  await expect(page.getByTestId("coach-activity-intelligence-panel")).toBeVisible({ timeout: 10_000 });
+  await expectNoHorizontalOverflow(page);
 
   await navigateByKey(page, "players");
   await openFirstCoachPlayerDetail(page);

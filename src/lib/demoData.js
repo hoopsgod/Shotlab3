@@ -1,380 +1,74 @@
 import { isDemoPlayerSessionShotLog } from "./demoMode.js";
-const STORAGE_KEYS = Object.freeze({
-  teams: "sl:teams",
-  players: "sl:players",
-  playerProfiles: "sl:player-profiles",
-  events: "sl:events",
-  rsvps: "sl:rsvps",
-  scores: "sl:scores",
-  programScores: "sl:program-scores",
-  shotLogs: "sl:shotlogs",
-  challenges: "sl:challenges",
-  scSessions: "sl:sc-sessions",
-  scRsvps: "sl:sc-rsvps",
-  scLogs: "sl:sc-logs",
-  coachPriorities: "sl:coach-priorities",
-  progressSnapshots: "sl:progress-snapshots",
-  demoMeta: "sl:demo-data-meta",
-});
 
-const DEMO_TEAM_ID = "team-demo-titans";
-const DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");
-const DEMO_TEAM_BRANDING = Object.freeze({
-  teamName: "Demo Titans",
-  logoUrl: "/branding/titans-exact-logo.png.PNG",
-  logoMarkUrl: "/branding/titans-default-mark.svg",
-});
+const STORAGE_KEYS=Object.freeze({teams:"sl:teams",players:"sl:players",playerProfiles:"sl:player-profiles",events:"sl:events",rsvps:"sl:rsvps",scores:"sl:scores",programScores:"sl:program-scores",shotLogs:"sl:shotlogs",challenges:"sl:challenges",scSessions:"sl:sc-sessions",scRsvps:"sl:sc-rsvps",scLogs:"sl:sc-logs",coachPriorities:"sl:coach-priorities",demoMeta:"sl:demo-data-meta"});
+const DEMO_TEAM_ID="team-demo-titans";
+const DEMO_TEAM_BRANDING=Object.freeze({teamName:"Demo Titans",logoUrl:"/branding/titans-exact-logo.png.PNG",logoMarkUrl:"/branding/titans-default-mark.svg"});
 
-const padDatePart = (value) => String(value).padStart(2, "0");
-export const localDateKey = (value = new Date()) => {
-  const date = value instanceof Date ? value : new Date(value);
-  return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
-};
+const padDatePart=(value)=>String(value).padStart(2,"0");
+export const localDateKey=(value=new Date())=>{const date=value instanceof Date?value:new Date(value);return `${date.getFullYear()}-${padDatePart(date.getMonth()+1)}-${padDatePart(date.getDate())}`;};
+const relativeDate=(days=0)=>{const date=new Date();date.setHours(12,0,0,0);date.setDate(date.getDate()+days);return localDateKey(date);};
+const relativeTimestamp=(days=0,hour=18,minute=0)=>{const date=new Date();date.setHours(hour,minute,0,0);date.setDate(date.getDate()+days);return date.getTime();};
+const rows=(value)=>value.split(";").map((row)=>row.split("|"));
 
-const relativeDate = (days = 0) => {
-  const date = new Date();
-  date.setHours(12, 0, 0, 0);
-  date.setDate(date.getDate() + days);
-  return localDateKey(date);
-};
+const demoRoster=rows("marcus-reed|Marcus|Reed|3|PG|12|782|127|15|24|36|40;jordan-mitchell|Jordan|Mitchell|11|SG|11|714|95|14|23|34|38;micah-santos|Micah|Santos|24|SF|12|661|123|13|22|32|36;isaiah-brooks|Isaiah|Brooks|5|PG|10|623|63|12|21|31|35;cameron-hayes|Cameron|Hayes|14|SG|11|579|125|11|20|29|34;noah-bennett|Noah|Bennett|21|PF|12|531|119|11|20|28|32;devin-walker|Devin|Walker|32|C|11|486|91|10|19|27|31;miles-thompson|Miles|Thompson|1|G|10|428|109|9|18|25|29;jalen-price|Jalen|Price|20|F|10|371|51|8|17|24|27;caleb-foster|Caleb|Foster|23|F|9|304|85|7|16|22|25;andre-lewis|Andre|Lewis|34|C|9|218|74|6|15|20|23;primary|Demo|Player|12|G|11|552|111|11|20|29|33|1").map(([slug,firstName,lastName,jerseyNumber,position,grade,weeklyMakes,attendanceMask,warmup,form,programA,programB,primary])=>({slug,email:primary?"demo@shotlab.app":`${slug.replace("-", ".")}@demo.shotlab.app`,firstName,lastName,jerseyNumber,position,grade,weeklyMakes:+weeklyMakes,attendanceMask:+attendanceMask,warmup:+warmup,form:+form,program:[+programA,+programB],primary:Boolean(primary)}));
+const playerName=(player)=>`${player.firstName} ${player.lastName}`;
+const playerId=(player)=>player.primary?"player-demo-primary":`player-demo-${player.slug}`;
+const attended=(player,index)=>Boolean(player.attendanceMask&(1<<index));
 
-const relativeTimestamp = (days = 0, hour = 18, minute = 0) => {
-  const date = new Date();
-  date.setHours(hour, minute, 0, 0);
-  date.setDate(date.getDate() + days);
-  return date.getTime();
-};
+const basePlayers=demoRoster.map((player)=>({id:playerId(player),email:player.email,name:playerName(player),role:"player"}));
+const basePlayerProfiles=demoRoster.map((player)=>({id:player.primary?"profile-demo-primary":`profile-demo-${player.slug}`,userId:player.email,email:player.email,firstName:player.firstName,lastName:player.lastName,jerseyNumber:player.jerseyNumber,position:player.position,grade:player.grade}));
 
-const basePlayers = [
-  { id: "player-demo-ava-brooks", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", role: "player", teamId: DEMO_TEAM_ID, hideFromLeaderboards: false, createdAt: DEMO_TIMESTAMP },
-  { id: "player-demo-jordan-lee", email: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", role: "player", teamId: DEMO_TEAM_ID, hideFromLeaderboards: false, createdAt: DEMO_TIMESTAMP + 1 },
-  { id: "player-demo-micah-santos", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", role: "player", teamId: DEMO_TEAM_ID, hideFromLeaderboards: false, createdAt: DEMO_TIMESTAMP + 2 },
-  { id: "player-demo-primary", email: "demo@shotlab.app", name: "Demo Player", role: "player", teamId: DEMO_TEAM_ID, hideFromLeaderboards: false, createdAt: DEMO_TIMESTAMP + 3 },
-];
+const baseEvents=rows("event-demo-open-gym|Open Gym + Competitive Shooting|-24|5:30 PM|Main Gym|workout;event-demo-advantage-reads|Advantage Reads Lab|-16|6:00 PM|Aux Gym|clinic;event-demo-team-practice-past|Team Practice|-9|6:15 PM|Main Gym|practice;event-demo-lift-past|Team Lift + Recovery|-4|6:30 AM|Weight Room|strength;evt-upcoming-1|Team Practice|1|6:00 PM|Main Gym|practice;event-demo-skill-lab|Skill Lab: Rim Pressure|3|6:15 PM|Main Gym Court 2|workout;event-demo-shooting-club|Early Work 300|5|6:30 AM|Aux Gym|shooting;event-demo-film-room|Film + Recovery Reset|8|4:45 PM|Team Room|recovery;event-demo-scrimmage|Blue / White Scrimmage|10|10:00 AM|Main Gym|game").map(([id,title,days,time,location,type])=>({id,title,date:relativeDate(+days),time,location,type}));
+const baseRsvps=baseEvents.slice(0,7).flatMap((event,eventIndex)=>demoRoster.map((player,playerIndex)=>({id:`rsvp-demo-${eventIndex+1}-${player.slug}`,email:player.email,playerId:player.email,name:playerName(player),eventId:event.id,attended:attended(player,eventIndex),status:attended(player,eventIndex)?"going":"not-going",ts:relativeTimestamp(eventIndex-6,16,playerIndex*2)})));
 
-const basePlayerProfiles = [
-  { id: "profile-demo-ava-brooks", userId: "ava.brooks@demo.shotlab.app", teamId: DEMO_TEAM_ID, firstName: "Ava", lastName: "Brooks", jerseyNumber: "3", createdAt: DEMO_TIMESTAMP },
-  { id: "profile-demo-jordan-lee", userId: "jordan.lee@demo.shotlab.app", teamId: DEMO_TEAM_ID, firstName: "Jordan", lastName: "Lee", jerseyNumber: "11", createdAt: DEMO_TIMESTAMP + 1 },
-  { id: "profile-demo-micah-santos", userId: "micah.santos@demo.shotlab.app", teamId: DEMO_TEAM_ID, firstName: "Micah", lastName: "Santos", jerseyNumber: "24", createdAt: DEMO_TIMESTAMP + 2 },
-  { id: "profile-demo-primary", userId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, firstName: "Demo", lastName: "Player", jerseyNumber: "0", createdAt: DEMO_TIMESTAMP + 3 },
-];
+const homeScore=(player,suffix,drillId,drillName,score,days,minute)=>({id:`score-${player.slug}-${suffix}`,email:player.email,playerId:player.email,name:playerName(player),drillId,drillName,score,date:relativeDate(days),ts:relativeTimestamp(days,18,minute),src:"home"});
+const demoPrimaryScores=demoRoster.flatMap((player,index)=>[
+  homeScore(player,"warmup","demo-home-warm-up-shooting-4-minute","4-Minute Warm-Up Shooting",player.warmup,index%3===0?0:-1,index*2),
+  homeScore(player,"form","demo-form-shooting","Form Shooting Ladder",player.form,-2-(index%2),index*2+1)
+]);
+const demoShotLogs=demoRoster.flatMap((player,index)=>{const first=Math.round(player.weeklyMakes*.4),second=Math.round(player.weeklyMakes*.33);return [first,second,player.weeklyMakes-first-second].map((made,slot)=>{const days=slot===0?(index%2===0?0:-1):slot===1?-3:-6;return {id:`shotlog-${player.slug}-${slot+1}`,email:player.email,playerId:player.email,name:playerName(player),made,date:relativeDate(days),ts:relativeTimestamp(days,19,index+slot*12)};});});
+const demoProgramScores=demoRoster.flatMap((player,index)=>player.program.map((score,slot)=>{const days=slot?-2-(index%3):-7-(index%2);return {id:`program-${player.slug}-${slot+1}`,email:player.email,playerId:player.email,name:playerName(player),drillId:"demo-program-230s",drillName:"2:30 Shooting",score,date:relativeDate(days),ts:relativeTimestamp(days,18,index+slot*15),src:"program"};}));
+const demoChallenges=[{id:"challenge-demo-pending",playerId:"marcus.reed@demo.shotlab.app",from:"marcus.reed@demo.shotlab.app",fromName:"Marcus Reed",to:"demo@shotlab.app",toName:"Demo Player",drillId:"demo-home-warm-up-shooting-4-minute",score:15,max:25,status:"pending",ts:relativeTimestamp(-1,20,5)}];
 
-const baseEvents = [
-  { id: "event-demo-foundation-shooting", teamId: DEMO_TEAM_ID, title: "Foundation Shooting Block", date: relativeDate(-28), time: "5:30 PM", location: "Main Gym", desc: "Footwork prep, paint finishes, and game-speed catch-and-shoot volume.", type: "workout" },
-  { id: "event-demo-advantage-reads", teamId: DEMO_TEAM_ID, title: "Advantage Reads Lab", date: relativeDate(-21), time: "9:00 AM", location: "Aux Gym", desc: "Ball-screen reads, two-dribble counters, and weak-side decision reps.", type: "clinic" },
-  { id: "event-demo-recovery-lab", teamId: DEMO_TEAM_ID, title: "Reset + Mobility Session", date: relativeDate(-14), time: "11:15 AM", location: "Training Room", desc: "Hip/ankle mobility and soft-tissue recovery between training blocks.", type: "recovery" },
-  { id: "evt-upcoming-1", teamId: DEMO_TEAM_ID, title: "Team Practice", date: relativeDate(1), time: "6:00 PM", location: "Main Gym", desc: "Team shooting standards, transition decisions, and controlled five-on-five.", type: "practice" },
-  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Rim Pressure Finishes", date: relativeDate(3), time: "6:15 PM", location: "Main Gym Court 2", desc: "Paint touch creation, contact finishes, and late-clock reads.", type: "workout" },
-  { id: "event-demo-shooting-club", teamId: DEMO_TEAM_ID, title: "Early Work 300", date: relativeDate(5), time: "6:30 AM", location: "Aux Gym", desc: "High-volume catch-and-shoot and relocation threes before school.", type: "shooting" },
-  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film + Recovery Reset", date: relativeDate(8), time: "4:45 PM", location: "Team Room", desc: "Possession review, spacing corrections, and recovery circuit.", type: "recovery" },
-];
+const demoScSessions=rows("sc-demo-recovery|Recovery + Mobility|Recovery|-6|6:30 AM|Performance Center;sc-demo-power|Total Body Strength|Strength|2|6:15 AM|Weight Room").map(([id,title,sport,days,time,location])=>({id,title,sport,date:relativeDate(+days),time,location,sessionType:"Program"}));
+const demoScRsvps=demoScSessions.flatMap((session,sessionIndex)=>demoRoster.map((player,playerIndex)=>({id:`scrsvp-${sessionIndex}-${player.slug}`,sessionId:session.id,email:player.email,playerId:player.email,name:playerName(player),status:attended(player,(sessionIndex+2)%7)?"going":"not-going",attended:sessionIndex===0?attended(player,2):undefined,ts:relativeTimestamp(-7+sessionIndex*4,12,playerIndex)})));
+const demoCoachPriorities={todayFocusText:"Raise team shooting volume and close tomorrow's RSVP gaps.",focusEmphasis:"Consistency",priorityDrillText:"2:30 Shooting",challengeText:"Get 10 players over 500 weekly makes.",weeklyMakesTarget:650,weeklyCheckinsTarget:3};
 
-const baseRsvps = baseEvents.slice(0, 6).map((event, index) => ({
-  id: "rsvp-demo-00" + (index + 1),
-  email: "demo@shotlab.app",
-  playerId: "demo@shotlab.app",
-  name: "Demo Player",
-  eventId: event.id,
-  teamId: DEMO_TEAM_ID,
-  attended: true,
-  ts: relativeTimestamp(index - 5, 17, 0),
-}));
-
-const demoPrimaryScores = [
-  { id: "score-dp-s01", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: relativeDate(0), ts: relativeTimestamp(0, 18, 0), src: "home" },
-  { id: "score-dp-s02", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-form-shooting", score: 22, date: relativeDate(-1), ts: relativeTimestamp(-1, 18, 0), src: "home" },
-  { id: "score-dp-s03", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 11, date: relativeDate(0), ts: relativeTimestamp(0, 18, 5), src: "home" },
-  { id: "score-dp-s04", email: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 10, date: relativeDate(0), ts: relativeTimestamp(0, 18, 10), src: "home" },
-];
-
-const demoShotLogs = [
-  { id: "shotlog-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, name: "Demo Player", made: 125, date: relativeDate(0), ts: relativeTimestamp(0, 19, 0) },
-  { id: "shotlog-demo-02", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", teamId: DEMO_TEAM_ID, name: "Ava Brooks", made: 160, date: relativeDate(0), ts: relativeTimestamp(0, 19, 5) },
-];
-
-const demoProgressSnapshots = [
-  { id: "progress-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, label: "7-day makes", value: 125, date: relativeDate(0), ts: relativeTimestamp(0, 19, 10) },
-];
-
-const demoProgramScores = [
-  { id: "program-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", name: "Demo Player", drillId: "demo-program-230s", drillName: "2:30 Shooting", score: 27, date: relativeDate(-6), ts: relativeTimestamp(-6, 18, 10), src: "program" },
-  { id: "program-demo-02", email: "demo@shotlab.app", playerId: "demo@shotlab.app", name: "Demo Player", drillId: "demo-program-230s", drillName: "2:30 Shooting", score: 31, date: relativeDate(-2), ts: relativeTimestamp(-2, 18, 15), src: "program" },
-  { id: "program-demo-03", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", drillId: "demo-program-230s", drillName: "2:30 Shooting", score: 34, date: relativeDate(-3), ts: relativeTimestamp(-3, 18, 20), src: "program" },
-  { id: "program-demo-04", email: "jordan.lee@demo.shotlab.app", playerId: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", drillId: "demo-program-230s", drillName: "2:30 Shooting", score: 29, date: relativeDate(-4), ts: relativeTimestamp(-4, 18, 25), src: "program" },
-];
-const demoChallenges = [
-  { id: "challenge-demo-pending", teamId: DEMO_TEAM_ID, playerId: "ava.brooks@demo.shotlab.app", from: "ava.brooks@demo.shotlab.app", fromName: "Ava Brooks", to: "demo@shotlab.app", toName: "Demo Player", drillId: "demo-home-warm-up-shooting-4-minute", score: 12, max: 25, status: "pending", ts: relativeTimestamp(-1, 20, 5) },
-  { id: "challenge-demo-complete", teamId: DEMO_TEAM_ID, playerId: "demo@shotlab.app", from: "demo@shotlab.app", fromName: "Demo Player", to: "jordan.lee@demo.shotlab.app", toName: "Jordan Lee", drillId: "demo-home-warm-up-shooting-4-minute", score: 14, respScore: 11, max: 25, status: "won", ts: relativeTimestamp(-5, 19, 10), respTs: relativeTimestamp(-4, 19, 10) },
-];
-
-const demoScSessions = [
-  { id: "sc-demo-recovery", title: "Recovery + Mobility", sport: "Recovery", date: relativeDate(-3), time: "6:30 AM", location: "Performance Center", desc: "Ankles, hips, trunk control, and recovery work.", sessionType: "Program" },
-  { id: "sc-demo-power", title: "Lower Body Power", sport: "Strength", date: relativeDate(2), time: "6:15 AM", location: "Weight Room", desc: "Trap-bar power, split squat strength, and landing control.", sessionType: "Program" },
-  { id: "sc-demo-speed", title: "Acceleration + Change of Direction", sport: "Performance", date: relativeDate(6), time: "7:00 AM", location: "Turf", desc: "First-step acceleration, deceleration, and reactive change of direction.", sessionType: "Program" },
-];
-
-const demoScRsvps = [
-  { id: "scrsvp-demo-01", sessionId: "sc-demo-recovery", email: "demo@shotlab.app", playerId: "demo@shotlab.app", name: "Demo Player", ts: relativeTimestamp(-4, 12, 0) },
-  { id: "scrsvp-demo-02", sessionId: "sc-demo-power", email: "demo@shotlab.app", playerId: "demo@shotlab.app", name: "Demo Player", ts: relativeTimestamp(0, 12, 5) },
-  { id: "scrsvp-demo-03", sessionId: "sc-demo-power", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", ts: relativeTimestamp(0, 12, 10) },
-  { id: "scrsvp-demo-04", sessionId: "sc-demo-power", email: "jordan.lee@demo.shotlab.app", playerId: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", ts: relativeTimestamp(0, 12, 15) },
-];
-
-const demoScLogs = [
-  { id: "sclog-demo-01", sessionId: "sc-demo-recovery", email: "demo@shotlab.app", playerId: "demo@shotlab.app", name: "Demo Player", sport: "Recovery", date: relativeDate(-3), duration: 42, notes: "Completed mobility and recovery block." },
-  { id: "sclog-demo-02", sessionId: "sc-demo-recovery", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", sport: "Recovery", date: relativeDate(-3), duration: 45, notes: "Full session completed." },
-];
-
-const demoCoachPriorities = {
-  todayFocusText: "Create paint pressure, then finish the day with 150 game-speed makes.",
-  focusEmphasis: "Consistency",
-  priorityDrillText: "2:30 Shooting",
-  challengeText: "Win today's skill block, log your makes, and close with 20 pressure free throws.",
-  weeklyMakesTarget: 650,
-  weeklyCheckinsTarget: 3,
-};
-
-function clone(value) {
-  return JSON.parse(JSON.stringify(value));
-}
-
-function buildDemoTeam(teamId, coachEmail, team) {
-  if (team) {
-    const existing = clone(team);
-    const currentName = String(existing?.name || "").trim();
-    const currentBrandingName = String(existing?.branding?.teamName || "").trim();
-    const genericName = !currentName || /^(demo team|shotlab team)$/i.test(currentName);
-    const genericBranding = !currentBrandingName || /^(demo team|shotlab team)$/i.test(currentBrandingName);
-    const shouldSeedDemoIdentity = genericName && genericBranding;
-    return {
-      ...existing,
-      id: teamId || existing.id,
-      ...(shouldSeedDemoIdentity ? {
-        name: "Demo Titans",
-        teamName: DEMO_TEAM_BRANDING.teamName,
-        logoUrl: DEMO_TEAM_BRANDING.logoUrl,
-        logoMarkUrl: DEMO_TEAM_BRANDING.logoMarkUrl,
-        branding: {
-          ...(existing.branding || {}),
-          ...DEMO_TEAM_BRANDING,
-        },
-      } : {}),
-      ownerCoachId: coachEmail || existing.ownerCoachId || existing.coachEmail || null,
-      updatedAt: Date.now(),
-    };
+function buildDemoTeam(teamId,coachEmail,team){
+  if(team){const existing=team,currentName=String(existing?.name||"").trim(),currentBrandingName=String(existing?.branding?.teamName||"").trim(),shouldSeedDemoIdentity=(!currentName||/^(demo team|shotlab team)$/i.test(currentName))&&(!currentBrandingName||/^(demo team|shotlab team)$/i.test(currentBrandingName));return {...existing,id:teamId||existing.id,...(shouldSeedDemoIdentity?{name:"Demo Titans",teamName:DEMO_TEAM_BRANDING.teamName,logoUrl:DEMO_TEAM_BRANDING.logoUrl,logoMarkUrl:DEMO_TEAM_BRANDING.logoMarkUrl,branding:{...(existing.branding||{}),...DEMO_TEAM_BRANDING}}:{}),ownerCoachId:coachEmail||existing.ownerCoachId||existing.coachEmail||null};
   }
+  return {id:teamId||DEMO_TEAM_ID,name:"Demo Titans",teamName:DEMO_TEAM_BRANDING.teamName,logoUrl:DEMO_TEAM_BRANDING.logoUrl,logoMarkUrl:DEMO_TEAM_BRANDING.logoMarkUrl,branding:{...DEMO_TEAM_BRANDING},ownerCoachId:coachEmail||null,joinCode:"DEMO26",updatedAt:Date.now()};
+}
+const withTeam=(rows,teamId)=>rows.map((row)=>({...row,teamId}));
 
-  return {
-    id: teamId || DEMO_TEAM_ID,
-    name: "Demo Titans",
-    teamName: DEMO_TEAM_BRANDING.teamName,
-    logoUrl: DEMO_TEAM_BRANDING.logoUrl,
-    logoMarkUrl: DEMO_TEAM_BRANDING.logoMarkUrl,
-    branding: { ...DEMO_TEAM_BRANDING },
-    ownerCoachId: coachEmail || null,
-    createdAt: DEMO_TIMESTAMP,
-    joinCode: "DEMO26",
-    updatedAt: Date.now(),
-  };
+export function buildDemoDataBundle({teamId=DEMO_TEAM_ID,coachEmail=null,team}={}){
+  const resolvedTeam=buildDemoTeam(teamId,coachEmail,team),playerRows=withTeam(basePlayers,resolvedTeam.id),coachRow=coachEmail?{id:"coach-demo-primary",email:coachEmail,name:"Demo Coach",role:"coach",isCoach:true,teamId:resolvedTeam.id,hideFromLeaderboards:true}:null;
+  return {teams:[resolvedTeam],players:coachRow?[coachRow,...playerRows]:playerRows,playerProfiles:withTeam(basePlayerProfiles,resolvedTeam.id),events:withTeam(baseEvents,resolvedTeam.id),rsvps:withTeam(baseRsvps,resolvedTeam.id),scores:withTeam(demoPrimaryScores,resolvedTeam.id),programScores:withTeam(demoProgramScores,resolvedTeam.id),shotLogs:withTeam(demoShotLogs,resolvedTeam.id),challenges:withTeam(demoChallenges,resolvedTeam.id),scSessions:withTeam(demoScSessions,resolvedTeam.id).map((session)=>({...session,ownerCoachId:coachEmail||"coach.demo@shotlab.app"})),scRsvps:withTeam(demoScRsvps,resolvedTeam.id),coachPriorities:{...demoCoachPriorities,updatedAt:new Date().toISOString()},demoMeta:{teamId:resolvedTeam.id,source:"demo-data"}};
 }
 
-export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, team } = {}) {
-  const resolvedTeam = buildDemoTeam(teamId, coachEmail, team);
-  const playerRows = basePlayers.map((player) => ({ ...player, teamId: resolvedTeam.id }));
-  const coachRow = coachEmail ? {
-    id: "coach-demo-primary",
-    email: coachEmail,
-    name: "Demo Coach",
-    role: "coach",
-    isCoach: true,
-    teamId: resolvedTeam.id,
-    hideFromLeaderboards: true,
-    createdAt: DEMO_TIMESTAMP - 1,
-  } : null;
-  const players = coachRow ? [coachRow, ...playerRows] : playerRows;
-  const playerProfiles = basePlayerProfiles.map((profile) => ({ ...profile, teamId: resolvedTeam.id }));
-  const events = baseEvents.map((event) => ({ ...event, teamId: resolvedTeam.id }));
-  const rsvps = baseRsvps.map((rsvp) => ({ ...rsvp, teamId: resolvedTeam.id }));
-  const scores = demoPrimaryScores.map((score) => ({ ...score, teamId: resolvedTeam.id, playerId: score.playerId || score.email }));
-  const programScores = demoProgramScores.map((score) => ({ ...score, teamId: resolvedTeam.id, playerId: score.playerId || score.email }));
-  const shotLogs = demoShotLogs.map((log) => ({ ...log, teamId: resolvedTeam.id }));
-  const challenges = demoChallenges.map((challenge) => ({ ...challenge, teamId: resolvedTeam.id }));
-  const scSessions = demoScSessions.map((session) => ({ ...session, teamId: resolvedTeam.id, ownerCoachId: coachEmail || "coach.demo@shotlab.app" }));
-  const scRsvps = demoScRsvps.map((rsvp) => ({ ...rsvp, teamId: resolvedTeam.id }));
-  const scLogs = demoScLogs.map((log) => ({ ...log, teamId: resolvedTeam.id }));
-  const coachPriorities = { ...demoCoachPriorities, updatedAt: new Date().toISOString() };
-  const progressSnapshots = demoProgressSnapshots.map((snapshot) => ({ ...snapshot, teamId: resolvedTeam.id }));
+function parseStored(value,fallback){if(value==null)return fallback;if(typeof value!=="string")return value;try{return JSON.parse(value);}catch{return fallback;}}
+export function unwrapManagedStorageValue(result){if(result&&typeof result==="object"&&Object.prototype.hasOwnProperty.call(result,"value"))return result.value;return result;}
+async function readStored(key,fallback){if(typeof window==="undefined")return fallback;try{if(window.storage&&typeof window.storage.get==="function"){const result=await window.storage.get(key),parsed=parseStored(unwrapManagedStorageValue(result),null);if(parsed!=null)return parsed;}}catch{}return parseStored(window.localStorage?.getItem(key),fallback);}
+async function writeStored(key,value){const json=JSON.stringify(value);if(typeof window==="undefined")return;if(window.localStorage)window.localStorage.setItem(key,json);if(window.storage&&typeof window.storage.set==="function")await window.storage.set(key,json,true);}
+const normalizeIdentity=(value)=>String(value||"").trim().toLowerCase();
+const rowTeamId=(row)=>String(row?.teamId??row?.team_id??"").trim();
+function demoIdentitySet(payload){const identities=new Set();for(const row of [...(payload.players||[]),...(payload.playerProfiles||[])])for(const value of [row.email,row.playerId,row.player_id,row.userId,row.user_id]){const normalized=normalizeIdentity(value);if(normalized)identities.add(normalized);}return identities;}
+function rowUsesManagedDemoIdentity(row,identities){return [row?.email,row?.player_email,row?.playerEmail,row?.playerId,row?.player_id,row?.userId,row?.user_id].map(normalizeIdentity).some((value)=>value&&identities.has(value));}
 
-  return {
-    teams: [resolvedTeam],
-    players,
-    playerProfiles,
-    events,
-    rsvps,
-    scores,
-    programScores,
-    shotLogs,
-    challenges,
-    scSessions,
-    scRsvps,
-    scLogs,
-    coachPriorities,
-    progressSnapshots,
-    demoMeta: {
-      seededAt: Date.now(),
-      teamId: resolvedTeam.id,
-      coachEmail,
-      source: "demo-data",
-    },
-  };
+export function mergeDemoCollection(existing,incoming,{teamId="",managedIdentities=new Set(),teamsOnly=false}={}){const prior=Array.isArray(existing)?existing:[],next=Array.isArray(incoming)?incoming:[],incomingIds=new Set(next.map((row)=>String(row?.id||"")).filter(Boolean)),preserved=prior.filter((row)=>{if(incomingIds.has(String(row?.id||"")))return false;if(teamsOnly)return String(row?.id||"")!==String(teamId||"");if(teamId&&rowTeamId(row)===String(teamId))return false;if(rowUsesManagedDemoIdentity(row,managedIdentities))return false;return true;});return [...preserved,...next];}
+
+export async function applyDemoData(bundle){
+  const payload=bundle||buildDemoDataBundle(),teamId=String(payload.demoMeta?.teamId||payload.teams?.[0]?.id||""),managedIdentities=demoIdentitySet(payload),collections=[[STORAGE_KEYS.teams,payload.teams||[],{teamsOnly:true}],[STORAGE_KEYS.players,payload.players||[]],[STORAGE_KEYS.playerProfiles,payload.playerProfiles||[]],[STORAGE_KEYS.events,payload.events||[]],[STORAGE_KEYS.rsvps,payload.rsvps||[]],[STORAGE_KEYS.scores,payload.scores||[]],[STORAGE_KEYS.programScores,payload.programScores||[]],[STORAGE_KEYS.shotLogs,payload.shotLogs||[]],[STORAGE_KEYS.challenges,payload.challenges||[]],[STORAGE_KEYS.scSessions,payload.scSessions||[]],[STORAGE_KEYS.scRsvps,payload.scRsvps||[]],[STORAGE_KEYS.scLogs,payload.scLogs||[]]];
+  for(const [key,incoming,options={}] of collections){const existing=await readStored(key,[]);await writeStored(key,mergeDemoCollection(existing,incoming,{teamId,managedIdentities,...options}));}
+  const existingPriorities=await readStored(STORAGE_KEYS.coachPriorities,{}),priorityMap=existingPriorities&&typeof existingPriorities==="object"&&!Array.isArray(existingPriorities)?existingPriorities:{};await writeStored(STORAGE_KEYS.coachPriorities,{...priorityMap,[teamId]:payload.coachPriorities||demoCoachPriorities});await writeStored(STORAGE_KEYS.demoMeta,payload.demoMeta||{});
 }
 
-function parseStored(value, fallback) {
-  if (value == null) return fallback;
-  if (typeof value !== "string") return value;
-  try { return JSON.parse(value); } catch { return fallback; }
+export async function clearDemoData(bundle){
+  const payload=bundle||buildDemoDataBundle({coachEmail:"coach.demo@shotlab.app"}),storedMeta=await readStored(STORAGE_KEYS.demoMeta,{}),teamId=String(storedMeta?.teamId||payload.demoMeta?.teamId||payload.teams?.[0]?.id||DEMO_TEAM_ID),managedIdentities=demoIdentitySet(payload);managedIdentities.add("coach.demo@shotlab.app");managedIdentities.add("demo@shotlab.app");
+  const collections=[[STORAGE_KEYS.teams,{teamsOnly:true}],[STORAGE_KEYS.players],[STORAGE_KEYS.playerProfiles],[STORAGE_KEYS.events],[STORAGE_KEYS.rsvps],[STORAGE_KEYS.scores],[STORAGE_KEYS.programScores],[STORAGE_KEYS.shotLogs],[STORAGE_KEYS.challenges],[STORAGE_KEYS.scSessions],[STORAGE_KEYS.scRsvps],[STORAGE_KEYS.scLogs]];
+  for(const [key,options={}] of collections){const existing=await readStored(key,[]),preserved=(Array.isArray(existing)?existing:[]).filter((row)=>{if(options.teamsOnly)return String(row?.id||"")!==teamId;if(rowTeamId(row)===teamId)return false;if(rowUsesManagedDemoIdentity(row,managedIdentities))return false;if(key===STORAGE_KEYS.shotLogs&&isDemoPlayerSessionShotLog(row,{teamId}))return false;return true;});await writeStored(key,preserved);}
+  const priorities=await readStored(STORAGE_KEYS.coachPriorities,{});if(priorities&&typeof priorities==="object"&&!Array.isArray(priorities)){const nextPriorities={...priorities};delete nextPriorities[teamId];await writeStored(STORAGE_KEYS.coachPriorities,nextPriorities);}await writeStored(STORAGE_KEYS.demoMeta,{});
 }
 
-export function unwrapManagedStorageValue(result) {
-  if (result && typeof result === "object" && Object.prototype.hasOwnProperty.call(result, "value")) return result.value;
-  return result;
-}
-
-async function readStored(key, fallback) {
-  if (typeof window === "undefined") return fallback;
-  try {
-    if (window.storage && typeof window.storage.get === "function") {
-      const result = await window.storage.get(key);
-      const parsed = parseStored(unwrapManagedStorageValue(result), null);
-      if (parsed != null) return parsed;
-    }
-  } catch {}
-  return parseStored(window.localStorage?.getItem(key), fallback);
-}
-
-async function writeStored(key, value) {
-  const json = JSON.stringify(value);
-  if (typeof window === "undefined") return;
-  if (window.localStorage) window.localStorage.setItem(key, json);
-  if (window.storage && typeof window.storage.set === "function") {
-    await window.storage.set(key, json, true);
-  }
-}
-
-const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
-const rowTeamId = (row) => String(row?.teamId ?? row?.team_id ?? "").trim();
-
-function demoIdentitySet(payload) {
-  const identities = new Set();
-  for (const row of payload.players || []) {
-    for (const value of [row.email, row.playerId, row.player_id, row.userId, row.user_id]) {
-      const normalized = normalizeIdentity(value);
-      if (normalized) identities.add(normalized);
-    }
-  }
-  for (const row of payload.playerProfiles || []) {
-    for (const value of [row.email, row.playerId, row.player_id, row.userId, row.user_id]) {
-      const normalized = normalizeIdentity(value);
-      if (normalized) identities.add(normalized);
-    }
-  }
-  return identities;
-}
-
-function rowUsesManagedDemoIdentity(row, identities) {
-  return [row?.email, row?.player_email, row?.playerEmail, row?.playerId, row?.player_id, row?.userId, row?.user_id]
-    .map(normalizeIdentity)
-    .some((value) => value && identities.has(value));
-}
-
-export function mergeDemoCollection(existing, incoming, { teamId = "", managedIdentities = new Set(), teamsOnly = false } = {}) {
-  const prior = Array.isArray(existing) ? existing : [];
-  const next = Array.isArray(incoming) ? incoming : [];
-  const incomingIds = new Set(next.map((row) => String(row?.id || "")).filter(Boolean));
-  const preserved = prior.filter((row) => {
-    if (incomingIds.has(String(row?.id || ""))) return false;
-    if (teamsOnly) return String(row?.id || "") !== String(teamId || "");
-    if (teamId && rowTeamId(row) === String(teamId)) return false;
-    if (rowUsesManagedDemoIdentity(row, managedIdentities)) return false;
-    return true;
-  });
-  return [...preserved, ...next];
-}
-
-export async function applyDemoData(bundle) {
-  const payload = bundle || buildDemoDataBundle();
-  const teamId = String(payload.demoMeta?.teamId || payload.teams?.[0]?.id || "");
-  const managedIdentities = demoIdentitySet(payload);
-  const collections = [
-    ["sl:teams", payload.teams || [], { teamsOnly: true }],
-    ["sl:players", payload.players || []],
-    ["sl:player-profiles", payload.playerProfiles || []],
-    ["sl:events", payload.events || []],
-    ["sl:rsvps", payload.rsvps || []],
-    ["sl:scores", payload.scores || []],
-    ["sl:program-scores", payload.programScores || []],
-    ["sl:shotlogs", payload.shotLogs || []],
-    ["sl:challenges", payload.challenges || []],
-    ["sl:sc-sessions", payload.scSessions || []],
-    ["sl:sc-rsvps", payload.scRsvps || []],
-    ["sl:sc-logs", payload.scLogs || []],
-    ["sl:progress-snapshots", payload.progressSnapshots || []],
-  ];
-
-  for (const [key, incoming, options = {}] of collections) {
-    const existing = await readStored(key, []);
-    const merged = mergeDemoCollection(existing, incoming, { teamId, managedIdentities, ...options });
-    await writeStored(key, merged);
-  }
-  const existingPriorities = await readStored(STORAGE_KEYS.coachPriorities, {});
-  const priorityMap = existingPriorities && typeof existingPriorities === "object" && !Array.isArray(existingPriorities) ? existingPriorities : {};
-  await writeStored(STORAGE_KEYS.coachPriorities, { ...priorityMap, [teamId]: payload.coachPriorities || demoCoachPriorities });
-  await writeStored("sl:demo-data-meta", payload.demoMeta || {});
-}
-
-export async function clearDemoData(bundle) {
-  const payload = bundle || buildDemoDataBundle({ coachEmail: "coach.demo@shotlab.app" });
-  const storedMeta = await readStored(STORAGE_KEYS.demoMeta, {});
-  const teamId = String(storedMeta?.teamId || payload.demoMeta?.teamId || payload.teams?.[0]?.id || DEMO_TEAM_ID);
-  const managedIdentities = demoIdentitySet(payload);
-  const storedCoachEmail = normalizeIdentity(storedMeta?.coachEmail);
-  if (storedCoachEmail) managedIdentities.add(storedCoachEmail);
-  managedIdentities.add("coach.demo@shotlab.app");
-  managedIdentities.add("demo@shotlab.app");
-
-  const collections = [
-    [STORAGE_KEYS.teams, { teamsOnly: true }],
-    [STORAGE_KEYS.players],
-    [STORAGE_KEYS.playerProfiles],
-    [STORAGE_KEYS.events],
-    [STORAGE_KEYS.rsvps],
-    [STORAGE_KEYS.scores],
-    [STORAGE_KEYS.programScores],
-    [STORAGE_KEYS.shotLogs],
-    [STORAGE_KEYS.challenges],
-    [STORAGE_KEYS.scSessions],
-    [STORAGE_KEYS.scRsvps],
-    [STORAGE_KEYS.scLogs],
-    [STORAGE_KEYS.progressSnapshots],
-  ];
-
-  for (const [key, options = {}] of collections) {
-    const existing = await readStored(key, []);
-    const preserved = (Array.isArray(existing) ? existing : []).filter((row) => {
-      if (options.teamsOnly) return String(row?.id || "") !== teamId;
-      if (rowTeamId(row) === teamId) return false;
-      if (rowUsesManagedDemoIdentity(row, managedIdentities)) return false;
-      if (key === STORAGE_KEYS.shotLogs && isDemoPlayerSessionShotLog(row, { teamId })) return false;
-      return true;
-    });
-    await writeStored(key, preserved);
-  }
-
-  const priorities = await readStored(STORAGE_KEYS.coachPriorities, {});
-  if (priorities && typeof priorities === "object" && !Array.isArray(priorities)) {
-    const nextPriorities = { ...priorities };
-    delete nextPriorities[teamId];
-    await writeStored(STORAGE_KEYS.coachPriorities, nextPriorities);
-  }
-  await writeStored(STORAGE_KEYS.demoMeta, {});
-}
+function installLegacyDemoMigrationMarker(){if(typeof window==="undefined")return;window.addEventListener("shotlab:demo-session-started",(event)=>{try{const accountEmail=normalizeIdentity(event?.detail?.email);if(accountEmail!=="coach.demo@shotlab.app"&&accountEmail!=="demo@shotlab.app")return;const players=parseStored(window.localStorage?.getItem(STORAGE_KEYS.players),[]),teams=parseStored(window.localStorage?.getItem(STORAGE_KEYS.teams),[]),demoRow=(Array.isArray(players)?players:[]).find((row)=>(normalizeIdentity(row?.email)==="demo@shotlab.app"||normalizeIdentity(row?.email)==="coach.demo@shotlab.app")&&row?.teamId),ownedTeam=(Array.isArray(teams)?teams:[]).find((row)=>normalizeIdentity(row?.ownerCoachId||row?.coachEmail)==="coach.demo@shotlab.app"),teamId=String(demoRow?.teamId||ownedTeam?.id||"").trim();if(teamId)writeStored(STORAGE_KEYS.demoMeta,{teamId,source:"demo-data"}).catch(()=>{});}catch{}});}
+installLegacyDemoMigrationMarker();

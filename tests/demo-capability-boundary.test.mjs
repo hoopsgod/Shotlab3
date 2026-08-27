@@ -44,8 +44,8 @@ test("demo cleanup is row-scoped and cannot wipe shared local collections", () =
   const clearStart = demoDataSource.indexOf("export async function clearDemoData");
   assert.ok(clearStart >= 0, "clearDemoData must exist");
   const clearSource = demoDataSource.slice(clearStart);
-  assert.match(clearSource, /rowTeamId\(row\) === teamId/);
-  assert.match(clearSource, /rowUsesManagedDemoIdentity\(row, managedIdentities\)/);
+  assert.match(clearSource, /rowTeamId\(row\)\s*===\s*teamId/);
+  assert.match(clearSource, /rowUsesManagedDemoIdentity\(row,\s*managedIdentities\)/);
   assert.doesNotMatch(clearSource, /localStorage\.removeItem\(/, "Demo cleanup must never remove a shared collection key wholesale");
   assert.doesNotMatch(clearSource, /JSON\.stringify\(\[\]\)/, "Demo cleanup must preserve unrelated tenant rows");
 });
