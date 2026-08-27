@@ -10,7 +10,7 @@
   padding: 12px;
   border: 1px solid rgba(220, 231, 236, .11);
   border-radius: 14px;
-  background: linear-gradient(155deg, rgba(18, 23, 26, .95), rgba(7, 10, 12, .98));
+  background: linear-gradient(145deg, var(--team-brand-surface-elevated, #0b2633), var(--team-brand-surface-deep, #071820) 72%);
 }
 
 .drawerMetric span {
@@ -164,7 +164,7 @@
   border: 1px solid rgba(220, 231, 236, .13);
   border-radius: 11px;
   color: var(--text-1, #fff);
-  background: #0a0e10;
+  background: var(--team-brand-surface-deep, #071820);
   font: 700 13px system-ui, sans-serif;
 }
 
@@ -192,7 +192,9 @@
 :global([data-testid="coach-event-intelligence-drawer"] aside section) {
   color: #f7fafb !important;
   border-color: rgba(220, 231, 236, .11) !important;
-  background: linear-gradient(150deg, rgba(255, 255, 255, .035), transparent 44%), #0f1214 !important;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, .035), transparent 44%),
+    var(--team-brand-surface-deep, #071820) !important;
 }
 
 :global([data-testid="coach-event-intelligence-drawer"] aside section > div) {
