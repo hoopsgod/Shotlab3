@@ -256,7 +256,6 @@ export function installMobileHorizontalViewportLock() {
   window.addEventListener('pointerup', scheduleCorrection, { passive: true });
   window.addEventListener('resize', scheduleCorrection, { passive: true });
   window.visualViewport?.addEventListener('resize', scheduleCorrection, { passive: true });
-  window.addEventListener('pageshow', forceRouteTop);
   window.addEventListener('shotlab:app-ready', forceRouteTop);
 
   scheduleCorrection();
@@ -271,7 +270,6 @@ export function installMobileHorizontalViewportLock() {
     window.removeEventListener('pointerup', scheduleCorrection);
     window.removeEventListener('resize', scheduleCorrection);
     window.visualViewport?.removeEventListener('resize', scheduleCorrection);
-    window.removeEventListener('pageshow', forceRouteTop);
     window.removeEventListener('shotlab:app-ready', forceRouteTop);
     if (rafId != null) window.cancelAnimationFrame(rafId);
     clearRegisteredCoachRouteGeometry();
