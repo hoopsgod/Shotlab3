@@ -597,22 +597,472 @@
   }
 }
 
-@media (max-width: 380px) {
+/* Coach Home prototype convergence.
+   Keep this scoped to the Mission Control home surface: dark rail/stage,
+   cream workspace, and flat supporting intelligence bands. */
+.mcShellV3 {
+  --mc-native: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
+  --mc-cream: #f4f0e7;
+  --mc-cream-raised: #f7f3ea;
+  --mc-ink: #101820;
+  --mc-copy: #66717a;
+  --mc-divider: rgba(16, 24, 32, .11);
+  background: var(--mc-cream);
+}
+
+.mcShellV3 .mcRail {
+  background: linear-gradient(180deg, #071c28 0%, #061721 100%);
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  color: #d9e0e3;
+}
+
+.mcShellV3 .mcRailBrand {
+  min-height: 58px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 0;
+  background: transparent;
+}
+
+.mcShellV3 .mcRailBrand::before {
+  content: "SHOTLAB";
+  color: #ffffff;
+  font: 800 25px/.9 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: -.02em;
+}
+
+.mcShellV3 .mcRailBrand::after {
+  content: "";
+  position: absolute;
+  left: 19px;
+  bottom: 10px;
+  width: 28px;
+  height: 2px;
+  background: var(--mc, #c8ff1a);
+}
+
+.mcShellV3 .mcRailBrand .mcTeamFallback,
+.mcShellV3 .mcRailBrand img {
+  display: none;
+}
+
+.mcShellV3 .mcRail nav {
+  gap: 5px;
+  padding: 0;
+  margin-top: 22px;
+}
+
+.mcShellV3 .mcRail nav button {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 7px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 11px;
+  color: #9facb2;
+  background: transparent;
+}
+
+.mcShellV3 .mcRail nav button span {
+  font: 650 12px/1 var(--mc-native);
+  letter-spacing: .01em;
+  text-transform: none;
+}
+
+.mcShellV3 .mcRail nav button.is-active {
+  color: #f4f7f8;
+  background: rgba(255, 255, 255, .055);
+}
+
+.mcShellV3 .missionControl {
+  max-width: none;
+  margin: 0;
+  background: var(--mc-cream);
+}
+
+.mcShellV3 .mcHeader {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.mcShellV3 .mcSection {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--mc-ink);
+}
+
+.mcShellV3 .mcSectionHead small {
+  color: var(--mc-copy);
+  font: 680 9px/1.1 var(--mc-native);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.mcShellV3 .mcSectionHead h2 {
+  color: inherit;
+  font: 760 25px/1.04 var(--mc-native);
+  letter-spacing: -.035em;
+  text-transform: none;
+}
+
+.mcShellV3 .mcAttention,
+.mcShellV3 .mcActivity,
+.mcShellV3 .mcNextSession,
+.mcShellV3 .mcLowerGrid .mcSection {
+  --mc-surface-copy: var(--mc-copy);
+  color: var(--mc-ink);
+  background: var(--mc-cream-raised);
+}
+
+.mcShellV3 .mcTeamHealth {
+  --mc-surface-copy: #9ba7ad;
+  color: #f4f7f8;
+  background: linear-gradient(150deg, #0b2231 0%, var(--team-brand-surface-deep, #06151d) 100%);
+}
+
+.mcShellV3 .mcTeamHealth .mcSectionHead h2,
+.mcShellV3 .mcTeamHealth .mcHealthFacts strong {
+  color: #f4f7f8;
+}
+
+.mcShellV3 .mcHealthScore,
+.mcShellV3 .mcTimeline time {
+  color: var(--mc, #c8ff1a);
+}
+
+.mcShellV3 .mcAttentionList,
+.mcShellV3 .mcTimeline {
+  display: grid;
+}
+
+.mcShellV3 .mcAttentionRow,
+.mcShellV3 .mcTimeline > div {
+  border-top: 1px solid var(--mc-divider);
+}
+
+.mcShellV3 .mcAttentionRow {
+  min-height: 68px;
+  padding: 9px 4px;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+
+.mcShellV3 .mcAttentionRow:hover,
+.mcShellV3 .mcAttentionRow:focus-visible {
+  background: color-mix(in srgb, var(--mc, #c8ff1a) 5%, transparent);
+}
+
+.mcShellV3 .mcAttentionCopy strong,
+.mcShellV3 .mcTimeline strong,
+.mcShellV3 .mcSessionSummary strong {
+  color: var(--mc-ink);
+  font-family: var(--mc-native);
+  text-transform: none;
+}
+
+.mcShellV3 .mcAttentionCopy small,
+.mcShellV3 .mcAttentionMeta,
+.mcShellV3 .mcTimeline small,
+.mcShellV3 .mcSessionSummary small,
+.mcShellV3 .mcHealthFacts small {
+  color: var(--mc-copy);
+  font-family: var(--mc-native);
+  text-transform: none;
+}
+
+.mcShellV3 .mcSessionSummary {
+  border-color: var(--mc-divider);
+  background: rgba(255, 255, 255, .38);
+  box-shadow: none;
+}
+
+.mcShellV3 .mcSecondaryAction {
+  border-color: color-mix(in srgb, var(--mc, #c8ff1a) 28%, var(--mc-divider));
+  background: color-mix(in srgb, var(--mc, #c8ff1a) 9%, #ffffff);
+  color: #35420b;
+  font-family: var(--mc-native);
+  text-transform: none;
+}
+
+.mcShellV3 .mcTextLink,
+.mcShellV3 .mcRowAction {
+  color: #5f6962;
+  font-family: var(--mc-native);
+  text-transform: none;
+}
+
+@media (min-width: 981px) {
+  .mcShellV3 {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  .mcShellV3 .mcRail {
+    padding: 22px 18px 18px;
+  }
+
+  .mcShellV3 .missionControl {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
+    gap: 0;
+    padding: 0 22px 28px;
+  }
+
+  .mcShellV3 .mcHeader {
+    grid-column: 1 / -1;
+  }
+
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
-    min-height: 478px;
+    grid-column: 1 / 10;
+    grid-row: 2;
+    min-height: 330px;
   }
 
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent {
-    min-height: 478px;
-    padding-inline: 16px;
+    width: 100%;
+    min-height: 330px;
+    padding: 38px 38px 26px 48px;
   }
 
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity {
-    --coach-hero-crest: 104px;
+    grid-template-columns: minmax(0, 1fr) max(128px, min(12vw, 168px));
+    gap: 28px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity {
+    max-width: 16ch;
+    color: #f8f8f4;
+    font: 800 max(42px, min(4.1vw, 62px))/.86 "Barlow Condensed", "Arial Narrow", sans-serif;
+    letter-spacing: -.015em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1 {
+    max-width: 38ch;
+    margin-top: 16px;
+    color: color-mix(in srgb, var(--mc, #c8ff1a) 82%, white);
+    font: 750 19px/1.08 var(--mc-native);
+    letter-spacing: -.03em;
+    text-transform: none;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent > p {
+    max-width: 48ch;
+    margin-top: 6px;
+    color: #aeb9be;
+    font: 500 11px/1.4 var(--mc-native);
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip {
+    width: min(620px, 100%);
+    margin-top: 18px;
+    border-block: 0;
+    background: transparent;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button {
+    min-height: 52px;
+    padding: 0 18px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong {
+    color: var(--mc, #c8ff1a);
+    font: 800 23px/.95 var(--mc-native);
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip small {
+    color: #b8c3c8;
+    margin-top: 4px;
+    font-size: 9px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary {
+    justify-self: start;
+    width: auto;
+    min-height: 46px;
+    margin-top: 14px;
+    padding: 0 16px;
+    border-radius: 9px;
+    font-size: 11px;
+  }
+
+  .mcShellV3 .mcFocusGrid,
+  .mcShellV3 .mcLowerGrid {
+    display: contents;
+  }
+
+  .mcShellV3 .mcTeamHealth {
+    grid-column: 10 / -1;
+    grid-row: 2;
+    min-height: 330px;
+    padding: 38px 30px 26px;
+    border-left: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .mcShellV3 .mcActivity,
+  .mcShellV3 .mcAttention,
+  .mcShellV3 .mcNextSession {
+    grid-row: 3;
+    min-height: 220px;
+    border-top: 1px solid var(--mc-divider);
+  }
+
+  .mcShellV3 .mcActivity {
+    grid-column: 1 / 6;
+  }
+
+  .mcShellV3 .mcAttention {
+    grid-column: 6 / 10;
+    border-left: 1px solid var(--mc-divider);
+  }
+
+  .mcShellV3 .mcNextSession {
+    grid-column: 10 / -1;
+    border-left: 1px solid var(--mc-divider);
+  }
+
+  .mcShellV3 .mcAttentionList {
+    padding: 9px 22px 0;
+  }
+
+  .mcShellV3 .mcTimeline {
+    padding: 9px 22px 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .mcShellV3 .missionControl {
+    gap: 9px;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    background: var(--mc-cream);
+  }
+
+  .mcShellV3 .mcFocusGrid,
+  .mcShellV3 .mcLowerGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .mcShellV3 .mcSection {
+    border: 0;
+    border-top: 1px solid var(--mc-divider);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .mcShellV3 .mcSectionHead {
+    padding: 18px 2px 0;
+  }
+
+  .mcShellV3 .mcSectionHead h2 {
+    font-size: 23px;
+  }
+
+  .mcShellV3 .mcAttentionList,
+  .mcShellV3 .mcTimeline {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
+    min-height: 382px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent {
+    min-height: 382px;
+    padding: 24px 16px 20px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity {
+    --coach-hero-crest: clamp(96px, 26vw, 108px);
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity {
+    max-width: 13ch;
+    color: #f7f9f9;
+    font: 800 max(36px, min(10.2vw, 45px))/.86 "Barlow Condensed", "Arial Narrow", sans-serif;
+    letter-spacing: -.018em;
+    text-transform: uppercase;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1 {
+    max-width: 18ch;
+    margin-top: 14px;
+    color: #f5f8f9;
+    font: 760 clamp(28px, 7.6vw, 33px)/.96 var(--mc-native);
+    letter-spacing: -.045em;
+    text-transform: none;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent > p {
+    max-width: 34ch;
+    margin-top: 8px;
+    color: #aeb9be;
+    font: 520 12px/1.4 var(--mc-native);
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip {
+    width: 100%;
+    margin: 17px 0 0;
+    padding: 0;
+    background: rgba(2, 13, 19, .18);
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button {
+    min-height: 48px;
+    padding: 6px 12px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong {
+    color: var(--mc, #c8ff1a);
+    font: 800 20px/.95 var(--mc-native);
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip small {
+    color: #adb9be;
+    margin-top: 3px;
+    font-size: 8px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary {
+    min-height: 50px;
+    margin-top: 14px;
+    padding: 0 15px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
+    min-height: 354px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent {
+    min-height: 354px;
+    padding-inline: 14px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity {
+    --coach-hero-crest: 92px;
     gap: 8px 12px;
   }
 
   .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] h1 {
-    font-size: 44px;
+    font-size: 28px;
   }
 }
