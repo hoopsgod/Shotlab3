@@ -12,7 +12,7 @@ const initialsFor = (value) => {
 };
 
 export function TeamIdentitySupportRail({ status = null, actions = [], external = false, className = "", ariaLabel = "Page status and actions" }) {
-  const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
+  const actionItems = actions?.filter(Boolean) || [];
   if (!status && !actionItems.length) return null;
 
   return (
@@ -64,56 +64,44 @@ export default function TeamIdentityTitleStage({
   const { branding } = useTeamBranding();
   const stageRef = useRef(null);
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
-  const rawLogo = tidy(branding?.logoUrl || branding?.logoMarkUrl);
-  const cleanedLogo = useCleanTeamLogo(rawLogo);
+  const cleanedLogo = useCleanTeamLogo(tidy(branding?.logoUrl || branding?.logoMarkUrl));
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
-  const titleWords = displayTitle.split(/\s+/).filter(Boolean);
+  const titleWords = displayTitle.split(/\s+/);
   const singleWordTitle = titleWords.length === 1;
   const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
   const longSingleWord = singleWordTitle && longestWordLength >= 11;
   const longTitle = displayTitle.length > 22 || longestWordLength > 12;
-  const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
+  const isHero = variant === "hero" || variant === "identity";
+  const heroClass = isHero ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
   const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
-  const titleFamily = heroClass === "teamIdentityTitleStage--hero" ? "identity" : "editorial";
+  const titleFamily = isHero ? "identity" : "editorial";
   const requestedMobileStage = tidy(dataMobileStage);
   const resolvedMobileStage = titleFamily === "editorial" && requestedMobileStage === "team-identity"
     ? "editorial"
-    : requestedMobileStage || (titleFamily === "identity" ? "team-identity" : "editorial");
+    : requestedMobileStage || (isHero ? "team-identity" : "editorial");
   const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
-  const fallbackBrandTreatment = titleFamily === "identity" ? "hero" : "compact";
+  const fallbackBrandTreatment = isHero ? "hero" : "compact";
   const resolvedBrandTreatment = requestedBrandTreatment === "auto"
     ? fallbackBrandTreatment
     : (BRAND_TREATMENTS.has(requestedBrandTreatment) ? requestedBrandTreatment : fallbackBrandTreatment);
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
-  const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
+  const brandingAction = actions?.find?.((action) => action?.key === "branding");
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
-  const showLogoSetupAction = isCoachStage && (!cleanedLogo || logoFailed);
-  const hasUsableLogo = Boolean(cleanedLogo && !logoFailed);
+  const hasUsableLogo = cleanedLogo && !logoFailed;
+  const showLogoSetupAction = isCoachStage && !hasUsableLogo;
   const openBrandingSettings = () => {
-    if (brandingAction?.onClick) {
-      brandingAction.onClick();
+    if (brandingAction?.onClick) return brandingAction.onClick();
+    const destination = document.querySelector('[data-nav-key="branding"]');
+    if (destination) return destination.click();
+    const more = document.querySelector('[data-testid="mobile-navigation-more"]');
+    if (more) {
+      more.click();
+      setTimeout(() => document.querySelector('[data-nav-key="branding"]')?.click());
       return;
     }
-
-    const directBrandingDestination = document.querySelector('[data-nav-key="branding"]');
-    if (directBrandingDestination instanceof HTMLElement) {
-      directBrandingDestination.click();
-      return;
-    }
-
-    const mobileMore = document.querySelector('[data-testid="mobile-navigation-more"]');
-    if (mobileMore instanceof HTMLElement) {
-      mobileMore.click();
-      window.setTimeout(() => {
-        const brandingDestination = document.querySelector('[data-nav-key="branding"]');
-        if (brandingDestination instanceof HTMLElement) brandingDestination.click();
-      }, 0);
-      return;
-    }
-
     document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click();
   };
 
@@ -169,7 +157,7 @@ export default function TeamIdentityTitleStage({
       ].filter(Boolean).join(" ")}
       data-testid={testId}
       data-team-identity-stage="true"
-      data-variant={titleFamily === "identity" ? "hero" : "standard"}
+      data-variant={isHero ? "hero" : "standard"}
       data-title-stage-family={titleFamily}
       data-brand-treatment={resolvedBrandTreatment}
       data-title-size={titleSize}
