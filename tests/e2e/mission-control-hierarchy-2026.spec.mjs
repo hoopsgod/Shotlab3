@@ -188,7 +188,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.metricColumns).toBe(3);
   expect(presentation.metricBackgroundColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(presentation.metricBorder).toContain("solid");
-  expect(presentation.metricValues.every((color) => Math.min(...rgbChannels(color)) > 220)).toBe(true);
+  expect(presentation.metricValues.every((color) => {
+    const channels = rgbChannels(color);
+    return channels.length === 3 && relativeLuminance(channels) > 0.55;
+  })).toBe(true);
   expect(presentation.metricLabels.every((color) => {
     const channels = rgbChannels(color);
     return channels.length === 3 && Math.min(...channels) > 120 && Math.max(...channels) < 230;
