@@ -48,6 +48,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(page.locator(".mcHeader")).toBeVisible();
   await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
+  // These decorative nodes can remain mounted for desktop/brand composition,
+  // but must not compete with the mobile identity-first stage.
   await expect(page.locator(".mcCourtArtwork")).toBeHidden();
   await expect(page.locator(".mcHeroScrim")).toBeHidden();
   await expect(page.locator(".mcTeamSelect")).toBeHidden();
@@ -59,10 +61,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   const presentation = await page.evaluate(() => {
     const workspace = document.querySelector(".performance-workspace--coach");
     const hero = document.querySelector(".mcHero");
-    const court = hero?.querySelector(".mcCourtArtwork");
-    const scrim = hero?.querySelector(".mcHeroScrim");
     const heroContent = document.querySelector(".mcHeroContent");
     const identity = hero?.querySelector(".mcHeroIdentity");
+    const programIdentity = hero?.querySelector(".mcProgramIdentity");
     const title = hero?.querySelector("h1");
     const headerMark = document.querySelector(".mcHeaderTeamMark");
     const heroMark = document.querySelector(".mcHeroTeamMark");
@@ -77,8 +78,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const effectiveBackground = (element) => {
       let current = element;
       while (current) {
-        const style = getComputedStyle(current);
-        const value = style.backgroundColor;
+        const value = getComputedStyle(current).backgroundColor;
         if (value && value !== "transparent" && value !== "rgba(0, 0, 0, 0)") return value;
         current = current.parentElement;
       }
@@ -101,21 +101,43 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const attentionStyle = attentionRow ? getComputedStyle(attentionRow) : null;
     const attentionTitleStyle = attentionTitle ? getComputedStyle(attentionTitle) : null;
     return {
-      workspaceBackground: effectiveBackground(workspace), heroBackgroundImage: heroStyle.backgroundImage, heroBackgroundColor: heroStyle.backgroundColor,
-      heroMaxHeight: heroStyle.maxHeight, heroHeight: hero.getBoundingClientRect().height, heroRadius: parseFloat(heroStyle.borderRadius),
-      courtDisplay: court ? getComputedStyle(court).display : "none", scrimDisplay: scrim ? getComputedStyle(scrim).display : "none",
-      heroContentBackground: heroContentStyle.backgroundColor, identityBackground: identityStyle.backgroundColor, identityBackgroundImage: identityStyle.backgroundImage,
-      identityHeight: identityRect.height, identityBottom: identityRect.bottom, decisionTitleSize: parseFloat(getComputedStyle(title).fontSize), decisionTitleTop: titleRect.top,
-      headerMarkDisplay: headerMarkStyle.display, headerMarkWidth: headerMarkRect.width, headerMarkHeight: headerMarkRect.height,
-      heroMarkDisplay: heroMarkStyle.display, heroMarkWidth: heroMarkRect.width, heroMarkHeight: heroMarkRect.height,
+      workspaceBackground: effectiveBackground(workspace),
+      heroBackgroundImage: heroStyle.backgroundImage,
+      heroBackgroundColor: heroStyle.backgroundColor,
+      heroMaxHeight: heroStyle.maxHeight,
+      heroHeight: hero.getBoundingClientRect().height,
+      heroRadius: parseFloat(heroStyle.borderRadius),
+      heroContentBackground: heroContentStyle.backgroundColor,
+      identityBackground: identityStyle.backgroundColor,
+      identityBackgroundImage: identityStyle.backgroundImage,
+      identityHeight: identityRect.height,
+      identityBottom: identityRect.bottom,
+      programIdentitySize: parseFloat(getComputedStyle(programIdentity).fontSize),
+      decisionTitleSize: parseFloat(getComputedStyle(title).fontSize),
+      decisionTitleTop: titleRect.top,
+      headerMarkDisplay: headerMarkStyle.display,
+      headerMarkWidth: headerMarkRect.width,
+      headerMarkHeight: headerMarkRect.height,
+      heroMarkDisplay: heroMarkStyle.display,
+      heroMarkWidth: heroMarkRect.width,
+      heroMarkHeight: heroMarkRect.height,
       heroLogoObjectFit: heroLogo ? getComputedStyle(heroLogo).objectFit : (heroFallback ? "fallback" : "missing"),
-      primaryBackground: primaryStyle.backgroundColor, primaryColor: primaryStyle.color, primaryBorder: primaryStyle.border, primaryHeight: parseFloat(primaryStyle.minHeight),
-      supportingBackground: sectionStyle?.backgroundColor || "", metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
-      metricBackgroundColor: realityStyle.backgroundColor, metricBackground: realityStyle.background, metricBackgroundImage: realityStyle.backgroundImage,
-      metricBorder: realityStyle.borderBottom, metricValues: metricButtons.map((button) => getComputedStyle(button.querySelector("strong")).color),
-      metricLabels: metricButtons.map((button) => getComputedStyle(button.querySelector("small")).color), metricButtonBackgrounds: metricButtons.map((button) => getComputedStyle(button).backgroundColor),
-      teamSelectDisplay: teamSelectStyle.display, attentionBackground: attentionStyle?.backgroundColor || "", attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 99,
-      attentionShadow: attentionStyle?.boxShadow || "", attentionTitleColor: attentionTitleStyle?.color || "",
+      primaryBackground: primaryStyle.backgroundColor,
+      primaryColor: primaryStyle.color,
+      primaryBorder: primaryStyle.border,
+      primaryHeight: parseFloat(primaryStyle.minHeight),
+      supportingBackground: sectionStyle?.backgroundColor || "",
+      metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
+      metricBackgroundColor: realityStyle.backgroundColor,
+      metricBorder: realityStyle.borderBottom,
+      metricValues: metricButtons.map((button) => getComputedStyle(button.querySelector("strong")).color),
+      metricLabels: metricButtons.map((button) => getComputedStyle(button.querySelector("small")).color),
+      metricButtonBackgrounds: metricButtons.map((button) => getComputedStyle(button).backgroundColor),
+      teamSelectDisplay: teamSelectStyle.display,
+      attentionBackground: attentionStyle?.backgroundColor || "",
+      attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 99,
+      attentionShadow: attentionStyle?.boxShadow || "",
+      attentionTitleColor: attentionTitleStyle?.color || "",
     };
   });
 
@@ -124,6 +146,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(Math.min(...workspaceChannels)).toBeGreaterThanOrEqual(235);
   expect(Math.max(...workspaceChannels) - Math.min(...workspaceChannels)).toBeLessThanOrEqual(12);
   expect(relativeLuminance(workspaceChannels)).toBeGreaterThan(0.84);
+
   const heroStops = rgbStops(presentation.heroBackgroundImage);
   const heroSurfaceStops = heroStops.length ? heroStops : [rgbChannels(presentation.heroBackgroundColor)];
   expect(heroSurfaceStops[0]).toHaveLength(3);
@@ -132,17 +155,20 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.heroHeight).toBeGreaterThanOrEqual(382);
   expect(presentation.heroHeight).toBeLessThanOrEqual(460);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
-  expect(presentation.courtDisplay).toBe("none");
-  expect(presentation.scrimDisplay).toBe("none");
   expect(isTransparent(presentation.heroContentBackground)).toBe(true);
+
   expect(isTransparent(presentation.identityBackground)).toBe(true);
   expect(presentation.identityBackgroundImage).toBe("none");
   expect(presentation.identityHeight).toBeGreaterThanOrEqual(96);
   expect(presentation.identityHeight).toBeLessThanOrEqual(120);
-  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(39);
-  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(45);
+  expect(presentation.programIdentitySize).toBeGreaterThanOrEqual(38);
+  expect(presentation.programIdentitySize).toBeLessThanOrEqual(46);
+  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(26);
+  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(34);
+  expect(presentation.programIdentitySize - presentation.decisionTitleSize).toBeGreaterThanOrEqual(8);
   expect(presentation.decisionTitleTop).toBeGreaterThanOrEqual(presentation.identityBottom - 1);
   expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 48);
+
   expect(presentation.headerMarkDisplay).toBe("none");
   expect(presentation.headerMarkWidth).toBe(0);
   expect(presentation.headerMarkHeight).toBe(0);
@@ -150,6 +176,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(96);
   expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(96);
   if (presentation.heroLogoObjectFit !== "fallback") expect(presentation.heroLogoObjectFit).toBe("contain");
+
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
   expect(presentation.primaryBackground).not.toBe("rgb(32, 36, 33)");
   expect(presentation.primaryBackground).not.toBe("rgba(0, 0, 0, 0)");
@@ -157,20 +184,30 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(primaryTextChannels).toHaveLength(3);
   expect(Math.max(...primaryTextChannels)).toBeLessThan(80);
   expect(presentation.primaryBorder).toContain("solid");
+
   expect(presentation.metricColumns).toBe(3);
   expect(presentation.metricBackgroundColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(presentation.metricBorder).toContain("solid");
   expect(presentation.metricValues.every((color) => Math.min(...rgbChannels(color)) > 220)).toBe(true);
-  expect(presentation.metricLabels.every((color) => { const channels = rgbChannels(color); return channels.length === 3 && Math.min(...channels) > 120 && Math.max(...channels) < 230; })).toBe(true);
+  expect(presentation.metricLabels.every((color) => {
+    const channels = rgbChannels(color);
+    return channels.length === 3 && Math.min(...channels) > 120 && Math.max(...channels) < 230;
+  })).toBe(true);
   expect(presentation.metricButtonBackgrounds).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]);
   expect(presentation.teamSelectDisplay).toBe("none");
+
   const supportingChannels = rgbChannels(presentation.supportingBackground);
-  if (!isTransparent(presentation.supportingBackground) && supportingChannels.length === 3) expect(Math.min(...supportingChannels)).toBeGreaterThanOrEqual(230);
+  if (!isTransparent(presentation.supportingBackground) && supportingChannels.length === 3) {
+    expect(Math.min(...supportingChannels)).toBeGreaterThanOrEqual(230);
+  }
   expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
   expect(presentation.attentionShadow).not.toBe("none");
   expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
   const attentionChannels = rgbChannels(presentation.attentionBackground);
-  if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
+  if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) {
+    expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
+  }
+
   await expectNoHorizontalOverflow(page);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });
   await page.screenshot({ path: `${SCREENSHOT_DIR}/coach-mission-control-390x844.png` });
