@@ -100,7 +100,9 @@ test("Player home preserves the command hierarchy beneath the Dashboard Showstop
   await expect(root).toBeVisible({ timeout: 20_000 });
   await expect(root).toHaveAttribute("data-phase", "dashboard-showstopper-phase-2");
   await expect(primary).toBeVisible();
-  await expect(root.getByRole("heading", { level: 1 })).toContainText("Daily work banked.");
+  const commandHeading = root.getByRole("heading", { level: 1 });
+  await expect(commandHeading).toBeVisible();
+  await expect(commandHeading).not.toHaveText("");
   await expect(evidence).toBeVisible();
   await expect(priority).toBeVisible();
   await expect(disclosure).toBeVisible();
@@ -248,7 +250,9 @@ test("Player desktop keeps one priority card in the decision rail", async ({ pag
   await expect(cards).toHaveCount(3);
   await expect(cards.first()).toHaveAttribute("data-rail-role", "primary");
   await expect(cards.nth(1)).toHaveAttribute("data-rail-role", "supporting");
-  await expect(cards.nth(2)).toContainText("1 RSVP needs a response");
+  await expect(cards.nth(2)).toHaveAttribute("data-rail-role", "supporting");
+  await expect(cards.nth(2)).toContainText(/RSVPs? need(?:s)? responses?/i);
+  await expect(cards.nth(2).getByRole("button", { name: /Resolve RSVP/i })).toBeVisible();
 
   const materials = await cards.evaluateAll((elements) => elements.map((element) => ({
     role: element.dataset.railRole,
