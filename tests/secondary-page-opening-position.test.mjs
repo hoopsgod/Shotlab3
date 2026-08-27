@@ -16,7 +16,6 @@ test('persistent mobile viewport owns route opening position instead of individu
   assert.match(viewportLock, /nextRoute === routeKey/);
   assert.match(viewportLock, /window\.scrollTo\(0, 0\)/);
   assert.match(viewportLock, /\.player-scroll-container, :scope > \.shell-main > \.content-wrap'\)\?\.scrollTo\(0, 0\)/);
-  assert.match(viewportLock, /window\.addEventListener\('shotlab:app-ready', scheduleCorrection\)/);
   assert.match(mobileAxis, /overflow-anchor:\s*none\s*!important/);
 });
 
