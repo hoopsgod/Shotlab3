@@ -4,16 +4,22 @@ import { readFileSync } from 'node:fs';
 
 const read = (path) => readFileSync(path, 'utf8');
 const titleStage = read('src/components/TeamIdentityTitleStage.jsx');
+const viewportLock = read('src/lib/mobileHorizontalViewportLock.js');
+const mobileAxis = read('src/styles/MobileViewportAxisAuthority2026.css');
 const visualAuthority = read('src/styles/AuthenticatedVisualAuthority2026.css');
 const coachConvergence = read('src/styles/CoachRoleVisualConvergence2026.css');
 
-test('mobile editorial title stages synchronously reset persistent route scroll position', () => {
-  assert.match(titleStage, /useLayoutEffect/);
-  assert.match(titleStage, /titleFamily !== "editorial"/);
-  assert.match(titleStage, /innerWidth > 767/);
-  assert.match(titleStage, /document\.querySelector\("\.player-scroll-container,\.coach-scroll-container,\.content-wrap"\)\?\.scrollTo\(0, 0\)/);
-  assert.match(titleStage, /scrollTo\(0, 0\)/);
-  assert.doesNotMatch(titleStage, /stageRef|ref=\{stageRef\}/);
+test('persistent mobile viewport owns route opening position instead of individual title components', () => {
+  assert.doesNotMatch(titleStage, /useLayoutEffect|scrollRestoration|scrollTo\(0, 0\)/);
+  assert.match(viewportLock, /scrollRestoration[^\n]*= 'manual'/);
+  assert.match(viewportLock, /performance-shell\.is-mobile\[data-workspace-tab\]/);
+  assert.match(viewportLock, /nextRoute === routeKey/);
+  assert.match(viewportLock, /root\.scrollTop = 0/);
+  assert.match(viewportLock, /\.player-scroll-container'\)\?\.scrollTo\(0, 0\)/);
+  assert.match(viewportLock, /\.shell-main > \.content-wrap'\)\?\.scrollTo\(0, 0\)/);
+  assert.match(viewportLock, /window\.addEventListener\('pageshow', forceRouteTop\)/);
+  assert.match(viewportLock, /window\.addEventListener\('shotlab:app-ready', forceRouteTop\)/);
+  assert.match(mobileAxis, /overflow-anchor:\s*none\s*!important/);
 });
 
 test('mobile secondary pages retain a safe top landing instead of collapsing under browser chrome', () => {
