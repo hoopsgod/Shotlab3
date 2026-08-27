@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
@@ -117,11 +117,6 @@ export default function TeamIdentityTitleStage({
   };
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
-  useLayoutEffect(() => {
-    if (titleFamily !== "editorial" || innerWidth > 767) return;
-    document.querySelector(".player-scroll-container,.coach-scroll-container,.content-wrap")?.scrollTo(0, 0);
-    scrollTo(0, 0);
-  }, [displayTitle, titleFamily]);
 
   const fullCrestBrand = (
     <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
