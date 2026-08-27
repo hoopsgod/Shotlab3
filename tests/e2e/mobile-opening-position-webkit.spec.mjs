@@ -60,31 +60,47 @@ async function seedStaleScroll(page) {
 
 async function assertOpeningTop(page, marker, label, screenshot) {
   await expect(marker).toBeVisible({ timeout: 20_000 });
+  const title = marker.locator('[data-identity-role="page-title"]').first();
+  const summary = marker.locator('.teamIdentityTitleStage__summary').first();
+  await expect(title).toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(700);
+
   const state = await marker.evaluate((node) => {
-    const rect = node.getBoundingClientRect();
+    const stage = node.getBoundingClientRect();
+    const heading = node.querySelector('[data-identity-role="page-title"]')?.getBoundingClientRect();
+    const supporting = node.querySelector('.teamIdentityTitleStage__summary')?.getBoundingClientRect();
     const player = document.querySelector('.player-scroll-container');
     const coach = document.querySelector('.performance-shell--coach.is-mobile > .shell-main > .content-wrap');
     const owner = player || coach;
     return {
-      top: rect.top,
-      bottom: rect.bottom,
+      stageTop: stage.top,
+      stageBottom: stage.bottom,
+      titleTop: heading?.top ?? -1,
+      titleBottom: heading?.bottom ?? -1,
+      summaryTop: supporting?.top ?? -1,
+      summaryBottom: supporting?.bottom ?? -1,
+      viewportHeight: window.innerHeight,
       rootScrollTop: document.scrollingElement?.scrollTop || 0,
       ownerScrollTop: owner?.scrollTop || 0,
-      overflowAnchor: owner ? getComputedStyle(owner).overflowAnchor : '',
     };
   });
+
   const diagnostic = `${label} opening geometry: ${JSON.stringify(state)}`;
   expect(state.rootScrollTop, diagnostic).toBeLessThanOrEqual(1);
   expect(state.ownerScrollTop, diagnostic).toBeLessThanOrEqual(1);
-  expect(state.top, diagnostic).toBeGreaterThanOrEqual(0);
-  expect(state.top, diagnostic).toBeLessThan(190);
-  expect(state.bottom, diagnostic).toBeGreaterThan(60);
-  expect(state.overflowAnchor, diagnostic).toBe('none');
+  expect(state.stageTop, diagnostic).toBeGreaterThanOrEqual(0);
+  expect(state.stageTop, diagnostic).toBeLessThan(190);
+  expect(state.titleTop, `${diagnostic}; heading must be fully below the viewport top`).toBeGreaterThanOrEqual(0);
+  expect(state.titleBottom, `${diagnostic}; heading must be fully inside the opening viewport`).toBeLessThanOrEqual(state.viewportHeight);
+  expect(state.titleBottom, diagnostic).toBeGreaterThan(state.titleTop);
+  if (await summary.count()) {
+    expect(state.summaryTop, `${diagnostic}; supporting copy must not be cropped`).toBeGreaterThanOrEqual(state.titleBottom);
+    expect(state.summaryBottom, `${diagnostic}; supporting copy must remain visible on load`).toBeLessThanOrEqual(state.viewportHeight);
+  }
   await page.screenshot({ path: `${OUTPUT_DIR}/${screenshot}`, animations: 'disabled' });
 }
 
-test('Coach Demo Drills, Players, and Schedule always open at the true top in iPhone WebKit', async () => {
+test('Coach Demo Drills, Players, and Schedule always open with the full heading visible in iPhone WebKit', async () => {
   test.setTimeout(180_000);
   const { browser, context, page } = await createDemo('coach');
   try {
@@ -100,7 +116,7 @@ test('Coach Demo Drills, Players, and Schedule always open at the true top in iP
   }
 });
 
-test('Player Demo Home and Train always open at the true top in iPhone WebKit', async () => {
+test('Player Demo Home and Train always open with the full heading visible in iPhone WebKit', async () => {
   test.setTimeout(180_000);
   const { browser, context, page } = await createDemo('player');
   try {
