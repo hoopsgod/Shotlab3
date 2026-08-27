@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
@@ -62,6 +62,7 @@ export default function TeamIdentityTitleStage({
   dataMobileStage = "",
 }) {
   const { branding } = useTeamBranding();
+  const stageRef = useRef(null);
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
   const rawLogo = tidy(branding?.logoUrl || branding?.logoMarkUrl);
   const cleanedLogo = useCleanTeamLogo(rawLogo);
@@ -118,6 +119,26 @@ export default function TeamIdentityTitleStage({
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
+  useLayoutEffect(() => {
+    if (
+      titleFamily !== "editorial"
+      || resolvedMobileStage !== "editorial"
+      || typeof window === "undefined"
+      || !window.matchMedia?.("(max-width: 767px)").matches
+    ) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const stage = stageRef.current;
+      if (!stage) return;
+      const localScroller = stage.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
+      if (localScroller instanceof HTMLElement && localScroller.scrollTop !== 0) localScroller.scrollTop = 0;
+      const documentScroller = document.scrollingElement;
+      if (documentScroller && documentScroller.scrollTop !== 0) documentScroller.scrollTop = 0;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [displayTitle, resolvedMobileStage, titleFamily]);
+
   const fullCrestBrand = (
     <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
       {hasUsableLogo ? (
@@ -149,6 +170,7 @@ export default function TeamIdentityTitleStage({
 
   return (
     <header
+      ref={stageRef}
       className={[
         "teamIdentityTitleStage",
         heroClass,
