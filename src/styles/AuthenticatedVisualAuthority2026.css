@@ -13,6 +13,119 @@
   --sl-font-display: -apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif;
 }
 
+/* Coach secondary-page title authority. Player keeps its deferred module-owned
+ * treatment; Coach gets the same premium hierarchy without touching Home. */
+.performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+  --coach-secondary-accent: var(--team-brand-primary, var(--accent, #c8ff1a));
+  --coach-secondary-rule: color-mix(in srgb, var(--coach-secondary-accent) 18%, rgba(17, 26, 33, .12));
+  --identity-crest: clamp(88px, 18vw, 106px);
+  overflow: visible;
+  padding-inline-start: clamp(15px, 3.4vw, 22px);
+}
+
+.performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"]::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset-block: 2px 12px;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--coach-secondary-accent) 92%, white 8%), color-mix(in srgb, var(--team-brand-secondary, var(--coach-secondary-accent)) 68%, transparent) 72%, transparent);
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__inner {
+  grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+  align-items: end;
+  gap: clamp(14px, 4vw, 24px);
+  padding: 8px 0 19px;
+  border-bottom: 1px solid var(--coach-secondary-rule);
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__identityLine {
+  gap: 6px 8px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 820;
+  letter-spacing: .105em;
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="team-name"] {
+  color: color-mix(in srgb, var(--coach-secondary-accent) 54%, #31402f);
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] {
+  max-width: 12ch;
+  color: #111915;
+  font-family: "Barlow Condensed", "Arial Narrow", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: clamp(46px, 8.1vw, 60px);
+  font-weight: 820;
+  line-height: .88;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.performance-shell--coach [data-visual-role="page-intro"][data-title-word-count="1"] [data-identity-role="page-title"] {
+  max-width: none;
+  white-space: nowrap;
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__summary {
+  max-width: 46ch;
+  margin-top: 9px;
+  color: #5f6a63;
+  font-size: 14px;
+  line-height: 1.43;
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__support {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(17, 26, 33, .075);
+}
+
+.performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="brand-panel"] {
+  width: var(--identity-crest);
+  height: var(--identity-crest);
+  min-width: var(--identity-crest);
+  align-self: end;
+  margin: 0;
+}
+
+.performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] {
+  gap: 16px !important;
+  padding-bottom: 0 !important;
+  border-bottom: 1px solid rgba(17, 26, 33, .10) !important;
+}
+
+.performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] button {
+  position: relative;
+  min-height: 44px;
+  padding-inline: 1px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-size: 11px !important;
+  font-weight: 720 !important;
+  letter-spacing: .025em !important;
+  text-transform: uppercase;
+}
+
+.performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] button[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  border-radius: 999px 999px 0 0;
+  background: var(--coach-secondary-accent);
+}
+
 /* Mobile geometry authority: meaningful content shares one 20px rail while
  * full-bleed surfaces continue to opt out through their existing breakout rules. */
 @media (max-width: 767px) {
@@ -33,12 +146,14 @@
   }
 
   html body #root .secondaryPageShell {
+    padding-top: max(18px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
     padding-inline: var(--shotlab-mobile-content-rail) !important;
     padding-bottom: calc(
       var(--bottom-nav-content-padding, 82px)
       + var(--shotlab-mobile-content-landing)
       + env(safe-area-inset-bottom, 0px)
     ) !important;
+    scroll-margin-top: max(18px, calc(env(safe-area-inset-top, 0px) + 8px));
   }
 
   /* Registered Coach routes already arrive inside App.jsx's canonical 20px
@@ -64,13 +179,48 @@
     margin-inline: 0 !important;
   }
 
-  /* Back is part of the opening title composition, not a detached row. The
-   * legacy button margin plus secondary-shell top padding created a 32px void. */
+  /* Back is part of the opening title composition, not a detached row. Keep a
+   * real landing zone below browser chrome instead of collapsing the title to 0. */
   html body #root .performance-shell--coach .shared-dashboard-back-action {
     margin-bottom: 0 !important;
   }
 
   html body #root .performance-shell--coach .shared-dashboard-back-action + .secondaryPageShell {
-    padding-top: 0 !important;
+    padding-top: max(14px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
   }
+
+  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+    --identity-crest: clamp(84px, 23vw, 100px);
+    padding-inline-start: 15px;
+  }
+
+  .performance-shell--coach [data-visual-role="page-intro"]::before { inset-block-end: 9px; }
+  .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__inner {
+    gap: 11px;
+    padding: 6px 0 15px;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] {
+    max-width: 10.5ch;
+    font-size: clamp(42px, 11vw, 46px);
+    line-height: .89;
+    letter-spacing: -.03em;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__summary {
+    display: -webkit-box;
+    max-width: 34ch;
+    margin-top: 8px;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.4;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__support {
+    margin-top: 11px;
+    padding-top: 9px;
+  }
+}
+
+@media (max-width: 390px) {
+  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] { --identity-crest: 84px; }
 }
