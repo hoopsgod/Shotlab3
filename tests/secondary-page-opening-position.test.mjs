@@ -11,9 +11,9 @@ test('mobile editorial title stages synchronously reset persistent route scroll 
   assert.match(titleStage, /useLayoutEffect/);
   assert.match(titleStage, /titleFamily !== "editorial"/);
   assert.match(titleStage, /innerWidth > 767/);
-  assert.match(titleStage, /stageRef\.current\?\.closest\("\.player-scroll-container,\.coach-scroll-container,\.content-wrap"\)\?\.scrollTo\(0, 0\)/);
-  assert.match(titleStage, /document\.scrollingElement\?\.scrollTo\(0, 0\)/);
-  assert.match(titleStage, /ref=\{stageRef\}/);
+  assert.match(titleStage, /document\.querySelector\("\.player-scroll-container,\.coach-scroll-container,\.content-wrap"\)\?\.scrollTo\(0, 0\)/);
+  assert.match(titleStage, /scrollTo\(0, 0\)/);
+  assert.doesNotMatch(titleStage, /stageRef|ref=\{stageRef\}/);
 });
 
 test('mobile secondary pages retain a safe top landing instead of collapsing under browser chrome', () => {
