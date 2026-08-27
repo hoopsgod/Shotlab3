@@ -5,6 +5,7 @@ import styles from "./PlayerProgressStory.module.css";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
+import "./PlayerSecondaryVisualSystem.css";
 
 function SignalCard({ eyebrow, title, detail, testId }) {
   return <article className={styles.signalCard} data-testid={testId}><span>{eyebrow}</span><strong>{title}</strong><p>{detail}</p></article>;
@@ -31,7 +32,7 @@ export default function PlayerProgressStory({
   const todayMakes = Math.max(0, Number(story.dailyMakes?.[story.dailyMakes.length - 1]?.made) || 0);
 
   return <>
-    <TeamIdentityTitleStage variant="standard" brandTreatment="compact" surface="light" role="Development" title="Progress" status={`${trendWord} · ${story.activeDays7}/7 active days`} testId="player-progress-team-title" className="playerProgressTeamTitle" dataLayoutRole="editorial-header" dataVisualRole="page-intro" dataPageKind="progress" dataMobileStage="editorial" ariaLabel="Team development and Progress" />
+    <TeamIdentityTitleStage variant="standard" brandTreatment="compact" surface="light" role="Development" title="Progress" status={`${trendWord} · ${story.activeDays7}/7 active days`} testId="player-progress-team-title" className="playerProgressTeamTitle" dataLayoutRole="editorial-header" dataVisualRole="player-team-workspace-title" dataPageKind="progress" dataMobileStage="editorial" ariaLabel="Team development and Progress" />
     <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend} data-page-hierarchy="command-story">
       <div className={styles.hero} data-testid="player-progress-story-hero" data-layout-role="command-story-header">
         <div className={styles.heroTopline} data-testid="player-progress-story-topline"><span>DEVELOPMENT STORY</span><span data-testid="player-progress-trend-badge">{trendWord}</span></div>
