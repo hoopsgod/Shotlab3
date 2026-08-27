@@ -62,7 +62,7 @@
 }
 
 .teamIdentityTitleStage[data-visual-role="player-team-workspace-title"] .teamIdentityTitleStage__inner {
-  grid-template-columns: minmax(0, 1fr) clamp(62px, 15vw, 82px);
+  grid-template-columns: minmax(0, 1fr) var(--identity-crest);
   align-items: end;
   gap: clamp(14px, 4vw, 24px);
   padding: 8px 0 19px;
@@ -163,9 +163,9 @@
 }
 
 .teamIdentityTitleStage[data-visual-role="player-team-workspace-title"] .teamIdentityTitleStage__crestSlot {
-  width: clamp(62px, 15vw, 82px);
-  height: clamp(62px, 15vw, 82px);
-  min-width: clamp(62px, 15vw, 82px);
+  width: var(--identity-crest);
+  height: var(--identity-crest);
+  min-width: var(--identity-crest);
   align-self: end;
   margin: 0;
 }
@@ -290,7 +290,7 @@
 
 @media (max-width: 760px) {
   .teamIdentityTitleStage[data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"] {
-    --identity-crest: clamp(56px, 14.5vw, 62px);
+    --identity-crest: clamp(96px, 25vw, 108px);
     --identity-title: clamp(42px, 11vw, 46px);
     padding-inline-start: 15px;
   }
@@ -371,7 +371,6 @@
 
 @media (max-width: 420px) {
   .teamIdentityTitleStage[data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"] {
-    --identity-crest: 56px;
     --identity-title: 42px;
   }
 
@@ -399,6 +398,12 @@
 
   [data-player-workspace-filter-rail="true"] {
     gap: 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  .teamIdentityTitleStage[data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"] {
+    --identity-crest: 84px;
   }
 }
 
