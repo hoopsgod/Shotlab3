@@ -81,9 +81,28 @@ async function capture(page, filename) {
   expect(fs.statSync(filePath).size).toBeGreaterThan(15_000);
 }
 
+async function readHomeControlFingerprint(page) {
+  return page.getByTestId("player-daily-command-center").locator('[data-command-role="primary"]').evaluate((element) => {
+    const style = getComputedStyle(element);
+    const shell = element.closest('.performance-shell--player');
+    const shellStyle = shell ? getComputedStyle(shell) : style;
+    return {
+      backgroundImage: style.backgroundImage,
+      backgroundColor: style.backgroundColor,
+      borderTopColor: style.borderTopColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      teamBrandPrimary: shellStyle.getPropertyValue('--team-brand-primary').trim(),
+      teamBrandSurfaceDeep: shellStyle.getPropertyValue('--team-brand-surface-deep').trim(),
+      teamBrandSurfaceElevated: shellStyle.getPropertyValue('--team-brand-surface-elevated').trim(),
+    };
+  });
+}
+
 async function captureSurfaceSet(page, origin, prefix) {
   await enterDemoAt(page, origin);
   await expect(page.getByTestId("player-dashboard-identity-header")).toHaveAttribute("data-title-stage-family", "identity");
+  const homeControl = await readHomeControlFingerprint(page);
   await capture(page, `${prefix}-player-home-390.png`);
 
   await navigateByKey(page, "log-drill");
@@ -101,19 +120,23 @@ async function captureSurfaceSet(page, origin, prefix) {
   await expect(page.getByTestId("player-progress-team-title").locator('[data-identity-role="page-title"]')).toHaveText("Progress");
   await expect(page.getByTestId("player-progress-story")).toBeVisible();
   await capture(page, `${prefix}-player-progress-390.png`);
+  return { homeControl };
 }
 
 test("capture immutable production before and exact-checkout prototype after at 390px", async ({ page }) => {
   test.setTimeout(150_000);
   await installSafeRoutes(page);
 
-  await captureSurfaceSet(page, BASELINE_ORIGIN, "before");
-  await captureSurfaceSet(page, PROTOTYPE_ORIGIN, "after");
+  const before = await captureSurfaceSet(page, BASELINE_ORIGIN, "before");
+  const after = await captureSurfaceSet(page, PROTOTYPE_ORIGIN, "after");
+
+  expect(after.homeControl, "Player Dashboard/Home must remain the immutable visual control").toEqual(before.homeControl);
 
   fs.writeFileSync(path.join(OUTPUT_DIR, "evidence-manifest.json"), JSON.stringify({
     viewport: { width: 390, height: 844 },
     baseline: { sha: BASELINE_SHA, origin: BASELINE_ORIGIN },
     prototype: { sha: PROTOTYPE_SHA, origin: PROTOTYPE_ORIGIN },
     surfaces: ["Player Dashboard/Home", "At Home Training", "Program Training", "Progress"],
+    homeControlFingerprint: { baseline: before.homeControl, prototype: after.homeControl },
   }, null, 2));
 });
