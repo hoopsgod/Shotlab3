@@ -123,7 +123,7 @@
   left: 0;
   height: 2px;
   border-radius: 999px 999px 0 0;
-  background: var(--coach-secondary-accent);
+  background: var(--team-brand-primary, var(--accent, #c8ff1a));
 }
 
 /* Mobile geometry authority: meaningful content shares one 20px rail while
