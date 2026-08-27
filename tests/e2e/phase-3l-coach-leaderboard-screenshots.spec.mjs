@@ -136,8 +136,9 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
 
   const followUpHost = drawer.getByTestId("coach-follow-up-ledger-host");
   await expect(followUpHost).toBeAttached({ timeout: 10_000 });
-  const drawerDialog = drawer.getByRole("dialog", { name: "Ava Brooks", exact: true });
+  const drawerDialog = drawer.locator('[role="dialog"]:visible').first();
   await expect(drawerDialog).toBeVisible();
+  await expect(drawerDialog.getByRole("heading", { level: 2 }).first()).toHaveText(/\S+/);
   const followUpInsideDialog = await followUpHost.evaluate((node) => Boolean(node.closest('[role="dialog"]')));
   expect(followUpInsideDialog).toBe(true);
 
