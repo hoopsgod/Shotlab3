@@ -4,6 +4,14 @@ import { mkdirSync } from "node:fs";
 const SCREENSHOT_DIR = "artifacts/mission-control-phase-2";
 
 const rgbChannels = (value = "") => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+const rgbStops = (value = "") => [...String(value).matchAll(/\brgb\((\d+),\s*(\d+),\s*(\d+)\)/g)].map((match) => match.slice(1, 4).map(Number));
+const relativeLuminance = ([r, g, b]) => {
+  const channels = [r, g, b].map((value) => {
+    const channel = value / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
+};
 const isTransparent = (value = "") => ["transparent", "rgba(0, 0, 0, 0)"].includes(String(value));
 
 async function installSafeRoutes(page) {
@@ -54,10 +62,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
   // Phase 4's identity-first composition intentionally retires the decorative
-  // court layer; certification protects that simplification rather than
-  // resurrecting obsolete visual chrome.
+  // court and scrim layers; certification protects that simplification rather
+  // than resurrecting obsolete visual chrome.
   await expect(page.locator(".mcCourtArtwork")).toBeHidden();
-  await expect(page.locator(".mcHeroScrim")).toBeVisible();
+  await expect(page.locator(".mcHeroScrim")).toBeHidden();
   await expect(page.locator(".mcTeamSelect")).toBeHidden();
   await expect(page.locator(".mcBell")).toBeVisible();
   await expect(page.locator(".mcMobileMenu")).toBeVisible();
@@ -107,7 +115,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       heroHeight: hero.getBoundingClientRect().height,
       heroRadius: parseFloat(heroStyle.borderRadius),
       courtDisplay: court ? getComputedStyle(court).display : "none",
-      scrimDisplay: getComputedStyle(scrim).display,
+      scrimDisplay: scrim ? getComputedStyle(scrim).display : "none",
       heroContentBackground: heroContentStyle.backgroundColor,
       identityBackground: identityStyle.backgroundColor,
       identityBackgroundImage: identityStyle.backgroundImage,
@@ -144,15 +152,16 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   });
 
   expect(presentation.workspaceBackground).toBe("rgb(243, 241, 234)");
-  const heroChannels = rgbChannels(presentation.heroBackgroundColor);
-  expect(heroChannels).toHaveLength(3);
-  expect(Math.max(...heroChannels)).toBeLessThan(100);
+  const heroStops = rgbStops(presentation.heroBackgroundImage);
+  const heroSurfaceStops = heroStops.length ? heroStops : [rgbChannels(presentation.heroBackgroundColor)];
+  expect(heroSurfaceStops[0]).toHaveLength(3);
+  expect(heroSurfaceStops.every((stop) => relativeLuminance(stop) < 0.18)).toBe(true);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
   expect(presentation.heroHeight).toBeGreaterThanOrEqual(382);
   expect(presentation.heroHeight).toBeLessThanOrEqual(460);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
   expect(presentation.courtDisplay).toBe("none");
-  expect(presentation.scrimDisplay).toBe("block");
+  expect(presentation.scrimDisplay).toBe("none");
   expect(isTransparent(presentation.heroContentBackground)).toBe(true);
 
   expect(isTransparent(presentation.identityBackground)).toBe(true);
