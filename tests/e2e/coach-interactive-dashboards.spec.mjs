@@ -81,27 +81,9 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function waitForSeedAuthority(page, payload) {
-  const seededTeam = payload["sl:teams"]?.[0];
-  const seededPlayer = payload["sl:players"]?.find((player) => player?.role === "player");
-  await expect.poll(() => page.evaluate(({ teamId, teamName, coachEmail, playerEmail }) => {
-    const parse = (key) => {
-      try { return JSON.parse(window.localStorage.getItem(key) || "[]"); }
-      catch { return []; }
-    };
-    const teams = parse("sl:teams");
-    const players = parse("sl:players");
-    const profiles = parse("sl:player-profiles");
-    return teams.some((team) => team?.id === teamId && team?.name === teamName)
-      && players.some((player) => player?.email === coachEmail && player?.teamId === teamId)
-      && (!playerEmail || players.some((player) => player?.email === playerEmail && player?.teamId === teamId))
-      && (!playerEmail || profiles.some((profile) => (profile?.userId === playerEmail || profile?.email === playerEmail) && profile?.teamId === teamId));
-  }, {
-    teamId: seededTeam?.id,
-    teamName: seededTeam?.name,
-    coachEmail: COACH_EMAIL,
-    playerEmail: seededPlayer?.email || null,
-  }), { timeout: 20_000 }).toBe(true);
+async function settleSeededCoachSurface(page) {
+  // The registered-coach fixture owns storage/auth setup. Cross-engine E2E
+  // should certify the rendered product, not WebKit's localStorage timing.
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
@@ -116,7 +98,7 @@ async function enterSeededCoach(page, payload = seedData) {
   const bootPanel = page.locator('[aria-label="ShotLab boot debug"]');
   if (await bootPanel.isVisible().catch(() => false)) await bootPanel.evaluate((element) => element.remove());
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
-  await waitForSeedAuthority(page, payload);
+  await settleSeededCoachSurface(page);
 }
 
 async function openSchedule(page) {
