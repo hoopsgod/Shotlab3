@@ -74,6 +74,7 @@ jobs:
           tests/e2e/demo-paid-responsive-parity.spec.mjs
           tests/e2e/registered-mobile-viewport-lock.spec.mjs
           tests/e2e/registered-mobile-webkit-scroll-lock.spec.mjs
+          tests/e2e/mobile-opening-position-webkit.spec.mjs
           tests/e2e/mobile-demo-paid-horizontal-lock.spec.mjs
           tests/e2e/demo-sandbox-safety.spec.mjs
           --config=playwright.acceptance.config.mjs
