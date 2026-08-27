@@ -204,6 +204,14 @@ test("three-digit locked entry remains production-safe at 375, 390, and 430px", 
 
 test("home daily Target Court preserves a meaningful above-target banked state", async ({ page }) => {
   await enterPlayerDemo(page);
+  await navigateMobile(page, "log-drill", "Train");
+  await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
+  const shotInput = page.getByText("SHOTS MADE", { exact: true }).locator("..").locator("input");
+  await expect(shotInput).toBeVisible();
+  await shotInput.fill("125");
+  await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
+  await navigateMobile(page, "home", "Home");
+
   const court = page.getByTestId("player-daily-performance-court");
   await expect(court).toBeVisible({ timeout: 20_000 });
   await expect(court).toHaveAttribute("data-performance-state", "above");
