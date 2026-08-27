@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
@@ -62,9 +62,9 @@ export default function TeamIdentityTitleStage({
   dataMobileStage = "",
 }) {
   const { branding } = useTeamBranding();
-  const stageRef = useRef(null);
   const teamName = tidy(branding?.teamName || branding?.name, "ShotLab Team");
-  const cleanedLogo = useCleanTeamLogo(tidy(branding?.logoUrl || branding?.logoMarkUrl));
+  const rawLogo = tidy(branding?.logoUrl || branding?.logoMarkUrl);
+  const cleanedLogo = useCleanTeamLogo(rawLogo);
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
   const displayPerson = tidy(personName);
@@ -74,15 +74,13 @@ export default function TeamIdentityTitleStage({
   const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
   const longSingleWord = singleWordTitle && longestWordLength >= 11;
   const longTitle = displayTitle.length > 22 || longestWordLength > 12;
-  const isHero = variant === "hero" || variant === "identity";
-  const isDark = surface === "dark";
-  const heroClass = isHero ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
-  const surfaceClass = isDark ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
-  const titleFamily = isHero ? "identity" : "editorial";
+  const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
+  const surfaceClass = surface === "dark" ? "teamIdentityTitleStage--dark" : "teamIdentityTitleStage--light";
+  const titleFamily = heroClass === "teamIdentityTitleStage--hero" ? "identity" : "editorial";
   const requestedMobileStage = tidy(dataMobileStage);
   const resolvedMobileStage = titleFamily === "editorial" && requestedMobileStage === "team-identity"
     ? "editorial"
-    : requestedMobileStage || (isHero ? "team-identity" : "editorial");
+    : requestedMobileStage || (titleFamily === "identity" ? "team-identity" : "editorial");
   const requestedBrandTreatment = tidy(brandTreatment, "auto").toLowerCase();
   const fallbackBrandTreatment = titleFamily === "identity" ? "hero" : "compact";
   const resolvedBrandTreatment = requestedBrandTreatment === "auto"
@@ -98,29 +96,31 @@ export default function TeamIdentityTitleStage({
       brandingAction.onClick();
       return;
     }
-    const destination = document.querySelector('[data-nav-key="branding"]');
-    if (destination instanceof HTMLElement) {
-      destination.click();
+
+    const directBrandingDestination = document.querySelector('[data-nav-key="branding"]');
+    if (directBrandingDestination instanceof HTMLElement) {
+      directBrandingDestination.click();
       return;
     }
-    const more = document.querySelector('[data-testid="mobile-navigation-more"]');
-    if (more instanceof HTMLElement) {
-      more.click();
-      setTimeout(() => {
+
+    const mobileMore = document.querySelector('[data-testid="mobile-navigation-more"]');
+    if (mobileMore instanceof HTMLElement) {
+      mobileMore.click();
+      window.setTimeout(() => {
         const brandingDestination = document.querySelector('[data-nav-key="branding"]');
         if (brandingDestination instanceof HTMLElement) brandingDestination.click();
       }, 0);
       return;
     }
+
     document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click();
   };
 
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
-
   useLayoutEffect(() => {
     if (titleFamily !== "editorial" || innerWidth > 767) return;
-    stageRef.current?.closest(".player-scroll-container,.coach-scroll-container,.content-wrap")?.scrollTo(0, 0);
-    document.scrollingElement?.scrollTo(0, 0);
+    document.querySelector(".player-scroll-container,.coach-scroll-container,.content-wrap")?.scrollTo(0, 0);
+    scrollTo(0, 0);
   }, [displayTitle, titleFamily]);
 
   const fullCrestBrand = (
@@ -154,7 +154,6 @@ export default function TeamIdentityTitleStage({
 
   return (
     <header
-      ref={stageRef}
       className={[
         "teamIdentityTitleStage",
         heroClass,
@@ -167,12 +166,12 @@ export default function TeamIdentityTitleStage({
       ].filter(Boolean).join(" ")}
       data-testid={testId}
       data-team-identity-stage="true"
-      data-variant={isHero ? "hero" : "standard"}
+      data-variant={titleFamily === "identity" ? "hero" : "standard"}
       data-title-stage-family={titleFamily}
       data-brand-treatment={resolvedBrandTreatment}
       data-title-size={titleSize}
       data-title-word-count={titleWords.length}
-      data-surface={isDark ? "dark" : "light"}
+      data-surface={surface === "dark" ? "dark" : "light"}
       data-layout-role={dataLayoutRole}
       data-visual-role={dataVisualRole}
       data-page-kind={dataPageKind}
