@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { enterSeededRegisteredPlayer } from "./registered-coach-fixture.mjs";
 
 const TEAM_ID = "team-player-freshness";
-const PLAYER_EMAIL = "demo@shotlab.app";
+const PLAYER_EMAIL = "player.freshness@shotlab.test";
+const COACH_EMAIL = "coach.freshness@shotlab.test";
 const OLD_FOCUS = "Old closeout focus that must not be shown";
 const OLD_DRILL = "Form Shooting";
 const OLD_CHALLENGE = "Complete the old assignment before anything else.";
@@ -18,12 +20,12 @@ const priorities = {
 };
 
 const seed = {
-  "sl:teams": [{ id: TEAM_ID, name: "Player Freshness Team", joinCode: "FRESH", ownerCoachId: "coach.demo@shotlab.app" }],
+  "sl:teams": [{ id: TEAM_ID, name: "Player Freshness Team", joinCode: "FRESH", ownerCoachId: COACH_EMAIL }],
   "sl:players": [
-    { id: "freshness-coach", email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-    { id: "freshness-player", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Demo Player", role: "player", teamId: TEAM_ID },
+    { id: "freshness-coach", email: COACH_EMAIL, name: "Freshness Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "freshness-player", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Freshness Player", role: "player", teamId: TEAM_ID },
   ],
-  "sl:player-profiles": [{ id: "freshness-profile", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Demo", lastName: "Player" }],
+  "sl:player-profiles": [{ id: "freshness-profile", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Freshness", lastName: "Player" }],
   "sl:drills": [
     { id: "form-shooting", name: "Form Shooting", desc: "Clean mechanics", max: 50, icon: "ft" },
     { id: "corner-threes", name: "Corner Threes", desc: "Corner volume", max: 40, icon: "3p" },
@@ -49,19 +51,19 @@ test("stale coach guidance is not presented as today's player assignment", async
       ok: true,
       storage_mode: "team_remote",
       priorities_by_team: { [TEAM_ID]: priorities },
-      metadata_by_team: { [TEAM_ID]: { updatedAt: oldPublishedAt, updatedBy: "coach.demo@shotlab.app" } },
+      metadata_by_team: { [TEAM_ID]: { updatedAt: oldPublishedAt, updatedBy: COACH_EMAIL } },
     }),
   }));
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
-  await page.addInitScript((payload) => {
-    window.localStorage.clear();
-    for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
-  }, seed);
 
-  await page.goto("/");
-  await page.getByRole("button", { name: "Player demo", exact: true }).click();
+  await enterSeededRegisteredPlayer(page, {
+    storage: seed,
+    playerEmail: PLAYER_EMAIL,
+    playerName: "Freshness Player",
+    teamId: TEAM_ID,
+  });
 
   const commandCenter = page.getByTestId("player-daily-command-center");
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
