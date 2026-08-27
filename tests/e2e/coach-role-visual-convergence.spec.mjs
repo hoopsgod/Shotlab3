@@ -143,8 +143,17 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   expect(home.crestWidth).toBeGreaterThanOrEqual(96);
   await expectNoHorizontalOverflow(page);
 
+  // Phase 4 deliberately retires the stacked Players decision card on mobile.
+  // Verify the live editorial/filter/roster hierarchy there; the other
+  // operational routes retain a visible branded decision stage.
+  await navigateByKey(page, "players");
+  await expectEditorialTitle(page);
+  await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("coach-players-filter-rail")).toBeVisible();
+  await expect(page.locator("#coach-roster-operations")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
   const operationalRoutes = [
-    ["players", "coach-players-decision-brief"],
     ["events", "coach-events-decision-brief"],
     ["drills", "coach-page-dashboard-drills-decision-brief"],
     ["sc", "coach-page-dashboard-strength-decision-brief"],
