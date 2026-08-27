@@ -161,9 +161,10 @@ test("coach removal creates a hidden tombstone and excludes the player from rost
   await enterRegisteredRemovalCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
-  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  await expect(roster.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+  await expect(roster.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
 
   const candidateRosterRow = page
     .locator("#coach-roster-operations .phase1RosterRow")
@@ -173,7 +174,7 @@ test("coach removal creates a hidden tombstone and excludes the player from rost
   await expect(candidateRosterRow).not.toHaveAttribute("role", "button");
   page.once("dialog", async (dialog) => dialog.accept());
   await candidateRosterRow.getByRole("button", { name: "REMOVE", exact: true }).click();
-  await expect(page.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
+  await expect(roster.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
 
   await expect.poll(() => page.evaluate((email) => {
     const rows = JSON.parse(window.localStorage.getItem("sl:players") || "[]");
