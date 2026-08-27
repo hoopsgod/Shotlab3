@@ -120,11 +120,10 @@ export default function TeamIdentityTitleStage({
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
   useLayoutEffect(() => {
-    if (titleFamily !== "editorial" || resolvedMobileStage !== "editorial" || window.innerWidth > 767) return;
-    const localScroller = stageRef.current?.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
-    if (localScroller) localScroller.scrollTop = 0;
-    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
-  }, [displayTitle, resolvedMobileStage, titleFamily]);
+    if (titleFamily !== "editorial" || innerWidth > 767) return;
+    stageRef.current?.closest(".player-scroll-container,.coach-scroll-container,.content-wrap")?.scrollTo(0, 0);
+    document.scrollingElement?.scrollTo(0, 0);
+  }, [displayTitle, titleFamily]);
 
   const fullCrestBrand = (
     <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
