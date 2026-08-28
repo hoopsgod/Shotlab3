@@ -9,6 +9,9 @@ const appSource = read("src/App.jsx");
 const transformedApp = applyInSeasonPlayerParity(appSource);
 const hubSource = read("src/components/InSeasonPerformanceHub.jsx");
 const routeEnhancers = read("scripts/run-route-enhancers.mjs");
+const playerNavStart = transformedApp.indexOf("const playerNavItems=[");
+const playerNavEnd = transformedApp.indexOf("const getPlayerNavItem=", playerNavStart);
+const playerNavSource = playerNavStart >= 0 && playerNavEnd > playerNavStart ? transformedApp.slice(playerNavStart, playerNavEnd) : "";
 
 test("player In Season parity transform is deterministic and idempotent", () => {
   assert.equal(applyInSeasonPlayerParity(transformedApp), transformedApp);
@@ -18,7 +21,7 @@ test("player In Season parity transform is deterministic and idempotent", () => 
 test("player navigation exposes an addressable In Season destination", () => {
   assert.match(transformedApp, /"in-season":"\/in-season"/);
   assert.match(transformedApp, /"\/in-season":"in-season"/);
-  assert.match(transformedApp, /\{k:"in-season",l:"In Season"/);
+  assert.match(playerNavSource, /\{k:"in-season",l:"In Season"/);
   assert.match(transformedApp, /getPlayerNavItem\("in-season",\{mobileLabel:"In Season",mobileIcon:"chart",group:"performance"/);
 });
 
