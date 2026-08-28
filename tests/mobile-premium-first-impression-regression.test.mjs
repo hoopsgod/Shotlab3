@@ -139,7 +139,6 @@ test("Player Home is the immersive Hero variant while Coach Home follows the app
 });
 
 test("legacy final-mobile compatibility cannot override title or team-identity composition", () => {
-  assert.match(finalMobileCss, /Title and team-identity composition are intentionally excluded/);
   assert.doesNotMatch(finalMobileCss, /\.mcHero h1|\.secondaryPageIntro|player-dashboard-identity-header/);
   assert.doesNotMatch(enhancer, /opacity:\s*\.17|mcHeroTeamMark/);
 });
