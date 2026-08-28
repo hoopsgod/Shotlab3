@@ -5,6 +5,7 @@ import { transform as transformCss } from "lightningcss";
 
 const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
+const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 
 async function removeBundledAuthorityDuplicates() {
@@ -55,14 +56,25 @@ function restructureCss(css, filename, { coach = false } = {}) {
   }).css;
 }
 
+function isProtectedFinalAuthority(file) {
+  return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
+}
+
 async function finalizeProductionCss(files) {
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
+  let protectedFiles = 0;
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
     const relative = path.relative(DIST_DIR, file);
+    if (isProtectedFinalAuthority(file)) {
+      sourceBytes += Buffer.byteLength(source);
+      outputBytes += Buffer.byteLength(source);
+      protectedFiles += 1;
+      continue;
+    }
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     // Dedupe/font-token passes run after the first CSSO pass. Re-run the same
     // standards-based restructure here so newly adjacent/equivalent rules can
@@ -77,7 +89,7 @@ async function finalizeProductionCss(files) {
     }
   }
 
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes.`);
+  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`);
 }
 
 async function main() {
@@ -98,9 +110,16 @@ async function main() {
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
+  let protectedFiles = 0;
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
+    if (isProtectedFinalAuthority(file)) {
+      sourceBytes += Buffer.byteLength(source);
+      outputBytes += Buffer.byteLength(source);
+      protectedFiles += 1;
+      continue;
+    }
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     const output = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
     sourceBytes += Buffer.byteLength(source);
@@ -112,7 +131,7 @@ async function main() {
   }
 
   console.log(`Removed ${removedAuthorityCopies} unreferenced visual-authority CSS copies.`);
-  console.log(`Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw.`);
+  console.log(`Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`);
 }
 
 await main();
