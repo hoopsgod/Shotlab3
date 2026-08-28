@@ -78,12 +78,10 @@ test('Program Branding preview uses one visible identity mark and a mobile-safe 
   assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"[\s\S]*title="Mission Control"/);
 });
 
-test('At Home Shot Tracker keeps equal grid tracks and repairs the input box model in the existing CSS authority', () => {
+test('At Home Shot Tracker keeps equal grid tracks and owns the input box model in source CSS', () => {
   assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
-  assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*width:\s*100%/);
-  assert.match(composition, /function repairShotTrackerInputGeometry\(\)/);
-  assert.match(composition, /box-sizing: border-box/);
-  assert.match(composition, /Shot Tracker input authority is missing/);
+  assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
   assert.match(composition, /player-primary-logging-region \.player-logging-field label\{text-align:center\}/);
+  assert.doesNotMatch(composition, /repairShotTrackerInputGeometry/);
 });
