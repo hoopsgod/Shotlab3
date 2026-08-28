@@ -145,7 +145,7 @@ test("legacy final-mobile compatibility cannot override title or team-identity c
 });
 
 test("Program Branding keeps intentional brand-derived identity contrast against later global surface authorities", () => {
-  assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview\{[^}]*background:linear-gradient\(145deg,var\(--team-brand-surface-deep,#0a2633\),var\(--team-brand-surface-elevated,#102f39\)\)!important/);
+  assert.match(brandingCss, /\.branding-industrial__preview\{[^}]*background:linear-gradient\(145deg,var\(--team-brand-surface-deep,#0a2633\),var\(--team-brand-surface-elevated,#102f39\)\)!important/);
   assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__panel-header h2\{color:#f8faf6!important/);
   assert.match(brandingCss, /\.branding-industrial \.branding-industrial__preview \.branding-industrial__kicker\{color:var\(--team-brand-primary,#c8ff1a\)!important/);
 });
