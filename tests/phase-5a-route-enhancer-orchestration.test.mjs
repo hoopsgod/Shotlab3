@@ -28,6 +28,7 @@ const finalPresentationChain = [
   'scripts/apply-mobile-player-coach-signal-signature.mjs',
   'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
+  'scripts/apply-in-season-player-parity.mjs',
   'scripts/minify-visual-authority-css.mjs',
 ]
 const registeredParityEnhancers = [
@@ -59,8 +60,8 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
   assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(0, 2), buildPrefix)
-  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-5), finalPresentationChain)
-  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-5), finalPresentationChain)
+  assert.deepEqual(DEV_ROUTE_ENHANCERS.slice(-finalPresentationChain.length), finalPresentationChain)
+  assert.deepEqual(BUILD_ROUTE_ENHANCERS.slice(-finalPresentationChain.length), finalPresentationChain)
 
   const devMinifyIndex = DEV_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
   const buildMinifyIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/minify-visual-authority-css.mjs')
