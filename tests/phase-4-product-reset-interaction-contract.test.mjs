@@ -55,9 +55,9 @@ test("authentication is single-flight, reports working state, and shields techni
   assert.match(source, /technicalAuthErrorPattern/);
   assert.match(source, /role="status" aria-live="polite"/);
   assert.match(source, /<ShotLabStatePanel[\s\S]*state="error"[\s\S]*testId="auth-error-state"/);
-  assert.match(statePanel, /const isError = state === "error"/);
-  assert.match(statePanel, /role=\{isError \? "alert" : "status"\}/);
-  assert.match(statePanel, /aria-live=\{isError \? "assertive" : "polite"\}/);
+  assert.match(statePanel, /const role = state === "error" \? "alert" : "status"/);
+  assert.match(statePanel, /role=\{role\}/);
+  assert.match(statePanel, /aria-live=\{state === "error" \? "assertive" : "polite"\}/);
   assert.match(source, /minHeight:44/);
   assert.doesNotMatch(source, /setErr\(r\.err\)/);
   assert.doesNotMatch(source, /setErr\(demo\.err/);
