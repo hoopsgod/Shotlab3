@@ -144,7 +144,7 @@ test('production externalizes legacy runtime CSS without changing the developmen
   assert.match(legacyRuntimeCssExtraction, /const LEGACY_STYLE_EXPORTS = \[['"]_STYLES_CSS['"], ['"]_PLAYER_COMPACT_DASHBOARD_CSS['"], ['"]_PAGE_SIGNATURE_CSS['"], ['"]_DESKTOP_SHELL_CSS['"]\]/)
   assert.match(legacyRuntimeCssExtraction, /LEGACY_STYLE_IMPORT/)
   assert.match(legacyRuntimeCssExtraction, /LEGACY_STYLE_COMPONENT/)
-  assert.match(legacyRuntimeCssExtraction, /data-shotlab-legacy-runtime=\\"1\\"/)
+  assert.match(legacyRuntimeCssExtraction, /data-shotlab-legacy-runtime="1"/)
   assert.match(appSource, /from ["']\.\/styles\/appLegacyStyles\.js["']/)
   assert.match(appSource, /const Styles=\(\)=>/)
 })
