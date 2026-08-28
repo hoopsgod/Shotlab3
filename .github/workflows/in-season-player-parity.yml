@@ -1,0 +1,69 @@
+name: In Season Player Parity
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "src/App.jsx"
+      - "src/components/InSeasonPerformanceHub.jsx"
+      - "src/lib/trainingCatalogPersistenceService.js"
+      - "scripts/apply-in-season-player-parity.mjs"
+      - "scripts/run-route-enhancers.mjs"
+      - "tests/in-season-player-parity.test.mjs"
+      - "tests/in-season-security-contract.test.mjs"
+      - "tests/signed-training-catalog-persistence.test.mjs"
+      - "tests/e2e/mobile-navigation.spec.mjs"
+      - ".github/workflows/in-season-player-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: in-season-player-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  certify-player-in-season:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify player route, team scope, and role boundaries
+        run: node --test tests/in-season-player-parity.test.mjs tests/in-season-security-contract.test.mjs tests/signed-training-catalog-persistence.test.mjs
+
+      - name: Verify production build and route enhancer application
+        run: npm run build
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify rendered Player Demo In Season route
+        run: npx playwright test tests/e2e/mobile-navigation.spec.mjs --config=playwright.config.mjs --reporter=line --grep "player mobile dock"
+
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: in-season-player-parity-failure
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
