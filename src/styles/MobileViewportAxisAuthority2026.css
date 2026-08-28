@@ -32,6 +32,27 @@
     --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px);
   }
 
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Current Coach title stages own Back navigation. The historical sibling Back
+   * row must not consume opening geometry or create a duplicate affordance. */
+  html body #root .performance-shell--coach.is-mobile .shared-dashboard-back-action {
+    display: none !important;
+  }
+
   /* MissionControlCascadeLock owns the Home shell and hero-content viewport
    * geometry. The final x-axis authority prevents the inner composition rail
    * from becoming a horizontal scroll owner while preserving full-bleed bands. */
@@ -50,7 +71,14 @@
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     margin-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+    padding-inline-start: 0 !important;
   }
 
   /* SecondaryPageShell > * already owns min-width/max-width/border-box. */
@@ -66,5 +94,52 @@
   html body #root .performance-shell--player.is-mobile .player-quick-actions,
   html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
     padding-inline: 0 !important;
+  }
+
+  /* Player Home optical evidence uses the same 20px page rail. Keep the accent
+   * outside the text block while preserving an 8px readable inset for the copy. */
+  html body #root .performance-shell--player.is-mobile [data-testid="player-coach-priority-signal"] {
+    padding-inline: 8px 2px !important;
+  }
+
+  /* Semantic metric text must remain readable on Player light workspaces even
+   * when an older visual layer appears later in the compiled cascade. */
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] {
+    color: #172019 !important;
+    -webkit-text-fill-color: #172019 !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] {
+    color: #4f5a52 !important;
+    -webkit-text-fill-color: #4f5a52 !important;
+  }
+
+  /* The three Coach leaderboard metrics are one compact ledger, never a
+   * horizontally scrolling carousel. */
+  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-visual-role="performance-evidence"] {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+    grid-auto-columns: minmax(0, 1fr) !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-inline: auto !important;
+  }
+  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] {
+    min-width: 0 !important;
+  }
+
+  /* Program Branding may wrap between words at narrow widths, but never split
+   * the word Mission itself. */
+  html body #root [data-testid="branding-preview-coach-title"] [data-identity-role="page-title"] {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+    --identity-crest: 84px !important;
   }
 }
