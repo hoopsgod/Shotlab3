@@ -13,6 +13,51 @@
   --sl-font-display: -apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif;
 }
 
+/* Coach secondary titles now share the premium editorial signature while Home
+ * remains on its separate Mission Control identity authority. */
+.performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+  --identity-crest: clamp(88px, 18vw, 106px);
+  overflow: visible;
+  padding-inline-start: 15px;
+}
+.performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"]::before {
+  content: "";
+  position: absolute;
+  inset: 2px auto 10px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--team-brand-primary, var(--accent, #c8ff1a));
+}
+.performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__inner {
+  grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+  gap: 14px;
+  padding: 8px 0 16px;
+  border-bottom: 1px solid rgba(17, 26, 33, .11);
+}
+.performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] {
+  max-width: 12ch;
+  font-family: "Barlow Condensed", "Arial Narrow", var(--sl-font-display);
+  font-size: clamp(46px, 8.1vw, 60px);
+  font-weight: 820;
+  line-height: .88;
+  letter-spacing: -.035em;
+}
+.performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] { border-bottom: 1px solid rgba(17, 26, 33, .1) !important; }
+.performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] button {
+  position: relative;
+  padding-inline: 1px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+.performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] button[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  background: var(--team-brand-primary, var(--accent, #c8ff1a));
+}
+
 /* Mobile geometry authority: meaningful content shares one 20px rail while
  * full-bleed surfaces continue to opt out through their existing breakout rules. */
 @media (max-width: 767px) {
@@ -33,6 +78,7 @@
   }
 
   html body #root .secondaryPageShell {
+    padding-top: max(18px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
     padding-inline: var(--shotlab-mobile-content-rail) !important;
     padding-bottom: calc(
       var(--bottom-nav-content-padding, 82px)
@@ -64,13 +110,19 @@
     margin-inline: 0 !important;
   }
 
-  /* Back is part of the opening title composition, not a detached row. The
-   * legacy button margin plus secondary-shell top padding created a 32px void. */
+  /* Back is part of the opening title composition, not a detached row. */
   html body #root .performance-shell--coach .shared-dashboard-back-action {
     margin-bottom: 0 !important;
   }
 
   html body #root .performance-shell--coach .shared-dashboard-back-action + .secondaryPageShell {
-    padding-top: 0 !important;
+    padding-top: max(14px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
   }
+
+  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] { --identity-crest: clamp(96px, 25vw, 108px); }
+  .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] { font-size: clamp(42px, 11vw, 46px); }
+}
+
+@media (max-width: 390px) {
+  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] { --identity-crest: 84px; }
 }

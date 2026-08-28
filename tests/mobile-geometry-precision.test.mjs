@@ -11,7 +11,9 @@ const secondaryPages = read('src/components/SecondaryPageSystem.css');
 const centering = read('public/shotlab-mobile-centering-reconciliation.css');
 const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
+const commandHierarchy = read('src/styles/CommandHierarchy2026.css');
 const app = read('src/App.jsx');
+const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 
 test('mobile geometry authority keeps Player and Coach on dedicated 20px rails', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
@@ -68,4 +70,18 @@ test('Player Home optical accents and progress summary do not create secondary l
 test('Player Train preserves Shot Tracker prominence while returning Training Plan to the scan rail', () => {
   assert.match(composition, /\.player-training-kicker\{justify-content:center!important\}/);
   assert.match(composition, /\.player-training-plan__header\{display:grid!important;justify-items:start!important;text-align:left!important;padding-inline:2px!important\}/);
+});
+
+test('Program Branding preview uses one visible identity mark and a mobile-safe Mission Control scale', () => {
+  assert.match(brandingPreview, /variant="hero" brandTreatment="compact"[\s\S]*title="Mission Control"/);
+  assert.match(brandingPreview, /title="Mission Control"[\s\S]*titleSize="long"/);
+  assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"[\s\S]*title="Mission Control"/);
+});
+
+test('At Home Shot Tracker keeps equal grid tracks and owns the input box model in source CSS', () => {
+  assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
+  assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
+  assert.match(composition, /player-primary-logging-region \.player-logging-field label\{text-align:center\}/);
+  assert.doesNotMatch(composition, /repairShotTrackerInputGeometry/);
 });

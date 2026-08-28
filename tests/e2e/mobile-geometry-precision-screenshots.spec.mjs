@@ -217,6 +217,24 @@ async function expectTrainOpticalRails(page) {
     expect(Math.abs(trackerRect.left - planRect.left)).toBeLessThanOrEqual(1);
     expect(Math.abs(trackerRect.right - planRect.right)).toBeLessThanOrEqual(1);
 
+    const shotFields = await tracker.locator(".player-logging-field").evaluateAll((elements) => elements.map((element) => {
+      const field = element.getBoundingClientRect();
+      const input = element.querySelector("input")?.getBoundingClientRect();
+      return { left: field.left, right: field.right, width: field.width, inputLeft: input?.left || 0, inputRight: input?.right || 0, inputWidth: input?.width || 0 };
+    }));
+    expect(shotFields).toHaveLength(2);
+    expect(Math.abs(shotFields[0].width - shotFields[1].width)).toBeLessThanOrEqual(1);
+    for (const field of shotFields) {
+      expect(field.inputLeft).toBeGreaterThanOrEqual(field.left - 0.5);
+      expect(field.inputRight).toBeLessThanOrEqual(field.right + 0.5);
+      expect(Math.abs(field.inputWidth - field.width)).toBeLessThanOrEqual(1);
+    }
+    const outerInsets = {
+      left: shotFields[0].left - trackerRect.left,
+      right: trackerRect.right - shotFields[1].right,
+    };
+    expect(Math.abs(outerInsets.left - outerInsets.right)).toBeLessThanOrEqual(1);
+
     const header = plan.locator(".player-training-plan__header");
     const row = plan.locator(".player-drill-row").first();
     if (await header.count() && await row.count()) {

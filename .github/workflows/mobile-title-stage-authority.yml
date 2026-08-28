@@ -122,6 +122,7 @@ jobs:
           tests/mobile-secondary-page-parity-contract.test.mjs
           tests/mobile-premium-visual-system-2026.test.mjs
           tests/mobile-premium-first-impression-regression.test.mjs
+          tests/secondary-page-opening-position.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -154,6 +155,11 @@ jobs:
           TITLE_STAGE_EVIDENCE_MODE: after
         run: npx playwright test tests/e2e/mobile-title-stage-authority.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
+      - name: Prove secondary pages reset stale mobile scroll before first paint settles
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/secondary-page-opening-position.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
       - name: Run existing mobile geometry production smoke
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
@@ -166,6 +172,7 @@ jobs:
           name: mobile-title-stage-authority-after
           path: |
             artifacts/mobile-title-stage-authority-after/
+            artifacts/secondary-page-opening-position/
             artifacts/phase-3a-cross-screen-visual-audit/
           if-no-files-found: warn
           retention-days: 14

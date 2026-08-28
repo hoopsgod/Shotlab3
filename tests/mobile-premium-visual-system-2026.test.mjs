@@ -78,8 +78,8 @@ test("mobile metrics and supporting evidence use flat ledger geometry rather tha
   assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*border-block: 1px solid/);
   assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\] > button\s*\{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important/);
   assert.match(secondaryPageCss, /\.secondaryPageEvidence > \*\s*\{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important/);
-  assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,#061923 0%,#082430 62%,#0b2d37 100%\)!important;[\s\S]*box-shadow:none!important/);
-  assert.match(playerMetricHierarchyCss, /\.metricPrimary \[class\*="metricValue"\]\{[\s\S]*font-size:46px!important/);
+  assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,var\(--team-brand-surface-elevated,#0b2633\) 0%,var\(--team-brand-surface,#0a202b\) 62%,var\(--team-brand-surface-deep,#071820\) 100%\)!important;[\s\S]*box-shadow:none!important/);
+  assert.match(playerMetricHierarchyCss, /\.metricPrimary>span:nth-child\(2\)\{[\s\S]*font-size:46px!important/);
   assert.match(playerMetricHierarchyCss, /\.metricSupporting\{[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
 });
 
