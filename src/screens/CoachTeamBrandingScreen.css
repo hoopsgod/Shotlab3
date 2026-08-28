@@ -395,7 +395,7 @@
   }
 
   [data-testid=branding-preview-coach-title] .teamIdentityTitleStage__inner {
-    grid-template-columns: 1fr;
+    display: block;
   }
 
   [data-testid=branding-preview-coach-title] .teamIdentityTitleStage__crestSlot {
