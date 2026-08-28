@@ -86,10 +86,10 @@ test("Phase 3N uses a stable late authority boundary so demo normalization canno
   assert.match(authority, /html body #root \[data-testid="player-commitment-center-events"\] \[data-testid="player-commitment-hero-events"\]/);
   assert.match(authority, /background-color:\s*#111411\s*!important/);
   assert.match(authority, /background-image:[\s\S]*linear-gradient\(152deg[\s\S]*!important/);
-  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] > div[\s\S]*background-color: transparent !important/);
-  assert.match(authority, /> div:nth-child\(2\) > div\[aria-label\][\s\S]*rgba\(255, 255, 255, \.045\) !important/);
-  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] h2[\s\S]*#f8faf5 !important/);
-  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] button[\s\S]*background-color: var\(--accent, #c8ff1a\) !important/);
+  assert.match(authority, /\[data-testid="player-commitment-hero-events"\]\s*>\s*div[\s\S]*background-color:\s*transparent\s*!important/);
+  assert.match(authority, />\s*div:nth-child\(2\)\s*>\s*div\[aria-label\][\s\S]*rgba\(255,\s*255,\s*255,\s*\.045\)\s*!important/);
+  assert.match(authority, /\[data-testid="player-commitment-hero-events"\]\s+h2[\s\S]*#f8faf5\s*!important/);
+  assert.match(authority, /\[data-testid="player-commitment-hero-events"\]\s+button[\s\S]*background-color:\s*var\(--accent,\s*#c8ff1a\)\s*!important/);
 });
 
 test("fresh iPhone evidence covers both commitment routes and verifies legacy controls on demand", () => {
