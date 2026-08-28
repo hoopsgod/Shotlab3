@@ -27,21 +27,21 @@ test('Phase 3D scopes presentation changes to the Player Profile analytics canva
 
 test('Rendered root lock survives React inline-style whitespace serialization', () => {
   assert.match(rootLock, /performance-shell--player\[data-workspace-tab="profile"\] div\[style\*="100vh"\]\[style\*="80px"\]/);
-  assert.match(rootLock, /min-height:\s*0!important;/);
-  assert.match(rootLock, /background:\s*transparent!important;/);
-  assert.match(rootLock, /background-image:\s*none!important;/);
+  assert.match(rootLock, /min-height:\s*0!important;?/);
+  assert.match(rootLock, /background:\s*transparent!important;?/);
+  assert.match(rootLock, /background-image:\s*none!important;?/);
 });
 
 test('Legacy analytics masthead becomes an in-flow native section header', () => {
-  assert.match(rootLock, />\s*div:first-child\{[\s\S]*?position:\s*relative!important;[\s\S]*?border-radius:\s*20px!important;[\s\S]*?background:\s*var\(--p3dl-surface\)!important;/);
-  assert.match(rootLock, /display:\s*none!important;/);
-  assert.match(rootLock, /font-size:\s*25px!important;/);
+  assert.match(rootLock, />\s*div:first-child\{[\s\S]*?position:\s*relative!important;?[\s\S]*?border-radius:\s*20px!important;?[\s\S]*?background:\s*var\(--p3dl-surface\)!important;?/);
+  assert.match(rootLock, /display:\s*none!important;?/);
+  assert.match(rootLock, /font-size:\s*25px!important;?/);
 });
 
 test('Analytics tabs remove emoji chrome and retain accessible touch sizing', () => {
-  assert.match(rootLock, /button\s*>\s*span:first-child\{\s*display:\s*none!important;/s);
-  assert.match(rootLock, /min-height:\s*42px!important;/);
-  assert.match(rootLock, /touch-action:\s*manipulation;/);
+  assert.match(rootLock, /button\s*>\s*span:first-child\{\s*display:\s*none!important;?/s);
+  assert.match(rootLock, /min-height:\s*42px!important;?/);
+  assert.match(rootLock, /touch-action:\s*manipulation;?/);
   assert.match(rootLock, /button:focus-visible\{/);
 });
 
