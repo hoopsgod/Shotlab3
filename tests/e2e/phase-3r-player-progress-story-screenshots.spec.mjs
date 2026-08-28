@@ -50,13 +50,23 @@ test("player progress opens with ShotLab Target Court before deep analytics", as
   await expect(page.getByTestId("player-profile-readout")).toBeHidden();
   await expect(story.getByTestId("player-progress-trend-chart")).toHaveCount(0);
 
-  const heroStyle = await story.getByTestId("player-progress-story-hero").evaluate((node) => ({
-    backgroundColor: getComputedStyle(node).backgroundColor,
-    backgroundImage: getComputedStyle(node).backgroundImage,
-    radius: getComputedStyle(node).borderRadius,
-    titleColor: getComputedStyle(node.querySelector("h2")).color,
-  }));
-  expect(heroStyle.backgroundColor).toBe("rgb(15, 20, 18)");
+  const heroStyle = await story.getByTestId("player-progress-story-hero").evaluate((node) => {
+    const probe = document.createElement("span");
+    probe.style.backgroundColor = "var(--team-brand-surface-deep)";
+    node.appendChild(probe);
+    const brandSurfaceDeep = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return {
+      backgroundColor: getComputedStyle(node).backgroundColor,
+      backgroundImage: getComputedStyle(node).backgroundImage,
+      radius: getComputedStyle(node).borderRadius,
+      titleColor: getComputedStyle(node.querySelector("h2")).color,
+      brandSurfaceDeep,
+    };
+  });
+  expect(heroStyle.brandSurfaceDeep).not.toBe("rgba(0, 0, 0, 0)");
+  expect(heroStyle.backgroundColor).toBe(heroStyle.brandSurfaceDeep);
+  expect(heroStyle.backgroundColor).not.toBe("rgb(15, 20, 18)");
   expect(heroStyle.backgroundImage).toContain("gradient");
   expect(parseFloat(heroStyle.radius)).toBeGreaterThanOrEqual(24);
   expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
