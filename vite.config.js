@@ -122,7 +122,7 @@ const COACH_WORKSPACE_FRAGMENTS = [
   '/src/lib/homeExperienceHierarchy.js',
   '/src/lib/visualSystemReboot',
 ]
-const AUTHORITY_BUNDLE_TARGET_BYTES = 120_000
+const AUTHORITY_BUNDLE_TARGET_BYTES = 1_000_000
 
 const matchesAny = (moduleId, fragments) => fragments.some((fragment) => moduleId.includes(fragment))
 
