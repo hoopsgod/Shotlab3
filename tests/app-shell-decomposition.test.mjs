@@ -7,6 +7,8 @@ const authSource = readFileSync(new URL('../src/components/AuthWorkspace.jsx', i
 const brandSource = readFileSync(new URL('../src/components/ShotLabBrand.jsx', import.meta.url), 'utf8');
 const legacyStyleSource = readFileSync(new URL('../src/styles/appLegacyStyles.js', import.meta.url), 'utf8');
 const legacyStyleRuntimeSource = readFileSync(new URL('../src/styles/appLegacyStylesRuntime.js', import.meta.url), 'utf8');
+const drillCatalogSource = readFileSync(new URL('../src/lib/defaultDrillCatalog.js', import.meta.url), 'utf8');
+const scheduleDataSource = readFileSync(new URL('../src/lib/defaultScheduleData.js', import.meta.url), 'utf8');
 const viteConfigSource = readFileSync(new URL('../vite.config.js', import.meta.url), 'utf8');
 
 const appBytes = Buffer.byteLength(appSource);
@@ -17,6 +19,19 @@ test('App shell stays below Babel code-generation deoptimization threshold', () 
   assert.match(appSource, /AUTH_WORKSPACE_RUNTIME=Object\.freeze/);
   assert.match(appSource, /<Auth runtime=\{AUTH_WORKSPACE_RUNTIME\}/);
   assert.doesNotMatch(appSource, /function Auth\(/);
+});
+
+test('default drill and schedule models stay outside the App shell', () => {
+  assert.match(appSource, /from "\.\/lib\/defaultDrillCatalog\.js"/);
+  assert.match(appSource, /from "\.\/lib\/defaultScheduleData\.js"/);
+  assert.doesNotMatch(appSource, /const DEFAULT_DEMO_DRILL_CATALOG=/);
+  assert.doesNotMatch(appSource, /const EVENTS_INIT=/);
+  assert.match(drillCatalogSource, /export const DRILLS_INIT=/);
+  assert.match(drillCatalogSource, /export const PROGRAM_DRILLS_INIT=/);
+  assert.match(drillCatalogSource, /export const mergeDefaultDrills=/);
+  assert.match(drillCatalogSource, /export const normalizeScoresForDefaultDrills=/);
+  assert.match(scheduleDataSource, /export const EVENTS_INIT=/);
+  assert.match(scheduleDataSource, /export const SC_INIT=/);
 });
 
 test('authentication remains a complete route workspace with preserved demo and legal entry contracts', () => {
