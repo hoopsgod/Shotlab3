@@ -32,6 +32,10 @@ export function applyInSeasonPlayerParity(rawSource) {
   const routeAfter = '  </div>}\n\n  {tab==="in-season"&&!active&&<div className={slideClass} key="in-season" data-testid="player-in-season-workspace">\n    <InSeasonPerformanceHub role="player" user={u} team={team} programDrills={programDrills} programScores={teamProgramScores} players={playerLeaderboardPlayers} seasonArchives={seasonArchives} addScore={addScore} />\n  </div>}\n\n  {/* ═════ SHOT STATS sub-screen ═════ */}';
   source = replaceOnce(source, routeBefore, routeAfter, "player In Season workspace mount");
 
+  const coachMetricBefore = 'programDrills.filter(d=>findMatchingDefaultDrill(d,DEFAULT_PROGRAM_DRILL_INDEX)||isInSeasonProgramDrill(d)).length';
+  const coachMetricAfter = 'programDrills.filter(d=>d?.isDefaultDemo||isInSeasonProgramDrill(d)).length';
+  source = replaceOnce(source, coachMetricBefore, coachMetricAfter, "coach In Season default-drill metric runtime safety");
+
   return source.replace(/\n/g, lineEnding);
 }
 
