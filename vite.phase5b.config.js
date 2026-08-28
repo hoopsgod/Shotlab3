@@ -1,16 +1,13 @@
-import path from 'node:path'
+import { transform as transformWithLightningCss } from 'lightningcss'
 import { defineConfig } from 'vite'
 import baseConfig from './vite.config.js'
-import { buildMinifiedLegacyStyleRuntimeSource } from './scripts/build-legacy-style-runtime-source.mjs'
 import { createCssModuleDeadSelectorPruner } from './scripts/css-module-dead-selector-pruner.mjs'
 
 const APP_SUFFIX = '/src/App.jsx'
 const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";'
 const SHARED_SECONDARY_PAGE_FRAGMENT = '/src/components/SecondaryPageSystem'
 const SHARED_PREMIUM_WORKSPACE_STYLE = '/src/styles/PremiumWorkspace.css'
-const MINIFIED_LEGACY_STYLE_SOURCE_ID = '\0shotlab-minified-legacy-style-source'
-const LEGACY_STYLE_SOURCE_MODULE = path.resolve(process.cwd(), 'src/styles/appLegacyStyles.js')
-const LEGACY_STYLE_EXPORTS = ['_STYLES_CSS', '_PAGE_SIGNATURE_CSS', '_DESKTOP_SHELL_CSS', '_PLAYER_COMPACT_DASHBOARD_CSS']
+const COACH_ENHANCER_MODULE = /\/src\/lib\/coach[A-Za-z0-9_-]*Enhancer\.js$/
 
 function normalizeModuleId(id = '') {
   return String(id).replaceAll('\\', '/')
@@ -31,18 +28,47 @@ function ownCoachInteractiveStylesInWorkspace() {
   }
 }
 
-function pruneLegacyStylePayload() {
+function minifyCoachEnhancerRuntimeCss() {
+  let transformedModules = 0
+  let transformedTemplates = 0
+  let rawBytesSaved = 0
+
   return {
-    name: 'shotlab-prune-legacy-style-payload',
+    name: 'shotlab-minify-coach-enhancer-runtime-css',
     apply: 'build',
     enforce: 'pre',
-    async load(id) {
-      if (id !== MINIFIED_LEGACY_STYLE_SOURCE_ID) return null
-      const compactSource = await buildMinifiedLegacyStyleRuntimeSource({
-        sourceFile: LEGACY_STYLE_SOURCE_MODULE,
-        exportNames: LEGACY_STYLE_EXPORTS,
+    transform(source, id) {
+      const moduleId = normalizeModuleId(id).split('?')[0]
+      if (!COACH_ENHANCER_MODULE.test(moduleId)) return null
+
+      let changed = false
+      const next = source.replace(/const\s+styles\s*=\s*`([\s\S]*?)`;/g, (whole, css) => {
+        if (!css || css.includes('${')) return whole
+        let compact
+        try {
+          compact = Buffer.from(transformWithLightningCss({
+            filename: `${moduleId.split('/').pop()}.css`,
+            code: Buffer.from(css),
+            minify: true,
+            sourceMap: false,
+            errorRecovery: false,
+          }).code).toString('utf8')
+        } catch {
+          return whole
+        }
+        if (compact.length >= css.length) return whole
+        changed = true
+        transformedTemplates += 1
+        rawBytesSaved += Buffer.byteLength(css) - Buffer.byteLength(compact)
+        return `const styles=\`${compact}\`;`
       })
-      return `export default ${JSON.stringify(compactSource)};`
+
+      if (!changed) return null
+      transformedModules += 1
+      return { code: next, map: null }
+    },
+    buildEnd() {
+      console.log(`Minified ${transformedTemplates} Coach enhancer runtime CSS templates across ${transformedModules} modules; saved ${(rawBytesSaved / 1024).toFixed(1)} KiB raw JavaScript payload before Terser/gzip.`)
     },
   }
 }
@@ -58,7 +84,7 @@ export default defineConfig(async (environment) => {
     ...resolvedBase,
     plugins: [
       ownCoachInteractiveStylesInWorkspace(),
-      pruneLegacyStylePayload(),
+      minifyCoachEnhancerRuntimeCss(),
       createCssModuleDeadSelectorPruner(),
       ...(resolvedBase.plugins || []),
     ],
