@@ -43,6 +43,7 @@ test("shared state actions acknowledge pending work without allowing duplicate a
 
 test("authentication is single-flight, reports working state, and shields technical failures", async () => {
   const source = await read("src/components/AuthWorkspace.jsx");
+  const statePanel = await read("src/components/ShotLabStatePanel.jsx");
 
   assert.match(source, /useRef, useState/);
   assert.match(source, /busyRef\.current/);
@@ -53,7 +54,10 @@ test("authentication is single-flight, reports working state, and shields techni
   assert.match(source, /friendlyAuthError/);
   assert.match(source, /technicalAuthErrorPattern/);
   assert.match(source, /role="status" aria-live="polite"/);
-  assert.match(source, /role="alert" aria-live="assertive"/);
+  assert.match(source, /<ShotLabStatePanel[\s\S]*state="error"[\s\S]*testId="auth-error-state"/);
+  assert.match(statePanel, /const isError = state === "error"/);
+  assert.match(statePanel, /role=\{isError \? "alert" : "status"\}/);
+  assert.match(statePanel, /aria-live=\{isError \? "assertive" : "polite"\}/);
   assert.match(source, /minHeight:44/);
   assert.doesNotMatch(source, /setErr\(r\.err\)/);
   assert.doesNotMatch(source, /setErr\(demo\.err/);
