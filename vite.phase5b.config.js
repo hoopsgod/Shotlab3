@@ -64,9 +64,14 @@ export default defineConfig(async (environment) => {
           ...baseOutput,
           manualChunks(id, api) {
             const moduleId = normalizeModuleId(id)
-            if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
+            if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AuthenticatedUi'
             if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
-            return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
+            const baseChunk = typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
+            // Domain services are already co-required with the authenticated UI in the
+            // production graph. Keeping them in one CSS-free shared chunk removes an
+            // extra request/compression boundary without changing route behavior.
+            if (baseChunk === 'AppDomainServices') return 'AuthenticatedUi'
+            return baseChunk
           },
         },
       },
