@@ -27,9 +27,9 @@ test('Coach Drill library management becomes one closed-by-default native disclo
   assert.match(css, /\.coach-drills-library-disclosure/);
   assert.match(css, /\.coach-drills-library-summary/);
   assert.match(css, /\.coach-drills-library-disclosure\[open\]/);
-  assert.match(css, /coach-drills-library-summary-copy > small[\s\S]*opacity: 1 !important/);
-  assert.match(css, /coach-drills-library-summary-copy > small[\s\S]*box-shadow: none !important/);
-  assert.match(css, /color: #596159 !important/);
+  assert.match(css, /coach-drills-library-summary-copy\s*>\s*small[\s\S]*opacity:\s*1\s*!important/);
+  assert.match(css, /coach-drills-library-summary-copy\s*>\s*small[\s\S]*box-shadow:\s*none\s*!important/);
+  assert.match(css, /color:\s*#596159\s*!important/);
 });
 
 test('Coach Drills keeps every management capability behind or beside the disclosure', () => {
@@ -43,30 +43,30 @@ test('Coach Drills keeps every management capability behind or beside the disclo
 
 test('Drill search, filters, and operational cards use the light native secondary system', () => {
   assert.match(css, /coach-drills-operational-filters/);
-  assert.match(css, /background: rgba\(255,255,255,\.94\)/);
+  assert.match(css, /background:\s*rgba\(255\s*,\s*255\s*,\s*255\s*,\s*\.94\)/);
   assert.match(css, /button\[aria-pressed=\"true\"\]/);
   assert.match(css, /coach-drills-operational-panel/);
   assert.match(css, /article h2/);
-  assert.match(css, /--phase3g-ink: #151915/);
+  assert.match(css, /--phase3g-ink:\s*#151915/);
 });
 
 test('Drills keeps one decision layer instead of repeating metric evidence twice', () => {
   assert.match(css, /coach-page-dashboard-drills-evidence/);
   assert.match(css, /coach-page-dashboard-drills-decision-brief/);
-  assert.match(css, /coach-page-dashboard-drills-evidence[^}]*display: none !important/s);
+  assert.match(css, /coach-page-dashboard-drills-evidence[^}]*display:\s*none\s*!important/s);
 });
 
 test('duplicate bottom Add Drill CTA is removed visually while the new-drill form remains available', () => {
-  assert.match(css, /\.coach-drills-library-disclosure \+ \.btn-v\.cta-primary/);
-  assert.match(css, /display: none !important/);
+  assert.match(css, /\.coach-drills-library-disclosure\s*\+\s*\.btn-v\.cta-primary/);
+  assert.match(css, /display:\s*none\s*!important/);
   assert.match(enhancer, /NEW DRILL/);
 });
 
 test('Phase 3G authority loads after Phase 3F and keeps accessibility behavior explicit', () => {
   assert.match(html, /shotlab-phase3f-profile-intelligence\.css[\s\S]*shotlab-phase3g-coach-drills-hierarchy\.css/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /touch-action: manipulation/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /touch-action:\s*manipulation/);
 });
 
 test('rendered iPhone evidence verifies default and expanded Coach Drills states', () => {
