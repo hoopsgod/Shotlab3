@@ -17,6 +17,7 @@ on:
       - "package-lock.json"
       - "performance-budget.json"
       - "scripts/verify-performance-budget.mjs"
+      - "scripts/report-phase5a1-source-weight.mjs"
       - ".github/workflows/performance-budget.yml"
   workflow_dispatch:
 
@@ -47,14 +48,23 @@ jobs:
       - name: Verify performance decomposition contracts
         run: node --test tests/performance-decomposition.test.mjs tests/coach-administration-decomposition.test.mjs tests/player-interface-decomposition.test.mjs tests/app-shell-decomposition.test.mjs
 
-      - name: Build and enforce performance budget
-        run: npm run build:performance
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Report production source weight
+        run: node scripts/report-phase5a1-source-weight.mjs
+
+      - name: Enforce performance budget
+        run: npm run verify:performance-budget
 
       - name: Upload bundle metrics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: shotlab-performance-metrics
-          path: artifacts/performance/build-metrics.json
+          path: |
+            artifacts/performance/build-metrics.json
+            artifacts/performance/bundle-ownership.json
+            artifacts/performance/source-weight.json
           if-no-files-found: error
           retention-days: 14
