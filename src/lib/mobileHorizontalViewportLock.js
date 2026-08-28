@@ -37,17 +37,15 @@ const INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR = [
 ].join(',');
 
 function isMobileViewport() {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia?.(MOBILE_VIEWPORT_QUERY).matches ?? window.innerWidth <= 760;
+  return typeof window !== 'undefined' && window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
 }
 
 export function isVisualViewportZoomed() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false;
   const visual = window.visualViewport;
   if (!visual) return false;
-  const layoutWidth = document.documentElement?.clientWidth || window.innerWidth || 0;
-  return Number(visual.scale || 1) > 1 + VISUAL_VIEWPORT_ZOOM_EPSILON
-    || (layoutWidth > 0 && Number(visual.width || layoutWidth) < layoutWidth - 1);
+  const layoutWidth = document.documentElement?.clientWidth || window.innerWidth;
+  return visual.scale > 1 + VISUAL_VIEWPORT_ZOOM_EPSILON || visual.width < layoutWidth - 1;
 }
 
 function findCoachRouteOwner() {
@@ -57,24 +55,20 @@ function findCoachRouteOwner() {
 
   return Array.from(workspace.children).find((node) => {
     if (!(node instanceof Element)) return false;
-    return Boolean(
-      node.querySelector('[data-testid="coach-command-center-full"]')
+    return node.querySelector('[data-testid="coach-command-center-full"]')
       || node.querySelector('.secondaryPageShell')
-      || node.querySelector('.page.pageShell')
-    );
+      || node.querySelector('.page.pageShell');
   }) || null;
 }
 
 export function clearRegisteredCoachRouteGeometry() {
   if (typeof document === 'undefined') return false;
   let cleared = false;
-
   document.querySelectorAll('.coach-route-scroll-container').forEach((routeOwner) => {
     routeOwner.classList.remove('coach-route-scroll-container');
     COACH_ROUTE_GEOMETRY_PROPERTIES.forEach((property) => routeOwner.style.removeProperty(property));
     cleared = true;
   });
-
   return cleared;
 }
 
@@ -85,23 +79,22 @@ export function normalizeRegisteredCoachRouteGeometry() {
 
   const isHome = Boolean(routeOwner.querySelector('[data-testid="coach-command-center-full"]'));
   routeOwner.classList.add('coach-route-scroll-container');
-
-  routeOwner.style.setProperty('width', '100%');
-  routeOwner.style.setProperty('min-width', '0');
-  routeOwner.style.setProperty('max-width', '100%');
+  Object.assign(routeOwner.style, {
+    width: '100%',
+    minWidth: '0',
+    maxWidth: '100%',
+    overflowX: 'clip',
+    marginLeft: '0',
+    marginRight: '0',
+  });
   routeOwner.style.setProperty('box-sizing', 'border-box');
-  routeOwner.style.setProperty('overflow-x', 'clip');
-  routeOwner.style.setProperty('margin-left', '0');
-  routeOwner.style.setProperty('margin-right', '0');
   routeOwner.style.setProperty('padding-left', isHome ? '0px' : COACH_MOBILE_RAIL);
   routeOwner.style.setProperty('padding-right', isHome ? '0px' : COACH_MOBILE_RAIL);
-
   return true;
 }
 
 function resetNodeHorizontalOffset(node) {
-  if (!node || typeof node.scrollLeft !== 'number') return false;
-  if (Math.abs(node.scrollLeft) <= 0.5) return false;
+  if (!node || Math.abs(node.scrollLeft) <= 0.5) return false;
   node.scrollLeft = 0;
   return true;
 }
@@ -109,15 +102,11 @@ function resetNodeHorizontalOffset(node) {
 function isIntentionalHorizontalGestureOwner(target) {
   let node = target instanceof Element ? target : target?.parentElement;
   while (node && node !== document.documentElement) {
-    if (node.matches?.(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR)) return true;
-
     const style = window.getComputedStyle?.(node);
     const ownsHorizontalScroll = node.scrollWidth > node.clientWidth + 1
       && (style?.overflowX === 'auto' || style?.overflowX === 'scroll');
-    if (ownsHorizontalScroll) return true;
-
     const touchAction = String(style?.touchAction || '').toLowerCase();
-    if (touchAction.includes('pan-x')) return true;
+    if (node.matches?.(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR) || ownsHorizontalScroll || touchAction.includes('pan-x')) return true;
     node = node.parentElement;
   }
   return false;
@@ -131,9 +120,7 @@ export function shouldContainRegisteredHorizontalGesture({
 } = {}) {
   const absX = Math.abs(Number(deltaX) || 0);
   const absY = Math.abs(Number(deltaY) || 0);
-  return !targetIsHorizontalOwner
-    && absX >= minimumHorizontalIntent
-    && absX > absY;
+  return !targetIsHorizontalOwner && absX >= minimumHorizontalIntent && absX > absY;
 }
 
 export function resetMobileHorizontalViewport() {
@@ -141,28 +128,19 @@ export function resetMobileHorizontalViewport() {
   if (!isMobileViewport()) return clearRegisteredCoachRouteGeometry();
 
   let corrected = normalizeRegisteredCoachRouteGeometry();
-
-  // When Safari is pinched or page-zoomed, the visual viewport is intentionally
-  // narrower than the layout viewport. Do not snap its horizontal position back
-  // to zero: that traps the user on the left edge and makes a valid zoomed page
-  // look like a right-clipped layout. Keep the structural Coach normalization,
-  // but let WebKit own zoom/pan geometry natively for accessibility.
   if (isVisualViewportZoomed()) return corrected;
 
   const scrollingElement = document.scrollingElement || document.documentElement;
   corrected = resetNodeHorizontalOffset(scrollingElement) || corrected;
   corrected = resetNodeHorizontalOffset(document.documentElement) || corrected;
   corrected = resetNodeHorizontalOffset(document.body) || corrected;
-
   document.querySelectorAll(LOCKED_VERTICAL_OWNER_SELECTOR).forEach((node) => {
     corrected = resetNodeHorizontalOffset(node) || corrected;
   });
-
   if (Math.abs(window.scrollX) > 0.5) {
     window.scrollTo(0, window.scrollY);
     corrected = true;
   }
-
   return corrected;
 }
 
@@ -171,26 +149,31 @@ export function installMobileHorizontalViewportLock() {
 
   let rafId = null;
   let touchStart = null;
+  let routeKey = '';
+  history.scrollRestoration = 'manual';
+
+  const resetRouteTop = () => {
+    const shell = document.querySelector('.performance-shell.is-mobile[data-workspace-tab]');
+    const nextRoute = shell?.dataset.workspaceTab;
+    if (!nextRoute || nextRoute === routeKey) return;
+    routeKey = nextRoute;
+    window.scrollTo(0, 0);
+    shell.querySelector('.player-scroll-container, :scope > .shell-main > .content-wrap')?.scrollTo(0, 0);
+  };
 
   const scheduleCorrection = () => {
     if (rafId != null) return;
     rafId = window.requestAnimationFrame(() => {
       rafId = null;
       resetMobileHorizontalViewport();
+      resetRouteTop();
     });
   };
 
   const handleCapturedScroll = (event) => {
     if (!isMobileViewport()) return;
     const target = event.target === document ? (document.scrollingElement || document.documentElement) : event.target;
-    if (
-      target === document.documentElement ||
-      target === document.body ||
-      target === document.scrollingElement ||
-      target?.matches?.(LOCKED_VERTICAL_OWNER_SELECTOR)
-    ) {
-      scheduleCorrection();
-    }
+    if (target === document.documentElement || target === document.body || target === document.scrollingElement || target?.matches?.(LOCKED_VERTICAL_OWNER_SELECTOR)) scheduleCorrection();
   };
 
   const handleTouchStart = (event) => {
@@ -208,21 +191,11 @@ export function installMobileHorizontalViewportLock() {
   };
 
   const handleTouchMove = (event) => {
-    if (!isMobileViewport() || !touchStart || event.touches?.length !== 1) return;
-    if (isVisualViewportZoomed()) return;
-
+    if (!isMobileViewport() || !touchStart || event.touches?.length !== 1 || isVisualViewportZoomed()) return;
     const touch = event.touches[0];
     const deltaX = touch.clientX - touchStart.x;
     const deltaY = touch.clientY - touchStart.y;
-
-    if (!shouldContainRegisteredHorizontalGesture({
-      deltaX,
-      deltaY,
-      targetIsHorizontalOwner: touchStart.targetIsHorizontalOwner,
-    })) return;
-
-    // At the normal 1x visual viewport, contain accidental outer-page horizontal
-    // drift while vertical scroll and intentional horizontal controls remain native.
+    if (!shouldContainRegisteredHorizontalGesture({ deltaX, deltaY, targetIsHorizontalOwner: touchStart.targetIsHorizontalOwner })) return;
     if (event.cancelable) event.preventDefault();
     resetMobileHorizontalViewport();
   };
@@ -243,8 +216,6 @@ export function installMobileHorizontalViewportLock() {
   window.addEventListener('pointerup', scheduleCorrection, { passive: true });
   window.addEventListener('resize', scheduleCorrection, { passive: true });
   window.visualViewport?.addEventListener('resize', scheduleCorrection, { passive: true });
-  window.addEventListener('shotlab:app-ready', scheduleCorrection);
-
   scheduleCorrection();
 
   return () => {
@@ -257,7 +228,6 @@ export function installMobileHorizontalViewportLock() {
     window.removeEventListener('pointerup', scheduleCorrection);
     window.removeEventListener('resize', scheduleCorrection);
     window.visualViewport?.removeEventListener('resize', scheduleCorrection);
-    window.removeEventListener('shotlab:app-ready', scheduleCorrection);
     if (rafId != null) window.cancelAnimationFrame(rafId);
     clearRegisteredCoachRouteGeometry();
   };

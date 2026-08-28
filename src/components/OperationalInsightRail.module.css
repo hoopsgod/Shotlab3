@@ -85,8 +85,8 @@
 .primaryCard {
   background:
     radial-gradient(ellipse 44% 64% at 103% 50%, transparent 64%, rgba(225,236,241,.12) 65%, transparent 66%),
-    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--rail-tone) 9%, transparent), transparent 40%),
-    linear-gradient(145deg, #0b2633, #071820);
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--team-brand-primary, var(--rail-tone)) 9%, transparent), transparent 40%),
+    linear-gradient(145deg, var(--team-brand-surface-elevated, #0b2633), var(--team-brand-surface-deep, #071820) 72%);
   border-color: color-mix(in srgb, var(--rail-tone) 24%, rgba(220,235,241,.1));
   box-shadow: inset 0 1px rgba(255,255,255,.025), 0 12px 28px rgba(7,24,32,.16);
   padding: 16px 15px 14px;
