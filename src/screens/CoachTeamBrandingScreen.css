@@ -405,6 +405,14 @@
   .team-branding-form__previews {
     grid-template-columns: 1fr;
   }
+
+  .branding-industrial__preview [data-testid="branding-preview-coach-title"] .teamIdentityTitleStage__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .branding-industrial__preview [data-testid="branding-preview-coach-title"] .teamIdentityTitleStage__crestSlot {
+    display: none;
+  }
 }
 
 @media (max-width: 380px) {
