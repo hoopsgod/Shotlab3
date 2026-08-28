@@ -7,6 +7,7 @@ const css = readFileSync('public/shotlab-phase3d-player-analytics.css', 'utf8');
 const rootLock = readFileSync('public/shotlab-phase3d-analytics-root-lock.css', 'utf8');
 const charts = readFileSync('src/components/ShotLabCharts.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
+const compactRootLock = rootLock.replace(/\s+/g, '');
 
 test('Phase 3D analytics authorities load after Phase 3C route framing in override order', () => {
   const framing = index.indexOf('shotlab-phase3-native-route-framing');
@@ -19,39 +20,39 @@ test('Phase 3D analytics authorities load after Phase 3C route framing in overri
 
 test('Phase 3D scopes presentation changes to the Player Profile analytics canvas', () => {
   assert.match(css, /performance-shell--player\[data-workspace-tab="profile"\]/);
-  assert.match(css, /div\[style\*="min-height: 100vh"\]/);
-  assert.match(css, /background:transparent!important;/);
+  assert.match(css, /div\[style\*="min-height:\s*100vh"\]/);
+  assert.match(css, /background:\s*transparent!important;/);
   assert.match(css, /font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text"/);
 });
 
 test('Rendered root lock survives React inline-style whitespace serialization', () => {
   assert.match(rootLock, /performance-shell--player\[data-workspace-tab="profile"\] div\[style\*="100vh"\]\[style\*="80px"\]/);
-  assert.match(rootLock, /min-height:0!important;/);
-  assert.match(rootLock, /background:transparent!important;/);
-  assert.match(rootLock, /background-image:none!important;/);
+  assert.match(rootLock, /min-height:\s*0!important;/);
+  assert.match(rootLock, /background:\s*transparent!important;/);
+  assert.match(rootLock, /background-image:\s*none!important;/);
 });
 
 test('Legacy analytics masthead becomes an in-flow native section header', () => {
-  assert.match(rootLock, /> div:first-child\{[\s\S]*?position:relative!important;[\s\S]*?border-radius:20px!important;[\s\S]*?background:var\(--p3dl-surface\)!important;/);
-  assert.match(rootLock, /display:none!important;/);
-  assert.match(rootLock, /font-size:25px!important;/);
+  assert.match(rootLock, />\s*div:first-child\{[\s\S]*?position:\s*relative!important;[\s\S]*?border-radius:\s*20px!important;[\s\S]*?background:\s*var\(--p3dl-surface\)!important;/);
+  assert.match(rootLock, /display:\s*none!important;/);
+  assert.match(rootLock, /font-size:\s*25px!important;/);
 });
 
 test('Analytics tabs remove emoji chrome and retain accessible touch sizing', () => {
-  assert.match(rootLock, /button > span:first-child\{\s*display:none!important;/s);
-  assert.match(rootLock, /min-height:42px!important;/);
-  assert.match(rootLock, /touch-action:manipulation;/);
+  assert.match(rootLock, /button\s*>\s*span:first-child\{\s*display:\s*none!important;/s);
+  assert.match(rootLock, /min-height:\s*42px!important;/);
+  assert.match(rootLock, /touch-action:\s*manipulation;/);
   assert.match(rootLock, /button:focus-visible\{/);
 });
 
 test('Legacy black surfaces and dark chart tokens are translated to the light Profile system', () => {
-  for (const token of ['rgb(10, 10, 10)', 'rgb(17, 19, 24)', 'rgb(22, 27, 34)', 'rgb(13, 17, 23)']) {
-    assert.ok(rootLock.includes(token), `expected explicit rendered legacy background translation for ${token}`);
+  for (const token of ['rgb(10,10,10)', 'rgb(17,19,24)', 'rgb(22,27,34)', 'rgb(13,17,23)']) {
+    assert.ok(compactRootLock.includes(token), `expected explicit rendered legacy background translation for ${token}`);
   }
   assert.match(rootLock, /svg \[stroke="#1e2530"\]/);
   assert.match(rootLock, /svg \[fill="#6b7280"\]/);
-  assert.match(rootLock, /--p3dl-surface:#ffffff/);
-  assert.match(rootLock, /--p3dl-ink:#151a16/);
+  assert.match(rootLock, /--p3dl-surface:\s*#ffffff/);
+  assert.match(rootLock, /--p3dl-ink:\s*#151a16/);
 });
 
 test('Phase 3D does not replace analytics calculations or data inputs', () => {
