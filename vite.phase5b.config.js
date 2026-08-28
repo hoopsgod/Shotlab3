@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import baseConfig from './vite.config.js'
 import { createCssModuleDeadSelectorPruner } from './scripts/css-module-dead-selector-pruner.mjs'
+import { createLegacyRuntimeCssExtractionPlugin } from './scripts/legacy-runtime-css-extraction-plugin.mjs'
 
 const APP_SUFFIX = '/src/App.jsx'
 const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";'
@@ -52,6 +53,7 @@ export default defineConfig(async (environment) => {
   return {
     ...resolvedBase,
     plugins: [
+      createLegacyRuntimeCssExtractionPlugin(),
       ownCoachInteractiveStylesInWorkspace(),
       createCssModuleDeadSelectorPruner(),
       ...(resolvedBase.plugins || []),
