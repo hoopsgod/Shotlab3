@@ -3,7 +3,6 @@ import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
-import "./PlayerShotTrackerGeometryRepair.css";
 
 function MetricContent({ metric }) {
   return <><span className={styles.metricLabel} data-metric-role="label">{metric.label}</span><span className={styles.metricValue} data-metric-role="value">{metric.value}</span><span className={styles.metricDetail} data-metric-role="detail">{metric.detail}</span></>;
