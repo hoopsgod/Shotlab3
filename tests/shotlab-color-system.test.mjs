@@ -61,7 +61,7 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
   assertDeclaration(content, "width", "100%");
   assert.doesNotMatch(coachTitleCss, /\.mcHeroIdentity::after\s*\{[\s\S]*content:\s*"Mission Control"/);
   assert.doesNotMatch(coachTitleCss, /!important/);
-  assert.match(corrections, /Title and team-identity composition are intentionally excluded/);
+  assert.doesNotMatch(corrections, /\.mcProgramIdentity\b|\.mcHeroIdentity\b|\.mcHeroTeamMark\b/);
   assert.doesNotMatch(corrections, /coach-primary-objective|\.mcHero\s*\{|max-height:\s*310px/);
 });
 
