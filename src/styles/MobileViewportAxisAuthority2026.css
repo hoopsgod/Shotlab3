@@ -106,10 +106,51 @@
     box-sizing: border-box !important;
   }
 
+  /* Player secondary title roles vary by destination. The semantic title-stage
+   * contract is the stable owner; border-box containment prevents late 16px
+   * content-box padding from escaping the viewport on Train/Rankings routes. */
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   /* Player Home optical evidence uses the same 20px page rail. Keep the accent
    * outside the text block while preserving an 8px readable inset for the copy. */
   html body #root .performance-shell--player.is-mobile [data-testid="player-coach-priority-signal"] {
     padding-inline: 8px 2px !important;
+  }
+
+  /* The Phase-close composition contract owns a 2px summary rail and an
+   * independently positioned disclosure control. Reassert it after legacy
+   * command-hierarchy padding so production geometry matches source intent. */
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary {
+    position: relative !important;
+    justify-content: space-between !important;
+    padding-inline: 2px 50px !important;
+  }
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary > span:first-child {
+    align-items: flex-start !important;
+  }
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary::after {
+    position: absolute !important;
+    right: 2px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  /* SHOT STATS is a quiet secondary action inside the dark logging region. Keep
+   * its 44px physical target without allowing generic button fills/borders to
+   * convert it into a competing primary control. */
+  html body #root .performance-shell--player.is-mobile .player-primary-logging-region .cta-secondary-link {
+    min-height: 44px !important;
+    padding-block: 9px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
   }
 
   /* Semantic metric text must remain readable on Player light workspaces even
@@ -138,6 +179,14 @@
     min-width: 0 !important;
   }
 
+  /* Leaderboards was the lone Coach secondary route opening ~14px above the
+   * Events control stage. Restore the same intentional opening rhythm without
+   * changing its horizontal rail or internal leaderboard composition. */
+  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="coach-leaderboards-stage"][data-title-stage-family="editorial"] {
+    margin-top: 14px !important;
+  }
+
   /* Program Branding may wrap between words at narrow widths, but never split
    * the word Mission itself. */
   html body #root [data-testid="branding-preview-coach-title"] [data-identity-role="page-title"] {
@@ -147,9 +196,19 @@
   }
 }
 
+/* The title-stage certification contract restores 25vw Coach crests above the
+ * compact <=390px breakpoint, clamped to the historical 96–108px range. */
+@media (min-width: 391px) and (max-width: 767px) {
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
+    --identity-crest: clamp(96px, 25vw, 108px) !important;
+  }
+}
+
 @media (max-width: 390px) {
   html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
-  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
     --identity-crest: 84px !important;
   }
 }
