@@ -84,7 +84,7 @@ test("Phase 3N visual system keeps unified route-title authority and iPhone cont
 test("Phase 3N uses a stable late authority boundary so demo normalization cannot wash out the dark commitment hero", () => {
   assert.match(html, /shotlab-phase3m-player-team-store-retail\.css[\s\S]*shotlab-phase3n-player-commitments\.css/);
   assert.match(authority, /html body #root \[data-testid="player-commitment-center-events"\] \[data-testid="player-commitment-hero-events"\]/);
-  assert.match(authority, /background-color: #111411 !important/);
+  assert.match(authority, /background-color:\s*#111411\s*!important/);
   assert.match(authority, /background-image:[\s\S]*linear-gradient\(152deg[\s\S]*!important/);
   assert.match(authority, /\[data-testid="player-commitment-hero-events"\] > div[\s\S]*background-color: transparent !important/);
   assert.match(authority, /> div:nth-child\(2\) > div\[aria-label\][\s\S]*rgba\(255, 255, 255, \.045\) !important/);
