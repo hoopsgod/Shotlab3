@@ -92,18 +92,6 @@
   border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
-.branding-industrial__preview .branding-industrial__kicker {
-  color: var(--team-brand-primary, #c8ff1a);
-}
-
-.branding-industrial__preview .branding-industrial__panel-header h2 {
-  color: #f8faf6;
-}
-
-.branding-industrial__preview .branding-industrial__panel-header p {
-  color: #c6d1cf;
-}
-
 .branding-industrial__preview .branding-industrial__status {
   border-color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 25%, transparent);
   background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 9%, transparent);
@@ -406,11 +394,11 @@
     grid-template-columns: 1fr;
   }
 
-  .branding-industrial__preview [data-testid="branding-preview-coach-title"] .teamIdentityTitleStage__inner {
-    grid-template-columns: minmax(0, 1fr);
+  [data-testid=branding-preview-coach-title] .teamIdentityTitleStage__inner {
+    grid-template-columns: 1fr;
   }
 
-  .branding-industrial__preview [data-testid="branding-preview-coach-title"] .teamIdentityTitleStage__crestSlot {
+  [data-testid=branding-preview-coach-title] .teamIdentityTitleStage__crestSlot {
     display: none;
   }
 }
