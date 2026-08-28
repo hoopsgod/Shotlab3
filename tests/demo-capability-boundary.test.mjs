@@ -30,7 +30,10 @@ test("destructive and external account actions are capability-protected", () => 
 test("demo reset controls are sandbox-only at both action and presentation boundaries", () => {
   const resetGuards = appSource.match(/requireAccountCapability\(accountCapabilities,"canResetSandbox"\)/g) || [];
   assert.equal(resetGuards.length, 2, "load and clear actions must independently require sandbox reset authority");
-  assert.match(appSource, /accountCapabilities\?\.canResetSandbox&&<article className="coachAdministrationCard">/);
+  assert.match(
+    appSource,
+    /accountCapabilities\?\.canResetSandbox\s*&&\s*<article\s+className="coachAdministrationCard"[^>]*data-sandbox-utility="true"/,
+  );
   assert.match(appSource, /accountCapabilities=\{accountCapabilities\}/);
 });
 

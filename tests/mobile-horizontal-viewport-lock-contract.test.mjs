@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { shouldContainRegisteredHorizontalGesture } from '../src/lib/mobileHorizontalViewportLock.js';
+import { assertDeclaration, mediaBlock, ruleBlock } from './helpers/css-contract.mjs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
 const authenticatedAuthority = readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8');
@@ -10,10 +11,24 @@ const guard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js',
 const main = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.spec.mjs', import.meta.url), 'utf8');
+const mobileCentering = mediaBlock(centering, '(max-width:760px)');
+const documentAxis = ruleBlock(mobileCentering, 'html,body,#root');
+const sharedRoleAxis = ruleBlock(mobileCentering, '.app-shell.is-mobile');
+const compactCentering = centering.replace(/\s+/g, '');
 
 test('mobile document and shared Demo/paid role shells use one split x-axis authority', () => {
-  assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*overflow-x:\s*clip\s*!important;/);
+  assert.match(documentAxis, /(?:^|;)\s*overflow-x:\s*hidden(?:;|$)/);
+  assert.match(documentAxis, /(?:^|;)\s*overflow-x:\s*clip\s*!important(?:;|$)/);
+  assertDeclaration(documentAxis, 'overscroll-behavior-x', 'none');
+  for (const selector of [
+    '.app-shell.is-mobile',
+    '.app-shell.is-mobile>.shell-main',
+    '.app-shell.is-mobile>.shell-main>.content-wrap',
+    '.performance-workspace',
+  ]) {
+    assert.ok(compactCentering.includes(selector), `shared mobile x-axis authority missing ${selector}`);
+  }
+  assertDeclaration(sharedRoleAxis, 'overflow-x', /^clip\s*!important$/);
   assert.match(finalAxisAuthority, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px\s*!important/);
   assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0\s*!important/);
   assert.match(finalAxisAuthority, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail,\s*20px\);/);

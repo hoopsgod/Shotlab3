@@ -14,19 +14,35 @@ const registeredViewportSpec = readFileSync(new URL('./e2e/registered-mobile-vie
 const webkitViewportSpec = readFileSync(new URL('./e2e/registered-mobile-webkit-scroll-lock.spec.mjs', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, '');
+const mobileCentering = mediaBlock(centering, '(max-width:760px)');
+const documentAxis = ruleBlock(mobileCentering, 'html,body,#root');
+const sharedRoleAxis = ruleBlock(mobileCentering, '.app-shell.is-mobile');
+const compactCentering = centering.replace(/\s+/g, '');
 
 test('mobile viewport authority uses a true non-scrollable x boundary and stops overscroll chaining', () => {
-  assert.match(centering, /html,\s*\n\s*body,\s*\n\s*#root\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-x:\s*clip\s*!important;[^}]*overscroll-behavior-x:\s*none;/);
-  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*\.performance-workspace,[\s\S]*\.player-scroll-container,[\s\S]*\.coach-scroll-container[\s\S]*overflow-x:\s*clip\s*!important;/);
-  assert.match(centering, /min-width:\s*0/);
-  assert.match(centering, /max-width:\s*100%/);
-  assert.match(centering, /box-sizing:\s*border-box/);
+  assert.match(documentAxis, /(?:^|;)\s*overflow-x:\s*hidden(?:;|$)/);
+  assert.match(documentAxis, /(?:^|;)\s*overflow-x:\s*clip\s*!important(?:;|$)/);
+  assertDeclaration(documentAxis, 'overscroll-behavior-x', 'none');
+  for (const selector of [
+    '.app-shell.is-mobile',
+    '.app-shell.is-mobile>.shell-main',
+    '.app-shell.is-mobile>.shell-main>.content-wrap',
+    '.performance-workspace',
+    '.player-scroll-container',
+    '.coach-scroll-container',
+  ]) {
+    assert.ok(compactCentering.includes(selector), `shared mobile x-axis authority missing ${selector}`);
+  }
+  assertDeclaration(sharedRoleAxis, 'overflow-x', /^clip\s*!important$/);
+  assertDeclaration(documentAxis, 'min-width', '0');
+  assertDeclaration(documentAxis, 'max-width', '100%');
+  assertDeclaration(documentAxis, 'box-sizing', 'border-box');
 });
 
 test('final mobile axis keeps Player and Coach on one dedicated 20px rail each', () => {
   assert.match(finalAxis, /--layout-gutter:\s*20px;/);
   assert.match(finalAxis, /--phase4e-mobile-gutter:\s*20px;/);
-  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important;/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*\{[^}]*padding-inline:\s*20px\s*!important/);
 
   assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0\s*!important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach\s*\{[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail,\s*20px\);/);
@@ -57,8 +73,18 @@ test('paid Coach onboarding and empty-state grids cannot expand their mobile tra
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
-  assert.match(centering, /\.player-scroll-container,[\s\S]*\.coach-scroll-container,[\s\S]*\.performance-workspace--coach > div:has\(> \.page\.pageShell\),[\s\S]*\.performance-workspace--coach > div:has\(> \.secondaryPageShell\),[\s\S]*coach-command-center-full[\s\S]*player-daily-command-center[\s\S]*overflow-x:\s*clip\s*!important;/);
-  assert.match(centering, /margin-inline:\s*auto;/);
+  for (const selector of [
+    '.player-scroll-container',
+    '.coach-scroll-container',
+    '.performance-workspace--coach>div:has(>.page.pageShell)',
+    '.performance-workspace--coach>div:has(>.secondaryPageShell)',
+    '[data-testid="coach-command-center-full"]',
+    '[data-testid="player-daily-command-center"]',
+  ]) {
+    assert.ok(compactCentering.includes(selector), `shared mobile x-axis authority missing ${selector}`);
+  }
+  assertDeclaration(sharedRoleAxis, 'overflow-x', /^clip\s*!important$/);
+  assert.match(centering, /margin-inline:\s*auto(?:\s*!important)?(?:;|})/);
   assert.doesNotMatch(centering, /touch-action:\s*pan-y pinch-zoom/);
   assert.match(registeredViewportSpec, /REGISTERED_CONTENT_RAIL_SELECTORS/);
   assert.match(registeredViewportSpec, /rail\.scrollLeft = 240/);
@@ -75,7 +101,14 @@ test('Coach Home removes the registered parent offset before Mission Control mou
   assertDeclaration(outerOwners, 'margin', '0!important');
   assertDeclaration(outerOwners, 'padding', '0!important');
   assert.doesNotMatch(stripComments(missionControlLock), /\.app-shell|\.shell-main|\.content-wrap|\.team-brand\.coach-mode\.page/);
-  assert.match(centering, /\.app-shell\.is-mobile,[\s\S]*\.shell-main,[\s\S]*\.content-wrap,[\s\S]*overflow-x:\s*clip\s*!important;/);
+  for (const selector of [
+    '.app-shell.is-mobile',
+    '.app-shell.is-mobile>.shell-main',
+    '.app-shell.is-mobile>.shell-main>.content-wrap',
+  ]) {
+    assert.ok(compactCentering.includes(selector), `Coach Home parent x-axis authority missing ${selector}`);
+  }
+  assertDeclaration(sharedRoleAxis, 'overflow-x', /^clip\s*!important$/);
 });
 
 test('Coach Home final source authority stays on the visual viewport instead of reviving a 100vw breakout', () => {

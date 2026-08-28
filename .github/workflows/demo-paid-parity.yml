@@ -45,21 +45,18 @@ jobs:
         run: npm ci
 
       - name: Enforce shared UI, capability, isolation, and mobile viewport contracts
-        run: |
-          mkdir -p parity-evidence
-          set -o pipefail
-          node --test \
-            tests/demo-visual-parity-contract.test.mjs \
-            tests/team-branding-legacy-logo-repair.test.mjs \
-            tests/demo-capability-boundary.test.mjs \
-            tests/account-capabilities.test.mjs \
-            tests/demo-data-isolation.test.mjs \
-            tests/demo-invitation-safety.test.mjs \
-            tests/home-shots-leaderboard-route.test.mjs \
-            tests/remote-leaderboard-roster-parity.test.mjs \
-            tests/registered-mobile-viewport-lock-contract.test.mjs \
-            tests/mobile-horizontal-viewport-lock-contract.test.mjs \
-            2>&1 | tee parity-evidence/source-contracts.tap
+        run: >-
+          node --test
+          tests/demo-visual-parity-contract.test.mjs
+          tests/team-branding-legacy-logo-repair.test.mjs
+          tests/demo-capability-boundary.test.mjs
+          tests/account-capabilities.test.mjs
+          tests/demo-data-isolation.test.mjs
+          tests/demo-invitation-safety.test.mjs
+          tests/home-shots-leaderboard-route.test.mjs
+          tests/remote-leaderboard-roster-parity.test.mjs
+          tests/registered-mobile-viewport-lock-contract.test.mjs
+          tests/mobile-horizontal-viewport-lock-contract.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
