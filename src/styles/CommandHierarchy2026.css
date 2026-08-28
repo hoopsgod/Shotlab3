@@ -179,6 +179,7 @@
 }
 
 .player-logging-input {
+  box-sizing: border-box;
   width: 100%;
   min-height: 52px !important;
   padding: 10px 12px !important;
