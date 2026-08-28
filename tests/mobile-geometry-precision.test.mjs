@@ -12,6 +12,9 @@ const centering = read('public/shotlab-mobile-centering-reconciliation.css');
 const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
 const app = read('src/App.jsx');
+const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
+const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
+const shotTrackerRepair = read('src/components/PlayerShotTrackerGeometryRepair.css');
 
 test('mobile geometry authority keeps Player and Coach on dedicated 20px rails', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
@@ -68,4 +71,19 @@ test('Player Home optical accents and progress summary do not create secondary l
 test('Player Train preserves Shot Tracker prominence while returning Training Plan to the scan rail', () => {
   assert.match(composition, /\.player-training-kicker\{justify-content:center!important\}/);
   assert.match(composition, /\.player-training-plan__header\{display:grid!important;justify-items:start!important;text-align:left!important;padding-inline:2px!important\}/);
+});
+
+test('Program Branding preview uses one visible identity mark and a mobile-safe Mission Control scale', () => {
+  assert.match(brandingPreview, /variant="hero" brandTreatment="compact"[\s\S]*title="Mission Control"/);
+  assert.match(brandingPreview, /title="Mission Control"[\s\S]*titleSize="long"/);
+  assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"[\s\S]*title="Mission Control"/);
+});
+
+test('At Home Shot Tracker owns equal centered iOS-safe input tracks', () => {
+  assert.match(playerWorkspace, /PlayerShotTrackerGeometryRepair\.css/);
+  assert.match(shotTrackerRepair, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important/);
+  assert.match(shotTrackerRepair, /box-sizing:\s*border-box !important/);
+  assert.match(shotTrackerRepair, /max-width:\s*100% !important/);
+  assert.match(shotTrackerRepair, /text-align:\s*center !important/);
+  assert.match(shotTrackerRepair, /::-webkit-date-and-time-value/);
 });
