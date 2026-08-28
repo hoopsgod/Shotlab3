@@ -87,7 +87,7 @@ test("late hierarchy and compatibility layers cannot redesign Coach Home identit
   assert.doesNotMatch(foundationCss, /body\.mission-control-active\s+\.mcSection[,\{]/);
   assert.doesNotMatch(foundationCss, /body\.mission-control-active\s+\.missionControl\s*\{/);
   assert.doesNotMatch(criticalCss, /\[data-testid="coach-primary-objective"\]/);
-  assert.match(criticalCss, /Coach Home identity, decision, metrics and CTA are intentionally excluded[\s\S]*source-owned by CoachMissionControlTitleStage\.css/);
+  assert.doesNotMatch(criticalCss, /\.mcHero\b|\.mcHeroIdentity\b|\.mcRealityStrip\b|\.mcPrimary\b/);
   assert.match(cascadeLock, /Mounted Coach Home geometry and composition must not be repaired from a late[\s\S]*CoachMissionControlShell\.css owns the legacy parent-shell[\s\S]*CoachMissionControlTitleStage\.css owns the page itself/);
 });
 
