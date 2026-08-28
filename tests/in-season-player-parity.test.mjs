@@ -34,6 +34,11 @@ test("player workspace mounts the shared team-scoped In Season hub", () => {
   assert.match(transformedApp, /addScore=\{addScore\}/);
 });
 
+test("coach In Season metrics use source-owned default drill markers without private catalog references", () => {
+  assert.match(transformedApp, /programDrills\.filter\(d=>d\?\.isDefaultDemo\|\|isInSeasonProgramDrill\(d\)\)\.length/);
+  assert.doesNotMatch(transformedApp, /findMatchingDefaultDrill\(d,DEFAULT_PROGRAM_DRILL_INDEX\)/);
+});
+
 test("shared hub keeps player and coach permissions distinct", () => {
   assert.match(hubSource, /const isCoach = role === "coach"/);
   assert.match(hubSource, /!isCoach && <form className="inSeasonScoreEntry"/);
