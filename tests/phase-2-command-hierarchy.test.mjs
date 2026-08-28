@@ -30,7 +30,8 @@ test("Phase 2 control and insight hierarchy survives Phase 4 identity",()=>{
  assert.match(railCss,/\.card\s*\{[\s\S]*background:\s*#fffefd[\s\S]*box-shadow:\s*0 5px 15px/);
  assert.match(railCss,/\.card h3\s*\{[\s\S]*color: #172019/);
  assert.match(railCss,/\.card p\s*\{[\s\S]*color: #5f6962/);
- assert.match(railCss,/\.primaryCard\s*\{[\s\S]*linear-gradient\(145deg, #0b2633, #071820\)/);
+ assert.match(railCss,/\.primaryCard\s*\{[\s\S]*linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#0b2633\),\s*var\(--team-brand-surface-deep,\s*#071820\)\s*72%\)/);
+ assert.doesNotMatch(railCss,/linear-gradient\(145deg,\s*#0b2633,\s*#071820\)/);
  assert.match(railCss,/\.primaryCard h3\s*\{[\s\S]*#f6f8f9/);
 });
 
