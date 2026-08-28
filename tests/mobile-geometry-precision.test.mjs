@@ -11,10 +11,9 @@ const secondaryPages = read('src/components/SecondaryPageSystem.css');
 const centering = read('public/shotlab-mobile-centering-reconciliation.css');
 const navigation = read('src/components/MobileNavigation.module.css');
 const composition = read('scripts/apply-mobile-player-composition-reconciliation.mjs');
+const commandHierarchy = read('src/styles/CommandHierarchy2026.css');
 const app = read('src/App.jsx');
 const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
-const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
-const shotTrackerRepair = read('src/components/PlayerShotTrackerGeometryRepair.css');
 
 test('mobile geometry authority keeps Player and Coach on dedicated 20px rails', () => {
   assert.match(authority, /--shotlab-mobile-content-rail:\s*var\(--space-5, 20px\)/);
@@ -79,11 +78,12 @@ test('Program Branding preview uses one visible identity mark and a mobile-safe 
   assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"[\s\S]*title="Mission Control"/);
 });
 
-test('At Home Shot Tracker owns equal centered iOS-safe input tracks', () => {
-  assert.match(playerWorkspace, /PlayerShotTrackerGeometryRepair\.css/);
-  assert.match(shotTrackerRepair, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\) !important/);
-  assert.match(shotTrackerRepair, /box-sizing:\s*border-box !important/);
-  assert.match(shotTrackerRepair, /max-width:\s*100% !important/);
-  assert.match(shotTrackerRepair, /text-align:\s*center !important/);
-  assert.match(shotTrackerRepair, /::-webkit-date-and-time-value/);
+test('At Home Shot Tracker keeps equal grid tracks and repairs the input box model in the existing CSS authority', () => {
+  assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
+  assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*width:\s*100%/);
+  assert.match(composition, /function repairShotTrackerInputGeometry\(\)/);
+  assert.match(composition, /box-sizing: border-box/);
+  assert.match(composition, /Shot Tracker input authority is missing/);
+  assert.match(composition, /player-primary-logging-region \.player-logging-field label\{text-align:center\}/);
 });
