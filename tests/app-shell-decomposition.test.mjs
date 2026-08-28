@@ -32,7 +32,7 @@ test('authentication remains a complete route workspace with preserved demo and 
 
 test('embedded brand asset and legacy style payload no longer inflate App source', () => {
   assert.match(brandSource, /export function SLLogo/);
-  assert.match(brandSource, /data:image\/png;base64/);
+  assert.doesNotMatch(brandSource, /data:image\/png;base64/);
   assert.match(brandSource, /export function BrandWordmark/);
   assert.match(brandSource, /export function BrandBackdrop/);
   assert.doesNotMatch(appSource, /data:image\/png;base64/);
