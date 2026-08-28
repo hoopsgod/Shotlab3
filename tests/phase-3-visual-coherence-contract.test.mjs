@@ -140,7 +140,7 @@ test("Player Rankings removes the repeated embedded hub introduction but keeps l
 });
 
 test("Team Store mobile portal owns the viewport and light empty-state foregrounds", () => {
-  assert.match(teamStoreImmersiveCss, /html\.team-store-portal-open body > #root[\s\S]*display:\s*none\s*!important/);
+  assert.match(teamStoreImmersiveCss, /html\.team-store-portal-open\s+body\s*>\s*#root[\s\S]*display:\s*none\s*!important/);
   assert.match(teamStoreImmersiveCss, /\[data-testid="mobile-navigation-dock"\][\s\S]*display:\s*none\s*!important/);
   assert.match(teamStoreImmersiveCss, /\.ts-empty-state p[\s\S]*color:\s*#5f6861\s*!important/);
   assert.match(teamStoreImmersiveCss, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:\s*#273129\s*!important/);
