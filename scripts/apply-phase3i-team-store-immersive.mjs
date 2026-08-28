@@ -11,7 +11,9 @@ const replaceOne = (source, before, after, label) => {
 };
 
 const path = 'src/components/TeamStorePortal.jsx';
-let source = readFileSync(path, 'utf8');
+const rawSource = readFileSync(path, 'utf8');
+const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n';
+let source = rawSource.replace(/\r\n/g, '\n');
 
 if (source.includes('data-testid="team-store-portal-overlay"')) {
   for (const marker of [
@@ -124,5 +126,5 @@ for (const preserved of [
   if (!source.includes(preserved)) fail(`Team Store capability removed: ${preserved}`);
 }
 
-writeFileSync(path, source);
+writeFileSync(path, source.replace(/\n/g, lineEnding));
 console.log('Applied Phase 3I Team Store immersive shell.');

@@ -1,6 +1,13 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 const fail = (message) => { throw new Error(`[phase4d-premium-state-system] ${message}`); };
+function readNormalized(path) {
+  const raw = readFileSync(path, "utf8");
+  return { source: raw.replace(/\r\n/g, "\n"), lineEnding: raw.includes("\r\n") ? "\r\n" : "\n" };
+}
+function writeNormalized(path, source, lineEnding) {
+  writeFileSync(path, source.replace(/\n/g, lineEnding));
+}
 const requireOne = (source, anchor, label) => {
   const count = source.split(anchor).length - 1;
   if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
@@ -13,7 +20,8 @@ const firstExactAnchor = (source, anchors, label) => {
 };
 
 const appPath = "src/App.jsx";
-let app = readFileSync(appPath, "utf8");
+const appFile = readNormalized(appPath);
+let app = appFile.source;
 
 if (!app.includes('import ShotLabStatePanel from "./components/ShotLabStatePanel.jsx";')) {
   const importAnchor = 'import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";\n';
@@ -33,10 +41,11 @@ if (!app.includes('testId="startup-error-state"')) {
   app = app.replace(errorAnchor, 'if(startupError)return <><Styles/><main className="phase4dBootState" data-testid="startup-state-shell"><div className="phase4dBootStateInner"><div className="phase4dBootBrand"><SLLogo size={42} glow/><div className="phase4dBootBrandCopy"><div className="phase4dBootBrandTitle">ShotLab</div><div className="phase4dBootBrandDetail">Performance development</div></div></div><ShotLabStatePanel state="error" eyebrow="Connection recovery" title="ShotLab could not finish loading" detail={startupError} actionLabel="Reload ShotLab" onAction={()=>window.location.reload()} testId="startup-error-state"/></div></main></>;');
 }
 
-writeFileSync(appPath, app);
+writeNormalized(appPath, app, appFile.lineEnding);
 
 const authPath = "src/components/AuthWorkspace.jsx";
-let auth = readFileSync(authPath, "utf8");
+const authFile = readNormalized(authPath);
+let auth = authFile.source;
 if (!auth.includes('import ShotLabStatePanel from "./ShotLabStatePanel.jsx";')) {
   const importAnchor = firstExactAnchor(auth, [
     'import { useRef, useState } from "react";\n',
@@ -58,7 +67,7 @@ if (!auth.includes('testId="auth-error-state"')) {
   ], "Auth inline error");
   auth = auth.replace(errorAnchor, '{err&&<div style={{margin:"0 0 14px"}}><ShotLabStatePanel state="error" eyebrow="Check your details" title="We could not continue" detail={err} compact surface="light" testId="auth-error-state"/></div>}');
 }
-writeFileSync(authPath, auth);
+writeNormalized(authPath, auth, authFile.lineEnding);
 
 const leaderboard = readFileSync("src/components/CompactLeaderboardPreviewCard.jsx", "utf8");
 for (const expected of [
@@ -75,12 +84,13 @@ for (const expected of [
 ]) if (!workspace.includes(expected)) fail(`Player workspace state integration missing: ${expected}`);
 
 const indexPath = "index.html";
-let index = readFileSync(indexPath, "utf8");
+const indexFile = readNormalized(indexPath);
+let index = indexFile.source;
 if (!index.includes('shotlab-phase4d-state-reconciliation')) {
   const anchor = '  <link id="shotlab-phase4c-interaction-material-motion" rel="stylesheet" href="/shotlab-phase4c-interaction-material-motion.css" />';
   requireOne(index, anchor, "Phase 4C stylesheet link");
   index = index.replace(anchor, `${anchor}\n  <link id="shotlab-phase4d-state-reconciliation" rel="stylesheet" href="/shotlab-phase4d-state-reconciliation.css" />`);
-  writeFileSync(indexPath, index);
+  writeNormalized(indexPath, index, indexFile.lineEnding);
 }
 
 console.log("Applied Phase 4D premium state system and final reconciliation.");

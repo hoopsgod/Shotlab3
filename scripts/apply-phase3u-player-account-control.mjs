@@ -4,13 +4,26 @@ const appPath = "src/App.jsx";
 const navPath = "src/components/MobileNavigation.jsx";
 const navCssPath = "src/components/MobileNavigation.module.css";
 
+function readNormalized(path) {
+  const raw = fs.readFileSync(path, "utf8");
+  return {
+    source: raw.replace(/\r\n/g, "\n"),
+    lineEnding: raw.includes("\r\n") ? "\r\n" : "\n",
+  };
+}
+
+function writeNormalized(path, source, lineEnding) {
+  fs.writeFileSync(path, source.replace(/\n/g, lineEnding));
+}
+
 function replaceOrVerify(source, before, after, label) {
   if (source.includes(after)) return source;
   if (!source.includes(before)) throw new Error(`Phase 3U patch target missing: ${label}`);
   return source.replace(before, after);
 }
 
-let app = fs.readFileSync(appPath, "utf8");
+const appFile = readNormalized(appPath);
+let app = appFile.source;
 const legacyDesktopQuickActions = `{isDesktop&&<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
   <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
   <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
@@ -43,9 +56,10 @@ app = replaceOrVerify(
   `{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} onLogout={logout} ariaLabel="Player navigation"/>}`,
   "player navigation logout handoff"
 );
-fs.writeFileSync(appPath, app);
+writeNormalized(appPath, app, appFile.lineEnding);
 
-let nav = fs.readFileSync(navPath, "utf8");
+const navFile = readNormalized(navPath);
+let nav = navFile.source;
 nav = replaceOrVerify(
   nav,
   `export default function MobileNavigation({ primaryItems = [], secondaryItems = [], activeKey, onChange, ariaLabel = "Mobile navigation" }) {`,
@@ -85,9 +99,10 @@ nav = replaceOrVerify(
         </section>`,
   "player More sheet account action"
 );
-fs.writeFileSync(navPath, nav);
+writeNormalized(navPath, nav, navFile.lineEnding);
 
-let css = fs.readFileSync(navCssPath, "utf8");
+const cssFile = readNormalized(navCssPath);
+let css = cssFile.source;
 const utilityCss = `
 .sheetUtility {
   margin-top: 18px;
@@ -164,6 +179,6 @@ if (!css.includes(".sheetUtility {")) {
   if (!css.includes(marker)) throw new Error("Phase 3U CSS marker missing");
   css = css.replace(marker, `${utilityCss}${marker}`);
 }
-fs.writeFileSync(navCssPath, css);
+writeNormalized(navCssPath, css, cssFile.lineEnding);
 
 console.log("Applied Phase 3U player account control consolidation.");

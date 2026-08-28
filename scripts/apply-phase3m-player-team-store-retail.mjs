@@ -7,7 +7,9 @@ const requireOne = (source, anchor, label) => {
 };
 
 const path = 'src/components/TeamStorePortal.jsx';
-let source = readFileSync(path, 'utf8');
+const rawSource = readFileSync(path, 'utf8');
+const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n';
+let source = rawSource.replace(/\r\n/g, '\n');
 const marker = 'data-testid="player-team-store-retail"';
 const forbiddenDemoUi = /isDemoPlayerPreview|DEMO STOREFRONT|Preview only in demo mode|Player experience preview|is-demo/;
 
@@ -71,5 +73,5 @@ for (const preserved of [
 }
 if (forbiddenDemoUi.test(source)) fail('Player Team Store transform introduced demo-only product UI');
 
-writeFileSync(path, source);
+writeFileSync(path, source.replace(/\n/g, lineEnding));
 console.log('Applied Phase 3M Player Team Store retail hierarchy with demo/registered parity.');

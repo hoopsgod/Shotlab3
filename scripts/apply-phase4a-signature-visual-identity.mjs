@@ -1,6 +1,13 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 const fail = (message) => { throw new Error(`[phase4a-signature-visual-identity] ${message}`); };
+function readNormalized(path) {
+  const raw = readFileSync(path, "utf8");
+  return { source: raw.replace(/\r\n/g, "\n"), lineEnding: raw.includes("\r\n") ? "\r\n" : "\n" };
+}
+function writeNormalized(path, source, lineEnding) {
+  writeFileSync(path, source.replace(/\n/g, lineEnding));
+}
 const replaceOne = (source, from, to, label) => {
   if (source.includes(to)) return source;
   const count = source.split(from).length - 1;
@@ -23,7 +30,8 @@ const ensureImportAfter = (source, anchor, importStatement, label) => {
 
 function patchPlayerDaily() {
   const path = "src/components/PlayerDailyCommandCenter.jsx";
-  let source = readFileSync(path, "utf8");
+  const file = readNormalized(path);
+  let source = file.source;
   source = ensureImportAfter(
     source,
     'import ShotLabIcon from "./ShotLabIcon";\n',
@@ -37,12 +45,13 @@ function patchPlayerDaily() {
     'testId="player-home-signature-field"',
     "PlayerDaily signature field",
   );
-  writeFileSync(path, source);
+  writeNormalized(path, source, file.lineEnding);
 }
 
 function patchProgressStory() {
   const path = "src/components/PlayerProgressStory.jsx";
-  let source = readFileSync(path, "utf8");
+  const file = readNormalized(path);
+  let source = file.source;
   source = ensureImportAfter(
     source,
     'import styles from "./PlayerProgressStory.module.css";\n',
@@ -56,12 +65,13 @@ function patchProgressStory() {
     'testId="player-progress-signature-field"',
     "PlayerProgress signature field",
   );
-  writeFileSync(path, source);
+  writeNormalized(path, source, file.lineEnding);
 }
 
 function patchAuth() {
   const path = "src/components/AuthWorkspace.jsx";
-  let source = readFileSync(path, "utf8");
+  const file = readNormalized(path);
+  let source = file.source;
   const authReactImport = [
     'import { useRef, useState } from "react";\n',
     'import { useState } from "react";\n',
@@ -79,19 +89,20 @@ function patchAuth() {
     '<div aria-hidden="true" style={{position:"fixed",inset:0,pointerEvents:"none",background:"radial-gradient(circle at 84% 4%, rgba(126,158,30,.09), transparent 27rem), linear-gradient(180deg,#FAF9F5 0%,#F3F1EA 70%)"}}/>\n<ShotLabSignatureField variant="identity" testId="auth-signature-field" style={{position:"fixed",inset:0,zIndex:0,opacity:.72}}/>\n<div className="fade-up"',
     "Auth signature field",
   );
-  writeFileSync(path, source);
+  writeNormalized(path, source, file.lineEnding);
 }
 
 function linkIdentityCss() {
   const path = "index.html";
-  let source = readFileSync(path, "utf8");
+  const file = readNormalized(path);
+  let source = file.source;
   const link = '  <link id="shotlab-phase4a-signature-identity" rel="stylesheet" href="/shotlab-phase4a-signature-identity.css" />';
   if (!source.includes('shotlab-phase4a-signature-identity')) {
     const anchor = '  <link id="shotlab-phase3v-final-closure" rel="stylesheet" href="/shotlab-phase3v-final-closure.css" />';
     const count = source.split(anchor).length - 1;
     if (count !== 1) fail(`Phase 3V stylesheet anchor: expected one, found ${count}`);
     source = source.replace(anchor, `${anchor}\n${link}`);
-    writeFileSync(path, source);
+    writeNormalized(path, source, file.lineEnding);
   }
 }
 

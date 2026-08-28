@@ -12,7 +12,9 @@ const replaceOne = (source, before, after, label) => {
 
 function transformProfile() {
   const path = 'src/App.jsx';
-  let source = readFileSync(path, 'utf8');
+  const rawSource = readFileSync(path, 'utf8');
+  const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n';
+  let source = rawSource.replace(/\r\n/g, '\n');
   if (source.includes('data-testid="player-profile-readout"')) {
     if (!source.includes('testId="player-profile-performance-intelligence"')) fail('performance intelligence disclosure missing from transformed Profile');
     if (!source.includes('testId="player-profile-drill-development"')) fail('drill development disclosure missing from transformed Profile');
@@ -61,13 +63,15 @@ ${trendStart}`;
   if (!source.includes('DRILL BREAKDOWN')) fail('drill breakdown was removed');
   if (!source.includes('>PRIVACY</div>')) fail('privacy controls were removed');
   if (!source.includes('<AccountTrustActions deleteAccount={deleteAccount}/>')) fail('account trust actions were removed');
-  writeFileSync(path, source);
+  writeFileSync(path, source.replace(/\n/g, lineEnding));
   console.log('Applied Phase 3F Profile progressive disclosure.');
 }
 
 function transformAnalytics() {
   const path = 'src/components/ShotLabCharts.jsx';
-  let source = readFileSync(path, 'utf8');
+  const rawSource = readFileSync(path, 'utf8');
+  const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n';
+  let source = rawSource.replace(/\r\n/g, '\n');
   if (source.includes('data-testid="player-analytics-workspace"')) {
     if (!source.includes('aria-pressed={tab === t.id}')) fail('analytics selected state missing from transformed source');
     if (!source.includes('import ShotLabIcon from "./ShotLabIcon";')) fail('ShotLabIcon import missing from transformed source');
@@ -182,7 +186,7 @@ function transformAnalytics() {
   if (legacyControlAnchors.some((anchor) => source.includes(anchor))) fail('legacy emoji analytics controls remain');
   if (!source.includes('const myScores = useMemo(')) fail('score filtering calculation changed unexpectedly');
   if (!source.includes('<MakesOverTime') || !source.includes('<WeeklyVolume') || !source.includes('<SkillRadar />') || !source.includes('<StreakCalendar />') || !source.includes('<SeasonGoal />')) fail('an analytics destination was removed');
-  writeFileSync(path, source);
+  writeFileSync(path, source.replace(/\n/g, lineEnding));
   console.log('Applied Phase 3F native analytics controls.');
 }
 

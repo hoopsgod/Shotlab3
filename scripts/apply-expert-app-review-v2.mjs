@@ -2,17 +2,21 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 function patch(path, before, after) {
   if (path === "tests/e2e/coach-player-invitation.spec.mjs") return;
-  const source = readFileSync(path, "utf8");
+  const rawSource = readFileSync(path, "utf8");
+  const lineEnding = rawSource.includes("\r\n") ? "\r\n" : "\n";
+  const source = rawSource.replace(/\r\n/g, "\n");
   if (path === "src/components/CoachInteractiveDashboards.jsx" && source.includes("buildCoachPlayerActionBriefing")) return;
   if (source.includes(after)) return;
   if (!source.includes(before)) throw new Error(`Expert app review anchor missing in ${path}`);
-  writeFileSync(path, source.replace(before, after));
+  writeFileSync(path, source.replace(before, after).replace(/\n/g, lineEnding));
 }
 
 function appendOnce(path, marker, content) {
-  const source = readFileSync(path, "utf8");
+  const rawSource = readFileSync(path, "utf8");
+  const lineEnding = rawSource.includes("\r\n") ? "\r\n" : "\n";
+  const source = rawSource.replace(/\r\n/g, "\n");
   if (source.includes(marker)) return;
-  writeFileSync(path, `${source.trimEnd()}\n\n${content.trim()}\n`);
+  writeFileSync(path, `${source.trimEnd()}\n\n${content.trim()}\n`.replace(/\n/g, lineEnding));
 }
 
 patch("src/main.jsx",

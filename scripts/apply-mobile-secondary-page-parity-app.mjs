@@ -2,7 +2,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const appPath = path.resolve(process.cwd(), 'src/App.jsx')
-let source = fs.readFileSync(appPath, 'utf8')
+const rawSource = fs.readFileSync(appPath, 'utf8')
+const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n'
+let source = rawSource.replace(/\r\n/g, '\n')
 
 function replaceRequired(needle, replacement, label) {
   if (source.includes(replacement)) return
@@ -103,5 +105,5 @@ withSurface('No players registered yet', () => {
   )
 })
 
-fs.writeFileSync(appPath, source)
+fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
 console.log('Applied stable mobile app-level secondary-page composition for available Demo and registered surfaces.')

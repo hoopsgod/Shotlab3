@@ -6,6 +6,7 @@ const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "u
 const navSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const packageSource = fs.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+const routeEnhancerSource = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const productionAcceptanceSource = fs.readFileSync(new URL("./e2e/production-acceptance.spec.mjs", import.meta.url), "utf8");
 
 test("mobile player account actions are consolidated into More", () => {
@@ -32,13 +33,14 @@ test("production acceptance follows the current More to Sign out path without we
   assert.match(productionAcceptanceSource, /getByTestId\("mobile-navigation-more"\)\.click\(\)/);
   assert.match(productionAcceptanceSource, /getByTestId\("mobile-navigation-sign-out"\)\.click\(\)/);
   assert.doesNotMatch(productionAcceptanceSource, /getByRole\("button", \{ name: \/\^logout\$\/i \}\)\.click\(\)/);
-  assert.match(productionAcceptanceSource, /countDemoPlayerShotRows\(page, 33\)\)\.toBe\(0\)/);
+  assert.match(productionAcceptanceSource, /const baselineMakes = await readAtHomeTodayMakes\(page\)/);
+  assert.match(productionAcceptanceSource, /toBe\(baselineMakes \+ 33\)/);
+  assert.match(productionAcceptanceSource, /toBe\(baselineMakes\)/);
 });
 
 test("Phase 3U remains ordered after legacy route enhancers and before later visual authorities", () => {
   const pkg = JSON.parse(packageSource);
-  for (const scriptName of ["dev", "prepare:route-enhancers"]) {
-    const script = pkg.scripts[scriptName];
-    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/apply-phase3u-production-acceptance-path\.mjs && node scripts\/apply-phase3v-final-reconciliation\.mjs && node scripts\/apply-phase4a-signature-visual-identity\.mjs && node scripts\/apply-phase4b-premium-performance-marks\.mjs && node scripts\/apply-phase4c-premium-interaction-material-motion\.mjs && node scripts\/apply-phase4d-premium-state-system\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
-  }
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts["prepare:route-enhancers"], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancerSource, /apply-expert-app-review-v2\.mjs'[\s\S]*apply-phase3u-player-account-control\.mjs'[\s\S]*apply-phase3u-production-acceptance-path\.mjs'[\s\S]*apply-phase3v-final-reconciliation\.mjs'[\s\S]*apply-phase4a-signature-visual-identity\.mjs'[\s\S]*apply-phase4b-premium-performance-marks\.mjs'[\s\S]*apply-phase4c-premium-interaction-material-motion\.mjs'[\s\S]*apply-phase4d-premium-state-system\.mjs'[\s\S]*minify-visual-authority-css\.mjs'/);
 });
