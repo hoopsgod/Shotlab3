@@ -31,6 +31,17 @@ function trimLegacyCoachEmptyStateTooltip() {
   return true
 }
 
+function repairShotTrackerInputGeometry() {
+  const target = path.resolve(ROOT, 'src/styles/CommandHierarchy2026.css')
+  const source = readFileSync(target, 'utf8')
+  const anchor = '.player-logging-input {\n  width: 100%;'
+  const repaired = '.player-logging-input {\n  box-sizing: border-box;\n  width: 100%;'
+  if (source.includes(repaired)) return false
+  if (!source.includes(anchor)) throw new Error('[mobile-player-composition] Shot Tracker input authority is missing')
+  writeFileSync(target, source.replace(anchor, repaired))
+  return true
+}
+
 const legacyHomeCss = `
 @media(max-width:700px){
 .hero{text-align:center}.heroTop{justify-content:center!important;flex-wrap:wrap}
@@ -57,6 +68,7 @@ export function applyMobilePlayerCompositionReconciliation() {
     hasDashboardShowstopperHome() ? false : appendOwnedBlock('src/components/PlayerDailyCommandCenter.module.css', legacyHomeCss),
     appendOwnedBlock('src/components/PlayerOperationalWorkspace.module.css', workspaceCss),
     trimLegacyCoachEmptyStateTooltip(),
+    repairShotTrackerInputGeometry(),
     appendOwnedBlock('src/styles/CommandHierarchy2026.css', hierarchyCss),
   ].filter(Boolean).length
   console.log(`Reconciled Player mobile optical composition in ${changed} non-title owned surface(s); commitment titles remain source-owned.`)
