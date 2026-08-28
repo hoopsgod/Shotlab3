@@ -3,7 +3,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 let changed = false;
 
 const panelPath = 'src/components/CoachDashboardPhase2.jsx';
-let source = readFileSync(panelPath, 'utf8');
+const rawSource = readFileSync(panelPath, 'utf8');
+const sourceLineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n';
+let source = rawSource.replace(/\r\n/g, '\n');
 const panelMarker = 'data-testid="coach-leaderboard-pulse"';
 
 if (!source.includes(panelMarker)) {
@@ -113,14 +115,16 @@ if (!source.includes(panelMarker)) {
 }`;
 
   source = source.replace(oldBlock, newBlock);
-  writeFileSync(panelPath, source);
+  writeFileSync(panelPath, source.replace(/\n/g, sourceLineEnding));
   changed = true;
 } else {
   console.log('Phase 3L Coach leaderboard hierarchy already applied.');
 }
 
 const followUpPath = 'src/lib/coachFollowUpEnhancer.js';
-let followUpSource = readFileSync(followUpPath, 'utf8');
+const rawFollowUpSource = readFileSync(followUpPath, 'utf8');
+const followUpLineEnding = rawFollowUpSource.includes('\r\n') ? '\r\n' : '\n';
+let followUpSource = rawFollowUpSource.replace(/\r\n/g, '\n');
 const placementMarker = `const body = dialog.querySelector('[data-visual-role="dashboard-section"]')?.parentElement;`;
 
 if (!followUpSource.includes(placementMarker)) {
@@ -145,7 +149,7 @@ if (!followUpSource.includes(placementMarker)) {
   followUpSource = directOccurrences === 1
     ? followUpSource.replace(directPlacement, desiredPlacement)
     : followUpSource.replace(legacyScrollPlacement, desiredPlacement);
-  writeFileSync(followUpPath, followUpSource);
+  writeFileSync(followUpPath, followUpSource.replace(/\n/g, followUpLineEnding));
   changed = true;
 } else {
   console.log('Phase 3L Coach follow-up placement already applied.');

@@ -12,6 +12,7 @@ const leaderboard = fs.readFileSync(new URL("../src/components/CompactLeaderboar
 const workspace = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+const routeEnhancers = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 
 test("Phase 4D defines one semantic state component for loading, first-use, empty, success, and error", () => {
   for (const state of ["loading", "empty", "first-use", "success", "error"]) {
@@ -22,7 +23,7 @@ test("Phase 4D defines one semantic state component for loading, first-use, empt
   assert.match(panel, /aria-busy=\{busy \|\| undefined\}/);
   assert.match(panelCss, /prefers-reduced-motion:reduce/);
   assert.match(panelCss, /animation:none!important/);
-  assert.match(panelCss, /\.action\{[^}]*min-height:44px/s);
+  assert.match(panelCss, /\.action\{[^}]*min-height:var\(--touch-target,44px\)/s);
   assert.match(leaderboard, /<button[^>]+onClick=\{onViewAll\}[^>]+minHeight:44/s);
   assert.match(leaderboard, /<a href=\{fullLeaderboardHref\}[^>]+minHeight:44/s);
 });
@@ -59,9 +60,8 @@ test("Phase 4D improves disabled and completion semantics without changing data 
 });
 
 test("Phase 4D runs after Phase 4C and before final visual minification", () => {
-  for (const name of ["dev", "prepare:route-enhancers"]) {
-    const command = pkg.scripts[name];
-    assert.match(command, /apply-phase4c-premium-interaction-material-motion\.mjs.*apply-phase4d-premium-state-system\.mjs.*minify-visual-authority-css\.mjs/);
-  }
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts["prepare:route-enhancers"], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase4c-premium-interaction-material-motion\.mjs'[\s\S]*apply-phase4d-premium-state-system\.mjs'[\s\S]*minify-visual-authority-css\.mjs'/);
   assert.match(index, /shotlab-phase4c-interaction-material-motion[^]*shotlab-phase4d-state-reconciliation/);
 });

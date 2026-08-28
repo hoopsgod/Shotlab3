@@ -3,7 +3,9 @@ import path from 'node:path'
 
 const appPath = path.resolve(process.cwd(), 'src/App.jsx')
 const authPath = path.resolve(process.cwd(), 'src/components/AuthWorkspace.jsx')
-let source = fs.readFileSync(appPath, 'utf8')
+const rawSource = fs.readFileSync(appPath, 'utf8')
+const appLineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n'
+let source = rawSource.replace(/\r\n/g, '\n')
 
 const signedImport = 'import { requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
 const combinedImport = 'import { hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
@@ -64,9 +66,11 @@ if (markerIndex < 0 || hydrateIndex < markerIndex || setUserIndex < hydrateIndex
   throw new Error('Registered collection hydration must finish before the authenticated mobile workspace becomes visible.')
 }
 
-fs.writeFileSync(appPath, source)
+fs.writeFileSync(appPath, source.replace(/\n/g, appLineEnding))
 
-let authSource = fs.readFileSync(authPath, 'utf8')
+const rawAuthSource = fs.readFileSync(authPath, 'utf8')
+const authLineEnding = rawAuthSource.includes('\r\n') ? '\r\n' : '\n'
+let authSource = rawAuthSource.replace(/\r\n/g, '\n')
 authSource = authSource.replace('import { hydrateAuthenticatedCollectionsToStorage } from "../lib/legacySignedCollectionPersistence.js";\n', '')
 
 // App owns registered post-login hydration before the authenticated workspace becomes interactive.
@@ -93,5 +97,5 @@ if (authSource.includes('hydrateAuthenticatedCollectionsToStorage') || authSourc
   throw new Error('AuthWorkspace must not trigger a second post-login hydration/reload after App has exposed the authenticated route.')
 }
 
-fs.writeFileSync(authPath, authSource)
+fs.writeFileSync(authPath, authSource.replace(/\n/g, authLineEnding))
 console.log('Applied identity-verified registered hydration before the mobile workspace becomes interactive, with no delayed auth reload.')

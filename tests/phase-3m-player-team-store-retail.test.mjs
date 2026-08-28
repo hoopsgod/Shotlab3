@@ -31,11 +31,11 @@ test('Player Team Store gains stable first-screen retail hierarchy seams', () =>
 test('Phase 3M styling is player-scoped and preserves the light premium system', () => {
   assert.match(css, /\.ts-player-content\[data-testid="player-team-store-retail"\]/);
   assert.match(css, /\.ts-player-retail-hero[\s\S]*linear-gradient/);
-  assert.match(css, /\.ts-player-retail-signals[\s\S]*grid-template-columns: repeat\(3/);
-  assert.match(css, /\.ts-player-storefront-shell[\s\S]*background: rgba\(255, 255, 255, \.92\)/);
-  assert.match(css, /\.ts-preview-button-disabled[\s\S]*min-height: 54px/);
-  assert.match(css, /@media \(max-width: 759px\)/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /\.ts-player-retail-signals[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /\.ts-player-storefront-shell[\s\S]*background:\s*rgba\(255,\s*255,\s*255,\s*\.92\)/);
+  assert.match(css, /\.ts-preview-button-disabled[\s\S]*min-height:\s*54px/);
+  assert.match(css, /@media\s*\(max-width:\s*759px\)/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
 test('Player retail authority loads after the accepted Phase 3L layer', () => {

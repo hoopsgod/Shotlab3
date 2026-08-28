@@ -7,6 +7,7 @@ const signatureCss = fs.readFileSync(new URL("../src/components/ShotLabSignature
 const identityCss = fs.readFileSync(new URL("../public/shotlab-phase4a-signature-identity.css", import.meta.url), "utf8");
 const script = fs.readFileSync(new URL("../scripts/apply-phase4a-signature-visual-identity.mjs", import.meta.url), "utf8");
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+const routeEnhancers = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 
 test("Phase 4A introduces one reusable basketball signature asset system", () => {
   assert.match(signature, /data-shotlab-signature=\{variant\}/);
@@ -49,15 +50,15 @@ test("Phase 4A anchors Player Home by the stable command-center root, not a reti
 test("Phase 4A keeps Liquid Glass out of the content identity layer", () => {
   assert.doesNotMatch(identityCss, /backdrop-filter/i);
   assert.doesNotMatch(identityCss, /-webkit-backdrop-filter/i);
+  assert.match(identityCss, /auth-signature-field/);
+  assert.match(identityCss, /player-home-signature-field/);
+  assert.match(identityCss, /player-progress-signature-field/);
   assert.match(identityCss, /premium-leaderboards-hub/);
-  assert.match(identityCss, /coach-primary-objective/);
-  assert.match(identityCss, /player-command-evidence/);
-  assert.match(identityCss, /player-progress-metrics/);
+  assert.doesNotMatch(identityCss, /coach-primary-objective/);
 });
 
 test("Phase 4A remains ordered after Phase 3 closure and before later Phase 4 authorities", () => {
-  for (const name of ["dev", "prepare:route-enhancers"]) {
-    const command = pkg.scripts[name];
-    assert.match(command, /apply-phase3v-final-reconciliation\.mjs.*apply-phase4a-signature-visual-identity\.mjs.*apply-phase4b-premium-performance-marks\.mjs.*apply-phase4c-premium-interaction-material-motion\.mjs.*minify-visual-authority-css\.mjs/);
-  }
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts["prepare:route-enhancers"], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3v-final-reconciliation\.mjs'[\s\S]*apply-phase4a-signature-visual-identity\.mjs'[\s\S]*apply-phase4b-premium-performance-marks\.mjs'[\s\S]*apply-phase4c-premium-interaction-material-motion\.mjs'[\s\S]*minify-visual-authority-css\.mjs'/);
 });

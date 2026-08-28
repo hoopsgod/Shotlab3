@@ -47,7 +47,7 @@ test('S&C keeps one header decision layer instead of repeating metric evidence',
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength\"\][\s\S]*padding-bottom:8px!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-evidence\"\][\s\S]*display:none!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\]/);
-  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] > button[\s\S]*background:var\(--p3-surface,#fff\)!important/);
+  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\]\s*>\s*button[\s\S]*background:var\(--p3-surface,#fff\)!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] \[data-premium-metric-value\][\s\S]*color:var\(--p3-ink,#151a16\)!important/);
 });
 
@@ -59,8 +59,8 @@ test('S&C operational filters use the light native utility rail', () => {
 
 test('desktop preserves expanded S&C intelligence while iPhone defaults it closed', () => {
   assert.match(enhancer, /open=\{typeof window !== \"undefined\" && window\.innerWidth > 760\}/);
-  assert.match(css, /@media \(min-width: 761px\)[\s\S]*coachStrengthSupportingSummary[\s\S]*display: none/);
-  assert.match(css, /@media \(max-width: 760px\)/);
+  assert.match(css, /@media\s*\(min-width:\s*761px\)[\s\S]*coachStrengthSupportingSummary[\s\S]*display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)/);
   assert.doesNotMatch(enhancer, /open=\{true\}/);
 });
 
@@ -70,11 +70,11 @@ test('mobile compliance disclosure uses route-scoped native summary authority', 
   assert.match(css, /min-height:68px/);
   assert.match(css, /touch-action:manipulation/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /html body #root \.pageShell\[data-accent=\"sc\"\] \[data-testid=\"coach-strength-operational-panel\"\] \.coachStrengthSupportingSummary > \.coachStrengthSupportingSummaryCopy/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /html body #root \.pageShell\[data-accent=\"sc\"\] \[data-testid=\"coach-strength-operational-panel\"\] \.coachStrengthSupportingSummary\s*>\s*\.coachStrengthSupportingSummaryCopy/);
   assert.match(css, /all:unset!important/);
   assert.match(css, /coachStrengthSupportingSummaryCopy::before[\s\S]*coachStrengthSupportingSummaryCopy::after[\s\S]*content:none!important/);
-  assert.match(css, /coachStrengthSupportingSummaryCopy > small[\s\S]*box-shadow:none!important[\s\S]*transform:none!important/);
+  assert.match(css, /coachStrengthSupportingSummaryCopy\s*>\s*small[\s\S]*box-shadow:none!important[\s\S]*transform:none!important/);
 });
 
 test('expanded S&C insight cards preserve light-surface contrast and readable controls', () => {

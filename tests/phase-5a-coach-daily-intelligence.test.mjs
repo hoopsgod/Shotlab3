@@ -9,6 +9,7 @@ const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
 const statePanelCss = await readFile(new URL("../src/components/ShotLabStatePanel.module.css", import.meta.url), "utf8");
 const phase4eAuthorityCss = await readFile(new URL("../public/shotlab-phase4e-final-polish.css", import.meta.url), "utf8");
 const repeatBuildWrapper = await readFile(new URL("../scripts/run-finish-v9-compatible.mjs", import.meta.url), "utf8");
+const routeEnhancerRunner = await readFile(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const budget = JSON.parse(await readFile(new URL("../performance-budget.json", import.meta.url), "utf8"));
 
@@ -26,11 +27,11 @@ test("Phase 5A preserves the stronger Phase 4 metric strip and lower dashboard c
   assert.match(commandCenter, /<strong>\{activeCount\}<span>\/\{rosterSize\}<\/span><\/strong><small>Active<\/small>/);
   assert.match(commandCenter, /<strong>\{attentionCount\}<\/strong><small>Follow-up<\/small>/);
   assert.match(commandCenter, /<strong>\{hasScheduledSession \? "Set" : "—"\}<\/strong><small>Next<\/small>/);
-  assert.match(commandCenter, /function TeamActivityPanel\(/);
-  assert.match(commandCenter, /const teamPanel = hasTeamActivity \? <TeamActivityPanel/);
-  assert.match(commandCenter, /const priorityPanel = sessionPanel \|\| teamPanel \|\| livePanel/);
-  assert.match(commandCenter, /const lowerPanels = \[sessionPanel \? teamPanel : null\]\.filter\(Boolean\)/);
-  assert.match(commandCenter, /coach-live-evidence-region/);
+  assert.match(commandCenter, /function LiveActivityPanel\(/);
+  assert.match(commandCenter, /const livePanel = <LiveActivityPanel items=\{resolvedActivity\} \/>/);
+  assert.match(commandCenter, /const sessionPanel = <NextSessionPanel/);
+  assert.match(commandCenter, /<section className="mcLowerGrid has-2-panels" data-layout-role="supporting-evidence">\{sessionPanel\}\{livePanel\}<\/section>/);
+  assert.match(commandCenter, /data-testid="coach-live-activity"/);
 });
 
 test("Phase 5A removes pseudo-derived intelligence rather than dressing it up", () => {
@@ -63,23 +64,29 @@ test("Phase 5A preserves proven state geometry and fixes the actual mobile Playe
   assert.doesNotMatch(statePanelCss, /@media \(max-width:640px\)[\s\S]*?\.root\{width:min\(calc\(100% - 28px\),calc\(100vw - 28px\)\)\}/);
   assert.match(statePanelCss, /\.action\{[\s\S]*?min-height:var\(--touch-target,44px\)/);
   assert.match(phase4eAuthorityCss, /\.performance-shell--player \.performance-workspace--player\s*\{[\s\S]*?max-width:\s*100vw;[\s\S]*?overflow-x:\s*clip;[\s\S]*?box-sizing:\s*border-box\b/);
-  assert.match(phase4eAuthorityCss, /\.performance-shell \.player-scroll-container\s*\{[\s\S]*?box-sizing:\s*border-box\s*!important;[\s\S]*?width:\s*100%\s*!important;[\s\S]*?max-width:\s*100%\s*!important/);
+  assert.match(phase4eAuthorityCss, /\.performance-shell \.player-scroll-container,\s*\.performance-shell \.coach-scroll-container\s*\{[^}]*box-sizing:\s*border-box\s*!important;[^}]*width:\s*100%\s*!important;[^}]*max-width:\s*100%\s*!important/);
   assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?max-width:\s*calc\(100%\s*-\s*6px\)/);
   assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?margin-left:\s*3px/);
 });
 
 test("Phase 5A signed-out bootstrap cannot be held behind team hydration or an unbounded Supabase session request", () => {
   assert.match(app, /if\(sess\?\.email\)\{try\{catalog=await trainingCatalogPersistence\.hydrateCatalog/);
-  assert.match(app, /Promise\.race\(\[supabase\.auth\.getSession\(\),new Promise\(r=>setTimeout\(r,3e3\)\)\]\)/);
-  assert.match(app, /const authEmail=normalizeEmail\(SUPABASE_AUTH_ENABLED\?\(await Promise\.race\([\s\S]*?\)\)\?\.data\?\.session\?\.user\?\.email:sess\?\.email\)/);
+  assert.match(app, /const supabaseSessionRequest=SUPABASE_AUTH_ENABLED\?supabase\.auth\.getSession\(\):null/);
+  assert.match(app, /Promise\.race\(\[supabaseSessionRequest,new Promise\(r=>setTimeout\(\(\)=>r\(null\),3e3\)\)\]\)/);
+  assert.match(app, /const authEmail=normalizeEmail\(SUPABASE_AUTH_ENABLED\?initialSupabaseSession\?\.data\?\.session\?\.user\?\.email:sess\?\.email\)/);
+  assert.match(app, /if\(SUPABASE_AUTH_ENABLED&&!authEmail&&supabaseSessionRequest\)/);
   assert.doesNotMatch(app, /\(SUPABASE_AUTH_ENABLED\?authSession\?\.data\?\.session\?\.user\?\.email:""\)\|\|sess\?\.email/);
 });
 
 test("Phase 5A owns the final enhancer position and makes repeated native builds safe", () => {
   const prepare = packageJson.scripts["prepare:route-enhancers"];
-  assert.match(prepare, /^node scripts\/run-finish-v9-compatible\.mjs/);
-  assert.match(prepare, /align-phase4f-browser-contracts\.mjs.*apply-phase5a-coach-daily-intelligence\.mjs$/);
-  assert.match(packageJson.scripts.dev, /apply-phase5a-coach-daily-intelligence\.mjs.*vite/);
+  assert.equal(prepare, "node scripts/run-route-enhancers.mjs build");
+  assert.match(packageJson.scripts.dev, /node scripts\/run-route-enhancers\.mjs dev && vite/);
+  assert.match(routeEnhancerRunner, /export const DEV_ROUTE_ENHANCERS = Object\.freeze\(\[\.\.\.CORE_ROUTE_ENHANCERS, \.\.\.FINAL_ROUTE_ENHANCERS\]\)/);
+  assert.match(routeEnhancerRunner, /export const BUILD_ROUTE_ENHANCERS = Object\.freeze\(\[\s*'scripts\/run-finish-v9-compatible\.mjs'/);
+  assert.match(routeEnhancerRunner, /'scripts\/align-phase4f-browser-contracts\.mjs'[\s\S]*\.\.\.FINAL_ROUTE_ENHANCERS/);
+  assert.match(routeEnhancerRunner, /const PHASE5A_COACH_INTELLIGENCE = 'scripts\/apply-phase5a-coach-daily-intelligence\.mjs'/);
+  assert.match(routeEnhancerRunner, /hasReleaseAuthRecovery\(cwd\)/);
   assert.match(repeatBuildWrapper, /phase5CoachIntelligenceApplied/);
   assert.match(repeatBuildWrapper, /const unresolvedRsvps =/);
   assert.match(repeatBuildWrapper, /label: \"Review RSVPs\"/);

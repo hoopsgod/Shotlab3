@@ -1,18 +1,1 @@
-/* ShotLab V11 — decision-first mobile hierarchy.
-   The coach sees the decision before controls, with compact supporting data below. */
-
-[data-testid="coach-players-interactive-dashboard"],
-[data-testid="coach-events-interactive-dashboard"]{
-  display:grid!important;
-  grid-auto-flow:row!important;
-  gap:12px!important;
-}
-
-[data-testid="coach-players-command-bar"],
-[data-testid="coach-events-command-bar"]{order:1!important}
-[data-testid="coach-players-decision-brief"],
-[data-testid="coach-events-decision-brief"]{order:2!important}
-[data-testid="coach-players-toolbar"],
-[data-testid="coach-events-toolbar"]{order:3!important}
-[data-testid="coach-players-insight-grid"],
-[data-testid="coach-events-insight-grid"]{order:4!important}
+[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"]{display:grid!important;grid-auto-flow:row!important;gap:12px!important}[data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]{order:1!important}[data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]{order:2!important}[data-testid="coach-players-toolbar"],[data-testid="coach-events-toolbar"]{order:3!important}[data-testid="coach-players-insight-grid"],[data-testid="coach-events-insight-grid"]{order:4!important}

@@ -2,7 +2,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const appPath = path.resolve(process.cwd(), 'src/App.jsx')
-let source = fs.readFileSync(appPath, 'utf8')
+const rawSource = fs.readFileSync(appPath, 'utf8')
+const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n'
+let source = rawSource.replace(/\r\n/g, '\n')
 
 const importNeedle = 'import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";'
 const importLine = 'import { requestLegacySignedCollection } from "./lib/legacySignedCollectionPersistence.js";'
@@ -38,5 +40,5 @@ if (!source.includes(marker)) {
   source = source.replace(needle, replacement)
 }
 
-fs.writeFileSync(appPath, source)
+fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
 console.log('Applied legacy signed collection reads to registered persistence hydration.')

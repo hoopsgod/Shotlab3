@@ -7,9 +7,11 @@ const MARKER = '/* Phase-close mobile optical composition reconciliation. */'
 
 function appendOwnedBlock(relativePath, css) {
   const target = path.resolve(ROOT, relativePath)
-  const source = readFileSync(target, 'utf8')
+  const rawSource = readFileSync(target, 'utf8')
+  const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n'
+  const source = rawSource.replace(/\r\n/g, '\n')
   if (source.includes(MARKER)) return false
-  writeFileSync(target, `${source.trimEnd()}\n\n${MARKER}\n${css.trim()}\n`)
+  writeFileSync(target, `${source.trimEnd()}\n\n${MARKER}\n${css.trim()}\n`.replace(/\n/g, lineEnding))
   return true
 }
 
@@ -20,14 +22,16 @@ function hasDashboardShowstopperHome() {
 
 function trimLegacyCoachEmptyStateTooltip() {
   const target = path.resolve(ROOT, 'src/App.jsx')
-  const source = readFileSync(target, 'utf8')
+  const rawSource = readFileSync(target, 'utf8')
+  const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n'
+  const source = rawSource.replace(/\r\n/g, '\n')
   const legacyConstant = '  const legacyCoachEmptyStateCopy = "No activity yet — invite players or have them log their first workout.";\n'
   const legacyTitle = ' title={legacyCoachEmptyStateCopy}'
   if (!source.includes(legacyConstant) && !source.includes(legacyTitle)) return false
   if (!source.includes(legacyConstant) || !source.includes(legacyTitle)) {
     throw new Error('[mobile-player-composition] legacy Coach empty-state tooltip contract is partially applied')
   }
-  writeFileSync(target, source.replace(legacyConstant, '').replace(legacyTitle, ''))
+  writeFileSync(target, source.replace(legacyConstant, '').replace(legacyTitle, '').replace(/\n/g, lineEnding))
   return true
 }
 

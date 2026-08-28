@@ -161,6 +161,8 @@ export function DashboardFilterRail({
             key={filter.key}
             type="button"
             className={cx(styles.filterChip, filter.key === activeFilter && styles.filterChipActive)}
+            data-coach-filter-chip
+            style={{ minHeight: 44, boxSizing: "border-box", touchAction: "manipulation" }}
             aria-pressed={filter.key === activeFilter}
             onClick={() => onFilterChange?.(filter.key)}
           >

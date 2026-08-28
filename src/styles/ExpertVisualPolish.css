@@ -124,3 +124,13 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
   button[data-visual-role],
   .performance-shell [data-testid="player-training-log-score"] { transition: none !important; }
 }
+
+/* coach-live-activity-release-lock */
+html body [data-testid="coach-live-activity"],
+html body.mission-control-active [data-testid="coach-live-activity"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}

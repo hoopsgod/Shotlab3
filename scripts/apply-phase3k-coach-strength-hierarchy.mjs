@@ -1,7 +1,9 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const panelPath = 'src/components/CoachDashboardPhase2.jsx';
-let source = readFileSync(panelPath, 'utf8');
+const rawSource = readFileSync(panelPath, 'utf8');
+const lineEnding = rawSource.includes('\r\n') ? '\r\n' : '\n';
+let source = rawSource.replace(/\r\n/g, '\n');
 
 // Keep the rendered evidence seam on a real DOM wrapper so Playwright and CSS observe the same node.
 const marker = 'data-testid="coach-strength-supporting-intelligence"';
@@ -44,5 +46,5 @@ const newBlock = `      <details
       </details>`;
 
 source = source.replace(oldBlock, newBlock);
-writeFileSync(panelPath, source);
+writeFileSync(panelPath, source.replace(/\n/g, lineEnding));
 console.log('Applied Phase 3K Coach S&C decision-to-session hierarchy.');

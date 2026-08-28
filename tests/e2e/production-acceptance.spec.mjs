@@ -234,7 +234,9 @@ test("Demo Player shot mutation is sandboxed and reset on logout", async ({ page
   await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
   await expect.poll(() => readAtHomeTodayMakes(page), { timeout: 15_000 }).toBe(baselineMakes + 33);
 
-  await page.getByRole("button", { name: /^logout$/i }).click();
+  await page.getByTestId("mobile-navigation-more").click();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toBeVisible();
+  await page.getByTestId("mobile-navigation-sign-out").click();
   await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
 
   await enterDemoPlayer(page);

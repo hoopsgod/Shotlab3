@@ -1,9 +1,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 const update = (path, transform) => {
-  const source = readFileSync(path, "utf8");
+  const rawSource = readFileSync(path, "utf8");
+  const lineEnding = rawSource.includes("\r\n") ? "\r\n" : "\n";
+  const source = rawSource.replace(/\r\n/g, "\n");
   const next = transform(source);
-  if (next !== source) writeFileSync(path, next);
+  if (next !== source) writeFileSync(path, next.replace(/\n/g, lineEnding));
 };
 
 const replaceRequired = (source, from, to, label) => {

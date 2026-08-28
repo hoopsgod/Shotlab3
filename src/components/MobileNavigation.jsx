@@ -86,7 +86,7 @@ function NavigationItem({ item, active, onSelect, compact = false }) {
   );
 }
 
-export default function MobileNavigation({ primaryItems = [], secondaryItems = [], activeKey, onChange, ariaLabel = "Mobile navigation" }) {
+export default function MobileNavigation({ primaryItems = [], secondaryItems = [], activeKey, onChange, onLogout, ariaLabel = "Mobile navigation" }) {
   const [open, setOpen] = useState(false);
   const closeButtonRef = useRef(null);
   const sheetRef = useRef(null);
@@ -148,6 +148,7 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
   }, [open]);
 
   const handleSelect = (key) => { setOpen(false); onChange?.(key); };
+  const handleLogout = async () => { setOpen(false); await onLogout?.(); };
   const activeMore = secondaryActive || open;
   const shell = (
     <>
@@ -161,8 +162,8 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
         </div>
       </nav>
 
-      {open && <div className={styles.overlay} data-testid="mobile-navigation-overlay" onMouseDown={() => setOpen(false)}>
-        <section ref={sheetRef} id="mobile-navigation-more-sheet" className={styles.sheet} role="dialog" aria-modal="true" aria-label="More navigation" data-testid="mobile-navigation-sheet" onMouseDown={(event) => event.stopPropagation()}>
+      {open && <div className={styles.overlay} data-navigation-role={role} data-testid="mobile-navigation-overlay" onMouseDown={() => setOpen(false)}>
+        <section ref={sheetRef} id="mobile-navigation-more-sheet" className={styles.sheet} role="dialog" aria-modal="true" aria-label="More navigation" data-navigation-role={role} data-testid="mobile-navigation-sheet" onMouseDown={(event) => event.stopPropagation()}>
           <div className={styles.sheetHandle} aria-hidden="true" />
           <div className={styles.sheetHeader}>
             <div><div className={styles.sheetEyebrow}>{sheetCopy.eyebrow}</div><h2 className={styles.sheetTitle}>{sheetCopy.title}</h2><p className={styles.sheetSummary}>{sheetCopy.summary}</p></div>
@@ -174,6 +175,12 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
               <div className={styles.sheetGrid}>{group.items.map((item) => <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} />)}</div>
             </section>)}
           </div>
+          {role === "player" && onLogout && <div className={styles.sheetUtility} data-testid="mobile-navigation-account-actions">
+            <button type="button" className={styles.signOutButton} data-testid="mobile-navigation-sign-out" onClick={handleLogout}>
+              <span className={styles.utilityIcon} aria-hidden="true"><ShotLabIcon name="logout" size={19} /></span>
+              <span><strong>Sign out</strong><small>Leave this ShotLab session</small></span>
+            </button>
+          </div>}
         </section>
       </div>}
     </>

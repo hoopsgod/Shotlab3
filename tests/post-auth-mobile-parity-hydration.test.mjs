@@ -169,6 +169,7 @@ test("production route enhancers are idempotent and finish authenticated data hy
   const enhancer = fs.readFileSync(new URL("../scripts/apply-post-auth-persistence-hydration.mjs", import.meta.url), "utf8");
   const signedReadsEnhancer = fs.readFileSync(new URL("../scripts/apply-legacy-signed-collection-reads.mjs", import.meta.url), "utf8");
   const auth = fs.readFileSync(new URL("../src/components/AuthWorkspace.jsx", import.meta.url), "utf8");
+  const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
   const routeRunner = fs.readFileSync(new URL("../scripts/run-route-enhancers.mjs", import.meta.url), "utf8");
 
   assert.match(enhancer, /hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection/);
@@ -184,8 +185,10 @@ test("production route enhancers are idempotent and finish authenticated data hy
   assert.match(signedReadsEnhancer, /const combinedImport = 'import \{ hydrateAuthenticatedCollectionsToStorage, requestLegacySignedCollection \}/);
   assert.match(signedReadsEnhancer, /!source\.includes\(importLine\) && !source\.includes\(combinedImport\)/);
 
-  assert.match(auth, /hydrateAuthenticatedCollectionsToStorage/);
-  assert.match(auth, /window\.location\?\.reload/);
+  assert.match(app, /hydrateAuthenticatedCollectionsToStorage\(\{expectedIdentity:normalizeEmail\(p\.email\)\}\)/);
+  assert.match(app, /await hydratePersistedData\(\)/);
+  assert.doesNotMatch(auth, /hydrateAuthenticatedCollectionsToStorage/);
+  assert.doesNotMatch(auth, /window\.location\?\.reload/);
 
   const signedReadsIndex = routeRunner.indexOf("scripts/apply-legacy-signed-collection-reads.mjs");
   const postAuthIndex = routeRunner.indexOf("scripts/apply-post-auth-persistence-hydration.mjs");
