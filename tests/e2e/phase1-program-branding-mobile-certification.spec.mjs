@@ -83,6 +83,23 @@ async function expectContained(locator) {
   expect(geometry.width).toBeGreaterThan(0);
 }
 
+async function expectCoachPreviewIdentityGeometry(page) {
+  const preview = page.getByTestId("branding-preview-coach-title");
+  await expect(preview).toBeVisible();
+  await expect(preview.locator(".teamIdentityTitleStage__tonalCrest")).toHaveCount(0);
+  await expect(preview.locator(".teamIdentityTitleStage__crestSlot")).toHaveCount(1);
+
+  const missionRects = await preview.getByRole("heading", { name: "Mission Control", exact: true }).evaluate((heading) => {
+    const text = heading.firstChild;
+    if (!text || text.nodeType !== Node.TEXT_NODE) return 99;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, Math.min(7, text.textContent.length));
+    return [...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).length;
+  });
+  expect(missionRects, 'Mission must never break inside the word').toBe(1);
+}
+
 async function expectPreviewContrast(page) {
   const result = await page.locator(".branding-industrial__preview").evaluate((preview) => {
     const heading = preview.querySelector(".branding-industrial__panel-header h2");
@@ -159,6 +176,7 @@ test("Program Branding is contained, readable, and touch-safe at 320, 375, 390, 
     await expectNoHorizontalOverflow(page);
     await expectContained(page.getByTestId("coach-branding-workspace"));
     await expectContained(page.locator(".branding-industrial__preview"));
+    await expectCoachPreviewIdentityGeometry(page);
     await expectPreviewContrast(page);
     await expectTouchTargets(page);
 

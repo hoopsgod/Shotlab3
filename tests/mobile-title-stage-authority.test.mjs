@@ -52,12 +52,14 @@ test('secondary destinations converge on one editorial treatment while restoring
   assert.doesNotMatch(playerWorkspace, /PLAYER_BRAND_TREATMENT|resolveWorkspaceBrandTreatment|signature|watermark|brandTreatment="none"/);
 });
 
-test('Home and Program Branding preserve an intentional identity-heavy hero treatment', () => {
+test('Home keeps identity-heavy hero treatment while Program Branding previews one compact mark inside its hero shell', () => {
   assert.match(stage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
   assert.match(playerHome, /variant="hero"/);
   assert.match(coachHome, /mcHeroIdentity/);
-  assert.match(brandingPreview, /variant="hero" brandTreatment="hero"/);
+  assert.match(brandingPreview, /variant="hero" brandTreatment="compact"/);
+  assert.match(brandingPreview, /title="Mission Control"[\s\S]*titleSize="long"/);
   assert.match(brandingPreview, /variant="editorial" brandTreatment="compact"/);
+  assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"/);
 });
 
 test('custom team logos remain data-driven and use the full crest slot on every title stage', () => {
