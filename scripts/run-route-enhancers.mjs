@@ -31,7 +31,6 @@ const CORE_ROUTE_ENHANCERS = Object.freeze([
 
 const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase5a-coach-daily-intelligence.mjs',
-  'scripts/apply-phase5b-practice-readiness.mjs',
   'scripts/apply-phase2d-premium-empty-state-language.mjs',
   'scripts/apply-demo-team-branding.mjs',
   'scripts/apply-mobile-premium-secondary-page-system.mjs',
