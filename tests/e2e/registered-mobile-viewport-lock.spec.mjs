@@ -122,12 +122,11 @@ const REGISTERED_CONTENT_RAIL_SELECTORS = [COACH_RAIL_SELECTOR, '.player-scroll-
 
 /* Coach Home intentionally uses a centered editorial gutter on mobile. The
    regression reported on iOS was asymmetric: a normal left gutter survived
-   while the stage ran into the right edge. Test the actual visual invariant,
-   not a full-bleed assumption. */
+   while the stage ran into the right edge. Measure only the visible mobile
+   authority; the retired duplicate team header may remain mounted at zero size. */
 const COACH_HOME_CENTER_AXIS_SELECTORS = [
   '[data-testid="coach-command-center-full"]',
   '[data-testid="coach-command-center-full"] .missionControl',
-  '[data-testid="mission-control-team-header"]',
   '.mcHero[data-team-identity-stage="coach-mission-control"]',
 ];
 
