@@ -36,6 +36,14 @@
     margin-bottom: 0 !important;
   }
 
+  /* Home is the only mobile Player route that owns the persistent identity hero.
+   * Secondary routes already publish their own compact editorial title stage;
+   * retaining the Home identity stage above them creates a duplicate title owner
+   * and leaves the retired mini-header in the first-impression geometry path. */
+  html body #root .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] {
+    display: none !important;
+  }
+
   /* The shared centering boundary owns width/min-width/box sizing. These two
    * registered Coach owners only opt out of an extra late inline gutter. */
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
