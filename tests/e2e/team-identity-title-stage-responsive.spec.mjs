@@ -190,14 +190,14 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    // Coach Home keeps a compact identity region and 80–92px mark at these widths.
+    // Coach Home keeps a compact team label above the dominant 36–44px decision title.
     expect(result.identityHeight).toBeGreaterThanOrEqual(80);
     expect(result.identityHeight).toBeLessThanOrEqual(160);
-    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(30);
-    expect(result.teamIdentitySize).toBeLessThanOrEqual(50);
-    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(16);
-    expect(result.decisionTitleSize).toBeLessThanOrEqual(34);
-    expect(result.teamIdentitySize - result.decisionTitleSize).toBeGreaterThanOrEqual(8);
+    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(10);
+    expect(result.teamIdentitySize).toBeLessThanOrEqual(16);
+    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(36);
+    expect(result.decisionTitleSize).toBeLessThanOrEqual(44);
+    expect(result.decisionTitleSize - result.teamIdentitySize).toBeGreaterThanOrEqual(20);
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
@@ -205,7 +205,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.crestWidth).toBeLessThanOrEqual(96);
     expect(result.crestHeight).toBeGreaterThanOrEqual(80);
     expect(result.crestHeight).toBeLessThanOrEqual(96);
-    expect(result.height).toBeGreaterThanOrEqual(350);
+    expect(result.height).toBeGreaterThanOrEqual(334);
     expect(result.height).toBeLessThanOrEqual(500);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
