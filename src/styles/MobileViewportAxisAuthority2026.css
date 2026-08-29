@@ -114,6 +114,9 @@
 }
 
 @media (min-width: 391px) and (max-width: 767px) {
+  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(64px, 17vw, 74px) !important; }
+
   html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(68px, 18vw, 76px) !important; }
 }
 
