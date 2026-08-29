@@ -75,7 +75,10 @@ test('shared player and coach page owners cannot become persistent horizontal sc
 
 test('Coach Home removes the registered parent offset before Mission Control mounts', () => {
   const shellBridge = mediaBlock(coachShellCss, '(max-width:980px)');
-  const outerOwners = ruleBlock(shellBridge, 'body.mission-control-active .app-shell', 1);
+  // The final grouped ancestry rule ends with the team-brand owner and applies
+  // the same width/max-width/margin/padding declarations to app-shell,
+  // shell-main, content-wrap, and the Coach page container.
+  const outerOwners = ruleBlock(shellBridge, 'body.mission-control-active .team-brand.coach-mode.page');
   assertDeclaration(outerOwners, 'width', '100%!important');
   assertDeclaration(outerOwners, 'max-width', 'none!important');
   assertDeclaration(outerOwners, 'margin', '0!important');
