@@ -220,6 +220,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     const brandPanel = element.querySelector('[data-identity-role="brand-panel"]');
     const brandPanelRect = brandPanel?.getBoundingClientRect();
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
+    const crestRect = crest?.getBoundingClientRect();
     const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
     return {
       left: rect.left,
@@ -230,6 +231,10 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       teamName: team?.textContent?.trim() || "",
       brandPanelWidth: brandPanelRect?.width || 0,
       brandPanelHeight: brandPanelRect?.height || 0,
+      brandPanelOverflow: brandPanel ? getComputedStyle(brandPanel).overflow : "missing",
+      crestWidth: crestRect?.width || 0,
+      crestHeight: crestRect?.height || 0,
+      hasBrandMark: Boolean(crest),
       hasBrandContent: Boolean(crest || fallback),
       objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
     };
@@ -245,14 +250,16 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.brandPanelHeight).toBeGreaterThanOrEqual(96);
     expect(result.height).toBeLessThanOrEqual(260);
   } else {
-    // The title system owns the brand-panel footprint. Intrinsic SVG dimensions
-    // may differ by aspect ratio, so certify the bounded panel rather than the
-    // replaced element's source-ratio box.
     expect(result.brandPanelWidth).toBeGreaterThanOrEqual(64);
     expect(result.brandPanelWidth).toBeLessThanOrEqual(80);
     expect(result.brandPanelHeight).toBeGreaterThanOrEqual(64);
     expect(result.brandPanelHeight).toBeLessThanOrEqual(80);
     expect(result.height).toBeLessThanOrEqual(350);
+    if (result.hasBrandMark) {
+      expect(result.brandPanelOverflow).toBe("hidden");
+      expect(result.crestWidth).toBeLessThanOrEqual(result.brandPanelWidth + 1);
+      expect(result.crestHeight).toBeLessThanOrEqual(result.brandPanelHeight + 1);
+    }
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
   await expectNoHorizontalOverflow(page);
