@@ -149,11 +149,11 @@ test("Team Store mobile portal owns the viewport and light empty-state foregroun
 test("Phase 3 mobile contract protects responsive geometry, touch targets and iPhone safe areas", () => {
   assert.match(surfaceCss, /--sl-phase3-touch-target:\s*44px/);
   assert.match(surfaceCss, /padding-bottom:\s*calc\(96px \+ env\(safe-area-inset-bottom,\s*0px\)\)/);
-  assert.match(surfaceCss, /@media \(max-width:\s*430px\)/);
+  assert.match(surfaceCss, /@media\s*\(max-width:\s*430px\)/);
   assert.match(surfaceCss, /safe-area-inset-left/);
   assert.match(surfaceCss, /safe-area-inset-right/);
-  assert.match(secondaryCss, /@media \(max-width:\s*760px\)/);
-  assert.match(titleStageCss, /@media \(max-width:\s*390px\)/);
+  assert.match(secondaryCss, /@media\s*\(max-width:\s*760px\)/);
+  assert.match(titleStageCss, /@media\s*\(max-width:\s*390px\)/);
   assert.match(titleStageCss, /\.teamIdentityTitleStage--hero \{ --identity-crest: 104px; --identity-title: 46px; \}/);
   assert.match(surfaceCss, /overflow-wrap:\s*anywhere/);
 });
