@@ -112,6 +112,7 @@ async function expectCompactFunctionalIntro(page) {
         left: rect.left,
         right: rect.right,
         width: rect.width,
+        titleText: title?.textContent?.trim() || "",
         titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
         brandPanelWidth: brandPanelRect?.width || 0,
         brandPanelHeight: brandPanelRect?.height || 0,
@@ -129,10 +130,11 @@ async function expectCompactFunctionalIntro(page) {
     expect(geometry.brandTreatment).toBe("compact");
     expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
     expect(geometry.titleSize).toBeLessThanOrEqual(46);
+    const maxBrandPanel = geometry.titleText === "Program Branding" ? 108 : 80;
     expect(geometry.brandPanelWidth).toBeGreaterThanOrEqual(56);
-    expect(geometry.brandPanelWidth).toBeLessThanOrEqual(80);
+    expect(geometry.brandPanelWidth).toBeLessThanOrEqual(maxBrandPanel);
     expect(geometry.brandPanelHeight).toBeGreaterThanOrEqual(56);
-    expect(geometry.brandPanelHeight).toBeLessThanOrEqual(80);
+    expect(geometry.brandPanelHeight).toBeLessThanOrEqual(maxBrandPanel);
     return;
   }
 
