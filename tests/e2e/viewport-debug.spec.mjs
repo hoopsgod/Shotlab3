@@ -86,13 +86,13 @@ async function captureCoachSecondaryPages(page) {
     ['S&C', 'strength-conditioning'],
     ['Rankings', 'rankings'],
     ['Settings', 'settings'],
-    ['Team Store', 'team-store'],
     ['Brand', 'brand'],
+    ['Team Store', 'team-store'],
   ];
 
   for (const [label, slug] of destinations) {
     const more = page.getByTestId('mobile-navigation-more');
-    if (!(await more.count())) return;
+    if (!(await more.count()) || !(await more.isVisible())) return;
     await more.click();
     const sheet = page.getByTestId('mobile-navigation-sheet');
     await expect(sheet).toBeVisible();
