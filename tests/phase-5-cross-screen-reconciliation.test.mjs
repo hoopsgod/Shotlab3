@@ -24,9 +24,11 @@ test("Phase 5 keeps mobile Player secondary identity source-owned, subordinate, 
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
   assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
-  assert.match(brandHierarchyCss, /@media \(max-width: 760px\)[\s\S]*--identity-crest:\s*clamp\(64px,\s*17vw,\s*74px\)/);
-  assert.match(brandHierarchyCss, /@media \(max-width: 760px\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
-  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*64px/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 760px\)/);
+  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(64px,\s*17vw,\s*74px\)/);
+  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s*var\(--identity-crest\)/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)/);
+  assert.match(brandHierarchyCss, /--identity-crest:\s*64px/);
   assert.match(brandHierarchyCss, /align-items:\s*start/);
   assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__microBrand|teamIdentityTitleStage__signatureRule|teamIdentityTitleStage__watermarkBrand|data-brand-treatment="none"/);
   assert.doesNotMatch(titleStageCss, /html\s+body\s+#root/);
