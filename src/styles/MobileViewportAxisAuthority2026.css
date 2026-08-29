@@ -65,10 +65,14 @@
   html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] { color: #172019 !important; -webkit-text-fill-color: #172019 !important; }
   html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="label"],
   html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] { color: #4f5a52 !important; -webkit-text-fill-color: #4f5a52 !important; }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] { background-color: var(--team-brand-surface-deep, #2f4f24) !important; }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"] { color: #f8faf5 !important; -webkit-text-fill-color: #f8faf5 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-layout-role="supporting-evidence"] { background-color: var(--team-brand-surface-deep, #2f4f24) !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="value"] { color: #f8faf5 !important; -webkit-text-fill-color: #f8faf5 !important; }
   html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="label"],
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="detail"] { color: #e8eee6 !important; -webkit-text-fill-color: #e8eee6 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="detail"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="detail"] { color: #e8eee6 !important; -webkit-text-fill-color: #e8eee6 !important; }
 
   html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-visual-role="performance-evidence"] {
     display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; grid-auto-flow: row !important; grid-auto-columns: minmax(0, 1fr) !important; overflow-x: hidden !important; overscroll-behavior-inline: auto !important;
