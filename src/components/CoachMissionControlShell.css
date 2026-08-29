@@ -24,6 +24,9 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:980px){
+ /* The permanent Coach rail is desktop-only. Keep this bridge authoritative so
+    a late/shared display rule cannot put the rail back into mobile document flow. */
+ body.mission-control-active .mcShellV3>.mcRail{display:none!important}
  body.mission-control-active .app-shell,
  body.mission-control-active .shell-main,
  body.mission-control-active .content-wrap,
