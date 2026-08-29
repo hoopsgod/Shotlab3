@@ -82,11 +82,12 @@ async function openCoachPriorityEditor(page) {
 
 async function captureCoachSecondaryPages(page) {
   const destinations = [
-    ['Analytics', 'analytics'],
-    ['Team & Account', 'team-account'],
-    ['Program Branding', 'program-branding'],
-    ['Coach Toolkit', 'coach-toolkit'],
-    ['Shot History', 'shot-history'],
+    ['Drills', 'drills'],
+    ['S&C', 'strength-conditioning'],
+    ['Rankings', 'rankings'],
+    ['Settings', 'settings'],
+    ['Team Store', 'team-store'],
+    ['Brand', 'brand'],
   ];
 
   for (const [label, slug] of destinations) {
@@ -101,7 +102,7 @@ async function captureCoachSecondaryPages(page) {
       continue;
     }
     await destination.click();
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(180);
     await page.evaluate(() => document.fonts?.ready);
     await capture(page, 'coach', `secondary-${slug}`, {
       extraSelectors: ['[data-visual-role="page-intro"]', '[data-testid="mobile-navigation-dock"]'],
@@ -115,7 +116,7 @@ for (const width of widths) {
     if (scenario === 'priority' && role === 'player') continue;
 
     test(`${role} viewport debug ${scenario} at ${width}px`, async ({ page }) => {
-      test.setTimeout(90_000);
+      test.setTimeout(120_000);
       await page.setViewportSize({ width, height: heightFor(width) });
       await installSafeRoutes(page);
       await enterDemo(page, role);
