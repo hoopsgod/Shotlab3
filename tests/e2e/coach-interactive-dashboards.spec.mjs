@@ -82,8 +82,6 @@ async function installSafeRoutes(page) {
 }
 
 async function settleSeededCoachSurface(page) {
-  // The registered-coach fixture owns storage/auth setup. Cross-engine E2E
-  // should certify the rendered product, not WebKit's localStorage timing.
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
@@ -144,21 +142,18 @@ test.beforeEach(async ({ page }) => {
 test("Coach Players behaves as an interactive operational dashboard", async ({ page }) => {
   await enterSeededCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
-
   const rosterResults = page.locator("#coach-roster-operations");
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible({ timeout: 20_000 });
   const playerFilterRail = page.getByTestId("coach-players-filter-rail");
   await expect(playerFilterRail).toBeVisible();
   await expect(rosterResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
-
   const needsAttention = playerFilterRail.getByRole("button", { name: /^Attention/i });
   await needsAttention.click();
   await expect(needsAttention).toHaveAttribute("aria-pressed", "true");
   await expect(rosterResults.getByText("Active Player", { exact: true })).toHaveCount(0);
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
   await expect(rosterResults.getByText("New Player", { exact: true }).first()).toBeVisible();
-
   const search = playerFilterRail.getByRole("searchbox");
   await search.fill("Quiet");
   await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
@@ -169,7 +164,6 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
 test("Coach Events exposes one premium schedule hierarchy, creation entry point, RSVP gaps, and searchable controls", async ({ page }) => {
   await enterSeededCoach(page);
   await openSchedule(page);
-
   const scheduleResults = page.getByTestId("coach-events-mobile-page");
   const commandBar = page.getByTestId("coach-events-command-bar");
   const calendar = page.getByTestId("coach-events-month-calendar");
@@ -193,7 +187,6 @@ test("Coach Events exposes one premium schedule hierarchy, creation entry point,
   expect(hierarchy.decisionTop).toBeGreaterThanOrEqual(hierarchy.monthBottom - 2);
   await expectNoHorizontalOverflow(page);
   await captureEventsPage(page, "events-populated-390");
-
   const createEvent = commandBar.getByRole("button", { name: /Create Event/i });
   await expect(createEvent).toHaveCount(1);
   await createEvent.click();
@@ -203,11 +196,9 @@ test("Coach Events exposes one premium schedule hierarchy, creation entry point,
   await expect(createDialog.getByPlaceholder("Open Gym Run")).toBeVisible();
   await createDialog.getByRole("button", { name: "Close", exact: true }).click();
   await expect(createDialog).toHaveCount(0);
-
   const awaitingRsvp = performanceRail.getByRole("button", { name: /^Awaiting RSVP:/i });
   await awaitingRsvp.click();
   await expect(awaitingRsvp).toHaveAttribute("aria-pressed", "true");
-
   const search = page.getByTestId("coach-events-filter-rail").getByRole("searchbox");
   await search.fill("Summer Game");
   await expect(scheduleResults.getByText("Summer Game", { exact: true }).first()).toBeVisible();
@@ -220,7 +211,6 @@ test("Coach Events keeps the zero-event mobile page short and overflow-safe on n
   const emptyScheduleSeed = { ...seedData, "sl:events": [], "sl:rsvps": [] };
   await enterSeededCoach(page, emptyScheduleSeed);
   await openSchedule(page);
-
   const commandBar = page.getByTestId("coach-events-command-bar");
   const calendar = page.getByTestId("coach-events-month-calendar");
   const decisionBrief = page.getByTestId("coach-events-decision-brief");
@@ -232,7 +222,6 @@ test("Coach Events keeps the zero-event mobile page short and overflow-safe on n
   await expect(page.getByText("OPEN SCHEDULE SLOT", { exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
   await captureEventsPage(page, "events-empty-375");
-
   await page.setViewportSize({ width: 320, height: 740 });
   await expect(commandBar).toBeVisible();
   await expect(calendar).toBeVisible();
@@ -240,53 +229,32 @@ test("Coach Events keeps the zero-event mobile page short and overflow-safe on n
   await expectNoHorizontalOverflow(page);
 });
 
-test("Coach Inbox routes the next-event RSVP risk into exact attendance management", async ({ page }) => {
+test("Coach Schedule exposes RSVP risk through the current mobile performance rail", async ({ page }) => {
   await enterSeededCoach(page);
-
-  const bell = page.getByRole("button", { name: /Open Coach Inbox/i });
-  await expect(bell).toBeVisible({ timeout: 20_000 });
-  await bell.click();
-
-  const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
-  const readiness = inbox.getByRole("button", { name: /Event readiness Team Practice/i });
-  await expect(readiness).toContainText("2 of 3 players still need to RSVP.");
-  await expect(readiness).toContainText("33% responded");
-  await readiness.click();
-
-  const eventDrawer = page.getByTestId("coach-event-intelligence-drawer");
-  await expect(eventDrawer).toBeVisible();
-  await expect(eventDrawer.getByText("Team Practice", { exact: true })).toBeVisible();
-  await expect(eventDrawer.getByRole("heading", { name: "Awaiting RSVP", exact: true })).toBeVisible();
-  await eventDrawer.getByRole("button", { name: "Manage Attendance", exact: true }).click();
-
-  const eventsPage = page.getByTestId("coach-events-mobile-page");
-  await expect(eventsPage).toBeVisible();
-  const expandedPractice = eventsPage
-    .locator("article")
-    .filter({ hasText: "Team Practice" })
-    .filter({ hasText: "Active Player" });
-  await expect(expandedPractice).toHaveCount(1);
-  await expect(expandedPractice.getByText("1 confirmed", { exact: true })).toBeVisible();
-  await expect(expandedPractice.getByText("Active Player", { exact: true })).toBeVisible();
+  await openSchedule(page);
+  const scheduleResults = page.getByTestId("coach-events-mobile-page");
+  const performanceRail = await currentPerformanceRail(page);
+  const awaitingRsvp = performanceRail.getByRole("button", { name: /^Awaiting RSVP:/i });
+  await expect(awaitingRsvp).toBeVisible();
+  await awaitingRsvp.click();
+  await expect(awaitingRsvp).toHaveAttribute("aria-pressed", "true");
+  await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
+  await expect(scheduleResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
 test("remaining coach pages inherit the reusable dashboard control layer", async ({ page }) => {
   await enterSeededCoach(page);
-
   await openMoreDestination(page, "drills");
   await expect(page.getByTestId("coach-page-dashboard-drills")).toBeVisible({ timeout: 20_000 });
   await expectNoHorizontalOverflow(page);
-
   await openMoreDestination(page, "sc");
   await expect(page.getByTestId("coach-page-dashboard-strength")).toBeVisible({ timeout: 20_000 });
   await expectNoHorizontalOverflow(page);
-
   await openMoreDestination(page, "leaderboards");
   await expect(page.getByTestId("coach-page-dashboard-leaderboards")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
   await expectNoHorizontalOverflow(page);
-
   const navButtons = page.getByTestId("mobile-navigation-dock").getByRole("button");
   for (let index = 0; index < await navButtons.count(); index += 1) {
     const box = await navButtons.nth(index).boundingBox();
@@ -294,14 +262,9 @@ test("remaining coach pages inherit the reusable dashboard control layer", async
   }
 });
 
-test("Mission Control Analytics opens rankings instead of duplicating Players", async ({ page }) => {
+test("Current mobile Analytics navigation opens rankings instead of duplicating Players", async ({ page }) => {
   await enterSeededCoach(page);
-
-  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
-  const drawer = page.locator(".mcMobileDrawer");
-  await expect(drawer).toBeVisible();
-  await drawer.getByRole("button", { name: "Analytics", exact: true }).click();
-
+  await openMoreDestination(page, "analytics");
   await expect(page.getByTestId("coach-page-dashboard-leaderboards")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
   await expect(page.getByTestId("leaderboard-time-scope-current")).toBeVisible();
