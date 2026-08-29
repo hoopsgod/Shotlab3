@@ -262,9 +262,9 @@ test("remaining coach pages inherit the reusable dashboard control layer", async
   }
 });
 
-test("Current mobile Analytics navigation opens rankings instead of duplicating Players", async ({ page }) => {
+test("Current mobile Leaderboards navigation opens rankings instead of duplicating Players", async ({ page }) => {
   await enterSeededCoach(page);
-  await openMoreDestination(page, "analytics");
+  await openMoreDestination(page, "leaderboards");
   await expect(page.getByTestId("coach-page-dashboard-leaderboards")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
   await expect(page.getByTestId("leaderboard-time-scope-current")).toBeVisible();
