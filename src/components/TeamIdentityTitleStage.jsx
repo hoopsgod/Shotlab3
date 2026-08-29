@@ -127,7 +127,14 @@ export default function TeamIdentityTitleStage({
           src={cleanedLogo}
           alt={`${teamName} logo`}
           draggable="false"
-          style={{ width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+          ref={(node) => {
+            if (!node) return;
+            node.style.setProperty("width", "100%", "important");
+            node.style.setProperty("height", "100%", "important");
+            node.style.setProperty("max-width", "100%", "important");
+            node.style.setProperty("max-height", "100%", "important");
+            node.style.setProperty("object-fit", "contain", "important");
+          }}
           onError={() => setLogoFailed(true)}
         />
       ) : showLogoSetupAction ? (
