@@ -135,6 +135,13 @@
     padding: 10px 0 14px;
   }
   .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__crestSlot {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    max-width: 76px !important;
+    max-height: 76px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
     margin-top: 10px;
   }
   .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] {
