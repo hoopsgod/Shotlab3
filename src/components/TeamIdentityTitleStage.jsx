@@ -127,6 +127,7 @@ export default function TeamIdentityTitleStage({
           src={cleanedLogo}
           alt={`${teamName} logo`}
           draggable="false"
+          style={{ width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
           onError={() => setLogoFailed(true)}
         />
       ) : showLogoSetupAction ? (
