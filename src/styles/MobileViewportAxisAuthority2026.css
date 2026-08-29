@@ -260,6 +260,15 @@
   }
 }
 
+/* The source Progress module has a second narrow breakpoint at 390px. Preserve
+ * that exact source-owned headline size here because the production restructure
+ * drops the nested module media rule along with the 620px composition rules. */
+@media (max-width: 390px) {
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 {
+    font-size: 37px !important;
+  }
+}
+
 /* The title-stage certification contract restores 25vw Coach crests above the
  * compact <=390px breakpoint, clamped to the historical 96–108px range. */
 @media (min-width: 391px) and (max-width: 767px) {
