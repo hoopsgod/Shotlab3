@@ -57,7 +57,7 @@ test("Coach Player Detail enters through the canonical editorial workspace and k
   assert.match(detail, /className="coachPlayerDataManagement"/);
   assert.match(detail, /<summary className="coachPlayerDataManagement__summary">/);
   assert.match(normalizedCss, /\.coachPlayerProfileHero\{[^}]*linear-gradient\(145deg,var\(--team-brand-surface-elevated,#171b18\),var\(--team-brand-surface-deep,#0c0f0d\)72%\)/);
-  assert.match(normalizedCss, /\.coachPlayerDataManagement\{[^}]*background:#fff/);
+  assert.match(normalizedCss, /\.coachPlayerProfileMetrics\{[^}]*background:#fff/);
 });
 
 test("Coach operational panels share the light 2026 workspace grammar", () => {
