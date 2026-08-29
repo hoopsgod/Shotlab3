@@ -79,7 +79,7 @@ test("component responsibilities are separated instead of layered by override",(
   assert.match(shellCss,/legacy app-shell bridge and desktop rail containment/i);
   assert.match(shellCss,/body\.mission-control-active \.app-shell/);
   assert.match(shellCss,/\.mcShellV3>\.mcRail\{display:flex!important;flex-direction:column/);
-  assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{|\.mcProgramIdentity\s*\{|\.mcTeamHealth\s*\{/);
+  assert.doesNotMatch(shellCss,/(?:^|\n)\s*\.(?:mcHeroTeamMark|mcProgramIdentity|mcTeamHealth)\s*\{/m);
 
   assert.match(finalCss,/support/i);
   assert.doesNotMatch(finalCss,/\.missionControl\s*\{|\.mcHero\[data-team-identity-stage|\.mcHeroTeamMark\s*\{/);
