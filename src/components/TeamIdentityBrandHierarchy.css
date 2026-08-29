@@ -90,27 +90,12 @@
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot,
   .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crestSlot {
-    width: var(--identity-crest) !important;
-    height: var(--identity-crest) !important;
-    min-width: var(--identity-crest) !important;
-    min-height: var(--identity-crest) !important;
-    max-width: var(--identity-crest) !important;
-    max-height: var(--identity-crest) !important;
+    width: var(--identity-crest);
+    min-width: 0;
+    max-width: var(--identity-crest);
     box-sizing: border-box;
-    overflow: hidden;
     align-self: start;
     margin-top: 10px;
-  }
-
-  /* Custom artwork may be extremely wide or tall. Keep the image box inside
-     the compact editorial slot; object-fit then preserves the artwork ratio. */
-  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crest,
-  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crest {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-    object-fit: contain !important;
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine {
