@@ -28,9 +28,7 @@ const mobileShellBlock = coachShellCss.match(/@media\(max-width:700px\)\{([\s\S]
 
 test('shared semantic title primitive remains authoritative for reusable authenticated page titles', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
-  for (const source of [coachHeader, playerHeader, secondary, playerWorkspace, playerCommitment, progress, brandingPreview]) {
-    assert.match(source, /TeamIdentityTitleStage/);
-  }
+  for (const source of [coachHeader, playerHeader, secondary, playerWorkspace, playerCommitment, progress, brandingPreview]) assert.match(source, /TeamIdentityTitleStage/);
   assert.doesNotMatch(stage, /appHeaderTitle|secondaryPageIntro|coach-dashboard-identity-header\s+appHeader/);
   assert.doesNotMatch(playerCommitment, /className=\{styles\.routeHeader\}/);
 });
@@ -43,28 +41,19 @@ test('obsolete parallel secondary-page title authorities remain deleted', () => 
   assert.doesNotMatch(playerCompositionEnhancer, /PlayerCommitmentCenter|MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home keeps one source-owned hero while runtime shell bridge owns only device containment and final mobile parity', () => {
+test('Coach Home keeps one source-owned hero while runtime shell bridge owns device containment and final mobile parity', () => {
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
   assert.match(coach, /is-mobile-shell/);
   assert.doesNotMatch(coach, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-
   const imports = [...coach.matchAll(/import ['"]\.\/(CoachMissionControl[^'"]+\.css)['"]/g)].map((match) => match[1]);
-  assert.deepEqual(imports, [
-    'CoachMissionControlInteractions.css',
-    'CoachMissionControlShell.css',
-    'CoachMissionControlFinal.css',
-    'CoachMissionControlTitleStage.css',
-  ]);
+  assert.deepEqual(imports, ['CoachMissionControlInteractions.css','CoachMissionControlShell.css','CoachMissionControlFinal.css','CoachMissionControlTitleStage.css']);
   assert.equal(imports.filter((name) => name === 'CoachMissionControlTitleStage.css').length, 1);
-
-  // TitleStage still owns the base composition. Shell.css is allowed one narrowly
-  // scoped mobile override because it is keyed to runtime viewport authority and
-  // fixes the real-device duplicate-header/cascade failure that media order missed.
   assert.match(coachTitleCss, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell/);
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell > \.mcRail\{display:none!important\}/);
+  assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*text-size-adjust:100%!important/);
   assert.match(mobileShellBlock, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
   assert.match(mobileShellBlock, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px!important\}/);
   assert.match(mobileShellBlock, /\.mcProgramIdentity\{font:780 11px\/1\.2/);
@@ -76,7 +65,6 @@ test('Coach mobile hierarchy intentionally uses one visible introduction instead
   assert.match(mobileShellBlock, /Coach Home had two competing introduction systems on iPhone/);
   assert.match(mobileShellBlock, /Remove the duplicate mobile header/);
   assert.match(mobileShellBlock, /Match the shared mobile editorial language used by Players and Events/);
-  assert.match(mobileShellBlock, /text-size-adjust:100%/);
   assert.doesNotMatch(mobileShellBlock, /\.mcProgramIdentity\{[^}]*clamp\(36px,\s*10\.2vw,\s*45px\)/);
   assert.doesNotMatch(mobileShellBlock, /h1\{[^}]*clamp\(28px,\s*7\.6vw,\s*33px\)/);
 });
@@ -92,15 +80,7 @@ test('secondary enhancer verifies title ownership instead of redesigning titles 
 test('title-only mutation scripts and emergency late authority remain retired', () => {
   const all = [...DEV_ROUTE_ENHANCERS, ...BUILD_ROUTE_ENHANCERS].join('\n');
   assert.doesNotMatch(all, /apply-mobile-route-signature-promotion\.mjs|apply-mobile-centered-route-stage\.mjs|apply-team-identity-coach-hero-mark\.mjs/);
-  for (const path of [
-    'scripts/apply-mobile-route-signature-promotion.mjs',
-    'scripts/apply-mobile-centered-route-stage.mjs',
-    'scripts/apply-team-identity-coach-hero-mark.mjs',
-    'scripts/title-authority-secondary-source-migration.mjs',
-    '.github/workflows/title-authority-secondary-source-migration.yml',
-    '.github/workflows/final-title-css-cleanup-v2-once.yml',
-    'public/shotlab-team-identity-title-authority.css',
-  ]) assert.equal(existsSync(path), false, `${path} must remain retired`);
+  for (const path of ['scripts/apply-mobile-route-signature-promotion.mjs','scripts/apply-mobile-centered-route-stage.mjs','scripts/apply-team-identity-coach-hero-mark.mjs','scripts/title-authority-secondary-source-migration.mjs','.github/workflows/title-authority-secondary-source-migration.yml','.github/workflows/final-title-css-cleanup-v2-once.yml','public/shotlab-team-identity-title-authority.css']) assert.equal(existsSync(path), false, `${path} must remain retired`);
 });
 
 test('shared title geometry preserves premium crest containment and difficult-title floor', () => {
