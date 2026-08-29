@@ -1,0 +1,228 @@
+/* Final mobile authority for authenticated secondary workspaces.
+   Keep team identity present, but make the page task—not the crest—the dominant signal. */
+@media (max-width: 760px) {
+  .secondaryPageShell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    gap: 20px;
+    padding: 8px 16px calc(96px + env(safe-area-inset-bottom));
+    overflow-x: clip;
+  }
+
+  .secondaryPageShell > *,
+  .secondaryPageToolbar,
+  .secondaryPageToolbar > *,
+  .secondaryPageEvidence,
+  .secondaryPageDecision,
+  .teamIdentityTitleStageFrame,
+  .secondaryPageTitleStage {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .secondaryPageTitleStage.teamIdentityTitleStage--standard {
+    --identity-crest: clamp(58px, 15vw, 68px);
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__inner {
+    grid-template-columns: minmax(0, 1fr) var(--identity-crest) !important;
+    gap: 10px !important;
+    padding: 10px 2px 12px !important;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__crestSlot {
+    margin-top: 7px !important;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__title {
+    max-width: 10.5ch;
+    margin: 0;
+    font-size: clamp(38px, 11vw, 48px) !important;
+    line-height: .94 !important;
+    letter-spacing: -.045em !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-wrap: balance;
+  }
+
+  .secondaryPageTitleStage.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
+    max-width: 11ch;
+    font-size: clamp(34px, 9.6vw, 42px) !important;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__identityLine {
+    margin-bottom: 7px !important;
+    font-size: 11px !important;
+    letter-spacing: .115em !important;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__summary {
+    max-width: 25ch;
+    margin-top: 9px !important;
+    color: #69706b !important;
+    font-size: clamp(16px, 4.5vw, 19px) !important;
+    line-height: 1.35 !important;
+    letter-spacing: -.015em;
+    text-wrap: pretty;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__support {
+    margin-top: 11px !important;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px !important;
+    width: 100%;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__action {
+    min-height: 46px !important;
+    max-width: 100%;
+    padding-inline: 14px !important;
+    font-size: 13px !important;
+    white-space: normal;
+  }
+
+  /* Toolbars must adapt to the viewport instead of compressing their children. */
+  .secondaryPageToolbar {
+    gap: 11px;
+    overflow: hidden;
+  }
+
+  .secondaryPageToolbar [data-visual-role="filter-rail"] {
+    display: flex !important;
+    align-items: center;
+    gap: 9px !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .secondaryPageToolbar [data-visual-role="filter-rail"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  .secondaryPageToolbar [data-visual-role="filter-rail"] > * {
+    flex: 0 0 auto;
+    min-width: max-content;
+  }
+
+  .secondaryPageToolbar input[type="search"],
+  .secondaryPageToolbar input:not([type]) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    padding-inline: 14px !important;
+    font-size: 16px !important;
+    text-overflow: ellipsis;
+  }
+
+  .secondaryPageToolbar form,
+  .secondaryPageToolbar label,
+  .secondaryPageToolbar [role="search"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Primary decision cards should read like a premium briefing, never a desktop
+     three-column card squeezed into a phone. */
+  .secondaryPageDecision {
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    align-items: start !important;
+    min-height: 0 !important;
+    gap: 14px !important;
+    padding: 19px 17px 18px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 18px 42px rgba(25,31,26,.14) !important;
+  }
+
+  .secondaryPageDecision__copy {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .secondaryPageDecision h2 {
+    max-width: 18ch !important;
+    margin: 0 !important;
+    font-size: clamp(27px, 8vw, 31px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -.04em !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-wrap: balance;
+  }
+
+  .secondaryPageDecision p {
+    max-width: 34ch;
+    margin-top: 9px !important;
+    font-size: 14px !important;
+    line-height: 1.48 !important;
+  }
+
+  .secondaryPageDecision button {
+    min-height: 46px !important;
+    margin-top: 14px !important;
+    padding-inline: 15px !important;
+    font-size: 13px !important;
+  }
+
+  .secondaryPageDecision__visual {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 14px 0 0 !important;
+    border-top: 1px solid rgba(255,255,255,.09) !important;
+    border-left: 0 !important;
+  }
+
+  .secondaryPageEvidence {
+    grid-template-columns: 1fr !important;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .secondaryPageEvidence > * {
+    width: 100%;
+    min-width: 0 !important;
+    padding: 17px 2px !important;
+  }
+
+  /* Legacy Coach lists embedded under the premium shell need explicit containment. */
+  .secondaryPageShell :is(.scSection, .ch) {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .secondaryPageShell :is(.scSection, .ch) :is(button, input, select) {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .secondaryPageShell {
+    padding-inline: 14px;
+  }
+
+  .secondaryPageTitleStage.teamIdentityTitleStage--standard {
+    --identity-crest: 58px;
+  }
+
+  .secondaryPageTitleStage .teamIdentityTitleStage__title {
+    font-size: clamp(36px, 10.5vw, 42px) !important;
+  }
+
+  .secondaryPageTitleStage.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
+    font-size: clamp(32px, 9vw, 38px) !important;
+  }
+}
