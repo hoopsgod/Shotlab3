@@ -49,7 +49,7 @@ test("Phase 4 preserves the existing Mission Control interaction contract", () =
   }
 });
 
-test("Phase 4 source owns program identity, subordinate daily decision, Program Pulse and workspace composition", () => {
+test("Phase 4 source owns shared-scale program identity, daily decision, Program Pulse and workspace composition", () => {
   assert.match(commandCenter, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
   assert.match(commandCenter, /mcHeroIdentity/);
@@ -57,8 +57,9 @@ test("Phase 4 source owns program identity, subordinate daily decision, Program 
   assert.match(titleCss, /Canonical Coach Home prototype-composition authority/);
   assert.match(titleCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\][\s\S]*min-height:\s*382px/);
   assert.match(titleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(titleCss, /\.mcProgramIdentity\s*\{[\s\S]*?clamp\(36px,\s*10\.2vw,\s*45px\)[\s\S]*?"Barlow Condensed","Arial Narrow"/);
-  assert.match(titleCss, /\sh1\s*\{[\s\S]*?clamp\(28px,\s*7\.6vw,\s*33px\)[\s\S]*?var\(--mc-native\)/);
+  assert.match(titleCss, /\.mcProgramIdentity\s*\{[\s\S]*?font:\s*780\s+11px\/1\.2\s+var\(--mc-native\)[\s\S]*?letter-spacing:\s*\.075em/);
+  assert.match(titleCss, /\sh1\s*\{[\s\S]*?clamp\(40px,\s*9\.8vw,\s*44px\)[\s\S]*?var\(--mc-native\)/);
+  assert.match(titleCss, /\.mcHeroContent>p\s*\{[\s\S]*?font:\s*520\s+14px\/1\.45\s+var\(--mc-native\)/);
   assert.match(titleCss, /\.mcTeamHealth\s*\{[\s\S]*?background:\s*linear-gradient\(180deg,var\(--team-brand-surface-deep/);
   assert.match(titleCss, /\.mcRealityStrip\s*\{/);
   assert.match(titleCss, /grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)/);
