@@ -43,6 +43,15 @@ async function enterDemo(page, role) {
   await page.evaluate(() => document.fonts?.ready);
 }
 
+async function assertCoachShellMode(page, width) {
+  const permanentRail = page.locator('.mcShellV3 > .mcRail');
+  if (width <= 980) {
+    await expect(permanentRail, 'desktop Coach rail must not enter mobile/tablet document flow').toBeHidden();
+    return;
+  }
+  await expect(permanentRail, 'desktop Coach rail should remain visible on desktop').toBeVisible();
+}
+
 async function capture(page, role, label, options = {}) {
   const report = await collectViewportDiagnostics(page, { role, label, ...options });
   const outputPath = writeViewportDiagnostics(report);
@@ -82,6 +91,7 @@ for (const width of widths) {
       await installSafeRoutes(page);
       await enterDemo(page, role);
 
+      if (role === 'coach') await assertCoachShellMode(page, width);
       await capture(page, role, 'home');
 
       const more = page.getByTestId('mobile-navigation-more');
