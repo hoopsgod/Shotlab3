@@ -88,7 +88,12 @@
     padding: 12px 2px 14px;
   }
 
-  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot {
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot,
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crestSlot {
+    width: var(--identity-crest);
+    min-width: 0;
+    max-width: var(--identity-crest);
+    box-sizing: border-box;
     align-self: start;
     margin-top: 10px;
   }
