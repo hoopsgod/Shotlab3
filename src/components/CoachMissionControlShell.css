@@ -24,7 +24,7 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 .app-shell:has(.mcShellV3.is-mobile-shell) > .shell-main,
 .app-shell:has(.mcShellV3.is-mobile-shell) > .shell-main > .content-wrap,
 .app-shell:has(.mcShellV3.is-mobile-shell) .team-brand.coach-mode.page{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
-.mcShellV3.is-mobile-shell{display:block!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow-x:clip!important}
+.mcShellV3.is-mobile-shell{display:block!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow-x:clip!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
 .mcShellV3.is-mobile-shell > .mcRail{display:none!important}
 
 @media(min-width:981px){
@@ -49,6 +49,18 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:700px){
+ /* Real-device parity lock. Viewport Debug previously checked containment only,
+    so a visually divergent Coach title system could still pass. Keep the utility
+    controls compact and make the visible Coach title copy use the same mobile
+    scale as TeamIdentityTitleStage used by Players, Events and other routes. */
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{min-height:52px!important;padding:4px 12px!important;grid-template-columns:44px minmax(0,1fr) 44px!important;background:#f7f3ea!important;color:#101820!important;border-bottom:1px solid rgba(16,24,32,.1)!important;box-shadow:none!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcBrandLockup{visibility:hidden!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcMobileMenu,
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcBell{background:transparent!important;color:#101820!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{font:780 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.075em!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{font:820 clamp(42px,10.2vw,44px)/.92 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:-.062em!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{font:520 14px/1.45 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
+
  /* External bottom navigation overlaps the document flow. This is shell clearance,
     not Coach Home composition; the visual page still owns its own gutters. */
  body.mission-control-active .mcShellV3 .missionControl{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important}
