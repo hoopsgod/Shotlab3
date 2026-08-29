@@ -129,10 +129,10 @@ async function expectCompactFunctionalIntro(page) {
     expect(geometry.brandTreatment).toBe("compact");
     expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
     expect(geometry.titleSize).toBeLessThanOrEqual(46);
-    expect(geometry.brandPanelWidth).toBeGreaterThanOrEqual(84);
-    expect(geometry.brandPanelWidth).toBeLessThanOrEqual(108);
-    expect(geometry.brandPanelHeight).toBeGreaterThanOrEqual(84);
-    expect(geometry.brandPanelHeight).toBeLessThanOrEqual(108);
+    expect(geometry.brandPanelWidth).toBeGreaterThanOrEqual(56);
+    expect(geometry.brandPanelWidth).toBeLessThanOrEqual(80);
+    expect(geometry.brandPanelHeight).toBeGreaterThanOrEqual(56);
+    expect(geometry.brandPanelHeight).toBeLessThanOrEqual(80);
     return;
   }
 
