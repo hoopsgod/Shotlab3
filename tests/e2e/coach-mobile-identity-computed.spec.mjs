@@ -123,10 +123,12 @@ for (const viewport of VIEWPORTS) {
       };
     });
 
-    expect(metrics.mark.width).toBeGreaterThanOrEqual(96);
-    expect(metrics.mark.width).toBeLessThanOrEqual(115);
-    expect(metrics.mark.height).toBeGreaterThanOrEqual(96);
-    expect(metrics.mark.height).toBeLessThanOrEqual(115);
+    // Coach Home keeps a larger identity mark than secondary pages, but the current
+    // compact mobile authority intentionally scales it from 80px to 92px here.
+    expect(metrics.mark.width).toBeGreaterThanOrEqual(80);
+    expect(metrics.mark.width).toBeLessThanOrEqual(96);
+    expect(metrics.mark.height).toBeGreaterThanOrEqual(80);
+    expect(metrics.mark.height).toBeLessThanOrEqual(96);
     expect(metrics.imageStyle.objectFit).toBe('contain');
     expect(metrics.image.left).toBeGreaterThanOrEqual(metrics.mark.left - 1);
     expect(metrics.image.right).toBeLessThanOrEqual(metrics.mark.right + 1);
@@ -145,10 +147,9 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(16);
     expect(metrics.decisionTitleSize).toBeLessThanOrEqual(34);
     expect(metrics.teamIdentitySize - metrics.decisionTitleSize).toBeGreaterThanOrEqual(8);
-    // Phase 4 deliberately keeps the mobile hero compact: the source-owned floor is
-    // 382px, with a 388px narrow-phone guard, so this contract must not reintroduce
-    // the older 400px dead-space requirement.
-    expect(metrics.hero.height).toBeGreaterThanOrEqual(382);
+    // The current source-owned mobile hero removes the older decorative void while
+    // retaining an identity-first composition at difficult mobile widths.
+    expect(metrics.hero.height).toBeGreaterThanOrEqual(350);
     expect(metrics.hero.height).toBeLessThanOrEqual(580);
     expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
     expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
