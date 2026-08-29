@@ -85,6 +85,7 @@
    * surface matches the certified Demo CTA geometry and remains touch-safe. */
   html body #root .performance-shell--coach.is-mobile .mcActivationPlan {
     grid-template-columns: auto minmax(0, 1fr) !important;
+    padding-inline: 16px !important;
   }
   html body #root .performance-shell--coach.is-mobile .mcActivationPlan > button {
     grid-column: 1 / -1 !important;
