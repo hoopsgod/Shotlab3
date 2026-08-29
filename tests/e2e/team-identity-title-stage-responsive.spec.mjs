@@ -190,7 +190,8 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    expect(result.identityHeight).toBeGreaterThanOrEqual(96);
+    // Coach Home keeps a compact identity region and 80–92px mark at these widths.
+    expect(result.identityHeight).toBeGreaterThanOrEqual(80);
     expect(result.identityHeight).toBeLessThanOrEqual(160);
     expect(result.teamIdentitySize).toBeGreaterThanOrEqual(30);
     expect(result.teamIdentitySize).toBeLessThanOrEqual(50);
@@ -200,9 +201,11 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
-    expect(result.crestWidth).toBeGreaterThanOrEqual(96);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(96);
-    expect(result.height).toBeGreaterThanOrEqual(382);
+    expect(result.crestWidth).toBeGreaterThanOrEqual(80);
+    expect(result.crestWidth).toBeLessThanOrEqual(96);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(80);
+    expect(result.crestHeight).toBeLessThanOrEqual(96);
+    expect(result.height).toBeGreaterThanOrEqual(350);
     expect(result.height).toBeLessThanOrEqual(500);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
@@ -239,8 +242,11 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.crestHeight).toBeGreaterThanOrEqual(96);
     expect(result.height).toBeLessThanOrEqual(260);
   } else {
-    expect(result.crestWidth).toBeGreaterThanOrEqual(80);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(80);
+    // Standard editorial stages are intentionally subordinate to their page title.
+    expect(result.crestWidth).toBeGreaterThanOrEqual(64);
+    expect(result.crestWidth).toBeLessThanOrEqual(80);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(64);
+    expect(result.crestHeight).toBeLessThanOrEqual(80);
     expect(result.height).toBeLessThanOrEqual(330);
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
