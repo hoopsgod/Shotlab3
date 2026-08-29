@@ -45,6 +45,29 @@
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest { min-width: 0 !important; }
 
+  /* Final hostile-artwork containment. Custom logos may have extreme source
+   * aspect ratios; the rendered mark must remain inside the compact editorial
+   * crest token instead of reclaiming vertical layout or painting into content. */
+  html body #root .performance-shell.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] [data-identity-role="brand-panel"] {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  html body #root .performance-shell.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] [data-identity-role="brand-mark"] {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
   html body #root .performance-shell--player.is-mobile .player-quick-actions,
   html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] { padding-inline: 0 !important; }
   html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
