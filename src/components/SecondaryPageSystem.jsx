@@ -14,6 +14,7 @@ const TITLE_LABELS=new Map([
   ["Leaderboards Dashboard","Leaderboards"],
 ]);
 const normalizeTitle=value=>TITLE_LABELS.get(String(value||""))||value;
+const mobileDecisionLayout=()=>typeof window!=="undefined"&&Math.min(window.innerWidth||Infinity,window.visualViewport?.width||Infinity,window.screen?.width||Infinity)<=760;
 
 export function SecondaryPageShell({children,testId,className=""}){return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>}
 
@@ -44,5 +45,12 @@ export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],back
 }
 
 export function SecondaryPageToolbar({children,testId,label="Page tools"}){return <section className="secondaryPageToolbar" data-testid={testId} data-layout-role="evidence-tools" data-surface="light" data-visual-role="page-tools" aria-label={label}>{children}</section>}
-export function SecondaryPageDecision({eyebrow,title,detail,tone="neutral",action,children,testId,icon}){const iconName=icon||iconFor(`${eyebrow} ${title}`);return <section className="secondaryPageDecision" data-tone={tone} data-testid={testId} data-layout-role="primary-decision" data-surface="dark" data-visual-role="primary-decision" data-page-kind={iconName} data-mobile-stage="performance"><span className="secondaryPageDecision__icon" aria-hidden="true"><ShotLabIcon name={iconName} size={23}/></span><div className="secondaryPageDecision__copy">{eyebrow?<div className="secondaryPageDecision__eyebrow">{eyebrow}</div>:null}<h2>{title}</h2>{detail?<p>{detail}</p>:null}{action?<button type="button" onClick={action.onClick} disabled={action.disabled}><span>{action.label}</span><ShotLabIcon name="arrow" size={16}/></button>:null}</div>{children?<div className="secondaryPageDecision__visual">{children}</div>:null}</section>}
+export function SecondaryPageDecision({eyebrow,title,detail,tone="neutral",action,children,testId,icon}){
+  const iconName=icon||iconFor(`${eyebrow} ${title}`);
+  const mobile=mobileDecisionLayout();
+  const sectionStyle=mobile?{gridTemplateColumns:"40px minmax(0,1fr)",alignItems:"start",minHeight:0,gap:14,padding:"19px 17px 18px"}:undefined;
+  const titleStyle=mobile?{maxWidth:"22ch",fontSize:29,lineHeight:1.02,overflowWrap:"normal",wordBreak:"normal"}:undefined;
+  const visualStyle=mobile?{gridColumn:"1 / -1",width:"100%",minWidth:0,padding:"15px 0 0",borderTop:"1px solid rgba(255,255,255,.09)",borderLeft:0}:undefined;
+  return <section className="secondaryPageDecision" style={sectionStyle} data-tone={tone} data-testid={testId} data-layout-role="primary-decision" data-surface="dark" data-visual-role="primary-decision" data-page-kind={iconName} data-mobile-stage="performance"><span className="secondaryPageDecision__icon" aria-hidden="true"><ShotLabIcon name={iconName} size={23}/></span><div className="secondaryPageDecision__copy" style={mobile?{minWidth:0,width:"auto"}:undefined}>{eyebrow?<div className="secondaryPageDecision__eyebrow">{eyebrow}</div>:null}<h2 style={titleStyle}>{title}</h2>{detail?<p>{detail}</p>:null}{action?<button type="button" onClick={action.onClick} disabled={action.disabled}><span>{action.label}</span><ShotLabIcon name="arrow" size={16}/></button>:null}</div>{children?<div className="secondaryPageDecision__visual" style={visualStyle}>{children}</div>:null}</section>
+}
 export function SecondaryPageEvidence({children,testId,label="Supporting evidence"}){return <section className="secondaryPageEvidence" data-testid={testId} data-layout-role="supporting-evidence" data-surface="light" data-visual-role="supporting-evidence" aria-label={label}>{children}</section>}
