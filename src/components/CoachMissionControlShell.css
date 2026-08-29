@@ -49,17 +49,24 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:700px){
- /* Real-device parity lock. Viewport Debug previously checked containment only,
-    so a visually divergent Coach title system could still pass. Keep the utility
-    controls compact and make the visible Coach title copy use the same mobile
-    scale as TeamIdentityTitleStage used by Players, Events and other routes. */
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{min-height:52px!important;padding:4px 12px!important;grid-template-columns:44px minmax(0,1fr) 44px!important;background:#f7f3ea!important;color:#101820!important;border-bottom:1px solid rgba(16,24,32,.1)!important;box-shadow:none!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcBrandLockup{visibility:hidden!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcMobileMenu,
- body.mission-control-active .mcShellV3.is-mobile-shell .mcBell{background:transparent!important;color:#101820!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{font:780 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.075em!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{font:820 clamp(42px,10.2vw,44px)/.92 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:-.062em!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{font:520 14px/1.45 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
+ /* Coach Home had two competing introduction systems on iPhone: a utility header
+    plus a wide native-font hero. Players and Events have one editorial title stage.
+    Remove the duplicate mobile header so Coach Home also has one visual authority. */
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none!important}
+
+ /* Match the shared mobile editorial language used by Players and Events. The
+    condensed display face is the important correction: the old 42-44px native
+    face rendered much wider and visually larger even when the numeric px value
+    was similar. Keep the team/context copy compact and the support copy at 14px. */
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"]{min-height:334px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent{min-height:334px!important;padding:20px 18px 18px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{--coach-hero-crest:clamp(80px,21vw,92px)!important;gap:12px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{font:780 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.075em!important;text-transform:uppercase!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcEyebrow{font:720 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.055em!important;text-transform:uppercase!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:15ch!important;margin:12px 0 0!important;font:800 clamp(40px,10.2vw,44px)/.92 "Barlow Condensed","Arial Narrow",sans-serif!important;letter-spacing:-.02em!important;text-wrap:balance!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{max-width:36ch!important;margin:7px 0 0!important;font:520 14px/1.42 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip{margin-top:13px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{margin-top:11px!important}
 
  /* External bottom navigation overlaps the document flow. This is shell clearance,
     not Coach Home composition; the visual page still owns its own gutters. */
