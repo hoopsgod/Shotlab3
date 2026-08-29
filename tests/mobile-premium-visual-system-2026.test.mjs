@@ -13,6 +13,7 @@ const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardH
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const coachCommand = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
+const coachShellCss = fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css", import.meta.url), "utf8");
 const playerCommitment = fs.readFileSync(new URL("../src/components/PlayerCommitmentCenter.jsx", import.meta.url), "utf8");
 const playerMetricHierarchyCss = fs.readFileSync(new URL("../src/components/PlayerMetricHierarchy.module.css", import.meta.url), "utf8");
 const secondaryCohesionCss = fs.readFileSync(new URL("../public/shotlab-phase3-secondary-cohesion.css", import.meta.url), "utf8");
@@ -52,32 +53,32 @@ test("secondary pages use one editorial title treatment while retaining the full
   assert.match(titleStage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
   assert.match(titleStage, /const fullCrestBrand =/);
   assert.match(titleStage, /className="teamIdentityTitleStage__crestSlot"/);
-  assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
-  assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
-  assert.match(titleStageCss, /clamp\(40px, 9\.8vw, 44px\)/);
+  assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(titleStageCss, /--identity-title:\s*clamp\(42px,\s*10\.2vw,\s*44px\)/);
+  assert.match(titleStageCss, /clamp\(40px,\s*9\.8vw,\s*44px\)/);
   assert.match(titleStageCss, /object-fit:\s*contain/);
   assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
-  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
-  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
-  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
+  assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+var\(--identity-crest\)/);
+  assert.match(brandHierarchyCss, /@media\s*\(max-width:\s*760px\)[\s\S]*--identity-crest:\s*clamp\(64px,\s*17vw,\s*74px\)/);
+  assert.match(brandHierarchyCss, /@media\s*\(max-width:\s*390px\)[\s\S]*--identity-crest:\s*64px/);
   assert.doesNotMatch(brandHierarchyCss, /signatureRule|data-brand-treatment="none"|teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand/);
   assert.doesNotMatch(secondaryPageSystem, /secondaryPageIntro/);
   assert.doesNotMatch(secondaryPageCss, /\.secondaryPageIntro\b/);
 });
 
 test("primary decisions are dark performance bands owned by SecondaryPageSystem CSS", () => {
-  assert.match(secondaryPageCss, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns: 44px minmax\(0, 1fr\) minmax\(180px, 30%\)/);
-  assert.match(secondaryPageCss, /linear-gradient\(145deg, var\(--team-brand-surface-elevated, #171b18\), var\(--team-brand-surface-deep, #0c0f0d\) 72%\)/);
-  assert.match(secondaryPageCss, /\.secondaryPageDecision__icon\s*\{[\s\S]*display: grid/);
-  assert.match(secondaryPageCss, /\.secondaryPageDecision__visual\s*\{[\s\S]*display: block/);
-  assert.match(secondaryPageCss, /\.secondaryPageDecision h2\s*\{[\s\S]*font: 770 clamp\(27px, 5vw, 38px\)/);
-  assert.match(secondaryPageCss, /\.secondaryPageDecision button\s*\{[\s\S]*min-height: var\(--touch-target, 44px\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns:\s*44px\s+minmax\(0,\s*1fr\)\s+minmax\(180px,\s*30%\)/);
+  assert.match(secondaryPageCss, /linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#171b18\),\s*var\(--team-brand-surface-deep,\s*#0c0f0d\)\s*72%\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision__icon\s*\{[\s\S]*display:\s*grid/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision__visual\s*\{[\s\S]*display:\s*block/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision h2\s*\{[\s\S]*font:\s*770\s+clamp\(27px,\s*5vw,\s*38px\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision button\s*\{[\s\S]*min-height:\s*var\(--touch-target,\s*44px\)/);
 });
 
 test("mobile metrics and supporting evidence use flat ledger geometry rather than card stacking", () => {
-  assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*border-block: 1px solid/);
-  assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\] > button\s*\{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important/);
-  assert.match(secondaryPageCss, /\.secondaryPageEvidence > \*\s*\{[\s\S]*border-radius: 0 !important;[\s\S]*background: transparent !important/);
+  assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*border-block:\s*1px\s+solid/);
+  assert.match(secondaryPageCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*>\s*button\s*\{[\s\S]*border-radius:\s*0\s*!important;[\s\S]*background:\s*transparent\s*!important/);
+  assert.match(secondaryPageCss, /\.secondaryPageEvidence\s*>\s*\*\s*\{[\s\S]*border-radius:\s*0\s*!important;[\s\S]*background:\s*transparent\s*!important/);
   assert.match(playerMetricHierarchyCss, /\.metricPrimary\{[\s\S]*grid-column:1 \/ -1!important;[\s\S]*linear-gradient\(124deg,var\(--team-brand-surface-elevated,#0b2633\) 0%,var\(--team-brand-surface,#0a202b\) 62%,var\(--team-brand-surface-deep,#071820\) 100%\)!important;[\s\S]*box-shadow:none!important/);
   assert.match(playerMetricHierarchyCss, /\.metricPrimary>span:nth-child\(2\)\{[\s\S]*font-size:46px!important/);
   assert.match(playerMetricHierarchyCss, /\.metricSupporting\{[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/);
@@ -94,15 +95,15 @@ test("Player event and lifting routes use the same semantic title primitive", ()
 });
 
 test("mobile metric interactions stay stable and reduced-motion safe", () => {
-  assert.match(secondaryPageCss, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(secondaryPageCss, /\.secondaryPageDecision button:active:not\(:disabled\) \{ transform: none; \}/);
+  assert.match(secondaryPageCss, /@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)/);
+  assert.match(secondaryPageCss, /\.secondaryPageDecision button:active:not\(:disabled\)\s*\{\s*transform:\s*none;?\s*\}/);
 });
 
 test("Coach detail surfaces retain the same brand-driven dark performance language below the shared title", () => {
-  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg, var\(--team-brand-surface-elevated/);
-  assert.match(secondaryPageCss, /\.coachPlayerProfileHero h2\s*\{[\s\S]*font: 780 clamp\(28px, 5vw, 40px\)/);
-  assert.match(secondaryPageCss, /\.coachPlayerProfileMetrics\s*\{[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
-  assert.match(secondaryPageCss, /@media \(max-width: 760px\)[\s\S]*\.coachPlayerProfileMetrics \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(secondaryPageCss, /\.coachPlayerProfileHero\s*\{[\s\S]*linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated/);
+  assert.match(secondaryPageCss, /\.coachPlayerProfileHero h2\s*\{[\s\S]*font:\s*780\s+clamp\(28px,\s*5vw,\s*40px\)/);
+  assert.match(secondaryPageCss, /\.coachPlayerProfileMetrics\s*\{[\s\S]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(secondaryPageCss, /@media\s*\(max-width:\s*760px\)[\s\S]*\.coachPlayerProfileMetrics\s*\{\s*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
 });
 
 test("Player and Coach Home identity use intentional shared/source-owned variants instead of legacy native chrome", () => {
@@ -114,14 +115,14 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.match(coachHeader, /TeamIdentityTitleStage/);
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
+  assert.match(coachCommand, /CoachMissionControlShell\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachTitleCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
-  assert.match(coachTitleCss, /\.mcProgramIdentity\{[^}]*clamp\(36px,\s*10\.2vw,\s*45px\)[^}]*"Barlow Condensed"/);
-  assert.match(coachTitleCss, /\sh1\{[^}]*clamp\(28px,\s*7\.6vw,\s*33px\)[^}]*var\(--mc-native\)/);
-  assert.match(coachTitleCss, /min-height:\s*382px/);
+  assert.match(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
+  assert.match(coachShellCss, /\.mcProgramIdentity\{font:780 11px\/1\.2 var\(--mc-native/);
+  assert.match(coachShellCss, /\sh1\{[^}]*clamp\(40px,10\.2vw,44px\)[^}]*"Barlow Condensed"/);
+  assert.match(coachShellCss, /min-height:334px!important/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
-  assert.doesNotMatch(coachTitleCss, /!important/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
 });
 
