@@ -74,8 +74,10 @@ async function expectEditorialTitle(page) {
       titleSize: titleNode ? Number.parseFloat(getComputedStyle(titleNode).fontSize) : 0,
     };
   });
-  expect(metrics.crestWidth).toBeGreaterThanOrEqual(84);
-  expect(metrics.crestWidth).toBeLessThanOrEqual(108);
+  // Secondary editorial identity is intentionally compact and subordinate to
+  // the page title; this matches the current 64–80px mobile authority.
+  expect(metrics.crestWidth).toBeGreaterThanOrEqual(64);
+  expect(metrics.crestWidth).toBeLessThanOrEqual(80);
   expect(metrics.titleSize).toBeGreaterThanOrEqual(38);
   expect(metrics.titleSize).toBeLessThanOrEqual(46);
 }
@@ -143,7 +145,10 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   expect(home.identityBackground).toBe("none");
   expect(home.decisionBackground).toBe("none");
   expect(home.titleColor).toBe("rgb(245, 248, 249)");
-  expect(home.crestWidth).toBeGreaterThanOrEqual(96);
+  // Coach Home retains a larger identity mark than secondary pages, but the
+  // current compact authority intentionally scales it within 80–96px.
+  expect(home.crestWidth).toBeGreaterThanOrEqual(80);
+  expect(home.crestWidth).toBeLessThanOrEqual(96);
   await expectNoHorizontalOverflow(page);
 
   // Phase 4 deliberately retires the stacked Players decision card on mobile.
