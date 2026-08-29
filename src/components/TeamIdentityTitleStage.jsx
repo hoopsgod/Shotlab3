@@ -119,21 +119,7 @@ export default function TeamIdentityTitleStage({
   useEffect(() => setLogoFailed(false), [cleanedLogo]);
 
   const fullCrestBrand = (
-    <div
-      className="teamIdentityTitleStage__crestSlot"
-      data-identity-role="brand-panel"
-      aria-label={`${teamName} identity`}
-      ref={(node) => {
-        if (!node) return;
-        node.style.setProperty("width", "var(--identity-crest)", "important");
-        node.style.setProperty("height", "var(--identity-crest)", "important");
-        node.style.setProperty("min-width", "var(--identity-crest)", "important");
-        node.style.setProperty("min-height", "var(--identity-crest)", "important");
-        node.style.setProperty("max-width", "var(--identity-crest)", "important");
-        node.style.setProperty("max-height", "var(--identity-crest)", "important");
-        node.style.setProperty("overflow", "hidden", "important");
-      }}
-    >
+    <div className="teamIdentityTitleStage__crestSlot" data-identity-role="brand-panel" aria-label={`${teamName} identity`}>
       {hasUsableLogo ? (
         <img
           className="teamIdentityTitleStage__crest"
@@ -141,14 +127,6 @@ export default function TeamIdentityTitleStage({
           src={cleanedLogo}
           alt={`${teamName} logo`}
           draggable="false"
-          ref={(node) => {
-            if (!node) return;
-            node.style.setProperty("width", "100%", "important");
-            node.style.setProperty("height", "100%", "important");
-            node.style.setProperty("max-width", "100%", "important");
-            node.style.setProperty("max-height", "100%", "important");
-            node.style.setProperty("object-fit", "contain", "important");
-          }}
           onError={() => setLogoFailed(true)}
         />
       ) : showLogoSetupAction ? (
