@@ -80,13 +80,42 @@ async function openCoachPriorityEditor(page) {
   return { editor, save };
 }
 
+async function captureCoachSecondaryPages(page) {
+  const destinations = [
+    ['Analytics', 'analytics'],
+    ['Team & Account', 'team-account'],
+    ['Program Branding', 'program-branding'],
+    ['Coach Toolkit', 'coach-toolkit'],
+    ['Shot History', 'shot-history'],
+  ];
+
+  for (const [label, slug] of destinations) {
+    const more = page.getByTestId('mobile-navigation-more');
+    if (!(await more.count())) return;
+    await more.click();
+    const sheet = page.getByTestId('mobile-navigation-sheet');
+    await expect(sheet).toBeVisible();
+    const destination = sheet.getByRole('button', { name: label, exact: true });
+    if (!(await destination.count())) {
+      await page.keyboard.press('Escape');
+      continue;
+    }
+    await destination.click();
+    await page.waitForTimeout(150);
+    await page.evaluate(() => document.fonts?.ready);
+    await capture(page, 'coach', `secondary-${slug}`, {
+      extraSelectors: ['[data-visual-role="page-intro"]', '[data-testid="mobile-navigation-dock"]'],
+    });
+  }
+}
+
 for (const width of widths) {
   for (const role of roles) {
     if (!['coach', 'player'].includes(role)) continue;
     if (scenario === 'priority' && role === 'player') continue;
 
     test(`${role} viewport debug ${scenario} at ${width}px`, async ({ page }) => {
-      test.setTimeout(60_000);
+      test.setTimeout(90_000);
       await page.setViewportSize({ width, height: heightFor(width) });
       await installSafeRoutes(page);
       await enterDemo(page, role);
@@ -102,6 +131,10 @@ for (const width of widths) {
           extraSelectors: ['[data-testid="mobile-navigation-sheet"]', '[data-testid="mobile-navigation-dock"]'],
         });
         await page.keyboard.press('Escape');
+      }
+
+      if (role === 'coach' && width === 390 && scenario === 'smoke') {
+        await captureCoachSecondaryPages(page);
       }
 
       if (scenario === 'priority' && role === 'coach') {
