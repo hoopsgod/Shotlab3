@@ -29,8 +29,8 @@ test('Coach secondary titles own premium editorial hierarchy without touching Co
   assert.match(coachConvergence, /intentionally does not style or reposition[\s\S]*shared title primitive/);
   assert.match(visualAuthority, /performance-shell--coach \[data-visual-role="page-intro"\]\[data-title-stage-family="editorial"\]/);
   assert.match(visualAuthority, /font-family:\s*"Barlow Condensed",\s*"Arial Narrow"/);
-  assert.match(visualAuthority, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
-  assert.match(visualAuthority, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
+  assert.match(visualAuthority, /--identity-crest:\s*clamp\(68px,\s*18vw,\s*76px\)/);
+  assert.match(visualAuthority, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*68px/);
   assert.match(visualAuthority, /data-visual-role="filter-rail"[\s\S]*button\[aria-pressed="true"\]::after/);
   assert.doesNotMatch(visualAuthority, /coach-command-center-full[^}]*font-family:\s*"Barlow Condensed"/);
 });
