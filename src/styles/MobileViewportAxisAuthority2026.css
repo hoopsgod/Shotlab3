@@ -220,6 +220,46 @@
   }
 }
 
+/* PlayerProgressStory.module.css owns this exact responsive composition in
+ * source, but its CSS-module max-width block is currently lost during the
+ * production restructure pass. Reassert the same mobile intent in the protected
+ * final authority so Progress does not fall back to its desktop split hero. */
+@media (max-width: 620px) {
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] {
+    border-radius: 26px !important;
+    padding: 17px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] {
+    margin-bottom: 14px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] {
+    min-width: 0 !important;
+    padding: 5px 0 3px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 {
+    font-size: clamp(34px, 11vw, 46px) !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] p {
+    display: none !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-court"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+    padding: 10px 0 0 !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.1) !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] {
+    margin-top: 14px !important;
+  }
+}
+
 /* The title-stage certification contract restores 25vw Coach crests above the
  * compact <=390px breakpoint, clamped to the historical 96–108px range. */
 @media (min-width: 391px) and (max-width: 767px) {
