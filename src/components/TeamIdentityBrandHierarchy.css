@@ -98,6 +98,17 @@
     margin-top: 10px;
   }
 
+  /* Custom artwork may be extremely wide or tall. Keep the image box inside
+     the compact editorial slot; object-fit then preserves the artwork ratio. */
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crest,
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crest {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+  }
+
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine {
     margin-bottom: 6px;
   }
