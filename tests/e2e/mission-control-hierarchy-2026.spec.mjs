@@ -39,20 +39,25 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   const demo = page.getByRole("button", { name: /Coach demo/i });
   await expect(demo).toBeVisible({ timeout: 20_000 });
   await demo.click();
+
   const commandCenter = page.getByTestId("coach-command-center-full");
   const hero = page.getByTestId("coach-primary-objective");
   const metrics = page.getByTestId("coach-primary-metrics");
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(hero).toBeVisible();
   await expect(metrics).toBeVisible();
-  await expect(page.locator(".mcHeader")).toBeVisible();
+
+  // Mobile Coach Home intentionally has one introduction system. The utility
+  // header remains mounted for desktop but is not a second visible mobile title.
+  await expect(page.locator(".mcHeader")).toBeHidden();
   await expect(page.locator(".mcHeaderTeamMark")).toBeHidden();
+  await expect(page.locator(".mcTeamSelect")).toBeHidden();
+  await expect(page.locator(".mcBell")).toBeHidden();
+  await expect(page.locator(".mcMobileMenu")).toBeHidden();
+
   await expect(page.locator(".mcHeroTeamMark")).toBeVisible();
   await expect(page.locator(".mcCourtArtwork")).toBeHidden();
   await expect(page.locator(".mcHeroScrim")).toBeHidden();
-  await expect(page.locator(".mcTeamSelect")).toBeHidden();
-  await expect(page.locator(".mcBell")).toBeVisible();
-  await expect(page.locator(".mcMobileMenu")).toBeVisible();
   await expect(page.locator(".mcPrimary")).toBeVisible();
   await expect(metrics.locator("button")).toHaveCount(3);
 
@@ -63,14 +68,12 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const identity = hero?.querySelector(".mcHeroIdentity");
     const programIdentity = hero?.querySelector(".mcProgramIdentity");
     const title = hero?.querySelector("h1");
-    const headerMark = document.querySelector(".mcHeaderTeamMark");
     const heroMark = document.querySelector(".mcHeroTeamMark");
     const heroLogo = heroMark?.querySelector("img");
     const heroFallback = heroMark?.querySelector(".mcTeamFallback");
     const primary = document.querySelector(".mcPrimary");
     const section = document.querySelector(".mcSection");
     const reality = document.querySelector(".mcRealityStrip");
-    const teamSelect = document.querySelector(".mcTeamSelect");
     const attentionRow = document.querySelector(".mcAttentionRow");
     const attentionTitle = attentionRow?.querySelector(".mcAttentionCopy strong");
     const effectiveBackground = (element) => {
@@ -85,8 +88,6 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const heroStyle = getComputedStyle(hero);
     const heroContentStyle = getComputedStyle(heroContent);
     const identityStyle = getComputedStyle(identity);
-    const headerMarkStyle = getComputedStyle(headerMark);
-    const headerMarkRect = headerMark.getBoundingClientRect();
     const heroMarkStyle = getComputedStyle(heroMark);
     const heroMarkRect = heroMark.getBoundingClientRect();
     const identityRect = identity.getBoundingClientRect();
@@ -95,7 +96,6 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const sectionStyle = section ? getComputedStyle(section) : null;
     const realityStyle = getComputedStyle(reality);
     const metricButtons = [...reality.querySelectorAll(":scope > button")];
-    const teamSelectStyle = getComputedStyle(teamSelect);
     const attentionStyle = attentionRow ? getComputedStyle(attentionRow) : null;
     const attentionTitleStyle = attentionTitle ? getComputedStyle(attentionTitle) : null;
     return {
@@ -111,11 +111,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       identityHeight: identityRect.height,
       identityBottom: identityRect.bottom,
       programIdentitySize: parseFloat(getComputedStyle(programIdentity).fontSize),
+      programIdentityTransform: getComputedStyle(programIdentity).textTransform,
       decisionTitleSize: parseFloat(getComputedStyle(title).fontSize),
+      decisionTitleFamily: getComputedStyle(title).fontFamily,
       decisionTitleTop: titleRect.top,
-      headerMarkDisplay: headerMarkStyle.display,
-      headerMarkWidth: headerMarkRect.width,
-      headerMarkHeight: headerMarkRect.height,
       heroMarkDisplay: heroMarkStyle.display,
       heroMarkWidth: heroMarkRect.width,
       heroMarkHeight: heroMarkRect.height,
@@ -131,7 +130,6 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       metricValues: metricButtons.map((button) => getComputedStyle(button.querySelector("strong")).color),
       metricLabels: metricButtons.map((button) => getComputedStyle(button.querySelector("small")).color),
       metricButtonBackgrounds: metricButtons.map((button) => getComputedStyle(button).backgroundColor),
-      teamSelectDisplay: teamSelectStyle.display,
       attentionPresent: Boolean(attentionRow),
       attentionBackground: attentionStyle?.backgroundColor || "",
       attentionRadius: attentionStyle ? parseFloat(attentionStyle.borderRadius) : 0,
@@ -151,29 +149,29 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(heroSurfaceStops[0]).toHaveLength(3);
   expect(heroSurfaceStops.every((stop) => relativeLuminance(stop) < 0.18)).toBe(true);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
-  expect(presentation.heroHeight).toBeGreaterThanOrEqual(382);
-  expect(presentation.heroHeight).toBeLessThanOrEqual(460);
+  expect(presentation.heroHeight).toBeGreaterThanOrEqual(334);
+  expect(presentation.heroHeight).toBeLessThanOrEqual(390);
   expect(presentation.heroRadius).toBeLessThanOrEqual(1);
   expect(isTransparent(presentation.heroContentBackground)).toBe(true);
 
   expect(isTransparent(presentation.identityBackground)).toBe(true);
   expect(presentation.identityBackgroundImage).toBe("none");
-  expect(presentation.identityHeight).toBeGreaterThanOrEqual(96);
-  expect(presentation.identityHeight).toBeLessThanOrEqual(120);
-  expect(presentation.programIdentitySize).toBeGreaterThanOrEqual(38);
-  expect(presentation.programIdentitySize).toBeLessThanOrEqual(46);
-  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(26);
-  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(34);
-  expect(presentation.programIdentitySize - presentation.decisionTitleSize).toBeGreaterThanOrEqual(8);
+  expect(presentation.identityHeight).toBeGreaterThanOrEqual(80);
+  expect(presentation.identityHeight).toBeLessThanOrEqual(100);
+  expect(presentation.programIdentitySize).toBeGreaterThanOrEqual(10);
+  expect(presentation.programIdentitySize).toBeLessThanOrEqual(12);
+  expect(presentation.programIdentityTransform).toBe("uppercase");
+  expect(presentation.decisionTitleSize).toBeGreaterThanOrEqual(40);
+  expect(presentation.decisionTitleSize).toBeLessThanOrEqual(44);
+  expect(presentation.decisionTitleFamily).toMatch(/Barlow Condensed|Arial Narrow/i);
   expect(presentation.decisionTitleTop).toBeGreaterThanOrEqual(presentation.identityBottom - 1);
-  expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 48);
+  expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 32);
 
-  expect(presentation.headerMarkDisplay).toBe("none");
-  expect(presentation.headerMarkWidth).toBe(0);
-  expect(presentation.headerMarkHeight).toBe(0);
   expect(presentation.heroMarkDisplay).not.toBe("none");
-  expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(96);
-  expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(96);
+  expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(80);
+  expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(80);
+  expect(presentation.heroMarkWidth).toBeLessThanOrEqual(94);
+  expect(presentation.heroMarkHeight).toBeLessThanOrEqual(94);
   if (presentation.heroLogoObjectFit !== "fallback") expect(presentation.heroLogoObjectFit).toBe("contain");
 
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
@@ -196,7 +194,6 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     return channels.length === 3 && Math.min(...channels) > 120 && Math.max(...channels) < 230;
   })).toBe(true);
   expect(presentation.metricButtonBackgrounds).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]);
-  expect(presentation.teamSelectDisplay).toBe("none");
 
   const supportingChannels = rgbChannels(presentation.supportingBackground);
   if (!isTransparent(presentation.supportingBackground) && supportingChannels.length === 3) {
