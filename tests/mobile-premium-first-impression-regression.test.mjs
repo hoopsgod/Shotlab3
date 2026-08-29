@@ -17,6 +17,7 @@ const playerHeader = fs.readFileSync(new URL("../src/components/PlayerDashboardH
 const coachHeader = fs.readFileSync(new URL("../src/components/CoachDashboardHeader.jsx", import.meta.url), "utf8");
 const coachCommand = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
+const coachShellCss = fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css", import.meta.url), "utf8");
 const progressStory = fs.readFileSync(new URL("../src/components/PlayerProgressStory.jsx", import.meta.url), "utf8");
 const brandingCss = fs.readFileSync(new URL("../src/screens/CoachTeamBrandingScreen.css", import.meta.url), "utf8");
 const metricCss = fs.readFileSync(new URL("../src/components/Phase2PremiumMetricLayer.css", import.meta.url), "utf8");
@@ -35,7 +36,7 @@ test("secondary routes use one explicit TeamIdentityTitleStage owner instead of 
   assert.doesNotMatch(enhancer, /writeFileSync/);
 });
 
-test("team branding keeps semantic metadata while restoring one full custom crest on every title stage", () => {
+test("team branding keeps semantic metadata while restoring one full but subordinate custom crest on editorial stages", () => {
   assert.match(titleStage, /useTeamBranding/);
   assert.match(titleStage, /useCleanTeamLogo/);
   assert.match(titleStage, /BRAND_TREATMENTS = new Set\(\["hero", "compact"\]\)/);
@@ -49,8 +50,8 @@ test("team branding keeps semantic metadata while restoring one full custom cres
   assert.match(titleStageCss, /object-fit:\s*contain/);
   assert.match(brandHierarchyCss, /data-title-stage-family="editorial"/);
   assert.match(brandHierarchyCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
-  assert.match(brandHierarchyCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
-  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 760px\)[\s\S]*--identity-crest:\s*clamp\(64px, 17vw, 74px\)/);
+  assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*64px/);
   assert.doesNotMatch(brandHierarchyCss, /teamIdentityTitleStage__signatureRule|teamIdentityTitleStage__microBrand|teamIdentityTitleStage__watermarkBrand|data-brand-treatment="none"/);
   assert.match(secondaryPageSystem, /brandTreatment="compact"/);
   assert.match(playerOperationalWorkspace, /<TeamIdentityTitleStage/);
@@ -63,6 +64,7 @@ test("mobile secondary title stages keep editorial hierarchy while the enhancer 
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(titleStageCss, /teamIdentityTitleStage--longTitle\.teamIdentityTitleStage--multiWord[\s\S]*clamp\(40px, 9\.8vw, 44px\)/);
   assert.match(titleStageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(38px, 9\.6vw, 40px\)/);
+  assert.match(brandHierarchyCss, /\.teamIdentityTitleStage--standard\s*\{[\s\S]*--identity-crest:\s*clamp\(64px, 17vw, 74px\)/);
   assert.match(secondaryPageSystem, /TITLE_LABELS=new Map/);
   assert.match(secondaryPageSystem, /\["Drills Dashboard","Drills"\]/);
   assert.match(secondaryPageSystem, /\["Strength & Conditioning Dashboard","S&C"\]/);
@@ -112,29 +114,32 @@ test("Schedule disclosure is structurally limited to two non-overlapping informa
   assert.doesNotMatch(scheduleCss, /!important/);
 });
 
-test("Player Home is the immersive Hero variant while Coach Home follows the approved brand-first Mission Control prototype", () => {
+test("Player Home remains immersive while Coach Home uses one verified brand-first mobile hierarchy", () => {
   assert.match(playerHeader, /variant="hero"/);
   assert.match(playerHeader, /surface="dark"/);
   assert.match(playerHeader, /role="Player Mode"/);
   assert.match(coachHeader, /TeamIdentityTitleStage/);
   assert.match(coachCommand, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coachCommand, /mcHeroIdentity/);
+  assert.match(coachCommand, /is-mobile-shell/);
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
+  assert.match(coachCommand, /CoachMissionControlShell\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
 
   const tablet = mediaBlock(coachTitleCss, "(min-width:701px) and (max-width:980px)");
-  const mobile = mediaBlock(coachTitleCss, "(max-width:700px)");
   assert.match(tablet, /min-height:354px/);
   assert.match(tablet, /clamp\(36px,5\.5vw,49px\)\/\.88 "Barlow Condensed"/);
   assert.match(tablet, /clamp\(112px,17vw,142px\)/);
-  assert.match(mobile, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
-  assert.match(mobile, /clamp\(36px,10\.2vw,45px\)\/\.86 "Barlow Condensed"/);
-  assert.match(mobile, /clamp\(28px,7\.6vw,33px\)\/\.96 var\(--mc-native\)/);
-  assert.match(mobile, /min-height:382px/);
+
+  assert.match(coachShellCss, /@media\(max-width:700px\)/);
+  assert.match(coachShellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
+  assert.match(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px!important\}/);
+  assert.match(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
+  assert.match(coachShellCss, /\.mcProgramIdentity\{font:780 11px\/1\.2/);
+  assert.match(coachShellCss, /h1\{[^}]*clamp\(40px,10\.2vw,44px\)[^}]*"Barlow Condensed"/);
+  assert.match(coachShellCss, /\.mcHeroContent>p\{[^}]*font:520 14px\/1\.42/);
   assert.match(coachTitleCss, /object-fit:contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:100%/);
-  assert.doesNotMatch(coachTitleCss, /clamp\(39px,\s*10\.5vw,\s*45px\)/);
-  assert.doesNotMatch(coachTitleCss, /!important/);
   assert.doesNotMatch(playerHeader, /!important|data-mobile-chrome="native-identity"/);
 });
 
