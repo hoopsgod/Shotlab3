@@ -1,6 +1,7 @@
 import ShotLabIcon from "./ShotLabIcon";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 import "./SecondaryPageSystem.css";
+import "./SecondaryPagePremiumMobile.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
 import "../styles/Phase2PremiumRosterLayer.css";
