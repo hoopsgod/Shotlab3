@@ -242,12 +242,13 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.crestHeight).toBeGreaterThanOrEqual(96);
     expect(result.height).toBeLessThanOrEqual(260);
   } else {
-    // Standard editorial stages are intentionally subordinate to their page title.
+    // Standard editorial stages remain compact, while hostile long names may wrap
+    // into one additional bounded line without creating horizontal overflow.
     expect(result.crestWidth).toBeGreaterThanOrEqual(64);
     expect(result.crestWidth).toBeLessThanOrEqual(80);
     expect(result.crestHeight).toBeGreaterThanOrEqual(64);
     expect(result.crestHeight).toBeLessThanOrEqual(80);
-    expect(result.height).toBeLessThanOrEqual(330);
+    expect(result.height).toBeLessThanOrEqual(350);
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
   await expectNoHorizontalOverflow(page);
