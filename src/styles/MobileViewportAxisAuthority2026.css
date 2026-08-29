@@ -79,6 +79,20 @@
   }
   html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] { min-width: 0 !important; }
   html body #root .performance-shell--coach.is-mobile [data-testid="coach-page-dashboard-leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"] { margin-top: 14px !important; }
+
+  /* Registered Coach activation uses a desktop three-column grid in source.
+   * On mobile the primary action owns a full-width second row so the paid Home
+   * surface matches the certified Demo CTA geometry and remains touch-safe. */
+  html body #root .performance-shell--coach.is-mobile .mcActivationPlan {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .mcActivationPlan > button {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    justify-self: stretch !important;
+  }
+
   html body #root [data-testid="branding-preview-coach-title"] [data-identity-role="page-title"] { overflow-wrap: normal !important; word-break: normal !important; hyphens: none !important; }
 }
 
