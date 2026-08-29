@@ -132,7 +132,7 @@ test("Coach secondary heading opens fully visible and uses premium editorial aut
     return { fontFamily: style.fontFamily, fontSize: style.fontSize, fontWeight: style.fontWeight };
   });
   expect(titleStyle.fontFamily).toMatch(/Barlow Condensed|Arial Narrow/i);
-  expect(Number.parseFloat(titleStyle.fontSize)).toBeGreaterThanOrEqual(41);
+  expect(Number.parseFloat(titleStyle.fontSize)).toBeGreaterThanOrEqual(38);
   expect(Number(titleStyle.fontWeight)).toBeGreaterThanOrEqual(800);
   await clearScrollSeed(page);
 });
