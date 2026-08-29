@@ -55,7 +55,7 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
   const shellMobile = mediaBlock(coachShellCss, "(max-width:700px)");
   assertDeclaration(hero, "min-height", "382px");
   assert.match(declaration(programIdentity, "font") ?? "", /11px.*var\(--mc-native\)/);
-  assert.match(declaration(heading, "font") ?? "", /Barlow Condensed/);
+  assert.match(declaration(heading, "font") ?? "", /clamp\(40px,9\.8vw,44px\).*var\(--mc-native\)/);
   assert.match(shellMobile, /\.mcProgramIdentity\{font:780 11px\/1\.2 var\(--mc-native/);
   assert.match(shellMobile, /h1\{max-width:15ch!important[\s\S]*font:800 clamp\(40px,10\.2vw,44px\)\/\.92 "Barlow Condensed"/);
   assertDeclaration(identity, "--coach-hero-crest", /^clamp\(96px,\s*26vw,\s*108px\)$/);
