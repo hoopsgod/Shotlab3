@@ -90,10 +90,14 @@
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot,
   .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crestSlot {
-    width: var(--identity-crest);
-    min-width: 0;
-    max-width: var(--identity-crest);
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
     box-sizing: border-box;
+    overflow: hidden;
     align-self: start;
     margin-top: 10px;
   }
