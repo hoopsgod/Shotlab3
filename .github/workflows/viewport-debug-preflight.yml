@@ -2,7 +2,7 @@ name: Viewport Debug Preflight
 
 # Coach Home is the Phase 4 visual migration gate. The implementation may not
 # spread to additional product surfaces until this workflow emits rendered
-# Coach Home evidence at both the primary mobile and desktop comparison widths.
+# Coach Home evidence from the same production build pipeline Cloudflare serves.
 on:
   pull_request:
     paths:
@@ -22,7 +22,7 @@ concurrency:
 jobs:
   coach-home-visual-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Check out exact candidate
         uses: actions/checkout@v4
@@ -47,13 +47,28 @@ jobs:
       - name: Verify viewport debugger unit contracts
         run: node --test tests/viewport-debug-tooling.test.mjs
 
-      - name: Render Coach Home comparison gate at 390px and 1440px
-        run: npm run debug:viewport -- --role=coach --widths=390,1440
+      - name: Build exact production bundle
+        env:
+          VITE_ENABLE_PRODUCTION_DEMOS: true
+        run: npm run build
 
-      - name: Run remaining mobile containment regression
-        run: npm run debug:viewport -- --widths=320,430
+      - name: Start exact production preview
+        run: |
+          nohup npm run preview:agent > /tmp/viewport-production-preview.log 2>&1 &
+          for i in {1..40}; do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/viewport-production-preview.log
+          exit 1
 
-      - name: Upload rendered viewport evidence
+      - name: Render Coach Home production comparison gate at 390px and 1440px
+        run: npm run debug:viewport -- --role=coach --widths=390,1440 --base-url=http://127.0.0.1:4173
+
+      - name: Run remaining production mobile containment regression
+        run: npm run debug:viewport -- --widths=320,430 --base-url=http://127.0.0.1:4173
+
+      - name: Upload rendered production viewport evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
