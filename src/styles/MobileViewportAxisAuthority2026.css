@@ -114,12 +114,13 @@
 }
 
 @media (min-width: 391px) and (max-width: 767px) {
-  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(96px, 25vw, 108px) !important; }
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(68px, 18vw, 76px) !important; }
 }
 
 @media (max-width: 390px) {
   html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 64px !important; }
+
   html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"],
-  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"],
-  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 84px !important; }
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 68px !important; }
 }
