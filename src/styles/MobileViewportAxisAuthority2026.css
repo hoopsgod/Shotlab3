@@ -15,8 +15,25 @@
     overflow-anchor: none !important;
   }
 
+  /* The persistent Player scroller declares width:100% inline. Own its border
+   * box here so the canonical 20px rail is included in that width rather than
+   * extending editorial stages beyond the physical viewport. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     padding-inline: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* When a Player secondary route carries the shared 44px return control, keep
+   * the route opening compact enough to land the editorial stage in the tested
+   * top zone without reducing the control's physical target. */
+  html body #root .performance-shell--player.is-mobile .player-scroll-container:has(> .shared-dashboard-back-action) {
+    padding-top: 4px !important;
+  }
+  html body #root .performance-shell--player.is-mobile .player-scroll-container > .shared-dashboard-back-action {
+    margin-bottom: 0 !important;
   }
 
   /* The shared centering boundary owns width/min-width/box sizing. These two
@@ -107,8 +124,8 @@
   }
 
   /* Player secondary title roles vary by destination. The semantic title-stage
-   * contract is the stable owner; border-box containment prevents late 16px
-   * content-box padding from escaping the viewport on Train/Rankings routes. */
+   * contract is the stable owner; border-box containment prevents late content
+   * padding from escaping the route rail. */
   html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
     width: 100% !important;
     max-width: 100% !important;
@@ -179,11 +196,10 @@
     min-width: 0 !important;
   }
 
-  /* Leaderboards was the lone Coach secondary route opening ~14px above the
-   * Events control stage. Restore the same intentional opening rhythm without
-   * changing its horizontal rail or internal leaderboard composition. */
-  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"],
-  html body #root .performance-shell--coach.is-mobile [data-visual-role="coach-leaderboards-stage"][data-title-stage-family="editorial"] {
+  /* The exact production trace identifies the Leaderboards shell by its stable
+   * dashboard test id. Move only its editorial stage down the measured 14px so
+   * it shares the Events/secondary opening rhythm. */
+  html body #root .performance-shell--coach.is-mobile [data-testid="coach-page-dashboard-leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
     margin-top: 14px !important;
   }
 
