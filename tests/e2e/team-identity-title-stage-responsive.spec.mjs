@@ -217,9 +217,10 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
     const team = element.querySelector('[data-identity-role="team-name"]');
+    const brandPanel = element.querySelector('[data-identity-role="brand-panel"]');
+    const brandPanelRect = brandPanel?.getBoundingClientRect();
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
     const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
-    const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       left: rect.left,
       right: rect.right,
@@ -227,8 +228,9 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       viewport: innerWidth,
       titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
       teamName: team?.textContent?.trim() || "",
-      crestWidth: crestRect?.width || 0,
-      crestHeight: crestRect?.height || 0,
+      brandPanelWidth: brandPanelRect?.width || 0,
+      brandPanelHeight: brandPanelRect?.height || 0,
+      hasBrandContent: Boolean(crest || fallback),
       objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
     };
   });
@@ -237,17 +239,19 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   expect(result.teamName).toBe(teamName);
   expect(result.titleSize).toBeGreaterThanOrEqual(38);
   expect(result.titleSize).toBeLessThanOrEqual(58);
+  expect(result.hasBrandContent).toBe(true);
   if (variant === "hero") {
-    expect(result.crestWidth).toBeGreaterThanOrEqual(96);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(96);
+    expect(result.brandPanelWidth).toBeGreaterThanOrEqual(96);
+    expect(result.brandPanelHeight).toBeGreaterThanOrEqual(96);
     expect(result.height).toBeLessThanOrEqual(260);
   } else {
-    // Standard editorial stages remain compact, while hostile long names may wrap
-    // into one additional bounded line without creating horizontal overflow.
-    expect(result.crestWidth).toBeGreaterThanOrEqual(64);
-    expect(result.crestWidth).toBeLessThanOrEqual(80);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(64);
-    expect(result.crestHeight).toBeLessThanOrEqual(80);
+    // The title system owns the brand-panel footprint. Intrinsic SVG dimensions
+    // may differ by aspect ratio, so certify the bounded panel rather than the
+    // replaced element's source-ratio box.
+    expect(result.brandPanelWidth).toBeGreaterThanOrEqual(64);
+    expect(result.brandPanelWidth).toBeLessThanOrEqual(80);
+    expect(result.brandPanelHeight).toBeGreaterThanOrEqual(64);
+    expect(result.brandPanelHeight).toBeLessThanOrEqual(80);
     expect(result.height).toBeLessThanOrEqual(350);
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
