@@ -138,18 +138,18 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.mark.right).toBeLessThanOrEqual(viewport.width);
 
     const identityRegionHeight = metrics.identity.bottom - metrics.header.top;
-    expect(identityRegionHeight).toBeGreaterThanOrEqual(160);
-    expect(identityRegionHeight).toBeLessThanOrEqual(300);
-    // Phase 4 makes program/team identity the dominant branded display element and
-    // keeps the transient daily coaching decision subordinate native UI typography.
-    expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(30);
-    expect(metrics.teamIdentitySize).toBeLessThanOrEqual(50);
-    expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(16);
-    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(34);
-    expect(metrics.teamIdentitySize - metrics.decisionTitleSize).toBeGreaterThanOrEqual(8);
+    expect(identityRegionHeight).toBeGreaterThanOrEqual(128);
+    expect(identityRegionHeight).toBeLessThanOrEqual(160);
+    // The compact Coach Home hierarchy uses the program/team name as a quiet
+    // eyebrow while the current coaching decision is the dominant headline.
+    expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(10);
+    expect(metrics.teamIdentitySize).toBeLessThanOrEqual(14);
+    expect(metrics.decisionTitleSize).toBeGreaterThanOrEqual(34);
+    expect(metrics.decisionTitleSize).toBeLessThanOrEqual(42);
+    expect(metrics.decisionTitleSize - metrics.teamIdentitySize).toBeGreaterThanOrEqual(20);
     // The current source-owned mobile hero removes the older decorative void while
     // retaining an identity-first composition at difficult mobile widths.
-    expect(metrics.hero.height).toBeGreaterThanOrEqual(350);
+    expect(metrics.hero.height).toBeGreaterThanOrEqual(340);
     expect(metrics.hero.height).toBeLessThanOrEqual(580);
     expect(metrics.title.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
     expect(metrics.title.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
