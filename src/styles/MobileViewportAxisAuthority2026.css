@@ -178,8 +178,9 @@
     font-size: 12px !important;
   }
 
-  /* Semantic metric text must remain readable on Player light workspaces even
-   * when an older visual layer appears later in the compiled cascade. */
+  /* Semantic metric text on light Player workspace ledgers uses stable dark ink.
+   * The At Home ledger is intentionally a dark team-brand performance band and
+   * receives its own accessible light foreground contract immediately below. */
   html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] {
     color: #172019 !important;
     -webkit-text-fill-color: #172019 !important;
@@ -188,6 +189,22 @@
   html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] {
     color: #4f5a52 !important;
     -webkit-text-fill-color: #4f5a52 !important;
+  }
+
+  /* At Home supporting evidence is a dark branded ledger. Give the surface an
+   * explicit dark fallback beneath its existing gradient and pair it with light
+   * semantic foregrounds so older and current Chromium both resolve >=4.5:1. */
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] {
+    background-color: var(--team-brand-surface-deep, #2f4f24) !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"] {
+    color: #f8faf5 !important;
+    -webkit-text-fill-color: #f8faf5 !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="detail"] {
+    color: #e8eee6 !important;
+    -webkit-text-fill-color: #e8eee6 !important;
   }
 
   /* The three Coach leaderboard metrics are one compact ledger, never a
