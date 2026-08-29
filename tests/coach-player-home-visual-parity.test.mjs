@@ -14,16 +14,16 @@ test("Coach mobile home restores the tactical-court first impression with brande
   assert.match(coachCss, /--coach-hero-crest:\s*clamp\(96px,\s*26vw,\s*108px\)/);
   assert.match(coachCss, /--team-brand-surface-deep/);
   assert.match(coachCss, /--team-brand-surface-elevated/);
-  assert.match(coachCss, /\.mcProgramIdentity\s*\{[\s\S]*?clamp\(36px,\s*10\.2vw,\s*45px\)[^}]*"Barlow Condensed","Arial Narrow"/);
+  assert.match(coachCss, /\.mcProgramIdentity\s*\{[\s\S]*?font:\s*780 11px\/1\.2 var\(--mc-native\)/);
 });
 
-test("Coach mobile hierarchy makes program identity dominant and the daily decision subordinate", () => {
+test("Coach mobile hierarchy makes the daily decision dominant and program identity a compact brand label", () => {
   const player = compact(playerCss);
   const coachHome = compact(coachCss);
   assert.ok(player.includes("--team-brand-surface-elevated"));
   assert.ok(coachHome.includes("--team-brand-surface-elevated"));
-  assert.match(coachCss, /\.mcProgramIdentity\s*\{[\s\S]*?clamp\(36px,\s*10\.2vw,\s*45px\)/);
-  assert.match(coachCss, /h1\s*\{[\s\S]*?clamp\(28px,\s*7\.6vw,\s*33px\)[\s\S]*?var\(--mc-native\)/);
+  assert.match(coachCss, /\.mcProgramIdentity\s*\{[\s\S]*?font:\s*780 11px\/1\.2 var\(--mc-native\)/);
+  assert.match(coachCss, /h1\s*\{[\s\S]*?clamp\(40px,\s*9\.8vw,\s*44px\)\/\.94 var\(--mc-native\)/);
   assert.match(coachCss, /\.mcPrimary\s*\{[\s\S]*?min-height:\s*50px/);
   assert.match(coachCss, /\.mcRealityStrip\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
 });
