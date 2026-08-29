@@ -5,9 +5,6 @@
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* iOS/WebKit may otherwise re-anchor the persistent app scroller after route
-   * hydration, font settling, or browser-chrome viewport changes. Route changes
-   * are explicitly reset by the mobile viewport controller instead. */
   html,
   body,
   html body #root .performance-shell--player.is-mobile .player-scroll-container,
@@ -15,9 +12,6 @@
     overflow-anchor: none !important;
   }
 
-  /* The persistent Player scroller declares width:100% inline. Own its border
-   * box here so the canonical 20px rail is included in that width rather than
-   * extending editorial stages beyond the physical viewport. */
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
     width: 100% !important;
     max-width: 100% !important;
@@ -26,279 +20,87 @@
     box-sizing: border-box !important;
   }
 
-  /* When a Player secondary route carries the shared 44px return control, keep
-   * the route opening compact enough to land the editorial stage in the tested
-   * top zone without reducing the control's physical target. */
-  html body #root .performance-shell--player.is-mobile .player-scroll-container:has(> .shared-dashboard-back-action) {
-    padding-top: 4px !important;
-  }
-  html body #root .performance-shell--player.is-mobile .player-scroll-container > .shared-dashboard-back-action {
-    margin-bottom: 0 !important;
-  }
+  html body #root .performance-shell--player.is-mobile .player-scroll-container:has(> .shared-dashboard-back-action) { padding-top: 4px !important; }
+  html body #root .performance-shell--player.is-mobile .player-scroll-container > .shared-dashboard-back-action { margin-bottom: 0 !important; }
+  html body #root .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none !important; }
 
-  /* Home is the only mobile Player route that owns the persistent identity hero.
-   * Secondary routes already publish their own compact editorial title stage;
-   * retaining the Home identity stage above them creates a duplicate title owner
-   * and leaves the retired mini-header in the first-impression geometry path. */
-  html body #root .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] {
-    display: none !important;
-  }
-
-  /* The shared centering boundary owns width/min-width/box sizing. These two
-   * registered Coach owners only opt out of an extra late inline gutter. */
   html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
-    padding-inline: 0 !important;
-  }
-
-  /* One registered Coach mobile rail. App.jsx consumes this variable directly
-   * for every non-Home route; SecondaryPageShell contributes no second gutter. */
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
-    --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px);
-  }
-
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) { padding-inline: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach { --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px); }
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    padding-inline: 0 !important;
-    box-sizing: border-box !important;
-    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important; padding-inline: 0 !important; box-sizing: border-box !important; grid-template-columns: minmax(0, 1fr) !important;
   }
-
-  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > * {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Current Coach title stages own Back navigation. The historical sibling Back
-   * row must not consume opening geometry or create a duplicate affordance. */
-  html body #root .performance-shell--coach.is-mobile .shared-dashboard-back-action {
-    display: none !important;
-  }
-
-  /* MissionControlCascadeLock owns the Home shell and hero-content viewport
-   * geometry. The final x-axis authority prevents the inner composition rail
-   * from becoming a horizontal scroll owner while preserving full-bleed bands. */
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .missionControl {
-    overflow-x: hidden !important;
-  }
-
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > * { min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important; }
+  html body #root .performance-shell--coach.is-mobile .shared-dashboard-back-action { display: none !important; }
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .missionControl { overflow-x: hidden !important; }
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
-    min-width: 0 !important;
-  }
-
-  /* Secondary Coach title stages stay inside the same outer route rail. Do not
-   * re-expand a title child after its parent has already been inset. */
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback { min-width: 0 !important; }
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-inline: 0 !important;
-    box-sizing: border-box !important;
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-inline: 0 !important; box-sizing: border-box !important;
   }
-
-  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
-    padding-inline-start: 0 !important;
-  }
-
-  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"] .teamIdentityTitleStage__inner {
-    padding-inline-start: 15px !important;
-  }
-
-  /* SecondaryPageShell > * already owns min-width/max-width/border-box. */
-  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
-    width: 100% !important;
-  }
-
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] { padding-inline-start: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"] .teamIdentityTitleStage__inner { padding-inline-start: 15px !important; }
+  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar { width: 100% !important; }
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
-  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest {
-    min-width: 0 !important;
-  }
+  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest { min-width: 0 !important; }
 
   html body #root .performance-shell--player.is-mobile .player-quick-actions,
-  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
-    padding-inline: 0 !important;
-  }
-
-  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Player secondary title roles vary by destination. The semantic title-stage
-   * contract is the stable owner; border-box containment prevents late content
-   * padding from escaping the route rail. */
+  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] { padding-inline: 0 !important; }
+  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
   html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-inline: 0 !important;
-    box-sizing: border-box !important;
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-inline: 0 !important; box-sizing: border-box !important;
   }
-
-  /* Player Home optical evidence uses the same 20px page rail. Keep the accent
-   * outside the text block while preserving an 8px readable inset for the copy. */
-  html body #root .performance-shell--player.is-mobile [data-testid="player-coach-priority-signal"] {
-    padding-inline: 8px 2px !important;
-  }
-
-  /* The Phase-close composition contract owns a 2px summary rail and an
-   * independently positioned disclosure control. Reassert it after legacy
-   * command-hierarchy padding so production geometry matches source intent. */
+  html body #root .performance-shell--player.is-mobile [data-testid="player-coach-priority-signal"] { padding-inline: 8px 2px !important; }
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary {
-    position: relative !important;
-    justify-content: space-between !important;
-    padding-inline: 2px 50px !important;
+    position: relative !important; justify-content: space-between !important; padding-inline: 2px 50px !important;
   }
-  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary > span:first-child {
-    align-items: flex-start !important;
-  }
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary > span:first-child { align-items: flex-start !important; }
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary::after {
-    position: absolute !important;
-    right: 2px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    position: absolute !important; right: 2px !important; top: 50% !important; transform: translateY(-50%) !important;
   }
-
-  /* SHOT STATS is a quiet secondary action inside the dark logging region. Keep
-   * its 44px physical target without allowing generic button fills/borders to
-   * convert it into a competing primary control. */
   html body #root .performance-shell--player.is-mobile .player-primary-logging-region .cta-secondary-link {
-    min-height: 44px !important;
-    padding-block: 9px !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    font-size: 12px !important;
+    min-height: 44px !important; padding-block: 9px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 12px !important;
   }
-
-  /* Semantic metric text on light Player workspace ledgers uses stable dark ink.
-   * The At Home ledger is intentionally a dark team-brand performance band and
-   * receives its own accessible light foreground contract immediately below. */
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] {
-    color: #172019 !important;
-    -webkit-text-fill-color: #172019 !important;
-  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] { color: #172019 !important; -webkit-text-fill-color: #172019 !important; }
   html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="label"],
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] {
-    color: #4f5a52 !important;
-    -webkit-text-fill-color: #4f5a52 !important;
-  }
-
-  /* At Home supporting evidence is a dark branded ledger. Give the surface an
-   * explicit dark fallback beneath its existing gradient and pair it with light
-   * semantic foregrounds so older and current Chromium both resolve >=4.5:1. */
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] {
-    background-color: var(--team-brand-surface-deep, #2f4f24) !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"] {
-    color: #f8faf5 !important;
-    -webkit-text-fill-color: #f8faf5 !important;
-  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] { color: #4f5a52 !important; -webkit-text-fill-color: #4f5a52 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] { background-color: var(--team-brand-surface-deep, #2f4f24) !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"] { color: #f8faf5 !important; -webkit-text-fill-color: #f8faf5 !important; }
   html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="label"],
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="detail"] {
-    color: #e8eee6 !important;
-    -webkit-text-fill-color: #e8eee6 !important;
-  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="detail"] { color: #e8eee6 !important; -webkit-text-fill-color: #e8eee6 !important; }
 
-  /* The three Coach leaderboard metrics are one compact ledger, never a
-   * horizontally scrolling carousel. */
   html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-visual-role="performance-evidence"] {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    grid-auto-flow: row !important;
-    grid-auto-columns: minmax(0, 1fr) !important;
-    overflow-x: hidden !important;
-    overscroll-behavior-inline: auto !important;
+    display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; grid-auto-flow: row !important; grid-auto-columns: minmax(0, 1fr) !important; overflow-x: hidden !important; overscroll-behavior-inline: auto !important;
   }
-  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] {
-    min-width: 0 !important;
-  }
-
-  /* The exact production trace identifies the Leaderboards shell by its stable
-   * dashboard test id. Move only its editorial stage down the measured 14px so
-   * it shares the Events/secondary opening rhythm. */
-  html body #root .performance-shell--coach.is-mobile [data-testid="coach-page-dashboard-leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
-    margin-top: 14px !important;
-  }
-
-  /* Program Branding may wrap between words at narrow widths, but never split
-   * the word Mission itself. */
-  html body #root [data-testid="branding-preview-coach-title"] [data-identity-role="page-title"] {
-    overflow-wrap: normal !important;
-    word-break: normal !important;
-    hyphens: none !important;
-  }
+  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] { min-width: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile [data-testid="coach-page-dashboard-leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"] { margin-top: 14px !important; }
+  html body #root [data-testid="branding-preview-coach-title"] [data-identity-role="page-title"] { overflow-wrap: normal !important; word-break: normal !important; hyphens: none !important; }
 }
 
-/* PlayerProgressStory.module.css owns this exact responsive composition in
- * source, but its CSS-module max-width block is currently lost during the
- * production restructure pass. Reassert the same mobile intent in the protected
- * final authority so Progress does not fall back to its desktop split hero. */
+/* PlayerProgressStory.module.css owns this responsive composition in source, but
+ * the production restructure drops the module media rule. Reassert the source
+ * mobile layout in the protected final authority. */
 @media (max-width: 620px) {
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] {
-    border-radius: 26px !important;
-    padding: 17px !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] {
-    margin-bottom: 14px !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 10px !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] {
-    min-width: 0 !important;
-    padding: 5px 0 3px !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 {
-    font-size: clamp(34px, 11vw, 46px) !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] p {
-    display: none !important;
-  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] { border-radius: 26px !important; padding: 17px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] { margin-bottom: 14px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] { min-width: 0 !important; padding: 5px 0 3px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 { font-size: min(42px, 11vw) !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] p { display: none !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-court"] {
-    width: 100% !important;
-    min-width: 0 !important;
-    flex: none !important;
-    padding: 10px 0 0 !important;
-    border-left: 0 !important;
-    border-top: 1px solid rgba(255,255,255,.1) !important;
+    width: 100% !important; min-width: 0 !important; flex: none !important; padding: 10px 0 0 !important; border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.1) !important;
   }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] {
-    margin-top: 14px !important;
-  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] { margin-top: 14px !important; }
 }
 
-/* The source Progress module has a second narrow breakpoint at 390px. Preserve
- * that exact source-owned headline size here because the production restructure
- * drops the nested module media rule along with the 620px composition rules. */
-@media (max-width: 390px) {
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 {
-    font-size: 37px !important;
-  }
-}
-
-/* The title-stage certification contract restores 25vw Coach crests above the
- * compact <=390px breakpoint, clamped to the historical 96–108px range. */
 @media (min-width: 391px) and (max-width: 767px) {
-  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
-    --identity-crest: clamp(96px, 25vw, 108px) !important;
-  }
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(96px, 25vw, 108px) !important; }
 }
 
 @media (max-width: 390px) {
   html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
   html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"],
   html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"],
-  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
-    --identity-crest: 84px !important;
-  }
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 84px !important; }
 }
