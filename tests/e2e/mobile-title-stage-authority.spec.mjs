@@ -83,7 +83,10 @@ async function expectNoHorizontalOverflow(page) {
   return geometry;
 }
 
-const expectedCrestWidth = (width) => width <= 390 ? 84 : Math.min(108, Math.max(96, width * 0.25));
+const expectedCrestWidth = (role, width) => {
+  if (role === "coach") return width <= 390 ? 68 : Math.min(76, Math.max(68, width * 0.18));
+  return width <= 390 ? 64 : Math.min(74, Math.max(64, width * 0.17));
+};
 
 async function inspectEditorialStage(page, { role, screen, width, expectedTitle, expectSingleLine = false }) {
   const stage = page.locator('[data-team-identity-stage="true"][data-title-stage-family="editorial"]').first();
@@ -125,7 +128,7 @@ async function inspectEditorialStage(page, { role, screen, width, expectedTitle,
 
   const overflow = await expectNoHorizontalOverflow(page);
   const viewportWidth = await page.evaluate(() => window.innerWidth);
-  const targetCrest = expectedCrestWidth(width);
+  const targetCrest = expectedCrestWidth(role, width);
   metrics.push({ mode: MODE, role, screen, width, expectedTitle, targetCrest, viewportWidth, ...geometry, overflow });
 
   if (STRICT) {
@@ -136,8 +139,8 @@ async function inspectEditorialStage(page, { role, screen, width, expectedTitle,
     expect(geometry.stage.left, `${role} ${screen} ${width}px left rail`).toBeLessThanOrEqual(22.5);
     expect(viewportWidth - geometry.stage.right, `${role} ${screen} ${width}px right rail`).toBeGreaterThanOrEqual(18.5);
     expect(viewportWidth - geometry.stage.right, `${role} ${screen} ${width}px right rail`).toBeLessThanOrEqual(22.5);
-    expect(geometry.mark.width, `${role} ${screen} ${width}px must restore the pre-reset crest size`).toBeGreaterThanOrEqual(targetCrest - 1.5);
-    expect(geometry.mark.width, `${role} ${screen} ${width}px must restore the pre-reset crest size`).toBeLessThanOrEqual(targetCrest + 1.5);
+    expect(geometry.mark.width, `${role} ${screen} ${width}px must use the compact editorial crest footprint`).toBeGreaterThanOrEqual(targetCrest - 1.5);
+    expect(geometry.mark.width, `${role} ${screen} ${width}px must use the compact editorial crest footprint`).toBeLessThanOrEqual(targetCrest + 1.5);
     expect(geometry.mark.right, `${role} ${screen} ${width}px crest must remain in the right-side title slot`).toBeLessThanOrEqual(geometry.stage.right + 0.5);
     if (expectSingleLine) expect(geometry.lineCount, `${role} ${screen} ${width}px single-word title`).toBe(1);
     if (/leaderboards/i.test(expectedTitle)) expect(geometry.lineCount, `${role} ${screen} ${width}px Leaderboards must remain one line`).toBe(1);
@@ -187,7 +190,7 @@ const coachRoutes = [
 function shouldCapture(width) { return SCREENSHOT_WIDTHS.has(width); }
 
 for (const role of ["player", "coach"]) {
-  test(`${role} title stages restore the full custom crest across 375–430px`, async ({ page }) => {
+  test(`${role} title stages preserve compact editorial branding across 375–430px`, async ({ page }) => {
     test.setTimeout(260_000);
     await installSafeRoutes(page);
     const routes = role === "player" ? playerRoutes : coachRoutes;
