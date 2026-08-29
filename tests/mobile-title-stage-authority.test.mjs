@@ -38,7 +38,7 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.match(longMultiRule, /clamp\(40px,\s*9\.8vw,\s*44px\)/);
 });
 
-test('secondary destinations converge on one editorial treatment while restoring the full custom crest', () => {
+test('secondary destinations converge on one editorial treatment with a compact full custom crest', () => {
   assert.match(stage, /BRAND_TREATMENTS = new Set\(\["hero", "compact"\]\)/);
   assert.match(stage, /fallbackBrandTreatment = titleFamily === "identity" \? "hero" : "compact"/);
   assert.doesNotMatch(stage, /AUTO_BRAND_TREATMENT_BY_PAGE_KIND/);
@@ -72,13 +72,13 @@ test('custom team logos remain data-driven and use the full crest slot on every 
   assert.doesNotMatch(stage, /titans-exact-logo|titans-default-mark/);
 });
 
-test('secondary mobile stages preserve the restored crest scale with one shared geometry', () => {
+test('secondary mobile stages preserve one compact shared geometry without dominating the page title', () => {
   assert.match(brandCss, /data-title-stage-family="editorial"/);
-  assert.match(brandCss, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
-  assert.match(brandCss, /grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
-  assert.match(brandCss, /align-items:\s*end/);
-  assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*84px/);
-  assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*8px[\s\S]*padding:\s*10px 2px 12px/);
+  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*--identity-crest:\s*clamp\(64px,\s*17vw,\s*74px\)/);
+  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\) var\(--identity-crest\)/);
+  assert.match(brandCss, /@media \(max-width: 760px\)[\s\S]*align-items:\s*start/);
+  assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*64px/);
+  assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*10px[\s\S]*padding:\s*10px 2px 12px/);
   assert.doesNotMatch(brandCss, /data-brand-treatment="signature"|data-brand-treatment="none"|signatureRule|watermarkBrand|microBrand/);
   assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
 });
