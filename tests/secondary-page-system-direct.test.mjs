@@ -42,9 +42,9 @@ test("secondary page title actions expose stable accessibility and disabled stat
 
 test("secondary page layout remains compact and mobile-first after the shared title stage", () => {
   assert.match(css, /width:\s*min\(100%,\s*1080px\)/);
-  assert.match(css, /@media \(max-width:\s*760px\)/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)/);
   assert.match(css, /grid-template-columns:\s*1fr/);
-  assert.match(css, /min-height:\s*var\(--control-height, 48px\)/);
+  assert.match(css, /min-height:\s*var\(--control-height,\s*48px\)/);
   assert.match(css, /prefers-reduced-motion/);
-  assert.match(titleCss, /@media \(max-width:\s*390px\)/);
+  assert.match(titleCss, /@media\s*\(max-width:\s*390px\)/);
 });
