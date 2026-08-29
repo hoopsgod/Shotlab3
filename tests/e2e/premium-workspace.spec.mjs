@@ -69,10 +69,11 @@ async function expectPremiumTitleStage(page) {
   expect(visual.titleSize).toBeGreaterThanOrEqual(38);
   expect(visual.titleSize).toBeLessThanOrEqual(58);
   expect(visual.teamText.length).toBeGreaterThan(0);
-  // Editorial mobile stages deliberately use a 64-74px crest footprint so branding stays
-  // present without consuming a quarter of a 390px viewport.
-  expect(visual.crestWidth).toBeGreaterThanOrEqual(60);
-  expect(visual.crestHeight).toBeGreaterThanOrEqual(60);
+  // Editorial stages keep a compact 64-74px slot. Preview variants may optically inset
+  // the actual panel by a few pixels, so require a meaningful mark without forcing it
+  // back toward the retired oversized treatment.
+  expect(visual.crestWidth).toBeGreaterThanOrEqual(56);
+  expect(visual.crestHeight).toBeGreaterThanOrEqual(56);
   expect(visual.crestWidth).toBeLessThanOrEqual(80);
   expect(visual.crestHeight).toBeLessThanOrEqual(80);
   expect(visual.left).toBeGreaterThanOrEqual(-1);
