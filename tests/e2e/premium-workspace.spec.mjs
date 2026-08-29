@@ -50,7 +50,7 @@ async function expectPremiumTitleStage(page) {
     const rect = node.getBoundingClientRect();
     const title = node.querySelector('[data-identity-role="page-title"], h1');
     const team = node.querySelector('[data-identity-role="team-name"]');
-    const crest = node.querySelector('[data-identity-role="brand-mark"], .teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
+    const crest = node.querySelector('[data-identity-role="brand-panel"]');
     const crestRect = crest?.getBoundingClientRect();
     return {
       family: node.getAttribute("data-title-stage-family") || "",
@@ -69,7 +69,7 @@ async function expectPremiumTitleStage(page) {
   expect(visual.titleSize).toBeGreaterThanOrEqual(38);
   expect(visual.titleSize).toBeLessThanOrEqual(58);
   expect(visual.teamText.length).toBeGreaterThan(0);
-  // Editorial mobile stages deliberately use a 64-74px crest so branding stays
+  // Editorial mobile stages deliberately use a 64-74px crest footprint so branding stays
   // present without consuming a quarter of a 390px viewport.
   expect(visual.crestWidth).toBeGreaterThanOrEqual(60);
   expect(visual.crestHeight).toBeGreaterThanOrEqual(60);
