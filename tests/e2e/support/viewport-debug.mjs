@@ -54,6 +54,16 @@ export function findViewportFailures(report) {
     if (!action.visible) failures.push(`critical action is not visible: ${action.label}`);
     else if (!action.inViewport) failures.push(`critical action is outside viewport: ${action.label}`);
   }
+
+  if (report.role === 'coach' && report.label === 'home' && report.coachHome?.programPulse) {
+    const pulse = report.coachHome.programPulse;
+    if (!pulse.backgroundImage || pulse.backgroundImage === 'none') {
+      failures.push(`Coach Home Program Pulse lost dark material (background=${pulse.backgroundColor}, image=${pulse.backgroundImage})`);
+    }
+    if (pulse.color && !/^rgb\((?:24[0-9]|25[0-5]),\s*(?:24[0-9]|25[0-5]),\s*(?:24[0-9]|25[0-5])\)$/.test(pulse.color)) {
+      failures.push(`Coach Home Program Pulse lost light foreground (${pulse.color})`);
+    }
+  }
   return failures;
 }
 
@@ -65,6 +75,10 @@ export function formatViewportDiagnostics(report) {
   ];
   for (const target of report.outerTargets || []) {
     lines.push(`  ${target.selector}: client=${target.clientWidth} scroll=${target.scrollWidth} persisted=${Math.round(target.persistedScrollLeft || 0)} x=${Math.round(target.left)}..${Math.round(target.right)} overflow-x=${target.overflowX}`);
+  }
+  if (report.coachHome?.programPulse) {
+    const pulse = report.coachHome.programPulse;
+    lines.push(`  program-pulse: background=${pulse.backgroundColor} image=${pulse.backgroundImage} color=${pulse.color}`);
   }
   if (report.offenders?.length) {
     lines.push('  widest/off-axis elements:');
@@ -134,6 +148,28 @@ export async function collectViewportDiagnostics(page, { role, label, extraSelec
       }
       return chain;
     };
+    const matchedRules = (node) => {
+      const result = [];
+      const walk = (rules, href, media = '') => {
+        for (const rule of rules || []) {
+          if (rule instanceof CSSMediaRule) {
+            if (matchMedia(rule.conditionText).matches) walk(rule.cssRules, href, rule.conditionText);
+            continue;
+          }
+          if (!(rule instanceof CSSStyleRule) || !rule.selectorText) continue;
+          let matches = false;
+          try { matches = node.matches(rule.selectorText); } catch { matches = false; }
+          if (!matches) continue;
+          const declarations = rule.style;
+          if (!declarations.background && !declarations.backgroundColor && !declarations.backgroundImage && !declarations.color && !declarations.display && !declarations.gridColumn) continue;
+          result.push({ href, media, selector: rule.selectorText, cssText: rule.cssText });
+        }
+      };
+      for (const sheet of document.styleSheets) {
+        try { walk(sheet.cssRules, sheet.href || 'inline'); } catch { /* same-origin preview should be readable; ignore browser-internal sheets */ }
+      }
+      return result.slice(-40);
+    };
 
     const outerTargets = [];
     for (const selector of selectors) {
@@ -162,6 +198,33 @@ export async function collectViewportDiagnostics(page, { role, label, extraSelec
       .filter((entry) => ['fixed', 'sticky'].includes(entry.position) && (entry.left < -1 || entry.right > viewport.width + 1 || entry.top < -1 || entry.bottom > viewport.height + 1))
       .slice(0, 12);
 
+    let coachHome = null;
+    if (role === 'coach' && label === 'home') {
+      const pulse = document.querySelector('[data-testid="coach-program-pulse"]');
+      const shell = document.querySelector('[data-testid="coach-command-center-full"]');
+      const mission = shell?.querySelector('.missionControl');
+      if (pulse) {
+        const style = getComputedStyle(pulse);
+        const rect = pulse.getBoundingClientRect();
+        coachHome = {
+          shell: shell ? { display: getComputedStyle(shell).display, classes: shell.className } : null,
+          mission: mission ? { display: getComputedStyle(mission).display, gridTemplateColumns: getComputedStyle(mission).gridTemplateColumns } : null,
+          programPulse: {
+            classes: pulse.className,
+            background: style.background,
+            backgroundColor: style.backgroundColor,
+            backgroundImage: style.backgroundImage,
+            color: style.color,
+            display: style.display,
+            width: rect.width,
+            height: rect.height,
+            matchedRules: matchedRules(pulse),
+          },
+          stylesheets: [...document.styleSheets].map((sheet) => sheet.href || 'inline'),
+        };
+      }
+    }
+
     return {
       role,
       label,
@@ -177,6 +240,7 @@ export async function collectViewportDiagnostics(page, { role, label, extraSelec
       outerTargets,
       offenders,
       fixedActionOffenders,
+      coachHome,
     };
   }, { selectors, role, label });
 
