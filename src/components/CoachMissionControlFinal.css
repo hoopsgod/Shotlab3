@@ -2,7 +2,10 @@
    typography, rows and data treatment only; TitleStage owns page composition. */
 .mcShellV3{--mc-native:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",sans-serif;--mc-light:#f4f0e7;--mc-ink:#101820;--mc-copy:#66717a;--mc-hairline:rgba(16,24,32,.12);--mc-surface-ink:#f4f7f8;--mc-surface-copy:#9ba7ad;font-family:var(--mc-native)}
 .mcShellV3 button{font-family:var(--mc-native)}
-.mcShellV3 .mcSection{min-width:0;border:0;border-radius:0;background:transparent;color:inherit;box-shadow:none}
+/* Material belongs to CoachMissionControlTitleStage.css. Keep the shared section
+   primitive geometry-only so production CSS reordering cannot flatten the dark
+   Program Pulse or other route-owned surfaces back to the cream parent. */
+.mcShellV3 .mcSection{min-width:0;border:0;border-radius:0;box-shadow:none}
 .mcShellV3 .mcSectionHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 24px 0}
 .mcShellV3 .mcSectionHead small,.mcShellV3 .mcPulseLead small{display:block;color:var(--mc-surface-copy);font:680 9px/1.1 var(--mc-native);letter-spacing:.08em;text-transform:uppercase}
 .mcShellV3 .mcSectionHead h2,.mcShellV3 .mcPulseLead h2{margin:5px 0 0;color:inherit;font:760 18px/1 var(--mc-native);letter-spacing:-.035em}
