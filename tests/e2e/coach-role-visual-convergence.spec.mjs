@@ -66,7 +66,7 @@ async function expectEditorialTitle(page) {
   const title = page.locator('[data-team-identity-stage="true"][data-title-stage-family="editorial"]:visible').first();
   await expect(title).toBeVisible({ timeout: 10_000 });
   const metrics = await title.evaluate((element) => {
-    const crest = element.querySelector('[data-identity-role="brand-mark"], [data-identity-role="brand-fallback"]');
+    const crest = element.querySelector('[data-identity-role="brand-panel"]');
     const titleNode = element.querySelector('[data-identity-role="page-title"]');
     const crestRect = crest?.getBoundingClientRect();
     return {
