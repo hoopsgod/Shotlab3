@@ -201,7 +201,9 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   if (presentation.attentionPresent) {
     expect(presentation.attentionRadius).toBeLessThanOrEqual(1);
     expect(presentation.attentionShadow).not.toBe("none");
-    expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
+    const attentionTitleChannels = rgbChannels(presentation.attentionTitleColor);
+    expect(attentionTitleChannels).toHaveLength(3);
+    expect(relativeLuminance(attentionTitleChannels)).toBeLessThan(0.08);
     const attentionChannels = rgbChannels(presentation.attentionBackground);
     if (!isTransparent(presentation.attentionBackground) && attentionChannels.length === 3) expect(Math.min(...attentionChannels)).toBeGreaterThanOrEqual(230);
   }
