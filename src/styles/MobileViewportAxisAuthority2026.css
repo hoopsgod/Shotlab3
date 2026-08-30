@@ -60,10 +60,10 @@
   }
   html body #root .performance-shell.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] [data-identity-role="brand-mark"] {
     display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
     object-fit: contain !important;
     object-position: center !important;
   }
@@ -144,6 +144,21 @@
 }
 
 @media (max-width: 390px) {
+  /* Keep compact Coach title actions on one touch-safe row. Long program names
+   * already consume the available copy height; allowing these two bounded
+   * actions to wrap adds an unnecessary 52px row and breaks the title-stage
+   * viewport contract. */
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] .teamIdentityTitleStage__actions {
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] .teamIdentityTitleStage__action {
+    min-width: 0 !important;
+    padding-inline: 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
   html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
   html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 64px !important; }
 
