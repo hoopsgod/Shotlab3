@@ -2,6 +2,13 @@ const MOBILE_VIEWPORT_QUERY = '(max-width: 760px)';
 const HORIZONTAL_INTENT_THRESHOLD_PX = 6;
 const VISUAL_VIEWPORT_ZOOM_EPSILON = 0.01;
 const COACH_MOBILE_RAIL = 'var(--shotlab-mobile-content-rail, 20px)';
+const COACH_HOME_AMBIENT_LEFT = 'min(80%, calc(100% - 125px))';
+const COACH_PROGRAM_PULSE_PROPERTIES = [
+  ['--sl-surface', 'linear-gradient(150deg,#0b2231,var(--team-brand-surface-deep,#06151d))'],
+  ['--sl-ink', '#f4f7f8'],
+  ['--mc-surface-ink', '#f4f7f8'],
+  ['--mc-surface-copy', '#9ba7ad'],
+];
 const COACH_ROUTE_GEOMETRY_PROPERTIES = [
   'width',
   'min-width',
@@ -93,6 +100,25 @@ export function normalizeRegisteredCoachRouteGeometry() {
   return true;
 }
 
+export function normalizeCoachHomeReleaseSurface() {
+  if (typeof document === 'undefined') return false;
+  let corrected = false;
+  const pulse = document.querySelector('[data-testid="coach-program-pulse"]');
+  if (pulse) {
+    for (const [property, value] of COACH_PROGRAM_PULSE_PROPERTIES) {
+      if (pulse.style.getPropertyValue(property) === value) continue;
+      pulse.style.setProperty(property, value);
+      corrected = true;
+    }
+  }
+  const ambient = document.querySelector('[data-testid="coach-ambient-glow"]');
+  if (ambient && ambient.style.left !== COACH_HOME_AMBIENT_LEFT) {
+    ambient.style.left = COACH_HOME_AMBIENT_LEFT;
+    corrected = true;
+  }
+  return corrected;
+}
+
 function resetNodeHorizontalOffset(node) {
   if (!node || Math.abs(node.scrollLeft) <= 0.5) return false;
   node.scrollLeft = 0;
@@ -165,6 +191,7 @@ export function installMobileHorizontalViewportLock() {
     if (rafId != null) return;
     rafId = window.requestAnimationFrame(() => {
       rafId = null;
+      normalizeCoachHomeReleaseSurface();
       resetMobileHorizontalViewport();
       resetRouteTop();
     });

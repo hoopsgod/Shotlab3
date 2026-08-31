@@ -48,15 +48,22 @@ test('final mobile viewport axis authority loads after every authenticated visua
   assert.ok(finalAxis > phase7, 'mobile viewport axis authority must load after Phase 7');
 });
 
-test('Coach ambient decoration has a stable hook and an intrinsically contained mobile box', () => {
-  const ambientGlow = ruleBlock(mediaBlock(finalAxisAuthority, '(max-width: 767px)'), '.coach-ambient-glow--top-right');
+test('Coach ambient decoration has a stable hook and source geometry normalized without extra CSS payload', () => {
   assert.match(app, /className="coach-ambient-glow coach-ambient-glow--top-right"/);
   assert.match(app, /dataTestId="coach-ambient-glow"/);
-  assertDeclaration(ambientGlow, 'left', 'auto!important');
-  assertDeclaration(ambientGlow, 'right', '0!important');
-  assertDeclaration(ambientGlow, 'width', 'min(250px, 100%)!important');
-  assertDeclaration(ambientGlow, 'max-width', '100%!important');
-  assertDeclaration(ambientGlow, 'transform', 'translateY(-50%)!important');
+  assert.match(guard, /COACH_HOME_AMBIENT_LEFT = 'min\(80%, calc\(100% - 125px\)\)'/);
+  assert.match(guard, /document\.querySelector\('\[data-testid="coach-ambient-glow"\]'\)/);
+  assert.match(guard, /ambient\.style\.left = COACH_HOME_AMBIENT_LEFT/);
+  assert.doesNotMatch(finalAxisAuthority, /coach-ambient-glow--top-right/);
+});
+
+test('Coach Program Pulse reuses the production surface-variable contract instead of adding protected CSS', () => {
+  assert.match(guard, /document\.querySelector\('\[data-testid="coach-program-pulse"\]'\)/);
+  assert.match(guard, /\['--sl-surface', 'linear-gradient\(150deg,#0b2231,var\(--team-brand-surface-deep,#06151d\)\)'\]/);
+  assert.match(guard, /\['--sl-ink', '#f4f7f8'\]/);
+  assert.match(guard, /\['--mc-surface-ink', '#f4f7f8'\]/);
+  assert.match(guard, /\['--mc-surface-copy', '#9ba7ad'\]/);
+  assert.doesNotMatch(finalAxisAuthority, /coach-program-pulse/);
 });
 
 test('shared centering owns generic outer containment while runtime normalizes the dynamic Coach route owner', () => {
