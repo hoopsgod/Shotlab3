@@ -1,8 +1,8 @@
 /*
  * Visual System Convergence: authenticated title stages expose exactly two
  * visual families. Home/identity stages own the hero treatment; every
- * secondary/editorial stage keeps the coach-configured custom logo in the
- * same restored right-side crest slot and uses one compact supporting tone.
+ * secondary/editorial stage keeps the coach-configured custom logo present but
+ * subordinate to the page title.
  */
 .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
   grid-template-columns: minmax(0, 1fr) var(--identity-crest);
@@ -73,23 +73,29 @@
 }
 
 @media (max-width: 760px) {
-  /* Preserve the restored full custom crest while keeping one secondary-page
-     geometry across Coach, Player, Demo, and registered experiences. */
+  /* A secondary page is an editorial surface, not another brand hero. The
+     previous 96-108px crest consumed roughly a quarter of an iPhone viewport,
+     forcing normal two-word titles into awkward multi-line stacks. */
   .teamIdentityTitleStage--standard {
-    --identity-crest: clamp(96px, 25vw, 108px);
+    --identity-crest: clamp(64px, 17vw, 74px);
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
   .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
     grid-template-columns: minmax(0, 1fr) var(--identity-crest);
-    align-items: end;
-    gap: clamp(16px, 4vw, 24px);
-    padding: 14px 2px 16px;
+    align-items: start;
+    gap: clamp(10px, 3vw, 14px);
+    padding: 12px 2px 14px;
   }
 
-  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot {
-    align-self: end;
-    margin-top: 0;
+  .teamIdentityTitleStage--standard .teamIdentityTitleStage__crestSlot,
+  .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crestSlot {
+    width: var(--identity-crest);
+    min-width: 0;
+    max-width: var(--identity-crest);
+    box-sizing: border-box;
+    align-self: start;
+    margin-top: 10px;
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__identityLine {
@@ -120,28 +126,26 @@
 
 @media (max-width: 390px) {
   .teamIdentityTitleStage--standard {
-    --identity-crest: 84px;
+    --identity-crest: 64px;
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner,
   .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__inner {
-    gap: 8px;
+    gap: 10px;
     padding: 10px 2px 12px;
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackAction {
-    border-radius: 18px;
+    border-radius: 16px;
   }
 
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__fallbackActionMark {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 
 @media (max-width: 350px) {
-  /* Only the extreme-small interval needs type accommodation. Interpolate from
-     32px at 320px back to the established 38px floor by 350px so every normal
-     mobile width keeps the certified editorial scale unchanged. */
+  /* Only the extreme-small interval needs type accommodation. */
   .teamIdentityTitleStage--standard.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
     font-size: clamp(32px, calc(20vw - 32px), 38px);
   }

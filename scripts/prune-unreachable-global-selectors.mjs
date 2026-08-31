@@ -9,6 +9,7 @@ const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
 const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|variant)(?:-|_|$)|^(?:active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger)$/i;
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
+const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -103,8 +104,17 @@ async function main() {
   let removedRules = 0;
   let bytesSaved = 0;
   let changedFiles = 0;
+  let protectedFiles = 0;
 
   for (const file of files) {
+    // This sheet is intentionally loaded last and contains the final mobile
+    // geometry/contrast authority. Source-text reachability is not a safe proof
+    // for a whole late authority layer: previous pruning reduced the emitted
+    // asset to zero bytes even though its selectors matched live Coach DOM.
+    if (FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file))) {
+      protectedFiles += 1;
+      continue;
+    }
     const source = await readFile(file, "utf8");
     const pruned = pruneRules(source, corpus);
     if (pruned.css === source) continue;
@@ -116,7 +126,7 @@ async function main() {
     changedFiles += 1;
   }
 
-  console.log(`Pruned global selectors: ${removedArms} unreachable selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
+  console.log(`Pruned global selectors: ${removedArms} unreachable selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`);
 }
 
 await main();

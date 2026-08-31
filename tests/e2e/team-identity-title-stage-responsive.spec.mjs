@@ -190,19 +190,22 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.left).toBeGreaterThanOrEqual(-1);
     expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
     expect(result.teamName.startsWith(teamName)).toBe(true);
-    expect(result.identityHeight).toBeGreaterThanOrEqual(96);
+    // Coach Home keeps a compact team label above the dominant 36–44px decision title.
+    expect(result.identityHeight).toBeGreaterThanOrEqual(80);
     expect(result.identityHeight).toBeLessThanOrEqual(160);
-    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(30);
-    expect(result.teamIdentitySize).toBeLessThanOrEqual(50);
-    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(16);
-    expect(result.decisionTitleSize).toBeLessThanOrEqual(34);
-    expect(result.teamIdentitySize - result.decisionTitleSize).toBeGreaterThanOrEqual(8);
+    expect(result.teamIdentitySize).toBeGreaterThanOrEqual(10);
+    expect(result.teamIdentitySize).toBeLessThanOrEqual(16);
+    expect(result.decisionTitleSize).toBeGreaterThanOrEqual(36);
+    expect(result.decisionTitleSize).toBeLessThanOrEqual(44);
+    expect(result.decisionTitleSize - result.teamIdentitySize).toBeGreaterThanOrEqual(20);
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
-    expect(result.crestWidth).toBeGreaterThanOrEqual(96);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(96);
-    expect(result.height).toBeGreaterThanOrEqual(382);
+    expect(result.crestWidth).toBeGreaterThanOrEqual(80);
+    expect(result.crestWidth).toBeLessThanOrEqual(96);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(80);
+    expect(result.crestHeight).toBeLessThanOrEqual(96);
+    expect(result.height).toBeGreaterThanOrEqual(334);
     expect(result.height).toBeLessThanOrEqual(500);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
@@ -214,9 +217,11 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     const rect = element.getBoundingClientRect();
     const title = element.querySelector("h1");
     const team = element.querySelector('[data-identity-role="team-name"]');
+    const brandPanel = element.querySelector('[data-identity-role="brand-panel"]');
+    const brandPanelRect = brandPanel?.getBoundingClientRect();
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
+    const crestRect = crest?.getBoundingClientRect();
     const fallback = element.querySelector('.teamIdentityTitleStage__fallbackCrest, .teamIdentityTitleStage__logoSetup');
-    const crestRect = crest?.getBoundingClientRect() || fallback?.getBoundingClientRect();
     return {
       left: rect.left,
       right: rect.right,
@@ -224,8 +229,13 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       viewport: innerWidth,
       titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
       teamName: team?.textContent?.trim() || "",
+      brandPanelWidth: brandPanelRect?.width || 0,
+      brandPanelHeight: brandPanelRect?.height || 0,
+      brandPanelOverflow: brandPanel ? getComputedStyle(brandPanel).overflow : "missing",
       crestWidth: crestRect?.width || 0,
       crestHeight: crestRect?.height || 0,
+      hasBrandMark: Boolean(crest),
+      hasBrandContent: Boolean(crest || fallback),
       objectFit: crest ? getComputedStyle(crest).objectFit : "fallback",
     };
   });
@@ -234,14 +244,22 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   expect(result.teamName).toBe(teamName);
   expect(result.titleSize).toBeGreaterThanOrEqual(38);
   expect(result.titleSize).toBeLessThanOrEqual(58);
+  expect(result.hasBrandContent).toBe(true);
   if (variant === "hero") {
-    expect(result.crestWidth).toBeGreaterThanOrEqual(96);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(96);
+    expect(result.brandPanelWidth).toBeGreaterThanOrEqual(96);
+    expect(result.brandPanelHeight).toBeGreaterThanOrEqual(96);
     expect(result.height).toBeLessThanOrEqual(260);
   } else {
-    expect(result.crestWidth).toBeGreaterThanOrEqual(80);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(80);
-    expect(result.height).toBeLessThanOrEqual(330);
+    expect(result.brandPanelWidth).toBeGreaterThanOrEqual(64);
+    expect(result.brandPanelWidth).toBeLessThanOrEqual(80);
+    expect(result.brandPanelHeight).toBeGreaterThanOrEqual(64);
+    expect(result.brandPanelHeight).toBeLessThanOrEqual(80);
+    expect(result.height).toBeLessThanOrEqual(350);
+    if (result.hasBrandMark) {
+      expect(result.brandPanelOverflow).toBe("hidden");
+      expect(result.crestWidth).toBeLessThanOrEqual(result.brandPanelWidth + 1);
+      expect(result.crestHeight).toBeLessThanOrEqual(result.brandPanelHeight + 1);
+    }
   }
   if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
   await expectNoHorizontalOverflow(page);

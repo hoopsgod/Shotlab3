@@ -35,8 +35,8 @@ test("secondary page identity and decision surfaces use the shared semantic desi
   assert.match(secondary, /secondaryPageDecision__icon/);
   assert.match(titleStage, /data-identity-role="page-title"/);
   assert.match(titleStage, /data-identity-role="brand-mark"/);
-  assert.match(titleStyles, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
-  assert.match(secondaryStyles, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns: 44px minmax\(0, 1fr\) minmax\(180px, 30%\)/);
+  assert.match(titleStyles, /--identity-crest:\s*clamp\(96px,\s*25vw,\s*108px\)/);
+  assert.match(secondaryStyles, /\.secondaryPageDecision\s*\{[\s\S]*grid-template-columns:\s*44px\s+minmax\(0,\s*1fr\)\s+minmax\(180px,\s*30%\)/);
   assert.match(secondaryStyles, /overflow-wrap:\s*anywhere/);
   assert.doesNotMatch(secondaryStyles, /\.secondaryPageIntro\b/);
 });

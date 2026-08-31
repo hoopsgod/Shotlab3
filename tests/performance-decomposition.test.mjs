@@ -3,6 +3,8 @@ import fs from 'node:fs'
 import test from 'node:test'
 
 const viteConfig = fs.readFileSync('vite.config.js', 'utf8')
+const phase5bViteConfig = fs.readFileSync('vite.phase5b.config.js', 'utf8')
+const legacyRuntimeCssExtraction = fs.readFileSync('scripts/legacy-runtime-css-extraction-plugin.mjs', 'utf8')
 const appSource = fs.readFileSync('src/App.jsx', 'utf8')
 const deferredCharts = fs.readFileSync('src/components/DeferredShotLabCharts.jsx', 'utf8')
 const deferredLeaderboards = fs.readFileSync('src/components/DeferredPremiumLeaderboardsHub.jsx', 'utf8')
@@ -133,6 +135,18 @@ test('shared season analytics use domain services while leaderboard UI stays in 
   assert.match(viteConfig, /['"]\/src\/components\/PremiumLeaderboardsHub\.jsx["']/)
   assert.match(viteConfig, /return ["']PlayerWorkspaces["']/)
   assert.doesNotMatch(viteConfig, /return ["']charts-vendor["']/)
+})
+
+test('production externalizes legacy runtime CSS without changing the development App source path', () => {
+  assert.match(phase5bViteConfig, /createLegacyRuntimeCssExtractionPlugin/)
+  assert.match(phase5bViteConfig, /createLegacyRuntimeCssExtractionPlugin\(\)/)
+  assert.match(legacyRuntimeCssExtraction, /const LEGACY_STYLE_ASSET = ['"]assets\/legacy-runtime\.css['"]/)
+  assert.match(legacyRuntimeCssExtraction, /const LEGACY_STYLE_EXPORTS = \[['"]_STYLES_CSS['"], ['"]_PLAYER_COMPACT_DASHBOARD_CSS['"], ['"]_PAGE_SIGNATURE_CSS['"], ['"]_DESKTOP_SHELL_CSS['"]\]/)
+  assert.match(legacyRuntimeCssExtraction, /LEGACY_STYLE_IMPORT/)
+  assert.match(legacyRuntimeCssExtraction, /LEGACY_STYLE_COMPONENT/)
+  assert.match(legacyRuntimeCssExtraction, /data-shotlab-legacy-runtime="1"/)
+  assert.match(appSource, /from ["']\.\/styles\/appLegacyStyles\.js["']/)
+  assert.match(appSource, /const Styles=\(\)=>/)
 })
 
 test('the performance verifier locks startup App assets and total request budgets', () => {

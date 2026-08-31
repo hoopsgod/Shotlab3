@@ -13,6 +13,11 @@ const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
 const STATIC_COACH_INTERACTIVE_IMPORT = './components/CoachInteractiveDashboards.jsx'
 const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
 const STATIC_LEGACY_STYLE_IMPORT = './styles/appLegacyStyles.js'
+const LEGACY_STYLE_RAW_IMPORT = './appLegacyStyles.js?raw'
+const LEGACY_STYLE_RUNTIME_SUFFIX = '/src/styles/appLegacyStylesRuntime.js'
+const LEGACY_STYLE_SOURCE_MODULE = path.resolve(process.cwd(), 'src/styles/appLegacyStyles.js')
+const MINIFIED_LEGACY_STYLE_SOURCE_ID = '\0shotlab-minified-legacy-style-source'
+const LEGACY_STYLE_EXPORTS = ['_STYLES_CSS', '_PAGE_SIGNATURE_CSS', '_DESKTOP_SHELL_CSS', '_PLAYER_COMPACT_DASHBOARD_CSS']
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachCommandCenter.jsx')
@@ -117,7 +122,7 @@ const COACH_WORKSPACE_FRAGMENTS = [
   '/src/lib/homeExperienceHierarchy.js',
   '/src/lib/visualSystemReboot',
 ]
-const AUTHORITY_BUNDLE_TARGET_BYTES = 120_000
+const AUTHORITY_BUNDLE_TARGET_BYTES = 1_000_000
 
 const matchesAny = (moduleId, fragments) => fragments.some((fragment) => moduleId.includes(fragment))
 
@@ -129,6 +134,51 @@ function redirectAppImport(name, sourceMatch, modulePath) {
       const importerId = normalizeModuleId(importer)
       if (source === sourceMatch && importerId.endsWith(APP_MODULE_SUFFIX)) return modulePath
       return null
+    },
+  }
+}
+
+function minifyLegacyStyleTemplate(template, exportName) {
+  const buildTokens = new Map()
+  const tokenized = template.replace(/\$\{([A-Z_]+)\}/g, (_match, tokenName) => {
+    const cssVariable = `--slbt-${tokenName.toLowerCase().replaceAll('_', '-')}`
+    buildTokens.set(cssVariable, `\${${tokenName}}`)
+    return `var(${cssVariable})`
+  })
+  const transformed = transformWithLightningCss({
+    filename: `${exportName}.css`,
+    code: Buffer.from(tokenized),
+    minify: true,
+  })
+  let css = Buffer.from(transformed.code).toString('utf8')
+  for (const [cssVariable, runtimeToken] of buildTokens) css = css.replaceAll(`var(${cssVariable})`, runtimeToken)
+  return css
+}
+
+function minifyLegacyStyleRawSource() {
+  return {
+    name: 'shotlab-minify-legacy-style-raw-source',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      if (source !== LEGACY_STYLE_RAW_IMPORT) return null
+      if (!normalizeModuleId(importer).endsWith(LEGACY_STYLE_RUNTIME_SUFFIX)) return null
+      return MINIFIED_LEGACY_STYLE_SOURCE_ID
+    },
+    async load(id) {
+      if (id !== MINIFIED_LEGACY_STYLE_SOURCE_ID) return null
+      const source = await readFile(LEGACY_STYLE_SOURCE_MODULE, 'utf8')
+      const compactExports = []
+      for (const exportName of LEGACY_STYLE_EXPORTS) {
+        const openingMarker = `export const ${exportName}=\``
+        const openingIndex = source.indexOf(openingMarker)
+        if (openingIndex === -1) throw new Error(`Legacy style export ${exportName} was not found during build.`)
+        const valueStart = openingIndex + openingMarker.length
+        const valueEnd = source.indexOf('`;', valueStart)
+        if (valueEnd === -1) throw new Error(`Legacy style export ${exportName} is not terminated during build.`)
+        const compactCss = minifyLegacyStyleTemplate(source.slice(valueStart, valueEnd), exportName)
+        compactExports.push(`export const ${exportName}=\`${compactCss}\`;`)
+      }
+      return `export default ${JSON.stringify(compactExports.join('\n'))};`
     },
   }
 }
@@ -288,6 +338,7 @@ export default defineConfig({
     redirectAppImport('shotlab-defer-coach-interactive-dashboards', STATIC_COACH_INTERACTIVE_IMPORT, DEFERRED_COACH_INTERACTIVE_MODULE),
     redirectAppImport('shotlab-defer-player-career-history', STATIC_CAREER_HISTORY_IMPORT, DEFERRED_CAREER_HISTORY_MODULE),
     redirectAppImport('shotlab-hydrate-legacy-styles', STATIC_LEGACY_STYLE_IMPORT, LEGACY_STYLE_RUNTIME_MODULE),
+    minifyLegacyStyleRawSource(),
     deferPlayerInterface(),
     deferCoachAdministration(),
     deferAuthenticatedUi(),

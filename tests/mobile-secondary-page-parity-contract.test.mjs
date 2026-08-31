@@ -34,7 +34,7 @@ test("demo-only utilities cannot change visible Coach Settings geometry", () => 
 });
 
 test("Coach Events parity preserves the premium short empty state and natural schedule length", () => {
-  assert.match(appParityEnhancer, /Coach Events now owns a deliberate short empty state and natural schedule length/);
+  assert.match(appParityEnhancer, /coach-events-mobile-empty-state/);
   assert.match(appParityEnhancer, /legacy Coach Events empty state visibility/);
   assert.match(appParityEnhancer, /aria-hidden=\"true\" style=\{\{display:\"none\"\}\}/);
   assert.match(appParityEnhancer, /Legacy Coach Events parity runway must not be present/);

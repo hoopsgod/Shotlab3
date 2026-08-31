@@ -13,10 +13,12 @@
   --sl-font-display: -apple-system,BlinkMacSystemFont,SF Pro Display,Segoe UI,sans-serif;
 }
 
-/* Coach secondary titles now share the premium editorial signature while Home
- * remains on its separate Mission Control identity authority. */
+/* Coach secondary titles share one editorial signature while Home remains on
+ * its separate Mission Control identity authority. Keep the crest present, but
+ * subordinate it to the page title so long Coach destinations do not become
+ * logo-first or wrap into oversized three-line headlines. */
 .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
-  --identity-crest: clamp(88px, 18vw, 106px);
+  --identity-crest: clamp(76px, 14vw, 92px);
   overflow: visible;
   padding-inline-start: 15px;
 }
@@ -30,17 +32,27 @@
 }
 .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__inner {
   grid-template-columns: minmax(0, 1fr) var(--identity-crest);
+  align-items: start;
   gap: 14px;
   padding: 8px 0 16px;
   border-bottom: 1px solid rgba(17, 26, 33, .11);
 }
+.performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__crestSlot {
+  align-self: start;
+  margin-top: 12px;
+}
 .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] {
-  max-width: 12ch;
+  max-width: 15ch;
   font-family: "Barlow Condensed", "Arial Narrow", var(--sl-font-display);
-  font-size: clamp(46px, 8.1vw, 60px);
+  font-size: clamp(40px, 6.6vw, 52px);
   font-weight: 820;
-  line-height: .88;
-  letter-spacing: -.035em;
+  line-height: .9;
+  letter-spacing: -.03em;
+}
+.performance-shell--coach [data-visual-role="page-intro"].teamIdentityTitleStage--longTitle [data-identity-role="page-title"] {
+  max-width: 17ch;
+  font-size: clamp(36px, 5.8vw, 46px);
+  line-height: .92;
 }
 .performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] { border-bottom: 1px solid rgba(17, 26, 33, .1) !important; }
 .performance-shell--coach [data-visual-role="filter-rail"][data-surface="light"] button {
@@ -87,10 +99,6 @@
     ) !important;
   }
 
-  /* Registered Coach routes already arrive inside App.jsx's canonical 20px
-   * route rail. SecondaryPageShell must not compose a second horizontal gutter.
-   * Paid empty/onboarding states can mount intrinsically wider children than the
-   * populated Demo state, so the shell must use a zero-minimum grid track. */
   html body #root .performance-shell--coach .secondaryPageShell {
     width: 100% !important;
     max-width: 100% !important;
@@ -110,7 +118,6 @@
     margin-inline: 0 !important;
   }
 
-  /* Back is part of the opening title composition, not a detached row. */
   html body #root .performance-shell--coach .shared-dashboard-back-action {
     margin-bottom: 0 !important;
   }
@@ -119,10 +126,96 @@
     padding-top: max(14px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
   }
 
-  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] { --identity-crest: clamp(96px, 25vw, 108px); }
-  .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] { font-size: clamp(42px, 11vw, 46px); }
+  /* Mobile Coach secondary pages are editorial, not billboard surfaces. */
+  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
+    --identity-crest: clamp(68px, 18vw, 76px);
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__inner {
+    gap: 12px;
+    padding: 10px 0 14px;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__crestSlot {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    max-width: 76px !important;
+    max-height: 76px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    margin-top: 10px;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] {
+    max-width: 16ch;
+    font-size: clamp(36px, 9.4vw, 40px);
+    line-height: .92;
+    letter-spacing: -.025em;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"].teamIdentityTitleStage--longTitle [data-identity-role="page-title"] {
+    max-width: 18ch;
+    font-size: clamp(32px, 8.6vw, 36px);
+    line-height: .95;
+  }
+  .performance-shell--coach [data-visual-role="page-intro"] .teamIdentityTitleStage__summary {
+    max-width: 34ch;
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.42;
+  }
+
+  /* Secondary operational content must also collapse to the mobile reading rail.
+   * Several older Coach modules retained desktop multi-column internals even after
+   * the outer page became mobile, producing one-character-per-line text and action
+   * buttons that consumed most of the card width. */
+  .performance-shell--coach [data-visual-role="insight-grid"] {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 12px !important;
+  }
+  .performance-shell--coach [data-visual-role="insight-card"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .performance-shell--coach [data-visual-role="insight-card"] h2,
+  .performance-shell--coach [data-visual-role="insight-card"] p {
+    max-width: 100% !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  .performance-shell--coach .scSection {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+  }
+  .performance-shell--coach .scSection > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .performance-shell--coach .scSection button {
+    max-width: 100% !important;
+    white-space: normal !important;
+  }
+  .performance-shell--coach [data-coach-sc-placeholder="true"] {
+    min-height: 150px !important;
+    justify-content: center !important;
+  }
 }
 
 @media (max-width: 390px) {
-  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] { --identity-crest: 84px; }
+  .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] { --identity-crest: 68px; }
+  .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] { font-size: 36px; }
+  .performance-shell--coach [data-visual-role="page-intro"].teamIdentityTitleStage--longTitle [data-identity-role="page-title"] { font-size: 32px; }
 }

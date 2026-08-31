@@ -87,7 +87,7 @@ async function verifyMoreSheet(page) {
   await expect(trigger).toBeFocused();
 }
 
-const expectedCrestWidth = (width) => width <= 390 ? 84 : Math.min(108, Math.max(96, width * 0.25));
+const expectedCrestWidth = (width) => width <= 390 ? 68 : Math.min(76, Math.max(68, width * 0.18));
 
 async function inspectCoachRoute(page, route, width) {
   const stage = page.locator('[data-team-identity-stage="true"][data-title-stage-family="editorial"]').first();

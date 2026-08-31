@@ -15,6 +15,18 @@ body.mission-control-active .app-shell.is-desktop > .shell-main > .content-wrap,
 body.mission-control-active .app-shell.is-desktop .team-brand.coach-mode.page{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important}
 body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!important;width:100%!important;margin:0!important}
 
+/* Runtime mobile authority. CoachCommandCenter marks itself is-mobile-shell from
+   the actual browser/visual/screen viewport. This deliberately does not depend
+   on the legacy parent shell's desktop/mobile class or on CSS media-query order. */
+.app-shell:has(.mcShellV3.is-mobile-shell) > .sidebar-nav,
+.app-shell:has(.mcShellV3.is-mobile-shell) > .insights-panel{display:none!important}
+.app-shell:has(.mcShellV3.is-mobile-shell){display:block!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100vw!important;min-width:0!important;margin:0!important;padding:0!important;overflow-x:clip!important}
+.app-shell:has(.mcShellV3.is-mobile-shell) > .shell-main,
+.app-shell:has(.mcShellV3.is-mobile-shell) > .shell-main > .content-wrap,
+.app-shell:has(.mcShellV3.is-mobile-shell) .team-brand.coach-mode.page{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
+.mcShellV3.is-mobile-shell{display:block!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow-x:clip!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
+.mcShellV3.is-mobile-shell > .mcRail{display:none!important}
+
 @media(min-width:981px){
  body.mission-control-active .app-shell.is-desktop .mcShellV3>.mcRail{display:flex!important;flex-direction:column;min-height:100vh}
  body.mission-control-active .app-shell.is-desktop .mcCoachIdentity{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:10px;min-width:0}
@@ -24,6 +36,12 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:980px){
+ /* The permanent Coach rail is desktop-only. Keep this bridge authoritative so
+    a late/shared display rule cannot put the rail back into mobile document flow. */
+ body.mission-control-active .mcShellV3>.mcRail{display:none!important}
+ body.mission-control-active .app-shell > .sidebar-nav,
+ body.mission-control-active .app-shell > .insights-panel{display:none!important}
+ body.mission-control-active .app-shell{display:block!important;grid-template-columns:minmax(0,1fr)!important;min-width:0!important;overflow-x:clip!important}
  body.mission-control-active .app-shell,
  body.mission-control-active .shell-main,
  body.mission-control-active .content-wrap,
@@ -31,6 +49,25 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:700px){
+ /* Coach Home had two competing introduction systems on iPhone: a utility header
+    plus a wide native-font hero. Players and Events have one editorial title stage.
+    Remove the duplicate mobile header so Coach Home also has one visual authority. */
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none!important}
+
+ /* Match the shared mobile editorial language used by Players and Events. The
+    condensed display face is the important correction: the old 42-44px native
+    face rendered much wider and visually larger even when the numeric px value
+    was similar. Keep the team/context copy compact and the support copy at 14px. */
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"]{min-height:334px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent{min-height:334px!important;padding:20px 18px 18px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{--coach-hero-crest:clamp(80px,21vw,92px)!important;gap:12px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{font:780 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.075em!important;text-transform:uppercase!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcEyebrow{font:720 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.055em!important;text-transform:uppercase!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:15ch!important;margin:12px 0 0!important;font:800 clamp(40px,10.2vw,44px)/.92 "Barlow Condensed","Arial Narrow",sans-serif!important;letter-spacing:-.02em!important;text-wrap:balance!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{max-width:36ch!important;margin:7px 0 0!important;font:520 14px/1.42 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip{margin-top:13px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{margin-top:11px!important}
+
  /* External bottom navigation overlaps the document flow. This is shell clearance,
     not Coach Home composition; the visual page still owns its own gutters. */
  body.mission-control-active .mcShellV3 .missionControl{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important}

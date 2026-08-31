@@ -87,8 +87,11 @@ for (const viewport of VIEWPORTS) {
     expect(standard.right).toBeLessThanOrEqual(standard.viewport + 1);
     expect(standard.titleSize).toBeGreaterThanOrEqual(38);
     expect(standard.titleSize).toBeLessThanOrEqual(44);
-    expect(standard.crestWidth).toBeGreaterThanOrEqual(92);
-    expect(standard.crestHeight).toBeGreaterThanOrEqual(92);
+    // Secondary/editorial stages use the compact 64–74px mobile crest authority.
+    expect(standard.crestWidth).toBeGreaterThanOrEqual(64);
+    expect(standard.crestWidth).toBeLessThanOrEqual(74);
+    expect(standard.crestHeight).toBeGreaterThanOrEqual(64);
+    expect(standard.crestHeight).toBeLessThanOrEqual(74);
     if (standard.objectFit !== "fallback") expect(standard.objectFit).toBe("contain");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: path.join(OUTPUT, `intermediate-${viewport.width}-player-leaderboards.png`), animations: "disabled", fullPage: false });

@@ -57,13 +57,14 @@ test("player mobile dock makes Development Story primary with semantic native ic
   await expect(sheet.getByText("Program work, schedule, rankings, and team tools.", { exact: true })).toBeVisible();
   await expect(sheet.getByRole("heading", { name: "Team program", exact: true })).toBeVisible();
   await expect(sheet.getByRole("heading", { name: "Rankings", exact: true })).toBeVisible();
-  for (const key of ["duels", "program", "sc", "leaderboards", "team-store"]) {
+  for (const key of ["duels", "program", "sc", "leaderboards", "in-season", "team-store"]) {
     await expect(sheet.locator(`[data-nav-key="${key}"]`)).toBeVisible();
   }
   await expect(sheet.locator('[data-nav-key="duels"]')).toHaveAttribute("data-icon-name", "program");
   await expect(sheet.locator('[data-nav-key="program"]')).toHaveAttribute("data-icon-name", "calendar");
   await expect(sheet.locator('[data-nav-key="sc"]')).toHaveAttribute("data-icon-name", "custom");
   await expect(sheet.locator('[data-nav-key="leaderboards"]')).toHaveAttribute("data-icon-name", "chart");
+  await expect(sheet.locator('[data-nav-key="in-season"]')).toHaveAttribute("data-icon-name", "chart");
   await expect(sheet.locator('[data-nav-key="team-store"]')).toHaveAttribute("data-icon-name", "store");
   await expect(sheet.locator('[data-nav-key="profile"]')).toHaveCount(0);
 
@@ -71,6 +72,15 @@ test("player mobile dock makes Development Story primary with semantic native ic
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page).toHaveURL(/\/leaderboards$/);
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
+
+  sheet = await openMore(page);
+  await sheet.locator('[data-nav-key="in-season"]').click();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/in-season$/);
+  await expect(page.getByTestId("player-in-season-workspace")).toBeVisible();
+  await expect(page.getByTestId("in-season-performance-hub")).toHaveAttribute("data-role", "player");
+  await expect(page.getByTestId("in-season-performance-hub").getByRole("heading", { name: "In Season", exact: true })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 
   sheet = await openMore(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
@@ -110,7 +120,7 @@ test("coach mobile dock uses Home, Players, and Schedule icons that match their 
   await expect(dock.getByRole("button", { name: "S&C", exact: true })).toHaveCount(0);
 
   const sheet = await openMore(page);
-  for (const key of ["drills", "sc", "leaderboards", "team-store", "branding"]) {
+  for (const key of ["drills", "sc", "leaderboards", "in-season", "team-store", "branding"]) {
     await expect(sheet.locator(`[data-nav-key="${key}"]`)).toBeVisible();
   }
 

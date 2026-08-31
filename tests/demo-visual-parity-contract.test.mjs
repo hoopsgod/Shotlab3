@@ -159,7 +159,7 @@ test('Team Store source and build enhancer preserve the same player state for de
     'TeamStorePortal.jsx must not contain a demo-only Team Store product path',
   );
   assert.match(teamStoreSource, /Your team store is not open yet/);
-  assert.match(teamStoreSource, /store \? <>/);
+  assert.match(teamStoreSource, /store\s*\?\s*<>/);
 
   // The enhancer intentionally names forbidden demo artifacts in its detector regex.
   // Reject actual generated/rendered branch artifacts rather than the guard that detects them.

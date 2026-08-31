@@ -99,19 +99,24 @@ async function enterSeededCoach(page) {
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
 }
 
+async function openTeamFocusEditor(page) {
+  const invoked = await page.evaluate(() => {
+    const action = [...document.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Set Team Focus');
+    if (!action) return false;
+    action.click();
+    return true;
+  });
+  expect(invoked).toBe(true);
+}
+
 test("demo coach can save player-facing priorities locally without a production publish", async ({ page }) => {
   const published = [];
   await installRoutes(page, published);
   await enterSeededCoach(page);
 
-  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
-  const drawer = page.locator(".mcMobileDrawer");
-  await expect(drawer).toBeVisible();
-  await drawer.getByRole("button", { name: "Coach Tools", exact: true }).click();
-
-  const actions = page.locator('[aria-label="Coach quick actions"]');
-  await expect(actions).toBeVisible();
-  await actions.getByRole("button", { name: "Set Team Focus", exact: true }).click();
+  // The global mobile dock superseded the old Mission Control drawer. Keep this
+  // persistence contract focused on the real Set Team Focus action and editor.
+  await openTeamFocusEditor(page);
 
   const editor = page.getByTestId("coach-priority-editor");
   await expect(editor).toBeVisible({ timeout: 20_000 });

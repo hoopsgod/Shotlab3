@@ -56,8 +56,8 @@ test('Coach prototype hierarchy is brand-first and intentionally responsive', ()
 
   assert.match(mobile, /min-height:382px/);
   assert.match(mobile, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
-  assert.match(mobile, /clamp\(36px,10\.2vw,45px\)\/\.86 "Barlow Condensed"/);
-  assert.match(mobile, /clamp\(28px,7\.6vw,33px\)\/\.96 var\(--mc-native\)/);
+  assert.match(mobile, /font:780 11px\/1\.2 var\(--mc-native\)/);
+  assert.match(mobile, /font:820 clamp\(40px,9\.8vw,44px\)\/\.94 var\(--mc-native\)/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px/);
   assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px/);
   assert.doesNotMatch(mobile, /clamp\(39px,10\.5vw,45px\)/);

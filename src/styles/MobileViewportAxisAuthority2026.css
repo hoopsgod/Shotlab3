@@ -5,9 +5,6 @@
     --phase4e-mobile-gutter: 20px;
   }
 
-  /* iOS/WebKit may otherwise re-anchor the persistent app scroller after route
-   * hydration, font settling, or browser-chrome viewport changes. Route changes
-   * are explicitly reset by the mobile viewport controller instead. */
   html,
   body,
   html body #root .performance-shell--player.is-mobile .player-scroll-container,
@@ -16,55 +13,154 @@
   }
 
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
-    padding-inline: 20px !important;
-  }
-
-  /* The shared centering boundary owns width/min-width/box sizing. These two
-   * registered Coach owners only opt out of an extra late inline gutter. */
-  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) {
-    padding-inline: 0 !important;
-  }
-
-  /* One registered Coach mobile rail. App.jsx consumes this variable directly
-   * for every non-Home route; SecondaryPageShell contributes no second gutter. */
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach {
-    --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px);
-  }
-
-  /* MissionControlCascadeLock owns the Home shell and hero-content viewport
-   * geometry. The final x-axis authority prevents the inner composition rail
-   * from becoming a horizontal scroll owner while preserving full-bleed bands. */
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .missionControl {
-    overflow-x: hidden !important;
-  }
-
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
-  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback {
+    width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
+    padding-inline: 20px !important;
+    box-sizing: border-box !important;
   }
 
-  /* Secondary Coach title stages stay inside the same outer route rail. Do not
-   * re-expand a title child after its parent has already been inset. Shared
-   * centering authority already supplies border-box sizing to these children. */
+  html body #root .performance-shell--player.is-mobile .player-scroll-container:has(> .shared-dashboard-back-action) { padding-top: 4px !important; }
+  html body #root .performance-shell--player.is-mobile .player-scroll-container > .shared-dashboard-back-action { margin-bottom: 0 !important; }
+  html body #root .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] { display: none !important; }
+
+  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]) { padding-inline: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach { --shotlab-coach-route-wrapper-gutter: var(--shotlab-mobile-content-rail, 20px); }
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell {
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important; padding-inline: 0 !important; box-sizing: border-box !important; grid-template-columns: minmax(0, 1fr) !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > * { min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important; }
+  html body #root .performance-shell--coach.is-mobile .shared-dashboard-back-action { display: none !important; }
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .missionControl { overflow-x: hidden !important; }
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
+  html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback { min-width: 0 !important; }
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: 100% !important;
-    margin-inline: 0 !important;
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-inline: 0 !important; box-sizing: border-box !important;
   }
-
-  /* SecondaryPageShell > * already owns min-width/max-width/border-box. */
-  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar {
-    width: 100% !important;
-  }
-
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] { padding-inline-start: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"] .teamIdentityTitleStage__inner { padding-inline-start: 15px !important; }
+  html body #root .performance-shell--coach.is-mobile .coachEventsPremiumWorkspace > .coachEventsCalendar { width: 100% !important; }
   html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__logoSetup,
-  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest {
-    min-width: 0 !important;
+  html body #root .performance-shell--coach.is-mobile .teamIdentityTitleStage__fallbackCrest { min-width: 0 !important; }
+
+  /* Final hostile-artwork containment. Custom logos may have extreme source
+   * aspect ratios; the rendered mark must remain inside the compact editorial
+   * crest token instead of reclaiming vertical layout or painting into content. */
+  html body #root .performance-shell.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] [data-identity-role="brand-panel"] {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  html body #root .performance-shell.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] [data-identity-role="brand-mark"] {
+    display: block !important;
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
+    object-fit: contain !important;
+    object-position: center !important;
   }
 
   html body #root .performance-shell--player.is-mobile .player-quick-actions,
-  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] {
-    padding-inline: 0 !important;
+  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] { padding-inline: 0 !important; }
+  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-inline: 0 !important; box-sizing: border-box !important;
   }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-coach-priority-signal"] { padding-inline: 8px 2px !important; }
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary {
+    position: relative !important; justify-content: space-between !important; padding-inline: 2px 50px !important;
+  }
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary > span:first-child { align-items: flex-start !important; }
+  html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary::after {
+    position: absolute !important; right: 2px !important; top: 50% !important; transform: translateY(-50%) !important;
+  }
+  html body #root .performance-shell--player.is-mobile .player-primary-logging-region .cta-secondary-link {
+    min-height: 44px !important; padding-block: 9px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 12px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] { color: #172019 !important; -webkit-text-fill-color: #172019 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] { color: #4f5a52 !important; -webkit-text-fill-color: #4f5a52 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-layout-role="supporting-evidence"] { background-color: var(--team-brand-surface-deep, #2f4f24) !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="value"] { color: #f8faf5 !important; -webkit-text-fill-color: #f8faf5 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="detail"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="detail"] { color: #e8eee6 !important; -webkit-text-fill-color: #e8eee6 !important; }
+
+  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-visual-role="performance-evidence"] {
+    display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; grid-auto-flow: row !important; grid-auto-columns: minmax(0, 1fr) !important; overflow-x: hidden !important; overscroll-behavior-inline: auto !important;
+  }
+  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] { min-width: 0 !important; }
+
+  /* Registered Coach activation uses a desktop three-column grid in source.
+   * On mobile the primary action owns a full-width second row so the paid Home
+   * surface matches the certified Demo CTA geometry and remains touch-safe. */
+  html body #root .performance-shell--coach.is-mobile .mcActivationPlan {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    padding-inline: 16px !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .mcActivationPlan > button {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    justify-self: stretch !important;
+  }
+
+  html body #root [data-testid="branding-preview-coach-title"] [data-identity-role="page-title"] { overflow-wrap: normal !important; word-break: normal !important; hyphens: none !important; }
+}
+
+/* PlayerProgressStory.module.css owns this responsive composition in source, but
+ * the production restructure drops the module media rule. Reassert the source
+ * mobile layout in the protected final authority. */
+@media (max-width: 620px) {
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] { border-radius: 26px !important; padding: 17px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] { margin-bottom: 14px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] { min-width: 0 !important; padding: 5px 0 3px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 { font-size: min(42px, 11vw) !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] p { display: none !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-court"] {
+    width: 100% !important; min-width: 0 !important; flex: none !important; padding: 10px 0 0 !important; border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.1) !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] { margin-top: 14px !important; }
+}
+
+@media (min-width: 391px) and (max-width: 767px) {
+  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(64px, 17vw, 74px) !important; }
+
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: clamp(68px, 18vw, 76px) !important; }
+}
+
+@media (max-width: 390px) {
+  /* Keep compact Coach title actions on one touch-safe row. Long program names
+   * already consume the available copy height; allowing these two bounded
+   * actions to wrap adds an unnecessary 52px row and breaks the title-stage
+   * viewport contract. */
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] .teamIdentityTitleStage__actions {
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] .teamIdentityTitleStage__action {
+    min-width: 0 !important;
+    padding-inline: 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 64px !important; }
+
+  html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"],
+  html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 68px !important; }
 }

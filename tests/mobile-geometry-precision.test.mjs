@@ -47,7 +47,7 @@ test('secondary mobile pages land beyond bottom navigation with deliberate breat
 });
 
 test('mobile route performance stages stay inside the canonical page rail', () => {
-  assert.match(centering, /\[data-visual-role="secondary-page"\] > \[data-visual-role="primary-decision"\][\s\S]*width:\s*100% !important;[\s\S]*max-width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.match(centering, /\[data-visual-role="secondary-page"\]\s*>\s*\[data-visual-role="primary-decision"\][\s\S]*width:\s*100% !important;[\s\S]*max-width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
   assert.doesNotMatch(centering, /width:\s*calc\(100% \+ var\(--layout-gutter/);
   assert.doesNotMatch(centering, /margin-left:\s*calc\(var\(--layout-gutter, 18px\) \* -1\)/);
   assert.match(secondaryPages, /\.secondaryPageDecision\s*\{/);

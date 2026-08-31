@@ -115,8 +115,8 @@ test("Coach Team Store mobile preview keeps readable text on the immersive light
   const staticCss = fs.readFileSync(new URL("../public/shotlab-phase3i-team-store-immersive.css", import.meta.url), "utf8");
   const generator = fs.readFileSync(new URL("../scripts/apply-phase3i-team-store-immersive.mjs", import.meta.url), "utf8");
 
-  assert.match(staticCss, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel h4 \{[\s\S]*color: #171a18 !important;[\s\S]*-webkit-text-fill-color: #171a18 !important;/);
-  assert.match(staticCss, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel p \{[\s\S]*color: #5f6861 !important;[\s\S]*-webkit-text-fill-color: #5f6861 !important;/);
+  assert.match(staticCss, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel h4\s*\{[\s\S]*color:\s*#171a18\s*!important;[\s\S]*-webkit-text-fill-color:\s*#171a18\s*!important;?/);
+  assert.match(staticCss, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel p\s*\{[\s\S]*color:\s*#5f6861\s*!important;[\s\S]*-webkit-text-fill-color:\s*#5f6861\s*!important;?/);
   assert.match(generator, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel h4\{color:#171a18!important;-webkit-text-fill-color:#171a18!important;\}/);
   assert.match(generator, /\.ts-coach-content \.ts-preview-column \.ts-preview-panel p\{color:#5f6861!important;-webkit-text-fill-color:#5f6861!important;\}/);
 });

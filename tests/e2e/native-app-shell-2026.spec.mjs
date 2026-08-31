@@ -7,7 +7,7 @@ const ROLE_EXPECTATIONS = {
   coach: {
     demoButton: /Coach demo/i,
     homeReady: "coach-command-center-full",
-    identitySelector: ".mcHeader",
+    identitySelector: '[data-team-identity-stage="coach-mission-control"]',
     tabs: ["Home", "Players", "Schedule", "More"],
     screenshot: "coach",
   },

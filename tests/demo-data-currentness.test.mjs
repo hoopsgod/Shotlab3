@@ -97,7 +97,9 @@ test("demo team refresh preserves unrelated teams while replacing the managed de
 });
 
 test("App Store evidence requires a populated Coach schedule", () => {
-  assert.match(screenshotSpec, /Calendar is open/);
+  assert.match(screenshotSpec, /openNavigation\(page, "Schedule"\)/);
+  assert.match(screenshotSpec, /getByRole\("heading", \{ name: "Events", exact: true \}\)/);
+  assert.match(screenshotSpec, /getByText\("Team Practice", \{ exact: true \}\)/);
   assert.match(expertReview, /tests\/e2e\/app-store-screenshots\.spec\.mjs/);
   assert.match(expertReview, /Team Practice/);
 });

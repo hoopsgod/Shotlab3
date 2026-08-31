@@ -160,21 +160,26 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
   });
 
   expect(metrics.teamName.startsWith(teamName)).toBe(true);
-  // Phase 4 keeps difficult branding identity-first without restoring an oversized decorative void.
-  expect(metrics.hero.height).toBeGreaterThanOrEqual(382);
+  // Difficult branding remains compact without restoring the retired 382px+
+  // decorative void or 96px+ mobile Coach mark.
+  expect(metrics.hero.height).toBeGreaterThanOrEqual(340);
   expect(metrics.hero.height).toBeLessThanOrEqual(500);
-  expect(metrics.identity.height).toBeGreaterThanOrEqual(96);
+  expect(metrics.identity.height).toBeGreaterThanOrEqual(80);
   expect(metrics.identity.height).toBeLessThanOrEqual(160);
-  expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(30);
-  expect(metrics.teamIdentitySize).toBeLessThanOrEqual(50);
-  expect(metrics.decisionTitle.size).toBeGreaterThanOrEqual(16);
-  expect(metrics.decisionTitle.size).toBeLessThanOrEqual(34);
-  expect(metrics.teamIdentitySize - metrics.decisionTitle.size).toBeGreaterThanOrEqual(8);
+  // Current Coach Home uses the program/team name as a quiet eyebrow and the
+  // coaching decision as the dominant editorial headline.
+  expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(10);
+  expect(metrics.teamIdentitySize).toBeLessThanOrEqual(14);
+  expect(metrics.decisionTitle.size).toBeGreaterThanOrEqual(34);
+  expect(metrics.decisionTitle.size).toBeLessThanOrEqual(42);
+  expect(metrics.decisionTitle.size - metrics.teamIdentitySize).toBeGreaterThanOrEqual(20);
   expect(metrics.decisionTitle.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
   expect(metrics.decisionTitle.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
   expect(metrics.realityTop).toBeGreaterThanOrEqual(metrics.decisionTitle.bottom);
-  expect(metrics.crest.width).toBeGreaterThanOrEqual(96);
-  expect(metrics.crest.height).toBeGreaterThanOrEqual(96);
+  expect(metrics.crest.width).toBeGreaterThanOrEqual(80);
+  expect(metrics.crest.width).toBeLessThanOrEqual(96);
+  expect(metrics.crest.height).toBeGreaterThanOrEqual(80);
+  expect(metrics.crest.height).toBeLessThanOrEqual(96);
   expect(metrics.hero.left).toBeGreaterThanOrEqual(-1);
   expect(metrics.hero.right).toBeLessThanOrEqual(metrics.viewport.width + 1);
   expect(metrics.overflow.document).toBeLessThanOrEqual(1);

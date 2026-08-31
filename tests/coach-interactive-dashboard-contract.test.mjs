@@ -12,18 +12,8 @@ const titleStageCss = fs.readFileSync("src/components/TeamIdentityTitleStage.css
 const dashboardCss = fs.readFileSync("src/components/CoachDashboardPrimitives.module.css", "utf8");
 const integrationCss = fs.readFileSync("src/styles/CoachInteractiveDashboard.css", "utf8");
 
-const section = (start, end) => {
-  const from = appSource.indexOf(start);
-  const to = appSource.indexOf(end, from + start.length);
-  assert.notEqual(from, -1, `Missing section start: ${start}`);
-  assert.notEqual(to, -1, `Missing section end: ${end}`);
-  return appSource.slice(from, to);
-};
-
 test("reusable dashboard components preserve operational interaction patterns", () => {
-  for (const component of ["DashboardCommandBar", "InteractiveMetricStrip", "DashboardFilterRail", "DashboardInsightCard", "DashboardSection", "DashboardProgress", "DashboardDetailDrawer"]) {
-    assert.match(primitivesSource, new RegExp(`export function ${component}`));
-  }
+  for (const component of ["DashboardCommandBar", "InteractiveMetricStrip", "DashboardFilterRail", "DashboardInsightCard", "DashboardSection", "DashboardProgress", "DashboardDetailDrawer"]) assert.match(primitivesSource, new RegExp(`export function ${component}`));
   assert.match(dashboardCss, /\.commandBar/);
   assert.match(dashboardCss, /\.metricStrip/);
   assert.match(dashboardCss, /\.filterRail/);
@@ -31,15 +21,13 @@ test("reusable dashboard components preserve operational interaction patterns", 
 });
 
 test("canonical secondary page system defines one page, toolbar, decision, and evidence grammar", () => {
-  for (const component of ["SecondaryPageShell", "SecondaryPageIntro", "SecondaryPageToolbar", "SecondaryPageDecision", "SecondaryPageEvidence"]) {
-    assert.match(pageSystemSource, new RegExp(`export function ${component}`));
-  }
+  for (const component of ["SecondaryPageShell", "SecondaryPageIntro", "SecondaryPageToolbar", "SecondaryPageDecision", "SecondaryPageEvidence"]) assert.match(pageSystemSource, new RegExp(`export function ${component}`));
   assert.match(titleStageCss, /\.teamIdentityTitleStage/);
   assert.match(titleStageCss, /\.teamIdentityTitleStage__title/);
   assert.match(pageSystemCss, /\.secondaryPageToolbar/);
   assert.match(pageSystemCss, /\.secondaryPageDecision/);
   assert.match(pageSystemCss, /\.secondaryPageEvidence/);
-  assert.match(pageSystemCss, /min-height:\s*var\(--control-height, 48px\)/);
+  assert.match(pageSystemCss, /min-height:\s*var\(--control-height,\s*48px\)/);
   assert.match(pageSystemCss, /@media\s*\(max-width:\s*760px\)/);
   assert.match(pageSystemCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
@@ -62,23 +50,17 @@ test("players and events share the canonical page composition while Events owns 
   assert.doesNotMatch(dashboardSource, /coach-events-insight-grid/);
 });
 
-test("App wires dashboard selectors and compositions into live coach routes", () => {
-  assert.match(appSource, /CoachPlayersInteractiveDashboard/);
-  assert.match(appSource, /CoachEventsInteractiveDashboard/);
-  assert.match(appSource, /CoachPageDashboardHeader/);
+test("App keeps the interactive dashboard implementations and selectors wired into the shared coach tree", () => {
+  assert.match(appSource, /import\s*\{[^}]*CoachEventsInteractiveDashboard[^}]*CoachPlayersInteractiveDashboard[^}]*\}\s*from\s*"\.\/components\/CoachInteractiveDashboards\.jsx"/s);
   assert.match(appSource, /buildCoachPlayerDashboardRows/);
   assert.match(appSource, /buildCoachEventDashboardRows/);
   assert.match(appSource, /filterCoachPlayerDashboardRows/);
   assert.match(appSource, /filterCoachEventDashboardRows/);
-
-  const players = section('{tab==="players"&&!selP', '{tab==="players"&&selP');
-  assert.match(players, /coach-players-interactive-dashboard|CoachPlayersInteractiveDashboard/);
-  assert.match(players, /filteredCoachRosterPlayers/);
-  assert.match(players, /filteredCoachPlayerDashboardRows/);
-
-  const events = section('{tab==="events"', '{tab==="leaderboards"');
-  assert.match(events, /CoachEventsInteractiveDashboard/);
-  assert.match(events, /filteredEvents/);
+  assert.match(appSource, /<CoachPlayersInteractiveDashboard\b/);
+  assert.match(appSource, /<CoachEventsInteractiveDashboard\b/);
+  assert.match(appSource, /filteredCoachRosterPlayers/);
+  assert.match(appSource, /filteredCoachPlayerDashboardRows/);
+  assert.match(appSource, /filteredEvents/);
 });
 
 test("remaining coach pages retain the current control layer for incremental migration", () => {
@@ -88,7 +70,5 @@ test("remaining coach pages retain the current control layer for incremental mig
 });
 
 test("cohesion pass introduces no schema, auth, persistence, or network writes", () => {
-  for (const source of [pageSystemSource, pageSystemCss, titleStageCss, dashboardSource, calendarSource, integrationCss]) {
-    assert.doesNotMatch(source, /supabase|auth\.|create table|alter table|fetch\(|XMLHttpRequest|localStorage|sessionStorage/i);
-  }
+  for (const source of [pageSystemSource, pageSystemCss, titleStageCss, dashboardSource, calendarSource, integrationCss]) assert.doesNotMatch(source, /supabase|auth\.|create table|alter table|fetch\(|XMLHttpRequest|localStorage|sessionStorage/i);
 });

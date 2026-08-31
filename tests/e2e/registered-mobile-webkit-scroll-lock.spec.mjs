@@ -10,6 +10,19 @@ const COACH = {
   isCoach: true,
 };
 const COACH_RAIL_SELECTOR = '.performance-shell--coach.is-mobile > .shell-main > .content-wrap';
+const LAYOUT_OWNER_SELECTORS = [
+  'html',
+  'body',
+  '#root',
+  '.app-shell.is-mobile',
+  '.shell-main',
+  '.content-wrap',
+  '.performance-workspace',
+  '.performance-workspace--coach',
+  '.performance-shell--coach.is-mobile .coach-route-scroll-container',
+  '.team-brand.coach-mode.page',
+  '[data-testid="coach-command-center-full"]',
+];
 
 function registeredCoachSeed() {
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -75,10 +88,24 @@ async function createRegisteredCoach(browser, viewport) {
 }
 
 async function collectHorizontalOverflow(page) {
-  return page.evaluate((coachRailSelector) => {
+  return page.evaluate(({ coachRailSelector, ownerSelectors }) => {
     const root = document.scrollingElement || document.documentElement;
     const rail = document.querySelector(coachRailSelector);
     const viewport = document.documentElement.clientWidth;
+    const owners = Object.fromEntries(ownerSelectors.map((selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return [selector, null];
+      const rect = node.getBoundingClientRect();
+      return [selector, {
+        left: rect.left,
+        right: rect.right,
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
+        scrollLeft: node.scrollLeft,
+        overflowX: getComputedStyle(node).overflowX,
+      }];
+    }));
+    const ambientRect = document.querySelector('[data-testid="coach-ambient-glow"]')?.getBoundingClientRect();
     const offenders = Array.from(document.querySelectorAll('body *'))
       .map((node) => {
         const styles = getComputedStyle(node);
@@ -109,6 +136,8 @@ async function collectHorizontalOverflow(page) {
       bodyScrollWidth: document.body.scrollWidth,
       windowScrollX: window.scrollX,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+      owners,
+      ambient: ambientRect ? { left: ambientRect.left, right: ambientRect.right, width: ambientRect.width } : null,
       rail: rail ? {
         clientWidth: rail.clientWidth,
         scrollWidth: rail.scrollWidth,
@@ -118,7 +147,7 @@ async function collectHorizontalOverflow(page) {
       } : null,
       offenders,
     };
-  }, COACH_RAIL_SELECTOR);
+  }, { coachRailSelector: COACH_RAIL_SELECTOR, ownerSelectors: LAYOUT_OWNER_SELECTORS });
 }
 
 async function expectNoPersistentDocumentOrRailPan(page, label) {
@@ -130,6 +159,17 @@ async function expectNoPersistentDocumentOrRailPan(page, label) {
   expect(before.rail, diagnostic).not.toBeNull();
   expect(['clip', 'hidden'], diagnostic).toContain(before.rail.overflowX);
   expect(Math.abs(before.rail.scrollLeft), diagnostic).toBeLessThanOrEqual(1);
+  for (const [selector, owner] of Object.entries(before.owners)) {
+    if (!owner && selector === '[data-testid="coach-command-center-full"]' && !label.includes('Home')) continue;
+    expect(owner, `${label} missing layout owner ${selector}`).not.toBeNull();
+    expect(owner.left, `${label} ${selector} left edge`).toBeGreaterThanOrEqual(-1);
+    expect(owner.right, `${label} ${selector} right edge`).toBeLessThanOrEqual(before.viewport + 1);
+    expect(owner.scrollWidth, `${label} ${selector} intrinsic width: ${JSON.stringify(owner)}`).toBeLessThanOrEqual(owner.clientWidth + 1);
+    expect(Math.abs(owner.scrollLeft), `${label} ${selector} initial scrollLeft`).toBeLessThanOrEqual(1);
+  }
+  expect(before.ambient, `${label} Coach ambient glow must exist`).not.toBeNull();
+  expect(before.ambient.left, `${label} Coach ambient glow left edge`).toBeGreaterThanOrEqual(-1);
+  expect(before.ambient.right, `${label} Coach ambient glow right edge`).toBeLessThanOrEqual(before.viewport + 1);
 
   const shifted = await page.evaluate(async (coachRailSelector) => {
     const root = document.scrollingElement || document.documentElement;
@@ -150,6 +190,14 @@ async function expectNoPersistentDocumentOrRailPan(page, label) {
   expect(Math.abs(shifted.railScrollLeft), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(shifted.windowScrollX), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(shifted.visualViewportOffsetLeft), diagnostic).toBeLessThanOrEqual(1);
+  const after = await collectHorizontalOverflow(page);
+  for (const [selector, owner] of Object.entries(after.owners)) {
+    if (!owner && selector === '[data-testid="coach-command-center-full"]' && !label.includes('Home')) continue;
+    expect(owner.scrollWidth, `${label} ${selector} width after pan probe`).toBeLessThanOrEqual(owner.clientWidth + 1);
+    expect(Math.abs(owner.scrollLeft), `${label} ${selector} scrollLeft after pan probe`).toBeLessThanOrEqual(1);
+  }
+  expect(after.ambient.left, `${label} Coach ambient glow left edge after pan probe`).toBeGreaterThanOrEqual(-1);
+  expect(after.ambient.right, `${label} Coach ambient glow right edge after pan probe`).toBeLessThanOrEqual(after.viewport + 1);
 }
 
 async function expectSymmetricVisualGutters(locator, label, minimumGutter = 12) {
@@ -242,7 +290,12 @@ async function verifyRegisteredCoachVisualAxis(page, width) {
   await page.screenshot({ path: `parity-evidence/webkit-paid-coach-events-${width}.png`, fullPage: true });
 }
 
-for (const viewport of [{ width: 390, height: 844 }, { width: 430, height: 932 }]) {
+for (const viewport of [
+  { width: 320, height: 740 },
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+]) {
   test(`registered paid Coach onboarding Home, Players, and Events keep symmetric gutters in mobile WebKit at ${viewport.width}px`, async () => {
     test.setTimeout(180_000);
     const browser = await webkit.launch();

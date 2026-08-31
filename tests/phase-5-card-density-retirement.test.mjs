@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const compact = (value) => value.replace(/\s+/g, "");
 
 const playerComponent = read("src/components/PlayerOperationalWorkspace.jsx");
 const playerCss = read("src/components/PlayerOperationalWorkspace.module.css");
@@ -46,13 +47,14 @@ test("Coach secondary pages expose the shared editorial and decision hierarchy w
 });
 
 test("Coach hierarchy uses shared title typography and semantic branded decision surfaces", () => {
+  const normalizedSecondaryCss = compact(secondaryCss);
   assert.match(secondaryComponent, /<TeamIdentityTitleStage/);
   assert.match(titleStageCss, /--identity-crest:\s*clamp\(96px, 25vw, 108px\)/);
   assert.match(titleStageCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.doesNotMatch(secondaryCss, /\.secondaryPageIntro\b/);
-  assert.match(secondaryCss, /\.secondaryPageToolbar \[data-visual-role="metric-strip"\]\s*\{[\s\S]*?border-block: 1px solid[\s\S]*?border-radius: 0 !important;[\s\S]*?background: transparent !important;/);
-  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg,\s*var\(--team-brand-surface-elevated,\s*#171b18\),\s*var\(--team-brand-surface-deep,\s*#0c0f0d\) 72%\)/);
-  assert.match(secondaryCss, /\.secondaryPageEvidence\s*\{[\s\S]*?gap: 0;[\s\S]*?border-block: 1px solid/);
+  assert.match(normalizedSecondaryCss, /\.secondaryPageToolbar\[data-visual-role="metric-strip"\]\{[^}]*border-block:1pxsolid[^}]*border-radius:0!important[^}]*background:transparent!important/);
+  assert.match(normalizedSecondaryCss, /\.secondaryPageDecision\{[^}]*linear-gradient\(145deg,var\(--team-brand-surface-elevated,#171b18\),var\(--team-brand-surface-deep,#0c0f0d\)72%\)/);
+  assert.match(normalizedSecondaryCss, /\.secondaryPageEvidence\{[^}]*gap:0[^}]*border-block:1pxsolid/);
 });
 
 test("Retired authority files no longer recreate card-heavy shared primitives", () => {

@@ -22,11 +22,13 @@ const activeTrack=roleTracks[role]||roleTracks.player;
 const beginWork=(action)=>{if(busyRef.current)return false;busyRef.current=true;setBusyAction(action);setErr("");setStatus("");return true;};
 const finishWork=()=>{busyRef.current=false;setBusyAction("");};
 const clearMessages=()=>{setErr("");setStatus("");};
+const releaseAuthInputFocus=()=>{const active=typeof document!=="undefined"?document.activeElement:null;if(active?.closest?.('[data-testid="auth-workspace"]')&&typeof active.blur==="function")active.blur();};
 const doLogin=async()=>{
 onClearAccountNotice();setStatus("");
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
 if(!beginWork("login"))return;
+releaseAuthInputFocus();
 const id=e.includes("@")?e:e+"@shotlab.app";
 try{
 const r=await onLogin(id,password);
@@ -41,6 +43,7 @@ const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!name.trim()){setErr("Enter your name");return}
 if(!password||password.length<4){setErr("Password must be at least 4 characters");return}
 if(!beginWork("register"))return;
+releaseAuthInputFocus();
 const id=e.includes("@")?e:e+"@shotlab.app";
 try{
 if(role==="player"&&inviteCode.trim()){
@@ -56,6 +59,7 @@ finally{finishWork();}
 const doDemo=async(kind="player")=>{
 onClearAccountNotice();clearMessages();
 if(!beginWork(`demo-${kind}`))return;
+releaseAuthInputFocus();
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 setEmail(acct.email);setPassword(acct.password);
 try{
@@ -65,7 +69,7 @@ finally{finishWork();}
 };
 const focusInput=(event)=>{event.currentTarget.style.borderColor="rgba(95,118,0,.55)";event.currentTarget.style.boxShadow="0 0 0 4px rgba(126,158,30,.10)";};
 const blurInput=(event)=>{event.currentTarget.style.borderColor="rgba(17,26,33,.14)";event.currentTarget.style.boxShadow="inset 0 1px 2px rgba(17,26,33,.025)";};
-const inp={width:"100%",height:52,padding:"0 15px",background:"#FFFFFF",border:"1px solid rgba(17,26,33,.14)",borderRadius:14,color:"#111A21",fontSize:15,fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontWeight:550,outline:"none",boxShadow:"inset 0 1px 2px rgba(17,26,33,.025)",transition:"border-color .15s ease, box-shadow .15s ease"};
+const inp={width:"100%",height:52,padding:"0 15px",background:"#FFFFFF",border:"1px solid rgba(17,26,33,.14)",borderRadius:14,color:"#111A21",fontSize:16,fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontWeight:550,outline:"none",boxShadow:"inset 0 1px 2px rgba(17,26,33,.025)",transition:"border-color .15s ease, box-shadow .15s ease"};
 const labelStyle={display:"block",marginBottom:7,color:"#58646D",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12,fontWeight:700,letterSpacing:"-.005em"};
 const segmentButton=(active)=>({flex:1,minHeight:44,borderRadius:11,border:"none",cursor:busyAction?"default":"pointer",touchAction:"manipulation",WebkitTapHighlightColor:"transparent",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,fontWeight:700,letterSpacing:"-.01em",transition:"background .15s ease,color .15s ease,box-shadow .15s ease,transform .12s ease",background:active?"#FFFFFF":"transparent",color:active?"#111A21":"#65717A",boxShadow:active?"0 1px 2px rgba(17,26,33,.06),0 6px 16px rgba(17,26,33,.05)":"none",opacity:busyAction?.72:1});
 const primaryBusy=busyAction==="login"||busyAction==="register";

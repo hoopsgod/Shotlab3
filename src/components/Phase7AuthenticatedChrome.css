@@ -7,4 +7,72 @@
 .performance-shell--coach.is-mobile .shared-dashboard-back-action{display:none!important}
 .is-mobile .shared-dashboard-back-action>span[aria-hidden="true"]{color:#182019!important;font-size:21px!important}
 .is-mobile .shared-dashboard-back-action:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 32%,transparent)!important;outline-offset:2px!important}
+
+/* Final mobile premium pass: secondary Coach routes should read as native, deliberate
+   command surfaces instead of desktop modules squeezed into 390px. Keep every region
+   width-contained, preserve 44px+ touch targets, and reduce visual noise below the title. */
+.secondaryPageShell{width:100%!important;max-width:100%!important;min-width:0!important;padding:10px 16px calc(116px + env(safe-area-inset-bottom))!important;gap:22px!important;box-sizing:border-box!important;overflow-x:clip!important}
+.secondaryPageShell>*{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+.secondaryPageDecision{width:100%!important;max-width:100%!important;min-width:0!important;grid-template-columns:40px minmax(0,1fr)!important;gap:14px!important;padding:18px 16px!important;border-radius:22px!important;box-sizing:border-box!important;overflow:hidden!important}
+.secondaryPageDecision__copy{min-width:0!important}
+.secondaryPageDecision h2{max-width:20ch!important;font-size:30px!important;line-height:.98!important;letter-spacing:-.035em!important;text-wrap:balance!important;overflow-wrap:normal!important;word-break:normal!important}
+.secondaryPageDecision p{max-width:34ch!important;font-size:14px!important;line-height:1.48!important;color:#b7c0b9!important}
+.secondaryPageDecision__visual{grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:14px 0 0!important;border-top:1px solid rgba(255,255,255,.1)!important;border-left:0!important;overflow:hidden!important}
+.secondaryPageDecision__visual>*{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+.secondaryPageDecision__visual [data-visual-role="metric-strip"]{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important;max-width:100%!important;overflow:hidden!important}
+.secondaryPageDecision__visual [data-visual-role="metric-strip"]>*{min-width:0!important;padding:12px 8px!important;overflow:hidden!important}
+.secondaryPageDecision__visual [data-premium-metric-head],
+.secondaryPageDecision__visual [data-premium-metric-readout],
+.secondaryPageDecision__visual [data-premium-metric-foot]{min-width:0!important;max-width:100%!important}
+.secondaryPageDecision__visual [data-premium-metric-label]{display:block!important;max-width:100%!important;font-size:9px!important;line-height:1.15!important;letter-spacing:.045em!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:normal!important;word-break:normal!important}
+.secondaryPageDecision__visual [data-premium-metric-detail]{display:block!important;max-width:100%!important;font-size:10px!important;line-height:1.2!important;white-space:normal!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.secondaryPageDecision__visual :is(span,small){white-space:normal!important;text-overflow:clip!important}
+.secondaryPageDecision__visual strong,
+.secondaryPageDecision__visual output{font-size:clamp(23px,7vw,30px)!important;line-height:1!important}
+.secondaryPageToolbar{width:100%!important;min-width:0!important;gap:10px!important}
+
+/* Operational filter rails are not always nested in secondaryPageToolbar. Give every
+   Coach secondary filter a two-row mobile composition: full search first, scroller second. */
+.performance-shell--coach [data-visual-role="filter-rail"]{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;gap:10px!important;padding:10px!important;overflow:visible!important;box-sizing:border-box!important}
+.performance-shell--coach [data-visual-role="filter-rail"]>*{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+.performance-shell--coach [data-visual-role="filter-rail"] label{display:flex!important;align-items:center!important;min-height:48px!important;padding-inline:12px!important;overflow:hidden!important}
+.performance-shell--coach [data-visual-role="filter-rail"] input{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;font-size:16px!important;text-overflow:ellipsis!important}
+.performance-shell--coach [data-visual-role="filter-rail"] [role="group"]{display:flex!important;width:100%!important;min-width:0!important;max-width:100%!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-inline:contain!important;scrollbar-width:none!important;padding:1px 1px 3px!important;scroll-snap-type:x proximity!important}
+.performance-shell--coach [data-visual-role="filter-rail"] [role="group"]::-webkit-scrollbar{display:none!important}
+.performance-shell--coach [data-visual-role="filter-rail"] [role="group"] button{flex:0 0 auto!important;min-width:max-content!important;min-height:44px!important;padding-inline:12px!important;white-space:nowrap!important;scroll-snap-align:start!important}
+
+/* Supporting intelligence should read like one disclosure row, not three strings
+   compressed on top of each other while the fixed navigation passes the viewport. */
+.coachStrengthSupportingIntelligence{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow:hidden!important}
+.coachStrengthSupportingSummary{display:grid!important;grid-template-columns:minmax(0,1fr) 28px!important;align-items:center!important;min-height:68px!important;padding:12px 2px!important;gap:10px!important;box-sizing:border-box!important}
+.coachStrengthSupportingSummaryCopy{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:3px!important;min-width:0!important;max-width:100%!important}
+.coachStrengthSupportingSummaryCopy>span{display:block!important;font-size:10px!important;line-height:1.15!important;letter-spacing:.065em!important;text-transform:uppercase!important;white-space:normal!important}
+.coachStrengthSupportingSummaryCopy strong{display:block!important;max-width:100%!important;font-size:15px!important;line-height:1.25!important;overflow-wrap:normal!important;word-break:normal!important;white-space:normal!important}
+.coachStrengthSupportingSummaryCopy small{display:block!important;max-width:100%!important;margin-top:1px!important;font-size:12px!important;line-height:1.3!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important}
+.coachStrengthSupportingChevron{justify-self:end!important}
+.coachStrengthSupportingBody{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+
+.coachAdministrationWorkspace{width:100%!important;min-width:0!important;gap:24px!important}
+.coachAdministrationSection{min-width:0!important;gap:16px!important}
+.coachAdministrationSection>header{padding-bottom:13px!important}
+.coachAdministrationSection>header h2{font-size:25px!important;line-height:1.02!important}
+.coachSeasonArchivePanel,.coachAdministrationCard,.seasonArchiveDetail{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;border-radius:18px!important}
+.coachSeasonArchiveForm,.coachAdministrationGrid{grid-template-columns:minmax(0,1fr)!important;width:100%!important}
+.coachAdministrationWorkspace :is(input,select,textarea){width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;font-size:16px!important}
+.coachAdministrationActions .btn-v,.coachSeasonArchivePanel>.cta-primary{width:100%!important;min-height:48px!important}
+.coachSeasonArchiveList>button{grid-template-columns:minmax(0,1fr) auto 18px!important;gap:10px!important;min-width:0!important}
+.coachSeasonArchiveList>button span{min-width:0!important}
+.coachSeasonArchiveList>button :is(strong,small){overflow-wrap:anywhere!important}
+.seasonArchiveStats{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important}
+.seasonArchiveStat{min-width:0!important;padding:13px 11px!important}
+.coachPlayerProfileHero{grid-template-columns:minmax(0,1fr)!important;width:100%!important;min-width:0!important;padding:18px 16px!important;border-radius:22px 22px 0 0!important}
+.coachPlayerProfileHero__identity{min-width:0!important}
+.coachPlayerProfileHero__headline{min-width:0!important;width:100%!important;padding:14px 0 0!important;border-top:1px solid rgba(255,255,255,.1)!important;border-left:0!important;text-align:left!important}
+.coachPlayerProfileMetrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important}
+.coachPlayerProfileMetric{min-width:0!important;padding:15px!important}
+.coachPlayerProfileEvidence{grid-template-columns:minmax(0,1fr)!important;width:100%!important}
+.coachPlayerProfileSection{min-width:0!important;padding:18px 2px!important}
+.coachPlayerProfileSection+.coachPlayerProfileSection{border-top:1px solid var(--sl-line,rgba(23,26,24,.1))!important;border-left:0!important}
+.performance-shell--coach.is-mobile [data-testid="mobile-navigation-dock"],
+.is-mobile [data-testid="mobile-navigation-dock"]{z-index:60!important;backdrop-filter:saturate(125%) blur(14px)!important;-webkit-backdrop-filter:saturate(125%) blur(14px)!important}
 }

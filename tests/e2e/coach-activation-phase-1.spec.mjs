@@ -74,38 +74,21 @@ test("fresh Coach Demo preserves its confirmed team identity and keeps branding 
   await expectNoHorizontalOverflow(page);
 });
 
-test("Coach Inbox remains an accessible mobile workflow with or without current actions", async ({ page }) => {
+test("Coach mobile utilities use the current More sheet without restoring retired Inbox chrome", async ({ page }) => {
   await enterFreshCoachDemo(page);
 
-  const bell = page.getByRole("button", { name: /Open Coach Inbox/i });
-  await expect(bell).toBeVisible({ timeout: 20_000 });
-  await expect(bell).toHaveAttribute("aria-expanded", "false");
-  await bell.click();
+  await expect(page.getByRole("button", { name: /Open Coach Inbox/i })).toHaveCount(0);
+  const more = page.getByTestId("mobile-navigation-more");
+  await expect(more).toBeVisible();
+  await more.click();
 
-  const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
-  await expect(inbox).toBeVisible();
-  await expect(bell).toHaveAttribute("aria-expanded", "true");
-  await expect(inbox.getByText("Only current team actions appear here.", { exact: true })).toBeVisible();
-  const currentActions = inbox.locator(".mcInboxList > button");
-  const actionCount = await currentActions.count();
-  if (actionCount > 0) {
-    await expect(currentActions.first()).toBeVisible();
-    await expect(currentActions.first()).toContainText(/\S+/);
-  }
+  const sheet = page.getByTestId("mobile-navigation-sheet");
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toHaveAttribute("role", "dialog");
+  await expect(page.locator('[data-navigation-group="program"]')).toBeVisible();
+  await expect(page.locator('[data-navigation-group="team"]')).toBeVisible();
 
   await page.keyboard.press("Escape");
-  await expect(inbox).toBeHidden();
-  await expect(bell).toHaveAttribute("aria-expanded", "false");
-
-  await bell.click();
-  await expect(inbox).toBeVisible();
-  if (actionCount > 0) {
-    await expect(currentActions.first()).toBeVisible();
-    await currentActions.first().click();
-    await expect(inbox).toBeHidden();
-  } else {
-    await page.keyboard.press("Escape");
-    await expect(inbox).toBeHidden();
-  }
+  await expect(sheet).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });

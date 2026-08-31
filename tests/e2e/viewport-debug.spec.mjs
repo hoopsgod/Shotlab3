@@ -43,6 +43,15 @@ async function enterDemo(page, role) {
   await page.evaluate(() => document.fonts?.ready);
 }
 
+async function assertCoachShellMode(page, width) {
+  const permanentRail = page.locator('.mcShellV3 > .mcRail');
+  if (width <= 980) {
+    await expect(permanentRail, 'desktop Coach rail must not enter mobile/tablet document flow').toBeHidden();
+    return;
+  }
+  await expect(permanentRail, 'desktop Coach rail should remain visible on desktop').toBeVisible();
+}
+
 async function capture(page, role, label, options = {}) {
   const report = await collectViewportDiagnostics(page, { role, label, ...options });
   const outputPath = writeViewportDiagnostics(report);
@@ -71,17 +80,48 @@ async function openCoachPriorityEditor(page) {
   return { editor, save };
 }
 
+async function captureCoachSecondaryPages(page) {
+  const destinations = [
+    ['Drills', 'drills'],
+    ['S&C', 'strength-conditioning'],
+    ['Rankings', 'rankings'],
+    ['Settings', 'settings'],
+    ['Brand', 'brand'],
+    ['Team Store', 'team-store'],
+  ];
+
+  for (const [label, slug] of destinations) {
+    const more = page.getByTestId('mobile-navigation-more');
+    if (!(await more.count()) || !(await more.isVisible())) return;
+    await more.click();
+    const sheet = page.getByTestId('mobile-navigation-sheet');
+    await expect(sheet).toBeVisible();
+    const destination = sheet.getByRole('button', { name: label, exact: true });
+    if (!(await destination.count())) {
+      await page.keyboard.press('Escape');
+      continue;
+    }
+    await destination.click();
+    await page.waitForTimeout(180);
+    await page.evaluate(() => document.fonts?.ready);
+    await capture(page, 'coach', `secondary-${slug}`, {
+      extraSelectors: ['[data-visual-role="page-intro"]', '[data-testid="mobile-navigation-dock"]'],
+    });
+  }
+}
+
 for (const width of widths) {
   for (const role of roles) {
     if (!['coach', 'player'].includes(role)) continue;
     if (scenario === 'priority' && role === 'player') continue;
 
     test(`${role} viewport debug ${scenario} at ${width}px`, async ({ page }) => {
-      test.setTimeout(60_000);
+      test.setTimeout(120_000);
       await page.setViewportSize({ width, height: heightFor(width) });
       await installSafeRoutes(page);
       await enterDemo(page, role);
 
+      if (role === 'coach') await assertCoachShellMode(page, width);
       await capture(page, role, 'home');
 
       const more = page.getByTestId('mobile-navigation-more');
@@ -92,6 +132,10 @@ for (const width of widths) {
           extraSelectors: ['[data-testid="mobile-navigation-sheet"]', '[data-testid="mobile-navigation-dock"]'],
         });
         await page.keyboard.press('Escape');
+      }
+
+      if (role === 'coach' && width === 390 && scenario === 'smoke') {
+        await captureCoachSecondaryPages(page);
       }
 
       if (scenario === 'priority' && role === 'coach') {

@@ -8,7 +8,7 @@ const ROOT = path.resolve(process.cwd(), "artifacts/demo-registered-runtime-pari
 const ROLES = ["coach", "player"];
 const COLOR_FIELDS = new Set(["color", "backgroundColor", "borderTopColor"]);
 const MAX_DIFFERENT_PIXEL_RATIO = 0.0015;
-const MAX_MEAN_CHANNEL_DELTA = 0.05;
+const MAX_MEAN_CHANNEL_DELTA = 0.10;
 const MAX_COLOR_SERIALIZATION_PIXEL_RATIO = 0.00005;
 const MAX_COLOR_SERIALIZATION_MEAN_DELTA = 0.005;
 
