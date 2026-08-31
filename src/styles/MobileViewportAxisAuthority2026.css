@@ -164,12 +164,3 @@
   html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"],
   html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 68px !important; }
 }
-
-/* Authenticated Coach mobile viewport containment authority. */
-@media (max-width: 767px) {
-  html body #root .performance-shell--coach.is-mobile .coach-route-scroll-container {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
-  }
-  html body #root .performance-shell--coach.is-mobile .secondaryPageShell { padding-top: 0 !important; }
-  html body #root .performance-shell--coach.is-mobile :is([data-visual-role="page-intro"], .mcHeroContent) { touch-action: pan-y pinch-zoom !important; }
-}

@@ -2,6 +2,8 @@ const MOBILE_VIEWPORT_QUERY = '(max-width: 760px)';
 const HORIZONTAL_INTENT_THRESHOLD_PX = 6;
 const VISUAL_VIEWPORT_ZOOM_EPSILON = 0.01;
 const COACH_MOBILE_RAIL = 'var(--shotlab-mobile-content-rail, 20px)';
+const COACH_AUTHENTICATED_TOP_START = 'calc(env(safe-area-inset-top, 0px) + 12px)';
+const COACH_VERTICAL_TOUCH_SURFACE_SELECTOR = '.performance-shell--coach.is-mobile [data-visual-role="page-intro"],.performance-shell--coach.is-mobile .mcHeroContent';
 const COACH_HOME_AMBIENT_LEFT = 'min(80%, calc(100% - 125px))';
 const COACH_PROGRAM_PULSE_PROPERTIES = [
   ['--sl-surface', 'linear-gradient(150deg,#0b2231,var(--team-brand-surface-deep,#06151d))'],
@@ -19,6 +21,7 @@ const COACH_ROUTE_GEOMETRY_PROPERTIES = [
   'margin-right',
   'padding-left',
   'padding-right',
+  'padding-top',
 ];
 
 const LOCKED_VERTICAL_OWNER_SELECTORS = [
@@ -68,15 +71,40 @@ function findCoachRouteOwner() {
   }) || null;
 }
 
-export function clearRegisteredCoachRouteGeometry() {
+function clearCoachVerticalTouchPolicy() {
   if (typeof document === 'undefined') return false;
   let cleared = false;
+  document.querySelectorAll('[data-shotlab-vertical-touch="true"]').forEach((node) => {
+    node.style.removeProperty('touch-action');
+    node.removeAttribute('data-shotlab-vertical-touch');
+    cleared = true;
+  });
+  return cleared;
+}
+
+export function clearRegisteredCoachRouteGeometry() {
+  if (typeof document === 'undefined') return false;
+  let cleared = clearCoachVerticalTouchPolicy();
   document.querySelectorAll('.coach-route-scroll-container').forEach((routeOwner) => {
+    routeOwner.querySelectorAll(':scope > .secondaryPageShell').forEach((shell) => shell.style.removeProperty('padding-top'));
     routeOwner.classList.remove('coach-route-scroll-container');
     COACH_ROUTE_GEOMETRY_PROPERTIES.forEach((property) => routeOwner.style.removeProperty(property));
     cleared = true;
   });
   return cleared;
+}
+
+function normalizeCoachVerticalTouchPolicy() {
+  if (typeof document === 'undefined') return false;
+  let corrected = false;
+  document.querySelectorAll(COACH_VERTICAL_TOUCH_SURFACE_SELECTOR).forEach((node) => {
+    if (node.style.touchAction !== 'pan-y pinch-zoom') {
+      node.style.setProperty('touch-action', 'pan-y pinch-zoom');
+      corrected = true;
+    }
+    if (node.getAttribute('data-shotlab-vertical-touch') !== 'true') node.setAttribute('data-shotlab-vertical-touch', 'true');
+  });
+  return corrected;
 }
 
 export function normalizeRegisteredCoachRouteGeometry() {
@@ -97,6 +125,9 @@ export function normalizeRegisteredCoachRouteGeometry() {
   routeOwner.style.setProperty('box-sizing', 'border-box');
   routeOwner.style.setProperty('padding-left', isHome ? '0px' : COACH_MOBILE_RAIL);
   routeOwner.style.setProperty('padding-right', isHome ? '0px' : COACH_MOBILE_RAIL);
+  routeOwner.style.setProperty('padding-top', COACH_AUTHENTICATED_TOP_START);
+  routeOwner.querySelectorAll(':scope > .secondaryPageShell').forEach((shell) => shell.style.setProperty('padding-top', '0px'));
+  normalizeCoachVerticalTouchPolicy();
   return true;
 }
 

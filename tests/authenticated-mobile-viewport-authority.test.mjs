@@ -4,9 +4,8 @@ import { readFileSync } from 'node:fs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
 const authority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
+const guard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const iphoneSpec = readFileSync(new URL('./e2e/registered-coach-iphone-viewport-authority.spec.mjs', import.meta.url), 'utf8');
-const marker = 'Authenticated Coach mobile viewport containment authority.';
-const finalAuthority = authority.slice(authority.lastIndexOf(marker));
 
 test('structural mobile authority contains roots, authenticated shell ancestry, and every Coach route-owner shape', () => {
   assert.match(centering, /html,body,#root\{[^}]*width:100%;[^}]*min-width:0;[^}]*max-width:100%;[^}]*overflow-x:clip !important;[^}]*overscroll-behavior-x:none/);
@@ -22,14 +21,22 @@ test('structural mobile authority contains roots, authenticated shell ancestry, 
   assert.match(centering, /\{width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:clip !important\}/);
 });
 
-test('Coach mobile route owner has the only safe-area start and secondary shells do not add another', () => {
-  assert.match(finalAuthority, /coach-route-scroll-container\s*\{[^}]*padding-top:\s*calc\(env\(safe-area-inset-top,\s*0px\)\s*\+\s*12px\)\s*!important;/);
-  assert.match(finalAuthority, /secondaryPageShell\s*\{[^}]*padding-top:\s*0\s*!important;/);
+test('runtime owns the authenticated Coach safe-area start and removes nested top competition', () => {
+  assert.match(guard, /COACH_AUTHENTICATED_TOP_START = 'calc\(env\(safe-area-inset-top, 0px\) \+ 12px\)'/);
+  assert.match(guard, /routeOwner\.style\.setProperty\('padding-top', COACH_AUTHENTICATED_TOP_START\)/);
+  assert.match(guard, /:scope > \.secondaryPageShell[^\n]*setProperty\('padding-top', '0px'\)/);
+  assert.match(guard, /'padding-top'/);
+  assert.doesNotMatch(authority, /safe-area-inset-top/);
 });
 
-test('non-horizontal Coach surfaces preserve vertical pan and pinch zoom without constraining the route ancestor', () => {
-  assert.match(finalAuthority, /:is\(\[data-visual-role="page-intro"\],\s*\.mcHeroContent\)\s*\{[^}]*touch-action:\s*pan-y pinch-zoom\s*!important;/);
-  assert.doesNotMatch(finalAuthority, /coach-route-scroll-container\s*\{[^}]*touch-action:/);
+test('runtime applies pan-y pinch-zoom only to non-horizontal Coach surfaces and cleans it on exit', () => {
+  assert.match(guard, /COACH_VERTICAL_TOUCH_SURFACE_SELECTOR/);
+  assert.match(guard, /\[data-visual-role="page-intro"\]/);
+  assert.match(guard, /\.mcHeroContent/);
+  assert.match(guard, /setProperty\('touch-action', 'pan-y pinch-zoom'\)/);
+  assert.match(guard, /data-shotlab-vertical-touch/);
+  assert.match(guard, /removeProperty\('touch-action'\)/);
+  assert.doesNotMatch(authority, /touch-action:\s*pan-y pinch-zoom/);
 });
 
 test('obsolete Leaderboards-only top offset cannot compete with the shared safe-area start', () => {
