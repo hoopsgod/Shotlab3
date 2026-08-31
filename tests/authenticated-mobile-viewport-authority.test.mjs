@@ -7,19 +7,13 @@ const iphoneSpec = readFileSync(new URL('./e2e/registered-coach-iphone-viewport-
 const marker = 'Authenticated Coach mobile viewport containment authority.';
 const finalAuthority = authority.slice(authority.lastIndexOf(marker));
 
-test('late mobile authority directly contains the document, authenticated shell, and Coach route owner', () => {
+test('late mobile authority directly contains the document, authenticated shell, and actual Coach route owner', () => {
   assert.ok(finalAuthority.length > marker.length, 'final authenticated mobile containment block must exist');
   for (const selector of [
     'html,',
     'body,',
     '#root,',
     '.performance-shell--coach.is-mobile,',
-    '.performance-shell--coach.is-mobile > .shell-main,',
-    '.performance-shell--coach.is-mobile > .shell-main > .content-wrap,',
-    '.performance-shell--coach.is-mobile .performance-workspace--coach,',
-    '.performance-workspace--coach > div:has([data-testid="coach-command-center-full"]),',
-    '.performance-workspace--coach > div:has(> .secondaryPageShell),',
-    '.performance-workspace--coach > div:has(> .page.pageShell)',
     '.performance-shell--coach.is-mobile .coach-route-scroll-container',
   ]) assert.ok(finalAuthority.includes(selector), `missing final mobile containment owner ${selector}`);
   assert.match(finalAuthority, /width:\s*100%\s*!important;/);
@@ -32,14 +26,18 @@ test('late mobile authority directly contains the document, authenticated shell,
 
 test('Coach mobile shell has one top safe-area authority and secondary shells do not add another', () => {
   assert.match(finalAuthority, /--shotlab-auth-mobile-top-start:\s*calc\(env\(safe-area-inset-top,\s*0px\)\s*\+\s*12px\);/);
-  assert.match(finalAuthority, /padding-top:\s*var\(--shotlab-auth-mobile-top-start\)\s*!important;/);
-  assert.match(finalAuthority, /performance-shell--coach\.is-mobile \.secondaryPageShell,[\s\S]*shared-dashboard-back-action \+ \.secondaryPageShell\s*\{[^}]*padding-top:\s*0\s*!important;/);
+  assert.match(finalAuthority, /coach-route-scroll-container\s*\{[^}]*padding-top:\s*var\(--shotlab-auth-mobile-top-start\)\s*!important;/);
+  assert.match(finalAuthority, /secondaryPageShell\s*\{[^}]*padding-top:\s*0\s*!important;/);
 });
 
-test('non-horizontal Coach surfaces preserve vertical pan and pinch zoom while horizontal controls remain explicit', () => {
-  assert.match(finalAuthority, /touch-action:\s*pan-y pinch-zoom\s*!important;/);
-  assert.match(finalAuthority, /touch-action:\s*pan-x pan-y pinch-zoom\s*!important;/);
-  assert.match(finalAuthority, /:not\(:has\(:is\(\.h-scroll,\[data-horizontal-scroll\],\[data-scroll-axis="x"\],\[role="slider"\],input\[type="range"\]\)\)\)/);
+test('non-horizontal Coach surfaces preserve vertical pan and pinch zoom without constraining intentional horizontal controls', () => {
+  assert.match(finalAuthority, /:is\(\[data-visual-role="page-intro"\],\s*\.mcHeroContent,\s*\.mcTeamFallback\)\s*\{[^}]*touch-action:\s*pan-y pinch-zoom\s*!important;/);
+  assert.doesNotMatch(finalAuthority, /coach-route-scroll-container\s*\{[^}]*touch-action:/);
+  assert.doesNotMatch(finalAuthority, /input\[type="range"\][^}]*touch-action:\s*pan-y/);
+});
+
+test('obsolete Leaderboards-only top offset cannot compete with the shared safe-area start', () => {
+  assert.doesNotMatch(authority, /coach-page-dashboard-leaderboards[^}]*margin-top:\s*14px\s*!important/);
 });
 
 test('iPhone WebKit regression measures visual viewport title safety and sustained finger dragging', () => {
