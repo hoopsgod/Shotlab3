@@ -17,9 +17,6 @@ const ROOT_AUTHORITY_SELECTORS = {
   body: 'body',
   root: '#root',
   shell: '.performance-shell--coach.is-mobile',
-  shellMain: '.performance-shell--coach.is-mobile > .shell-main',
-  contentWrap: '.performance-shell--coach.is-mobile > .shell-main > .content-wrap',
-  workspace: '.performance-shell--coach.is-mobile .performance-workspace--coach',
   routeOwner: '.performance-shell--coach.is-mobile .coach-route-scroll-container',
 };
 
