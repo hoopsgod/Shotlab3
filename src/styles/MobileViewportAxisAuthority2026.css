@@ -101,7 +101,6 @@
     display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; grid-auto-flow: row !important; grid-auto-columns: minmax(0, 1fr) !important; overflow-x: hidden !important; overscroll-behavior-inline: auto !important;
   }
   html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] { min-width: 0 !important; }
-  html body #root .performance-shell--coach.is-mobile [data-testid="coach-page-dashboard-leaderboards"] [data-team-identity-stage="true"][data-title-stage-family="editorial"] { margin-top: 14px !important; }
 
   /* Registered Coach activation uses a desktop three-column grid in source.
    * On mobile the primary action owns a full-width second row so the paid Home
@@ -168,21 +167,10 @@
 
 /* Authenticated Coach mobile viewport containment authority. */
 @media (max-width: 767px) {
-  html body #root .performance-shell--coach.is-mobile {
-    --shotlab-auth-mobile-top-start: calc(env(safe-area-inset-top, 0px) + 12px);
-  }
-
   html,
   body,
   #root,
   html body #root .performance-shell--coach.is-mobile,
-  html body #root .performance-shell--coach.is-mobile > .shell-main,
-  html body #root .performance-shell--coach.is-mobile > .shell-main > .content-wrap,
-  html body #root .performance-shell--coach.is-mobile .performance-workspace,
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach,
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]),
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has(> .secondaryPageShell),
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has(> .page.pageShell),
   html body #root .performance-shell--coach.is-mobile .coach-route-scroll-container {
     width: 100% !important;
     min-width: 0 !important;
@@ -192,38 +180,17 @@
     overscroll-behavior-x: none !important;
   }
 
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has([data-testid="coach-command-center-full"]),
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has(> .secondaryPageShell),
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:has(> .page.pageShell),
+  html body #root .performance-shell--coach.is-mobile {
+    --shotlab-auth-mobile-top-start: calc(env(safe-area-inset-top, 0px) + 12px);
+  }
   html body #root .performance-shell--coach.is-mobile .coach-route-scroll-container {
     padding-top: var(--shotlab-auth-mobile-top-start) !important;
   }
-
-  html body #root .performance-shell--coach.is-mobile .secondaryPageShell,
-  html body #root .performance-shell--coach.is-mobile .shared-dashboard-back-action + .secondaryPageShell {
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell {
     padding-top: 0 !important;
   }
 
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:not(:has(:is(.h-scroll,[data-horizontal-scroll],[data-scroll-axis="x"],[role="slider"],input[type="range"]))),
-  html body #root .performance-shell--coach.is-mobile :where(
-    [data-visual-role="page-intro"],
-    [data-visual-role="primary-decision"],
-    [data-visual-role="supporting-evidence"],
-    [data-visual-role="insight-card"],
-    .mcHeroContent,
-    .mcPrimary,
-    .mcTeamFallback
-  ):not(:has(:is(.h-scroll,[data-horizontal-scroll],[data-scroll-axis="x"],[role="slider"],input[type="range"]))) {
+  html body #root .performance-shell--coach.is-mobile :is([data-visual-role="page-intro"], .mcHeroContent, .mcTeamFallback) {
     touch-action: pan-y pinch-zoom !important;
-  }
-
-  html body #root .performance-shell--coach.is-mobile :is(
-    .h-scroll,
-    [data-horizontal-scroll],
-    [data-scroll-axis="x"],
-    [role="slider"],
-    input[type="range"]
-  ) {
-    touch-action: pan-x pan-y pinch-zoom !important;
   }
 }
