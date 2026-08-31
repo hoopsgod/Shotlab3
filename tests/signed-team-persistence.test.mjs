@@ -20,6 +20,18 @@ const TEAM_A = {
   coach_user_id: "11111111-1111-4111-8111-111111111111",
   school: "Alpha High",
   level: "Varsity",
+  branding: {
+    primaryColor: "#0B2D4F",
+    secondaryColor: "#9CA3AF",
+    accentColor: "#C8FF1A",
+    textOnPrimary: "#FFFFFF",
+    logoUrl: "/branding/alpha.png",
+    logoMarkUrl: "/branding/alpha-mark.png",
+    textScale: "large",
+    updatedAt: 200,
+    updatedBy: "coach@example.com",
+    version: 2,
+  },
 };
 
 const TEAM_B = {
@@ -58,7 +70,7 @@ function matches(row, url) {
 function installBackend({ requester = "coach@example.com", role = "coach", teamId = "team-a", teams = [TEAM_A, TEAM_B] } = {}) {
   const originalFetch = global.fetch;
   const calls = [];
-  const state = { teams: teams.map((row) => ({ ...row })) };
+  const state = { teams: teams.map((row) => ({ ...row, branding: row.branding ? { ...row.branding } : row.branding })) };
   const requesterUuid = role === "coach" ? TEAM_A.coach_user_id : "33333333-3333-4333-8333-333333333333";
 
   global.fetch = async (input, init = {}) => {
@@ -214,7 +226,7 @@ test("generic persistence cannot create teams or reuse another team's join code"
   } finally { backend.restore(); }
 });
 
-test("team cache is reduced to the active team and REST requests use the signed API", async () => {
+test("team cache is reduced to the active team and signed hydration preserves branding", async () => {
   const storage = memoryStorage([
     ["sl:session", JSON.stringify({ email: "coach@example.com", teamId: "team-a", role: "coach" })],
     ["sl:players", JSON.stringify([{ id: "coach-row", email: "coach@example.com", teamId: "team-a", role: "coach" }])],
@@ -241,7 +253,10 @@ test("team cache is reduced to the active team and REST requests use the signed 
   const read = await target.fetch("https://example.supabase.co/rest/v1/teams?select=*");
   assert.deepEqual((await read.json()).map((row) => row.id), ["team-a"]);
   assert.match(calls[0].input, /^\/v1\/teams\?team_id=team-a$/);
-  assert.deepEqual(JSON.parse(storage.snapshot("sl:teams")).map((row) => row.id), ["team-a"]);
+  const cachedTeams = JSON.parse(storage.snapshot("sl:teams"));
+  assert.deepEqual(cachedTeams.map((row) => row.id), ["team-a"]);
+  assert.equal(cachedTeams[0]?.branding?.primaryColor, "#0B2D4F");
+  assert.equal(cachedTeams[0]?.branding?.logoUrl, "/branding/alpha.png");
   assert.equal(calls.some((call) => call.input.includes("/rest/v1/teams")), false);
   assert.equal(bridgeUtils.signedTeamResourceFor("https://example.supabase.co/rest/v1/teams", target), true);
   assert.equal(bridgeUtils.signedTeamResourceFor("https://evil.example/rest/v1/teams", target), false);
