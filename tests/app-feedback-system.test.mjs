@@ -44,9 +44,11 @@ test("feedback styling uses restrained motion mobile safe areas and touch-safe d
 test("branding workflow reports verified save feedback through the global app layer", async () => {
   const source = await read("src/screens/CoachTeamBrandingScreen.jsx");
   assert.match(source, /import \{ announceFeedback \} from "\.\.\/components\/AppFeedbackLayer"/);
+  assert.match(source, /import \{ persistCoachBranding \} from "\.\.\/lib\/teamBrandingPersistence\.js"/);
   assert.doesNotMatch(source, /<AppFeedbackLayer\s*\/>/);
-  assert.match(source, /await onSave\?\.\(next\)/);
+  assert.match(source, /const result = await persistCoachBranding\(\{[\s\S]*nextBranding:\s*next,[\s\S]*appSave:\s*onSave,/);
   assert.match(source, /Team identity saved/);
+  assert.match(source, /verified on the team account and will remain after sign-out/);
   assert.match(source, /Branding was not saved/);
   assert.match(source, /aria-busy=\{saving\}/);
   assert.match(source, /Saving changes…/);
