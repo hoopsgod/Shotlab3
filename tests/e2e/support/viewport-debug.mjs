@@ -9,6 +9,9 @@ export const OUTER_VIEWPORT_SELECTORS = [
   '.shell-main',
   '.content-wrap',
   '.performance-workspace',
+  '.performance-workspace--coach',
+  '.performance-shell--coach.is-mobile .coach-route-scroll-container',
+  '.team-brand.coach-mode.page',
   '.player-scroll-container',
   '.coach-scroll-container',
   '[data-testid="coach-command-center-full"]',
@@ -39,6 +42,9 @@ export function findViewportFailures(report) {
     if (target.left < -1 || target.right > report.viewport.width + 1) {
       failures.push(`${target.selector} escapes viewport (${Math.round(target.left)}..${Math.round(target.right)} of ${report.viewport.width})`);
     }
+    if (target.scrollWidth > target.clientWidth + 1) {
+      failures.push(`${target.selector} owns intrinsic horizontal overflow (${target.clientWidth}/${target.scrollWidth})`);
+    }
     const isStrictScrollOwner = STRICT_SCROLL_STATE_SELECTORS.has(target.selector);
     const overflowAllowsHorizontalScroll = ['auto', 'scroll'].includes(target.overflowX);
     if (isStrictScrollOwner && !overflowAllowsHorizontalScroll && Math.abs(target.persistedScrollLeft || 0) > 1) {
@@ -63,6 +69,12 @@ export function findViewportFailures(report) {
     if (pulse.color && !/^rgb\((?:24[0-9]|25[0-5]),\s*(?:24[0-9]|25[0-5]),\s*(?:24[0-9]|25[0-5])\)$/.test(pulse.color)) {
       failures.push(`Coach Home Program Pulse lost light foreground (${pulse.color})`);
     }
+    const ambient = report.coachHome.ambientGlow;
+    if (!ambient) failures.push('Coach Home ambient glow is missing');
+    else {
+      if (ambient.left < -1) failures.push(`Coach Home ambient glow escapes left (${Math.round(ambient.left)}px)`);
+      if (ambient.right > report.viewport.width + 1) failures.push(`Coach Home ambient glow escapes right (${Math.round(ambient.right)}px of ${report.viewport.width}px)`);
+    }
   }
   return failures;
 }
@@ -79,6 +91,8 @@ export function formatViewportDiagnostics(report) {
   if (report.coachHome?.programPulse) {
     const pulse = report.coachHome.programPulse;
     lines.push(`  program-pulse: background=${pulse.backgroundColor} image=${pulse.backgroundImage} color=${pulse.color}`);
+    const ambient = report.coachHome.ambientGlow;
+    if (ambient) lines.push(`  coach-ambient-glow: x=${Math.round(ambient.left)}..${Math.round(ambient.right)} w=${Math.round(ambient.width)}`);
   }
   if (report.offenders?.length) {
     lines.push('  widest/off-axis elements:');
@@ -203,12 +217,14 @@ export async function collectViewportDiagnostics(page, { role, label, extraSelec
       const pulse = document.querySelector('[data-testid="coach-program-pulse"]');
       const shell = document.querySelector('[data-testid="coach-command-center-full"]');
       const mission = shell?.querySelector('.missionControl');
+      const ambientRect = document.querySelector('[data-testid="coach-ambient-glow"]')?.getBoundingClientRect();
       if (pulse) {
         const style = getComputedStyle(pulse);
         const rect = pulse.getBoundingClientRect();
         coachHome = {
           shell: shell ? { display: getComputedStyle(shell).display, classes: shell.className } : null,
           mission: mission ? { display: getComputedStyle(mission).display, gridTemplateColumns: getComputedStyle(mission).gridTemplateColumns } : null,
+          ambientGlow: ambientRect ? { left: ambientRect.left, right: ambientRect.right, width: ambientRect.width } : null,
           programPulse: {
             classes: pulse.className,
             background: style.background,

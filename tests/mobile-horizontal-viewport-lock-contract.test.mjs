@@ -8,6 +8,7 @@ const centering = readFileSync(new URL('../public/shotlab-mobile-centering-recon
 const authenticatedAuthority = readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8');
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const guard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
+const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const main = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.spec.mjs', import.meta.url), 'utf8');
@@ -45,6 +46,43 @@ test('final mobile viewport axis authority loads after every authenticated visua
   const finalAxis = main.indexOf("await import('./styles/MobileViewportAxisAuthority2026.css')");
   assert.ok(phase7 >= 0, 'Phase 7 authenticated chrome import must exist');
   assert.ok(finalAxis > phase7, 'mobile viewport axis authority must load after Phase 7');
+});
+
+test('Coach ambient decoration has a stable hook and an intrinsically contained mobile box', () => {
+  const ambientGlow = ruleBlock(mediaBlock(finalAxisAuthority, '(max-width: 767px)'), '.coach-ambient-glow--top-right');
+  assert.match(app, /className="coach-ambient-glow coach-ambient-glow--top-right"/);
+  assert.match(app, /dataTestId="coach-ambient-glow"/);
+  assertDeclaration(ambientGlow, 'left', 'auto!important');
+  assertDeclaration(ambientGlow, 'right', '0!important');
+  assertDeclaration(ambientGlow, 'width', 'min(250px, 100%)!important');
+  assertDeclaration(ambientGlow, 'max-width', '100%!important');
+  assertDeclaration(ambientGlow, 'transform', 'translateY(-50%)!important');
+});
+
+test('final authenticated mobile authority explicitly contains every Coach layout owner', () => {
+  const mobileAxis = mediaBlock(finalAxisAuthority, '(max-width: 767px)');
+  const compactAxis = mobileAxis.replace(/\s+/g, '');
+  for (const selector of [
+    'html',
+    'body',
+    'htmlbody#root',
+    '.app-shell.is-mobile',
+    '.app-shell.is-mobile>.shell-main',
+    '.app-shell.is-mobile>.shell-main>.content-wrap',
+    '.performance-workspace',
+    '.performance-workspace--coach',
+    '.coach-route-scroll-container',
+    '.team-brand.coach-mode.page',
+    '[data-testid="coach-command-center-full"]',
+  ]) assert.ok(compactAxis.includes(selector), `final authenticated mobile axis missing ${selector}`);
+  const ownerRule = ruleBlock(mobileAxis, '.coach-route-scroll-container');
+  assertDeclaration(ownerRule, 'width', '100%!important');
+  assertDeclaration(ownerRule, 'min-width', '0!important');
+  assertDeclaration(ownerRule, 'max-width', '100%!important');
+  assertDeclaration(ownerRule, 'margin-inline', 'auto!important');
+  assertDeclaration(ownerRule, 'box-sizing', 'border-box!important');
+  assertDeclaration(ownerRule, 'overflow-x', 'clip!important');
+  assertDeclaration(ownerRule, 'overscroll-behavior-x', 'none!important');
 });
 
 test('runtime blocks horizontal-dominant outer touch movement before Safari can translate the viewport', () => {
@@ -87,10 +125,10 @@ test('runtime installs one shared guard against invalid outer scrollLeft using t
   assert.doesNotMatch(guard, /querySelectorAll\(['"]\*['"]\)/);
 });
 
-test('shared browser certification covers current Demo entry and paid Coach/Player at all target widths', () => {
+test('shared browser certification covers current Demo entry and paid Coach at all target widths', () => {
   for (const width of ['320', '375', '390', '430']) assert.match(sharedSpec, new RegExp(`width: ${width}`));
   assert.match(sharedSpec, /for \(const mode of \['demo', 'paid'\]\)/);
-  assert.match(sharedSpec, /for \(const role of \['coach', 'player'\]\)/);
+  assert.match(sharedSpec, /const role = 'coach'/);
   assert.match(sharedSpec, /page\.goto\('\/\?demo=1'\)/);
   assert.match(sharedSpec, /Coach demo/);
   assert.match(sharedSpec, /Player demo/);
@@ -98,10 +136,17 @@ test('shared browser certification covers current Demo entry and paid Coach/Play
   assert.match(sharedSpec, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap/);
   assert.match(sharedSpec, /visualViewportCenter/);
   assert.match(sharedSpec, /dashboard must have symmetric visual-viewport gutters/);
+  assert.match(sharedSpec, /scrollWidth/);
+  assert.match(sharedSpec, /clientWidth \+ 1/);
+  assert.match(sharedSpec, /coach-ambient-glow/);
   assert.match(sharedSpec, /forceInvalidHorizontalState/);
   assert.match(sharedSpec, /Input\.dispatchTouchEvent/);
   assert.match(sharedSpec, /defaultPrevented/);
   assert.match(sharedSpec, /preventedCount/);
   assert.match(sharedSpec, /outer horizontal touchmove must be cancelled while finger is down/);
+  assert.match(sharedSpec, /during finger pan sample/);
+  assert.match(sharedSpec, /expectIntentionalRangeGestureWorks/);
+  assert.match(sharedSpec, /range gesture must not be cancelled/);
+  assert.match(sharedSpec, /expectVerticalScrollWorks/);
   assert.match(parityWorkflow, /tests\/e2e\/mobile-demo-paid-horizontal-lock\.spec\.mjs/);
 });

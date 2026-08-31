@@ -71,6 +71,10 @@ test('shared player and coach page owners cannot become persistent horizontal sc
   assert.match(registeredViewportSpec, /registered content rail must reject persistent horizontal scrollLeft/);
   assert.match(webkitViewportSpec, /rail\.scrollLeft = 240/);
   assert.match(webkitViewportSpec, /railScrollLeft/);
+  assert.match(registeredViewportSpec, /scrollWidth[^\n]*clientWidth \+ 1/);
+  assert.match(registeredViewportSpec, /coach-ambient-glow/);
+  assert.match(webkitViewportSpec, /scrollWidth[^\n]*clientWidth \+ 1/);
+  assert.match(webkitViewportSpec, /coach-ambient-glow/);
 });
 
 test('Coach Home removes the registered parent offset before Mission Control mounts', () => {
@@ -128,7 +132,7 @@ test('registered WebKit parity measures visible paid Coach gutters on Home, Play
   assert.match(webkitViewportSpec, /leftGutter/);
   assert.match(webkitViewportSpec, /rightGutter/);
   assert.match(webkitViewportSpec, /leftGutter - geometry\.rightGutter/);
-  for (const width of ['390', '430']) assert.match(webkitViewportSpec, new RegExp(`width: ${width}`));
+  for (const width of ['320', '375', '390', '430']) assert.match(webkitViewportSpec, new RegExp(`width: ${width}`));
 });
 
 test('Experience Parity executes Chromium, WebKit, and shared Demo/paid mobile scroll regressions', () => {

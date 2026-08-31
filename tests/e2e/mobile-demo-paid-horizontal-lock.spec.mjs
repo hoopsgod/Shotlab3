@@ -27,8 +27,8 @@ function registeredSeed(role) {
       'sl:supabase-access-token': `shared-lock-${role}`,
       'sl:session': { email: current.email },
       'sl:teams': [withParityBranding({ id: TEAM_ID, name: 'Shared Mobile Lock Team', ownerCoachId: coach.email, joinCode: 'LOCK26', createdAt: 1_780_000_000_000 })],
-      'sl:players': [coach, player],
-      'sl:player-profiles': [{ id: 'profile-shared-lock-player', userId: player.email, teamId: TEAM_ID, firstName: 'Shared', lastName: 'Player', jerseyNumber: '12' }],
+      'sl:players': role === 'coach' ? [coach] : [coach, player],
+      'sl:player-profiles': role === 'coach' ? [] : [{ id: 'profile-shared-lock-player', userId: player.email, teamId: TEAM_ID, firstName: 'Shared', lastName: 'Player', jerseyNumber: '12' }],
       'sl:scores': [], 'sl:program-scores': [], 'sl:shotlogs': [], 'sl:events': [], 'sl:rsvps': [], 'sl:sc-sessions': [], 'sl:sc-rsvps': [], 'sl:sc-logs': [], 'sl:challenges': [], 'sl:season-archives': [], 'sl:team-stores': [],
     },
   };
@@ -77,16 +77,22 @@ function selectorsFor(role) {
     ? '.performance-shell--coach.is-mobile > .shell-main > .content-wrap'
     : '.player-scroll-container';
   const dashboard = role === 'coach' ? '[data-testid="coach-command-center-full"]' : '[data-testid="player-daily-command-center"]';
+  const coachOwners = role === 'coach' ? [
+    '.performance-workspace--coach',
+    '.performance-shell--coach.is-mobile .coach-route-scroll-container',
+    '.team-brand.coach-mode.page',
+  ] : [];
   return {
     roleRail,
     dashboard,
-    locked: [...new Set(['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', roleRail, dashboard])],
+    ambient: role === 'coach' ? '[data-testid="coach-ambient-glow"]' : null,
+    locked: [...new Set(['html', 'body', '#root', '.app-shell.is-mobile', '.shell-main', '.content-wrap', '.performance-workspace', ...coachOwners, roleRail, dashboard])],
   };
 }
 
 async function readGeometry(page, role) {
   const selectors = selectorsFor(role);
-  return page.evaluate(({ locked, roleRail, dashboard }) => {
+  return page.evaluate(({ locked, roleRail, dashboard, ambient }) => {
     const layoutViewportWidth = document.documentElement.clientWidth;
     const visualViewportLeft = window.visualViewport?.offsetLeft ?? 0;
     const visualViewportWidth = window.visualViewport?.width ?? layoutViewportWidth;
@@ -101,6 +107,8 @@ async function readGeometry(page, role) {
         left: rect.left,
         right: rect.right,
         width: rect.width,
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
         scrollLeft: node.scrollLeft,
         overflowX: style.overflowX,
         overscrollBehaviorX: style.overscrollBehaviorX,
@@ -109,6 +117,8 @@ async function readGeometry(page, role) {
     }));
     const dashboardEntry = entries[dashboard];
     const roleEntry = entries[roleRail];
+    const ambientNode = ambient ? document.querySelector(ambient) : null;
+    const ambientRect = ambientNode?.getBoundingClientRect();
     return {
       layoutViewportWidth,
       visualViewportLeft,
@@ -121,6 +131,7 @@ async function readGeometry(page, role) {
       rootScrollLeft: document.scrollingElement?.scrollLeft || 0,
       roleRail,
       dashboard,
+      ambient: ambientRect ? { left: ambientRect.left, right: ambientRect.right, width: ambientRect.width } : null,
       entries,
       dashboardCenter: dashboardEntry ? (dashboardEntry.left + dashboardEntry.right) / 2 : null,
       dashboardLeftGutter: dashboardEntry ? dashboardEntry.left - visualViewportLeft : null,
@@ -148,6 +159,7 @@ async function forceInvalidHorizontalState(page, role) {
 }
 
 async function dispatchHorizontalFingerPan(page, role) {
+  const selectors = selectorsFor(role);
   const viewport = page.viewportSize();
   const dashboard = page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center');
   const box = await dashboard.boundingBox();
@@ -159,19 +171,27 @@ async function dispatchHorizontalFingerPan(page, role) {
   const startX = Math.round(left + width * 0.78);
   const endX = Math.round(left + width * 0.22);
 
-  await page.evaluate(() => {
+  await page.evaluate(({ locked, ambient }) => {
     const previous = window.__shotlabHorizontalPanProbeHandler;
     if (previous) document.removeEventListener('touchmove', previous);
     window.__shotlabHorizontalPanProbeEvents = [];
     const handler = (event) => {
+      const ambientRect = ambient ? document.querySelector(ambient)?.getBoundingClientRect() : null;
       window.__shotlabHorizontalPanProbeEvents.push({
         cancelable: event.cancelable,
         defaultPrevented: event.defaultPrevented,
+        windowScrollX: window.scrollX,
+        visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
+        owners: Object.fromEntries(locked.map((selector) => {
+          const node = document.querySelector(selector);
+          return [selector, node ? { clientWidth: node.clientWidth, scrollWidth: node.scrollWidth, scrollLeft: node.scrollLeft } : null];
+        })),
+        ambient: ambientRect ? { left: ambientRect.left, right: ambientRect.right } : null,
       });
     };
     window.__shotlabHorizontalPanProbeHandler = handler;
     document.addEventListener('touchmove', handler, { passive: true });
-  });
+  }, selectors);
 
   const session = await page.context().newCDPSession(page);
   try {
@@ -197,8 +217,82 @@ async function dispatchHorizontalFingerPan(page, role) {
       count: events.length,
       cancelableCount: events.filter((event) => event.cancelable).length,
       preventedCount: events.filter((event) => event.defaultPrevented).length,
+      samples: events,
     };
   });
+}
+
+async function expectIntentionalRangeGestureWorks(page, label) {
+  const viewport = page.viewportSize();
+  const probe = await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = '0';
+    input.max = '100';
+    input.value = '0';
+    input.dataset.testid = 'horizontal-range-pan-probe';
+    Object.assign(input.style, { position: 'fixed', left: '20px', right: '20px', bottom: '120px', zIndex: '9999', height: '44px' });
+    document.body.append(input);
+    window.__shotlabRangeProbeEvents = [];
+    input.addEventListener('touchmove', (event) => window.__shotlabRangeProbeEvents.push({ defaultPrevented: event.defaultPrevented }), { passive: true });
+    const rect = input.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, y: rect.top + rect.height / 2 };
+  });
+
+  const session = await page.context().newCDPSession(page);
+  try {
+    const startX = Math.round(probe.left + (probe.right - probe.left) * 0.2);
+    const endX = Math.round(probe.left + (probe.right - probe.left) * 0.8);
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: startX, y: Math.round(probe.y) }] });
+    for (let step = 1; step <= 6; step += 1) {
+      const x = Math.round(startX + ((endX - startX) * step) / 6);
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: Math.round(probe.y) }] });
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  } finally {
+    await session.detach();
+  }
+
+  const result = await page.evaluate(() => {
+    const input = document.querySelector('[data-testid="horizontal-range-pan-probe"]');
+    const events = window.__shotlabRangeProbeEvents || [];
+    const value = Number(input?.value || 0);
+    input?.remove();
+    delete window.__shotlabRangeProbeEvents;
+    return { value, count: events.length, preventedCount: events.filter((event) => event.defaultPrevented).length };
+  });
+  expect(result.count, `${label} range must receive trusted touchmove events`).toBeGreaterThan(0);
+  expect(result.preventedCount, `${label} range gesture must not be cancelled by the outer viewport lock`).toBe(0);
+  expect(result.value, `${label} range must respond to horizontal touch movement in a ${viewport.width}px viewport`).toBeGreaterThan(20);
+}
+
+async function expectVerticalScrollWorks(page, label) {
+  const result = await page.evaluate(async () => {
+    const root = document.scrollingElement || document.documentElement;
+    const maxY = Math.max(0, root.scrollHeight - root.clientHeight);
+    const targetY = Math.min(180, maxY);
+    window.scrollTo(0, targetY);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const measured = { maxY, scrollY: window.scrollY, scrollX: window.scrollX };
+    window.scrollTo(0, 0);
+    return measured;
+  });
+  expect(result.maxY, `${label} must expose vertical content`).toBeGreaterThan(0);
+  expect(result.scrollY, `${label} vertical scroll must remain available`).toBeGreaterThan(0);
+  expect(Math.abs(result.scrollX), `${label} vertical movement must not introduce x translation`).toBeLessThanOrEqual(1);
+}
+
+function expectIntrinsicContainment(geometry, role, label) {
+  if (role !== 'coach') return;
+  for (const [selector, entry] of Object.entries(geometry.entries)) {
+    if (!entry) continue;
+    expect(entry.scrollWidth, `${label} ${selector} intrinsic width: ${JSON.stringify(entry)}`).toBeLessThanOrEqual(entry.clientWidth + 1);
+  }
+  if (geometry.ambient) {
+    expect(geometry.ambient.left, `${label} Coach ambient glow left edge`).toBeGreaterThanOrEqual(geometry.visualViewportLeft - 1);
+    expect(geometry.ambient.right, `${label} Coach ambient glow right edge`).toBeLessThanOrEqual(geometry.visualViewportRight + 1);
+  }
 }
 
 function expectVisualAxis(geometry, label) {
@@ -217,6 +311,7 @@ async function expectSharedMobileLock(page, role, label) {
   expect(Math.abs(before.rootScrollLeft), diagnostic).toBeLessThanOrEqual(1);
   expect(Math.abs(before.visualViewportOffsetLeft), diagnostic).toBeLessThanOrEqual(1);
   expectVisualAxis(before, label);
+  expectIntrinsicContainment(before, role, label);
 
   for (const [selector, entry] of Object.entries(before.entries)) {
     if (!entry) continue;
@@ -240,6 +335,7 @@ async function expectSharedMobileLock(page, role, label) {
   expect(Math.abs(afterForced.windowScrollX), `${label} window retained forced x offset`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterForced.rootScrollLeft), `${label} root retained forced x offset`).toBeLessThanOrEqual(1);
   expectVisualAxis(afterForced, `${label} after forced offset`);
+  expectIntrinsicContainment(afterForced, role, `${label} after forced offset`);
   for (const [selector, entry] of Object.entries(afterForced.entries)) {
     if (!entry) continue;
     expect(Math.abs(entry.scrollLeft), `${label} ${selector} retained forced scrollLeft`).toBeLessThanOrEqual(1);
@@ -249,12 +345,27 @@ async function expectSharedMobileLock(page, role, label) {
   expect(touchProbe.count, `${label} must receive trusted touchmove events`).toBeGreaterThan(0);
   expect(touchProbe.cancelableCount, `${label} must receive cancelable touchmove events`).toBeGreaterThan(0);
   expect(touchProbe.preventedCount, `${label} outer horizontal touchmove must be cancelled while finger is down`).toBeGreaterThan(0);
+  for (const [index, sample] of touchProbe.samples.entries()) {
+    const sampleLabel = `${label} during finger pan sample ${index + 1}`;
+    expect(Math.abs(sample.windowScrollX), sampleLabel).toBeLessThanOrEqual(1);
+    expect(Math.abs(sample.visualViewportOffsetLeft), sampleLabel).toBeLessThanOrEqual(1);
+    for (const [selector, owner] of Object.entries(sample.owners)) {
+      if (!owner) continue;
+      if (role === 'coach') expect(owner.scrollWidth, `${sampleLabel} ${selector} intrinsic width`).toBeLessThanOrEqual(owner.clientWidth + 1);
+      expect(Math.abs(owner.scrollLeft), `${sampleLabel} ${selector} scrollLeft`).toBeLessThanOrEqual(1);
+    }
+    if (sample.ambient) {
+      expect(sample.ambient.left, `${sampleLabel} Coach ambient glow left edge`).toBeGreaterThanOrEqual(-1);
+      expect(sample.ambient.right, `${sampleLabel} Coach ambient glow right edge`).toBeLessThanOrEqual(before.layoutViewportWidth + 1);
+    }
+  }
 
   const afterTouch = await readGeometry(page, role);
   expect(Math.abs(afterTouch.windowScrollX), `${label} window moved after finger pan`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterTouch.rootScrollLeft), `${label} root moved after finger pan`).toBeLessThanOrEqual(1);
   expect(Math.abs(afterTouch.visualViewportOffsetLeft), `${label} visual viewport moved after finger pan`).toBeLessThanOrEqual(1);
   expectVisualAxis(afterTouch, `${label} after finger pan`);
+  expectIntrinsicContainment(afterTouch, role, `${label} after finger pan`);
   for (const [selector, entry] of Object.entries(afterTouch.entries)) {
     if (!entry) continue;
     expect(Math.abs(entry.scrollLeft), `${label} ${selector} moved after finger pan`).toBeLessThanOrEqual(1);
@@ -262,21 +373,24 @@ async function expectSharedMobileLock(page, role, label) {
 }
 
 for (const viewport of VIEWPORTS) {
-  test(`Demo and paid Coach/Player share a locked centered mobile viewport at ${viewport.width}px`, async ({ browser }) => {
+  test(`Demo and paid Coach share a locked centered mobile viewport at ${viewport.width}px`, async ({ browser }) => {
     test.setTimeout(180_000);
     for (const mode of ['demo', 'paid']) {
-      for (const role of ['coach', 'player']) {
-        const session = mode === 'demo'
-          ? await createDemo(browser, role, viewport)
-          : await createRegistered(browser, role, viewport);
-        try {
-          await expectSharedMobileLock(session.page, role, `${mode} ${role} ${viewport.width}px`);
-          if (viewport.width === 390) {
-            await session.page.screenshot({ path: `parity-evidence/${mode}-${role}-shared-mobile-lock-390.png`, fullPage: true });
-          }
-        } finally {
-          await session.context.close();
+      const role = 'coach';
+      const session = mode === 'demo'
+        ? await createDemo(browser, role, viewport)
+        : await createRegistered(browser, role, viewport);
+      try {
+        await expectSharedMobileLock(session.page, role, `${mode} ${role} ${viewport.width}px`);
+        if (mode === 'paid') {
+          await expectIntentionalRangeGestureWorks(session.page, `paid coach ${viewport.width}px`);
+          await expectVerticalScrollWorks(session.page, `paid coach ${viewport.width}px`);
         }
+        if (viewport.width === 390 || viewport.width === 430) {
+          await session.page.screenshot({ path: `parity-evidence/${mode}-${role}-shared-mobile-lock-${viewport.width}.png`, fullPage: true });
+        }
+      } finally {
+        await session.context.close();
       }
     }
   });

@@ -21,8 +21,8 @@ function registeredSeed(role) {
       'sl:supabase-access-token': `viewport-${role}-token`,
       'sl:session': { email: current.email },
       'sl:teams': [withParityBranding({ id: TEAM_ID, name: 'Viewport Lock Team', ownerCoachId: coach.email, joinCode: 'VIEW26', createdAt: 1_780_000_000_000 })],
-      'sl:players': [coach, player],
-      'sl:player-profiles': [{ id: 'profile-viewport-player', userId: player.email, teamId: TEAM_ID, firstName: 'Viewport', lastName: 'Player', jerseyNumber: '12' }],
+      'sl:players': role === 'coach' ? [coach] : [coach, player],
+      'sl:player-profiles': role === 'coach' ? [] : [{ id: 'profile-viewport-player', userId: player.email, teamId: TEAM_ID, firstName: 'Viewport', lastName: 'Player', jerseyNumber: '12' }],
       'sl:scores': [{ id: 'score-viewport-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, drillId: 'demo-home-warm-up-shooting-4-minute', score: 12, date: '2026-08-21', src: 'home' }],
       'sl:program-scores': [],
       'sl:shotlogs': [{ id: 'shot-viewport-1', email: player.email, playerId: player.email, name: player.name, teamId: TEAM_ID, made: 100, date: '2026-08-21', syncState: 'remote_saved', syncSource: 'remote' }],
@@ -89,6 +89,9 @@ const VIEWPORT_CONTAINMENT_SELECTORS = [
   '.shell-main',
   '.content-wrap',
   '.performance-workspace',
+  '.performance-workspace--coach',
+  '.performance-shell--coach.is-mobile .coach-route-scroll-container',
+  '.team-brand.coach-mode.page',
   '.player-scroll-container',
   COACH_RAIL_SELECTOR,
   '[data-testid="coach-command-center-full"]',
@@ -164,7 +167,7 @@ async function expectRegisteredContentRailLocked(page) {
   expect(Math.abs(result.after.visualViewportOffsetLeft)).toBeLessThanOrEqual(1);
 }
 
-async function expectRegisteredViewportLocked(page) {
+async function expectRegisteredViewportLocked(page, role) {
   const geometry = await page.evaluate(async (selectors) => {
     const nodes = selectors.map((selector) => [selector, document.querySelector(selector)]).filter(([, node]) => node);
     const before = Object.fromEntries(nodes.map(([selector, node]) => {
@@ -191,6 +194,10 @@ async function expectRegisteredViewportLocked(page) {
       scrollingElementScrollLeft: document.scrollingElement?.scrollLeft || 0,
       visualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
       before,
+      ambient: (() => {
+        const rect = document.querySelector('[data-testid="coach-ambient-glow"]')?.getBoundingClientRect();
+        return rect ? { left: rect.left, right: rect.right, width: rect.width } : null;
+      })(),
     };
     window.scrollTo(0, y);
     return result;
@@ -205,9 +212,15 @@ async function expectRegisteredViewportLocked(page) {
     if (!entry) continue;
     expect(entry.left, `${selector} left edge`).toBeGreaterThanOrEqual(-1);
     expect(entry.right, `${selector} right edge`).toBeLessThanOrEqual(geometry.viewport + 1);
+    if (role === 'coach') expect(entry.scrollWidth, `${selector} intrinsic width`).toBeLessThanOrEqual(entry.clientWidth + 1);
     if (OVERFLOW_LOCK_SELECTORS.has(selector)) {
       expect(['clip', 'hidden'], `${selector} horizontal overflow`).toContain(entry.overflowX);
     }
+  }
+
+  if (geometry.ambient) {
+    expect(geometry.ambient.left, 'Coach ambient glow left edge').toBeGreaterThanOrEqual(-1);
+    expect(geometry.ambient.right, 'Coach ambient glow right edge').toBeLessThanOrEqual(geometry.viewport + 1);
   }
 
   for (const selector of OVERSCROLL_LOCK_SELECTORS) {
@@ -279,11 +292,11 @@ for (const viewport of [
       test.setTimeout(120_000);
       const registered = await createRegistered(browser, role, viewport);
       try {
-        await expectRegisteredViewportLocked(registered.page);
+        await expectRegisteredViewportLocked(registered.page, role);
         if (role === 'coach') await expectCoachHomeCentered(registered.page);
         for (const route of routes) {
           await navigateByKey(registered.page, route);
-          await expectRegisteredViewportLocked(registered.page);
+          await expectRegisteredViewportLocked(registered.page, role);
         }
       } finally {
         await registered.context.close();

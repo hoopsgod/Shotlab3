@@ -27,7 +27,7 @@ test("optimized production CSS preserves Coach Home Program Pulse material autho
 
   for (const name of names) {
     const css = await readFile(path.join(assetsDir, name), "utf8");
-    for (const rule of css.matchAll(/([^{}]*\.mcTeamHealth[^{}]*)\{([^{}]*)\}/g)) {
+    for (const rule of css.matchAll(/([^{}]*(?:\.mcTeamHealth|\[data-testid=coach-program-pulse\])[^{}]*)\{([^{}]*)\}/g)) {
       matches.push({ file: name, selector: rule[1].trim(), declarations: rule[2].trim() });
     }
   }
@@ -35,7 +35,7 @@ test("optimized production CSS preserves Coach Home Program Pulse material autho
   assert.ok(matches.length > 0, "Expected optimized CSS to retain Program Pulse rules");
   const diagnostic = JSON.stringify(matches, null, 2);
   const darkOwner = matches.find(({ selector, declarations }) =>
-    selector.includes(".mcShellV3 .mcTeamHealth") &&
+    (selector.includes(".mcShellV3 .mcTeamHealth") || selector.includes("[data-testid=coach-program-pulse]")) &&
     /background(?:-image)?\s*:[^;]*(?:gradient|#0[0-9a-f]{5}|var\(--team-brand-surface-deep)/i.test(declarations) &&
     /color\s*:\s*#f[0-9a-f]{5}/i.test(declarations)
   );
