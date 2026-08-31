@@ -30,10 +30,21 @@ test('runtime owns the authenticated Coach safe-area start and removes nested to
   assert.doesNotMatch(authority, /safe-area-inset-top/);
 });
 
-test('runtime applies pan-y pinch-zoom only to non-horizontal Coach surfaces and cleans it on exit', () => {
+test('runtime applies pan-y pinch-zoom across the complete Coach page surface and cleans it on exit', () => {
   assert.match(guard, /COACH_VERTICAL_TOUCH_SURFACE_SELECTOR/);
-  assert.match(guard, /\[data-visual-role="page-intro"\]/);
-  assert.match(guard, /\.mcHeroContent/);
+  for (const selector of [
+    '[data-testid="coach-command-center-full"]',
+    '[data-visual-role="page-intro"]',
+    '[data-visual-role="primary-decision"]',
+    '[data-visual-role="supporting-evidence"]',
+    '[data-visual-role="insight-card"]',
+    '.mcHeroContent',
+    '.mcFocusGrid',
+    '.mcActivationChapter',
+    '.mcLowerGrid',
+  ]) assert.ok(guard.includes(selector), `missing vertical touch surface ${selector}`);
+  assert.match(guard, /node\.matches\?\.\(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR\)/);
+  assert.match(guard, /node\.querySelector\?\.\(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR\)/);
   assert.match(guard, /setProperty\('touch-action', 'pan-y pinch-zoom'\)/);
   assert.match(guard, /data-shotlab-vertical-touch/);
   assert.match(guard, /removeProperty\('touch-action'\)/);
@@ -53,6 +64,9 @@ test('iPhone WebKit regression measures required authority owners, root overscro
   assert.match(iphoneSpec, /SUSTAINED_TOUCH_STEPS = 12/);
   assert.match(iphoneSpec, /DOCUMENT_OVERSCROLL_OWNERS = new Set\(\['html', 'body', 'root'\]\)/);
   assert.match(iphoneSpec, /routeOwner:\s*'\.performance-shell--coach\.is-mobile \.coach-route-scroll-container'/);
+  for (const selector of ['.mcFocusGrid', '.mcActivationChapter', '.mcLowerGrid']) {
+    assert.ok(iphoneSpec.includes(selector), `iPhone drag regression misses ${selector}`);
+  }
   assert.doesNotMatch(iphoneSpec, /shellMain:|contentWrap:|workspace:/);
   assert.match(iphoneSpec, /for \(let step = 1; step <= steps; step \+= 1\)/);
   assert.match(iphoneSpec, /defaultPrevented/);

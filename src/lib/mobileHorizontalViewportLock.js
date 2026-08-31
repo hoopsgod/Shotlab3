@@ -3,7 +3,17 @@ const HORIZONTAL_INTENT_THRESHOLD_PX = 6;
 const VISUAL_VIEWPORT_ZOOM_EPSILON = 0.01;
 const COACH_MOBILE_RAIL = 'var(--shotlab-mobile-content-rail, 20px)';
 const COACH_AUTHENTICATED_TOP_START = 'calc(env(safe-area-inset-top, 0px) + 12px)';
-const COACH_VERTICAL_TOUCH_SURFACE_SELECTOR = '.performance-shell--coach.is-mobile [data-visual-role="page-intro"],.performance-shell--coach.is-mobile .mcHeroContent';
+const COACH_VERTICAL_TOUCH_SURFACE_SELECTOR = [
+  '.performance-shell--coach.is-mobile [data-testid="coach-command-center-full"]',
+  '.performance-shell--coach.is-mobile [data-visual-role="page-intro"]',
+  '.performance-shell--coach.is-mobile [data-visual-role="primary-decision"]',
+  '.performance-shell--coach.is-mobile [data-visual-role="supporting-evidence"]',
+  '.performance-shell--coach.is-mobile [data-visual-role="insight-card"]',
+  '.performance-shell--coach.is-mobile .mcHeroContent',
+  '.performance-shell--coach.is-mobile .mcFocusGrid',
+  '.performance-shell--coach.is-mobile .mcActivationChapter',
+  '.performance-shell--coach.is-mobile .mcLowerGrid',
+].join(',');
 const COACH_HOME_AMBIENT_LEFT = 'min(80%, calc(100% - 125px))';
 const COACH_PROGRAM_PULSE_PROPERTIES = [
   ['--sl-surface', 'linear-gradient(150deg,#0b2231,var(--team-brand-surface-deep,#06151d))'],
@@ -98,6 +108,8 @@ function normalizeCoachVerticalTouchPolicy() {
   if (typeof document === 'undefined') return false;
   let corrected = false;
   document.querySelectorAll(COACH_VERTICAL_TOUCH_SURFACE_SELECTOR).forEach((node) => {
+    if (node.matches?.(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR)
+      || node.querySelector?.(INTENTIONAL_HORIZONTAL_GESTURE_SELECTOR)) return;
     if (node.style.touchAction !== 'pan-y pinch-zoom') {
       node.style.setProperty('touch-action', 'pan-y pinch-zoom');
       corrected = true;

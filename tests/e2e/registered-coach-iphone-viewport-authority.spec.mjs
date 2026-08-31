@@ -184,14 +184,13 @@ async function expectVisibleTitlesBelowVisualViewportTop(page, label) {
   }
 }
 
-async function expectSustainedFingerDragCannotPanPage(page, label) {
-  const result = await page.evaluate(async (steps) => {
-    const surfaceCandidates = [
+async function expectSustainedFingerDragCannotPanPage(page, label, surfaceSelector = '') {
+  const result = await page.evaluate(async ({ steps, surfaceSelector }) => {
+    const surfaceCandidates = (surfaceSelector ? [document.querySelector(surfaceSelector)] : [
       document.querySelector('[data-visual-role="page-intro"]'),
       document.querySelector('[data-testid="coach-primary-objective"] .mcHeroContent'),
-      document.querySelector('[data-testid="coach-command-center-full"] .mcHeroContent'),
       document.querySelector('.performance-shell--coach.is-mobile .coach-route-scroll-container'),
-    ].filter(Boolean);
+    ]).filter(Boolean);
     const surface = surfaceCandidates.find((node) => {
       const rect = node.getBoundingClientRect();
       const style = getComputedStyle(node);
@@ -240,7 +239,7 @@ async function expectSustainedFingerDragCannotPanPage(page, label) {
       finalRootScrollLeft: document.scrollingElement?.scrollLeft || 0,
       finalVisualViewportOffsetLeft: window.visualViewport?.offsetLeft || 0,
     };
-  }, SUSTAINED_TOUCH_STEPS);
+  }, { steps: SUSTAINED_TOUCH_STEPS, surfaceSelector });
 
   expect(result, `${label} must expose a non-horizontal touch surface`).not.toBeNull();
   expect(result.touchAction, `${label} touch policy must preserve vertical pan`).toContain('pan-y');
@@ -265,7 +264,13 @@ test('registered paid Coach iPhone viewport keeps titles safe and rejects sustai
     try {
       await expectAuthoritativeHorizontalContainment(registered.page, 'Coach Home');
       await expectVisibleTitlesBelowVisualViewportTop(registered.page, 'Coach Home');
-      await expectSustainedFingerDragCannotPanPage(registered.page, 'Coach Home');
+      for (const [surfaceLabel, surfaceSelector] of [
+        ['full paid surface', '[data-testid="coach-command-center-full"]'],
+        ['decision hero', '.mcHeroContent'],
+        ['program intelligence', '.mcFocusGrid'],
+        ['empty-roster activation', '.mcActivationChapter'],
+        ['supporting evidence', '.mcLowerGrid'],
+      ]) await expectSustainedFingerDragCannotPanPage(registered.page, `Coach Home ${surfaceLabel}`, surfaceSelector);
 
       for (const route of ROUTES) {
         await navigateByKey(registered.page, route);
