@@ -123,9 +123,22 @@ test("players read their team but cannot update team metadata", async () => {
   } finally { backend.restore(); }
 });
 
-test("coaches update only owned team metadata and immutable ownership stays intact", async () => {
+test("coaches update owned team metadata and branding while immutable ownership stays intact", async () => {
   const backend = installBackend();
   try {
+    const branding = {
+      primaryColor: "#112233",
+      secondaryColor: "#445566",
+      accentColor: "#778899",
+      textOnPrimary: "#FFFFFF",
+      logoUrl: "data:image/png;base64,AAAA",
+      logoMarkUrl: "https://cdn.example.com/alpha-mark.png",
+      textScale: "large",
+      updatedAt: 123,
+      updatedBy: "spoofed@example.com",
+      version: 4,
+      unsupported: "drop-me",
+    };
     const update = await syncTeams(context({
       method: "POST",
       headers: { "x-user-id": "coach@example.com" },
@@ -136,11 +149,12 @@ test("coaches update only owned team metadata and immutable ownership stays inta
           join_code: "NEW123",
           school: "Updated School",
           level: "JV",
-          branding: { unsupported: true },
+          branding,
         }],
       },
     }));
     assert.equal(update.status, 200);
+    const body = await update.json();
     const stored = backend.state.teams.find((row) => row.id === "team-a");
     assert.equal(stored.name, "Alpha Updated");
     assert.equal(stored.join_code, "NEW123");
@@ -149,7 +163,16 @@ test("coaches update only owned team metadata and immutable ownership stays inta
     assert.equal(stored.owner_coach_id, TEAM_A.owner_coach_id);
     assert.equal(stored.coach_user_id, TEAM_A.coach_user_id);
     assert.equal(stored.created_at, TEAM_A.created_at);
-    assert.equal(Object.hasOwn(stored, "branding"), false);
+    assert.equal(stored.branding.primaryColor, "#112233");
+    assert.equal(stored.branding.logoUrl, "data:image/png;base64,AAAA");
+    assert.equal(stored.branding.textScale, "large");
+    assert.equal(stored.branding.updatedBy, "coach@example.com");
+    assert.equal(stored.branding.unsupported, undefined);
+    assert.equal(body.teams.find((row) => row.id === "team-a")?.branding?.logoMarkUrl, "https://cdn.example.com/alpha-mark.png");
+
+    const read = await getTeams(context({ path: "/v1/teams?team_id=team-a", headers: { "x-user-id": "coach@example.com" } }));
+    assert.equal(read.status, 200);
+    assert.equal((await read.json()).teams[0]?.branding?.primaryColor, "#112233");
 
     const ownerChange = await syncTeams(context({
       method: "POST",
