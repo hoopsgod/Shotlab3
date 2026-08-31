@@ -88,9 +88,15 @@ export async function persistCoachBranding({
   }
 
   let remoteTeam = loadedRows.find((row) => teamIdFor(row) === teamId) || null;
-  const baseTeam = localTeam || remoteTeam;
+  if (loadError && !remoteTeam) throw loadError;
+
+  // The signed API row is authoritative for immutable ownership, creation, and
+  // invite metadata. Local app rows can legitimately contain older legacy
+  // shapes, so using them as the POST base can trigger immutable-field 409s even
+  // when the coach is only changing branding.
+  const baseTeam = remoteTeam || localTeam;
   if (!baseTeam) {
-    throw loadError || new Error("The active team could not be loaded for branding persistence.");
+    throw new Error("The active team could not be loaded for branding persistence.");
   }
 
   const desiredBranding = {
