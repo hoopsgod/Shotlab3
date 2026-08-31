@@ -10,6 +10,7 @@ const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxi
 const guard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const main = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
+const auth = readFileSync(new URL('../src/components/AuthWorkspace.jsx', import.meta.url), 'utf8');
 const parityWorkflow = readFileSync(new URL('../.github/workflows/demo-paid-parity.yml', import.meta.url), 'utf8');
 const sharedSpec = readFileSync(new URL('./e2e/mobile-demo-paid-horizontal-lock.spec.mjs', import.meta.url), 'utf8');
 const mobileCentering = mediaBlock(centering, '(max-width:760px)');
@@ -96,6 +97,17 @@ test('runtime blocks horizontal-dominant outer touch movement before Safari can 
   assert.match(guard, /document\.addEventListener\('touchmove', handleTouchMove, \{ passive: false, capture: true \}\)/);
   assert.match(guard, /event\.cancelable\) event\.preventDefault\(\)/);
   assert.match(guard, /event\.touches\?\.length !== 1/);
+});
+
+test('paid mobile entry prevents Safari focus zoom before mounting the shared Coach workspace', () => {
+  assert.match(auth, /const inp=\{[^}]*fontSize:16/);
+  assert.doesNotMatch(auth, /const inp=\{[^}]*fontSize:(?:1[0-5]|\d)(?:[,}])/);
+  assert.match(auth, /const releaseAuthInputFocus=\(\)=>\{[^}]*document\.activeElement[^}]*active\.blur\(\)/);
+
+  const loginStart = auth.indexOf('const doLogin=async()=>');
+  const loginEnd = auth.indexOf('const doRegister=async()=>');
+  const loginFlow = auth.slice(loginStart, loginEnd);
+  assert.ok(loginFlow.indexOf('releaseAuthInputFocus();') < loginFlow.indexOf('await onLogin(id,password)'), 'paid login must release the focused field before the authenticated route transition');
 });
 
 test('runtime normalizes the real Coach route owner without CSS :has discovery', () => {

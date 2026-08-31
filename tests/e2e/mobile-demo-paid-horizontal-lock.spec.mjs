@@ -372,6 +372,37 @@ async function expectSharedMobileLock(page, role, label) {
   }
 }
 
+test('paid mobile sign-in fields preserve the unzoomed viewport used by Coach Demo', async ({ browser }) => {
+  test.setTimeout(90_000);
+  for (const viewport of VIEWPORTS) {
+    const context = await browser.newContext({ viewport, screen: viewport, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+    const page = await context.newPage();
+    try {
+      await page.goto('/');
+      const auth = page.getByTestId('auth-workspace');
+      await expect(auth).toBeVisible({ timeout: 20_000 });
+      const fields = auth.locator('input');
+      const fieldCount = await fields.count();
+      expect(fieldCount, `${viewport.width}px paid entry must expose sign-in fields`).toBeGreaterThanOrEqual(2);
+
+      for (let index = 0; index < fieldCount; index += 1) {
+        const field = fields.nth(index);
+        const fontSize = await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).fontSize));
+        expect(fontSize, `${viewport.width}px paid auth input ${index + 1} must not trigger iOS focus zoom`).toBeGreaterThanOrEqual(16);
+        await field.focus();
+        const viewportState = await page.evaluate(() => ({
+          scale: window.visualViewport?.scale || 1,
+          offsetLeft: window.visualViewport?.offsetLeft || 0,
+        }));
+        expect(viewportState.scale, `${viewport.width}px paid auth input ${index + 1} changed visual viewport scale`).toBeLessThanOrEqual(1.01);
+        expect(Math.abs(viewportState.offsetLeft), `${viewport.width}px paid auth input ${index + 1} shifted the visual viewport`).toBeLessThanOrEqual(1);
+      }
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 for (const viewport of VIEWPORTS) {
   test(`Demo and paid Coach share a locked centered mobile viewport at ${viewport.width}px`, async ({ browser }) => {
     test.setTimeout(180_000);
