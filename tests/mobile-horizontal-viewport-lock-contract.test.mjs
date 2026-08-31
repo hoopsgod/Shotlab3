@@ -59,30 +59,23 @@ test('Coach ambient decoration has a stable hook and an intrinsically contained 
   assertDeclaration(ambientGlow, 'transform', 'translateY(-50%)!important');
 });
 
-test('final authenticated mobile authority explicitly contains every Coach layout owner', () => {
-  const mobileAxis = mediaBlock(finalAxisAuthority, '(max-width: 767px)');
-  const compactAxis = mobileAxis.replace(/\s+/g, '');
+test('shared centering owns generic outer containment while runtime normalizes the dynamic Coach route owner', () => {
   for (const selector of [
-    'html',
-    'body',
-    'htmlbody#root',
     '.app-shell.is-mobile',
     '.app-shell.is-mobile>.shell-main',
     '.app-shell.is-mobile>.shell-main>.content-wrap',
     '.performance-workspace',
-    '.performance-workspace--coach',
-    '.coach-route-scroll-container',
-    '.team-brand.coach-mode.page',
     '[data-testid="coach-command-center-full"]',
-  ]) assert.ok(compactAxis.includes(selector), `final authenticated mobile axis missing ${selector}`);
-  const ownerRule = ruleBlock(mobileAxis, '.coach-route-scroll-container');
-  assertDeclaration(ownerRule, 'width', '100%!important');
-  assertDeclaration(ownerRule, 'min-width', '0!important');
-  assertDeclaration(ownerRule, 'max-width', '100%!important');
-  assertDeclaration(ownerRule, 'margin-inline', 'auto!important');
-  assertDeclaration(ownerRule, 'box-sizing', 'border-box!important');
-  assertDeclaration(ownerRule, 'overflow-x', 'clip!important');
-  assertDeclaration(ownerRule, 'overscroll-behavior-x', 'none!important');
+  ]) assert.ok(compactCentering.includes(selector), `shared mobile x-axis authority missing ${selector}`);
+
+  assert.match(guard, /routeOwner\.classList\.add\('coach-route-scroll-container'\)/);
+  assert.match(guard, /width:\s*'100%'/);
+  assert.match(guard, /minWidth:\s*'0'/);
+  assert.match(guard, /maxWidth:\s*'100%'/);
+  assert.match(guard, /overflowX:\s*'clip'/);
+
+  const mobileAxis = mediaBlock(finalAxisAuthority, '(max-width: 767px)');
+  assert.doesNotMatch(mobileAxis, /html,\s*body,\s*html body #root,\s*html body #root \.app-shell\.is-mobile/);
 });
 
 test('runtime blocks horizontal-dominant outer touch movement before Safari can translate the viewport', () => {

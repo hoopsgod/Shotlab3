@@ -16,26 +16,9 @@ html body #root .performance-shell--coach [data-testid="coach-program-pulse"] {
     --phase4e-mobile-gutter: 20px;
   }
 
-  html,
-  body,
-  html body #root,
-  html body #root .app-shell.is-mobile,
-  html body #root .app-shell.is-mobile > .shell-main,
-  html body #root .app-shell.is-mobile > .shell-main > .content-wrap,
-  html body #root .app-shell.is-mobile .performance-workspace,
-  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach,
-  html body #root .performance-shell--coach.is-mobile .team-brand.coach-mode.page,
-  html body #root .performance-shell--coach.is-mobile .coach-route-scroll-container,
-  html body #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin-inline: auto !important;
-    box-sizing: border-box !important;
-    overflow-x: clip !important;
-    overscroll-behavior-x: none !important;
-  }
-
+  /* Shared document/shell/workspace containment is already owned by
+   * shotlab-mobile-centering-reconciliation.css. Keep this protected layer
+   * focused on the Coach-specific overflow source and production-only repairs. */
   /* The registered Coach backdrop used a translated 250px orb centered at 80%,
    * which painted 47px past a 390px viewport and created an intrinsic scroll
    * range even though outer owners clipped it. Anchor its mobile box to the

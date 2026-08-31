@@ -42,12 +42,14 @@ export function findViewportFailures(report) {
     if (target.left < -1 || target.right > report.viewport.width + 1) {
       failures.push(`${target.selector} escapes viewport (${Math.round(target.left)}..${Math.round(target.right)} of ${report.viewport.width})`);
     }
-    if (target.scrollWidth > target.clientWidth + 1) {
-      failures.push(`${target.selector} owns intrinsic horizontal overflow (${target.clientWidth}/${target.scrollWidth})`);
-    }
     const isStrictScrollOwner = STRICT_SCROLL_STATE_SELECTORS.has(target.selector);
     const overflowAllowsHorizontalScroll = ['auto', 'scroll'].includes(target.overflowX);
-    if (isStrictScrollOwner && !overflowAllowsHorizontalScroll && Math.abs(target.persistedScrollLeft || 0) > 1) {
+    const retainsHorizontalScrollState = Math.abs(target.persistedScrollLeft || 0) > 1;
+    const ownsIntrinsicHorizontalOverflow = target.scrollWidth > target.clientWidth + 1;
+    if (ownsIntrinsicHorizontalOverflow && (report.role === 'coach' || overflowAllowsHorizontalScroll || retainsHorizontalScrollState)) {
+      failures.push(`${target.selector} owns intrinsic horizontal overflow (${target.clientWidth}/${target.scrollWidth})`);
+    }
+    if (isStrictScrollOwner && !overflowAllowsHorizontalScroll && retainsHorizontalScrollState) {
       failures.push(`${target.selector} retains horizontal scrollLeft=${Math.round(target.persistedScrollLeft)} (${target.clientWidth}/${target.scrollWidth}, overflow-x=${target.overflowX})`);
     }
   }

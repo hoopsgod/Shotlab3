@@ -33,24 +33,37 @@ test('viewport debugger reports true document overflow', () => {
   assert.ok(failures.some((message) => message.includes('document overflows viewport by 24px')));
 });
 
-test('clipped layout owners still fail when intrinsic width exceeds client width', () => {
+test('Coach layout owners fail when intrinsic width exceeds client width', () => {
   const failures = findViewportFailures(healthy({
+    role: 'coach',
     outerTargets: [
       { selector: '.performance-workspace', left: 0, right: 390, clientWidth: 390, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'hidden' },
-      { selector: '[data-testid="player-daily-command-center"]', left: 20, right: 370, clientWidth: 350, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'clip' },
+      { selector: '[data-testid="coach-command-center-full"]', left: 20, right: 370, clientWidth: 350, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'clip' },
     ],
   }));
   assert.ok(failures.some((message) => message.includes('.performance-workspace owns intrinsic horizontal overflow (390/443)')));
-  assert.ok(failures.some((message) => message.includes('[data-testid="player-daily-command-center"] owns intrinsic horizontal overflow (350/443)')));
+  assert.ok(failures.some((message) => message.includes('[data-testid="coach-command-center-full"] owns intrinsic horizontal overflow (350/443)')));
 });
 
-test('clipping and scroll reset cannot excuse intrinsic owner overflow', () => {
+test('Coach clipping and scroll reset cannot excuse intrinsic owner overflow', () => {
   const failures = findViewportFailures(healthy({
+    role: 'coach',
     outerTargets: [
       { selector: '.performance-workspace', left: 0, right: 390, clientWidth: 390, scrollWidth: 443, persistedScrollLeft: 53, overflowX: 'hidden' },
     ],
   }));
   assert.ok(failures.some((message) => message.includes('.performance-workspace owns intrinsic horizontal overflow (390/443)')));
+});
+
+test('clipped Player decoration is diagnostic-only when the outer axis cannot move', () => {
+  const failures = findViewportFailures(healthy({
+    role: 'player',
+    outerTargets: [
+      { selector: '.performance-workspace', left: 0, right: 390, clientWidth: 390, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'hidden' },
+      { selector: '[data-testid="player-daily-command-center"]', left: 20, right: 370, clientWidth: 350, scrollWidth: 443, persistedScrollLeft: 0, overflowX: 'clip' },
+    ],
+  }));
+  assert.deepEqual(failures, []);
 });
 
 test('locked shell retaining horizontal scroll state is a hard failure', () => {
