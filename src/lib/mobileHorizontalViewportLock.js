@@ -86,7 +86,7 @@ export function clearRegisteredCoachRouteGeometry() {
   if (typeof document === 'undefined') return false;
   let cleared = clearCoachVerticalTouchPolicy();
   document.querySelectorAll('.coach-route-scroll-container').forEach((routeOwner) => {
-    routeOwner.querySelectorAll(':scope > .secondaryPageShell').forEach((shell) => shell.style.removeProperty('padding-top'));
+    routeOwner.querySelectorAll('.secondaryPageShell').forEach((shell) => shell.style.removeProperty('padding-top'));
     routeOwner.classList.remove('coach-route-scroll-container');
     COACH_ROUTE_GEOMETRY_PROPERTIES.forEach((property) => routeOwner.style.removeProperty(property));
     cleared = true;
@@ -126,7 +126,7 @@ export function normalizeRegisteredCoachRouteGeometry() {
   routeOwner.style.setProperty('padding-left', isHome ? '0px' : COACH_MOBILE_RAIL);
   routeOwner.style.setProperty('padding-right', isHome ? '0px' : COACH_MOBILE_RAIL);
   routeOwner.style.setProperty('padding-top', COACH_AUTHENTICATED_TOP_START);
-  routeOwner.querySelectorAll(':scope > .secondaryPageShell').forEach((shell) => shell.style.setProperty('padding-top', '0px'));
+  routeOwner.querySelectorAll('.secondaryPageShell').forEach((shell) => shell.style.setProperty('padding-top', '0px'));
   normalizeCoachVerticalTouchPolicy();
   return true;
 }

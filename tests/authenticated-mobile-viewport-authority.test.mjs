@@ -24,7 +24,8 @@ test('structural mobile authority contains roots, authenticated shell ancestry, 
 test('runtime owns the authenticated Coach safe-area start and removes nested top competition', () => {
   assert.match(guard, /COACH_AUTHENTICATED_TOP_START = 'calc\(env\(safe-area-inset-top, 0px\) \+ 12px\)'/);
   assert.match(guard, /routeOwner\.style\.setProperty\('padding-top', COACH_AUTHENTICATED_TOP_START\)/);
-  assert.match(guard, /:scope > \.secondaryPageShell[^\n]*setProperty\('padding-top', '0px'\)/);
+  assert.match(guard, /querySelectorAll\('\.secondaryPageShell'\)[^\n]*setProperty\('padding-top', '0px'\)/);
+  assert.match(guard, /querySelectorAll\('\.secondaryPageShell'\)[^\n]*removeProperty\('padding-top'\)/);
   assert.match(guard, /'padding-top'/);
   assert.doesNotMatch(authority, /safe-area-inset-top/);
 });
