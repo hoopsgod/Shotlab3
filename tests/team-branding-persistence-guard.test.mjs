@@ -36,21 +36,36 @@ test("branding comparison ignores server metadata but requires every coach-contr
   assert.equal(brandingMatches(desiredBranding, { ...desiredBranding, textScale: "standard" }), false);
 });
 
-test("a stale server round trip is repaired and the authoritative branding is cached for the next login", async () => {
+test("a stale server round trip is repaired from authoritative team metadata and cached for the next login", async () => {
   const storage = memoryStorage({
     "sl:session": JSON.stringify({ email: "coach@example.com" }),
     "sl:players": JSON.stringify([{ email: "coach@example.com", role: "coach", teamId: "team-1" }]),
-    "sl:teams": JSON.stringify([{ id: "team-1", name: "BK", ownerCoachId: "coach@example.com", branding: staleBranding }]),
+    "sl:teams": JSON.stringify([{
+      id: "team-1",
+      name: "BK",
+      ownerCoachId: "legacy-local-owner@example.com",
+      coachUserId: "legacy-local-user-id",
+      joinCode: "LOCAL1",
+      createdAt: 999,
+      branding: staleBranding,
+    }]),
   });
   let syncCalls = 0;
   let syncPayload = null;
 
+  const remoteTeam = {
+    id: "team-1",
+    name: "BK",
+    owner_coach_id: "coach@example.com",
+    coach_user_id: "11111111-1111-4111-8111-111111111111",
+    join_code: "REMOTE1",
+    created_at: 100,
+    branding: staleBranding,
+  };
+
   const fakeService = {
     readContext: () => ({ requester: "coach@example.com", teamId: "team-1", role: "coach" }),
-    loadTeams: async () => ({
-      ok: true,
-      rows: [{ id: "team-1", name: "BK", owner_coach_id: "coach@example.com", branding: staleBranding }],
-    }),
+    loadTeams: async () => ({ ok: true, rows: [remoteTeam] }),
     syncTeams: async (rows) => {
       syncCalls += 1;
       syncPayload = rows;
@@ -58,9 +73,7 @@ test("a stale server round trip is repaired and the authoritative branding is ca
         ok: true,
         storageMode: "signed_api",
         rows: [{
-          id: "team-1",
-          name: "BK",
-          owner_coach_id: "coach@example.com",
+          ...remoteTeam,
           branding: { ...desiredBranding, updatedAt: 100, updatedBy: "coach@example.com", version: 3 },
         }],
       };
@@ -78,6 +91,11 @@ test("a stale server round trip is repaired and the authoritative branding is ca
   assert.equal(syncCalls, 1);
   assert.equal(syncPayload[0].branding.primaryColor, desiredBranding.primaryColor);
   assert.equal(syncPayload[0].branding.logoUrl, desiredBranding.logoUrl);
+  assert.equal(syncPayload[0].owner_coach_id, "coach@example.com");
+  assert.equal(syncPayload[0].coach_user_id, "11111111-1111-4111-8111-111111111111");
+  assert.equal(syncPayload[0].join_code, "REMOTE1");
+  assert.equal(syncPayload[0].created_at, 100);
+  assert.equal(syncPayload[0].ownerCoachId, undefined);
 
   const cached = JSON.parse(storage.getItem("sl:teams"));
   assert.equal(cached.length, 1);
