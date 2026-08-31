@@ -167,21 +167,9 @@
 
 /* Authenticated Coach mobile viewport containment authority. */
 @media (max-width: 767px) {
-  html,
-  body,
-  #root,
-  html body #root .performance-shell--coach.is-mobile,
-  html body #root .performance-shell--coach.is-mobile .coach-route-scroll-container {
-    overflow-x: clip !important;
-    overscroll-behavior-x: none !important;
-  }
   html body #root .performance-shell--coach.is-mobile .coach-route-scroll-container {
     padding-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
   }
-  html body #root .performance-shell--coach.is-mobile .secondaryPageShell {
-    padding-top: 0 !important;
-  }
-  html body #root .performance-shell--coach.is-mobile :is([data-visual-role="page-intro"], .mcHeroContent) {
-    touch-action: pan-y pinch-zoom !important;
-  }
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell { padding-top: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile :is([data-visual-role="page-intro"], .mcHeroContent) { touch-action: pan-y pinch-zoom !important; }
 }

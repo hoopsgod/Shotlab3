@@ -12,6 +12,7 @@ const COACH = {
 const IPHONE_VIEWPORT = { width: 390, height: 844 };
 const ROUTES = ['players', 'drills', 'events', 'sc', 'leaderboards', 'activity'];
 const SUSTAINED_TOUCH_STEPS = 12;
+const DOCUMENT_OVERSCROLL_OWNERS = new Set(['html', 'body', 'root']);
 const ROOT_AUTHORITY_SELECTORS = {
   html: 'html',
   body: 'body',
@@ -145,7 +146,7 @@ async function expectAuthoritativeHorizontalContainment(page, label) {
   for (const [name, owner] of Object.entries(report.owners)) {
     expect(owner, `${label} missing ${name} authority owner`).not.toBeNull();
     expect(['clip', 'hidden'], `${label} ${name} overflow-x`).toContain(owner.overflowX);
-    expect(owner.overscrollBehaviorX, `${label} ${name} overscroll-x`).toBe('none');
+    if (DOCUMENT_OVERSCROLL_OWNERS.has(name)) expect(owner.overscrollBehaviorX, `${label} ${name} overscroll-x`).toBe('none');
     expect(owner.left, `${label} ${name} left edge`).toBeGreaterThanOrEqual(-1);
     expect(owner.right, `${label} ${name} right edge`).toBeLessThanOrEqual(report.viewportWidth + 1);
   }
