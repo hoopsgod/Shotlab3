@@ -57,6 +57,7 @@ jobs:
           tests/remote-leaderboard-roster-parity.test.mjs
           tests/registered-mobile-viewport-lock-contract.test.mjs
           tests/mobile-horizontal-viewport-lock-contract.test.mjs
+          tests/authenticated-mobile-viewport-authority.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -74,6 +75,7 @@ jobs:
           tests/e2e/demo-paid-responsive-parity.spec.mjs
           tests/e2e/registered-mobile-viewport-lock.spec.mjs
           tests/e2e/registered-mobile-webkit-scroll-lock.spec.mjs
+          tests/e2e/registered-coach-iphone-viewport-authority.spec.mjs
           tests/e2e/mobile-opening-position-webkit.spec.mjs
           tests/e2e/mobile-demo-paid-horizontal-lock.spec.mjs
           tests/e2e/demo-sandbox-safety.spec.mjs
