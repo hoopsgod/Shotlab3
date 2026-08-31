@@ -7,10 +7,14 @@ on:
     paths:
       - "functions/v1/teams/index.js"
       - "src/components/useCleanTeamLogo.js"
+      - "src/components/TeamIdentityBrandHierarchy.css"
+      - "src/screens/CoachTeamBrandingScreen.jsx"
+      - "src/lib/teamBrandingPersistence.js"
       - "src/lib/teamPersistenceService.js"
       - "src/lib/apiFetchBridge.js"
       - "migrations/047_teams_signed_api_boundary.sql"
       - "tests/signed-team-persistence.test.mjs"
+      - "tests/team-branding-persistence-guard.test.mjs"
       - "tests/team-logo-transparent-background.test.mjs"
       - "tests/team-memberships-confirm-context-route.test.mjs"
       - "tests/teams-restore-context-route.test.mjs"
@@ -48,6 +52,7 @@ jobs:
       - name: Verify signed team authorization and branding contracts
         run: |
           node --test tests/signed-team-persistence.test.mjs
+          node --test tests/team-branding-persistence-guard.test.mjs
           node --test tests/team-logo-transparent-background.test.mjs
           node --test tests/team-memberships-confirm-context-route.test.mjs tests/teams-restore-context-route.test.mjs
           node --test tests/coach-signup-bootstrap-route.test.mjs tests/invite-membership-flow.test.mjs

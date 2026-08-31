@@ -7,6 +7,7 @@ const {
   sampleCornerBackground,
   perimeterBackgroundRatio,
   floodEdgeBackground,
+  INSET_SAMPLE_ALPHA,
   INSET_BACKGROUND_PERIMETER_RATIO,
 } = __testUtils;
 
@@ -22,6 +23,15 @@ function paintPixel(data, width, x, y, [r, g, b, a = 255]) {
   data[offset + 3] = a;
 }
 
+function paintCrest(pixels, width) {
+  for (let y = 17; y <= 47; y += 1) {
+    const inset = Math.abs(32 - y) / 2;
+    for (let x = Math.ceil(18 + inset); x <= Math.floor(46 - inset); x += 1) {
+      paintPixel(pixels.data, width, x, y, [5, 43, 79, 255]);
+    }
+  }
+}
+
 test("transparent custom logo with an inset gray plate is detected and flood-cleared without deleting the crest", () => {
   const width = 64;
   const height = 64;
@@ -30,10 +40,7 @@ test("transparent custom logo with an inset gray plate is detected and flood-cle
   for (let y = 5; y <= 58; y += 1) {
     for (let x = 5; x <= 58; x += 1) paintPixel(pixels.data, width, x, y, [204, 207, 210, 255]);
   }
-  for (let y = 17; y <= 47; y += 1) {
-    const inset = Math.abs(32 - y) / 2;
-    for (let x = Math.ceil(18 + inset); x <= Math.floor(46 - inset); x += 1) paintPixel(pixels.data, width, x, y, [5, 43, 79, 255]);
-  }
+  paintCrest(pixels, width);
 
   const bounds = findVisibleBounds(pixels.data, width, height);
   assert.deepEqual(bounds, { minX: 5, minY: 5, maxX: 58, maxY: 58 });
@@ -46,7 +53,31 @@ test("transparent custom logo with an inset gray plate is detected and flood-cle
   assert.equal(pixels.data[(((32 * width) + 32) * 4) + 3], 255, "crest center stays opaque");
 });
 
-test("a normal transparent crest does not look like an opaque rectangular plate", () => {
+test("a semi-transparent gray plate is removed so it cannot reappear on tinted secondary pages", () => {
+  const width = 64;
+  const height = 64;
+  const pixels = imageData(width, height);
+
+  for (let y = 5; y <= 58; y += 1) {
+    for (let x = 5; x <= 58; x += 1) paintPixel(pixels.data, width, x, y, [204, 207, 210, 92]);
+  }
+  paintCrest(pixels, width);
+
+  const bounds = findVisibleBounds(pixels.data, width, height);
+  assert.deepEqual(bounds, { minX: 5, minY: 5, maxX: 58, maxY: 58 });
+  const background = sampleCornerBackground(pixels.data, width, height, bounds, INSET_SAMPLE_ALPHA);
+  assert.ok(background, "low-alpha flat plate should still be sampled");
+  assert.ok(
+    perimeterBackgroundRatio(pixels.data, width, bounds, background, INSET_SAMPLE_ALPHA) >= INSET_BACKGROUND_PERIMETER_RATIO,
+    "low-alpha plate should cover the visible perimeter",
+  );
+
+  floodEdgeBackground(pixels, width, height, background, bounds);
+  assert.equal(pixels.data[(((5 * width) + 5) * 4) + 3], 0, "faded gray plate becomes fully transparent");
+  assert.equal(pixels.data[(((32 * width) + 32) * 4) + 3], 255, "crest center stays opaque");
+});
+
+test("a normal transparent crest does not look like an opaque or faded rectangular plate", () => {
   const width = 64;
   const height = 64;
   const pixels = imageData(width, height);
@@ -57,7 +88,7 @@ test("a normal transparent crest does not look like an opaque rectangular plate"
   }
 
   const bounds = findVisibleBounds(pixels.data, width, height);
-  const candidate = sampleCornerBackground(pixels.data, width, height, bounds);
-  const ratio = candidate ? perimeterBackgroundRatio(pixels.data, width, bounds, candidate) : 0;
+  const candidate = sampleCornerBackground(pixels.data, width, height, bounds, INSET_SAMPLE_ALPHA);
+  const ratio = candidate ? perimeterBackgroundRatio(pixels.data, width, bounds, candidate, INSET_SAMPLE_ALPHA) : 0;
   assert.ok(ratio < INSET_BACKGROUND_PERIMETER_RATIO);
 });

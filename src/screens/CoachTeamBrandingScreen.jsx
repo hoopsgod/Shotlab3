@@ -4,6 +4,7 @@ import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
 import { SecondaryPageIntro, SecondaryPageShell } from "../components/SecondaryPageSystem";
 import { announceFeedback } from "../components/AppFeedbackLayer";
+import { persistCoachBranding } from "../lib/teamBrandingPersistence.js";
 import "../styles/PremiumWorkspace.css";
 import "./CoachTeamBrandingScreen.css";
 
@@ -18,17 +19,22 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
   const handleSave = async (next) => {
     setSaving(true);
     try {
-      await onSave?.(next);
+      const result = await persistCoachBranding({
+        nextBranding: next,
+        appSave: onSave,
+      });
+      setDraftBranding({ ...DEFAULT_BRANDING, ...(result?.branding || next) });
       announceFeedback({
         tone: "success",
         title: "Team identity saved",
-        message: "Your updated colors, logos, and typography are now applied across coach and player experiences.",
+        message: "Your colors, logos, and text size were verified on the team account and will remain after sign-out.",
       });
+      return result;
     } catch (error) {
       announceFeedback({
         tone: "error",
         title: "Branding was not saved",
-        message: error?.message || "ShotLab could not save these changes. Your draft remains available so you can try again.",
+        message: error?.message || "ShotLab could not verify these changes on the team account. Your draft remains available so you can try again.",
         duration: 5200,
       });
       throw error;

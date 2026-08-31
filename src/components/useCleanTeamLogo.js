@@ -5,6 +5,9 @@ const MAX_LOGO_SIZE = 640;
 const CORNER_SAMPLE_SIZE = 8;
 const BACKGROUND_DISTANCE = 54;
 const FEATHER_DISTANCE = 78;
+const VISIBLE_ALPHA = 18;
+const OPAQUE_SAMPLE_ALPHA = 180;
+const INSET_SAMPLE_ALPHA = 18;
 const INSET_BACKGROUND_PERIMETER_RATIO = 0.52;
 
 const colorDistance = (data, offset, bg) => {
@@ -24,7 +27,7 @@ const findVisibleBounds = (data, width, height) => {
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
-      if (data[(((y * width) + x) * 4) + 3] <= 18) continue;
+      if (data[(((y * width) + x) * 4) + 3] <= VISIBLE_ALPHA) continue;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
       maxX = Math.max(maxX, x);
@@ -35,7 +38,13 @@ const findVisibleBounds = (data, width, height) => {
   return maxX >= minX && maxY >= minY ? { minX, minY, maxX, maxY } : null;
 };
 
-const sampleCornerBackground = (data, width, height, bounds = fullBounds(width, height)) => {
+const sampleCornerBackground = (
+  data,
+  width,
+  height,
+  bounds = fullBounds(width, height),
+  minAlpha = OPAQUE_SAMPLE_ALPHA,
+) => {
   if (!bounds) return null;
   const samples = [];
   const boundWidth = Math.max(1, bounds.maxX - bounds.minX + 1);
@@ -53,7 +62,7 @@ const sampleCornerBackground = (data, width, height, bounds = fullBounds(width, 
     for (let y = startY; y <= Math.min(bounds.maxY, startY + sampleHeight - 1); y += 1) {
       for (let x = startX; x <= Math.min(bounds.maxX, startX + sampleWidth - 1); x += 1) {
         const offset = ((y * width) + x) * 4;
-        if (data[offset + 3] > 180) samples.push([data[offset], data[offset + 1], data[offset + 2]]);
+        if (data[offset + 3] > minAlpha) samples.push([data[offset], data[offset + 1], data[offset + 2]]);
       }
     }
   });
@@ -70,14 +79,20 @@ const sampleCornerBackground = (data, width, height, bounds = fullBounds(width, 
   return averageSpread <= 34 ? bg : null;
 };
 
-const perimeterBackgroundRatio = (data, width, bounds, bg) => {
+const perimeterBackgroundRatio = (
+  data,
+  width,
+  bounds,
+  bg,
+  minAlpha = OPAQUE_SAMPLE_ALPHA,
+) => {
   if (!bounds || !bg) return 0;
   let matching = 0;
   let total = 0;
   const inspect = (x, y) => {
     total += 1;
     const offset = ((y * width) + x) * 4;
-    if (data[offset + 3] > 180 && colorDistance(data, offset, bg) <= BACKGROUND_DISTANCE) matching += 1;
+    if (data[offset + 3] > minAlpha && colorDistance(data, offset, bg) <= BACKGROUND_DISTANCE) matching += 1;
   };
 
   for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
@@ -153,7 +168,7 @@ const removeLikelyRectangularFrame = (imageData, width, height) => {
   const edgeTolerance = Math.max(2, Math.round(Math.min(width, height) * 0.018));
 
   for (let seed = 0; seed < visited.length; seed += 1) {
-    if (visited[seed] || data[(seed * 4) + 3] <= 18) continue;
+    if (visited[seed] || data[(seed * 4) + 3] <= VISIBLE_ALPHA) continue;
     let head = 0;
     let tail = 0;
     let minX = width;
@@ -175,7 +190,7 @@ const removeLikelyRectangularFrame = (imageData, width, height) => {
       maxY = Math.max(maxY, y);
       const neighbors = [x > 0 ? index - 1 : -1, x < width - 1 ? index + 1 : -1, y > 0 ? index - width : -1, y < height - 1 ? index + width : -1];
       neighbors.forEach((next) => {
-        if (next < 0 || visited[next] || data[(next * 4) + 3] <= 18) return;
+        if (next < 0 || visited[next] || data[(next * 4) + 3] <= VISIBLE_ALPHA) return;
         visited[next] = 1;
         queue[tail++] = next;
       });
@@ -268,8 +283,23 @@ export const cleanTeamLogoSource = (src) => {
         let floodBounds = fullBounds(width, height);
 
         if (alreadyTransparent && visibleBounds) {
-          const insetCandidate = sampleCornerBackground(imageData.data, width, height, visibleBounds);
-          if (insetCandidate && perimeterBackgroundRatio(imageData.data, width, visibleBounds, insetCandidate) >= INSET_BACKGROUND_PERIMETER_RATIO) {
+          const insetCandidate = sampleCornerBackground(
+            imageData.data,
+            width,
+            height,
+            visibleBounds,
+            INSET_SAMPLE_ALPHA,
+          );
+          if (
+            insetCandidate
+            && perimeterBackgroundRatio(
+              imageData.data,
+              width,
+              visibleBounds,
+              insetCandidate,
+              INSET_SAMPLE_ALPHA,
+            ) >= INSET_BACKGROUND_PERIMETER_RATIO
+          ) {
             background = insetCandidate;
             floodBounds = visibleBounds;
           }
@@ -303,6 +333,7 @@ export const __testUtils = {
   perimeterBackgroundRatio,
   floodEdgeBackground,
   hasMeaningfulTransparency,
+  INSET_SAMPLE_ALPHA,
   INSET_BACKGROUND_PERIMETER_RATIO,
 };
 
