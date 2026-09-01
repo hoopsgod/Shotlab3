@@ -133,7 +133,7 @@ test("custom team identity stays dynamic and user-controlled",()=>{
   assert.match(logoSource,/sampledCorners/);
   assert.match(logoSource,/trimTransparentEdges/);
   assert.match(brandingForm,/cleanTeamLogoSource/);
-  assert.match(brandingForm,/transparent PNG or SVG/);
+  assert.match(brandingForm,/Upload PNG or SVG[\s\S]*transparent PNG/);
   const heroImageRule=ruleBlock(titleCss,'.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
   assert.match(heroImageRule,/object-fit:contain/);
 });
