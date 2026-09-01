@@ -126,7 +126,7 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
       handleChange(FILE_TO_FIELD_MAP[kind], transparentPng);
       setUploadError("");
     } catch {
-      setUploadError("This logo could not be prepared. Try another image or use the logo URL field.");
+      setUploadError("Could not prepare this logo. Try another image or enter a logo URL.");
     } finally {
       setCleaning(false);
     }
@@ -142,7 +142,7 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
       setValues((previous) => ({ ...previous, logoUrl: full, logoMarkUrl: mark }));
       setUploadError("");
     } catch {
-      setUploadError("The current logo URL could not be cleaned. Uploading the file directly usually works better.");
+      setUploadError("Could not clean this logo URL. Upload the file instead.");
     } finally {
       setCleaning(false);
     }
@@ -164,9 +164,6 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
         textOnPrimary: safePalette.textOnPrimary,
       }));
     } catch (error) {
-      // Keep the real safe application/API failure visible on-device. The prior
-      // generic alert erased the only useful evidence from production Safari and
-      // made distinct persistence failures look identical.
       const message = String(error?.message || "").trim();
       setUploadError(message || "Team branding could not be saved. Your changes are still here; try again.");
     } finally {
@@ -232,7 +229,7 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
       <section className="team-branding-form__section">
         <SectionHeading
           title="Team logos"
-          description="Upload transparent PNG or SVG files when possible. ShotLab automatically removes simple flat backgrounds and saves the cleaned result as a PNG."
+          description="Upload PNG or SVG when possible. ShotLab removes simple flat backgrounds and saves a transparent PNG."
         />
         <div className="team-branding-form__field-list">
           {LOGO_FIELDS.map((field) => (
