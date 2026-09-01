@@ -1,57 +1,56 @@
-# ShotLab Phase 1 Handoff
+# ShotLab Mobile Phase Handoff
 
-## Permanent boundary for this phase series
+## Permanent mobile boundary
 
-- **All Phase 1 changes, tests, evidence, and certification in this phase series are mobile-only.**
+- **All work in this phase series is mobile-only.**
 - Desktop redesign, desktop visual certification, desktop-specific enhancements, and expansion of desktop scope are excluded.
-- Shared code may be touched only when necessary to protect the mobile contract and must not redesign desktop behavior.
-- Product/CSS behavior changes remain **not permitted** in Phase 1C.
+- Shared code may be touched only when necessary to protect or simplify the mobile contract and must not redesign desktop behavior.
 
-## Current review boundary
+## Frozen Phase 1 production baseline
 
-- Subphase: **Phase 1C — mobile focused visual, console, and critical-request regression coverage**
-- Status: committed mobile visual baselines are in the PR; final exact-head certification is the remaining gate.
-- Branch: `agent/phase1c-visual-runtime-guardrails`
+- Phase 1A PR #1519 merged; mobile geometry, one-pixel rail, horizontal gesture lock, and controlled overflow negative proof accepted.
+- Phase 1B PR #1521 merged; deterministic Demo/registered mobile parity accepted.
+- Phase 1C PR #1522 merged.
+- Final Phase 1C certified PR head: `ff303aaa69b855d30ffbac69ac5dd919a8f7423c`.
+- Production merge commit / Phase 2 base: `63a2ee51f37f94c30d0390b7b2f48a3b829de550`.
+- Certified PR head and production merge commit share Git tree `5a54f540f6d60bd61040e27998dbe97665e17d21`.
+- Exact production Cloudflare deployment for the merge commit: `https://8435af01.shotlab3.pages.dev`.
+- Cloudflare Pages check for `63a2ee51...`: success.
+- Post-merge `production-acceptance` check on `63a2ee51...`: success, including 4 mobile-Chromium live production tests.
+- Post-merge `live-preview-smoke` check on `63a2ee51...`: success.
+- Phase 1C final exact-head run passed 13/13 focused mobile visual/runtime tests, 6/6 Phase 1B mobile parity tests, and 20 executable Phase 1A mobile geometry tests; the controlled negative fixture remained intentionally skipped in the inherited rerun.
+
+## Current work
+
+- Phase: **Phase 2 — mobile CSS/layout authority cleanup**
+- Branch: `agent/phase2-mobile-css-authority-cleanup`
 - Base branch: `march-3-reset-85393dd`
-- Phase 1C base SHA: `ab5c449ce0334d863dbd6fcc69ca16946f125abe`
-- Authoritative candidate SHA: use the current PR #1522 head and confirm it matches `artifacts/phase1c/exact-head-sha.txt`; do not certify an older SHA.
+- Base SHA: `63a2ee51f37f94c30d0390b7b2f48a3b829de550`
+- Goal: simplify and consolidate the mobile width/margin/transform/viewport/overflow authority that can cause Demo/registered layout drift, while preserving the accepted Phase 1 mobile appearance and behavior.
 
-## Accepted Phase 1A baseline
+## Phase 2 rules
 
-- PR #1519 merged at exact head `051e1845189ec54330eb3695329c7f224d4b9f94`.
-- Merge commit: `d7b5086e8b3f47dbd2f6d330f889f2973ad01130`.
-- Mobile Chromium/WebKit geometry matrix, one-pixel rail contract, horizontal gesture lock, and deliberate-overflow negative proof passed before merge.
+1. Do not redesign the app or intentionally change the accepted mobile appearance.
+2. Do not add features or alter data/auth/product semantics.
+3. Do not expand into desktop cleanup.
+4. Start from the mobile axis/centering authority and only expand when evidence shows a competing rule.
+5. Prefer deleting or consolidating obsolete/duplicate mobile declarations over adding another override layer.
+6. Preserve Demo/registered shared mobile layout authority.
+7. After each meaningful cleanup slice, re-run the relevant Phase 1A/1B/1C mobile guardrails before proceeding.
+8. Do not update committed Phase 1C visual baselines merely to make cleanup pass; visual drift requires investigation.
+9. Keep Phase 2 changes small and reviewable; no broad CSS rewrite.
+10. Do not merge a Phase 2 PR without explicit authorization.
 
-## Accepted Phase 1B baseline
+## Immediate Phase 2 task
 
-- PR #1521 merged at exact head `d8f831b6bb77b06b534a7c18abe418203ce949a6`.
-- Merge commit / Phase 1C base: `ab5c449ce0334d863dbd6fcc69ca16946f125abe`.
-- Mobile Chromium/WebKit deterministic Demo/registered state parity passed.
-- Inherited Phase 1A mobile Chromium regression rerun passed.
-- Exact-head Cloudflare preview before merge: `https://19569d86.shotlab3.pages.dev`.
-- No application source, CSS, layout, persistence, auth, or product behavior changes were introduced by Phase 1B.
+Audit the mobile CSS authority for competing declarations affecting:
 
-## Phase 1C mobile guardrails
+- page/root width and max-width;
+- horizontal margins and centering;
+- transforms/translateX;
+- overflow-x and overscroll behavior;
+- viewport-sized widths (`100vw`, `100dvw`, etc.);
+- shared Coach/Player authenticated shells;
+- Demo versus registered selectors or late overrides.
 
-- Committed Playwright visual baselines cover mobile login, Coach Mission Control Demo/registered empty state, Coach Players, Coach Events, Player Home, Player Progress, hostile branding/long names, and 320/430 shared-shell edges.
-- The focused matrix uses mobile viewports at 320px, 390px, and 430px; inherited Phase 1A also covers 375px.
-- Every focused app surface enforces mobile viewport containment and the accepted Phase 1A geometry/centering contract.
-- Runtime guard fails on uncaught page exceptions, console errors, failed critical requests, and critical API responses >= 400.
-- Critical request classification covers auth/team restore, roster/player, events, assignments, leaderboards, progress/score/shot data, season archives, and relevant Supabase auth/data traffic.
-- Fixtures are credential-free and reuse the accepted Phase 1B deterministic state model.
-- Motion, time, fonts, images, caret, and scroll position are stabilized; mobile layout regions are not masked.
-- The 13 baseline PNGs were generated only after Phase 1C, inherited Phase 1B mobile parity, and inherited Phase 1A mobile geometry all passed on the bootstrap head.
-- Final workflow is read-only and compares against committed baselines; it cannot silently update them.
-
-## Final validation gate
-
-Before Phase 1C can be accepted:
-
-1. Run Phase 1C normally against the committed mobile baselines on the final exact head.
-2. Re-run accepted Phase 1B mobile parity and Phase 1A mobile Chromium geometry on that same exact head.
-3. Inspect the fresh mobile screenshot artifact set manually; a green comparison alone is insufficient.
-4. Verify zero unexpected console errors, page exceptions, failed critical requests, or critical HTTP failures.
-5. Verify the newest Cloudflare Pages deployment maps to the final exact Phase 1C head.
-6. Keep PR #1522 unmerged until explicit merge authorization.
-
-Do not begin Phase 2 from this branch.
+Make only the smallest evidence-backed cleanup that removes duplicate/obsolete authority while keeping Phase 1A/1B/1C green.
