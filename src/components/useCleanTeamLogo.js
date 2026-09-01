@@ -23,16 +23,21 @@ const findVisibleBounds = (data, width, height, minAlpha = VISIBLE_ALPHA) => {
   let minY = height;
   let maxX = -1;
   let maxY = -1;
+  let transparent = 0;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
-      if (data[(((y * width) + x) * 4) + 3] <= minAlpha) continue;
+      const alpha = data[(((y * width) + x) * 4) + 3];
+      if (alpha < 236) transparent += 1;
+      if (alpha <= minAlpha) continue;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
       maxX = Math.max(maxX, x);
       maxY = Math.max(maxY, y);
     }
   }
-  return maxX >= minX && maxY >= minY ? { minX, minY, maxX, maxY } : null;
+  return maxX >= minX && maxY >= minY
+    ? { minX, minY, maxX, maxY, transparent: transparent / (width * height) > 0.018 }
+    : null;
 };
 
 const sampleCornerBackground = (
@@ -43,8 +48,6 @@ const sampleCornerBackground = (
   minAlpha = OPAQUE_SAMPLE_ALPHA,
 ) => {
   if (!bounds) return null;
-  const samples = [];
-  let sampledCorners = 0;
   const sampleWidth = Math.min(CORNER_SAMPLE_SIZE, bounds.maxX - bounds.minX + 1);
   const sampleHeight = Math.min(CORNER_SAMPLE_SIZE, bounds.maxY - bounds.minY + 1);
   const corners = [
@@ -53,42 +56,42 @@ const sampleCornerBackground = (
     [bounds.minX, bounds.maxY - sampleHeight + 1],
     [bounds.maxX - sampleWidth + 1, bounds.maxY - sampleHeight + 1],
   ];
+  let count = 0;
+  let sampledCorners = 0;
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+  let base = null;
+  let spread = 0;
 
   corners.forEach(([startX, startY]) => {
     let sampled = false;
     for (let y = startY; y < startY + sampleHeight; y += 1) {
       for (let x = startX; x < startX + sampleWidth; x += 1) {
         const offset = ((y * width) + x) * 4;
-        if (data[offset + 3] > minAlpha) {
-          samples.push([data[offset], data[offset + 1], data[offset + 2]]);
-          sampled = true;
-        }
+        if (data[offset + 3] <= minAlpha) continue;
+        const r = data[offset];
+        const g = data[offset + 1];
+        const b = data[offset + 2];
+        if (!base) base = [r, g, b];
+        spread = Math.max(spread, Math.abs(r - base[0]) + Math.abs(g - base[1]) + Math.abs(b - base[2]));
+        red += r;
+        green += g;
+        blue += b;
+        count += 1;
+        sampled = true;
       }
     }
     if (sampled) sampledCorners += 1;
   });
 
-  if (!samples.length) return null;
-  const totals = samples.reduce((sum, sample) => [sum[0] + sample[0], sum[1] + sample[1], sum[2] + sample[2]], [0, 0, 0]);
-  const bg = { r: totals[0] / samples.length, g: totals[1] / samples.length, b: totals[2] / samples.length, sampledCorners };
-  const averageSpread = samples.reduce((sum, sample) => {
-    const dr = sample[0] - bg.r;
-    const dg = sample[1] - bg.g;
-    const db = sample[2] - bg.b;
-    return sum + Math.sqrt((dr * dr) + (dg * dg) + (db * db));
-  }, 0) / samples.length;
-  return averageSpread <= 34 ? bg : null;
-};
-
-const hasMeaningfulTransparency = (data) => {
-  let transparent = 0;
-  const pixels = data.length / 4;
-  for (let offset = 3; offset < data.length; offset += 4) if (data[offset] < 236) transparent += 1;
-  return transparent / Math.max(1, pixels) > 0.018;
+  return count && spread <= 75
+    ? { r: red / count, g: green / count, b: blue / count, sampledCorners }
+    : null;
 };
 
 const floodEdgeBackground = (imageData, width, height, bg, bounds = fullBounds(width, height)) => {
-  if (!bg || !bounds) return new Uint8Array(width * height);
+  if (!bg || !bounds) return;
   const { data } = imageData;
   const visited = new Uint8Array(width * height);
   const queue = new Int32Array(width * height);
@@ -110,7 +113,6 @@ const floodEdgeBackground = (imageData, width, height, bg, bounds = fullBounds(w
     enqueue((y * width) + bounds.minX);
     enqueue((y * width) + bounds.maxX);
   }
-
   while (head < tail) {
     const index = queue[head++];
     const x = index % width;
@@ -121,11 +123,9 @@ const floodEdgeBackground = (imageData, width, height, bg, bounds = fullBounds(w
     if (y < bounds.maxY) enqueue(index + width);
   }
   for (let index = 0; index < visited.length; index += 1) if (visited[index]) data[(index * 4) + 3] = 0;
-  return visited;
 };
 
 const featherTransparentBoundary = (imageData, width, height, bg) => {
-  if (!bg) return;
   const { data } = imageData;
   for (let index = 0; index < width * height; index += 1) {
     const offset = index * 4;
@@ -159,7 +159,6 @@ const trimTransparentEdges = (canvas, imageData) => {
 export const cleanTeamLogoSource = (src) => {
   if (!src || typeof document === "undefined" || typeof Image === "undefined") return Promise.resolve(src);
   if (logoCache.has(src)) return Promise.resolve(logoCache.get(src));
-
   return new Promise((resolve) => {
     const finish = (result) => {
       const safeResult = result || src;
@@ -181,8 +180,8 @@ export const cleanTeamLogoSource = (src) => {
         if (!context) return finish(src);
         context.drawImage(image, 0, 0, width, height);
         const imageData = context.getImageData(0, 0, width, height);
-        const alreadyTransparent = hasMeaningfulTransparency(imageData.data);
         const visibleBounds = findVisibleBounds(imageData.data, width, height);
+        const alreadyTransparent = visibleBounds?.transparent === true;
         let floodBounds = fullBounds(width, height);
         let background;
 
@@ -195,7 +194,6 @@ export const cleanTeamLogoSource = (src) => {
         } else {
           background = sampleCornerBackground(imageData.data, width, height);
         }
-
         if (background) {
           floodEdgeBackground(imageData, width, height, background, floodBounds);
           featherTransparentBoundary(imageData, width, height, background);
@@ -212,13 +210,7 @@ export const cleanTeamLogoSource = (src) => {
   });
 };
 
-export const __testUtils = {
-  findVisibleBounds,
-  sampleCornerBackground,
-  floodEdgeBackground,
-  hasMeaningfulTransparency,
-  INSET_SAMPLE_ALPHA,
-};
+export const __testUtils = { findVisibleBounds, sampleCornerBackground, floodEdgeBackground, INSET_SAMPLE_ALPHA };
 
 export default function useCleanTeamLogo(src) {
   const [cleaned, setCleaned] = useState(src);
