@@ -47,46 +47,32 @@ const sampleCornerBackground = (
   minAlpha = OPAQUE_SAMPLE_ALPHA,
 ) => {
   if (!bounds) return null;
-  const sampleWidth = Math.min(CORNER_SAMPLE_SIZE, bounds.maxX - bounds.minX + 1);
-  const sampleHeight = Math.min(CORNER_SAMPLE_SIZE, bounds.maxY - bounds.minY + 1);
+  const w = Math.min(CORNER_SAMPLE_SIZE, bounds.maxX - bounds.minX + 1);
+  const h = Math.min(CORNER_SAMPLE_SIZE, bounds.maxY - bounds.minY + 1);
   const corners = [
     [bounds.minX, bounds.minY],
-    [bounds.maxX - sampleWidth + 1, bounds.minY],
-    [bounds.minX, bounds.maxY - sampleHeight + 1],
-    [bounds.maxX - sampleWidth + 1, bounds.maxY - sampleHeight + 1],
+    [bounds.maxX - w + 1, bounds.minY],
+    [bounds.minX, bounds.maxY - h + 1],
+    [bounds.maxX - w + 1, bounds.maxY - h + 1],
   ];
-  let count = 0;
-  let sampledCorners = 0;
-  let red = 0;
-  let green = 0;
-  let blue = 0;
-  let base = null;
-  let spread = 0;
-
-  corners.forEach(([startX, startY]) => {
-    let sampled = false;
-    for (let y = startY; y < startY + sampleHeight; y += 1) {
-      for (let x = startX; x < startX + sampleWidth; x += 1) {
+  const samples = [];
+  for (const [startX, startY] of corners) {
+    let found = null;
+    for (let y = startY; y < startY + h && !found; y += 1) {
+      for (let x = startX; x < startX + w; x += 1) {
         const offset = ((y * width) + x) * 4;
-        if (data[offset + 3] <= minAlpha) continue;
-        const r = data[offset];
-        const g = data[offset + 1];
-        const b = data[offset + 2];
-        if (!base) base = [r, g, b];
-        spread = Math.max(spread, Math.abs(r - base[0]) + Math.abs(g - base[1]) + Math.abs(b - base[2]));
-        red += r;
-        green += g;
-        blue += b;
-        count += 1;
-        sampled = true;
+        if (data[offset + 3] > minAlpha) {
+          found = [data[offset], data[offset + 1], data[offset + 2]];
+          break;
+        }
       }
     }
-    if (sampled) sampledCorners += 1;
-  });
-
-  return count && spread <= 75
-    ? { r: red / count, g: green / count, b: blue / count, sampledCorners }
-    : null;
+    if (found) samples.push(found);
+  }
+  if (!samples.length) return null;
+  const [r, g, b] = samples[0];
+  if (samples.some(([red, green, blue]) => Math.abs(red - r) + Math.abs(green - g) + Math.abs(blue - b) > 75)) return null;
+  return { r, g, b, sampledCorners: samples.length };
 };
 
 const floodEdgeBackground = (imageData, width, height, bg, bounds = fullBounds(width, height)) => {
@@ -162,11 +148,10 @@ export const cleanTeamLogoSource = (src) => {
         context.drawImage(image, 0, 0, width, height);
         const imageData = context.getImageData(0, 0, width, height);
         const visibleBounds = findVisibleBounds(imageData.data, width, height);
-        const alreadyTransparent = visibleBounds?.transparent === true;
         let floodBounds = fullBounds(width, height);
         let background;
 
-        if (alreadyTransparent && visibleBounds) {
+        if (visibleBounds?.transparent) {
           const candidate = sampleCornerBackground(imageData.data, width, height, visibleBounds, INSET_SAMPLE_ALPHA);
           if (candidate?.sampledCorners >= 3) {
             background = candidate;
