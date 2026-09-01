@@ -1,10 +1,10 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
-const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
+const identity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
 const teamIdFor = (row) => clean(row?.id || row?.teamId || row?.team_id);
 
-function parseStored(storage, key, fallback) {
+function stored(storage, key, fallback) {
   try {
     const raw = storage?.getItem?.(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -14,26 +14,25 @@ function parseStored(storage, key, fallback) {
 }
 
 function readContext(storage = globalThis?.localStorage) {
-  const rawSession = parseStored(storage, "sl:session", null);
-  const session = Array.isArray(rawSession) ? rawSession[0] : rawSession;
-  const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
-  const players = parseStored(storage, "sl:players", []);
-  const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
-  const teams = parseStored(storage, "sl:teams", []);
-  const soleTeam = Array.isArray(teams) && teams.length === 1 ? teams[0] : null;
-  const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || teamIdFor(soleTeam));
+  const raw = stored(storage, "sl:session", null);
+  const session = Array.isArray(raw) ? raw[0] : raw;
+  const requester = identity(session?.email || session?.userEmail || session?.user_id);
+  const players = stored(storage, "sl:players", []);
+  const actor = (Array.isArray(players) ? players : []).find((row) => identity(row?.email) === requester);
+  const teams = stored(storage, "sl:teams", []);
+  const sole = Array.isArray(teams) && teams.length === 1 ? teams[0] : null;
   return {
     requester,
-    teamId,
-    role: normalizeIdentity(session?.role || actor?.role || (soleTeam ? "coach" : "")),
+    teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || teamIdFor(sole)),
+    role: identity(session?.role || actor?.role || (sole ? "coach" : "")),
   };
 }
 
-async function readJson(response) {
+async function json(response) {
   try { return await response.json(); } catch { return {}; }
 }
 
-function requestError(body, response, fallback) {
+function failure(body, response, fallback) {
   const error = new Error(String(body?.error || fallback));
   error.code = String(body?.error || fallback);
   error.status = Number(response?.status || 0);
@@ -41,27 +40,16 @@ function requestError(body, response, fallback) {
   return error;
 }
 
-export function createTeamPersistenceService({
-  fetchImpl = globalThis?.fetch,
-  storage = globalThis?.localStorage,
-} = {}) {
-  const headers = (extra = {}) => {
-    const context = readContext(storage);
-    return buildApiIdentityHeaders({ requester: context.requester, storage, headers: extra });
-  };
+export function createTeamPersistenceService({ fetchImpl = globalThis?.fetch, storage = globalThis?.localStorage } = {}) {
+  const headers = (extra = {}) => buildApiIdentityHeaders({ requester: readContext(storage).requester, storage, headers: extra });
 
   const loadTeams = async ({ teamId = "" } = {}) => {
-    if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
-    const activeTeamId = clean(teamId || readContext(storage).teamId);
-    const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
-    const response = await fetchImpl(`/v1/teams${query}`, { method: "GET", headers: headers() });
-    const body = await readJson(response);
-    if (!response?.ok || body?.error) throw requestError(body, response, "team_load_failed");
-    return {
-      ok: true,
-      storageMode: String(body?.storage_mode || "signed_api"),
-      rows: Array.isArray(body?.teams) ? body.teams : [],
-    };
+    if (typeof fetchImpl !== "function") return { rows: [] };
+    const active = clean(teamId || readContext(storage).teamId);
+    const response = await fetchImpl(`/v1/teams${active ? `?team_id=${encodeURIComponent(active)}` : ""}`, { method: "GET", headers: headers() });
+    const body = await json(response);
+    if (!response?.ok || body?.error) throw failure(body, response, "team_load_failed");
+    return { rows: Array.isArray(body?.teams) ? body.teams : [] };
   };
 
   const syncTeams = async (teams = []) => {
@@ -71,14 +59,9 @@ export function createTeamPersistenceService({
       headers: headers({ "Content-Type": "application/json" }),
       body: JSON.stringify({ teams: Array.isArray(teams) ? teams : [] }),
     });
-    const body = await readJson(response);
-    if (!response?.ok || body?.error) throw requestError(body, response, "team_sync_failed");
-    return {
-      ok: true,
-      storageMode: String(body?.storage_mode || "signed_api"),
-      rows: Array.isArray(body?.teams) ? body.teams : [],
-      ignoredCount: Number(body?.ignored_count || 0),
-    };
+    const body = await json(response);
+    if (!response?.ok || body?.error) throw failure(body, response, "team_sync_failed");
+    return { rows: Array.isArray(body?.teams) ? body.teams : [] };
   };
 
   return { loadTeams, syncTeams, readContext: () => readContext(storage) };
