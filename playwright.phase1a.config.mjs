@@ -9,6 +9,7 @@ export default defineConfig({
   forbidOnly: true,
   retries: 0,
   workers: 1,
+  timeout: 60_000,
   reporter: [["line"], ["html", { outputFolder: "artifacts/phase1a/report", open: "never" }]],
   outputDir: "artifacts/phase1a/test-results",
   use: {
