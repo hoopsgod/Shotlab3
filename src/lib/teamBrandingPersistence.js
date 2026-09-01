@@ -48,6 +48,23 @@ function cacheAuthoritativeTeam(storage, teamId, baseTeam, remoteTeam) {
   storage.setItem("sl:teams", JSON.stringify([localTeam]));
 }
 
+function inferLocalTeamId(localRows = [], requester = "") {
+  const rows = Array.isArray(localRows) ? localRows.filter((row) => teamIdFor(row)) : [];
+  const normalizedRequester = clean(requester).toLowerCase();
+  const owned = rows.find((row) => clean(row?.ownerCoachId || row?.owner_coach_id).toLowerCase() === normalizedRequester);
+  if (owned) return teamIdFor(owned);
+  const ids = [...new Set(rows.map(teamIdFor).filter(Boolean))];
+  return ids.length === 1 ? ids[0] : "";
+}
+
+function inferRemoteTeamId(remoteRows = [], localRows = []) {
+  const remoteIds = [...new Set((Array.isArray(remoteRows) ? remoteRows : []).map(teamIdFor).filter(Boolean))];
+  if (remoteIds.length === 1) return remoteIds[0];
+  const localIds = new Set((Array.isArray(localRows) ? localRows : []).map(teamIdFor).filter(Boolean));
+  const matches = remoteIds.filter((id) => localIds.has(id));
+  return matches.length === 1 ? matches[0] : "";
+}
+
 export async function persistCoachBranding({
   nextBranding,
   appSave,
@@ -70,24 +87,49 @@ export async function persistCoachBranding({
   const service = serviceFactory({ fetchImpl, storage });
   const context = service?.readContext?.() || {};
   const requester = clean(context.requester).toLowerCase();
-  const teamId = clean(context.teamId);
-  if (!requester || !teamId) {
-    throw new Error("Coach team context is unavailable. Sign in again and retry.");
+  if (!requester) {
+    throw new Error("Coach sign-in context is unavailable. Sign in again and retry.");
   }
 
-  const localRows = readJson(storage, "sl:teams", []);
-  const localTeam = (Array.isArray(localRows) ? localRows : []).find((row) => teamIdFor(row) === teamId) || null;
-
+  const localRowsRaw = readJson(storage, "sl:teams", []);
+  const localRows = Array.isArray(localRowsRaw) ? localRowsRaw : [];
+  let teamId = clean(context.teamId) || inferLocalTeamId(localRows, requester);
   let loadedRows = [];
   let loadError = null;
+
   try {
-    const loaded = await service.loadTeams({ teamId });
+    const loaded = await service.loadTeams(teamId ? { teamId } : {});
     loadedRows = Array.isArray(loaded?.rows) ? loaded.rows : [];
   } catch (error) {
     loadError = error;
   }
 
+  // A real legacy-coach shape can have sl:session={email} and a coach row in
+  // sl:players whose team_id is null. In that state, the signed /v1/teams read is
+  // the reliable authority. Resolve one unambiguous team from that response
+  // instead of failing before the POST is ever attempted.
+  if (!teamId) teamId = inferRemoteTeamId(loadedRows, localRows);
+  if (!teamId) {
+    if (loadError) throw loadError;
+    throw new Error("The active coach team could not be resolved. Sign in again and retry.");
+  }
+
+  const localTeam = localRows.find((row) => teamIdFor(row) === teamId) || null;
   let remoteTeam = loadedRows.find((row) => teamIdFor(row) === teamId) || null;
+
+  // If context resolution selected a team after the broad signed read but that
+  // row was not present (for example after a cache transition), do one exact
+  // authoritative read before attempting a write.
+  if (!remoteTeam && !loadError) {
+    try {
+      const exact = await service.loadTeams({ teamId });
+      const exactRows = Array.isArray(exact?.rows) ? exact.rows : [];
+      remoteTeam = exactRows.find((row) => teamIdFor(row) === teamId) || null;
+    } catch (error) {
+      loadError = error;
+    }
+  }
+
   if (loadError && !remoteTeam) throw loadError;
 
   // The signed API row is authoritative for immutable ownership, creation, and
@@ -134,4 +176,6 @@ export const __testUtils = {
   readJson,
   teamIdFor,
   toLocalTeam,
+  inferLocalTeamId,
+  inferRemoteTeamId,
 };
