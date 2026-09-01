@@ -146,6 +146,9 @@ export async function onRequestPost({ request, env }) {
 
       if (isSelf) {
         if (priorRole && priorRole !== row.role) return Response.json({ error: "player_role_conflict" }, { status: 409 });
+        const sessionTeamId = cleanText(auth?.session?.teamId || auth?.session?.team_id, 180);
+        if (!row.teamId && priorTeamId) row.teamId = priorTeamId;
+        if (!row.teamId && sessionTeamId && readableTeamIds.has(sessionTeamId)) row.teamId = sessionTeamId;
         if (row.teamId && !readableTeamIds.has(row.teamId)) return Response.json({ error: "team_assignment_forbidden" }, { status: 403 });
         const sessionRole = normalizeIdentity(auth?.session?.role);
         if (!priorRole && ["player", "coach", "assistant_coach"].includes(sessionRole)) row.role = sessionRole;
