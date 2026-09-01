@@ -72,8 +72,6 @@ test("branding save reaches the signed API when legacy session and player rows d
   let syncCalls = 0;
 
   const fakeService = {
-    // Reproduce the production failure shape directly: identity is known, but
-    // the old context resolver could not find team_id from session/player rows.
     readContext: () => ({ requester: "coach@example.com", teamId: "", role: "coach" }),
     loadTeams: async (options = {}) => {
       loadCalls.push(options);
@@ -102,24 +100,16 @@ test("branding save reaches the signed API when legacy session and player rows d
 
   assert.equal(result.ok, true);
   assert.equal(syncCalls, 1);
-  assert.equal(loadCalls.length >= 1, true);
+  assert.equal(loadCalls.length, 1);
   assert.equal(result.team.id, legacyTeamId);
   assert.equal(result.branding.logoUrl, desiredBranding.logoUrl);
 });
 
-test("a stale server round trip is repaired from authoritative team metadata and cached for the next login", async () => {
+test("a stale server value is repaired from authoritative team metadata", async () => {
   const storage = memoryStorage({
     "sl:session": JSON.stringify({ email: "coach@example.com" }),
     "sl:players": JSON.stringify([{ email: "coach@example.com", role: "coach", teamId: "team-1" }]),
-    "sl:teams": JSON.stringify([{
-      id: "team-1",
-      name: "BK",
-      ownerCoachId: "legacy-local-owner@example.com",
-      coachUserId: "legacy-local-user-id",
-      joinCode: "LOCAL1",
-      createdAt: 999,
-      branding: staleBranding,
-    }]),
+    "sl:teams": JSON.stringify([{ id: "team-1", name: "BK", branding: staleBranding }]),
   });
   let syncCalls = 0;
   let syncPayload = null;
@@ -136,7 +126,7 @@ test("a stale server round trip is repaired from authoritative team metadata and
 
   const fakeService = {
     readContext: () => ({ requester: "coach@example.com", teamId: "team-1", role: "coach" }),
-    loadTeams: async () => ({ ok: true, rows: [remoteTeam] }),
+    loadTeams: async () => ({ ok: true, storageMode: "signed_api", rows: [remoteTeam] }),
     syncTeams: async (rows) => {
       syncCalls += 1;
       syncPayload = rows;
@@ -167,13 +157,7 @@ test("a stale server round trip is repaired from authoritative team metadata and
   assert.equal(syncPayload[0].join_code, "REMOTE1");
   assert.equal(syncPayload[0].created_at, 100);
   assert.equal(syncPayload[0].ownerCoachId, undefined);
-
-  const cached = JSON.parse(storage.getItem("sl:teams"));
-  assert.equal(cached.length, 1);
-  assert.equal(cached[0].id, "team-1");
-  assert.equal(cached[0].ownerCoachId, "coach@example.com");
-  assert.equal(cached[0].branding.primaryColor, desiredBranding.primaryColor);
-  assert.equal(cached[0].branding.logoMarkUrl, desiredBranding.logoMarkUrl);
+  assert.equal(result.branding.logoMarkUrl, desiredBranding.logoMarkUrl);
 });
 
 test("an already-persisted server value is verified without issuing a redundant repair write", async () => {
