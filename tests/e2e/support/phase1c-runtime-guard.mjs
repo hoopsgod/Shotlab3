@@ -6,10 +6,19 @@ import { collectMobileGeometry, expectMobileGeometry } from './mobile-geometry-c
 const OUTPUT_ROOT = path.resolve(process.cwd(), 'artifacts/phase1c');
 const SCREENSHOT_DIR = path.join(OUTPUT_ROOT, 'screenshots');
 const RUNTIME_DIR = path.join(OUTPUT_ROOT, 'runtime');
+const EXACT_HEAD_PATH = path.join(OUTPUT_ROOT, 'exact-head-sha.txt');
 const FIXED_NOW = Date.parse('2026-09-01T12:00:00-04:00');
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 fs.mkdirSync(RUNTIME_DIR, { recursive: true });
+
+function exactHeadSha() {
+  try {
+    const value = fs.readFileSync(EXACT_HEAD_PATH, 'utf8').trim();
+    if (/^[0-9a-f]{40}$/i.test(value)) return value;
+  } catch {}
+  return process.env.PHASE1C_HEAD_SHA || process.env.GITHUB_SHA || 'local-checkout';
+}
 
 function sanitizeUrl(rawUrl) {
   try {
@@ -157,7 +166,7 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
 
   const runtime = guard.snapshot();
   const evidence = {
-    exactHead: process.env.GITHUB_SHA || 'local-checkout',
+    exactHead: exactHeadSha(),
     name,
     containment,
     geometry: geometryEvidence,
