@@ -1,0 +1,68 @@
+name: Phase 1C Focused Visual Runtime Guardrails
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase1c-focused-visual-runtime-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused-visual-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner and Chromium
+        run: |
+          npm install --no-save @playwright/test@1.55.1
+          npx playwright install --with-deps chromium
+
+      - name: Build exact production assets
+        run: npm run build
+
+      - name: Record exact head
+        run: |
+          mkdir -p artifacts/phase1c
+          git rev-parse HEAD > artifacts/phase1c/exact-head-sha.txt
+
+      - name: Run committed Phase 1C mobile visual/runtime guardrails
+        run: npx playwright test --config=playwright.phase1c.config.mjs
+
+      - name: Re-run accepted Phase 1B mobile parity on Chromium
+        run: npx playwright test --config=playwright.phase1b.config.mjs --project=mobile-chromium
+
+      - name: Re-run accepted Phase 1A mobile geometry on Chromium
+        run: npm run test:e2e:phase1a -- --project=mobile-chromium
+
+      - name: Upload Phase 1C mobile evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1c-focused-mobile-visual-runtime-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/phase1c/
+            tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/
+          if-no-files-found: error
+          retention-days: 21
