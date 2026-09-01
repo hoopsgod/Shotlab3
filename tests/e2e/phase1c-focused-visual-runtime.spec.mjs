@@ -80,10 +80,19 @@ const fulfill = (route, body, status = 200) => route.fulfill({
 
 async function installSignedCollectionRoute(page, pattern, fixture, responseFields) {
   await page.route(pattern, async (route) => {
-    const body = { ok: true, storage_mode: 'signed_api', team_id: PHASE1B_TEAM_ID };
-    for (const [field, storageKey] of Object.entries(responseFields)) {
-      body[field] = fixture.storage[storageKey] || [];
+    const method = route.request().method().toUpperCase();
+    let posted = {};
+    if (method !== 'GET') {
+      try { posted = route.request().postDataJSON() || {}; } catch {}
     }
+    const body = { ok: true, storage_mode: 'phase1c_seed', team_id: PHASE1B_TEAM_ID };
+    for (const [field, storageKey] of Object.entries(responseFields)) {
+      const seededRows = fixture.storage[storageKey] || [];
+      body[field] = method === 'GET'
+        ? seededRows
+        : Array.isArray(posted?.[field]) ? posted[field] : seededRows;
+    }
+    if (method === 'DELETE') body.deleted_count = 0;
     await fulfill(route, body);
   });
 }
@@ -102,6 +111,18 @@ async function installPhase1CRoutes(page, fixture) {
   await page.route('**/v1/season-archives**', (route) => fulfill(route, { ok: true, archives: [] }));
   await page.route('**/v1/leaderboards/home-shots**', (route) => fulfill(route, { team_id: PHASE1B_TEAM_ID, scope: 'players', count: 0, leaderboard: [] }));
   await page.route('**/v1/coach/players/provision**', (route) => fulfill(route, { ok: true, invitations: [] }));
+  await page.route('**/v1/coach-follow-ups**', (route) => fulfill(route, {
+    ok: true,
+    storage_mode: 'team_remote',
+    team_id: PHASE1B_TEAM_ID,
+    follow_ups: [],
+  }));
+  await page.route('**/v1/coach/activity/first-results**', (route) => fulfill(route, {
+    ok: true,
+    team_id: PHASE1B_TEAM_ID,
+    count: 0,
+    results: [],
+  }));
   await page.route('**/v1/player-assignments**', (route) => fulfill(route, {
     ok: true,
     storage_mode: 'team_remote',
@@ -134,7 +155,16 @@ async function installPhase1CRoutes(page, fixture) {
     logs: 'sl:sc-logs',
   });
 
-  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => fulfill(route, []));
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
+    const method = route.request().method().toUpperCase();
+    if (method === 'GET') {
+      await fulfill(route, []);
+      return;
+    }
+    let posted = [];
+    try { posted = route.request().postDataJSON() || []; } catch {}
+    await fulfill(route, posted);
+  });
 }
 
 async function replaceDemoCollections(page, fixture) {
