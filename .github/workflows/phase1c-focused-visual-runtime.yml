@@ -24,7 +24,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 2
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -78,7 +77,7 @@ jobs:
           if-no-files-found: error
           retention-days: 21
 
-      - name: Commit exact visual baseline after bootstrap
+      - name: Commit exact mobile visual baselines after bootstrap
         if: steps.phase1c.outputs.generated_baseline == 'true'
         env:
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
@@ -90,7 +89,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/*.png
-          git checkout HEAD^ -- .github/workflows/phase1c-focused-visual-runtime.yml
-          git add .github/workflows/phase1c-focused-visual-runtime.yml
-          git commit -m "Commit Phase 1C visual baselines"
+          git commit -m "Commit Phase 1C mobile visual baselines"
           git push origin "HEAD:${PR_HEAD_REF}"
