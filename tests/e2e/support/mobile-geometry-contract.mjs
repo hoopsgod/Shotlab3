@@ -18,15 +18,6 @@ export const INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST = [{
   rationale: "Keeps every named roster filter reachable without widening the page.",
 }];
 
-async function waitForRequiredGeometryTargets(page, contract, label) {
-  for (const [name, selector] of Object.entries(contract.targets || {})) {
-    await expect(
-      page.locator(selector).first(),
-      `${label} geometry target "${name}" did not become visible: ${selector}`,
-    ).toBeVisible({ timeout: 10_000 });
-  }
-}
-
 export async function collectMobileGeometry(page, contract) {
   return page.evaluate(async ({ contract, allowlist }) => {
     const tolerance = 1;
@@ -34,10 +25,14 @@ export async function collectMobileGeometry(page, contract) {
     const visualLeft = window.visualViewport?.offsetLeft ?? 0;
     const visualWidth = window.visualViewport?.width ?? layoutWidth;
     const visualRight = visualLeft + visualWidth;
+    // Opacity is intentionally not part of geometry visibility. A transitioning
+    // opacity:0 element still owns layout width and can still create overflow.
+    // Excluding it made WebKit snapshots race harmless entrance animations and
+    // also weakened overflow diagnostics.
     const visible = (node) => {
       const style = getComputedStyle(node);
       const rect = node.getBoundingClientRect();
-      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || 1) > 0 && rect.width > 0 && rect.height > 0;
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     };
     const labelFor = (node) => {
       const testId = node.getAttribute("data-testid");
@@ -134,6 +129,19 @@ export async function collectMobileGeometry(page, contract) {
       offenders,
     };
   }, { contract, allowlist: INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST });
+}
+
+async function collectReadyMobileGeometry(page, contract, label) {
+  let report = null;
+  await expect.poll(async () => {
+    report = await collectMobileGeometry(page, contract);
+    return Object.values(report.targets).every(Boolean);
+  }, {
+    message: `${label} required geometry targets must exist in the same snapshot`,
+    timeout: 10_000,
+    intervals: [50, 100, 200, 400],
+  }).toBe(true);
+  return report;
 }
 
 export async function performHorizontalPointerGesture(page, selector, browserName) {
@@ -242,8 +250,7 @@ export function expectMobileGeometry(report, label) {
 }
 
 export async function assertMobileGeometry(page, contract, { label, browserName }) {
-  await waitForRequiredGeometryTargets(page, contract, label);
-  const before = await collectMobileGeometry(page, contract);
+  const before = await collectReadyMobileGeometry(page, contract, `${label} before gesture`);
   expectMobileGeometry(before, `${label} before gesture`);
   const localScrollProof = [];
   for (const selector of contract.localScrollSelectors || []) {
@@ -256,12 +263,12 @@ export async function assertMobileGeometry(page, contract, { label, browserName 
     const localInteraction = await performLocalHorizontalGesture(page, entry.selector, browserName);
     const afterLocal = await owner.evaluate((node) => ({ scrollLeft: node.scrollLeft, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth }));
     expect(afterLocal.scrollLeft, `${label} ${entry.component} did not accept the local horizontal interaction`).toBeGreaterThan(beforeLocal.scrollLeft + MOBILE_GEOMETRY_TOLERANCE);
-    const afterLocalReport = await collectMobileGeometry(page, contract);
+    const afterLocalReport = await collectReadyMobileGeometry(page, contract, `${label} after local ${entry.component} interaction`);
     expectMobileGeometry(afterLocalReport, `${label} after local ${entry.component} interaction`);
     localScrollProof.push({ ...entry, method: localInteraction.method, before: beforeLocal, after: afterLocal, pageScroll: afterLocalReport.scroll });
   }
   await performHorizontalPointerGesture(page, contract.targets.workspace, browserName);
-  const after = await collectMobileGeometry(page, contract);
+  const after = await collectReadyMobileGeometry(page, contract, `${label} after gesture`);
   expectMobileGeometry(after, `${label} after gesture`);
   for (const name of contract.centered || []) {
     const beforeEntry = before.centered[name];
