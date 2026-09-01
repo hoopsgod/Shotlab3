@@ -2,55 +2,52 @@
 
 ## Current review boundary
 
-- Subphase: **Phase 1B — Demo/registered parity and deterministic state fixtures**
-- Status: implementation started from the accepted Phase 1A merge
-- Branch: `agent/phase1b-demo-registered-parity-fixtures`
+- Subphase: **Phase 1C — focused visual, console, and critical-request regression coverage**
+- Status: implementation started from the accepted Phase 1B production merge
+- Branch: `agent/phase1c-visual-runtime-guardrails`
 - Base branch: `march-3-reset-85393dd`
-- Base SHA: `d7b5086e8b3f47dbd2f6d330f889f2973ad01130` (Phase 1A merge commit)
-- Phase 1C: not started; Phase 1B must be accepted first
+- Base SHA: `ab5c449ce0334d863dbd6fcc69ca16946f125abe`
+- Product/CSS behavior changes: **none permitted**
 
 ## Accepted Phase 1A baseline
 
 - PR #1519 merged at exact head `051e1845189ec54330eb3695329c7f224d4b9f94`.
 - Merge commit: `d7b5086e8b3f47dbd2f6d330f889f2973ad01130`.
-- Phase 1A exact-head CI passed production build, Chromium/WebKit mobile geometry matrix, deliberate-overflow negative proof, and evidence upload.
-- Exact-head Cloudflare preview for the accepted Phase 1A head: `https://e30e7eda.shotlab3.pages.dev`.
-- One-pixel mobile geometry contract and the single approved local horizontal scroller remain unchanged.
+- Chromium/WebKit geometry matrix, one-pixel rail contract, horizontal gesture lock, and deliberate-overflow negative proof passed before merge.
 
-## Phase 1B implementation
+## Accepted Phase 1B baseline
 
-- `tests/e2e/support/phase1b-state-fixtures.mjs`: reusable credential-free paired fixtures for Demo and deterministic registered sessions.
-- `tests/e2e/phase1b-state-parity.spec.mjs`: paired Coach/Player layout-authority and geometry verification at 390×844.
-- `playwright.phase1b.config.mjs`: isolated Chromium/WebKit production-preview configuration.
-- `.github/workflows/phase1b-demo-registered-state-parity.yml`: exact-head build, Phase 1B browser matrix, Phase 1A Chromium regression rerun, and paired evidence upload.
-- `package.json`: focused `test:e2e:phase1b` command.
-- No application source, CSS, layout, persistence, auth, or product behavior changes.
+- PR #1521 merged at exact head `d8f831b6bb77b06b534a7c18abe418203ce949a6`.
+- Merge commit / Phase 1C base: `ab5c449ce0334d863dbd6fcc69ca16946f125abe`.
+- Phase 1B Chromium/WebKit deterministic Demo/registered state parity passed.
+- Inherited Phase 1A Chromium regression rerun passed.
+- Exact-head Cloudflare preview before merge: `https://19569d86.shotlab3.pages.dev`.
+- No application source, CSS, layout, persistence, auth, or product behavior changes were introduced by Phase 1B.
 
-## Deterministic state matrix
+## Phase 1C implementation scope
 
-Coach:
-- populated roster/activity state;
-- empty/onboarding state;
-- long team name + unusually wide custom logo + hostile/light brand-color stress state.
+- Deterministic Playwright visual snapshots for login, Coach Mission Control Demo/registered empty state, Coach Players, Coach Events, Player Home, Player Progress, branding stress, and 320/430 shared-shell edges.
+- Fresh screenshot artifacts are written under `artifacts/phase1c/screenshots/` while committed Playwright PNGs provide the regression baseline.
+- Every focused surface also records viewport/geometry and runtime evidence under `artifacts/phase1c/runtime/`.
+- Runtime guard fails on uncaught page exceptions, console errors, failed critical requests, and critical API responses >= 400.
+- Critical request classification covers auth/team restore, roster/player, event, assignment, leaderboard, progress/score/shot, season archive, and relevant Supabase auth/data traffic.
+- Fixtures remain credential-free and reuse the accepted Phase 1B deterministic state model.
+- Motion, time, fonts, images, and scroll position are stabilized for screenshot repeatability; layout regions are not masked.
 
-Player:
-- populated training/activity state;
-- first-use state with zero scores, shot logs, and events;
-- long team name + unusually wide custom logo + hostile/light brand-color stress state.
+## Baseline bootstrap rule
 
-Each state is exercised as a paired Demo and registered session with equivalent visible product data. Account identity is allowed to differ; layout ownership, structure, route geometry, horizontal safety, and presentation authority are not.
+The first Phase 1C CI run may generate the PNG visual baselines from this unchanged accepted product tree and intentionally stop after uploading them. Those exact generated PNGs must then be committed. Subsequent runs compare against the committed visual baseline and fail on material screenshot drift.
 
-## Phase 1B acceptance contract
+## Validation gate
 
-- Demo and registered pairs use the same route shells and layout owners rather than exact-copy matching.
-- Coach routes: Home, Players, Events.
-- Player routes: Home, Progress/Profile.
-- Every protected route must satisfy the inherited Phase 1A mobile geometry contract.
-- Paired screenshots and JSON geometry/ownership evidence are written under `artifacts/phase1b/`.
-- CI runs on every pull request so future non-source changes cannot silently bypass the deterministic parity gate.
-- The Phase 1B workflow re-runs the full Phase 1A Chromium matrix after the state-parity matrix.
-- No live credentials or production user data are used.
+Before Phase 1C can be accepted:
 
-## Next gate
+1. Commit the generated exact-tree visual baseline PNGs.
+2. Re-run Phase 1C normally against a production build.
+3. Re-run accepted Phase 1B parity and Phase 1A Chromium geometry on the same exact head.
+4. Inspect the fresh screenshot artifact set manually; a green snapshot comparison alone is not sufficient.
+5. Verify zero unexpected console errors/page exceptions/critical request failures.
+6. Verify the Cloudflare Pages deployment maps to the final exact Phase 1C head.
+7. Keep the PR unmerged until explicit review/authorization.
 
-Validate syntax/diff integrity, push the single-purpose Phase 1B commit, open one draft PR, and certify the exact PR head through the Phase 1B workflow and its matching Cloudflare Pages preview. Do not begin Phase 1C until Phase 1B is accepted.
+Do not begin Phase 2 from this branch.
