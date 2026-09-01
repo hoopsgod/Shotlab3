@@ -87,7 +87,8 @@ test("team branding errors stay user-facing rather than dumping raw exception te
   const source = fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx", import.meta.url), "utf8");
 
   assert.doesNotMatch(source, /setUploadError\(error\.message/);
-  assert.match(source, /This logo could not be prepared\. Try another image or use the logo URL field\./);
+  assert.doesNotMatch(source, /error\?\.message/);
+  assert.match(source, /Could not prepare this logo\. Try another image or enter a logo URL\./);
   assert.match(source, /Team branding could not be saved\. Your changes are still here; try again\./);
 });
 
