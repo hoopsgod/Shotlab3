@@ -2,6 +2,7 @@ import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
+const teamIdFor = (row) => clean(row?.id || row?.teamId || row?.team_id);
 
 function parseStored(storage, key, fallback) {
   try {
@@ -12,8 +13,6 @@ function parseStored(storage, key, fallback) {
   }
 }
 
-const teamIdFor = (row) => clean(row?.id || row?.teamId || row?.team_id);
-
 function readContext(storage = globalThis?.localStorage) {
   const rawSession = parseStored(storage, "sl:session", null);
   const session = Array.isArray(rawSession) ? rawSession[0] : rawSession;
@@ -21,28 +20,12 @@ function readContext(storage = globalThis?.localStorage) {
   const players = parseStored(storage, "sl:players", []);
   const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
   const teams = parseStored(storage, "sl:teams", []);
-  const teamRows = Array.isArray(teams) ? teams.filter((row) => teamIdFor(row)) : [];
-  const ownedTeam = teamRows.find((row) => normalizeIdentity(row?.ownerCoachId || row?.owner_coach_id) === requester) || null;
-  const uniqueTeamIds = [...new Set(teamRows.map(teamIdFor).filter(Boolean))];
-  const soleTeamId = uniqueTeamIds.length === 1 ? uniqueTeamIds[0] : "";
-
-  // Older registered coach accounts can legitimately have an unassigned row in
-  // sl:players even though their signed team membership is valid. The signed
-  // team hydration still leaves exactly the active team in sl:teams, so use that
-  // as the final context source instead of failing the branding write.
-  const teamId = clean(
-    session?.teamId
-    || session?.team_id
-    || actor?.teamId
-    || actor?.team_id
-    || teamIdFor(ownedTeam)
-    || soleTeamId,
-  );
-
+  const soleTeam = Array.isArray(teams) && teams.length === 1 ? teams[0] : null;
+  const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || teamIdFor(soleTeam));
   return {
     requester,
     teamId,
-    role: normalizeIdentity(session?.role || actor?.role || (ownedTeam ? "coach" : "")),
+    role: normalizeIdentity(session?.role || actor?.role || (soleTeam ? "coach" : "")),
   };
 }
 
@@ -69,8 +52,7 @@ export function createTeamPersistenceService({
 
   const loadTeams = async ({ teamId = "" } = {}) => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
-    const context = readContext(storage);
-    const activeTeamId = clean(teamId || context.teamId);
+    const activeTeamId = clean(teamId || readContext(storage).teamId);
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/teams${query}`, { method: "GET", headers: headers() });
     const body = await readJson(response);
