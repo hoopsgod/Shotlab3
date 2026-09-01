@@ -12,16 +12,37 @@ function parseStored(storage, key, fallback) {
   }
 }
 
+const teamIdFor = (row) => clean(row?.id || row?.teamId || row?.team_id);
+
 function readContext(storage = globalThis?.localStorage) {
   const rawSession = parseStored(storage, "sl:session", null);
   const session = Array.isArray(rawSession) ? rawSession[0] : rawSession;
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
   const players = parseStored(storage, "sl:players", []);
   const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
+  const teams = parseStored(storage, "sl:teams", []);
+  const teamRows = Array.isArray(teams) ? teams.filter((row) => teamIdFor(row)) : [];
+  const ownedTeam = teamRows.find((row) => normalizeIdentity(row?.ownerCoachId || row?.owner_coach_id) === requester) || null;
+  const uniqueTeamIds = [...new Set(teamRows.map(teamIdFor).filter(Boolean))];
+  const soleTeamId = uniqueTeamIds.length === 1 ? uniqueTeamIds[0] : "";
+
+  // Older registered coach accounts can legitimately have an unassigned row in
+  // sl:players even though their signed team membership is valid. The signed
+  // team hydration still leaves exactly the active team in sl:teams, so use that
+  // as the final context source instead of failing the branding write.
+  const teamId = clean(
+    session?.teamId
+    || session?.team_id
+    || actor?.teamId
+    || actor?.team_id
+    || teamIdFor(ownedTeam)
+    || soleTeamId,
+  );
+
   return {
     requester,
-    teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id),
-    role: normalizeIdentity(session?.role || actor?.role),
+    teamId,
+    role: normalizeIdentity(session?.role || actor?.role || (ownedTeam ? "coach" : "")),
   };
 }
 
@@ -81,4 +102,4 @@ export function createTeamPersistenceService({
   return { loadTeams, syncTeams, readContext: () => readContext(storage) };
 }
 
-export const __testUtils = { readContext };
+export const __testUtils = { readContext, teamIdFor };
