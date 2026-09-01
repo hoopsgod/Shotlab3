@@ -204,6 +204,6 @@ test("the save fails closed when the repaired server response still drops the co
       storage,
       serviceFactory: () => fakeService,
     }),
-    /did not survive the server round trip/,
+    /Branding verification failed/,
   );
 });
