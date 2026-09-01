@@ -48,7 +48,7 @@ test("branding workflow reports verified save feedback through the global app la
   assert.doesNotMatch(source, /<AppFeedbackLayer\s*\/>/);
   assert.match(source, /const result = await persistCoachBranding\(\{[\s\S]*nextBranding:\s*next,[\s\S]*appSave:\s*onSave,/);
   assert.match(source, /Team identity saved/);
-  assert.match(source, /verified on the team account and will remain after sign-out/);
+  assert.match(source, /Saved to the team account[\s\S]*remain after sign-out/);
   assert.match(source, /Branding was not saved/);
   assert.match(source, /aria-busy=\{saving\}/);
   assert.match(source, /Saving changes…/);
