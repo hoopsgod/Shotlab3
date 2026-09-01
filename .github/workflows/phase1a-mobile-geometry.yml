@@ -1,0 +1,76 @@
+name: Phase 1A Mobile Geometry Guardrails
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/e2e/phase1a-mobile-geometry.spec.mjs"
+      - "tests/e2e/support/mobile-geometry-contract.mjs"
+      - "playwright.phase1a.config.mjs"
+      - ".github/workflows/phase1a-mobile-geometry.yml"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase1a-mobile-geometry-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner and browsers
+        run: |
+          npm install --no-save @playwright/test@1.55.1
+          npx playwright install --with-deps chromium webkit
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Run Phase 1A geometry matrix
+        run: npx playwright test --config=playwright.phase1a.config.mjs
+
+      - name: Prove deliberate overflow is detected
+        shell: bash
+        run: |
+          set +e
+          PHASE1A_ENABLE_NEGATIVE_FIXTURE=1 npx playwright test --config=playwright.phase1a.config.mjs --project=mobile-chromium --grep="controlled overflow fixture"
+          fixture_status=$?
+          set -e
+          if [ "$fixture_status" -eq 0 ]; then
+            echo "Negative fixture unexpectedly passed."
+            exit 1
+          fi
+          echo "Negative fixture failed as required."
+
+      - name: Upload Phase 1A geometry evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1a-mobile-geometry-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/phase1a/
+          if-no-files-found: error
+          retention-days: 21
