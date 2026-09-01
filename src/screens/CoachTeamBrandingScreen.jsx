@@ -27,14 +27,14 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
       announceFeedback({
         tone: "success",
         title: "Team identity saved",
-        message: "Your colors, logos, and text size were verified on the team account and will remain after sign-out.",
+        message: "Saved to the team account. Your colors, logos, and text size will remain after sign-out.",
       });
       return result;
     } catch (error) {
       announceFeedback({
         tone: "error",
         title: "Branding was not saved",
-        message: error?.message || "ShotLab could not verify these changes on the team account. Your draft remains available so you can try again.",
+        message: error?.message || "ShotLab could not verify this save. Your draft is still here; try again.",
         duration: 5200,
       });
       throw error;
