@@ -114,15 +114,15 @@ async function installPhase1CRoutes(page, fixture) {
     priorities_by_team: {},
   }));
 
-  await installSignedCollectionRoute(page, '**/v1/teams**', fixture, { teams: 'sl:teams' });
-  await installSignedCollectionRoute(page, '**/v1/players**', fixture, { players: 'sl:players' });
-  await installSignedCollectionRoute(page, '**/v1/player-profiles**', fixture, { profiles: 'sl:player-profiles' });
-  await installSignedCollectionRoute(page, '**/v1/scores**', fixture, { scores: 'sl:scores' });
-  await installSignedCollectionRoute(page, '**/v1/program-scores**', fixture, { program_scores: 'sl:program-scores' });
-  await installSignedCollectionRoute(page, '**/v1/shot-logs**', fixture, { shot_logs: 'sl:shotlogs' });
-  await installSignedCollectionRoute(page, '**/v1/events**', fixture, { events: 'sl:events' });
-  await installSignedCollectionRoute(page, '**/v1/rsvps**', fixture, { rsvps: 'sl:rsvps' });
-  await installSignedCollectionRoute(page, '**/v1/strength-conditioning**', fixture, {
+  await installSignedCollectionRoute(page, /\/v1\/teams(?:\?.*)?$/, fixture, { teams: 'sl:teams' });
+  await installSignedCollectionRoute(page, /\/v1\/players(?:\?.*)?$/, fixture, { players: 'sl:players' });
+  await installSignedCollectionRoute(page, /\/v1\/player-profiles(?:\?.*)?$/, fixture, { profiles: 'sl:player-profiles' });
+  await installSignedCollectionRoute(page, /\/v1\/scores(?:\?.*)?$/, fixture, { scores: 'sl:scores' });
+  await installSignedCollectionRoute(page, /\/v1\/program-scores(?:\?.*)?$/, fixture, { program_scores: 'sl:program-scores' });
+  await installSignedCollectionRoute(page, /\/v1\/shot-logs(?:\?.*)?$/, fixture, { shot_logs: 'sl:shotlogs' });
+  await installSignedCollectionRoute(page, /\/v1\/events(?:\?.*)?$/, fixture, { events: 'sl:events' });
+  await installSignedCollectionRoute(page, /\/v1\/rsvps(?:\?.*)?$/, fixture, { rsvps: 'sl:rsvps' });
+  await installSignedCollectionRoute(page, /\/v1\/strength-conditioning(?:\?.*)?$/, fixture, {
     sessions: 'sl:sc-sessions',
     rsvps: 'sl:sc-rsvps',
     logs: 'sl:sc-logs',
