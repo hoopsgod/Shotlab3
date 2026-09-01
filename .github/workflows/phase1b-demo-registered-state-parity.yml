@@ -1,0 +1,58 @@
+name: Phase 1B Demo Registered State Parity
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase1b-demo-registered-state-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  state-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner and browsers
+        run: |
+          npm install --no-save @playwright/test@1.55.1
+          npx playwright install --with-deps chromium webkit
+
+      - name: Build exact production assets
+        run: npm run build
+
+      - name: Run Phase 1B deterministic state parity matrix
+        run: npm run test:e2e:phase1b
+
+      - name: Re-run Phase 1A Chromium geometry guardrails
+        run: npm run test:e2e:phase1a -- --project=mobile-chromium
+
+      - name: Upload Phase 1B paired evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1b-demo-registered-state-parity-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/phase1b/
+          if-no-files-found: error
+          retention-days: 21
