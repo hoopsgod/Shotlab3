@@ -150,8 +150,16 @@ export async function performHorizontalPointerGesture(page, selector, browserNam
   const box = await target.boundingBox();
   const viewport = page.viewportSize();
   if (!box || !viewport) throw new Error(`Cannot gesture on ${selector}`);
-  const innerY = Math.min(Math.max(8, box.height * 0.2), Math.max(8, box.height - 8));
-  const y = Math.round(Math.min(viewport.height - 8, Math.max(8, box.y + innerY)));
+
+  // Base the gesture on the target's visible viewport intersection, not the
+  // full height of a tall scroll workspace. Using the full workspace height can
+  // clamp the pointer to the bottom of the viewport and accidentally activate
+  // interactive content while WebKit performs its mouse-drag cross-check.
+  const visibleTop = Math.max(8, box.y + 8);
+  const visibleBottom = Math.min(viewport.height - 8, box.y + box.height - 8);
+  if (visibleBottom <= visibleTop) throw new Error(`No visible gesture band for ${selector}`);
+  const visibleHeight = visibleBottom - visibleTop;
+  const y = Math.round(visibleTop + Math.min(48, Math.max(8, visibleHeight * 0.08)));
   const startX = Math.round(Math.min(viewport.width - 24, box.x + box.width * 0.78));
   const endX = Math.round(Math.max(24, box.x + box.width * 0.22));
 
