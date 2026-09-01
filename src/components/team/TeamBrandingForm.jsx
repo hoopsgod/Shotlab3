@@ -163,8 +163,12 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
         accentColor: safePalette.accentColor,
         textOnPrimary: safePalette.textOnPrimary,
       }));
-    } catch {
-      setUploadError("Team branding could not be saved. Your changes are still here; try again.");
+    } catch (error) {
+      // Keep the real safe application/API failure visible on-device. The prior
+      // generic alert erased the only useful evidence from production Safari and
+      // made distinct persistence failures look identical.
+      const message = String(error?.message || "").trim();
+      setUploadError(message || "Team branding could not be saved. Your changes are still here; try again.");
     } finally {
       submitInFlightRef.current = false;
       setSubmitting(false);
