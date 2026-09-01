@@ -108,6 +108,12 @@ async function installPhase1CRoutes(page, fixture) {
     team_id: PHASE1B_TEAM_ID,
     assignments: [],
   }));
+  await page.route('**/v1/player-assignment-history**', (route) => fulfill(route, {
+    ok: true,
+    storage_mode: 'team_remote',
+    team_id: PHASE1B_TEAM_ID,
+    history: [],
+  }));
   await page.route('**/v1/team-priorities**', (route) => fulfill(route, {
     ok: true,
     storage_mode: 'team_remote',
