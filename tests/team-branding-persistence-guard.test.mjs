@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { brandingMatches, persistCoachBranding } from "../src/lib/teamBrandingPersistence.js";
+import { __testUtils as teamPersistenceUtils } from "../src/lib/teamPersistenceService.js";
 
 function memoryStorage(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -34,6 +35,76 @@ const staleBranding = {
 test("branding comparison ignores server metadata but requires every coach-controlled choice", () => {
   assert.equal(brandingMatches(desiredBranding, { ...desiredBranding, updatedAt: 42, updatedBy: "coach@example.com", version: 9 }), true);
   assert.equal(brandingMatches(desiredBranding, { ...desiredBranding, textScale: "standard" }), false);
+});
+
+test("legacy coach context recovers a sole signed team when the player identity row is unassigned", () => {
+  const legacyTeamId = "team_legacy_text_id";
+  const storage = memoryStorage({
+    "sl:session": JSON.stringify({ email: "coach@example.com" }),
+    "sl:players": JSON.stringify([{ id: "player:unassigned:coach@example.com", email: "coach@example.com", role: "coach", team_id: null }]),
+    "sl:teams": JSON.stringify([{ id: legacyTeamId, name: "BK", owner_coach_id: null, coach_user_id: "11111111-1111-4111-8111-111111111111", branding: staleBranding }]),
+  });
+
+  const context = teamPersistenceUtils.readContext(storage);
+  assert.equal(context.requester, "coach@example.com");
+  assert.equal(context.role, "coach");
+  assert.equal(context.teamId, legacyTeamId);
+});
+
+test("branding save reaches the signed API when legacy session and player rows do not carry team_id", async () => {
+  const legacyTeamId = "team_legacy_text_id";
+  const storage = memoryStorage({
+    "sl:session": JSON.stringify({ email: "coach@example.com" }),
+    "sl:players": JSON.stringify([{ id: "player:unassigned:coach@example.com", email: "coach@example.com", role: "coach", team_id: null }]),
+    "sl:teams": JSON.stringify([{ id: legacyTeamId, name: "BK", branding: staleBranding }]),
+  });
+
+  const remoteTeam = {
+    id: legacyTeamId,
+    name: "BK",
+    owner_coach_id: null,
+    coach_user_id: "11111111-1111-4111-8111-111111111111",
+    join_code: null,
+    created_at: 100,
+    branding: staleBranding,
+  };
+  const loadCalls = [];
+  let syncCalls = 0;
+
+  const fakeService = {
+    // Reproduce the production failure shape directly: identity is known, but
+    // the old context resolver could not find team_id from session/player rows.
+    readContext: () => ({ requester: "coach@example.com", teamId: "", role: "coach" }),
+    loadTeams: async (options = {}) => {
+      loadCalls.push(options);
+      return { ok: true, rows: [remoteTeam] };
+    },
+    syncTeams: async (rows) => {
+      syncCalls += 1;
+      assert.equal(rows[0].id, legacyTeamId);
+      return {
+        ok: true,
+        storageMode: "signed_api",
+        rows: [{
+          ...remoteTeam,
+          branding: { ...desiredBranding, updatedAt: 100, updatedBy: "coach@example.com", version: 3 },
+        }],
+      };
+    },
+  };
+
+  const result = await persistCoachBranding({
+    nextBranding: desiredBranding,
+    appSave: async () => ({ ok: true }),
+    storage,
+    serviceFactory: () => fakeService,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(syncCalls, 1);
+  assert.equal(loadCalls.length >= 1, true);
+  assert.equal(result.team.id, legacyTeamId);
+  assert.equal(result.branding.logoUrl, desiredBranding.logoUrl);
 });
 
 test("a stale server round trip is repaired from authoritative team metadata and cached for the next login", async () => {
