@@ -4,7 +4,6 @@ const logoCache = new Map();
 const MAX_LOGO_SIZE = 640;
 const CORNER_SAMPLE_SIZE = 8;
 const BACKGROUND_DISTANCE = 54;
-const FEATHER_DISTANCE = 78;
 const VISIBLE_ALPHA = 18;
 const OPAQUE_SAMPLE_ALPHA = 180;
 const INSET_SAMPLE_ALPHA = 18;
@@ -125,23 +124,6 @@ const floodEdgeBackground = (imageData, width, height, bg, bounds = fullBounds(w
   for (let index = 0; index < visited.length; index += 1) if (visited[index]) data[(index * 4) + 3] = 0;
 };
 
-const featherTransparentBoundary = (imageData, width, height, bg) => {
-  const { data } = imageData;
-  for (let index = 0; index < width * height; index += 1) {
-    const offset = index * 4;
-    if (data[offset + 3] <= 0) continue;
-    const x = index % width;
-    const y = Math.floor(index / width);
-    const touchesTransparent = (x > 0 && data[((index - 1) * 4) + 3] === 0)
-      || (x < width - 1 && data[((index + 1) * 4) + 3] === 0)
-      || (y > 0 && data[((index - width) * 4) + 3] === 0)
-      || (y < height - 1 && data[((index + width) * 4) + 3] === 0);
-    if (!touchesTransparent) continue;
-    const distance = colorDistance(data, offset, bg);
-    if (distance <= FEATHER_DISTANCE) data[offset + 3] = Math.min(data[offset + 3], Math.round(70 + ((distance / FEATHER_DISTANCE) * 135)));
-  }
-};
-
 const trimTransparentEdges = (canvas, imageData) => {
   const { width, height } = canvas;
   const bounds = findVisibleBounds(imageData.data, width, height, 10);
@@ -167,7 +149,6 @@ export const cleanTeamLogoSource = (src) => {
     };
     const image = new Image();
     image.crossOrigin = "anonymous";
-    image.decoding = "async";
     image.onload = () => {
       try {
         const scale = Math.min(1, MAX_LOGO_SIZE / Math.max(image.naturalWidth || 1, image.naturalHeight || 1));
@@ -194,10 +175,7 @@ export const cleanTeamLogoSource = (src) => {
         } else {
           background = sampleCornerBackground(imageData.data, width, height);
         }
-        if (background) {
-          floodEdgeBackground(imageData, width, height, background, floodBounds);
-          featherTransparentBoundary(imageData, width, height, background);
-        }
+        if (background) floodEdgeBackground(imageData, width, height, background, floodBounds);
         context.putImageData(imageData, 0, 0);
         const trimmed = trimTransparentEdges(canvas, imageData);
         finish(trimmed ? trimmed.toDataURL("image/png") : src);
