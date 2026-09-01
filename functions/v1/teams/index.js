@@ -214,8 +214,8 @@ export async function onRequestPost({ request, env }) {
         ...prior,
         name: row.name || prior.name,
         joinCode: row.joinCode || prior.joinCode,
-        school: row.school,
-        level: row.level,
+        school: row.school || prior.school,
+        level: row.level || prior.level,
         branding,
         updatedAt: Date.now(),
       }));
