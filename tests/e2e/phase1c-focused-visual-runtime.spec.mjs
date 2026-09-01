@@ -78,6 +78,16 @@ const fulfill = (route, body, status = 200) => route.fulfill({
   body: JSON.stringify(body),
 });
 
+async function installSignedCollectionRoute(page, pattern, fixture, responseFields) {
+  await page.route(pattern, async (route) => {
+    const body = { ok: true, storage_mode: 'signed_api', team_id: PHASE1B_TEAM_ID };
+    for (const [field, storageKey] of Object.entries(responseFields)) {
+      body[field] = fixture.storage[storageKey] || [];
+    }
+    await fulfill(route, body);
+  });
+}
+
 async function installPhase1CRoutes(page, fixture) {
   const profile = {
     email: fixture.identity.email,
@@ -103,6 +113,21 @@ async function installPhase1CRoutes(page, fixture) {
     storage_mode: 'team_remote',
     priorities_by_team: {},
   }));
+
+  await installSignedCollectionRoute(page, '**/v1/teams**', fixture, { teams: 'sl:teams' });
+  await installSignedCollectionRoute(page, '**/v1/players**', fixture, { players: 'sl:players' });
+  await installSignedCollectionRoute(page, '**/v1/player-profiles**', fixture, { profiles: 'sl:player-profiles' });
+  await installSignedCollectionRoute(page, '**/v1/scores**', fixture, { scores: 'sl:scores' });
+  await installSignedCollectionRoute(page, '**/v1/program-scores**', fixture, { program_scores: 'sl:program-scores' });
+  await installSignedCollectionRoute(page, '**/v1/shot-logs**', fixture, { shot_logs: 'sl:shotlogs' });
+  await installSignedCollectionRoute(page, '**/v1/events**', fixture, { events: 'sl:events' });
+  await installSignedCollectionRoute(page, '**/v1/rsvps**', fixture, { rsvps: 'sl:rsvps' });
+  await installSignedCollectionRoute(page, '**/v1/strength-conditioning**', fixture, {
+    sessions: 'sl:sc-sessions',
+    rsvps: 'sl:sc-rsvps',
+    logs: 'sl:sc-logs',
+  });
+
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => fulfill(route, []));
 }
 
