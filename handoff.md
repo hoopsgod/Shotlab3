@@ -2,49 +2,55 @@
 
 ## Current review boundary
 
-- Subphase: **Phase 1A — mobile geometry and horizontal-axis contracts**
-- Status: ready for draft-PR review after exact-head CI and Cloudflare preview verification
-- Phase 1B and Phase 1C: not started; acceptance of Phase 1A is required first
-- Branch: `agent/phase1a-mobile-geometry-guardrails`
+- Subphase: **Phase 1B — Demo/registered parity and deterministic state fixtures**
+- Status: implementation started from the accepted Phase 1A merge
+- Branch: `agent/phase1b-demo-registered-parity-fixtures`
 - Base branch: `march-3-reset-85393dd`
-- Base SHA: `208b7799bec1138e4a51eb514436037c83bd118e`
-- Exact Phase 1A head: resolve the branch/PR head after this handoff commit; the PR checks and release handoff are authoritative because a commit cannot contain its own SHA
+- Base SHA: `d7b5086e8b3f47dbd2f6d330f889f2973ad01130` (Phase 1A merge commit)
+- Phase 1C: not started; Phase 1B must be accepted first
 
-## Phase 0 baseline
+## Accepted Phase 1A baseline
 
-- Exact-base Cloudflare preview: `https://f1441df2.shotlab3.pages.dev`
-- Deployment status: successful and mapped by the Cloudflare Pages check to base SHA `208b7799bec1138e4a51eb514436037c83bd118e`
-- Baseline geometry: Demo Coach and Player at 320, 375, 390, and 430 CSS pixels had document/body widths equal to the viewport and zero horizontal page scroll
-- Secure registered fixtures: repository-owned mocked authentication and deterministic storage fixtures work without credentials or production user data
-- Existing harmless app warning: `[analytics] VITE_ANALYTICS_ENDPOINT not set; events will be queued locally.`
-- Existing suite debt: `npm test` has 107 failures at the exact base and 106 on this branch; the failure-name comparison shows no new failure from Phase 1A
+- PR #1519 merged at exact head `051e1845189ec54330eb3695329c7f224d4b9f94`.
+- Merge commit: `d7b5086e8b3f47dbd2f6d330f889f2973ad01130`.
+- Phase 1A exact-head CI passed production build, Chromium/WebKit mobile geometry matrix, deliberate-overflow negative proof, and evidence upload.
+- Exact-head Cloudflare preview for the accepted Phase 1A head: `https://e30e7eda.shotlab3.pages.dev`.
+- One-pixel mobile geometry contract and the single approved local horizontal scroller remain unchanged.
 
-## Phase 1A changes
+## Phase 1B implementation
 
-- `tests/e2e/support/mobile-geometry-contract.mjs`: reusable geometry, equal-rail, viewport-bound, diagnostic, page-gesture, and local-scroll assertions
-- `tests/e2e/phase1a-mobile-geometry.spec.mjs`: login/registration, Coach Home/Players/Events, Player Home/Progress, Demo/registered, and 320/375/390/430 coverage
-- `playwright.phase1a.config.mjs`: production-preview Chromium/WebKit projects and deterministic artifact paths
-- `.github/workflows/phase1a-mobile-geometry.yml`: exact-head build, browser matrix, negative proof, and evidence upload
-- `package.json`: focused Phase 1A command
-- No application source, CSS, layout, data, or product behavior changes
+- `tests/e2e/support/phase1b-state-fixtures.mjs`: reusable credential-free paired fixtures for Demo and deterministic registered sessions.
+- `tests/e2e/phase1b-state-parity.spec.mjs`: paired Coach/Player layout-authority and geometry verification at 390×844.
+- `playwright.phase1b.config.mjs`: isolated Chromium/WebKit production-preview configuration.
+- `.github/workflows/phase1b-demo-registered-state-parity.yml`: exact-head build, Phase 1B browser matrix, Phase 1A Chromium regression rerun, and paired evidence upload.
+- `package.json`: focused `test:e2e:phase1b` command.
+- No application source, CSS, layout, persistence, auth, or product behavior changes.
 
-## Validation
+## Deterministic state matrix
 
-- `npm run build`: pass; production bundle tested after restoring build-generated source rewrites
-- `npm run test:e2e:phase1a -- --project=mobile-chromium`: pass, 20 passed / 1 expected skip
-- Controlled overflow fixture: expected fail; injected width 438px against a 390px body and was rejected by the one-pixel contract
-- Focused mobile/viewport/parity Node contracts: pass, 39 passed
-- `npm test`: inherited failure, 1713 passed / 106 failed / 1 skipped; exact-base comparison is 1712 passed / 107 failed / 1 skipped with no new failing test name
-- Local WebKit launch: environment-blocked by missing GTK/GStreamer/WebKit libraries; CI installs Chromium/WebKit with system dependencies
-- `git diff --check` and Node syntax checks: pass
+Coach:
+- populated roster/activity state;
+- empty/onboarding state;
+- long team name + unusually wide custom logo + hostile/light brand-color stress state.
 
-## Guardrail decisions
+Player:
+- populated training/activity state;
+- first-use state with zero scores, shot logs, and events;
+- long team name + unusually wide custom logo + hostile/light brand-color stress state.
 
-- Tolerance remains one rendered CSS pixel.
-- The only horizontal-scroll allowlist entry is the semantic selector `[aria-label="Dashboard view filters"]`, the Coach Players five-filter chip row. Its horizontal wheel gesture moves the local rail while page horizontal positions remain zero.
-- The accepted Coach Players presentation hides the separate decision brief; its visible title stage owns status and primary actions and is therefore the protected primary decision region.
-- The deliberate overflow fixture is test-only and disabled unless `PHASE1A_ENABLE_NEGATIVE_FIXTURE=1`.
+Each state is exercised as a paired Demo and registered session with equivalent visible product data. Account identity is allowed to differ; layout ownership, structure, route geometry, horizontal safety, and presentation authority are not.
+
+## Phase 1B acceptance contract
+
+- Demo and registered pairs use the same route shells and layout owners rather than exact-copy matching.
+- Coach routes: Home, Players, Events.
+- Player routes: Home, Progress/Profile.
+- Every protected route must satisfy the inherited Phase 1A mobile geometry contract.
+- Paired screenshots and JSON geometry/ownership evidence are written under `artifacts/phase1b/`.
+- CI runs on every pull request so future non-source changes cannot silently bypass the deterministic parity gate.
+- The Phase 1B workflow re-runs the full Phase 1A Chromium matrix after the state-parity matrix.
+- No live credentials or production user data are used.
 
 ## Next gate
 
-Push the single-purpose Phase 1A commit, open or update one draft PR, verify CI and the Cloudflare preview against the exact PR head, and re-run the critical contract against that exact preview. Do not begin Phase 1B until Phase 1A is accepted.
+Validate syntax/diff integrity, push the single-purpose Phase 1B commit, open one draft PR, and certify the exact PR head through the Phase 1B workflow and its matching Cloudflare Pages preview. Do not begin Phase 1C until Phase 1B is accepted.
