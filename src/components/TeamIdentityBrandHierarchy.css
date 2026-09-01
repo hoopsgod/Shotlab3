@@ -9,6 +9,17 @@
   gap: clamp(16px, 4vw, 24px);
 }
 
+/* Secondary pages must never add a tile, plate, or shadow box behind uploaded
+   artwork. Any transparency belongs to the image itself and is cleaned by the
+   shared team-logo pipeline. */
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crestSlot,
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crest {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 /* The editorial title component owns lexical wrapping. Generic secondary-page
    safety rules may protect arbitrary headings, but they must not introduce
    emergency breaks inside authenticated page-title words. */

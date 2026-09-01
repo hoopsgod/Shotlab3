@@ -5,6 +5,11 @@ import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 
 const DEMO_IDENTITIES = new Set(["coach.demo@shotlab.app", "demo@shotlab.app"]);
 const MAX_TEAMS_PER_REQUEST = 100;
+const MAX_LOGO_SOURCE_LENGTH = 8_600_000;
+const BRAND_COLOR_RE = /^#[0-9a-f]{6}$/i;
+const DATA_IMAGE_RE = /^data:image\/(?:png|jpe?g|webp|svg\+xml);base64,/i;
+const HTTP_URL_RE = /^https?:\/\//i;
+const TEXT_SCALES = new Set(["standard", "large", "xl"]);
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value, max = 500) => String(value ?? "").trim().slice(0, max);
@@ -12,6 +17,46 @@ const finiteNumber = (value) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 };
+
+function cleanBrandColor(value) {
+  const color = cleanText(value, 32);
+  return BRAND_COLOR_RE.test(color) ? color : "";
+}
+
+function cleanLogoSource(value) {
+  if (typeof value !== "string") return "";
+  const source = value.trim();
+  if (!source || source.length > MAX_LOGO_SOURCE_LENGTH) return "";
+  if (DATA_IMAGE_RE.test(source) || HTTP_URL_RE.test(source) || /^\/(?!\/)/.test(source)) return source;
+  return "";
+}
+
+export function sanitizeTeamBranding(value = null) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const branding = {};
+  const primaryColor = cleanBrandColor(value.primaryColor);
+  const secondaryColor = cleanBrandColor(value.secondaryColor);
+  const accentColor = cleanBrandColor(value.accentColor);
+  const textOnPrimary = cleanBrandColor(value.textOnPrimary);
+  const logoUrl = cleanLogoSource(value.logoUrl);
+  const logoMarkUrl = cleanLogoSource(value.logoMarkUrl);
+  const textScale = cleanText(value.textScale, 24);
+  const updatedAt = finiteNumber(value.updatedAt);
+  const version = finiteNumber(value.version);
+
+  if (primaryColor) branding.primaryColor = primaryColor;
+  if (secondaryColor) branding.secondaryColor = secondaryColor;
+  if (accentColor) branding.accentColor = accentColor;
+  if (textOnPrimary) branding.textOnPrimary = textOnPrimary;
+  if (logoUrl) branding.logoUrl = logoUrl;
+  if (logoMarkUrl) branding.logoMarkUrl = logoMarkUrl;
+  if (TEXT_SCALES.has(textScale)) branding.textScale = textScale;
+  if (updatedAt != null && updatedAt >= 0) branding.updatedAt = updatedAt;
+  if (value.updatedBy) branding.updatedBy = normalizeIdentity(value.updatedBy).slice(0, 320);
+  if (version != null && version >= 1) branding.version = Math.floor(version);
+
+  return Object.keys(branding).length ? branding : null;
+}
 
 export function sanitizeTeamRow(value = {}) {
   return {
@@ -24,6 +69,7 @@ export function sanitizeTeamRow(value = {}) {
     coachUserId: cleanText(value?.coach_user_id || value?.coachUserId, 80),
     school: cleanText(value?.school, 240),
     level: cleanText(value?.level, 120),
+    branding: sanitizeTeamBranding(value?.branding),
   };
 }
 
@@ -38,6 +84,7 @@ function toDatabase(row) {
     coach_user_id: row.coachUserId || null,
     school: row.school || null,
     level: row.level || null,
+    ...(row.branding ? { branding: row.branding } : {}),
   };
 }
 
@@ -53,6 +100,7 @@ function toResponse(value = {}) {
     coach_user_id: row.coachUserId || null,
     school: row.school,
     level: row.level,
+    branding: row.branding,
   };
 }
 
@@ -64,7 +112,7 @@ async function readTeam(env, teamId) {
   const rows = await selectRows(
     env,
     "teams",
-    `select=id,name,owner_coach_id,join_code,created_at,updated_at,coach_user_id,school,level&id=eq.${encodeURIComponent(teamId)}&limit=1`,
+    `select=id,name,owner_coach_id,join_code,created_at,updated_at,coach_user_id,school,level,branding&id=eq.${encodeURIComponent(teamId)}&limit=1`,
   );
   return Array.isArray(rows) ? rows[0] || null : null;
 }
@@ -149,12 +197,26 @@ export async function onRequestPost({ request, env }) {
         return Response.json({ error: "join_code_conflict" }, { status: 409 });
       }
 
+      let branding = prior.branding;
+      if (row.branding) {
+        const requestedVersion = Number(row.branding.version || 0);
+        const priorVersion = Number(prior.branding?.version || 0);
+        branding = sanitizeTeamBranding({
+          ...(prior.branding || {}),
+          ...row.branding,
+          updatedAt: Date.now(),
+          updatedBy: requester,
+          version: Math.max(priorVersion + 1, requestedVersion, 1),
+        });
+      }
+
       upserts.push(toDatabase({
         ...prior,
         name: row.name || prior.name,
         joinCode: row.joinCode || prior.joinCode,
-        school: row.school,
-        level: row.level,
+        school: row.school || prior.school,
+        level: row.level || prior.level,
+        branding,
         updatedAt: Date.now(),
       }));
     }

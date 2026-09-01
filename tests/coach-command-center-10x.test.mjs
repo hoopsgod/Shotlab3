@@ -129,10 +129,11 @@ test("custom team identity stays dynamic and user-controlled",()=>{
   assert.match(source,/aria-label=\{`Customize \$\{teamName\} team identity`\}/);
   assert.match(source,/data-team-identity-stage="coach-mission-control"/);
   assert.match(logoSource,/export const cleanTeamLogoSource/);
-  assert.match(logoSource,/removeLikelyRectangularFrame/);
+  assert.match(logoSource,/sampleCornerBackground/);
+  assert.match(logoSource,/sampledCorners/);
   assert.match(logoSource,/trimTransparentEdges/);
   assert.match(brandingForm,/cleanTeamLogoSource/);
-  assert.match(brandingForm,/transparent PNG or SVG/);
+  assert.match(brandingForm,/Upload PNG or SVG[\s\S]*transparent PNG/);
   const heroImageRule=ruleBlock(titleCss,'.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
   assert.match(heroImageRule,/object-fit:contain/);
 });
