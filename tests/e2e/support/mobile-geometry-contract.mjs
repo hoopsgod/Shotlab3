@@ -18,6 +18,15 @@ export const INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST = [{
   rationale: "Keeps every named roster filter reachable without widening the page.",
 }];
 
+async function waitForRequiredGeometryTargets(page, contract, label) {
+  for (const [name, selector] of Object.entries(contract.targets || {})) {
+    await expect(
+      page.locator(selector).first(),
+      `${label} geometry target "${name}" did not become visible: ${selector}`,
+    ).toBeVisible({ timeout: 10_000 });
+  }
+}
+
 export async function collectMobileGeometry(page, contract) {
   return page.evaluate(async ({ contract, allowlist }) => {
     const tolerance = 1;
@@ -160,14 +169,52 @@ export async function performHorizontalPointerGesture(page, selector, browserNam
   await page.waitForTimeout(120);
 }
 
-export async function performLocalHorizontalGesture(page, selector) {
+export async function performLocalHorizontalGesture(page, selector, browserName) {
   const target = page.locator(selector);
+  await expect(target).toBeVisible();
   await target.scrollIntoViewIfNeeded();
+  const before = await target.evaluate((node) => ({
+    scrollLeft: node.scrollLeft,
+    clientWidth: node.clientWidth,
+    scrollWidth: node.scrollWidth,
+  }));
+
+  if (before.scrollWidth <= before.clientWidth + MOBILE_GEOMETRY_TOLERANCE) {
+    return { method: "not-scrollable", before, after: before };
+  }
+
+  // Playwright intentionally does not expose mouse.wheel for mobile WebKit.
+  // Preserve Chromium's wheel interaction coverage, but prove the same local
+  // scroll ownership in WebKit by moving only the allowlisted element's own
+  // scrollLeft. This cannot hide document/body drift because the full geometry
+  // contract is re-measured immediately afterward.
+  if (browserName === "webkit") {
+    const after = await target.evaluate(async (node) => {
+      const maximum = Math.max(0, node.scrollWidth - node.clientWidth);
+      const next = Math.min(maximum, Math.max(node.scrollLeft + 40, Math.round(maximum * 0.5)));
+      node.scrollLeft = next;
+      node.dispatchEvent(new Event("scroll"));
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return {
+        scrollLeft: node.scrollLeft,
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
+      };
+    });
+    return { method: "element-scrollLeft", before, after };
+  }
+
   const box = await target.boundingBox();
   if (!box) throw new Error(`Cannot gesture on ${selector}`);
   await page.mouse.move(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
   await page.mouse.wheel(180, 0);
   await page.waitForTimeout(120);
+  const after = await target.evaluate((node) => ({
+    scrollLeft: node.scrollLeft,
+    clientWidth: node.clientWidth,
+    scrollWidth: node.scrollWidth,
+  }));
+  return { method: "mouse-wheel", before, after };
 }
 
 export function expectMobileGeometry(report, label) {
@@ -195,6 +242,7 @@ export function expectMobileGeometry(report, label) {
 }
 
 export async function assertMobileGeometry(page, contract, { label, browserName }) {
+  await waitForRequiredGeometryTargets(page, contract, label);
   const before = await collectMobileGeometry(page, contract);
   expectMobileGeometry(before, `${label} before gesture`);
   const localScrollProof = [];
@@ -205,12 +253,12 @@ export async function assertMobileGeometry(page, contract, { label, browserName 
     if (await owner.count() === 0) continue;
     const beforeLocal = await owner.evaluate((node) => ({ scrollLeft: node.scrollLeft, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth }));
     if (beforeLocal.scrollWidth <= beforeLocal.clientWidth + MOBILE_GEOMETRY_TOLERANCE) continue;
-    await performLocalHorizontalGesture(page, entry.selector);
+    const localInteraction = await performLocalHorizontalGesture(page, entry.selector, browserName);
     const afterLocal = await owner.evaluate((node) => ({ scrollLeft: node.scrollLeft, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth }));
-    expect(afterLocal.scrollLeft, `${label} ${entry.component} did not accept the local horizontal gesture`).toBeGreaterThan(beforeLocal.scrollLeft + MOBILE_GEOMETRY_TOLERANCE);
+    expect(afterLocal.scrollLeft, `${label} ${entry.component} did not accept the local horizontal interaction`).toBeGreaterThan(beforeLocal.scrollLeft + MOBILE_GEOMETRY_TOLERANCE);
     const afterLocalReport = await collectMobileGeometry(page, contract);
-    expectMobileGeometry(afterLocalReport, `${label} after local ${entry.component} gesture`);
-    localScrollProof.push({ ...entry, before: beforeLocal, after: afterLocal, pageScroll: afterLocalReport.scroll });
+    expectMobileGeometry(afterLocalReport, `${label} after local ${entry.component} interaction`);
+    localScrollProof.push({ ...entry, method: localInteraction.method, before: beforeLocal, after: afterLocal, pageScroll: afterLocalReport.scroll });
   }
   await performHorizontalPointerGesture(page, contract.targets.workspace, browserName);
   const after = await collectMobileGeometry(page, contract);
