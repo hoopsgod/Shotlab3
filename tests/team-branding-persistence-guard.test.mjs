@@ -42,99 +42,29 @@ test("legacy coach context recovers a sole signed team when the player identity 
   const storage = memoryStorage({
     "sl:session": JSON.stringify({ email: "coach@example.com" }),
     "sl:players": JSON.stringify([{ id: "player:unassigned:coach@example.com", email: "coach@example.com", role: "coach", team_id: null }]),
-    "sl:teams": JSON.stringify([{ id: legacyTeamId, name: "BK", owner_coach_id: null, coach_user_id: "11111111-1111-4111-8111-111111111111", branding: staleBranding }]),
+    "sl:teams": JSON.stringify([{ id: legacyTeamId, name: "BK", branding: staleBranding }]),
   });
-
   const context = teamPersistenceUtils.readContext(storage);
   assert.equal(context.requester, "coach@example.com");
   assert.equal(context.role, "coach");
   assert.equal(context.teamId, legacyTeamId);
 });
 
-test("branding save reaches the signed API when legacy session and player rows do not carry team_id", async () => {
-  const legacyTeamId = "team_legacy_text_id";
-  const storage = memoryStorage({
-    "sl:session": JSON.stringify({ email: "coach@example.com" }),
-    "sl:players": JSON.stringify([{ id: "player:unassigned:coach@example.com", email: "coach@example.com", role: "coach", team_id: null }]),
-    "sl:teams": JSON.stringify([{ id: legacyTeamId, name: "BK", branding: staleBranding }]),
-  });
-
-  const remoteTeam = {
-    id: legacyTeamId,
-    name: "BK",
-    owner_coach_id: null,
-    coach_user_id: "11111111-1111-4111-8111-111111111111",
-    join_code: null,
-    created_at: 100,
-    branding: staleBranding,
-  };
-  const loadCalls = [];
-  let syncCalls = 0;
-
-  const fakeService = {
-    readContext: () => ({ requester: "coach@example.com", teamId: "", role: "coach" }),
-    loadTeams: async (options = {}) => {
-      loadCalls.push(options);
-      return { ok: true, rows: [remoteTeam] };
-    },
-    syncTeams: async (rows) => {
-      syncCalls += 1;
-      assert.equal(rows[0].id, legacyTeamId);
-      return {
-        ok: true,
-        storageMode: "signed_api",
-        rows: [{
-          ...remoteTeam,
-          branding: { ...desiredBranding, updatedAt: 100, updatedBy: "coach@example.com", version: 3 },
-        }],
-      };
-    },
-  };
-
-  const result = await persistCoachBranding({
-    nextBranding: desiredBranding,
-    appSave: async () => ({ ok: true }),
-    storage,
-    serviceFactory: () => fakeService,
-  });
-
-  assert.equal(result.ok, true);
-  assert.equal(syncCalls, 1);
-  assert.equal(loadCalls.length, 1);
-  assert.equal(result.team.id, legacyTeamId);
-  assert.equal(result.branding.logoUrl, desiredBranding.logoUrl);
-});
-
-test("a stale server value is repaired from authoritative team metadata", async () => {
-  const storage = memoryStorage({
-    "sl:session": JSON.stringify({ email: "coach@example.com" }),
-    "sl:players": JSON.stringify([{ email: "coach@example.com", role: "coach", teamId: "team-1" }]),
-    "sl:teams": JSON.stringify([{ id: "team-1", name: "BK", branding: staleBranding }]),
-  });
-  let syncCalls = 0;
+test("branding save posts only the active team id and branding, then verifies the authoritative response", async () => {
   let syncPayload = null;
-
-  const remoteTeam = {
-    id: "team-1",
-    name: "BK",
-    owner_coach_id: "coach@example.com",
-    coach_user_id: "11111111-1111-4111-8111-111111111111",
-    join_code: "REMOTE1",
-    created_at: 100,
-    branding: staleBranding,
-  };
-
   const fakeService = {
     readContext: () => ({ requester: "coach@example.com", teamId: "team-1", role: "coach" }),
-    loadTeams: async () => ({ ok: true, storageMode: "signed_api", rows: [remoteTeam] }),
     syncTeams: async (rows) => {
-      syncCalls += 1;
       syncPayload = rows;
       return {
         ok: true,
         storageMode: "signed_api",
         rows: [{
-          ...remoteTeam,
+          id: "team-1",
+          name: "BK",
+          owner_coach_id: "coach@example.com",
+          school: "West Test High",
+          level: "Varsity",
           branding: { ...desiredBranding, updatedAt: 100, updatedBy: "coach@example.com", version: 3 },
         }],
       };
@@ -144,64 +74,25 @@ test("a stale server value is repaired from authoritative team metadata", async 
   const result = await persistCoachBranding({
     nextBranding: desiredBranding,
     appSave: async () => ({ ok: true }),
-    storage,
     serviceFactory: () => fakeService,
   });
 
+  assert.deepEqual(syncPayload, [{ id: "team-1", branding: desiredBranding }]);
   assert.equal(result.ok, true);
-  assert.equal(syncCalls, 1);
-  assert.equal(syncPayload[0].branding.primaryColor, desiredBranding.primaryColor);
-  assert.equal(syncPayload[0].branding.logoUrl, desiredBranding.logoUrl);
-  assert.equal(syncPayload[0].owner_coach_id, "coach@example.com");
-  assert.equal(syncPayload[0].coach_user_id, "11111111-1111-4111-8111-111111111111");
-  assert.equal(syncPayload[0].join_code, "REMOTE1");
-  assert.equal(syncPayload[0].created_at, 100);
-  assert.equal(syncPayload[0].ownerCoachId, undefined);
-  assert.equal(result.branding.logoMarkUrl, desiredBranding.logoMarkUrl);
+  assert.equal(result.team.school, "West Test High");
+  assert.equal(result.branding.logoUrl, desiredBranding.logoUrl);
 });
 
-test("an already-persisted server value is verified without issuing a redundant repair write", async () => {
-  const storage = memoryStorage({
-    "sl:session": JSON.stringify({ email: "coach@example.com" }),
-    "sl:players": JSON.stringify([{ email: "coach@example.com", role: "coach", teamId: "team-1" }]),
-    "sl:teams": JSON.stringify([{ id: "team-1", name: "BK", branding: desiredBranding }]),
-  });
-
+test("branding save fails closed when the signed response drops a coach choice", async () => {
   const fakeService = {
     readContext: () => ({ requester: "coach@example.com", teamId: "team-1", role: "coach" }),
-    loadTeams: async () => ({ ok: true, rows: [{ id: "team-1", name: "BK", branding: { ...desiredBranding, version: 4 } }] }),
-    syncTeams: async () => { throw new Error("sync should not run"); },
-  };
-
-  const result = await persistCoachBranding({
-    nextBranding: desiredBranding,
-    appSave: async () => ({ ok: true }),
-    storage,
-    serviceFactory: () => fakeService,
-  });
-
-  assert.equal(result.ok, true);
-  assert.equal(result.branding.primaryColor, desiredBranding.primaryColor);
-});
-
-test("the save fails closed when the repaired server response still drops the coach choices", async () => {
-  const storage = memoryStorage({
-    "sl:session": JSON.stringify({ email: "coach@example.com" }),
-    "sl:players": JSON.stringify([{ email: "coach@example.com", role: "coach", teamId: "team-1" }]),
-    "sl:teams": JSON.stringify([{ id: "team-1", name: "BK", branding: staleBranding }]),
-  });
-
-  const fakeService = {
-    readContext: () => ({ requester: "coach@example.com", teamId: "team-1", role: "coach" }),
-    loadTeams: async () => ({ ok: true, rows: [{ id: "team-1", name: "BK", branding: staleBranding }] }),
-    syncTeams: async () => ({ ok: true, rows: [{ id: "team-1", name: "BK", branding: staleBranding }] }),
+    syncTeams: async () => ({ ok: true, rows: [{ id: "team-1", branding: staleBranding }] }),
   };
 
   await assert.rejects(
     () => persistCoachBranding({
       nextBranding: desiredBranding,
       appSave: async () => ({ ok: true }),
-      storage,
       serviceFactory: () => fakeService,
     }),
     /Branding verification failed/,
