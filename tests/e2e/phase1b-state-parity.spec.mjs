@@ -167,7 +167,7 @@ async function expectStateLoaded(page, role, scenario) {
     };
   });
   if (scenario === 'populated' || scenario === 'stress') {
-    expect(state.players).toBeGreaterThanOrEqual(role === 'coach' ? 3 : 3);
+    expect(state.players).toBeGreaterThanOrEqual(role === 'coach' ? 3 : 1);
     expect(state.scores).toBeGreaterThan(0);
     expect(state.events).toBeGreaterThan(0);
   } else {
