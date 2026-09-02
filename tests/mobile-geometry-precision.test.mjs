@@ -84,15 +84,17 @@ test('Program Branding preview uses one visible identity mark and a mobile-safe 
   assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"[\s\S]*title="Mission Control"/);
 });
 
-test('At Home Shot Tracker keeps equal grid tracks and protected border-box authority', () => {
+test('At Home Shot Tracker keeps equal grid tracks and clamps native iOS controls inside normal flow', () => {
   assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
   assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
-  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[\s\S]*display:\s*grid !important;[\s\S]*grid-template-rows:\s*auto 52px !important/);
+  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[\s\S]*display:\s*flex !important;[\s\S]*flex-direction:\s*column !important/);
   assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field label\s*\{[^}]*text-align:\s*center !important/);
   assert.match(finalAxis, /player-primary-logging-region \.player-logging-input\s*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
-  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*height:\s*52px !important;[^}]*text-align:\s*center !important/);
-  assert.match(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value\s*\{[\s\S]*display:\s*block;[\s\S]*width:\s*100%;[\s\S]*text-align:\s*center/);
+  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*height:\s*52px !important;[^}]*min-height:\s*52px !important;[^}]*max-height:\s*52px !important;[^}]*padding-block:\s*0 !important;[^}]*text-align:\s*center !important/);
+  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-input\[type="date"\]\s*\{[^}]*-webkit-appearance:\s*none !important;[^}]*appearance:\s*none !important/);
+  assert.match(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value\s*\{[\s\S]*width:\s*100%;[\s\S]*text-align:\s*center/);
+  assert.doesNotMatch(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value\s*\{[^}]*display:\s*block/);
   assert.doesNotMatch(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*(?:^|[;{]\s*)width:\s*100%/m);
   assert.doesNotMatch(composition, /player-primary-logging-region \.player-logging-(?:field|input)/);
   assert.doesNotMatch(commandHierarchy, /player-primary-logging-region \.player-logging-(?:field|input)/);

@@ -234,9 +234,12 @@ async function expectTrainOpticalRails(page) {
         inputRight: input?.right || 0,
         inputWidth: input?.width || 0,
         inputHeight: input?.height || 0,
+        inputBottom: input?.bottom || 0,
+        fieldBottom: field.bottom,
         inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : "",
       };
     }));
+    const submitTop = await tracker.getByRole("button", { name: "LOG SHOTS", exact: true }).evaluate((element) => element.getBoundingClientRect().top);
     expect(shotFields).toHaveLength(2);
     expect(Math.abs(shotFields[0].width - shotFields[1].width)).toBeLessThanOrEqual(1);
     expect(Math.abs(shotFields[0].inputHeight - shotFields[1].inputHeight)).toBeLessThanOrEqual(1);
@@ -244,6 +247,8 @@ async function expectTrainOpticalRails(page) {
       expect(field.inputLeft).toBeGreaterThanOrEqual(field.left - 0.5);
       expect(field.inputRight).toBeLessThanOrEqual(field.right + 0.5);
       expect(Math.abs(field.inputWidth - field.width)).toBeLessThanOrEqual(1);
+      expect(field.inputBottom).toBeLessThanOrEqual(field.fieldBottom + 0.5);
+      expect(submitTop - field.inputBottom).toBeGreaterThanOrEqual(12);
       expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - ((field.left + field.right) / 2))).toBeLessThanOrEqual(1);
       expect(field.labelTextAlign).toBe("center");
       expect(field.inputTextAlign).toBe("center");

@@ -163,9 +163,12 @@ test('Player Demo Shot Tracker centers equal controls at 393px in iPhone WebKit'
         inputRight: input?.right || 0,
         inputWidth: input?.width || 0,
         inputHeight: input?.height || 0,
+        inputBottom: input?.bottom || 0,
+        fieldBottom: field.bottom,
         inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : '',
       };
     }));
+    const submitTop = await tracker.getByRole('button', { name: 'LOG SHOTS', exact: true }).evaluate((element) => element.getBoundingClientRect().top);
 
     expect(geometry).toHaveLength(2);
     expect(Math.abs(geometry[0].fieldWidth - geometry[1].fieldWidth)).toBeLessThanOrEqual(1);
@@ -175,6 +178,8 @@ test('Player Demo Shot Tracker centers equal controls at 393px in iPhone WebKit'
       expect(field.inputLeft).toBeGreaterThanOrEqual(field.fieldLeft - 0.5);
       expect(field.inputRight).toBeLessThanOrEqual(field.fieldRight + 0.5);
       expect(Math.abs(field.inputWidth - field.fieldWidth)).toBeLessThanOrEqual(1);
+      expect(field.inputBottom, 'native input must remain inside its field flow box').toBeLessThanOrEqual(field.fieldBottom + 0.5);
+      expect(submitTop - field.inputBottom, 'submit action must clear both native input border boxes').toBeGreaterThanOrEqual(12);
       expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - fieldCenter)).toBeLessThanOrEqual(1);
       expect(field.labelTextAlign).toBe('center');
       expect(field.inputTextAlign).toBe('center');
