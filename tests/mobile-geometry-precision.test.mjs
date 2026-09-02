@@ -88,10 +88,11 @@ test('At Home Shot Tracker keeps equal grid tracks and clamps native iOS control
   assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
   assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
-  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[\s\S]*display:\s*flex !important;[\s\S]*flex-flow:\s*column !important/);
+  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[^}]*display:\s*grid !important/);
+  assert.doesNotMatch(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[^}]*grid-template-rows/);
   assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field label\s*\{[^}]*text-align:\s*center !important/);
   assert.match(finalAxis, /player-primary-logging-region \.player-logging-input\s*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
-  assert.match(commandHierarchy, /\.player-logging-input\s*\{[^}]*min-height:\s*52px !important/);
+  assert.match(commandHierarchy, /\.player-logging-input\s*\{[^}]*height:\s*52px !important/);
   assert.match(commandHierarchy, /\.player-logging-input--score\s*\{[^}]*text-align:\s*center/);
   assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*max-height:\s*52px !important/);
   assert.match(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value\s*\{[\s\S]*width:\s*100%;[\s\S]*text-align:\s*center/);

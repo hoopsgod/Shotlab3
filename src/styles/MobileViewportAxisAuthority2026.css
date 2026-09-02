@@ -78,10 +78,7 @@
   }
   /* Keep native iOS date controls in normal flow. A fixed grid track lets the
    * Safari date control paint beyond its field and under the CTA. */
-  .player-primary-logging-region .player-logging-field {
-    display: flex !important;
-    flex-flow: column !important;
-  }
+  .player-primary-logging-region .player-logging-field { display: grid !important; }
   .player-primary-logging-region .player-logging-field label { text-align: center !important; }
   .player-primary-logging-region .player-logging-input { max-height: 52px !important; }
   .player-primary-logging-region .player-logging-input[type="date"]::-webkit-date-and-time-value {
