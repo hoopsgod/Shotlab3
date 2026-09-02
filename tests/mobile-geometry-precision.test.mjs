@@ -22,6 +22,7 @@ test('mobile geometry authority keeps Player and Coach on dedicated 20px rails',
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(finalAxis, /--layout-gutter:\s*20px/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container\s*\{[^}]*(?:width|max-width|min-width|box-sizing):/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0 !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail, 20px\)/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[\s\S]*padding-inline:\s*0 !important/);
@@ -84,7 +85,7 @@ test('At Home Shot Tracker keeps equal grid tracks and source-owned width author
   assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
   assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[\s\S]*display:\s*grid !important;[\s\S]*grid-template-rows:\s*auto 52px !important/);
   assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-field label\s*\{[^}]*text-align:\s*center !important/);
-  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*height:\s*52px !important/);
+  assert.match(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*height:\s*52px !important;[^}]*text-align:\s*center !important/);
   assert.match(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value\s*\{[\s\S]*display:\s*block;[\s\S]*width:\s*100%;[\s\S]*text-align:\s*center/);
   assert.doesNotMatch(finalAxis, /\.player-primary-logging-region \.player-logging-input\s*\{[^}]*(?:min-width|max-width|width):/);
   assert.doesNotMatch(composition, /player-primary-logging-region \.player-logging-(?:field|input)/);

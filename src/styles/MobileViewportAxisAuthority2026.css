@@ -13,11 +13,7 @@
   }
 
   html body #root .performance-shell--player.is-mobile .player-scroll-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
     padding-inline: 20px !important;
-    box-sizing: border-box !important;
   }
 
   html body #root .performance-shell--player.is-mobile .player-scroll-container:has(> .shared-dashboard-back-action) { padding-top: 4px !important; }
@@ -90,7 +86,7 @@
     grid-template-rows: auto 52px !important;
   }
   .player-primary-logging-region .player-logging-field label { text-align: center !important; }
-  .player-primary-logging-region .player-logging-input { height: 52px !important; }
+  .player-primary-logging-region .player-logging-input { height: 52px !important; text-align: center !important; }
   .player-primary-logging-region .player-logging-input[type="date"]::-webkit-date-and-time-value {
     display: block;
     width: 100%;
