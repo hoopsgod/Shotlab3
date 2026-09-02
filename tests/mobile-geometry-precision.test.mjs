@@ -82,11 +82,11 @@ test('At Home Shot Tracker keeps equal grid tracks and owns the input box model 
   assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
   assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
-  for (const source of [commandHierarchy, composition]) {
-    assert.match(source, /\.player-primary-logging-region \.player-logging-field\{display:grid;grid-template-rows:auto 52px;min-width:0\}/);
-    assert.match(source, /\.player-primary-logging-region \.player-logging-field label\{width:100%;text-align:center!important\}/);
-    assert.match(source, /\.player-primary-logging-region \.player-logging-input\{width:100%!important;min-width:0!important;max-width:100%!important;height:52px!important;text-align:center!important\}/);
-    assert.match(source, /\.player-primary-logging-region \.player-logging-input\[type="date"\]::-webkit-date-and-time-value\{display:block;width:100%;min-width:0;text-align:center\}/);
-  }
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-primary-logging-region \.player-logging-field\s*\{[\s\S]*display:\s*grid !important;[\s\S]*grid-template-rows:\s*auto 52px !important;[\s\S]*min-width:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-primary-logging-region \.player-logging-field label\s*\{[\s\S]*width:\s*100% !important;[\s\S]*text-align:\s*center !important/);
+  assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-primary-logging-region \.player-logging-input\s*\{[\s\S]*width:\s*100% !important;[\s\S]*min-width:\s*0 !important;[\s\S]*max-width:\s*100% !important;[\s\S]*height:\s*52px !important;[\s\S]*text-align:\s*center !important/);
+  assert.match(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value\s*\{[\s\S]*width:\s*100%;[\s\S]*text-align:\s*center/);
+  assert.doesNotMatch(composition, /player-primary-logging-region \.player-logging-(?:field|input)/);
+  assert.doesNotMatch(commandHierarchy, /player-primary-logging-region \.player-logging-(?:field|input)/);
   assert.doesNotMatch(composition, /repairShotTrackerInputGeometry/);
 });

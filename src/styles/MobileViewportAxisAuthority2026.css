@@ -82,6 +82,30 @@
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary::after {
     position: absolute !important; right: 2px !important; top: 50% !important; transform: translateY(-50%) !important;
   }
+  /* The production restructure drops the older composition-tail rule for this
+   * form. Keep its iPhone geometry in the protected, last-loaded mobile owner. */
+  html body #root .performance-shell--player.is-mobile .player-primary-logging-region .player-logging-field {
+    display: grid !important;
+    grid-template-rows: auto 52px !important;
+    min-width: 0 !important;
+  }
+  html body #root .performance-shell--player.is-mobile .player-primary-logging-region .player-logging-field label {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  html body #root .performance-shell--player.is-mobile .player-primary-logging-region .player-logging-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 52px !important;
+    text-align: center !important;
+  }
+  html body #root .performance-shell--player.is-mobile .player-primary-logging-region .player-logging-input[type="date"]::-webkit-date-and-time-value {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+  }
   html body #root .performance-shell--player.is-mobile .player-primary-logging-region .cta-secondary-link {
     min-height: 44px !important; padding-block: 9px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 12px !important;
   }
