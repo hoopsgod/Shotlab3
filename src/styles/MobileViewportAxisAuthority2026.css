@@ -27,9 +27,10 @@
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .missionControl { overflow-x: hidden !important; }
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback { min-width: 0 !important; }
-  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame,
-  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-inline: 0 !important; box-sizing: border-box !important;
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell { grid-template-columns: minmax(0, 1fr) !important; }
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell > *,
+  .player-primary-logging-region .player-logging-input {
+    box-sizing: border-box !important; min-width: 0 !important; max-width: 100% !important;
   }
   html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"] { padding-inline-start: 0 !important; }
   html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"] .teamIdentityTitleStage__inner { padding-inline-start: 15px !important; }
