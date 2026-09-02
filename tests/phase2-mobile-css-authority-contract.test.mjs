@@ -16,7 +16,7 @@ test('Phase 2 keeps generic mobile containment in CSS and dynamic Coach route ow
     '.app-shell.is-mobile [data-testid="coach-command-center-full"]',
     '.app-shell.is-mobile [data-testid="player-daily-command-center"]',
   ]) {
-    assert.ok(compactCentering.includes(selector), `generic mobile containment missing ${selector}`);
+    assert.ok(centering.includes(selector), `generic mobile containment missing ${selector}`);
   }
 
   assert.doesNotMatch(
