@@ -32,6 +32,8 @@ test('mobile geometry authority keeps Player and Coach on dedicated 20px rails',
 test('Coach secondary routes use one outer rail with no composed inner gutter or title breakout', () => {
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
   assert.match(authority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{/);
+  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*\s*\{/);
   assert.match(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100%;[\s\S]*max-width:\s*100%;[\s\S]*margin-inline:\s*0;/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
