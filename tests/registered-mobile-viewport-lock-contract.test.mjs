@@ -42,7 +42,9 @@ test('final mobile axis keeps Player and Coach on one dedicated 20px rail each',
   assert.doesNotMatch(authenticatedAuthority, /16px wrapper \+ 4px secondary shell/);
   assert.match(finalAxis, /performance-workspace--coach > div:has\(\[data-testid="coach-command-center-full"\]\)[\s\S]*padding-inline:\s*0\s*!important/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][\s\S]*padding-inline:\s*0\s*!important/);
-  assert.match(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*,[\s\S]*\{[^}]*box-sizing:\s*border-box\s*!important;[^}]*min-width:\s*0\s*!important;[^}]*max-width:\s*100%\s*!important/);
+  assert.doesNotMatch(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,/);
   assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
