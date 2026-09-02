@@ -20,7 +20,7 @@ test("built Player workspace CSS remains substantive after production optimizati
   assert.ok(info.size >= 20_000, `PlayerWorkspaces CSS was stripped to ${info.size} bytes`);
 });
 
-test("optimized production CSS preserves Coach Home Program Pulse material authority", async () => {
+test("optimized production bundle preserves the runtime-owned Coach Home Program Pulse material authority", async () => {
   const assetsDir = path.join(root, "dist", "assets");
   const names = (await readdir(assetsDir)).filter((name) => name.endsWith(".css"));
   const matches = [];
@@ -32,17 +32,22 @@ test("optimized production CSS preserves Coach Home Program Pulse material autho
     }
   }
 
-  assert.ok(matches.length > 0, "Expected optimized CSS to retain Program Pulse rules");
   const diagnostic = JSON.stringify(matches, null, 2);
-  const darkOwner = matches.find(({ selector, declarations }) =>
-    (selector.includes(".mcShellV3 .mcTeamHealth") || selector.includes("[data-testid=coach-program-pulse]")) &&
-    /background(?:-image)?\s*:[^;]*(?:gradient|#0[0-9a-f]{5}|var\(--team-brand-surface-deep)/i.test(declarations) &&
-    /color\s*:\s*#f[0-9a-f]{5}/i.test(declarations)
-  );
-  assert.ok(darkOwner, `Expected optimized Program Pulse to retain a dark material owner. Found:\n${diagnostic}`);
-
   const flatteningOwner = matches.find(({ declarations }) =>
     /background(?:-color)?\s*:\s*(?:#fff(?:fff)?|white|transparent|rgba\(0,0,0,0\))/i.test(declarations)
   );
   assert.equal(flatteningOwner, undefined, `Unexpected Program Pulse flattening rule survived optimization:\n${diagnostic}`);
+
+  const javaScriptNames = (await readdir(assetsDir)).filter((name) => name.endsWith(".js"));
+  const runtimeOwners = [];
+  for (const name of javaScriptNames) {
+    const source = await readFile(path.join(assetsDir, name), "utf8");
+    if (
+      source.includes('coach-program-pulse') &&
+      source.includes('--sl-surface') &&
+      source.includes('linear-gradient(150deg,#0b2231,var(--team-brand-surface-deep,#06151d))') &&
+      source.includes('--mc-surface-ink')
+    ) runtimeOwners.push(name);
+  }
+  assert.ok(runtimeOwners.length > 0, "Expected optimized JavaScript to retain the runtime Program Pulse material owner");
 });

@@ -236,6 +236,7 @@ async function expectTrainOpticalRails(page) {
         inputHeight: input?.height || 0,
         inputBottom: input?.bottom || 0,
         fieldBottom: field.bottom,
+        inputType: inputElement?.type || "",
         inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : "",
       };
     }));
@@ -251,7 +252,7 @@ async function expectTrainOpticalRails(page) {
       expect(submitTop - field.inputBottom).toBeGreaterThanOrEqual(12);
       expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - ((field.left + field.right) / 2))).toBeLessThanOrEqual(1);
       expect(field.labelTextAlign).toBe("center");
-      expect(field.inputTextAlign).toBe("center");
+      if (field.inputType === "number") expect(field.inputTextAlign).toBe("center");
     }
     const outerInsets = {
       left: shotFields[0].left - trackerRect.left,

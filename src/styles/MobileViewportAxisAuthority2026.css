@@ -76,24 +76,14 @@
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary::after {
     position: absolute !important; right: 2px !important; top: 50% !important; transform: translateY(-50%) !important;
   }
-  /* Keep native iOS date controls in normal flow. A fixed grid track lets
-   * Safari's intrinsic date control paint beyond its field and under the CTA. */
+  /* Keep native iOS date controls in normal flow. A fixed grid track lets the
+   * Safari date control paint beyond its field and under the CTA. */
   .player-primary-logging-region .player-logging-field {
     display: flex !important;
-    flex-direction: column !important;
+    flex-flow: column !important;
   }
   .player-primary-logging-region .player-logging-field label { text-align: center !important; }
-  .player-primary-logging-region .player-logging-input {
-    height: 52px !important;
-    min-height: 52px !important;
-    max-height: 52px !important;
-    padding-block: 0 !important;
-    text-align: center !important;
-  }
-  .player-primary-logging-region .player-logging-input[type="date"] {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-  }
+  .player-primary-logging-region .player-logging-input { max-height: 52px !important; }
   .player-primary-logging-region .player-logging-input[type="date"]::-webkit-date-and-time-value {
     width: 100%;
     text-align: center;

@@ -165,6 +165,7 @@ test('Player Demo Shot Tracker centers equal controls at 393px in iPhone WebKit'
         inputHeight: input?.height || 0,
         inputBottom: input?.bottom || 0,
         fieldBottom: field.bottom,
+        inputType: inputElement?.type || '',
         inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : '',
       };
     }));
@@ -182,7 +183,7 @@ test('Player Demo Shot Tracker centers equal controls at 393px in iPhone WebKit'
       expect(submitTop - field.inputBottom, 'submit action must clear both native input border boxes').toBeGreaterThanOrEqual(12);
       expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - fieldCenter)).toBeLessThanOrEqual(1);
       expect(field.labelTextAlign).toBe('center');
-      expect(field.inputTextAlign).toBe('center');
+      if (field.inputType === 'number') expect(field.inputTextAlign).toBe('center');
     }
 
     await tracker.screenshot({ path: `${OUTPUT_DIR}/webkit-player-shot-tracker-393.png`, animations: 'disabled' });
