@@ -53,7 +53,12 @@ const hierarchyCss = `
 [data-testid="player-coach-priority-signal"]{padding-inline:8px 2px!important}
 .playerProgressDisclosure>summary{position:relative;justify-content:space-between!important;padding-inline:2px 50px!important}.playerProgressDisclosure>summary>span:first-child{align-items:flex-start}.playerProgressDisclosure>summary::after{position:absolute;right:2px;top:50%;transform:translateY(-50%)}
 [data-testid="player-daily-momentum-signal"]{--surface-elevated:transparent!important;--text-1:#17211a!important;--text-2:#465149!important;--text-3:#667069!important;--neon:#617900!important;grid-template-columns:1fr!important;justify-items:start!important;padding:18px 0!important;border-radius:0!important;background:transparent!important;text-align:left!important;box-shadow:none!important}
-.player-training-kicker{justify-content:center!important}.player-primary-logging-region .player-logging-field label{text-align:center}.player-training-plan__header{display:grid!important;justify-items:start!important;text-align:left!important;padding-inline:2px!important}}
+.player-training-kicker{justify-content:center!important}
+.player-primary-logging-region .player-logging-field{display:grid;grid-template-rows:auto 52px;min-width:0}
+.player-primary-logging-region .player-logging-field label{width:100%;text-align:center!important}
+.player-primary-logging-region .player-logging-input{width:100%!important;min-width:0!important;max-width:100%!important;height:52px!important;text-align:center!important}
+.player-primary-logging-region .player-logging-input[type="date"]::-webkit-date-and-time-value{display:block;width:100%;min-width:0;text-align:center}
+.player-training-plan__header{display:grid!important;justify-items:start!important;text-align:left!important;padding-inline:2px!important}}
 `
 
 export function applyMobilePlayerCompositionReconciliation() {

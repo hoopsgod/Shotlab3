@@ -219,15 +219,34 @@ async function expectTrainOpticalRails(page) {
 
     const shotFields = await tracker.locator(".player-logging-field").evaluateAll((elements) => elements.map((element) => {
       const field = element.getBoundingClientRect();
-      const input = element.querySelector("input")?.getBoundingClientRect();
-      return { left: field.left, right: field.right, width: field.width, inputLeft: input?.left || 0, inputRight: input?.right || 0, inputWidth: input?.width || 0 };
+      const labelElement = element.querySelector("label");
+      const inputElement = element.querySelector("input");
+      const label = labelElement?.getBoundingClientRect();
+      const input = inputElement?.getBoundingClientRect();
+      return {
+        left: field.left,
+        right: field.right,
+        width: field.width,
+        labelLeft: label?.left || 0,
+        labelRight: label?.right || 0,
+        labelTextAlign: labelElement ? getComputedStyle(labelElement).textAlign : "",
+        inputLeft: input?.left || 0,
+        inputRight: input?.right || 0,
+        inputWidth: input?.width || 0,
+        inputHeight: input?.height || 0,
+        inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : "",
+      };
     }));
     expect(shotFields).toHaveLength(2);
     expect(Math.abs(shotFields[0].width - shotFields[1].width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(shotFields[0].inputHeight - shotFields[1].inputHeight)).toBeLessThanOrEqual(1);
     for (const field of shotFields) {
       expect(field.inputLeft).toBeGreaterThanOrEqual(field.left - 0.5);
       expect(field.inputRight).toBeLessThanOrEqual(field.right + 0.5);
       expect(Math.abs(field.inputWidth - field.width)).toBeLessThanOrEqual(1);
+      expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - ((field.left + field.right) / 2))).toBeLessThanOrEqual(1);
+      expect(field.labelTextAlign).toBe("center");
+      expect(field.inputTextAlign).toBe("center");
     }
     const outerInsets = {
       left: shotFields[0].left - trackerRect.left,
