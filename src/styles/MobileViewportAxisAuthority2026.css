@@ -61,14 +61,15 @@
   }
 
   html body #root .performance-shell--player.is-mobile .player-quick-actions,
-  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"] { padding-inline: 0 !important; }
+  html body #root .performance-shell--player.is-mobile [data-visual-role="secondary-page"],
+  html body #root .performance-shell--coach.is-mobile .secondaryPageShell { padding-inline: 0 !important; }
   html body #root .performance-shell--player.is-mobile [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"],
   html body #root .performance-shell--player.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] {
     width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-inline: 0 !important; box-sizing: border-box !important;
   }
   html body #root .performance-shell--player.is-mobile [data-testid="player-coach-priority-signal"] { padding-inline: 8px 2px !important; }
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary {
-    position: relative !important; justify-content: space-between !important; padding-inline: 2px 50px !important;
+    position: relative !important; padding-inline: 2px 50px !important;
   }
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary > span:first-child { align-items: flex-start !important; }
   html body #root .performance-shell--player.is-mobile .playerProgressDisclosure > summary::after {

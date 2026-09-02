@@ -32,7 +32,7 @@ test('mobile geometry authority keeps Player and Coach on dedicated 20px rails',
 test('Coach secondary routes use one outer rail with no composed inner gutter or title breakout', () => {
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
   assert.match(authority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*0 !important/);
-  assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell[^{]*\{[^}]*padding-inline:\s*0 !important/);
   assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*\s*\{/);
   assert.match(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100%;[\s\S]*max-width:\s*100%;[\s\S]*margin-inline:\s*0;/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
@@ -65,8 +65,10 @@ test('first supporting mobile metric returns to the editorial rail without flatt
 
 test('Player Home optical accents and progress summary do not create secondary left rails', () => {
   assert.match(composition, /\[data-testid="player-coach-priority-signal"\]\{padding-inline:8px 2px!important\}/);
+  assert.match(commandHierarchy, /\.playerProgressDisclosure > summary\s*\{[^}]*justify-content:\s*space-between/);
   assert.match(composition, /\.playerProgressDisclosure>summary\{[\s\S]*padding-inline:2px 50px!important/);
   assert.match(composition, /\.playerProgressDisclosure>summary::after\{[\s\S]*right:2px/);
+  assert.doesNotMatch(finalAxis, /playerProgressDisclosure > summary\s*\{[^}]*justify-content:/);
   assert.doesNotMatch(composition, /padding-inline:14px 54px!important/);
 });
 
