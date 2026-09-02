@@ -10,8 +10,8 @@ const VIEWPORTS = [
   { width: 402, height: 874 },
   { width: 430, height: 932 },
 ];
-const SCREENSHOT_WIDTHS = new Set([375, 390, 430]);
-const DEEP_AUDIT_WIDTHS = new Set([390, 430]);
+const SCREENSHOT_WIDTHS = new Set([375, 390, 393, 430]);
+const DEEP_AUDIT_WIDTHS = new Set([390, 393, 430]);
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -221,8 +221,10 @@ async function expectTrainOpticalRails(page) {
       const field = element.getBoundingClientRect();
       const labelElement = element.querySelector("label");
       const inputElement = element.querySelector("input");
+      const controlElement = element.querySelector(".player-logging-control");
       const label = labelElement?.getBoundingClientRect();
       const input = inputElement?.getBoundingClientRect();
+      const control = controlElement?.getBoundingClientRect();
       return {
         left: field.left,
         right: field.right,
@@ -236,27 +238,42 @@ async function expectTrainOpticalRails(page) {
         inputHeight: input?.height || 0,
         inputBottom: input?.bottom || 0,
         fieldBottom: field.bottom,
+        controlLeft: control?.left || 0,
+        controlRight: control?.right || 0,
+        controlBottom: control?.bottom || 0,
+        controlWidth: control?.width || 0,
+        controlHeight: control?.height || 0,
         inputType: inputElement?.type || "",
         inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : "",
+        inputAppearance: inputElement ? getComputedStyle(inputElement).appearance : "",
       };
     }));
     const submitTop = await tracker.getByRole("button", { name: "LOG SHOTS", exact: true }).evaluate((element) => element.getBoundingClientRect().top);
     expect(shotFields).toHaveLength(2);
     expect(Math.abs(shotFields[0].width - shotFields[1].width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(shotFields[0].controlWidth - shotFields[1].controlWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(shotFields[0].controlHeight - shotFields[1].controlHeight)).toBeLessThanOrEqual(1);
     expect(Math.abs(shotFields[0].inputHeight - shotFields[1].inputHeight)).toBeLessThanOrEqual(1);
     for (const field of shotFields) {
-      expect(field.inputLeft).toBeGreaterThanOrEqual(field.left - 0.5);
-      expect(field.inputRight).toBeLessThanOrEqual(field.right + 0.5);
-      expect(Math.abs(field.inputWidth - field.width)).toBeLessThanOrEqual(1);
+      expect(field.controlLeft).toBeGreaterThanOrEqual(field.left - 0.5);
+      expect(field.controlRight).toBeLessThanOrEqual(field.right + 0.5);
+      expect(Math.abs(field.controlWidth - field.width)).toBeLessThanOrEqual(1);
+      expect(field.inputLeft).toBeGreaterThanOrEqual(field.controlLeft - 0.5);
+      expect(field.inputRight).toBeLessThanOrEqual(field.controlRight + 0.5);
+      expect(field.inputWidth).toBeGreaterThanOrEqual(field.controlWidth - 2.5);
       expect(field.inputBottom).toBeLessThanOrEqual(field.fieldBottom + 0.5);
-      expect(submitTop - field.inputBottom).toBeGreaterThanOrEqual(12);
+      expect(submitTop - field.controlBottom).toBeGreaterThanOrEqual(12);
       expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - ((field.left + field.right) / 2))).toBeLessThanOrEqual(1);
       expect(field.labelTextAlign).toBe("center");
       if (field.inputType === "number") expect(field.inputTextAlign).toBe("center");
+      if (field.inputType === "date") {
+        expect(field.inputAppearance).toBe("none");
+        expect(field.inputTextAlign).toBe("center");
+      }
     }
     const outerInsets = {
-      left: shotFields[0].left - trackerRect.left,
-      right: trackerRect.right - shotFields[1].right,
+      left: shotFields[0].controlLeft - trackerRect.left,
+      right: trackerRect.right - shotFields[1].controlRight,
     };
     expect(Math.abs(outerInsets.left - outerInsets.right)).toBeLessThanOrEqual(1);
 
@@ -290,6 +307,9 @@ test("candidate mobile geometry is optically disciplined from 375 through 430", 
     await navigateByKey(page, "log-drill");
     await expectPlayerTwentyPixelPageRail(page);
     await expectTrainOpticalRails(page);
+    if (viewport.width === 393) {
+      await captureSurface(page, page.getByTestId("player-shot-logging-region"), "precision-player-shot-tracker-393.png");
+    }
     if (DEEP_AUDIT_WIDTHS.has(viewport.width)) {
       await captureSurface(page, page.locator('[data-team-workspace="at-home"]'), `precision-player-train-full-${viewport.width}.png`);
     }

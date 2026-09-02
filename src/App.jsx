@@ -2270,11 +2270,15 @@ return <div className={`app-shell performance-shell performance-shell--player ${
       <div className="player-logging-fields">
         <div className="player-logging-field">
           <label htmlFor="player-home-shots-made">SHOTS MADE</label>
-          <input id="player-home-shots-made" className="player-logging-input player-logging-input--score" type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0"/>
+          <div className="player-logging-control">
+            <input id="player-home-shots-made" className="player-logging-input player-logging-input--score" type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0"/>
+          </div>
         </div>
         <div className="player-logging-field">
           <label htmlFor="player-home-shot-date">DATE</label>
-          <input id="player-home-shot-date" className="player-logging-input" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)}/>
+          <div className="player-logging-control player-logging-control--date">
+            <input id="player-home-shot-date" className="player-logging-input" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)}/>
+          </div>
         </div>
       </div>
 
