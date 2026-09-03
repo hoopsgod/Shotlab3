@@ -97,12 +97,11 @@
     display: flex !important;
     gap: 9px !important;
     overflow-x: auto !important;
-    scrollbar-width: none;
   }
 
   /* Coach Players is the one mobile secondary surface whose nested chip group
      owns horizontal scrolling. Keep the composite rail itself out of x-scroll. */
-  .secondaryPageToolbar [data-testid="coach-players-filter-rail"] {
+  [data-testid="coach-players-filter-rail"] {
     overflow-x: visible !important;
   }
 
@@ -110,10 +109,11 @@
     display: none;
   }
 
-  .secondaryPageToolbar [data-visual-role="filter-rail"] > * {
+  /* Non-Players rails keep their children intrinsic so the composite rail owns
+     any horizontal movement instead of collapsing the nested chip group. */
+  .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-players-filter-rail"]) > * {
     flex: 0 0 auto;
-    min-width: 0;
-    max-width: 100%;
+    min-width: max-content;
   }
 
   .secondaryPageToolbar input[type="search"],

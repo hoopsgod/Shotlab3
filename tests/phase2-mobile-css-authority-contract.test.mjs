@@ -37,7 +37,7 @@ test('Phase 2 keeps generic mobile containment in CSS and dynamic Coach route ow
   assert.match(runtimeGuard, /overflowX:\s*'clip'/);
 });
 
-test('Coach Players filters keep one scoped horizontal owner', () => {
+test('Coach secondary filters keep one scoped horizontal owner', () => {
   assert.doesNotMatch(
     finalAxisAuthority,
     /\[data-visual-role="filter-rail"\]/,
@@ -45,11 +45,11 @@ test('Coach Players filters keep one scoped horizontal owner', () => {
   );
   assert.match(
     secondaryMobile,
-    /\.secondaryPageToolbar\s+\[data-testid="coach-players-filter-rail"\]\s*\{[^}]*overflow-x:\s*visible\s*!important/,
+    /\[data-testid="coach-players-filter-rail"\]\s*\{[^}]*overflow-x:\s*visible\s*!important/,
   );
   assert.match(
     secondaryMobile,
-    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]\s*>\s*\*\s*\{[^}]*min-width:\s*0;[^}]*max-width:\s*100%/,
+    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\)\s*>\s*\*\s*\{[^}]*min-width:\s*max-content/,
   );
   assert.match(
     geometryContract,

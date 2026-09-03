@@ -26,7 +26,7 @@
 - Branch: `agent/phase1b-parity-state-guardrails` (PR #1520, rewritten onto the current default branch)
 - Base branch: `march-3-reset-85393dd`
 - Base SHA: `d2a66b95a1631d23c795b13647ed4db6c228cbca` (Phase 2 PR #1523 merged)
-- Goal: remove the duplicate Coach Players filter-rail horizontal owner exposed by populated parity fixtures and make the inherited WebKit geometry navigation deterministic without changing product navigation behavior.
+- Goal: keep Coach Players and Coach Events on distinct, deterministic mobile horizontal-scroll ownership without changing product navigation behavior.
 
 ## Phase 2 rules
 
@@ -43,23 +43,19 @@
 
 ## Closure changes
 
-- The shared secondary toolbar keeps its accepted mobile row presentation; redundant width/axis declarations were removed rather than adding another final-authority override.
-- Only `[data-testid="coach-players-filter-rail"]` clears the composite rail's inherited x-scroll ownership; its existing nested chip group remains the intentional local horizontal scroller.
-- The geometry allowlist is scoped to `[data-testid="coach-players-filter-rail"] > [role="group"]` instead of the globally repeated accessible label.
+- The shared secondary toolbar keeps its accepted mobile row presentation while the protected final mobile axis layer stays out of filter-rail ownership.
+- `[data-testid="coach-players-filter-rail"]` clears composite x-scroll ownership so its existing nested chip group remains the intentional local horizontal scroller.
+- Non-Players secondary filter rails keep intrinsic child sizing (`min-width: max-content`) so their nested chip groups do not collapse into accidental local x-scrollers.
+- The geometry allowlist remains scoped only to `[data-testid="coach-players-filter-rail"] > [role="group"]`; Coach Events is not allowlisted.
 - Scroll-owner diagnostics include bounded ancestry so a recurrence identifies the owning product surface.
 - Phase 1A WebKit navigation forces only the fixed-dock click after its synthetic horizontal gesture, retaining the real React route handler while avoiding Playwright's stale actionability wait.
-- The source contract rejects rediscovering shared filter rails in the protected final mobile axis layer.
+- The source contract rejects rediscovering shared filter rails in the protected final mobile axis layer and locks the Players/non-Players sizing split.
 
 ## Closure evidence
 
-- Reproduction before the first fix: current-base Phase 1B `coach-populated` failed because `[data-testid="coach-players-filter-rail"]` became a second 350/685px horizontal owner.
-- Focused reproduction after the first fix: pass, 1/1.
-- Phase 1A mobile Chromium locally: pass, 20 passed / 1 expected negative-fixture skip.
-- Phase 1B mobile Chromium locally: pass, 6/6.
-- Focused mobile authority Node contracts locally: pass, 7/7.
-- Optimized production build locally: pass.
-- Focused `coach-populated` parity case against the optimized preview: pass, 1/1.
-- First exact-head CI on `b6cd49d0a51ecfafef10ad5dad06d2492698878a` disproved the generic filter override: Phase 1A failed at Coach Events on 390/430 in both Chromium and WebKit because the Events nested filter group became an unapproved horizontal owner.
-- The same exact head built successfully but measured 88,040 total CSS gzip bytes against the 88,000-byte budget, and Phase 5A also rejected its bundle growth versus the exact base.
-- The follow-up therefore removes the generic final-axis filter override, scopes the ownership change to Coach Players in the existing secondary-toolbar authority, and deletes redundant mobile toolbar declarations instead of broadening the allowlist.
-- Final exact-head browser and performance certification must be read from PR #1520 after this follow-up commit; do not certify `b6cd49d...`.
+- Original current-base reproduction: Phase 1B `coach-populated` rejected `[data-testid="coach-players-filter-rail"]` as a second 350/685px horizontal owner.
+- First exact-head CI on `b6cd49d0a51ecfafef10ad5dad06d2492698878a` disproved the broad final-axis override: Coach Events became an unapproved nested x-scroller at 390/430 in Chromium and WebKit, while CSS gzip measured 88,040 bytes against the 88,000-byte budget and Phase 5A rejected bundle growth.
+- Follow-up exact head `a48b87ca79676e6be0da82a91a8382719c795eb2` fixed the bundle/performance side: Production Performance Budget, Phase 5A Route Enhancer Orchestration, Phase 5 Release Hardening, Production Acceptance, and the other major release suites passed; Cloudflare deployed successfully.
+- `a48b87ca...` still failed Phase 1A, Phase 1B, and Phase 1C for one shared reason: Coach Events' nested filter group collapsed and became an unapproved x-scroller. Phase 1A reproduced it for Demo/registered at 390/430 in Chromium and WebKit (for example 8/105px at 390 and roughly 38–48/210–218px at 430). Phase 1B stopped on the same Demo Coach Events owner, and Phase 1C stopped on the same registered Coach Events owner.
+- The closure correction restores intrinsic sizing only for non-Players filter children while leaving Players to its existing shrinkable nested scroller. It also removes the Firefox-only outer scrollbar declaration so the minified production CSS does not grow relative to the already passing exact head.
+- Final merge-readiness must be certified from the next exact PR head; do not certify `b6cd49d...` or `a48b87ca...`.
