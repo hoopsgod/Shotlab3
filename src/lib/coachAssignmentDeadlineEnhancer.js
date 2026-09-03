@@ -1,5 +1,9 @@
 import { formatAssignmentDueDate, isAssignmentOverdue, normalizeAssignmentDueDate } from "./assignmentDeadline.js";
-import { loadTeamPlayerAssignments, PLAYER_ASSIGNMENT_CHANGE_EVENT } from "./playerAssignmentService.js";
+import {
+  ASSIGNMENT_READ_STATES,
+  loadTeamPlayerAssignments,
+  PLAYER_ASSIGNMENT_CHANGE_EVENT,
+} from "./playerAssignmentService.js";
 
 const STYLE_ID = "shotlab-coach-assignment-deadline-styles";
 const clean = (value, max = 320) => String(value ?? "").trim().slice(0, max);
@@ -39,6 +43,17 @@ export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() 
   return map;
 }
 
+export function resolveAssignmentDeadlineRefresh(result = {}, currentDeadlines = new Map(), options = {}) {
+  const readState = result?.readState || (result?.ok ? ASSIGNMENT_READ_STATES.EMPTY : ASSIGNMENT_READ_STATES.FAILURE);
+  if (readState === ASSIGNMENT_READ_STATES.FAILURE || readState === ASSIGNMENT_READ_STATES.DENIED) {
+    return { deadlines: currentDeadlines, readState };
+  }
+  return {
+    deadlines: buildAssignmentDeadlineMap(result?.assignments || [], options),
+    readState,
+  };
+}
+
 function ensureStyles() {
   if (document.getElementById(STYLE_ID)) return;
   const style = document.createElement("style");
@@ -47,9 +62,10 @@ function ensureStyles() {
   document.head.appendChild(style);
 }
 
-function decoratePanel(deadlines) {
+function decoratePanel(deadlines, readState) {
   const panel = document.querySelector('[data-testid="coach-assignment-accountability"]');
   if (!panel) return;
+  panel.dataset.assignmentReadState = readState;
   const actionRegion = panel.querySelector('[aria-label="Players needing assignment action"]');
   const overdueRows = [];
 
@@ -91,11 +107,16 @@ function decoratePanel(deadlines) {
   }
   const meta = panel.querySelector(".mcAssignmentAccountabilityMeta");
   if (meta) {
-    if (!meta.dataset.deadlineDecorated) meta.dataset.deadlineBaseText = meta.textContent || "";
-    meta.dataset.deadlineDecorated = overdueCount > 0 ? "true" : "";
+    if (meta.dataset.deadlineBaseText == null) meta.dataset.deadlineBaseText = meta.textContent || "";
+    const stateSuffix = readState === ASSIGNMENT_READ_STATES.DEGRADED || readState === ASSIGNMENT_READ_STATES.FAILURE
+      ? " · sync delayed"
+      : readState === ASSIGNMENT_READ_STATES.DENIED
+        ? " · assignment data unavailable"
+        : "";
+    meta.dataset.deadlineDecorated = overdueCount > 0 || stateSuffix ? "true" : "";
     meta.textContent = overdueCount > 0
-      ? `${meta.dataset.deadlineBaseText} · ${overdueCount} overdue`
-      : meta.dataset.deadlineBaseText;
+      ? `${meta.dataset.deadlineBaseText} · ${overdueCount} overdue${stateSuffix}`
+      : `${meta.dataset.deadlineBaseText}${stateSuffix}`;
   }
 }
 
@@ -106,6 +127,7 @@ export function installCoachAssignmentDeadlineEnhancer() {
   ensureStyles();
 
   let deadlines = new Map();
+  let readState = ASSIGNMENT_READ_STATES.EMPTY;
   let loading = false;
   let frame = null;
   let observer = null;
@@ -118,7 +140,7 @@ export function installCoachAssignmentDeadlineEnhancer() {
     frame = window.requestAnimationFrame(() => {
       frame = null;
       observer?.disconnect();
-      decoratePanel(deadlines);
+      decoratePanel(deadlines, readState);
       observe();
     });
   };
@@ -127,14 +149,22 @@ export function installCoachAssignmentDeadlineEnhancer() {
     const teamId = sessionTeamId();
     if (!teamId) {
       deadlines = new Map();
+      readState = ASSIGNMENT_READ_STATES.EMPTY;
       render();
       return;
     }
     loading = true;
-    const result = await loadTeamPlayerAssignments({ teamId }).catch(() => ({ assignments: [] }));
-    loading = false;
-    deadlines = buildAssignmentDeadlineMap(result?.assignments || []);
-    render();
+    try {
+      const result = await loadTeamPlayerAssignments({ teamId });
+      const resolved = resolveAssignmentDeadlineRefresh(result, deadlines);
+      deadlines = resolved.deadlines;
+      readState = resolved.readState;
+    } catch {
+      readState = ASSIGNMENT_READ_STATES.FAILURE;
+    } finally {
+      loading = false;
+      render();
+    }
   };
 
   observer = new MutationObserver(render);
