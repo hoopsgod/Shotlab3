@@ -40,9 +40,10 @@ export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() 
 }
 
 export function resolveAssignmentDeadlineRefresh(result = {}, currentDeadlines = new Map(), options = {}) {
-  const readState = result?.readState || (result?.ok ? "empty" : "failure");
-  if (readState === "failure" || readState === "denied") return { deadlines: currentDeadlines, readState };
-  return { deadlines: buildAssignmentDeadlineMap(result?.assignments || [], options), readState };
+  const state = result?.readState || (result?.ok ? "empty" : "failure");
+  return state === "failure" || state === "denied"
+    ? currentDeadlines
+    : buildAssignmentDeadlineMap(result?.assignments || [], options);
 }
 
 function ensureStyles() {
@@ -53,10 +54,9 @@ function ensureStyles() {
   document.head.appendChild(style);
 }
 
-function decoratePanel(deadlines, readState) {
+function decoratePanel(deadlines) {
   const panel = document.querySelector('[data-testid="coach-assignment-accountability"]');
   if (!panel) return;
-  panel.dataset.assignmentReadState = readState;
   const actionRegion = panel.querySelector('[aria-label="Players needing assignment action"]');
   const overdueRows = [];
 
@@ -96,17 +96,6 @@ function decoratePanel(deadlines, readState) {
     badge.classList.toggle("is-overdue", overdueCount > 0);
     badge.textContent = overdueCount > 0 ? `${overdueCount} OVERDUE` : badge.dataset.deadlineBaseText;
   }
-  const meta = panel.querySelector(".mcAssignmentAccountabilityMeta");
-  if (meta) {
-    if (meta.dataset.deadlineBaseText == null) meta.dataset.deadlineBaseText = meta.textContent || "";
-    const suffix = readState === "degraded" || readState === "failure"
-      ? " · sync delayed"
-      : readState === "denied" ? " · assignment data unavailable" : "";
-    meta.dataset.deadlineDecorated = overdueCount > 0 || suffix ? "true" : "";
-    meta.textContent = overdueCount > 0
-      ? `${meta.dataset.deadlineBaseText} · ${overdueCount} overdue${suffix}`
-      : `${meta.dataset.deadlineBaseText}${suffix}`;
-  }
 }
 
 export function installCoachAssignmentDeadlineEnhancer() {
@@ -116,7 +105,6 @@ export function installCoachAssignmentDeadlineEnhancer() {
   ensureStyles();
 
   let deadlines = new Map();
-  let readState = "empty";
   let loading = false;
   let frame = null;
   let observer = null;
@@ -129,7 +117,7 @@ export function installCoachAssignmentDeadlineEnhancer() {
     frame = window.requestAnimationFrame(() => {
       frame = null;
       observer?.disconnect();
-      decoratePanel(deadlines, readState);
+      decoratePanel(deadlines);
       observe();
     });
   };
@@ -138,18 +126,13 @@ export function installCoachAssignmentDeadlineEnhancer() {
     const teamId = sessionTeamId();
     if (!teamId) {
       deadlines = new Map();
-      readState = "empty";
       render();
       return;
     }
     loading = true;
     try {
-      const resolved = resolveAssignmentDeadlineRefresh(await loadTeamPlayerAssignments({ teamId }), deadlines);
-      deadlines = resolved.deadlines;
-      readState = resolved.readState;
-    } catch {
-      readState = "failure";
-    } finally {
+      deadlines = resolveAssignmentDeadlineRefresh(await loadTeamPlayerAssignments({ teamId }), deadlines);
+    } catch {} finally {
       loading = false;
       render();
     }
