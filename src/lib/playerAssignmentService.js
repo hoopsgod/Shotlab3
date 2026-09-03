@@ -188,7 +188,7 @@ export async function savePlayerAssignment({
   if (!draft) return { ok: false, message: "Player and assignment required." };
   if (!session.requester || typeof fetchImpl !== "function") {
     const local = savePlayerAssignmentLocal(draft, storage);
-    return { ok: true, storageMode: "local_only", assignment: local, message: "Assignment saved locally." };
+    return { ok: true, storageMode: "local_only", assignment: local, message: "Saved locally." };
   }
 
   try {
@@ -210,14 +210,14 @@ export async function savePlayerAssignment({
     const body = await readJson(response);
     if (!response?.ok || body?.error) {
       const local = savePlayerAssignmentLocal(draft, storage);
-      return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_write_failed", message: "Saved locally; delivery sync failed." };
+      return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_write_failed", message: "Saved locally; sync failed." };
     }
     const remote = normalizePlayerAssignment(body?.assignment) || draft;
     savePlayerAssignmentLocal(remote, storage);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: body?.storage_mode === "demo_local" ? "Assignment saved in demo." : "Assignment delivered to the player." };
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: body?.storage_mode === "demo_local" ? "Saved in demo." : "Assignment delivered to the player." };
   } catch (error) {
     const local = savePlayerAssignmentLocal(draft, storage);
-    return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: String(error?.message || "assignment_write_failed"), message: "Saved locally; delivery sync failed." };
+    return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: String(error?.message || "assignment_write_failed"), message: "Saved locally; sync failed." };
   }
 }
 
@@ -233,7 +233,7 @@ export async function updatePlayerAssignmentState({
   const nextState = action === "acknowledge" ? "acknowledged" : action === "start" ? "started" : "completed";
   if (!current) return { ok: false, message: "Assignment unavailable." };
   const optimistic = savePlayerAssignmentLocal({ ...current, state: nextState, updatedAt: new Date().toISOString() }, storage);
-  if (!session.requester || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", assignment: optimistic, message: "Assignment updated locally." };
+  if (!session.requester || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", assignment: optimistic, message: "Updated locally." };
 
   try {
     const response = await fetchImpl("/v1/player-assignments", {
@@ -244,14 +244,14 @@ export async function updatePlayerAssignmentState({
     const body = await readJson(response);
     if (!response?.ok || body?.error) {
       savePlayerAssignmentLocal(current, storage);
-      return { ok: false, assignment: current, error: body?.error || "assignment_state_failed", message: "Assignment status sync failed." };
+      return { ok: false, assignment: current, error: body?.error || "assignment_state_failed", message: "Status sync failed." };
     }
     const remote = normalizePlayerAssignment(body?.assignment) || optimistic;
     savePlayerAssignmentLocal(remote, storage);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: nextState === "completed" ? "Assignment marked complete." : nextState === "started" ? "Assignment started." : "Assignment acknowledged." };
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: nextState === "completed" ? "Completed." : nextState === "started" ? "Started." : "Acknowledged." };
   } catch (error) {
     savePlayerAssignmentLocal(current, storage);
-    return { ok: false, assignment: current, error: String(error?.message || "assignment_state_failed"), message: "Assignment status sync failed." };
+    return { ok: false, assignment: current, error: String(error?.message || "assignment_state_failed"), message: "Status sync failed." };
   }
 }
 
