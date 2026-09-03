@@ -39,11 +39,6 @@ export default function PlayerCoachAssignmentCard() {
     setMessage(nextMessage);
   }, []);
 
-  const refresh = useCallback(async () => {
-    const result = await loadPlayerAssignment();
-    applyLoadResult(result);
-  }, [applyLoadResult]);
-
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -71,7 +66,7 @@ export default function PlayerCoachAssignmentCard() {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener(PLAYER_ASSIGNMENT_CHANGE_EVENT, onChanged);
     };
-  }, [applyLoadResult, refresh]);
+  }, [applyLoadResult]);
 
   if (!assignment) {
     if (readState !== ASSIGNMENT_READ_STATES.FAILURE && readState !== ASSIGNMENT_READ_STATES.DENIED) return null;
