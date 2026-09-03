@@ -56,6 +56,7 @@ export function deriveCoachFollowUpQueue({ records = [], roster = [], teamId = "
     completed,
     openCount: planned.length,
     completedCount: completed.length,
+    pendingCount: activeRecords.filter((record) => record.syncPending).length,
     totalCount: activeRecords.length,
     hasRecords: activeRecords.length > 0,
   };
