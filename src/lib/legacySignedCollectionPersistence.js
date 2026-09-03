@@ -104,11 +104,7 @@ async function readJsonResponse(response) {
 }
 
 function signedHeaders(storage, requester = "") {
-  return buildApiIdentityHeaders({
-    requester,
-    storage,
-    headers: { Accept: "application/json" },
-  });
+  return buildApiIdentityHeaders({ requester, storage });
 }
 
 async function hydrateGroup({
@@ -126,7 +122,6 @@ async function hydrateGroup({
     try {
       const response = await fetchImpl(group.path, {
         method: "GET",
-        credentials: "same-origin",
         headers: signedHeaders(storage, requester),
       });
       const payload = await readJsonResponse(response);
@@ -235,7 +230,6 @@ export async function requestLegacySignedCollection({
   try {
     const response = await fetchImpl(config.path, {
       method: "GET",
-      credentials: "same-origin",
       headers: signedHeaders(storage, requester),
     });
     const payload = await readJsonResponse(response);
