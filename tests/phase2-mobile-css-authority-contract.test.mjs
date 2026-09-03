@@ -6,6 +6,7 @@ const centering = readFileSync(new URL('../public/shotlab-mobile-centering-recon
 const runtimeGuard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const secondaryMobile = readFileSync(new URL('../src/components/SecondaryPagePremiumMobile.css', import.meta.url), 'utf8');
+const coachEventsMobile = readFileSync(new URL('../src/components/CoachEventsPremium.css', import.meta.url), 'utf8');
 const geometryContract = readFileSync(new URL('./e2e/support/mobile-geometry-contract.mjs', import.meta.url), 'utf8');
 
 const compactCentering = centering.replace(/\s+/g, '');
@@ -45,11 +46,23 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
   );
   assert.match(
     secondaryMobile,
+    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{[^}]*overflow-x:\s*auto\s*!important/,
+  );
+  assert.match(
+    secondaryMobile,
     /\[data-testid="coach-players-filter-rail"\]\s*\{[^}]*overflow-x:\s*visible\s*!important/,
   );
   assert.match(
     secondaryMobile,
-    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\)\s*>\s*\*\s*\{[^}]*min-width:\s*max-content;[^}]*overflow-x:\s*visible\s*!important/,
+    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\):not\(\[data-testid="coach-events-filter-rail"\]\)\s*>\s*\*\s*\{[^}]*min-width:\s*max-content/,
+  );
+  assert.match(
+    coachEventsMobile,
+    /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*flex-wrap:\s*wrap;[^}]*overflow-x:\s*visible/,
+  );
+  assert.doesNotMatch(
+    coachEventsMobile,
+    /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*overflow-x:\s*auto/,
   );
   assert.match(
     geometryContract,
