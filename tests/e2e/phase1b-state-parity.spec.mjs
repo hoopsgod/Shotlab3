@@ -40,7 +40,7 @@ const ROUTES = {
           primaryRegion: '[data-testid="coach-players-command-bar"]',
         },
         centered: ['routeShell', 'titleStage', 'primaryRegion'],
-        localScrollSelectors: ['[aria-label="Dashboard view filters"]'],
+        localScrollSelectors: ['[data-testid="coach-players-filter-rail"] > [role="group"]'],
       },
     },
     {

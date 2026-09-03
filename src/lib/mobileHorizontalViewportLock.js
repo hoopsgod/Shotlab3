@@ -275,7 +275,10 @@ export function installMobileHorizontalViewportLock() {
     scheduleCorrection();
   };
 
-  const observer = new MutationObserver(scheduleCorrection);
+  const observer = new MutationObserver(() => {
+    normalizeRegisteredCoachRouteGeometry();
+    scheduleCorrection();
+  });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   document.addEventListener('scroll', handleCapturedScroll, true);

@@ -145,6 +145,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
               </button>
             ) : null}
             testId="coach-events-filter-rail"
+            wrapFilters
           />
         </div>
       </SecondaryPageToolbar>
