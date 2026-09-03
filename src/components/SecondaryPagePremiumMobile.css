@@ -114,6 +114,7 @@
   .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-players-filter-rail"]) > * {
     flex: 0 0 auto;
     min-width: max-content;
+    overflow-x: visible !important;
   }
 
   .secondaryPageToolbar input[type="search"],

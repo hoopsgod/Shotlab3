@@ -49,7 +49,7 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
   );
   assert.match(
     secondaryMobile,
-    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\)\s*>\s*\*\s*\{[^}]*min-width:\s*max-content/,
+    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\)\s*>\s*\*\s*\{[^}]*min-width:\s*max-content;[^}]*overflow-x:\s*visible\s*!important/,
   );
   assert.match(
     geometryContract,
