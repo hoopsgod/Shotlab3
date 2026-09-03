@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatAssignmentDueDate } from "../lib/assignmentDeadline.js";
 import { derivePlayerAssignmentPriority } from "../lib/playerAssignmentPriority.js";
-import {
-  ASSIGNMENT_READ_STATES,
-  loadPlayerAssignment,
-  PLAYER_ASSIGNMENT_CHANGE_EVENT,
-  updatePlayerAssignmentState,
-} from "../lib/playerAssignmentService.js";
+import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
 import styles from "./PlayerCoachAssignmentCard.module.css";
 
 const actionFor = (state = "assigned") => state === "assigned" ? { action: "acknowledge", label: "Acknowledge assignment" } : state === "acknowledged" ? { action: "start", label: "Start assignment" } : state === "started" ? { action: "complete", label: "Mark assignment complete" } : null;
@@ -14,13 +9,11 @@ const formatDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 };
-const readMessage = (readState) => readState === ASSIGNMENT_READ_STATES.DEGRADED
-  ? "Showing the saved assignment. Latest coach updates could not be refreshed."
-  : readState === ASSIGNMENT_READ_STATES.FAILURE
-    ? "Coach assignment is temporarily unavailable. Try again when your connection is restored."
-    : readState === ASSIGNMENT_READ_STATES.DENIED
-      ? "Coach assignment is unavailable for this account."
-      : "";
+const readMessage = (state) => state === "degraded"
+  ? "Showing saved assignment; latest updates could not refresh."
+  : state === "failure"
+    ? "Coach assignment is temporarily unavailable."
+    : state === "denied" ? "Coach assignment is unavailable for this account." : "";
 
 export default function PlayerCoachAssignmentCard() {
   const [assignment, setAssignment] = useState(null);
@@ -31,10 +24,10 @@ export default function PlayerCoachAssignmentCard() {
   const actionInFlightRef = useRef(false);
 
   const applyLoadResult = useCallback((result = {}) => {
-    const nextReadState = result.readState || (result.ok ? ASSIGNMENT_READ_STATES.EMPTY : ASSIGNMENT_READ_STATES.FAILURE);
-    setReadState(nextReadState);
-    if (result.assignment || nextReadState === ASSIGNMENT_READ_STATES.EMPTY) setAssignment(result.assignment || null);
-    const nextMessage = readMessage(nextReadState);
+    const state = result.readState || (result.ok ? "empty" : "failure");
+    setReadState(state);
+    if (result.assignment || state === "empty") setAssignment(result.assignment || null);
+    const nextMessage = readMessage(state);
     setError(Boolean(nextMessage));
     setMessage(nextMessage);
   }, []);
@@ -43,15 +36,14 @@ export default function PlayerCoachAssignmentCard() {
     let cancelled = false;
     const run = async () => {
       const result = await loadPlayerAssignment();
-      if (cancelled) return;
-      applyLoadResult(result);
+      if (!cancelled) applyLoadResult(result);
     };
     const onFocus = () => void run();
     const onVisibility = () => { if (document.visibilityState === "visible") void run(); };
     const onChanged = (event) => {
       if (!cancelled && event?.detail?.assignmentText) {
         setAssignment(event.detail);
-        setReadState(ASSIGNMENT_READ_STATES.SUCCESS);
+        setReadState("success");
       }
     };
     void run();
@@ -69,14 +61,9 @@ export default function PlayerCoachAssignmentCard() {
   }, [applyLoadResult]);
 
   if (!assignment) {
-    if (readState !== ASSIGNMENT_READ_STATES.FAILURE && readState !== ASSIGNMENT_READ_STATES.DENIED) return null;
+    if (readState !== "failure" && readState !== "denied") return null;
     return (
-      <section
-        className={styles.root}
-        data-testid="player-coach-assignment"
-        data-assignment-read-state={readState}
-        aria-label="Coach assignment status"
-      >
+      <section className={styles.root} data-testid="player-coach-assignment" data-assignment-read-state={readState} aria-label="Coach assignment status">
         <div className={`${styles.message} ${styles.messageError}`} role="status">{message}</div>
       </section>
     );
