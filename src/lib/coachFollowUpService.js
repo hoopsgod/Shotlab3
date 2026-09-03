@@ -28,7 +28,7 @@ export function sanitizeCoachFollowUp(value = {}) {
     updatedAt: clean(value?.updated_at || value?.updatedAt, 120),
     completedAt: clean(value?.completed_at || value?.completedAt, 120),
     updatedBy: identity(value?.updated_by || value?.updatedBy),
-    syncPending: value?.syncPending === true,
+    syncPending: !!value?.syncPending,
   };
 }
 
@@ -81,9 +81,7 @@ export async function loadCoachFollowUps({
   const store = readCoachFollowUpStore(storage);
   const local = Object.values(store).map(sanitizeCoachFollowUp).filter((row) => row.teamId === activeTeamId);
   const requester = readRequester(storage);
-  if (!requester || !activeTeamId || typeof fetchImpl !== "function") {
-    return { ok: true, storageMode: "local_only", records: local };
-  }
+  if (!requester || !activeTeamId || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", records: local };
 
   try {
     const response = await fetchImpl(`/v1/coach-follow-ups?team_id=${encodeURIComponent(activeTeamId)}`, {
@@ -91,24 +89,18 @@ export async function loadCoachFollowUps({
       headers: buildApiIdentityHeaders({ requester, storage }),
     });
     const body = await readJson(response);
-    if (!response?.ok || body?.error) {
-      return { ok: false, storageMode: "local_fallback", records: local, error: body?.error || "follow_up_load_failed" };
-    }
+    if (!response?.ok || body?.error) return { ok: false, storageMode: "local_fallback", records: local, error: body?.error || "follow_up_load_failed" };
 
-    const remote = (Array.isArray(body?.follow_ups) ? body.follow_ups : []).map(sanitizeCoachFollowUp);
-    const pending = local.filter((row) => row.syncPending);
+    const remote = (Array.isArray(body?.follow_ups) ? body.follow_ups : [])
+      .map(sanitizeCoachFollowUp)
+      .filter((row) => row.teamId === activeTeamId && row.playerIdentity);
+    const merged = Object.fromEntries(remote.map((row) => [recordKey(row.teamId, row.playerIdentity), row]));
+    for (const row of local) if (row.syncPending) merged[recordKey(row.teamId, row.playerIdentity)] = row;
     const nextStore = { ...store };
-    for (const [key, value] of Object.entries(nextStore)) {
-      const row = sanitizeCoachFollowUp(value);
-      if (row.teamId === activeTeamId) delete nextStore[key];
-    }
-    for (const row of remote) {
-      if (row.teamId && row.playerIdentity) nextStore[recordKey(row.teamId, row.playerIdentity)] = row;
-    }
-    for (const row of pending) nextStore[recordKey(row.teamId, row.playerIdentity)] = row;
+    for (const key of Object.keys(nextStore)) if (key.startsWith(`${activeTeamId}::`)) delete nextStore[key];
+    Object.assign(nextStore, merged);
     writeCoachFollowUpStore(storage, nextStore);
-    const records = Object.values(nextStore).map(sanitizeCoachFollowUp).filter((row) => row.teamId === activeTeamId);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", records };
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", records: Object.values(merged) };
   } catch (error) {
     return { ok: false, storageMode: "local_fallback", records: local, error: String(error?.message || "follow_up_load_failed") };
   }
@@ -120,14 +112,8 @@ export async function loadCoachFollowUp({
   storage = globalThis?.localStorage,
   fetchImpl = globalThis?.fetch,
 } = {}) {
-  const result = await loadCoachFollowUps({ teamId, storage, fetchImpl });
-  const target = identity(playerIdentity);
-  return {
-    ok: result.ok,
-    storageMode: result.storageMode,
-    record: result.records.find((row) => row.playerIdentity === target) || null,
-    ...(result.error ? { error: result.error } : {}),
-  };
+  const { records, ...result } = await loadCoachFollowUps({ teamId, storage, fetchImpl });
+  return { ...result, record: records.find((row) => row.playerIdentity === identity(playerIdentity)) || null };
 }
 
 export async function saveCoachFollowUp({
