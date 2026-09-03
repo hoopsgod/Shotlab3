@@ -1,4 +1,5 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+import { mergeHydratedRows } from "./remotePersistence.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
@@ -139,7 +140,10 @@ async function hydrateGroup({
             missingFields.push(binding.field);
             continue;
           }
-          storage.setItem(binding.storageKey, JSON.stringify(payload[binding.field]));
+          const rows = binding.storageKey === "sl:shotlogs"
+            ? mergeHydratedRows(binding.storageKey, readJson(storage, binding.storageKey), payload[binding.field])
+            : payload[binding.field];
+          storage.setItem(binding.storageKey, JSON.stringify(rows));
           hydrated.push(binding.storageKey);
         }
         if (!missingFields.length) return { ok: true, hydrated };
