@@ -7,6 +7,8 @@ const runtimeGuard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLo
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const secondaryMobile = readFileSync(new URL('../src/components/SecondaryPagePremiumMobile.css', import.meta.url), 'utf8');
 const coachEventsMobile = readFileSync(new URL('../src/components/CoachEventsPremium.css', import.meta.url), 'utf8');
+const dashboardPrimitives = readFileSync(new URL('../src/components/CoachDashboardPrimitives.jsx', import.meta.url), 'utf8');
+const coachDashboards = readFileSync(new URL('../src/components/CoachInteractiveDashboards.jsx', import.meta.url), 'utf8');
 const geometryContract = readFileSync(new URL('./e2e/support/mobile-geometry-contract.mjs', import.meta.url), 'utf8');
 
 const compactCentering = centering.replace(/\s+/g, '');
@@ -31,6 +33,8 @@ test('Phase 2 keeps generic mobile containment in CSS and dynamic Coach route ow
 
   assert.match(runtimeGuard, /function findCoachRouteOwner\(\)/);
   assert.match(runtimeGuard, /Array\.from\(workspace\.children\)/);
+  assert.match(runtimeGuard, /\.team-brand\.coach-mode\.page/);
+  assert.match(runtimeGuard, /Array\.from\(coachPage\?\.children \|\| \[\]\)\.find\(matchesRouteOwner\)/);
   assert.match(runtimeGuard, /routeOwner\.classList\.add\('coach-route-scroll-container'\)/);
   assert.match(runtimeGuard, /width:\s*'100%'/);
   assert.match(runtimeGuard, /minWidth:\s*'0'/);
@@ -64,16 +68,9 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
     coachEventsMobile,
     /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*overflow-x:\s*auto/,
   );
-  assert.match(
-    finalAxisAuthority,
-    /\[data-testid="coach-events-filter-rail"\]\s*>\s*\[role="group"\]\s*\{[^}]*flex-wrap:\s*wrap\s*!important;[^}]*overflow-x:\s*visible\s*!important/,
-    'protected final authority must preserve the Events wrap contract after production CSS restructuring',
-  );
-  assert.match(
-    finalAxisAuthority,
-    /\.performance-workspace--coach\s*>\s*div:not\(\.coach-route-scroll-container\)\s*\{[^}]*overflow-x:\s*clip\s*!important/,
-    'direct Coach workspace siblings must never become WebKit horizontal scroll owners',
-  );
+  assert.match(dashboardPrimitives, /wrapFilters = false/);
+  assert.match(dashboardPrimitives, /style=\{wrapFilters \? \{ flexWrap: "wrap", overflowX: "visible" \} : undefined\}/);
+  assert.match(coachDashboards, /testId="coach-events-filter-rail"\s+wrapFilters/);
   assert.match(
     geometryContract,
     /selector:\s*'\[data-testid="coach-players-filter-rail"\]\s*>\s*\[role="group"\]'/,
