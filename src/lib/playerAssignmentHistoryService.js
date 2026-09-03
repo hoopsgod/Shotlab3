@@ -96,9 +96,9 @@ export async function saveNextPlayerAssignment({
   const activeTeamId = clean(teamId || session.teamId, 180);
   const target = identity(playerIdentity);
   const current = getPlayerAssignmentLocal({ teamId: activeTeamId, playerIdentity: target, storage });
-  if (!current || current.state !== "completed") return { ok: false, message: "Complete current assignment before assigning next.", error: "completed_assignment_required" };
+  if (!current || current.state !== "completed") return { ok: false, message: "Complete current assignment first.", error: "completed_assignment_required" };
   const text = clean(assignmentText, 4000);
-  if (!text) return { ok: false, message: "New assignment required.", error: "assignment_text_required" };
+  if (!text) return { ok: false, message: "Assignment required.", error: "assignment_text_required" };
 
   const archived = archivePlayerAssignmentLocal(current, storage);
   const now = new Date().toISOString();
@@ -117,7 +117,7 @@ export async function saveNextPlayerAssignment({
 
   if (!session.requester || typeof fetchImpl !== "function") {
     const local = savePlayerAssignmentLocal(draft, storage);
-    return { ok: true, storageMode: "local_only", assignment: local, archivedAssignment: archived, message: "Next assignment saved locally; completed work remains in history." };
+    return { ok: true, storageMode: "local_only", assignment: local, archivedAssignment: archived, message: "Saved locally; completed work remains in history." };
   }
 
   try {
@@ -136,14 +136,14 @@ export async function saveNextPlayerAssignment({
     });
     const body = await response.json().catch(() => ({}));
     if (!response?.ok || body?.error) {
-      return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: body?.error || "assignment_next_failed", message: "Completed assignment preserved; next delivery failed. Retry when sync returns." };
+      return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: body?.error || "assignment_next_failed", message: "Completed work preserved; next sync failed. Retry." };
     }
     const remote = normalizePlayerAssignment(body?.assignment) || draft;
     savePlayerAssignmentLocal(remote, storage);
     if (body?.archived_assignment) archivePlayerAssignmentLocal(body.archived_assignment, storage);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, archivedAssignment: normalizePlayerAssignmentHistory(body?.archived_assignment) || archived, message: body?.storage_mode === "demo_local" ? "Next assignment saved in demo." : "Next assignment delivered; previous work preserved in history." };
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, archivedAssignment: normalizePlayerAssignmentHistory(body?.archived_assignment) || archived, message: body?.storage_mode === "demo_local" ? "Saved in demo." : "Delivered; previous work preserved in history." };
   } catch (error) {
-    return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: String(error?.message || "assignment_next_failed"), message: "Completed assignment preserved; next delivery failed. Retry when sync returns." };
+    return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: String(error?.message || "assignment_next_failed"), message: "Completed work preserved; next sync failed. Retry." };
   }
 }
 
