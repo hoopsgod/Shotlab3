@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import {
   deriveCoachFollowUpQueue,
   loadCoachFollowUpQueue,
@@ -32,6 +33,7 @@ test("queue includes only active-team roster records and separates open from com
   const queue = deriveCoachFollowUpQueue({ records, roster, teamId: "team-a" });
   assert.equal(queue.openCount, 1);
   assert.equal(queue.completedCount, 1);
+  assert.equal(queue.pendingCount, 0);
   assert.equal(queue.totalCount, 2);
   assert.equal(queue.planned[0].playerIdentity, "one@example.test");
   assert.equal(queue.completed[0].playerIdentity, "two@example.test");
@@ -98,6 +100,7 @@ test("remote team collection replaces stale synced local queue state", async () 
   assert.equal(result.storageMode, "team_remote");
   assert.equal(result.queue.openCount, 0);
   assert.equal(result.queue.completedCount, 1);
+  assert.equal(result.queue.pendingCount, 0);
   assert.match(storage.snapshot()["sl:coach-follow-ups"], /completed/);
 });
 
@@ -142,6 +145,7 @@ test("successful remote refresh preserves a newer pending local follow-up", asyn
   assert.equal(result.ok, true);
   assert.equal(result.queue.openCount, 1);
   assert.equal(result.queue.completedCount, 0);
+  assert.equal(result.queue.pendingCount, 1);
   assert.equal(result.queue.planned[0].note, "Pending local follow-up");
   assert.equal(result.queue.planned[0].syncPending, true);
   assert.match(storage.snapshot()["sl:coach-follow-ups"], /Pending local follow-up/);
@@ -164,4 +168,11 @@ test("failed remote load preserves an honest local fallback queue", async () => 
   assert.equal(result.storageMode, "local_fallback");
   assert.equal(result.queue.openCount, 1);
   assert.equal(result.error, "offline");
+});
+
+test("queue UI exposes pending sync truth instead of claiming full sync", () => {
+  const enhancer = fs.readFileSync(new URL("../src/lib/coachFollowUpQueueEnhancer.js", import.meta.url), "utf8");
+  assert.match(enhancer, /data-pending-count/);
+  assert.match(enhancer, /pending team sync/);
+  assert.match(enhancer, /queue\.pendingCount > 0/);
 });
