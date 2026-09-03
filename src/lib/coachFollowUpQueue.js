@@ -79,12 +79,10 @@ export async function loadCoachFollowUpQueue({
   fetchImpl = globalThis?.fetch,
 } = {}) {
   const context = readCoachFollowUpQueueContext(storage);
-  const result = await loadCoachFollowUps({ teamId: context.teamId, storage, fetchImpl });
+  const { records, ...result } = await loadCoachFollowUps({ teamId: context.teamId, storage, fetchImpl });
   return {
-    ok: result.ok,
-    storageMode: result.storageMode,
-    queue: deriveCoachFollowUpQueue({ records: result.records, roster: context.roster, teamId: context.teamId }),
+    ...result,
+    queue: deriveCoachFollowUpQueue({ records, roster: context.roster, teamId: context.teamId }),
     context,
-    ...(result.error ? { error: result.error } : {}),
   };
 }
