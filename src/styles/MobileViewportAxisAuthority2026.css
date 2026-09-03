@@ -28,6 +28,26 @@
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcPrimary,
   html body.mission-control-active #root .performance-shell--coach.is-mobile [data-testid="coach-command-center-full"] .mcTeamFallback { min-width: 0 !important; }
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell { grid-template-columns: minmax(0, 1fr) !important; }
+
+  /* Keep the accepted component ownership split intact after production CSS
+   * restructuring. Events wraps its chips; Players keeps its nested local
+   * scroller. The final authority is intentionally route-specific here. */
+  html body #root .performance-shell--coach.is-mobile [data-testid="coach-events-filter-rail"] > [role="group"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    overscroll-behavior-inline: auto !important;
+  }
+
+  /* Direct Coach-workspace siblings are structural/decorative owners, never
+   * horizontal interaction rails. WebKit can promote a 320px decorative div to
+   * an auto x-owner when descendant paint exceeds the box, so clip that axis at
+   * the workspace boundary without touching nested intentional scrollers. */
+  html body #root .performance-shell--coach.is-mobile .performance-workspace--coach > div:not(.coach-route-scroll-container) {
+    overflow-x: clip !important;
+  }
+
   html body #root .performance-shell--coach.is-mobile .secondaryPageShell > *,
   .player-primary-logging-region .player-logging-input {
     box-sizing: border-box !important; min-width: 0 !important; max-width: 100% !important;
