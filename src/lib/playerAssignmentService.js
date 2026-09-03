@@ -3,13 +3,6 @@ import { normalizeAssignmentDueDate } from "./assignmentDeadline.js";
 
 export const PLAYER_ASSIGNMENT_STORAGE_KEY = "sl:player-assignments";
 export const PLAYER_ASSIGNMENT_CHANGE_EVENT = "shotlab:player-assignment-changed";
-export const ASSIGNMENT_READ_STATES = Object.freeze({
-  SUCCESS: "success",
-  EMPTY: "empty",
-  DEGRADED: "degraded",
-  DENIED: "denied",
-  FAILURE: "failure",
-});
 const STATES = new Set(["assigned", "acknowledged", "started", "completed"]);
 const clean = (value, max = 4000) => String(value ?? "").trim().slice(0, max);
 const identity = (value) => clean(value, 320).toLowerCase();
@@ -23,18 +16,14 @@ const readJson = async (response) => {
   try { return await response.json(); } catch { return {}; }
 };
 
-const hasAssignmentReadValue = (value) => Array.isArray(value) ? value.length > 0 : Boolean(value);
-
-export function deriveAssignmentReadState(result = {}, value = null) {
-  if (result?.storageMode === "forbidden" || result?.error === "coach_required") return ASSIGNMENT_READ_STATES.DENIED;
-  if (!result?.ok) return hasAssignmentReadValue(value) ? ASSIGNMENT_READ_STATES.DEGRADED : ASSIGNMENT_READ_STATES.FAILURE;
-  return hasAssignmentReadValue(value) ? ASSIGNMENT_READ_STATES.SUCCESS : ASSIGNMENT_READ_STATES.EMPTY;
+export function assignmentReadState(result = {}, value = null) {
+  const hasValue = Array.isArray(value) ? value.length > 0 : Boolean(value);
+  if (result?.storageMode === "forbidden" || result?.error === "coach_required") return "denied";
+  if (!result?.ok) return hasValue ? "degraded" : "failure";
+  return hasValue ? "success" : "empty";
 }
 
-const withAssignmentReadState = (result, value) => ({
-  ...result,
-  readState: deriveAssignmentReadState(result, value),
-});
+const withReadState = (result, value) => ({ ...result, readState: assignmentReadState(result, value) });
 
 function readSession(storage = globalThis?.localStorage) {
   const raw = parseJson(storage?.getItem?.("sl:session"), {});
@@ -134,11 +123,11 @@ export async function loadTeamPlayerAssignments({
   const local = listPlayerAssignmentsLocal({ teamId: activeTeamId, storage });
   if (session.role && session.role !== "coach") {
     const result = { ok: false, storageMode: "forbidden", assignments: [], error: "coach_required" };
-    return withAssignmentReadState(result, result.assignments);
+    return withReadState(result, result.assignments);
   }
   if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") {
     const result = { ok: true, storageMode: "local_only", assignments: local };
-    return withAssignmentReadState(result, result.assignments);
+    return withReadState(result, result.assignments);
   }
 
   const query = new URLSearchParams({ team_id: activeTeamId });
@@ -147,14 +136,14 @@ export async function loadTeamPlayerAssignments({
     const body = await readJson(response);
     if (!response?.ok || body?.error) {
       const result = { ok: false, storageMode: "local_fallback", assignments: local, error: body?.error || "assignment_load_failed" };
-      return withAssignmentReadState(result, result.assignments);
+      return withReadState(result, result.assignments);
     }
     const remote = replaceTeamPlayerAssignmentsLocal(Array.isArray(body?.assignments) ? body.assignments : [], { teamId: activeTeamId, storage });
     const result = { ok: true, storageMode: body?.storage_mode || "team_remote", assignments: remote };
-    return withAssignmentReadState(result, result.assignments);
+    return withReadState(result, result.assignments);
   } catch (error) {
     const result = { ok: false, storageMode: "local_fallback", assignments: local, error: String(error?.message || "assignment_load_failed") };
-    return withAssignmentReadState(result, result.assignments);
+    return withReadState(result, result.assignments);
   }
 }
 
@@ -170,7 +159,7 @@ export async function loadPlayerAssignment({
   const local = targetIdentity ? getPlayerAssignmentLocal({ teamId: activeTeamId, playerIdentity: targetIdentity, storage }) : null;
   if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") {
     const result = { ok: true, storageMode: "local_only", assignment: local };
-    return withAssignmentReadState(result, result.assignment);
+    return withReadState(result, result.assignment);
   }
 
   const query = new URLSearchParams({ team_id: activeTeamId });
@@ -180,16 +169,16 @@ export async function loadPlayerAssignment({
     const body = await readJson(response);
     if (!response?.ok || body?.error) {
       const result = { ok: false, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_load_failed" };
-      return withAssignmentReadState(result, result.assignment);
+      return withReadState(result, result.assignment);
     }
     const remote = (Array.isArray(body?.assignments) ? body.assignments : []).map(normalizePlayerAssignment).filter(Boolean)
       .find((row) => !targetIdentity || row.playerIdentity === targetIdentity) || null;
     if (remote) savePlayerAssignmentLocal(remote, storage);
     const result = { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote || local };
-    return withAssignmentReadState(result, result.assignment);
+    return withReadState(result, result.assignment);
   } catch (error) {
     const result = { ok: false, storageMode: "local_fallback", assignment: local, error: String(error?.message || "assignment_load_failed") };
-    return withAssignmentReadState(result, result.assignment);
+    return withReadState(result, result.assignment);
   }
 }
 
@@ -218,8 +207,10 @@ export async function savePlayerAssignment({
     updatedAt: new Date().toISOString(),
   });
   if (!draft) return { ok: false, message: "A player and assignment are required." };
-  const local = savePlayerAssignmentLocal(draft, storage);
-  if (!session.requester || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", assignment: local, message: "Assignment saved on this device only." };
+  if (!session.requester || typeof fetchImpl !== "function") {
+    const local = savePlayerAssignmentLocal(draft, storage);
+    return { ok: true, storageMode: "local_only", assignment: local, message: "Assignment saved on this device only." };
+  }
 
   try {
     const response = await fetchImpl("/v1/player-assignments", {
@@ -238,11 +229,15 @@ export async function savePlayerAssignment({
       }),
     });
     const body = await readJson(response);
-    if (!response?.ok || body?.error) return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_write_failed", message: "Saved locally, but player delivery sync failed." };
-    const remote = normalizePlayerAssignment(body?.assignment) || local;
+    if (!response?.ok || body?.error) {
+      const local = savePlayerAssignmentLocal(draft, storage);
+      return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_write_failed", message: "Saved locally, but player delivery sync failed." };
+    }
+    const remote = normalizePlayerAssignment(body?.assignment) || draft;
     savePlayerAssignmentLocal(remote, storage);
     return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: body?.storage_mode === "demo_local" ? "Assignment saved in this demo session." : "Assignment delivered to the player." };
   } catch (error) {
+    const local = savePlayerAssignmentLocal(draft, storage);
     return { ok: false, localSaved: true, storageMode: "local_fallback", assignment: local, error: String(error?.message || "assignment_write_failed"), message: "Saved locally, but player delivery sync failed." };
   }
 }
