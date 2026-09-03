@@ -26,7 +26,7 @@
 - Branch: `agent/phase1b-parity-state-guardrails` (PR #1520, rewritten onto the current default branch)
 - Base branch: `march-3-reset-85393dd`
 - Base SHA: `d2a66b95a1631d23c795b13647ed4db6c228cbca` (Phase 2 PR #1523 merged)
-- Goal: remove the duplicate Coach filter-rail horizontal owner exposed by populated parity fixtures and make the inherited WebKit geometry navigation deterministic without changing product navigation behavior.
+- Goal: remove the duplicate Coach Players filter-rail horizontal owner exposed by populated parity fixtures and make the inherited WebKit geometry navigation deterministic without changing product navigation behavior.
 
 ## Phase 2 rules
 
@@ -43,19 +43,23 @@
 
 ## Closure changes
 
-- The final mobile axis authority keeps each composite Coach filter rail width-bound; only its nested chip group may scroll horizontally.
-- The geometry allowlist is scoped to the Coach Players chip group instead of the globally repeated accessible label.
+- The shared secondary toolbar keeps its accepted mobile row presentation; redundant width/axis declarations were removed rather than adding another final-authority override.
+- Only `[data-testid="coach-players-filter-rail"]` clears the composite rail's inherited x-scroll ownership; its existing nested chip group remains the intentional local horizontal scroller.
+- The geometry allowlist is scoped to `[data-testid="coach-players-filter-rail"] > [role="group"]` instead of the globally repeated accessible label.
 - Scroll-owner diagnostics include bounded ancestry so a recurrence identifies the owning product surface.
 - Phase 1A WebKit navigation forces only the fixed-dock click after its synthetic horizontal gesture, retaining the real React route handler while avoiding Playwright's stale actionability wait.
-- A source contract locks the single-owner filter rule and the scoped allowlist selector.
+- The source contract rejects rediscovering shared filter rails in the protected final mobile axis layer.
 
-## Local closure evidence
+## Closure evidence
 
-- Reproduction before the fix: current-base Phase 1B `coach-populated` failed because `[data-testid="coach-players-filter-rail"]` became a second 350/685px horizontal owner.
-- Focused reproduction after the fix: pass, 1/1.
-- Phase 1A mobile Chromium: pass, 20 passed / 1 expected negative-fixture skip.
-- Phase 1B mobile Chromium: pass, 6/6.
-- Focused mobile authority Node contracts: pass, 7/7.
-- Optimized production build: pass; the protected final mobile authority asset survived the CSS optimization pipeline.
+- Reproduction before the first fix: current-base Phase 1B `coach-populated` failed because `[data-testid="coach-players-filter-rail"]` became a second 350/685px horizontal owner.
+- Focused reproduction after the first fix: pass, 1/1.
+- Phase 1A mobile Chromium locally: pass, 20 passed / 1 expected negative-fixture skip.
+- Phase 1B mobile Chromium locally: pass, 6/6.
+- Focused mobile authority Node contracts locally: pass, 7/7.
+- Optimized production build locally: pass.
 - Focused `coach-populated` parity case against the optimized preview: pass, 1/1.
-- WebKit remains an exact-head CI gate.
+- First exact-head CI on `b6cd49d0a51ecfafef10ad5dad06d2492698878a` disproved the generic filter override: Phase 1A failed at Coach Events on 390/430 in both Chromium and WebKit because the Events nested filter group became an unapproved horizontal owner.
+- The same exact head built successfully but measured 88,040 total CSS gzip bytes against the 88,000-byte budget, and Phase 5A also rejected its bundle growth versus the exact base.
+- The follow-up therefore removes the generic final-axis filter override, scopes the ownership change to Coach Players in the existing secondary-toolbar authority, and deletes redundant mobile toolbar declarations instead of broadening the allowlist.
+- Final exact-head browser and performance certification must be read from PR #1520 after this follow-up commit; do not certify `b6cd49d...`.

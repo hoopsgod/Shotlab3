@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
 const runtimeGuard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
+const secondaryMobile = readFileSync(new URL('../src/components/SecondaryPagePremiumMobile.css', import.meta.url), 'utf8');
 const geometryContract = readFileSync(new URL('./e2e/support/mobile-geometry-contract.mjs', import.meta.url), 'utf8');
 
 const compactCentering = centering.replace(/\s+/g, '');
@@ -36,14 +37,19 @@ test('Phase 2 keeps generic mobile containment in CSS and dynamic Coach route ow
   assert.match(runtimeGuard, /overflowX:\s*'clip'/);
 });
 
-test('Coach filters keep one scoped horizontal owner', () => {
-  assert.match(
+test('Coach Players filters keep one scoped horizontal owner', () => {
+  assert.doesNotMatch(
     finalAxisAuthority,
-    /\[data-visual-role="filter-rail"\]\s*\{[^}]*overflow-x:\s*visible\s*!important/,
+    /\[data-visual-role="filter-rail"\]/,
+    'final axis authority must not rediscover shared secondary filter rails',
   );
   assert.match(
-    finalAxisAuthority,
-    /\[data-visual-role="filter-rail"\]\s*>\s*\[role="group"\]\s*\{[^}]*overflow-x:\s*auto\s*!important/,
+    secondaryMobile,
+    /\.secondaryPageToolbar\s+\[data-testid="coach-players-filter-rail"\]\s*\{[^}]*overflow-x:\s*visible\s*!important/,
+  );
+  assert.match(
+    secondaryMobile,
+    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]\s*>\s*\*\s*\{[^}]*min-width:\s*0;[^}]*max-width:\s*100%/,
   );
   assert.match(
     geometryContract,
