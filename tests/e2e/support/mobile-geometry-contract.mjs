@@ -13,7 +13,7 @@ export const MOBILE_GEOMETRY_TOLERANCE = 1;
 // named filters do not fit at the supported mobile widths. It is the only
 // product surface authorized to own horizontal scrolling in Phase 1A.
 export const INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST = [{
-  selector: '[aria-label="Dashboard view filters"]',
+  selector: '[data-testid="coach-players-filter-rail"] > [role="group"]',
   component: "Coach Players dashboard filters",
   rationale: "Keeps every named roster filter reachable without widening the page.",
 }];
@@ -40,6 +40,15 @@ export async function collectMobileGeometry(page, contract) {
       const id = node.id ? `#${node.id}` : "";
       const classes = [...node.classList].slice(0, 3).map((name) => `.${name}`).join("");
       return `${node.tagName.toLowerCase()}${id}${classes}`;
+    };
+    const ancestryFor = (node) => {
+      const ancestry = [];
+      let current = node;
+      while (current && current !== document.body && ancestry.length < 6) {
+        ancestry.push(labelFor(current));
+        current = current.parentElement;
+      }
+      return ancestry;
     };
     const describe = (selector) => {
       const node = document.querySelector(selector);
@@ -79,6 +88,7 @@ export async function collectMobileGeometry(page, contract) {
           right: rect.right,
           overflowX: style.overflowX,
           allowedBy: allowlistEntry?.selector || null,
+          ancestry: ancestryFor(node),
         };
       })
       .filter((entry) => ["auto", "scroll"].includes(entry.overflowX) && entry.scrollWidth > entry.clientWidth + tolerance);

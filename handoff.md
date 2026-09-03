@@ -22,11 +22,11 @@
 
 ## Current work
 
-- Phase: **Phase 2 — mobile CSS/layout authority cleanup**
-- Branch: `agent/phase2-mobile-css-authority-cleanup`
+- Phase: **Post-Phase 2 mobile scroll-owner closure**
+- Branch: `agent/phase1b-parity-state-guardrails` (PR #1520, rewritten onto the current default branch)
 - Base branch: `march-3-reset-85393dd`
-- Base SHA: `63a2ee51f37f94c30d0390b7b2f48a3b829de550`
-- Goal: simplify and consolidate the mobile width/margin/transform/viewport/overflow authority that can cause Demo/registered layout drift, while preserving the accepted Phase 1 mobile appearance and behavior.
+- Base SHA: `d2a66b95a1631d23c795b13647ed4db6c228cbca` (Phase 2 PR #1523 merged)
+- Goal: remove the duplicate Coach filter-rail horizontal owner exposed by populated parity fixtures and make the inherited WebKit geometry navigation deterministic without changing product navigation behavior.
 
 ## Phase 2 rules
 
@@ -41,16 +41,21 @@
 9. Keep Phase 2 changes small and reviewable; no broad CSS rewrite.
 10. Do not merge a Phase 2 PR without explicit authorization.
 
-## Immediate Phase 2 task
+## Closure changes
 
-Audit the mobile CSS authority for competing declarations affecting:
+- The final mobile axis authority keeps each composite Coach filter rail width-bound; only its nested chip group may scroll horizontally.
+- The geometry allowlist is scoped to the Coach Players chip group instead of the globally repeated accessible label.
+- Scroll-owner diagnostics include bounded ancestry so a recurrence identifies the owning product surface.
+- Phase 1A WebKit navigation forces only the fixed-dock click after its synthetic horizontal gesture, retaining the real React route handler while avoiding Playwright's stale actionability wait.
+- A source contract locks the single-owner filter rule and the scoped allowlist selector.
 
-- page/root width and max-width;
-- horizontal margins and centering;
-- transforms/translateX;
-- overflow-x and overscroll behavior;
-- viewport-sized widths (`100vw`, `100dvw`, etc.);
-- shared Coach/Player authenticated shells;
-- Demo versus registered selectors or late overrides.
+## Local closure evidence
 
-Make only the smallest evidence-backed cleanup that removes duplicate/obsolete authority while keeping Phase 1A/1B/1C green.
+- Reproduction before the fix: current-base Phase 1B `coach-populated` failed because `[data-testid="coach-players-filter-rail"]` became a second 350/685px horizontal owner.
+- Focused reproduction after the fix: pass, 1/1.
+- Phase 1A mobile Chromium: pass, 20 passed / 1 expected negative-fixture skip.
+- Phase 1B mobile Chromium: pass, 6/6.
+- Focused mobile authority Node contracts: pass, 7/7.
+- Optimized production build: pass; the protected final mobile authority asset survived the CSS optimization pipeline.
+- Focused `coach-populated` parity case against the optimized preview: pass, 1/1.
+- WebKit remains an exact-head CI gate.

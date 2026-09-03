@@ -47,7 +47,7 @@ const CONTRACTS = {
       primaryRegion: '[data-testid="coach-players-command-bar"]',
     },
     centered: ["routeShell", "titleStage", "primaryRegion"],
-    localScrollSelectors: ['[aria-label="Dashboard view filters"]'],
+    localScrollSelectors: ['[data-testid="coach-players-filter-rail"] > [role="group"]'],
   },
   coachEvents: {
     targets: {
@@ -151,10 +151,13 @@ async function enterRegistered(browser, role, viewport) {
   return { context, page };
 }
 
-async function navigate(page, key, readyTestId) {
+async function navigate(page, key, readyTestId, browserName = "chromium") {
   const direct = page.getByTestId("mobile-navigation-dock").locator(`[data-nav-key="${key}"]`);
   if (await direct.count()) {
-    await direct.click();
+    // A synthetic horizontal drag can leave Playwright WebKit waiting for
+    // pointer actionability even though the fixed dock is visible. Force only
+    // this post-gesture transition; the real React handler still executes.
+    await direct.click({ force: browserName === "webkit" });
   } else {
     await page.getByTestId("mobile-navigation-more").click();
     const sheet = page.getByTestId("mobile-navigation-sheet");
@@ -197,9 +200,9 @@ for (const viewport of MOBILE_GEOMETRY_WIDTHS) {
       const browserName = testInfo.project.name.includes("webkit") ? "webkit" : "chromium";
       try {
         await certify(session.page, CONTRACTS.coachHome, `${mode}-coach-home-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
-        await navigate(session.page, "players", "coach-players-interactive-dashboard");
+        await navigate(session.page, "players", "coach-players-interactive-dashboard", browserName);
         await certify(session.page, CONTRACTS.coachPlayers, `${mode}-coach-players-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
-        await navigate(session.page, "events", "coach-events-interactive-dashboard");
+        await navigate(session.page, "events", "coach-events-interactive-dashboard", browserName);
         await certify(session.page, CONTRACTS.coachEvents, `${mode}-coach-events-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
       } finally {
         await session.context.close();
@@ -211,7 +214,7 @@ for (const viewport of MOBILE_GEOMETRY_WIDTHS) {
       const browserName = testInfo.project.name.includes("webkit") ? "webkit" : "chromium";
       try {
         await certify(session.page, CONTRACTS.playerHome, `${mode}-player-home-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
-        await navigate(session.page, "profile", "player-profile-workspace");
+        await navigate(session.page, "profile", "player-profile-workspace", browserName);
         await certify(session.page, CONTRACTS.playerProgress, `${mode}-player-progress-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
       } finally {
         await session.context.close();
