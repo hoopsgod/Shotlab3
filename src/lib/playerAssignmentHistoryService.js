@@ -1,7 +1,7 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { normalizeAssignmentDueDate } from "./assignmentDeadline.js";
 import {
-  deriveAssignmentReadState,
+  assignmentReadState,
   getPlayerAssignmentLocal,
   normalizePlayerAssignment,
   savePlayerAssignmentLocal,
@@ -30,10 +30,7 @@ const headers = (storage, extra = {}) => {
   return buildApiIdentityHeaders({ requester, storage, headers: extra });
 };
 
-const withHistoryReadState = (result) => ({
-  ...result,
-  readState: deriveAssignmentReadState(result, result?.history || []),
-});
+const withReadState = (result) => ({ ...result, readState: assignmentReadState(result, result?.history || []) });
 
 export function normalizePlayerAssignmentHistory(value = {}) {
   const assignment = normalizePlayerAssignment(value);
@@ -89,23 +86,17 @@ export async function loadCoachAssignmentHistory({
   const session = readSession(storage);
   const activeTeamId = clean(teamId || session.teamId, 180);
   const local = listPlayerAssignmentHistoryLocal({ teamId: activeTeamId, storage });
-  if (session.role && session.role !== "coach") {
-    return withHistoryReadState({ ok: false, storageMode: "forbidden", history: [], error: "coach_required" });
-  }
-  if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") {
-    return withHistoryReadState({ ok: true, storageMode: "local_only", history: local });
-  }
+  if (session.role && session.role !== "coach") return withReadState({ ok: false, storageMode: "forbidden", history: [], error: "coach_required" });
+  if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") return withReadState({ ok: true, storageMode: "local_only", history: local });
   try {
     const query = new URLSearchParams({ team_id: activeTeamId });
     const response = await fetchImpl(`/v1/player-assignment-history?${query.toString()}`, { method: "GET", headers: headers(storage) });
     const body = await response.json().catch(() => ({}));
-    if (!response?.ok || body?.error) {
-      return withHistoryReadState({ ok: false, storageMode: "local_fallback", history: local, error: body?.error || "assignment_history_load_failed" });
-    }
+    if (!response?.ok || body?.error) return withReadState({ ok: false, storageMode: "local_fallback", history: local, error: body?.error || "assignment_history_load_failed" });
     const history = replaceTeamPlayerAssignmentHistoryLocal(Array.isArray(body?.history) ? body.history : [], { teamId: activeTeamId, storage });
-    return withHistoryReadState({ ok: true, storageMode: body?.storage_mode || "team_remote", history });
+    return withReadState({ ok: true, storageMode: body?.storage_mode || "team_remote", history });
   } catch (error) {
-    return withHistoryReadState({ ok: false, storageMode: "local_fallback", history: local, error: String(error?.message || "assignment_history_load_failed") });
+    return withReadState({ ok: false, storageMode: "local_fallback", history: local, error: String(error?.message || "assignment_history_load_failed") });
   }
 }
 
