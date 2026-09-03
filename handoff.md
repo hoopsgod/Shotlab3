@@ -40,7 +40,8 @@
 - Current-player and team assignment reads return `readState` without removing existing `ok`, `storageMode`, data, or error fields.
 - `playerAssignmentHistoryService.js` reuses the same read-state contract for coach history reads.
 - `PlayerCoachAssignmentCard.jsx` keeps cached assignment truth visible when refresh is degraded and renders explicit unavailable/denied messaging only when no assignment can be shown.
-- `coachAssignmentDeadlineEnhancer.js` no longer converts unexpected refresh failures into an empty assignment list; it preserves the last known deadline map on hard failure/denial and marks degraded/failure state truthfully.
+- `coachAssignmentDeadlineEnhancer.js` preserves the last known deadline map on hard failure/denial and owns only deadline/overdue decoration; it does not mutate the accountability summary owned by the accountability panel.
+- Remote assignment delivery no longer announces an optimistic pre-POST write; successful remote truth is announced after the server response, while failed delivery retains the existing honest local fallback behavior.
 - No CSS files, geometry allowlists, auth semantics, API routes, database migrations, or visual baselines are changed.
 
 ## Validation target
