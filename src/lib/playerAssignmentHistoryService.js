@@ -1,8 +1,9 @@
-import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { normalizeAssignmentDueDate } from "./assignmentDeadline.js";
 import {
+  assignmentHeaders,
   getPlayerAssignmentLocal,
   normalizePlayerAssignment,
+  readAssignmentSession,
   savePlayerAssignmentLocal,
 } from "./playerAssignmentService.js";
 
@@ -13,21 +14,6 @@ const parse = (value, fallback) => {
   try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
 };
 const keyFor = (row) => `${clean(row?.teamId, 180)}::${identity(row?.playerIdentity)}::${clean(row?.createdAt, 120)}`;
-
-function readSession(storage = globalThis?.localStorage) {
-  const raw = parse(storage?.getItem?.("sl:session"), {});
-  const session = Array.isArray(raw) ? raw[0] || {} : raw;
-  return {
-    requester: identity(session?.email || session?.userEmail || session?.user_id),
-    teamId: clean(session?.teamId || session?.team_id, 180),
-    role: identity(session?.role),
-  };
-}
-
-const headers = (storage, extra = {}) => {
-  const { requester } = readSession(storage);
-  return buildApiIdentityHeaders({ requester, storage, headers: extra });
-};
 
 export function normalizePlayerAssignmentHistory(value = {}) {
   const assignment = normalizePlayerAssignment(value);
@@ -80,14 +66,14 @@ export async function loadCoachAssignmentHistory({
   storage = globalThis?.localStorage,
   fetchImpl = globalThis?.fetch,
 } = {}) {
-  const session = readSession(storage);
+  const session = readAssignmentSession(storage);
   const activeTeamId = clean(teamId || session.teamId, 180);
   const local = listPlayerAssignmentHistoryLocal({ teamId: activeTeamId, storage });
   if (session.role && session.role !== "coach") return { ok: false, storageMode: "forbidden", history: [], error: "coach_required" };
   if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", history: local };
   try {
     const query = new URLSearchParams({ team_id: activeTeamId });
-    const response = await fetchImpl(`/v1/player-assignment-history?${query.toString()}`, { method: "GET", headers: headers(storage) });
+    const response = await fetchImpl(`/v1/player-assignment-history?${query.toString()}`, { method: "GET", headers: assignmentHeaders(storage) });
     const body = await response.json().catch(() => ({}));
     if (!response?.ok || body?.error) return { ok: false, storageMode: "local_fallback", history: local, error: body?.error || "assignment_history_load_failed" };
     const history = replaceTeamPlayerAssignmentHistoryLocal(Array.isArray(body?.history) ? body.history : [], { teamId: activeTeamId, storage });
@@ -106,13 +92,13 @@ export async function saveNextPlayerAssignment({
   storage = globalThis?.localStorage,
   fetchImpl = globalThis?.fetch,
 } = {}) {
-  const session = readSession(storage);
+  const session = readAssignmentSession(storage);
   const activeTeamId = clean(teamId || session.teamId, 180);
   const target = identity(playerIdentity);
   const current = getPlayerAssignmentLocal({ teamId: activeTeamId, playerIdentity: target, storage });
-  if (!current || current.state !== "completed") return { ok: false, message: "Complete the current assignment before assigning the next one.", error: "completed_assignment_required" };
+  if (!current || current.state !== "completed") return { ok: false, message: "Complete current assignment before assigning next.", error: "completed_assignment_required" };
   const text = clean(assignmentText, 4000);
-  if (!text) return { ok: false, message: "A new assignment is required.", error: "assignment_text_required" };
+  if (!text) return { ok: false, message: "New assignment required.", error: "assignment_text_required" };
 
   const archived = archivePlayerAssignmentLocal(current, storage);
   const now = new Date().toISOString();
@@ -131,13 +117,13 @@ export async function saveNextPlayerAssignment({
 
   if (!session.requester || typeof fetchImpl !== "function") {
     const local = savePlayerAssignmentLocal(draft, storage);
-    return { ok: true, storageMode: "local_only", assignment: local, archivedAssignment: archived, message: "Next assignment saved on this device. The completed assignment remains in local history." };
+    return { ok: true, storageMode: "local_only", assignment: local, archivedAssignment: archived, message: "Next assignment saved locally; completed work remains in history." };
   }
 
   try {
     const response = await fetchImpl("/v1/player-assignment-history", {
       method: "POST",
-      headers: headers(storage, { "Content-Type": "application/json" }),
+      headers: assignmentHeaders(storage, { "Content-Type": "application/json" }),
       body: JSON.stringify({
         team_id: activeTeamId,
         assignment: {
@@ -150,15 +136,15 @@ export async function saveNextPlayerAssignment({
     });
     const body = await response.json().catch(() => ({}));
     if (!response?.ok || body?.error) {
-      return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: body?.error || "assignment_next_failed", message: "The completed assignment is preserved, but the next assignment was not delivered. Retry when sync is available." };
+      return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: body?.error || "assignment_next_failed", message: "Completed assignment preserved; next delivery failed. Retry when sync returns." };
     }
     const remote = normalizePlayerAssignment(body?.assignment) || draft;
     savePlayerAssignmentLocal(remote, storage);
     if (body?.archived_assignment) archivePlayerAssignmentLocal(body.archived_assignment, storage);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, archivedAssignment: normalizePlayerAssignmentHistory(body?.archived_assignment) || archived, message: body?.storage_mode === "demo_local" ? "Next assignment saved in this demo session." : "Next assignment delivered. The completed assignment was preserved in history." };
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, archivedAssignment: normalizePlayerAssignmentHistory(body?.archived_assignment) || archived, message: body?.storage_mode === "demo_local" ? "Next assignment saved in demo." : "Next assignment delivered; previous work preserved in history." };
   } catch (error) {
-    return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: String(error?.message || "assignment_next_failed"), message: "The completed assignment is preserved, but the next assignment was not delivered. Retry when sync is available." };
+    return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: String(error?.message || "assignment_next_failed"), message: "Completed assignment preserved; next delivery failed. Retry when sync returns." };
   }
 }
 
-export const __testUtils = { readSession, keyFor };
+export const __testUtils = { readSession: readAssignmentSession, keyFor };
