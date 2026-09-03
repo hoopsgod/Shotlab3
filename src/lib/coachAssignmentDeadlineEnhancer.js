@@ -1,9 +1,5 @@
 import { formatAssignmentDueDate, isAssignmentOverdue, normalizeAssignmentDueDate } from "./assignmentDeadline.js";
-import {
-  ASSIGNMENT_READ_STATES,
-  loadTeamPlayerAssignments,
-  PLAYER_ASSIGNMENT_CHANGE_EVENT,
-} from "./playerAssignmentService.js";
+import { loadTeamPlayerAssignments, PLAYER_ASSIGNMENT_CHANGE_EVENT } from "./playerAssignmentService.js";
 
 const STYLE_ID = "shotlab-coach-assignment-deadline-styles";
 const clean = (value, max = 320) => String(value ?? "").trim().slice(0, max);
@@ -44,14 +40,9 @@ export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() 
 }
 
 export function resolveAssignmentDeadlineRefresh(result = {}, currentDeadlines = new Map(), options = {}) {
-  const readState = result?.readState || (result?.ok ? ASSIGNMENT_READ_STATES.EMPTY : ASSIGNMENT_READ_STATES.FAILURE);
-  if (readState === ASSIGNMENT_READ_STATES.FAILURE || readState === ASSIGNMENT_READ_STATES.DENIED) {
-    return { deadlines: currentDeadlines, readState };
-  }
-  return {
-    deadlines: buildAssignmentDeadlineMap(result?.assignments || [], options),
-    readState,
-  };
+  const readState = result?.readState || (result?.ok ? "empty" : "failure");
+  if (readState === "failure" || readState === "denied") return { deadlines: currentDeadlines, readState };
+  return { deadlines: buildAssignmentDeadlineMap(result?.assignments || [], options), readState };
 }
 
 function ensureStyles() {
@@ -108,15 +99,13 @@ function decoratePanel(deadlines, readState) {
   const meta = panel.querySelector(".mcAssignmentAccountabilityMeta");
   if (meta) {
     if (meta.dataset.deadlineBaseText == null) meta.dataset.deadlineBaseText = meta.textContent || "";
-    const stateSuffix = readState === ASSIGNMENT_READ_STATES.DEGRADED || readState === ASSIGNMENT_READ_STATES.FAILURE
+    const suffix = readState === "degraded" || readState === "failure"
       ? " · sync delayed"
-      : readState === ASSIGNMENT_READ_STATES.DENIED
-        ? " · assignment data unavailable"
-        : "";
-    meta.dataset.deadlineDecorated = overdueCount > 0 || stateSuffix ? "true" : "";
+      : readState === "denied" ? " · assignment data unavailable" : "";
+    meta.dataset.deadlineDecorated = overdueCount > 0 || suffix ? "true" : "";
     meta.textContent = overdueCount > 0
-      ? `${meta.dataset.deadlineBaseText} · ${overdueCount} overdue${stateSuffix}`
-      : `${meta.dataset.deadlineBaseText}${stateSuffix}`;
+      ? `${meta.dataset.deadlineBaseText} · ${overdueCount} overdue${suffix}`
+      : `${meta.dataset.deadlineBaseText}${suffix}`;
   }
 }
 
@@ -127,7 +116,7 @@ export function installCoachAssignmentDeadlineEnhancer() {
   ensureStyles();
 
   let deadlines = new Map();
-  let readState = ASSIGNMENT_READ_STATES.EMPTY;
+  let readState = "empty";
   let loading = false;
   let frame = null;
   let observer = null;
@@ -149,18 +138,17 @@ export function installCoachAssignmentDeadlineEnhancer() {
     const teamId = sessionTeamId();
     if (!teamId) {
       deadlines = new Map();
-      readState = ASSIGNMENT_READ_STATES.EMPTY;
+      readState = "empty";
       render();
       return;
     }
     loading = true;
     try {
-      const result = await loadTeamPlayerAssignments({ teamId });
-      const resolved = resolveAssignmentDeadlineRefresh(result, deadlines);
+      const resolved = resolveAssignmentDeadlineRefresh(await loadTeamPlayerAssignments({ teamId }), deadlines);
       deadlines = resolved.deadlines;
       readState = resolved.readState;
     } catch {
-      readState = ASSIGNMENT_READ_STATES.FAILURE;
+      readState = "failure";
     } finally {
       loading = false;
       render();
