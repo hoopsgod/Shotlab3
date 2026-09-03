@@ -31,7 +31,6 @@ export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() 
     const state = identity(row?.state || "assigned");
     map.set(playerIdentity, {
       dueDate,
-      state,
       overdue: isAssignmentOverdue({ dueDate, state, now }),
       label: formatAssignmentDueDate(dueDate),
     });
