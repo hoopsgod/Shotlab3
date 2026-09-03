@@ -257,9 +257,8 @@
     width: 100%;
     min-width: 0;
     gap: 6px;
-    padding-bottom: 1px;
     flex-wrap: wrap;
-    overflow-x: visible;
+    overflow-x: visible !important;
   }
 
   [data-testid="coach-events-filter-rail"] > div[role="group"] button {
