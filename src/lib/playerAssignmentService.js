@@ -231,9 +231,9 @@ export async function updatePlayerAssignmentState({
   const activeTeamId = clean(teamId || session.teamId, 180);
   const current = getPlayerAssignmentLocal({ teamId: activeTeamId, playerIdentity: session.requester, storage });
   const nextState = action === "acknowledge" ? "acknowledged" : action === "start" ? "started" : "completed";
-  if (!current) return { ok: false, message: "Assignment unavailable." };
+  if (!current) return { ok: false, message: "Unavailable." };
   const optimistic = savePlayerAssignmentLocal({ ...current, state: nextState, updatedAt: new Date().toISOString() }, storage);
-  if (!session.requester || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", assignment: optimistic, message: "Updated locally." };
+  if (!session.requester || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", assignment: optimistic, message: "Updated." };
 
   try {
     const response = await fetchImpl("/v1/player-assignments", {
@@ -248,7 +248,7 @@ export async function updatePlayerAssignmentState({
     }
     const remote = normalizePlayerAssignment(body?.assignment) || optimistic;
     savePlayerAssignmentLocal(remote, storage);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: nextState === "completed" ? "Completed." : nextState === "started" ? "Started." : "Acknowledged." };
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, message: nextState === "completed" ? "Assignment marked complete." : nextState === "started" ? "Started." : "Acknowledged." };
   } catch (error) {
     savePlayerAssignmentLocal(current, storage);
     return { ok: false, assignment: current, error: String(error?.message || "assignment_state_failed"), message: "Status sync failed." };
