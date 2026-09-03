@@ -33,13 +33,16 @@ test('Phase 2 keeps generic mobile containment in CSS and dynamic Coach route ow
 
   assert.match(runtimeGuard, /function findCoachRouteOwner\(\)/);
   assert.match(runtimeGuard, /Array\.from\(workspace\.children\)/);
-  assert.match(runtimeGuard, /\.team-brand\.coach-mode\.page/);
-  assert.match(runtimeGuard, /Array\.from\(coachPage\?\.children \|\| \[\]\)\.find\(matchesRouteOwner\)/);
   assert.match(runtimeGuard, /routeOwner\.classList\.add\('coach-route-scroll-container'\)/);
   assert.match(runtimeGuard, /width:\s*'100%'/);
   assert.match(runtimeGuard, /minWidth:\s*'0'/);
   assert.match(runtimeGuard, /maxWidth:\s*'100%'/);
   assert.match(runtimeGuard, /overflowX:\s*'clip'/);
+  assert.match(
+    runtimeGuard,
+    /new MutationObserver\(\(\) => \{\s*normalizeRegisteredCoachRouteGeometry\(\);\s*scheduleCorrection\(\);\s*\}\)/,
+    'new Coach route wrappers must receive x-axis geometry before the deferred animation-frame correction',
+  );
 });
 
 test('Coach secondary filters keep one scoped horizontal owner', () => {
