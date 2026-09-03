@@ -1,5 +1,5 @@
 import { formatAssignmentDueDate, isAssignmentOverdue, normalizeAssignmentDueDate } from "./assignmentDeadline.js";
-import { loadTeamPlayerAssignments, PLAYER_ASSIGNMENT_CHANGE_EVENT } from "./playerAssignmentService.js";
+import { assignmentReadState, loadTeamPlayerAssignments, PLAYER_ASSIGNMENT_CHANGE_EVENT } from "./playerAssignmentService.js";
 
 const STYLE_ID = "shotlab-coach-assignment-deadline-styles";
 const clean = (value, max = 320) => String(value ?? "").trim().slice(0, max);
@@ -40,10 +40,8 @@ export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() 
 }
 
 export function resolveAssignmentDeadlineRefresh(result = {}, currentDeadlines = new Map(), options = {}) {
-  const state = result?.readState || (result?.ok ? "empty" : "failure");
-  return state === "failure" || state === "denied"
-    ? currentDeadlines
-    : buildAssignmentDeadlineMap(result?.assignments || [], options);
+  const state = assignmentReadState(result, result?.assignments || []);
+  return state === "failure" || state === "denied" ? currentDeadlines : buildAssignmentDeadlineMap(result?.assignments || [], options);
 }
 
 function ensureStyles() {
