@@ -7,6 +7,7 @@ const runtimeGuard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLo
 const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const secondaryMobile = readFileSync(new URL('../src/components/SecondaryPagePremiumMobile.css', import.meta.url), 'utf8');
 const coachEventsMobile = readFileSync(new URL('../src/components/CoachEventsPremium.css', import.meta.url), 'utf8');
+const dashboardPrimitiveStyles = readFileSync(new URL('../src/components/CoachDashboardPrimitives.module.css', import.meta.url), 'utf8');
 const dashboardPrimitives = readFileSync(new URL('../src/components/CoachDashboardPrimitives.jsx', import.meta.url), 'utf8');
 const geometryContract = readFileSync(new URL('./e2e/support/mobile-geometry-contract.mjs', import.meta.url), 'utf8');
 
@@ -63,17 +64,19 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
     /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\):not\(\[data-testid="coach-events-filter-rail"\]\)\s*>\s*\*\s*\{[^}]*min-width:\s*max-content/,
   );
   assert.match(
-    coachEventsMobile,
-    /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*flex-wrap:\s*wrap;[^}]*overflow-x:\s*visible/,
+    dashboardPrimitiveStyles,
+    /:global\(\[data-testid="coach-events-filter-rail"\]\)\s*>\s*\.filterScroller\s*\{[^}]*width:\s*100%;[^}]*gap:\s*6px;[^}]*flex-wrap:\s*wrap;[^}]*overflow-x:\s*visible/,
+    'Coach Events must anchor its non-scrolling filter group to the live CSS-module class so production pruning cannot remove it',
   );
   assert.doesNotMatch(
     coachEventsMobile,
-    /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*overflow-x:\s*auto/,
+    /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{/,
+    'Coach Events must not duplicate filter-group ownership in a global selector that production pruning can remove',
   );
   assert.doesNotMatch(
     dashboardPrimitives,
     /wrapFilters|style=\{[^}]*flexWrap:\s*"wrap"[^}]*overflowX:\s*"visible"/,
-    'shared React filter primitive must not duplicate Coach Events page-specific wrapping authority',
+    'shared React filter primitive must not duplicate Coach Events CSS-module wrapping authority',
   );
   assert.match(
     geometryContract,
