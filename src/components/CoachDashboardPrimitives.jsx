@@ -139,6 +139,7 @@ export function DashboardFilterRail({
   trailing,
   testId,
   surface = "dark",
+  wrapFilters = false,
 }) {
   return (
     <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail">
@@ -155,7 +156,12 @@ export function DashboardFilterRail({
           placeholder={searchPlaceholder}
         />
       </label>
-      <div className={styles.filterScroller} role="group" aria-label="Dashboard view filters">
+      <div
+        className={styles.filterScroller}
+        role="group"
+        aria-label="Dashboard view filters"
+        style={wrapFilters ? { flexWrap: "wrap", overflowX: "visible" } : undefined}
+      >
         {filters.map((filter) => (
           <button
             key={filter.key}
