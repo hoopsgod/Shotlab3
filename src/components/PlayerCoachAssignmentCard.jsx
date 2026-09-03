@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatAssignmentDueDate } from "../lib/assignmentDeadline.js";
 import { derivePlayerAssignmentPriority } from "../lib/playerAssignmentPriority.js";
 import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
@@ -9,11 +9,6 @@ const formatDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 };
-const readMessage = (state) => state === "degraded"
-  ? "Showing saved assignment; latest updates could not refresh."
-  : state === "failure"
-    ? "Coach assignment is temporarily unavailable."
-    : state === "denied" ? "Coach assignment is unavailable for this account." : "";
 
 export default function PlayerCoachAssignmentCard() {
   const [assignment, setAssignment] = useState(null);
@@ -23,20 +18,17 @@ export default function PlayerCoachAssignmentCard() {
   const [error, setError] = useState(false);
   const actionInFlightRef = useRef(false);
 
-  const applyLoadResult = useCallback((result = {}) => {
-    const state = result.readState || (result.ok ? "empty" : "failure");
-    setReadState(state);
-    if (result.assignment || state === "empty") setAssignment(result.assignment || null);
-    const nextMessage = readMessage(state);
-    setError(Boolean(nextMessage));
-    setMessage(nextMessage);
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       const result = await loadPlayerAssignment();
-      if (!cancelled) applyLoadResult(result);
+      if (cancelled) return;
+      const state = result.readState || (result.ok ? "empty" : "failure");
+      const msg = state === "degraded" ? "Showing saved assignment; sync delayed." : state === "failure" ? "Coach assignment unavailable." : state === "denied" ? "Assignment unavailable for this account." : "";
+      setReadState(state);
+      if (result.assignment || state === "empty") setAssignment(result.assignment || null);
+      setError(Boolean(msg));
+      setMessage(msg);
     };
     const onFocus = () => void run();
     const onVisibility = () => { if (document.visibilityState === "visible") void run(); };
@@ -44,6 +36,8 @@ export default function PlayerCoachAssignmentCard() {
       if (!cancelled && event?.detail?.assignmentText) {
         setAssignment(event.detail);
         setReadState("success");
+        setError(false);
+        setMessage("");
       }
     };
     void run();
@@ -58,7 +52,7 @@ export default function PlayerCoachAssignmentCard() {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener(PLAYER_ASSIGNMENT_CHANGE_EVENT, onChanged);
     };
-  }, [applyLoadResult]);
+  }, []);
 
   if (!assignment) {
     if (readState !== "failure" && readState !== "denied") return null;
