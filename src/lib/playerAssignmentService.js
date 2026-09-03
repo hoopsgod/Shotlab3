@@ -3,6 +3,13 @@ import { normalizeAssignmentDueDate } from "./assignmentDeadline.js";
 
 export const PLAYER_ASSIGNMENT_STORAGE_KEY = "sl:player-assignments";
 export const PLAYER_ASSIGNMENT_CHANGE_EVENT = "shotlab:player-assignment-changed";
+export const ASSIGNMENT_READ_STATES = Object.freeze({
+  SUCCESS: "success",
+  EMPTY: "empty",
+  DEGRADED: "degraded",
+  DENIED: "denied",
+  FAILURE: "failure",
+});
 const STATES = new Set(["assigned", "acknowledged", "started", "completed"]);
 const clean = (value, max = 4000) => String(value ?? "").trim().slice(0, max);
 const identity = (value) => clean(value, 320).toLowerCase();
@@ -15,6 +22,19 @@ const parseJson = (value, fallback) => {
 const readJson = async (response) => {
   try { return await response.json(); } catch { return {}; }
 };
+
+const hasAssignmentReadValue = (value) => Array.isArray(value) ? value.length > 0 : Boolean(value);
+
+export function deriveAssignmentReadState(result = {}, value = null) {
+  if (result?.storageMode === "forbidden" || result?.error === "coach_required") return ASSIGNMENT_READ_STATES.DENIED;
+  if (!result?.ok) return hasAssignmentReadValue(value) ? ASSIGNMENT_READ_STATES.DEGRADED : ASSIGNMENT_READ_STATES.FAILURE;
+  return hasAssignmentReadValue(value) ? ASSIGNMENT_READ_STATES.SUCCESS : ASSIGNMENT_READ_STATES.EMPTY;
+}
+
+const withAssignmentReadState = (result, value) => ({
+  ...result,
+  readState: deriveAssignmentReadState(result, value),
+});
 
 function readSession(storage = globalThis?.localStorage) {
   const raw = parseJson(storage?.getItem?.("sl:session"), {});
@@ -113,10 +133,12 @@ export async function loadTeamPlayerAssignments({
   const activeTeamId = clean(teamId || session.teamId, 180);
   const local = listPlayerAssignmentsLocal({ teamId: activeTeamId, storage });
   if (session.role && session.role !== "coach") {
-    return { ok: false, storageMode: "forbidden", assignments: [], error: "coach_required" };
+    const result = { ok: false, storageMode: "forbidden", assignments: [], error: "coach_required" };
+    return withAssignmentReadState(result, result.assignments);
   }
   if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") {
-    return { ok: true, storageMode: "local_only", assignments: local };
+    const result = { ok: true, storageMode: "local_only", assignments: local };
+    return withAssignmentReadState(result, result.assignments);
   }
 
   const query = new URLSearchParams({ team_id: activeTeamId });
@@ -124,12 +146,15 @@ export async function loadTeamPlayerAssignments({
     const response = await fetchImpl(`/v1/player-assignments?${query.toString()}`, { method: "GET", headers: headers(storage) });
     const body = await readJson(response);
     if (!response?.ok || body?.error) {
-      return { ok: false, storageMode: "local_fallback", assignments: local, error: body?.error || "assignment_load_failed" };
+      const result = { ok: false, storageMode: "local_fallback", assignments: local, error: body?.error || "assignment_load_failed" };
+      return withAssignmentReadState(result, result.assignments);
     }
     const remote = replaceTeamPlayerAssignmentsLocal(Array.isArray(body?.assignments) ? body.assignments : [], { teamId: activeTeamId, storage });
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignments: remote };
+    const result = { ok: true, storageMode: body?.storage_mode || "team_remote", assignments: remote };
+    return withAssignmentReadState(result, result.assignments);
   } catch (error) {
-    return { ok: false, storageMode: "local_fallback", assignments: local, error: String(error?.message || "assignment_load_failed") };
+    const result = { ok: false, storageMode: "local_fallback", assignments: local, error: String(error?.message || "assignment_load_failed") };
+    return withAssignmentReadState(result, result.assignments);
   }
 }
 
@@ -143,20 +168,28 @@ export async function loadPlayerAssignment({
   const activeTeamId = clean(teamId || session.teamId, 180);
   const targetIdentity = identity(playerIdentity || (session.role === "player" ? session.requester : ""));
   const local = targetIdentity ? getPlayerAssignmentLocal({ teamId: activeTeamId, playerIdentity: targetIdentity, storage }) : null;
-  if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", assignment: local };
+  if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") {
+    const result = { ok: true, storageMode: "local_only", assignment: local };
+    return withAssignmentReadState(result, result.assignment);
+  }
 
   const query = new URLSearchParams({ team_id: activeTeamId });
   if (targetIdentity && session.role !== "player") query.set("player_identity", targetIdentity);
   try {
     const response = await fetchImpl(`/v1/player-assignments?${query.toString()}`, { method: "GET", headers: headers(storage) });
     const body = await readJson(response);
-    if (!response?.ok || body?.error) return { ok: false, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_load_failed" };
+    if (!response?.ok || body?.error) {
+      const result = { ok: false, storageMode: "local_fallback", assignment: local, error: body?.error || "assignment_load_failed" };
+      return withAssignmentReadState(result, result.assignment);
+    }
     const remote = (Array.isArray(body?.assignments) ? body.assignments : []).map(normalizePlayerAssignment).filter(Boolean)
       .find((row) => !targetIdentity || row.playerIdentity === targetIdentity) || null;
     if (remote) savePlayerAssignmentLocal(remote, storage);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote || local };
+    const result = { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote || local };
+    return withAssignmentReadState(result, result.assignment);
   } catch (error) {
-    return { ok: false, storageMode: "local_fallback", assignment: local, error: String(error?.message || "assignment_load_failed") };
+    const result = { ok: false, storageMode: "local_fallback", assignment: local, error: String(error?.message || "assignment_load_failed") };
+    return withAssignmentReadState(result, result.assignment);
   }
 }
 
