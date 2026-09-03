@@ -265,6 +265,9 @@ test('login entry is visually locked at 390px and runtime-clean', async ({ brows
     await page.goto('/?demo=1');
     await expect(page.getByRole('button', { name: 'Coach demo', exact: true })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole('button', { name: 'Player demo', exact: true })).toBeVisible({ timeout: 20_000 });
+    const authShell = page.getByTestId('auth-workspace').locator(':scope > .fade-up');
+    await expect(authShell, 'login visual authority must reach its final visible state before capture').toHaveCSS('opacity', '1', { timeout: 20_000 });
+    await expect(authShell, 'login entrance transform must settle before capture').toHaveCSS('transform', 'none', { timeout: 20_000 });
     await capturePhase1CSnapshot(page, guard, 'login-390');
   } finally {
     await context.close();

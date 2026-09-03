@@ -22,20 +22,24 @@ test('mobile geometry authority keeps Player and Coach on dedicated 20px rails',
   assert.match(authority, /--phase4e-mobile-gutter:\s*var\(--shotlab-mobile-content-rail\)/);
   assert.match(finalAxis, /--layout-gutter:\s*20px/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container[^}]*padding-inline:\s*20px !important/);
+  assert.doesNotMatch(finalAxis, /performance-shell--player\.is-mobile \.player-scroll-container\s*\{[^}]*(?:width|max-width|min-width|box-sizing):/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[\s\S]*padding-inline:\s*0 !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.performance-workspace--coach[^}]*--shotlab-coach-route-wrapper-gutter:\s*var\(--shotlab-mobile-content-rail, 20px\)/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \.player-quick-actions[\s\S]*padding-inline:\s*0 !important/);
   assert.doesNotMatch(finalAxis, /performance-shell--coach\.is-mobile > \.shell-main > \.content-wrap[^}]*padding-inline:\s*20px !important/);
 });
 
-test('Coach secondary routes use one outer rail with no composed inner gutter or title breakout', () => {
+test('Coach secondary routes use one outer rail with bounded mobile grid content', () => {
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
   assert.match(authority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell[^{]*\{[^}]*padding-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*,[\s\S]*player-primary-logging-region \.player-logging-input\s*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
   assert.match(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100%;[\s\S]*max-width:\s*100%;[\s\S]*margin-inline:\s*0;/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
   assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);
-  assert.match(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.doesNotMatch(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][^}]*padding-inline:\s*0 !important/);
 });
 
@@ -62,8 +66,10 @@ test('first supporting mobile metric returns to the editorial rail without flatt
 
 test('Player Home optical accents and progress summary do not create secondary left rails', () => {
   assert.match(composition, /\[data-testid="player-coach-priority-signal"\]\{padding-inline:8px 2px!important\}/);
+  assert.match(commandHierarchy, /\.playerProgressDisclosure > summary\s*\{[^}]*justify-content:\s*space-between/);
   assert.match(composition, /\.playerProgressDisclosure>summary\{[\s\S]*padding-inline:2px 50px!important/);
   assert.match(composition, /\.playerProgressDisclosure>summary::after\{[\s\S]*right:2px/);
+  assert.doesNotMatch(finalAxis, /playerProgressDisclosure > summary\s*\{[^}]*justify-content:/);
   assert.doesNotMatch(composition, /padding-inline:14px 54px!important/);
 });
 
@@ -78,10 +84,20 @@ test('Program Branding preview uses one visible identity mark and a mobile-safe 
   assert.doesNotMatch(brandingPreview, /variant="hero" brandTreatment="hero"[\s\S]*title="Mission Control"/);
 });
 
-test('At Home Shot Tracker keeps equal grid tracks and owns the input box model in source CSS', () => {
+test('At Home Shot Tracker uses equal visual shells instead of native iOS control geometry', () => {
   assert.match(commandHierarchy, /\.player-logging-fields\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(commandHierarchy, /\.player-logging-field\s*\{\s*min-width:\s*0/);
-  assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%/);
-  assert.match(composition, /player-primary-logging-region \.player-logging-field label\{text-align:center\}/);
+  assert.match(commandHierarchy, /\.player-logging-control\s*\{[^}]*width:\s*100%;[^}]*min-width:\s*0;[^}]*height:\s*52px;[^}]*overflow:\s*hidden/);
+  assert.match(commandHierarchy, /\.player-logging-input\s*\{[\s\S]*box-sizing:\s*border-box;[\s\S]*width:\s*100%;[\s\S]*height:\s*100% !important/);
+  assert.match(commandHierarchy, /\.player-logging-field label\s*\{[^}]*text-align:\s*center/);
+  assert.doesNotMatch(finalAxis, /\.player-primary-logging-region \.player-logging-field\s*\{[^}]*grid-template-rows/);
+  assert.match(finalAxis, /player-primary-logging-region \.player-logging-input\s*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
+  assert.match(commandHierarchy, /\.player-logging-input--score\s*\{[^}]*text-align:\s*center/);
+  assert.match(commandHierarchy, /\.player-logging-control--date \.player-logging-input\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*-webkit-appearance:\s*none !important;[^}]*appearance:\s*none !important;[^}]*text-align:\s*center !important/);
+  assert.match(commandHierarchy, /\.player-logging-control--date \.player-logging-input::\-webkit-date-and-time-value\s*\{[^}]*width:\s*100%;[^}]*min-width:\s*0;[^}]*text-align:\s*center/);
+  assert.match(app, /player-logging-control player-logging-control--date[\s\S]*id="player-home-shot-date"[^>]*type="date"/);
+  assert.doesNotMatch(finalAxis, /player-logging-input\[type="date"\]::-webkit-date-and-time-value/);
+  assert.doesNotMatch(composition, /player-primary-logging-region \.player-logging-(?:field|input)/);
+  assert.doesNotMatch(commandHierarchy, /player-primary-logging-region \.player-logging-(?:field|input)/);
   assert.doesNotMatch(composition, /repairShotTrackerInputGeometry/);
 });

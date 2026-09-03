@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { assertDeclaration, mediaBlock, ruleBlock } from './helpers/css-contract.mjs';
 
 const centering = readFileSync(new URL('../public/shotlab-mobile-centering-reconciliation.css', import.meta.url), 'utf8');
+const runtimeGuard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const authenticatedAuthority = readFileSync(new URL('../src/styles/AuthenticatedVisualAuthority2026.css', import.meta.url), 'utf8');
 const finalAxis = readFileSync(new URL('../src/styles/MobileViewportAxisAuthority2026.css', import.meta.url), 'utf8');
 const dashboards = readFileSync(new URL('../src/components/CoachInteractiveDashboards.css', import.meta.url), 'utf8');
@@ -41,7 +42,9 @@ test('final mobile axis keeps Player and Coach on one dedicated 20px rail each',
   assert.doesNotMatch(authenticatedAuthority, /16px wrapper \+ 4px secondary shell/);
   assert.match(finalAxis, /performance-workspace--coach > div:has\(\[data-testid="coach-command-center-full"\]\)[\s\S]*padding-inline:\s*0\s*!important/);
   assert.match(finalAxis, /performance-shell--player\.is-mobile \[data-visual-role="secondary-page"\][\s\S]*padding-inline:\s*0\s*!important/);
-  assert.match(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100% !important;[\s\S]*margin-inline:\s*0 !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*,[\s\S]*\{[^}]*box-sizing:\s*border-box\s*!important;[^}]*min-width:\s*0\s*!important;[^}]*max-width:\s*100%\s*!important/);
+  assert.doesNotMatch(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,/);
   assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
@@ -62,7 +65,25 @@ test('paid Coach onboarding and empty-state grids cannot expand their mobile tra
 });
 
 test('shared player and coach page owners cannot become persistent horizontal scroll owners', () => {
-  for (const selector of ['.player-scroll-container','.coach-scroll-container','.performance-workspace--coach>div:has(>.page.pageShell)','.performance-workspace--coach>div:has(>.secondaryPageShell)','[data-testid="coach-command-center-full"]','[data-testid="player-daily-command-center"]']) assert.ok(compactCentering.includes(selector), `shared mobile x-axis authority missing ${selector}`);
+  for (const selector of [
+    '.player-scroll-container',
+    '.coach-scroll-container',
+    '[data-testid="coach-command-center-full"]',
+    '[data-testid="player-daily-command-center"]',
+  ]) assert.ok(compactCentering.includes(selector), `shared mobile x-axis authority missing ${selector}`);
+  assert.doesNotMatch(
+    compactCentering,
+    /\.performance-workspace--coach>div:has\(/,
+    'shared centering CSS must not rediscover the dynamic Coach route owner',
+  );
+  for (const selector of [
+    '[data-testid="coach-command-center-full"]',
+    '.secondaryPageShell',
+    '.page.pageShell',
+  ]) assert.ok(runtimeGuard.includes(selector), `runtime route-owner discovery missing ${selector}`);
+  assert.match(runtimeGuard, /routeOwner\.classList\.add\('coach-route-scroll-container'\)/);
+  assert.match(runtimeGuard, /overflowX:\s*'clip'/);
+  assert.match(runtimeGuard, /LOCKED_VERTICAL_OWNER_SELECTORS[\s\S]*\.coach-route-scroll-container/);
   assertDeclaration(sharedRoleAxis, 'overflow-x', /^clip\s*!important$/);
   assert.match(centering, /margin-inline:\s*auto(?:\s*!important)?(?:;|})/);
   assert.doesNotMatch(centering, /touch-action:\s*pan-y pinch-zoom/);

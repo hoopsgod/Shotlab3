@@ -3,13 +3,14 @@ import fs from 'node:fs';
 
 const OUTPUT_DIR = 'parity-evidence';
 const VIEWPORT = { width: 390, height: 844 };
+const SHOT_TRACKER_VIEWPORT = { width: 393, height: 852 };
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-async function createDemo(role) {
+async function createDemo(role, viewport = VIEWPORT) {
   const browser = await webkit.launch();
   const context = await browser.newContext({
-    viewport: VIEWPORT,
-    screen: VIEWPORT,
+    viewport,
+    screen: viewport,
     isMobile: true,
     hasTouch: true,
     deviceScaleFactor: 3,
@@ -129,6 +130,86 @@ test('Player Demo Home and Train always open with the full heading visible in iP
     await navigateByKey(page, 'log-drill');
     const stage = page.locator('[data-team-identity-stage="true"][data-title-stage-family="editorial"]:visible').first();
     await assertOpeningTop(page, stage, 'Player Train', 'webkit-player-train-opening-390.png');
+  } finally {
+    await context.close();
+    await browser.close();
+  }
+});
+
+
+test('Player Demo Shot Tracker centers equal controls at 393px in iPhone WebKit', async () => {
+  test.setTimeout(120_000);
+  const { browser, context, page } = await createDemo('player', SHOT_TRACKER_VIEWPORT);
+  try {
+    await navigateByKey(page, 'log-drill');
+    const tracker = page.getByTestId('player-shot-logging-region');
+    await expect(tracker).toBeVisible({ timeout: 20_000 });
+    await page.waitForTimeout(500);
+
+    const trackerRect = await tracker.evaluate((element) => element.getBoundingClientRect().toJSON());
+    const geometry = await tracker.locator('.player-logging-field').evaluateAll((elements) => elements.map((element) => {
+      const field = element.getBoundingClientRect();
+      const labelElement = element.querySelector('label');
+      const inputElement = element.querySelector('input');
+      const controlElement = element.querySelector('.player-logging-control');
+      const label = labelElement?.getBoundingClientRect();
+      const input = inputElement?.getBoundingClientRect();
+      const control = controlElement?.getBoundingClientRect();
+      return {
+        fieldLeft: field.left,
+        fieldRight: field.right,
+        fieldWidth: field.width,
+        labelLeft: label?.left || 0,
+        labelRight: label?.right || 0,
+        labelTextAlign: labelElement ? getComputedStyle(labelElement).textAlign : '',
+        inputLeft: input?.left || 0,
+        inputRight: input?.right || 0,
+        inputWidth: input?.width || 0,
+        inputHeight: input?.height || 0,
+        inputBottom: input?.bottom || 0,
+        fieldBottom: field.bottom,
+        controlLeft: control?.left || 0,
+        controlRight: control?.right || 0,
+        controlBottom: control?.bottom || 0,
+        controlWidth: control?.width || 0,
+        controlHeight: control?.height || 0,
+        inputType: inputElement?.type || '',
+        inputTextAlign: inputElement ? getComputedStyle(inputElement).textAlign : '',
+        inputAppearance: inputElement ? getComputedStyle(inputElement).appearance : '',
+      };
+    }));
+    const submitTop = await tracker.getByRole('button', { name: 'LOG SHOTS', exact: true }).evaluate((element) => element.getBoundingClientRect().top);
+
+    expect(geometry).toHaveLength(2);
+    expect(Math.abs(geometry[0].fieldWidth - geometry[1].fieldWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(geometry[0].controlWidth - geometry[1].controlWidth)).toBeLessThanOrEqual(1);
+    expect(Math.abs(geometry[0].controlHeight - geometry[1].controlHeight)).toBeLessThanOrEqual(1);
+    expect(Math.abs(geometry[0].inputHeight - geometry[1].inputHeight)).toBeLessThanOrEqual(1);
+    for (const field of geometry) {
+      const fieldCenter = (field.fieldLeft + field.fieldRight) / 2;
+      expect(field.controlLeft).toBeGreaterThanOrEqual(field.fieldLeft - 0.5);
+      expect(field.controlRight).toBeLessThanOrEqual(field.fieldRight + 0.5);
+      expect(Math.abs(field.controlWidth - field.fieldWidth)).toBeLessThanOrEqual(1);
+      expect(field.inputLeft).toBeGreaterThanOrEqual(field.controlLeft - 0.5);
+      expect(field.inputRight).toBeLessThanOrEqual(field.controlRight + 0.5);
+      expect(field.inputWidth).toBeGreaterThanOrEqual(field.controlWidth - 2.5);
+      expect(field.inputBottom, 'native input must remain inside its field flow box').toBeLessThanOrEqual(field.fieldBottom + 0.5);
+      expect(submitTop - field.controlBottom, 'submit action must clear both visible control shells').toBeGreaterThanOrEqual(12);
+      expect(Math.abs(((field.labelLeft + field.labelRight) / 2) - fieldCenter)).toBeLessThanOrEqual(1);
+      expect(field.labelTextAlign).toBe('center');
+      if (field.inputType === 'number') expect(field.inputTextAlign).toBe('center');
+      if (field.inputType === 'date') {
+        expect(field.inputAppearance).toBe('none');
+        expect(field.inputTextAlign).toBe('center');
+      }
+    }
+    const outerInsets = {
+      left: geometry[0].controlLeft - trackerRect.left,
+      right: trackerRect.right - geometry[1].controlRight,
+    };
+    expect(Math.abs(outerInsets.left - outerInsets.right)).toBeLessThanOrEqual(1);
+
+    await tracker.screenshot({ path: `${OUTPUT_DIR}/webkit-player-shot-tracker-393.png`, animations: 'disabled' });
   } finally {
     await context.close();
     await browser.close();

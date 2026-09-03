@@ -58,6 +58,7 @@ jobs:
           tests/registered-mobile-viewport-lock-contract.test.mjs
           tests/mobile-horizontal-viewport-lock-contract.test.mjs
           tests/authenticated-mobile-viewport-authority.test.mjs
+          tests/phase2-mobile-css-authority-contract.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1

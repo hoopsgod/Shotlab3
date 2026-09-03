@@ -7,18 +7,30 @@ const authority = readFileSync(new URL('../src/styles/MobileViewportAxisAuthorit
 const guard = readFileSync(new URL('../src/lib/mobileHorizontalViewportLock.js', import.meta.url), 'utf8');
 const iphoneSpec = readFileSync(new URL('./e2e/registered-coach-iphone-viewport-authority.spec.mjs', import.meta.url), 'utf8');
 
-test('structural mobile authority contains roots, authenticated shell ancestry, and every Coach route-owner shape', () => {
+test('structural mobile authority contains roots and authenticated shell ancestry while runtime owns every Coach route-owner shape', () => {
   assert.match(centering, /html,body,#root\{[^}]*width:100%;[^}]*min-width:0;[^}]*max-width:100%;[^}]*overflow-x:clip !important;[^}]*overscroll-behavior-x:none/);
   for (const selector of [
     '.app-shell.is-mobile',
     '.app-shell.is-mobile>.shell-main',
     '.app-shell.is-mobile>.shell-main>.content-wrap',
     '.app-shell.is-mobile .performance-workspace',
-    '.performance-workspace--coach>div:has(>.page.pageShell)',
-    '.performance-workspace--coach>div:has(>.secondaryPageShell)',
-    '.performance-workspace--coach>div:has([data-testid="coach-command-center-full"])',
   ]) assert.ok(centering.includes(selector), `missing structural containment owner ${selector}`);
   assert.match(centering, /\{width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:clip !important\}/);
+  assert.doesNotMatch(
+    centering,
+    /\.performance-workspace--coach>div:has\(/,
+    'shared centering CSS must not rediscover the dynamic Coach route owner',
+  );
+  assert.match(guard, /function findCoachRouteOwner\(\)/);
+  assert.match(guard, /return Array\.from\(workspace\.children\)\.find/);
+  for (const selector of [
+    '[data-testid="coach-command-center-full"]',
+    '.secondaryPageShell',
+    '.page.pageShell',
+  ]) assert.ok(guard.includes(selector), `runtime route-owner discovery missing ${selector}`);
+  assert.match(guard, /routeOwner\.classList\.add\('coach-route-scroll-container'\)/);
+  assert.match(guard, /overflowX:\s*'clip'/);
+  assert.match(guard, /LOCKED_VERTICAL_OWNER_SELECTORS[\s\S]*\.coach-route-scroll-container/);
 });
 
 test('runtime owns the authenticated Coach safe-area start and removes nested top competition', () => {
