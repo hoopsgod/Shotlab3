@@ -65,6 +65,16 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
     /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*overflow-x:\s*auto/,
   );
   assert.match(
+    finalAxisAuthority,
+    /\[data-testid="coach-events-filter-rail"\]\s*>\s*\[role="group"\]\s*\{[^}]*flex-wrap:\s*wrap\s*!important;[^}]*overflow-x:\s*visible\s*!important/,
+    'protected final authority must preserve the Events wrap contract after production CSS restructuring',
+  );
+  assert.match(
+    finalAxisAuthority,
+    /\.performance-workspace--coach\s*>\s*div:not\(\.coach-route-scroll-container\)\s*\{[^}]*overflow-x:\s*clip\s*!important/,
+    'direct Coach workspace siblings must never become WebKit horizontal scroll owners',
+  );
+  assert.match(
     geometryContract,
     /selector:\s*'\[data-testid="coach-players-filter-rail"\]\s*>\s*\[role="group"\]'/,
   );
