@@ -64,19 +64,17 @@ test("deadline refresh preserves prior truth on failure and uses cached data whe
   ], { now });
 
   const failed = resolveAssignmentDeadlineRefresh({ ok: false, readState: "failure", assignments: [] }, current, { now });
-  assert.equal(failed.readState, "failure");
-  assert.equal(failed.deadlines, current);
-  assert.equal(failed.deadlines.get("a@example.com").overdue, true);
+  assert.equal(failed, current);
+  assert.equal(failed.get("a@example.com").overdue, true);
 
   const degraded = resolveAssignmentDeadlineRefresh({
     ok: false,
     readState: "degraded",
     assignments: [{ playerIdentity: "b@example.com", dueDate: "2026-08-03", state: "assigned" }],
   }, current, { now });
-  assert.equal(degraded.readState, "degraded");
-  assert.notEqual(degraded.deadlines, current);
-  assert.equal(degraded.deadlines.has("a@example.com"), false);
-  assert.equal(degraded.deadlines.get("b@example.com").overdue, true);
+  assert.notEqual(degraded, current);
+  assert.equal(degraded.has("a@example.com"), false);
+  assert.equal(degraded.get("b@example.com").overdue, true);
 });
 
 test("assignment service normalizes and sends an optional due date without private data", async () => {
@@ -133,7 +131,7 @@ test("database and app contracts keep deadlines optional, direct, and date-only"
   assert.match(service, /dueDate/);
   assert.match(service, /assignmentReadState/);
   assert.match(deadlineEnhancer, /resolveAssignmentDeadlineRefresh/);
-  assert.match(deadlineEnhancer, /sync delayed/);
+  assert.doesNotMatch(deadlineEnhancer, /mcAssignmentAccountabilityMeta/);
   assert.doesNotMatch(deadlineEnhancer, /catch\(\(\) => \(\{ assignments: \[\] \}\)\)/);
   assert.match(quickAssign, /coach-quick-assign-due-date/);
   assert.match(quickAssign, /setDueDate\(""\)/);
