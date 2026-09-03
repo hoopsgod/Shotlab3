@@ -2,10 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
+  archivePlayerAssignmentLocal,
   listPlayerAssignmentHistoryLocal,
+  loadCoachAssignmentHistory,
   saveNextPlayerAssignment,
 } from "../src/lib/playerAssignmentHistoryService.js";
-import { getPlayerAssignmentLocal, savePlayerAssignmentLocal } from "../src/lib/playerAssignmentService.js";
+import {
+  ASSIGNMENT_READ_STATES,
+  getPlayerAssignmentLocal,
+  savePlayerAssignmentLocal,
+} from "../src/lib/playerAssignmentService.js";
 
 function memoryStorage(seed = {}) {
   const values = new Map(Object.entries(seed).map(([key, value]) => [key, typeof value === "string" ? value : JSON.stringify(value)]));
@@ -120,11 +126,47 @@ test("assign-next refuses to overwrite active work", async () => {
   assert.equal(getPlayerAssignmentLocal({ teamId: TEAM_ID, playerIdentity: PLAYER, storage }).state, "started");
 });
 
+test("history reads distinguish empty, degraded cached data, failure, and denied access", async () => {
+  const storage = coachStorage();
+  const empty = await loadCoachAssignmentHistory({
+    storage,
+    fetchImpl: async () => ({ ok: true, json: async () => ({ ok: true, storage_mode: "team_remote", history: [] }) }),
+  });
+  assert.equal(empty.readState, ASSIGNMENT_READ_STATES.EMPTY);
+
+  archivePlayerAssignmentLocal(completed, storage);
+  const degraded = await loadCoachAssignmentHistory({
+    storage,
+    fetchImpl: async () => ({ ok: false, json: async () => ({ error: "offline" }) }),
+  });
+  assert.equal(degraded.readState, ASSIGNMENT_READ_STATES.DEGRADED);
+  assert.equal(degraded.history.length, 1);
+
+  const freshStorage = coachStorage();
+  const failed = await loadCoachAssignmentHistory({
+    storage: freshStorage,
+    fetchImpl: async () => { throw new Error("network_down"); },
+  });
+  assert.equal(failed.readState, ASSIGNMENT_READ_STATES.FAILURE);
+  assert.equal(failed.history.length, 0);
+
+  const playerStorage = memoryStorage({
+    "sl:session": { email: PLAYER, role: "player", teamId: TEAM_ID },
+  });
+  const denied = await loadCoachAssignmentHistory({
+    storage: playerStorage,
+    fetchImpl: async () => { throw new Error("must_not_fetch"); },
+  });
+  assert.equal(denied.readState, ASSIGNMENT_READ_STATES.DENIED);
+  assert.equal(denied.error, "coach_required");
+});
+
 test("database, server, and UI contracts keep history immutable, visible, and private", () => {
   const migration = fs.readFileSync(new URL("../migrations/040_player_assignment_history.sql", import.meta.url), "utf8");
   const route = fs.readFileSync(new URL("../functions/v1/player-assignment-history/index.js", import.meta.url), "utf8");
   const enhancer = fs.readFileSync(new URL("../src/lib/coachAssignNextEnhancer.js", import.meta.url), "utf8");
   const readyEnhancer = fs.readFileSync(new URL("../src/lib/coachAssignNextReadyEnhancer.js", import.meta.url), "utf8");
+  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentHistoryService.js", import.meta.url), "utf8");
   const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 
   assert.match(migration, /primary key \(team_id, player_identity, created_at\)/i);
@@ -133,6 +175,8 @@ test("database, server, and UI contracts keep history immutable, visible, and pr
   assert.match(route, /assignment_in_progress/);
   assert.match(route, /player_assignment_history/);
   assert.match(route, /archived_previous/);
+  assert.match(service, /readState/);
+  assert.match(service, /deriveAssignmentReadState/);
   assert.match(enhancer, /Assign next/);
   assert.match(enhancer, /coach-assignment-history/);
   assert.match(readyEnhancer, /coach-assign-next-ready/);
