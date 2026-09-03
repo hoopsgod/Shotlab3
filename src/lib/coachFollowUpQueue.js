@@ -1,10 +1,5 @@
-import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { getCoachRosterPlayers } from "./playerDataManagement.js";
-import {
-  readCoachFollowUpStore,
-  sanitizeCoachFollowUp,
-  writeCoachFollowUpStore,
-} from "./coachFollowUpService.js";
+import { loadCoachFollowUps, sanitizeCoachFollowUp } from "./coachFollowUpService.js";
 
 const clean = (value) => String(value ?? "").trim();
 const identity = (value) => clean(value).toLowerCase();
@@ -14,11 +9,6 @@ const parse = (raw, fallback) => {
   try { return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
 };
 
-const readJson = async (response) => {
-  try { return await response.json(); } catch { return {}; }
-};
-
-const recordKey = (record = {}) => `${clean(record.teamId)}::${identity(record.playerIdentity)}`;
 const dateValue = (value) => {
   const time = Date.parse(String(value || ""));
   return Number.isFinite(time) ? time : 0;
@@ -66,6 +56,7 @@ export function deriveCoachFollowUpQueue({ records = [], roster = [], teamId = "
     completed,
     openCount: planned.length,
     completedCount: completed.length,
+    pendingCount: activeRecords.filter((record) => record.syncPending).length,
     totalCount: activeRecords.length,
     hasRecords: activeRecords.length > 0,
   };
@@ -88,44 +79,10 @@ export async function loadCoachFollowUpQueue({
   fetchImpl = globalThis?.fetch,
 } = {}) {
   const context = readCoachFollowUpQueueContext(storage);
-  const localRecords = Object.values(readCoachFollowUpStore(storage)).map(sanitizeCoachFollowUp);
-  const localQueue = deriveCoachFollowUpQueue({ records: localRecords, roster: context.roster, teamId: context.teamId });
-
-  if (!context.requester || !context.teamId || typeof fetchImpl !== "function") {
-    return { ok: true, storageMode: "local_only", queue: localQueue, context };
-  }
-
-  try {
-    const response = await fetchImpl(`/v1/coach-follow-ups?team_id=${encodeURIComponent(context.teamId)}`, {
-      method: "GET",
-      headers: buildApiIdentityHeaders({ requester: context.requester, storage }),
-    });
-    const body = await readJson(response);
-    if (!response?.ok || body?.error) {
-      return {
-        ok: false,
-        storageMode: "local_fallback",
-        queue: localQueue,
-        context,
-        error: String(body?.error || "follow_up_queue_load_failed"),
-      };
-    }
-
-    const remoteRecords = safeArray(body?.follow_ups).map(sanitizeCoachFollowUp);
-    const store = { ...readCoachFollowUpStore(storage) };
-    for (const record of remoteRecords) {
-      if (record.teamId && record.playerIdentity) store[recordKey(record)] = record;
-    }
-    writeCoachFollowUpStore(storage, store);
-    const queue = deriveCoachFollowUpQueue({ records: remoteRecords, roster: context.roster, teamId: context.teamId });
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", queue, context };
-  } catch (error) {
-    return {
-      ok: false,
-      storageMode: "local_fallback",
-      queue: localQueue,
-      context,
-      error: String(error?.message || "follow_up_queue_load_failed"),
-    };
-  }
+  const { records, ...result } = await loadCoachFollowUps({ teamId: context.teamId, storage, fetchImpl });
+  return {
+    ...result,
+    queue: deriveCoachFollowUpQueue({ records, roster: context.roster, teamId: context.teamId }),
+    context,
+  };
 }

@@ -84,6 +84,11 @@ function CoachFollowUpQueuePanel() {
   if (!queue?.hasRecords) return null;
   const visiblePlanned = queue.planned.slice(0, 4);
   const visibleCompleted = queue.completed.slice(0, 4);
+  const status = queue.pendingCount > 0
+    ? `${queue.pendingCount} local update${queue.pendingCount === 1 ? "" : "s"} pending team sync`
+    : result.ok
+      ? (result.storageMode === "team_remote" ? "Synced coach-only records" : "Demo or local records")
+      : "Showing local records because team sync is unavailable";
 
   return React.createElement(
     "article",
@@ -91,6 +96,7 @@ function CoachFollowUpQueuePanel() {
       className: "mcSection mcFollowUpQueue",
       "data-testid": "coach-follow-up-queue",
       "data-open-count": String(queue.openCount),
+      "data-pending-count": String(queue.pendingCount),
       "data-storage-mode": result.storageMode || "unknown",
       "aria-labelledby": "mc-follow-up-queue-heading",
     },
@@ -114,7 +120,7 @@ function CoachFollowUpQueuePanel() {
         React.createElement("div", { className: "mcFollowUpQueueRows", "aria-label": "Completed coach follow-ups" }, visibleCompleted.map((record) => React.createElement(FollowUpRow, { record, completed: true, key: `${record.teamId}:${record.playerIdentity}` }))),
       )
       : null,
-    React.createElement("div", { className: "mcFollowUpQueueStatus" }, result.ok ? (result.storageMode === "team_remote" ? "Synced coach-only records" : "Demo or local records") : "Showing local records because team sync is unavailable"),
+    React.createElement("div", { className: "mcFollowUpQueueStatus" }, status),
   );
 }
 

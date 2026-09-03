@@ -9,19 +9,11 @@ const identity = (value) => clean(value, 320).toLowerCase();
 const recordKey = (teamId, playerIdentity) => `${clean(teamId, 160)}::${identity(playerIdentity)}`;
 
 const parseJson = (value, fallback) => {
-  try {
-    return value ? JSON.parse(value) : fallback;
-  } catch {
-    return fallback;
-  }
+  try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
 };
 
 const readJson = async (response) => {
-  try {
-    return await response.json();
-  } catch {
-    return {};
-  }
+  try { return await response.json(); } catch { return {}; }
 };
 
 export function sanitizeCoachFollowUp(value = {}) {
@@ -36,6 +28,7 @@ export function sanitizeCoachFollowUp(value = {}) {
     updatedAt: clean(value?.updated_at || value?.updatedAt, 120),
     completedAt: clean(value?.completed_at || value?.completedAt, 120),
     updatedBy: identity(value?.updated_by || value?.updatedBy),
+    syncPending: !!value?.syncPending,
   };
 }
 
@@ -58,11 +51,7 @@ function announceFollowUpChange(record) {
   try {
     if (typeof globalThis?.dispatchEvent !== "function" || typeof globalThis?.CustomEvent !== "function") return;
     globalThis.dispatchEvent(new CustomEvent(COACH_FOLLOW_UP_CHANGE_EVENT, {
-      detail: {
-        teamId: record?.teamId || "",
-        playerIdentity: record?.playerIdentity || "",
-        state: record?.state || "",
-      },
+      detail: { teamId: record?.teamId || "", playerIdentity: record?.playerIdentity || "", state: record?.state || "" },
     }));
   } catch {}
 }
@@ -83,31 +72,48 @@ function readRequester(storage = globalThis?.localStorage) {
   return identity(resolved?.email || resolved?.userEmail || resolved?.user_id);
 }
 
+export async function loadCoachFollowUps({
+  teamId = "",
+  storage = globalThis?.localStorage,
+  fetchImpl = globalThis?.fetch,
+} = {}) {
+  const activeTeamId = clean(teamId, 160);
+  const store = readCoachFollowUpStore(storage);
+  const local = Object.values(store).map(sanitizeCoachFollowUp).filter((row) => row.teamId === activeTeamId);
+  const requester = readRequester(storage);
+  if (!requester || !activeTeamId || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", records: local };
+
+  try {
+    const response = await fetchImpl(`/v1/coach-follow-ups?team_id=${encodeURIComponent(activeTeamId)}`, {
+      method: "GET",
+      headers: buildApiIdentityHeaders({ requester, storage }),
+    });
+    const body = await readJson(response);
+    if (!response?.ok || body?.error) return { ok: false, storageMode: "local_fallback", records: local, error: body?.error || "follow_up_load_failed" };
+
+    const remote = (Array.isArray(body?.follow_ups) ? body.follow_ups : [])
+      .map(sanitizeCoachFollowUp)
+      .filter((row) => row.teamId === activeTeamId && row.playerIdentity);
+    const merged = Object.fromEntries(remote.map((row) => [recordKey(row.teamId, row.playerIdentity), row]));
+    for (const row of local) if (row.syncPending) merged[recordKey(row.teamId, row.playerIdentity)] = row;
+    const nextStore = { ...store };
+    for (const key of Object.keys(nextStore)) if (key.startsWith(`${activeTeamId}::`)) delete nextStore[key];
+    Object.assign(nextStore, merged);
+    writeCoachFollowUpStore(storage, nextStore);
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", records: Object.values(merged) };
+  } catch (error) {
+    return { ok: false, storageMode: "local_fallback", records: local, error: String(error?.message || "follow_up_load_failed") };
+  }
+}
+
 export async function loadCoachFollowUp({
   teamId = "",
   playerIdentity = "",
   storage = globalThis?.localStorage,
   fetchImpl = globalThis?.fetch,
 } = {}) {
-  const local = getCoachFollowUpFromStore({ storage, teamId, playerIdentity });
-  const requester = readRequester(storage);
-  if (!requester || typeof fetchImpl !== "function") return { ok: true, storageMode: "local_only", record: local };
-
-  try {
-    const response = await fetchImpl(`/v1/coach-follow-ups?team_id=${encodeURIComponent(clean(teamId, 160))}`, {
-      method: "GET",
-      headers: buildApiIdentityHeaders({ requester, storage }),
-    });
-    const body = await readJson(response);
-    if (!response?.ok || body?.error) return { ok: false, storageMode: "local_fallback", record: local, error: body?.error || "follow_up_load_failed" };
-    const remote = (Array.isArray(body?.follow_ups) ? body.follow_ups : [])
-      .map(sanitizeCoachFollowUp)
-      .find((item) => item.teamId === clean(teamId, 160) && item.playerIdentity === identity(playerIdentity));
-    if (remote) saveLocalRecord(storage, remote);
-    return { ok: true, storageMode: body?.storage_mode || "team_remote", record: remote || local };
-  } catch (error) {
-    return { ok: false, storageMode: "local_fallback", record: local, error: String(error?.message || "follow_up_load_failed") };
-  }
+  const { records, ...result } = await loadCoachFollowUps({ teamId, storage, fetchImpl });
+  return { ...result, record: records.find((row) => row.playerIdentity === identity(playerIdentity)) || null };
 }
 
 export async function saveCoachFollowUp({
@@ -120,6 +126,8 @@ export async function saveCoachFollowUp({
   fetchImpl = globalThis?.fetch,
 } = {}) {
   const previous = getCoachFollowUpFromStore({ storage, teamId, playerIdentity });
+  const requester = readRequester(storage);
+  const shouldSync = Boolean(requester && typeof fetchImpl === "function");
   const now = new Date().toISOString();
   const draft = sanitizeCoachFollowUp({
     ...previous,
@@ -131,23 +139,17 @@ export async function saveCoachFollowUp({
     createdAt: previous?.createdAt || now,
     updatedAt: now,
     completedAt: state === "completed" ? now : "",
+    syncPending: shouldSync,
   });
   if (!draft.teamId || !draft.playerIdentity) return { ok: false, message: "Player follow-up identity is unavailable." };
 
   const localRecord = saveLocalRecord(storage, draft);
-  const requester = readRequester(storage);
-  if (!requester || typeof fetchImpl !== "function") {
-    return { ok: true, storageMode: "local_only", record: localRecord, message: "Saved on this device only." };
-  }
+  if (!shouldSync) return { ok: true, storageMode: "local_only", record: localRecord, message: "Saved on this device only." };
 
   try {
     const response = await fetchImpl("/v1/coach-follow-ups", {
       method: "POST",
-      headers: buildApiIdentityHeaders({
-        requester,
-        storage,
-        headers: { "Content-Type": "application/json" },
-      }),
+      headers: buildApiIdentityHeaders({ requester, storage, headers: { "Content-Type": "application/json" } }),
       body: JSON.stringify({
         team_id: draft.teamId,
         player_identity: draft.playerIdentity,
@@ -169,7 +171,7 @@ export async function saveCoachFollowUp({
       };
     }
     const remoteRaw = body?.follow_up || (Array.isArray(body?.follow_ups) ? body.follow_ups[0] : null);
-    const remote = remoteRaw ? sanitizeCoachFollowUp(remoteRaw) : localRecord;
+    const remote = sanitizeCoachFollowUp(remoteRaw || { ...localRecord, syncPending: false });
     saveLocalRecord(storage, remote);
     return {
       ok: true,

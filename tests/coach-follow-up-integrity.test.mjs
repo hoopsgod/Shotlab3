@@ -37,6 +37,7 @@ test("follow-up sanitizers enforce bounded coach-only task states", () => {
     updatedAt: "",
     completedAt: "",
     updatedBy: "",
+    syncPending: false,
   });
   assert.equal(sanitizeApiFollowUp({ ...input, state: "sent" }).state, "planned");
 });
@@ -59,6 +60,7 @@ test("local-only save is honest and survives a new service read", async () => {
   const persisted = getCoachFollowUpFromStore({ storage, teamId: "team-a", playerIdentity: "player@example.com" });
   assert.equal(persisted.state, "planned");
   assert.equal(persisted.note, "Check in after practice.");
+  assert.equal(persisted.syncPending, false);
   assert.ok(storage.snapshot()[COACH_FOLLOW_UP_STORAGE_KEY]);
 });
 
@@ -96,10 +98,28 @@ test("remote save uses exact team and player identity without claiming delivery 
   assert.equal(requestBody.player_identity, "player@example.com");
   assert.equal(requestBody.state, "completed");
   assert.equal(result.record.updatedBy, "coach@example.com");
+  assert.equal(result.record.syncPending, false);
   assert.doesNotMatch(result.message, /message sent|player notified|delivered to player/i);
 });
 
-test("remote load replaces an older local record", async () => {
+test("failed remote save preserves local truth as pending sync", async () => {
+  const storage = memoryStorage({ "sl:session": { email: "coach@example.com", teamId: "team-a" } });
+  const result = await saveCoachFollowUp({
+    teamId: "team-a",
+    playerIdentity: "player@example.com",
+    playerName: "Player One",
+    state: "planned",
+    note: "Retry this follow-up.",
+    storage,
+    fetchImpl: async () => ({ ok: false, json: async () => ({ error: "offline" }) }),
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.localSaved, true);
+  assert.equal(result.record.syncPending, true);
+  assert.equal(getCoachFollowUpFromStore({ storage, teamId: "team-a", playerIdentity: "player@example.com" }).syncPending, true);
+});
+
+test("remote load replaces an older synced local record", async () => {
   const storage = memoryStorage({
     "sl:session": { email: "coach@example.com", teamId: "team-a" },
     [COACH_FOLLOW_UP_STORAGE_KEY]: {
@@ -139,6 +159,7 @@ test("remote load replaces an older local record", async () => {
   assert.equal(result.ok, true);
   assert.equal(result.record.state, "completed");
   assert.equal(result.record.note, "Current note");
+  assert.equal(result.record.syncPending, false);
   assert.equal(getCoachFollowUpFromStore({ storage, teamId: "team-a", playerIdentity: "player@example.com" }).state, "completed");
 });
 

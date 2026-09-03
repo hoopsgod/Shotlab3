@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import {
   deriveCoachFollowUpQueue,
   loadCoachFollowUpQueue,
@@ -32,6 +33,7 @@ test("queue includes only active-team roster records and separates open from com
   const queue = deriveCoachFollowUpQueue({ records, roster, teamId: "team-a" });
   assert.equal(queue.openCount, 1);
   assert.equal(queue.completedCount, 1);
+  assert.equal(queue.pendingCount, 0);
   assert.equal(queue.totalCount, 2);
   assert.equal(queue.planned[0].playerIdentity, "one@example.test");
   assert.equal(queue.completed[0].playerIdentity, "two@example.test");
@@ -55,13 +57,10 @@ test("queue context uses canonical roster rules and active coach team", () => {
   assert.deepEqual(context.roster.map((row) => row.email), ["one@example.test"]);
 });
 
-test("remote team collection replaces stale local queue state", async () => {
+test("remote team collection replaces stale synced local queue state", async () => {
   const storage = memoryStorage({
     "sl:session": { email: "coach@example.test", teamId: "team-a" },
-    "sl:players": [
-      { email: "coach@example.test", role: "coach", teamId: "team-a" },
-      ...roster,
-    ],
+    "sl:players": [{ email: "coach@example.test", role: "coach", teamId: "team-a" }, ...roster],
     "sl:player-profiles": [],
     "sl:coach-follow-ups": {
       "team-a::one@example.test": {
@@ -101,7 +100,55 @@ test("remote team collection replaces stale local queue state", async () => {
   assert.equal(result.storageMode, "team_remote");
   assert.equal(result.queue.openCount, 0);
   assert.equal(result.queue.completedCount, 1);
+  assert.equal(result.queue.pendingCount, 0);
   assert.match(storage.snapshot()["sl:coach-follow-ups"], /completed/);
+});
+
+test("successful remote refresh preserves a newer pending local follow-up", async () => {
+  const storage = memoryStorage({
+    "sl:session": { email: "coach@example.test", teamId: "team-a" },
+    "sl:players": [{ email: "coach@example.test", role: "coach", teamId: "team-a" }, ...roster],
+    "sl:player-profiles": [],
+    "sl:coach-follow-ups": {
+      "team-a::one@example.test": {
+        teamId: "team-a",
+        playerIdentity: "one@example.test",
+        playerName: "One",
+        state: "planned",
+        note: "Pending local follow-up",
+        updatedAt: "2026-07-30T12:00:00Z",
+        syncPending: true,
+      },
+    },
+  });
+
+  const result = await loadCoachFollowUpQueue({
+    storage,
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        storage_mode: "team_remote",
+        follow_ups: [{
+          team_id: "team-a",
+          player_identity: "one@example.test",
+          player_name: "One",
+          state: "completed",
+          note: "Older remote follow-up",
+          updated_at: "2026-07-29T12:00:00Z",
+          completed_at: "2026-07-29T12:00:00Z",
+        }],
+      }),
+    }),
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.queue.openCount, 1);
+  assert.equal(result.queue.completedCount, 0);
+  assert.equal(result.queue.pendingCount, 1);
+  assert.equal(result.queue.planned[0].note, "Pending local follow-up");
+  assert.equal(result.queue.planned[0].syncPending, true);
+  assert.match(storage.snapshot()["sl:coach-follow-ups"], /Pending local follow-up/);
 });
 
 test("failed remote load preserves an honest local fallback queue", async () => {
@@ -121,4 +168,11 @@ test("failed remote load preserves an honest local fallback queue", async () => 
   assert.equal(result.storageMode, "local_fallback");
   assert.equal(result.queue.openCount, 1);
   assert.equal(result.error, "offline");
+});
+
+test("queue UI exposes pending sync truth instead of claiming full sync", () => {
+  const enhancer = fs.readFileSync(new URL("../src/lib/coachFollowUpQueueEnhancer.js", import.meta.url), "utf8");
+  assert.match(enhancer, /data-pending-count/);
+  assert.match(enhancer, /pending team sync/);
+  assert.match(enhancer, /queue\.pendingCount > 0/);
 });
