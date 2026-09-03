@@ -70,15 +70,23 @@ export function isVisualViewportZoomed() {
 
 function findCoachRouteOwner() {
   if (typeof document === 'undefined') return null;
-  const workspace = document.querySelector('.performance-shell--coach.is-mobile .performance-workspace--coach');
-  if (!workspace) return null;
-
-  return Array.from(workspace.children).find((node) => {
+  const matchesRouteOwner = (node) => {
     if (!(node instanceof Element)) return false;
     return node.querySelector('[data-testid="coach-command-center-full"]')
       || node.querySelector('.secondaryPageShell')
       || node.querySelector('.page.pageShell');
-  }) || null;
+  };
+  const workspace = document.querySelector('.performance-shell--coach.is-mobile .performance-workspace--coach');
+  if (workspace) {
+    const workspaceOwner = Array.from(workspace.children).find(matchesRouteOwner);
+    if (workspaceOwner) return workspaceOwner;
+  }
+
+  // Demo Coach renders the vertical route wrapper directly under the branded
+  // page container. Normalize the same owner shape instead of allowing its
+  // overflow-y:auto declaration to compute overflow-x:auto in WebKit.
+  const coachPage = document.querySelector('.performance-shell--coach.is-mobile .team-brand.coach-mode.page');
+  return Array.from(coachPage?.children || []).find(matchesRouteOwner) || null;
 }
 
 function clearCoachVerticalTouchPolicy() {
