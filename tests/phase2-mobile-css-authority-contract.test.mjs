@@ -8,7 +8,6 @@ const finalAxisAuthority = readFileSync(new URL('../src/styles/MobileViewportAxi
 const secondaryMobile = readFileSync(new URL('../src/components/SecondaryPagePremiumMobile.css', import.meta.url), 'utf8');
 const coachEventsMobile = readFileSync(new URL('../src/components/CoachEventsPremium.css', import.meta.url), 'utf8');
 const dashboardPrimitives = readFileSync(new URL('../src/components/CoachDashboardPrimitives.jsx', import.meta.url), 'utf8');
-const coachDashboards = readFileSync(new URL('../src/components/CoachInteractiveDashboards.jsx', import.meta.url), 'utf8');
 const geometryContract = readFileSync(new URL('./e2e/support/mobile-geometry-contract.mjs', import.meta.url), 'utf8');
 
 const compactCentering = centering.replace(/\s+/g, '');
@@ -71,9 +70,11 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
     coachEventsMobile,
     /\[data-testid="coach-events-filter-rail"\]\s*>\s*div\[role="group"\]\s*\{[^}]*overflow-x:\s*auto/,
   );
-  assert.match(dashboardPrimitives, /wrapFilters = false/);
-  assert.match(dashboardPrimitives, /style=\{wrapFilters \? \{ flexWrap: "wrap", overflowX: "visible" \} : undefined\}/);
-  assert.match(coachDashboards, /testId="coach-events-filter-rail"\s+wrapFilters/);
+  assert.doesNotMatch(
+    dashboardPrimitives,
+    /wrapFilters|style=\{[^}]*flexWrap:\s*"wrap"[^}]*overflowX:\s*"visible"/,
+    'shared React filter primitive must not duplicate Coach Events page-specific wrapping authority',
+  );
   assert.match(
     geometryContract,
     /selector:\s*'\[data-testid="coach-players-filter-rail"\]\s*>\s*\[role="group"\]'/,
