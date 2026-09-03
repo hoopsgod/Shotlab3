@@ -55,13 +55,10 @@ test("queue context uses canonical roster rules and active coach team", () => {
   assert.deepEqual(context.roster.map((row) => row.email), ["one@example.test"]);
 });
 
-test("remote team collection replaces stale local queue state", async () => {
+test("remote team collection replaces stale synced local queue state", async () => {
   const storage = memoryStorage({
     "sl:session": { email: "coach@example.test", teamId: "team-a" },
-    "sl:players": [
-      { email: "coach@example.test", role: "coach", teamId: "team-a" },
-      ...roster,
-    ],
+    "sl:players": [{ email: "coach@example.test", role: "coach", teamId: "team-a" }, ...roster],
     "sl:player-profiles": [],
     "sl:coach-follow-ups": {
       "team-a::one@example.test": {
@@ -102,6 +99,52 @@ test("remote team collection replaces stale local queue state", async () => {
   assert.equal(result.queue.openCount, 0);
   assert.equal(result.queue.completedCount, 1);
   assert.match(storage.snapshot()["sl:coach-follow-ups"], /completed/);
+});
+
+test("successful remote refresh preserves a newer pending local follow-up", async () => {
+  const storage = memoryStorage({
+    "sl:session": { email: "coach@example.test", teamId: "team-a" },
+    "sl:players": [{ email: "coach@example.test", role: "coach", teamId: "team-a" }, ...roster],
+    "sl:player-profiles": [],
+    "sl:coach-follow-ups": {
+      "team-a::one@example.test": {
+        teamId: "team-a",
+        playerIdentity: "one@example.test",
+        playerName: "One",
+        state: "planned",
+        note: "Pending local follow-up",
+        updatedAt: "2026-07-30T12:00:00Z",
+        syncPending: true,
+      },
+    },
+  });
+
+  const result = await loadCoachFollowUpQueue({
+    storage,
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        storage_mode: "team_remote",
+        follow_ups: [{
+          team_id: "team-a",
+          player_identity: "one@example.test",
+          player_name: "One",
+          state: "completed",
+          note: "Older remote follow-up",
+          updated_at: "2026-07-29T12:00:00Z",
+          completed_at: "2026-07-29T12:00:00Z",
+        }],
+      }),
+    }),
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.queue.openCount, 1);
+  assert.equal(result.queue.completedCount, 0);
+  assert.equal(result.queue.planned[0].note, "Pending local follow-up");
+  assert.equal(result.queue.planned[0].syncPending, true);
+  assert.match(storage.snapshot()["sl:coach-follow-ups"], /Pending local follow-up/);
 });
 
 test("failed remote load preserves an honest local fallback queue", async () => {
