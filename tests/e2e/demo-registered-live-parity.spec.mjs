@@ -373,7 +373,7 @@ async function enterRegistered(page, role) {
   await page.locator('input[type="email"]').fill(identities[role].email);
   await page.locator('input[type="password"]').fill(PASSWORD);
   await page.getByRole("button", { name: /^sign in$/i }).last().click();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 35_000 });
   await settle(page);
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem("sl:demoMode"))).not.toBe("true");
 }

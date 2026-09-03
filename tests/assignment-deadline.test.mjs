@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { buildAssignmentDeadlineMap } from "../src/lib/coachAssignmentDeadlineEnhancer.js";
+import {
+  buildAssignmentDeadlineMap,
+  resolveAssignmentDeadlineRefresh,
+} from "../src/lib/coachAssignmentDeadlineEnhancer.js";
 import {
   assignmentDateKey,
   assignmentDueDateFromOffset,
@@ -54,6 +57,26 @@ test("coach deadline map is identity-scoped and marks only incomplete past-due w
   assert.equal(map.get("b@example.com").overdue, false);
 });
 
+test("deadline refresh preserves prior truth on failure and uses cached data when degraded", () => {
+  const now = new Date(2026, 7, 5, 12, 0, 0);
+  const current = buildAssignmentDeadlineMap([
+    { playerIdentity: "a@example.com", dueDate: "2026-08-04", state: "started" },
+  ], { now });
+
+  const failed = resolveAssignmentDeadlineRefresh({ ok: false, readState: "failure", assignments: [] }, current, { now });
+  assert.equal(failed, current);
+  assert.equal(failed.get("a@example.com").overdue, true);
+
+  const degraded = resolveAssignmentDeadlineRefresh({
+    ok: false,
+    readState: "degraded",
+    assignments: [{ playerIdentity: "b@example.com", dueDate: "2026-08-03", state: "assigned" }],
+  }, current, { now });
+  assert.notEqual(degraded, current);
+  assert.equal(degraded.has("a@example.com"), false);
+  assert.equal(degraded.get("b@example.com").overdue, true);
+});
+
 test("assignment service normalizes and sends an optional due date without private data", async () => {
   const storage = memoryStorage({ "sl:session": { email: "coach@example.com", role: "coach", teamId: "team-a" } });
   let payload = null;
@@ -96,6 +119,7 @@ test("database and app contracts keep deadlines optional, direct, and date-only"
   const migration = fs.readFileSync(new URL("../migrations/039_player_assignment_due_dates.sql", import.meta.url), "utf8");
   const api = fs.readFileSync(new URL("../functions/v1/player-assignments/index.js", import.meta.url), "utf8");
   const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");
+  const deadlineEnhancer = fs.readFileSync(new URL("../src/lib/coachAssignmentDeadlineEnhancer.js", import.meta.url), "utf8");
   const quickAssign = fs.readFileSync(new URL("../src/lib/coachQuickAssignEnhancer.js", import.meta.url), "utf8");
   const playerCard = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
   const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
@@ -105,6 +129,10 @@ test("database and app contracts keep deadlines optional, direct, and date-only"
   assert.match(api, /due_date/);
   assert.match(api, /invalid_due_date/);
   assert.match(service, /dueDate/);
+  assert.match(service, /assignmentReadState/);
+  assert.match(deadlineEnhancer, /resolveAssignmentDeadlineRefresh/);
+  assert.doesNotMatch(deadlineEnhancer, /mcAssignmentAccountabilityMeta/);
+  assert.doesNotMatch(deadlineEnhancer, /catch\(\(\) => \(\{ assignments: \[\] \}\)\)/);
   assert.match(quickAssign, /coach-quick-assign-due-date/);
   assert.match(quickAssign, /setDueDate\(""\)/);
   assert.match(quickAssign, /savePlayerAssignment\([\s\S]*dueDate/);

@@ -1,12 +1,10 @@
 import { formatAssignmentDueDate, isAssignmentOverdue, normalizeAssignmentDueDate } from "./assignmentDeadline.js";
-import { loadTeamPlayerAssignments, PLAYER_ASSIGNMENT_CHANGE_EVENT } from "./playerAssignmentService.js";
+import { assignmentReadState, loadTeamPlayerAssignments, PLAYER_ASSIGNMENT_CHANGE_EVENT, readAssignmentSession } from "./playerAssignmentService.js";
 
 const STYLE_ID = "shotlab-coach-assignment-deadline-styles";
 const clean = (value, max = 320) => String(value ?? "").trim().slice(0, max);
 const identity = (value) => clean(value).toLowerCase();
-const parse = (value, fallback) => {
-  try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
-};
+const sessionTeamId = (storage = globalThis?.localStorage) => readAssignmentSession(storage).teamId;
 
 const styles = `
 .mcAssignmentAccountabilityRow.is-overdue{border-color:rgba(255,116,92,.46);background:rgba(255,116,92,.055)}
@@ -15,12 +13,6 @@ const styles = `
 .mcAssignmentDeadlineTag.is-overdue{color:#ff9b87}
 .mcAssignmentAccountabilityBadge.is-overdue{border-color:rgba(255,116,92,.46);background:rgba(255,116,92,.09);color:#ff9b87}
 `;
-
-function sessionTeamId(storage = globalThis?.localStorage) {
-  const raw = parse(storage?.getItem?.("sl:session"), {});
-  const session = Array.isArray(raw) ? raw[0] || {} : raw;
-  return clean(session?.teamId || session?.team_id, 180);
-}
 
 export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() } = {}) {
   const map = new Map();
@@ -31,12 +23,16 @@ export function buildAssignmentDeadlineMap(assignments = [], { now = new Date() 
     const state = identity(row?.state || "assigned");
     map.set(playerIdentity, {
       dueDate,
-      state,
       overdue: isAssignmentOverdue({ dueDate, state, now }),
       label: formatAssignmentDueDate(dueDate),
     });
   }
   return map;
+}
+
+export function resolveAssignmentDeadlineRefresh(result = {}, currentDeadlines = new Map(), options = {}) {
+  const state = assignmentReadState(result, result?.assignments || []);
+  return state === "failure" || state === "denied" ? currentDeadlines : buildAssignmentDeadlineMap(result?.assignments || [], options);
 }
 
 function ensureStyles() {
@@ -89,14 +85,6 @@ function decoratePanel(deadlines) {
     badge.classList.toggle("is-overdue", overdueCount > 0);
     badge.textContent = overdueCount > 0 ? `${overdueCount} OVERDUE` : badge.dataset.deadlineBaseText;
   }
-  const meta = panel.querySelector(".mcAssignmentAccountabilityMeta");
-  if (meta) {
-    if (!meta.dataset.deadlineDecorated) meta.dataset.deadlineBaseText = meta.textContent || "";
-    meta.dataset.deadlineDecorated = overdueCount > 0 ? "true" : "";
-    meta.textContent = overdueCount > 0
-      ? `${meta.dataset.deadlineBaseText} · ${overdueCount} overdue`
-      : meta.dataset.deadlineBaseText;
-  }
 }
 
 export function installCoachAssignmentDeadlineEnhancer() {
@@ -131,10 +119,12 @@ export function installCoachAssignmentDeadlineEnhancer() {
       return;
     }
     loading = true;
-    const result = await loadTeamPlayerAssignments({ teamId }).catch(() => ({ assignments: [] }));
-    loading = false;
-    deadlines = buildAssignmentDeadlineMap(result?.assignments || []);
-    render();
+    try {
+      deadlines = resolveAssignmentDeadlineRefresh(await loadTeamPlayerAssignments({ teamId }), deadlines);
+    } catch {} finally {
+      loading = false;
+      render();
+    }
   };
 
   observer = new MutationObserver(render);

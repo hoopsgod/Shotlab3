@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatAssignmentDueDate } from "../lib/assignmentDeadline.js";
 import { derivePlayerAssignmentPriority } from "../lib/playerAssignmentPriority.js";
-import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
+import { assignmentReadState, loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
 import styles from "./PlayerCoachAssignmentCard.module.css";
 
 const actionFor = (state = "assigned") => state === "assigned" ? { action: "acknowledge", label: "Acknowledge assignment" } : state === "acknowledged" ? { action: "start", label: "Start assignment" } : state === "started" ? { action: "complete", label: "Mark assignment complete" } : null;
@@ -12,33 +12,33 @@ const formatDate = (value) => {
 
 export default function PlayerCoachAssignmentCard() {
   const [assignment, setAssignment] = useState(null);
+  const [readState, setReadState] = useState("loading");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const actionInFlightRef = useRef(false);
-
-  const refresh = useCallback(async () => {
-    const result = await loadPlayerAssignment();
-    if (result.assignment) setAssignment(result.assignment);
-    if (!result.ok && result.error) {
-      setError(true);
-      setMessage("The latest coach assignment could not be refreshed.");
-    }
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       const result = await loadPlayerAssignment();
       if (cancelled) return;
-      setAssignment(result.assignment || null);
-      setError(!result.ok && Boolean(result.error));
-      setMessage(!result.ok && result.error ? "The latest coach assignment could not be refreshed." : "");
+      const state = assignmentReadState(result, result.assignment);
+      const msg = state === "degraded" ? "Showing saved assignment; sync delayed." : state === "failure" ? "Coach assignment unavailable." : state === "denied" ? "Assignment unavailable for this account." : "";
+      setReadState(state);
+      if (result.assignment || state === "empty") setAssignment(result.assignment || null);
+      setError(Boolean(msg));
+      setMessage(msg);
     };
     const onFocus = () => void run();
     const onVisibility = () => { if (document.visibilityState === "visible") void run(); };
     const onChanged = (event) => {
-      if (!cancelled && event?.detail?.assignmentText) setAssignment(event.detail);
+      if (!cancelled && event?.detail?.assignmentText) {
+        setAssignment(event.detail);
+        setReadState("success");
+        setError(false);
+        setMessage("");
+      }
     };
     void run();
     const timer = window.setInterval(run, 15_000);
@@ -52,9 +52,16 @@ export default function PlayerCoachAssignmentCard() {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener(PLAYER_ASSIGNMENT_CHANGE_EVENT, onChanged);
     };
-  }, [refresh]);
+  }, []);
 
-  if (!assignment) return null;
+  if (!assignment) {
+    if (readState !== "failure" && readState !== "denied") return null;
+    return (
+      <section className={styles.root} data-testid="player-coach-assignment" data-assignment-read-state={readState} aria-label="Coach assignment status">
+        <div className={`${styles.message} ${styles.messageError}`} role="status">{message}</div>
+      </section>
+    );
+  }
   const priority = derivePlayerAssignmentPriority(assignment);
   const next = actionFor(priority.state);
   const dueLabel = formatAssignmentDueDate(assignment.dueDate);
@@ -86,6 +93,7 @@ export default function PlayerCoachAssignmentCard() {
       data-assignment-state={priority.state}
       data-assignment-overdue={String(priority.overdue)}
       data-assignment-priority={priority.priorityState}
+      data-assignment-read-state={readState}
       aria-label={priority.complete ? "Completed coach assignment" : "Coach assignment next action"}
     >
       <div className={styles.header}>
