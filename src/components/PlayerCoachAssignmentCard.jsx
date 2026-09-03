@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { formatAssignmentDueDate } from "../lib/assignmentDeadline.js";
 import { derivePlayerAssignmentPriority } from "../lib/playerAssignmentPriority.js";
-import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
+import { assignmentReadState, loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
 import styles from "./PlayerCoachAssignmentCard.module.css";
 
 const actionFor = (state = "assigned") => state === "assigned" ? { action: "acknowledge", label: "Acknowledge assignment" } : state === "acknowledged" ? { action: "start", label: "Start assignment" } : state === "started" ? { action: "complete", label: "Mark assignment complete" } : null;
@@ -23,7 +23,7 @@ export default function PlayerCoachAssignmentCard() {
     const run = async () => {
       const result = await loadPlayerAssignment();
       if (cancelled) return;
-      const state = result.readState || (result.ok ? "empty" : "failure");
+      const state = assignmentReadState(result, result.assignment);
       const msg = state === "degraded" ? "Showing saved assignment; sync delayed." : state === "failure" ? "Coach assignment unavailable." : state === "denied" ? "Assignment unavailable for this account." : "";
       setReadState(state);
       if (result.assignment || state === "empty") setAssignment(result.assignment || null);
