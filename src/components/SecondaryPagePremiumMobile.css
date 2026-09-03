@@ -93,7 +93,7 @@
     overflow: hidden;
   }
 
-  .secondaryPageToolbar [data-visual-role="filter-rail"] {
+  .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-events-filter-rail"]) {
     display: flex !important;
     gap: 9px !important;
     overflow-x: auto !important;
@@ -109,12 +109,11 @@
     display: none;
   }
 
-  /* Non-Players rails keep their children intrinsic so the composite rail owns
-     any horizontal movement instead of collapsing the nested chip group. */
-  .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-players-filter-rail"]) > * {
+  /* Other secondary rails keep intrinsic child sizing. Coach Events is excluded
+     because its page-specific one-column filter layout wraps instead of scrolling. */
+  .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-players-filter-rail"]):not([data-testid="coach-events-filter-rail"]) > * {
     flex: 0 0 auto;
     min-width: max-content;
-    overflow-x: visible !important;
   }
 
   .secondaryPageToolbar input[type="search"],
