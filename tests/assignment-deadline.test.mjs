@@ -12,7 +12,7 @@ import {
   isAssignmentOverdue,
   normalizeAssignmentDueDate,
 } from "../src/lib/assignmentDeadline.js";
-import { ASSIGNMENT_READ_STATES, savePlayerAssignment } from "../src/lib/playerAssignmentService.js";
+import { savePlayerAssignment } from "../src/lib/playerAssignmentService.js";
 
 function memoryStorage(seed = {}) {
   const values = new Map(Object.entries(seed).map(([key, value]) => [key, typeof value === "string" ? value : JSON.stringify(value)]));
@@ -63,21 +63,17 @@ test("deadline refresh preserves prior truth on failure and uses cached data whe
     { playerIdentity: "a@example.com", dueDate: "2026-08-04", state: "started" },
   ], { now });
 
-  const failed = resolveAssignmentDeadlineRefresh({
-    ok: false,
-    readState: ASSIGNMENT_READ_STATES.FAILURE,
-    assignments: [],
-  }, current, { now });
-  assert.equal(failed.readState, ASSIGNMENT_READ_STATES.FAILURE);
+  const failed = resolveAssignmentDeadlineRefresh({ ok: false, readState: "failure", assignments: [] }, current, { now });
+  assert.equal(failed.readState, "failure");
   assert.equal(failed.deadlines, current);
   assert.equal(failed.deadlines.get("a@example.com").overdue, true);
 
   const degraded = resolveAssignmentDeadlineRefresh({
     ok: false,
-    readState: ASSIGNMENT_READ_STATES.DEGRADED,
+    readState: "degraded",
     assignments: [{ playerIdentity: "b@example.com", dueDate: "2026-08-03", state: "assigned" }],
   }, current, { now });
-  assert.equal(degraded.readState, ASSIGNMENT_READ_STATES.DEGRADED);
+  assert.equal(degraded.readState, "degraded");
   assert.notEqual(degraded.deadlines, current);
   assert.equal(degraded.deadlines.has("a@example.com"), false);
   assert.equal(degraded.deadlines.get("b@example.com").overdue, true);
@@ -135,7 +131,7 @@ test("database and app contracts keep deadlines optional, direct, and date-only"
   assert.match(api, /due_date/);
   assert.match(api, /invalid_due_date/);
   assert.match(service, /dueDate/);
-  assert.match(service, /ASSIGNMENT_READ_STATES/);
+  assert.match(service, /assignmentReadState/);
   assert.match(deadlineEnhancer, /resolveAssignmentDeadlineRefresh/);
   assert.match(deadlineEnhancer, /sync delayed/);
   assert.doesNotMatch(deadlineEnhancer, /catch\(\(\) => \(\{ assignments: \[\] \}\)\)/);
