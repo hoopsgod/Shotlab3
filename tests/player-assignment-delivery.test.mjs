@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
-  ASSIGNMENT_READ_STATES,
   getPlayerAssignmentLocal,
   loadPlayerAssignment,
   loadTeamPlayerAssignments,
@@ -83,7 +82,7 @@ test("player loads only their assignment and advances one state at a time", asyn
   };
 
   const loaded = await loadPlayerAssignment({ storage, fetchImpl });
-  assert.equal(loaded.readState, ASSIGNMENT_READ_STATES.SUCCESS);
+  assert.equal(loaded.readState, "success");
   assert.equal(loaded.assignment.playerIdentity, "player@example.com");
   assert.equal(loaded.assignment.state, "assigned");
   for (const [action, expected] of [["acknowledge", "acknowledged"], ["start", "started"], ["complete", "completed"]]) {
@@ -102,7 +101,7 @@ test("assignment reads distinguish empty, degraded cached data, hard failure, an
     storage: playerStorage,
     fetchImpl: async () => ({ ok: true, json: async () => ({ ok: true, storage_mode: "team_remote", assignments: [] }) }),
   });
-  assert.equal(empty.readState, ASSIGNMENT_READ_STATES.EMPTY);
+  assert.equal(empty.readState, "empty");
   assert.equal(empty.assignment, null);
 
   savePlayerAssignmentLocal(assignment, playerStorage);
@@ -110,7 +109,7 @@ test("assignment reads distinguish empty, degraded cached data, hard failure, an
     storage: playerStorage,
     fetchImpl: async () => ({ ok: false, json: async () => ({ error: "offline" }) }),
   });
-  assert.equal(degraded.readState, ASSIGNMENT_READ_STATES.DEGRADED);
+  assert.equal(degraded.readState, "degraded");
   assert.equal(degraded.assignment.playerIdentity, "player@example.com");
 
   const freshPlayerStorage = memoryStorage({
@@ -120,14 +119,14 @@ test("assignment reads distinguish empty, degraded cached data, hard failure, an
     storage: freshPlayerStorage,
     fetchImpl: async () => { throw new Error("network_down"); },
   });
-  assert.equal(failed.readState, ASSIGNMENT_READ_STATES.FAILURE);
+  assert.equal(failed.readState, "failure");
   assert.equal(failed.assignment, null);
 
   const denied = await loadTeamPlayerAssignments({
     storage: playerStorage,
     fetchImpl: async () => { throw new Error("must_not_fetch"); },
   });
-  assert.equal(denied.readState, ASSIGNMENT_READ_STATES.DENIED);
+  assert.equal(denied.readState, "denied");
   assert.equal(denied.error, "coach_required");
 });
 
@@ -154,7 +153,7 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   assert.match(coach, /Private coach notes remain coach-only/);
   assert.match(player, /player-coach-assignment/);
   assert.match(player, /data-assignment-read-state/);
-  assert.match(player, /Showing the saved assignment/);
+  assert.match(player, /Showing saved assignment/);
   assert.match(player, /Acknowledge assignment/);
   assert.match(player, /Start assignment/);
   assert.match(player, /Mark assignment complete/);
