@@ -187,15 +187,16 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   if (!target || typeof target.fetch !== "function") return null;
   if (target.fetch?.[BRIDGE_MARKER]) return target.fetch;
 
-  pruneTeamCache(target?.localStorage);
-  prunePlayerCache(target?.localStorage);
-  prunePlayerProfileCache(target?.localStorage);
+  const storage = target?.localStorage;
+  pruneTeamCache(storage);
+  prunePlayerCache(storage);
+  prunePlayerProfileCache(storage);
   const originalFetch = target.fetch.bind(target);
-  const schedulePersistence = createSchedulePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const playerProfilePersistence = createPlayerProfilePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const playerIdentityPersistence = createPlayerIdentityPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const teamPersistence = createTeamPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const strengthPersistence = createStrengthConditioningPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
+  const schedulePersistence = createSchedulePersistenceService({ fetchImpl: originalFetch, storage });
+  const playerProfilePersistence = createPlayerProfilePersistenceService({ fetchImpl: originalFetch, storage });
+  const playerIdentityPersistence = createPlayerIdentityPersistenceService({ fetchImpl: originalFetch, storage });
+  const teamPersistence = createTeamPersistenceService({ fetchImpl: originalFetch, storage });
+  const strengthPersistence = createStrengthConditioningPersistenceService({ fetchImpl: originalFetch, storage });
 
   const wrappedFetch = async (input, init = {}) => {
     const strengthResource = signedStrengthResourceFor(input, target);
@@ -223,7 +224,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const method = methodFor(input, init);
         if (method === "GET") {
           const result = await teamPersistence.loadTeams();
-          try { target?.localStorage?.setItem?.("sl:teams", JSON.stringify(result.rows)); } catch {}
+          try { storage?.setItem?.("sl:teams", JSON.stringify(result.rows)); } catch {}
           return jsonResponse(target, result.rows, 200);
         }
         if (method === "POST") {
@@ -241,7 +242,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerIdentityPersistence.loadPlayers();
-          try { target?.localStorage?.setItem?.("sl:players", JSON.stringify(result.rows)); } catch {}
+          try { storage?.setItem?.("sl:players", JSON.stringify(result.rows)); } catch {}
           return jsonResponse(target, result.rows, 200);
         }
         if (method === "POST") {
@@ -259,7 +260,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerProfilePersistence.loadProfiles();
-          try { target?.localStorage?.setItem?.("sl:player-profiles", JSON.stringify(result.rows)); } catch {}
+          try { storage?.setItem?.("sl:player-profiles", JSON.stringify(result.rows)); } catch {}
           return jsonResponse(target, result.rows, 200);
         }
         if (method === "POST") {
@@ -283,10 +284,10 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
-          const pending = !isEvents && readActorContext(target?.localStorage);
-          if (pending) try { target?.localStorage?.setItem?.("sl:rp", `${pending.requester}\t${pending.teamId}`); } catch {}
+          const pending = !isEvents && readActorContext(storage);
+          if (pending) try { storage?.setItem?.("sl:rp", `${pending.requester}\t${pending.teamId}`); } catch {}
           const result = isEvents ? await schedulePersistence.syncEvents(rows) : await schedulePersistence.syncRsvps(rows);
-          if (pending) try { target?.localStorage?.removeItem?.("sl:rp"); } catch {}
+          if (pending) try { storage?.removeItem?.("sl:rp"); } catch {}
           return jsonResponse(target, result.rows, 200);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
@@ -297,7 +298,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
 
     if (!apiPathFor(input, target)) return originalFetch(input, init);
     const currentHeaders = new Headers(init?.headers || (typeof input === "object" && input?.headers ? input.headers : undefined));
-    const identityHeaders = buildApiIdentityHeaders({ requester: readRequester(target?.localStorage), storage: target?.localStorage });
+    const identityHeaders = buildApiIdentityHeaders({ requester: readRequester(storage), storage });
     for (const [key, value] of Object.entries(identityHeaders)) {
       if (value && !currentHeaders.has(key)) currentHeaders.set(key, value);
     }
