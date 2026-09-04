@@ -1,21 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { createSchedulePersistenceService } from "../src/lib/schedulePersistenceService.js";
+import {
+  clearRsvpSyncPending,
+  createSchedulePersistenceService,
+  markRsvpSyncPending,
+  readRsvpSyncPending,
+} from "../src/lib/schedulePersistenceService.js";
 import {
   hydrateAuthenticatedCollectionsToStorage,
   requestLegacySignedCollection,
 } from "../src/lib/legacySignedCollectionPersistence.js";
-import {
-  clearRsvpSyncPending,
-  markRsvpSyncPending,
-  readRsvpSyncPending,
-  RSVP_SYNC_PENDING_KEY,
-} from "../src/lib/rsvpSyncOwnership.js";
 import { routeEnhancersFor } from "../scripts/run-route-enhancers.mjs";
 
 const EMAIL = "phase3d.player@shotlab.test";
 const TEAM_ID = "team-phase3d";
+const RSVP_SYNC_PENDING_KEY = "sl:rsvps-sync-pending";
 
 function memoryStorage(entries = []) {
   const values = new Map(entries);
@@ -75,17 +75,10 @@ const hydrationPayloads = (remoteRsvps = []) => ({
 
 test("Phase 3D pending RSVP truth is scoped to the registered identity and team", () => {
   const storage = registeredStorage();
-  const marker = markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID, now: 123 });
-
-  assert.deepEqual(marker, {
-    pending: true,
-    requester: EMAIL,
-    teamId: TEAM_ID,
-    updatedAt: 123,
-  });
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID })?.pending, true);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: "team-other" }), null);
-  assert.equal(readRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), null);
+  assert.equal(markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: "team-other" }), false);
+  assert.equal(readRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), false);
   assert.equal(clearRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), false);
   assert.ok(storage.getItem(RSVP_SYNC_PENDING_KEY));
   assert.equal(clearRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
@@ -103,16 +96,12 @@ test("Phase 3D failed RSVP replacement keeps explicit pending truth and serves t
     },
   });
 
-  await assert.rejects(
-    () => service.syncRsvps([LOCAL_RSVP], { teamId: TEAM_ID }),
-    /offline/,
-  );
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID })?.pending, true);
+  await assert.rejects(() => service.syncRsvps([LOCAL_RSVP], { teamId: TEAM_ID }), /offline/);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
 
   const loaded = await service.loadRsvps({ teamId: TEAM_ID });
   assert.equal(loaded.ok, true);
   assert.equal(loaded.storageMode, "local_pending");
-  assert.equal(loaded.syncPending, true);
   assert.deepEqual(loaded.rows, [LOCAL_RSVP]);
   assert.equal(calls, 1, "pending local RSVP reads must not refetch stale remote truth through the schedule service");
 });
@@ -130,7 +119,7 @@ test("Phase 3D successful RSVP replacement clears pending truth", async () => {
 
   const saved = await service.syncRsvps([LOCAL_RSVP], { teamId: TEAM_ID });
   assert.equal(saved.ok, true);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), null);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), false);
 });
 
 test("Phase 3D final RSVP removal reaches the replacement API as an explicit empty collection", async () => {
@@ -151,7 +140,7 @@ test("Phase 3D final RSVP removal reaches the replacement API as an explicit emp
   assert.equal(saved.ok, true);
   assert.equal(saved.deletedCount, 1);
   assert.equal(calls, 1);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), null);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), false);
 });
 
 test("Phase 3D legacy signed RSVP reads preserve pending local truth without contacting stale remote state", async () => {
@@ -170,7 +159,6 @@ test("Phase 3D legacy signed RSVP reads preserve pending local truth without con
 
   assert.equal(result.error, null);
   assert.equal(result.storageMode, "local_pending");
-  assert.equal(result.syncPending, true);
   assert.deepEqual(result.data, [LOCAL_RSVP]);
   assert.equal(calls, 0);
 });
@@ -225,18 +213,9 @@ test("Phase 3D post-auth hydration ignores pending RSVP truth from a different t
 test("Phase 3D build authority sends empty RSVP replacement syncs through both App and the Supabase adapter", () => {
   const enhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
   const hydrationEnhancer = readFileSync("scripts/apply-post-auth-persistence-hydration.mjs", "utf8");
-  assert.match(
-    enhancer,
-    /signedReplacementCollection = k === \"sl:rsvps\" \|\| k === \"sl:sc-sessions\"/,
-  );
-  assert.match(
-    enhancer,
-    /normalizedBody\.length === 0 && table !== \"rsvps\"/,
-  );
-  assert.match(
-    hydrationEnhancer,
-    /expectedIdentity:normalizeEmail\(p\.email\),expectedTeamId:p\.teamId\|\|\"\"/,
-  );
+  assert.match(enhancer, /signedReplacementCollection = k === \"sl:rsvps\" \|\| k === \"sl:sc-sessions\"/);
+  assert.match(enhancer, /normalizedBody\.length === 0 && table !== \"rsvps\"/);
+  assert.match(hydrationEnhancer, /expectedIdentity:normalizeEmail\(p\.email\),expectedTeamId:p\.teamId\|\|\"\"/);
   for (const mode of ["dev", "build"]) {
     assert.ok(routeEnhancersFor(mode).includes("scripts/apply-phase3d-rsvp-state-ownership.mjs"));
   }
