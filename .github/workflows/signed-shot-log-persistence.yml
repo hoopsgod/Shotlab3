@@ -51,13 +51,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify signed shot-log authorization, hydration, and persistence contracts
-        run: |
-          node --test tests/signed-shot-log-persistence.test.mjs
-          node --test tests/remote-persistence-hydration-merge.test.mjs tests/phase3c-shot-log-hydration-ownership.test.mjs
-          node --test tests/home-shots-legacy-profile-fallback-middleware.test.mjs
-          node --test tests/home-shots-log-route.test.mjs tests/home-shots-roster-identity.test.mjs
-          node --test tests/player-home-shot-logging-save-path.test.mjs
+      - name: Verify signed shot-log authorization and API boundary
+        run: node --test tests/signed-shot-log-persistence.test.mjs
+
+      - name: Verify shot-log hydration reconciliation
+        run: node --test tests/remote-persistence-hydration-merge.test.mjs tests/phase3c-shot-log-hydration-ownership.test.mjs
+
+      - name: Verify legacy profile fallback middleware
+        run: node --test tests/home-shots-legacy-profile-fallback-middleware.test.mjs
+
+      - name: Verify home-shot route and roster identity
+        run: node --test tests/home-shots-log-route.test.mjs tests/home-shots-roster-identity.test.mjs
+
+      - name: Verify Player home-shot save path
+        run: node --test tests/player-home-shot-logging-save-path.test.mjs
 
       - name: Verify production build
         run: npm run build
