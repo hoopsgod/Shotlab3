@@ -2,10 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  clearRsvpSyncPending,
   createSchedulePersistenceService,
-  markRsvpSyncPending,
-  readRsvpSyncPending,
+  isRsvpSyncPending,
 } from "../src/lib/schedulePersistenceService.js";
 import {
   hydrateAuthenticatedCollectionsToStorage,
@@ -39,6 +37,10 @@ function registeredStorage(rsvps = []) {
     ["sl:players", JSON.stringify([{ id: "player-phase3d", email: EMAIL, teamId: TEAM_ID, role: "player" }])],
     ["sl:rsvps", JSON.stringify(rsvps)],
   ]);
+}
+
+function markPending(storage, requester = EMAIL, teamId = TEAM_ID) {
+  storage.setItem(RSVP_SYNC_PENDING_KEY, `${requester.trim().toLowerCase()}\t${teamId.trim()}`);
 }
 
 const LOCAL_RSVP = {
@@ -75,14 +77,10 @@ const hydrationPayloads = (remoteRsvps = []) => ({
 
 test("Phase 3D pending RSVP truth is scoped to the registered identity and team", () => {
   const storage = registeredStorage();
-  assert.equal(markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: "team-other" }), false);
-  assert.equal(readRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), false);
-  assert.equal(clearRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), false);
-  assert.ok(storage.getItem(RSVP_SYNC_PENDING_KEY));
-  assert.equal(clearRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
-  assert.equal(storage.getItem(RSVP_SYNC_PENDING_KEY), null);
+  markPending(storage);
+  assert.equal(isRsvpSyncPending(storage, EMAIL, TEAM_ID), true);
+  assert.equal(isRsvpSyncPending(storage, EMAIL, "team-other"), false);
+  assert.equal(isRsvpSyncPending(storage, "other@shotlab.test", TEAM_ID), false);
 });
 
 test("Phase 3D failed RSVP replacement keeps explicit pending truth and serves the intended local collection", async () => {
@@ -97,7 +95,7 @@ test("Phase 3D failed RSVP replacement keeps explicit pending truth and serves t
   });
 
   await assert.rejects(() => service.syncRsvps([LOCAL_RSVP], { teamId: TEAM_ID }), /offline/);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), true);
+  assert.equal(isRsvpSyncPending(storage, EMAIL, TEAM_ID), true);
 
   const loaded = await service.loadRsvps({ teamId: TEAM_ID });
   assert.equal(loaded.ok, true);
@@ -119,7 +117,7 @@ test("Phase 3D successful RSVP replacement clears pending truth", async () => {
 
   const saved = await service.syncRsvps([LOCAL_RSVP], { teamId: TEAM_ID });
   assert.equal(saved.ok, true);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), false);
+  assert.equal(isRsvpSyncPending(storage, EMAIL, TEAM_ID), false);
 });
 
 test("Phase 3D final RSVP removal reaches the replacement API as an explicit empty collection", async () => {
@@ -140,12 +138,12 @@ test("Phase 3D final RSVP removal reaches the replacement API as an explicit emp
   assert.equal(saved.ok, true);
   assert.equal(saved.deletedCount, 1);
   assert.equal(calls, 1);
-  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), false);
+  assert.equal(isRsvpSyncPending(storage, EMAIL, TEAM_ID), false);
 });
 
 test("Phase 3D legacy signed RSVP reads preserve pending local truth without contacting stale remote state", async () => {
   const storage = registeredStorage([LOCAL_RSVP]);
-  markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID });
+  markPending(storage);
   let calls = 0;
 
   const result = await requestLegacySignedCollection({
@@ -169,7 +167,7 @@ test("Phase 3D post-auth hydration preserves pending RSVP additions and pending 
     { name: "delete-final-rsvp", local: [], remote: [REMOTE_STALE_RSVP] },
   ]) {
     const storage = registeredStorage(scenario.local);
-    markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID });
+    markPending(storage);
     const payloads = hydrationPayloads(scenario.remote);
 
     const result = await hydrateAuthenticatedCollectionsToStorage({
@@ -190,7 +188,7 @@ test("Phase 3D post-auth hydration preserves pending RSVP additions and pending 
 
 test("Phase 3D post-auth hydration ignores pending RSVP truth from a different team", async () => {
   const storage = registeredStorage([LOCAL_RSVP]);
-  markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID });
+  markPending(storage);
   const activeTeamId = "team-phase3d-new";
   const remoteCurrentTeamRsvp = { ...REMOTE_STALE_RSVP, id: "rsvp-current-team", team_id: activeTeamId };
   const payloads = hydrationPayloads([remoteCurrentTeamRsvp]);
