@@ -1,11 +1,9 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { mergeHydratedRows } from "./remotePersistence.js";
-import { isRsvpSyncPending, readScheduleContext } from "./schedulePersistenceService.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
-
-const DEMO_IDENTITIES = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const APP_SESSION_KEY = "sl:session";
+const RSVP_PENDING_KEY = "sl:rsvps-sync-pending";
 const DEFAULT_SESSION_WAIT_MS = 4_000;
 const DEFAULT_SESSION_POLL_MS = 25;
 const DEFAULT_GROUP_ATTEMPTS = 2;
@@ -59,16 +57,22 @@ function readJson(storage, key) {
 function registeredSessionIdentity(storage) {
   const session = readJson(storage, APP_SESSION_KEY);
   const email = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
-  if (!email || DEMO_IDENTITIES.has(email)) return "";
-  return email;
+  return !email || email === "demo@shotlab.app" || email === "coach.demo@shotlab.app" ? "" : email;
 }
 
-export function readLegacyRegisteredIdentity({
-  storage = globalThis?.localStorage,
-  supabaseAuthEnabled = false,
-} = {}) {
-  if (supabaseAuthEnabled) return "";
-  return registeredSessionIdentity(storage);
+function rsvpPending(storage, requester, expectedTeamId = "") {
+  const session = readJson(storage, APP_SESSION_KEY);
+  let teamId = String(expectedTeamId || session?.teamId || session?.team_id || "").trim();
+  if (!teamId) {
+    const players = readJson(storage, "sl:players");
+    const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
+    teamId = String(actor?.teamId || actor?.team_id || "").trim();
+  }
+  return Boolean(requester && teamId && storage?.getItem?.(RSVP_PENDING_KEY) === `${requester}\t${teamId}`);
+}
+
+export function readLegacyRegisteredIdentity({ storage = globalThis?.localStorage, supabaseAuthEnabled = false } = {}) {
+  return supabaseAuthEnabled ? "" : registeredSessionIdentity(storage);
 }
 
 export async function waitForRegisteredSession({
@@ -79,7 +83,6 @@ export async function waitForRegisteredSession({
 } = {}) {
   const expected = normalizeIdentity(expectedIdentity);
   const deadline = Date.now() + Math.max(0, Number(timeoutMs) || 0);
-
   while (true) {
     const current = registeredSessionIdentity(storage);
     if (current && (!expected || current === expected)) return { ok: true, identity: current };
@@ -113,7 +116,6 @@ async function hydrateGroup({
 }) {
   let lastFailure = "failed";
   const maxAttempts = Math.max(1, Number(attempts) || 1);
-
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       const response = await fetchImpl(group.path, {
@@ -126,33 +128,29 @@ async function hydrateGroup({
       } else {
         const hydrated = [];
         const missingFields = [];
+        const pendingRsvps = group.path === "/v1/rsvps" && rsvpPending(storage, requester, teamId);
         for (const binding of group.fields) {
           if (!Array.isArray(payload?.[binding.field])) {
             missingFields.push(binding.field);
             continue;
           }
-          const localRows = readJson(storage, binding.storageKey);
-          const rsvpPending = binding.storageKey === "sl:rsvps"
-            && isRsvpSyncPending(storage, requester, teamId);
           const rows = binding.storageKey === "sl:shotlogs"
-            ? mergeHydratedRows(binding.storageKey, localRows, payload[binding.field])
-            : rsvpPending
-              ? (Array.isArray(localRows) ? localRows : [])
+            ? mergeHydratedRows(binding.storageKey, readJson(storage, binding.storageKey), payload[binding.field])
+            : pendingRsvps
+              ? (readJson(storage, binding.storageKey) || [])
               : payload[binding.field];
           storage.setItem(binding.storageKey, JSON.stringify(rows));
           hydrated.push(binding.storageKey);
         }
-        if (!missingFields.length) return { ok: true, hydrated };
+        if (!missingFields.length) return { hydrated, pendingRsvps };
         lastFailure = `missing_fields:${missingFields.join(",")}`;
       }
     } catch (error) {
       lastFailure = String(error?.message || "failed");
     }
-
     if (attempt < maxAttempts) await delay(retryDelayMs * attempt);
   }
-
-  return { ok: false, hydrated: [], failure: `${group.path}:${lastFailure}` };
+  return { hydrated: [], failure: `${group.path}:${lastFailure}` };
 }
 
 export async function hydrateAuthenticatedCollectionsToStorage({
@@ -168,7 +166,6 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") {
     return { ok: false, hydrated: [], pending: [], failures: ["storage_unavailable"], identity: "" };
   }
-
   const session = await waitForRegisteredSession({
     storage,
     expectedIdentity,
@@ -179,14 +176,13 @@ export async function hydrateAuthenticatedCollectionsToStorage({
     return { ok: false, hydrated: [], pending: [], failures: [session.error], identity: session.identity || "" };
   }
 
-  const activeTeamId = String(expectedTeamId || readScheduleContext(storage).teamId || "").trim();
   const results = await Promise.all(
     AUTHENTICATED_COLLECTION_GROUPS.map((group) => hydrateGroup({
       group,
       fetchImpl,
       storage,
       requester: session.identity,
-      teamId: activeTeamId,
+      teamId: expectedTeamId,
       attempts: groupAttempts,
       retryDelayMs,
     })),
@@ -196,7 +192,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   const failures = [];
   for (const result of results) {
     hydrated.push(...result.hydrated);
-    if (!result.ok) failures.push(result.failure);
+    if (result.failure) failures.push(result.failure);
   }
 
   const storedPlayers = readJson(storage, "sl:players");
@@ -210,7 +206,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   return {
     ok: failures.length === 0,
     hydrated: [...new Set(hydrated)],
-    pending: isRsvpSyncPending(storage, session.identity, activeTeamId) ? ["sl:rsvps"] : [],
+    pending: results.some((result) => result.pendingRsvps) ? ["sl:rsvps"] : [],
     failures: [...new Set(failures)],
     identity: session.identity,
     identityHydrated,
@@ -227,21 +223,13 @@ export async function requestLegacySignedCollection({
   const config = LEGACY_SIGNED_COLLECTIONS[String(table || "")];
   const requester = readLegacyRegisteredIdentity({ storage, supabaseAuthEnabled });
   if (!config || method !== "GET" || !requester || typeof fetchImpl !== "function") return null;
-
-  if (String(table || "") === "rsvps" && isRsvpSyncPending(storage, requester, readScheduleContext(storage).teamId)) {
-    const localRows = readJson(storage, "sl:rsvps");
-    return {
-      data: Array.isArray(localRows) ? localRows : [],
-      error: null,
-      storageMode: "local_pending",
-    };
+  if (table === "rsvps" && rsvpPending(storage, requester)) {
+    const rows = readJson(storage, "sl:rsvps");
+    return { data: Array.isArray(rows) ? rows : [], error: null, storageMode: "local_pending" };
   }
 
   try {
-    const response = await fetchImpl(config.path, {
-      method: "GET",
-      headers: signedHeaders(storage, requester),
-    });
+    const response = await fetchImpl(config.path, { method: "GET", headers: signedHeaders(storage, requester) });
     const payload = await readJsonResponse(response);
     if (!response?.ok || payload?.ok === false || payload?.error) {
       return {
