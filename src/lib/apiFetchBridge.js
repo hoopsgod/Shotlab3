@@ -9,7 +9,7 @@ const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 
 function parseStored(storage, key, fallback) {
   try {
-    const raw = storage?.getItem?.(key);
+    const raw = storage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
   } catch {
     return fallback;
@@ -18,8 +18,8 @@ function parseStored(storage, key, fallback) {
 
 function writeStored(storage, key, value) {
   try {
-    if (value === null) storage?.removeItem?.(key);
-    else storage?.setItem?.(key, value);
+    if (value === null) storage.removeItem(key);
+    else storage.setItem(key, value);
   } catch {}
 }
 
@@ -27,12 +27,12 @@ function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
 
-function readSession(storage = globalThis?.localStorage) {
+function readSession(storage = globalThis.localStorage) {
   const parsed = parseStored(storage, "sl:session", null);
   return Array.isArray(parsed) ? parsed[0] : parsed;
 }
 
-function readRequester(storage = globalThis?.localStorage) {
+function readRequester(storage = globalThis.localStorage) {
   const session = readSession(storage);
   return normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
 }
@@ -41,7 +41,7 @@ function isDemoRequester(requester) {
   return requester === "coach.demo@shotlab.app" || requester === "demo@shotlab.app";
 }
 
-function readActorContext(storage = globalThis?.localStorage) {
+function readActorContext(storage = globalThis.localStorage) {
   const session = readSession(storage);
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
   const players = parseStored(storage, "sl:players", []);
@@ -53,7 +53,7 @@ function readActorContext(storage = globalThis?.localStorage) {
   };
 }
 
-function pruneTeamCache(storage = globalThis?.localStorage) {
+function pruneTeamCache(storage = globalThis.localStorage) {
   const { requester, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
   const teams = parseStored(storage, "sl:teams", []);
@@ -63,7 +63,7 @@ function pruneTeamCache(storage = globalThis?.localStorage) {
   return filtered;
 }
 
-function prunePlayerCache(storage = globalThis?.localStorage) {
+function prunePlayerCache(storage = globalThis.localStorage) {
   const { requester, role, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
   const players = parseStored(storage, "sl:players", []);
@@ -79,7 +79,7 @@ function prunePlayerCache(storage = globalThis?.localStorage) {
   return filtered;
 }
 
-function prunePlayerProfileCache(storage = globalThis?.localStorage) {
+function prunePlayerProfileCache(storage = globalThis.localStorage) {
   const { requester, role, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
   const profiles = parseStored(storage, "sl:player-profiles", []);
@@ -169,7 +169,7 @@ function parseRows(body) {
 }
 
 function jsonResponse(target, payload, status = 200) {
-  const ResponseCtor = target?.Response || globalThis.Response;
+  const ResponseCtor = target.Response || globalThis.Response;
   return new ResponseCtor(JSON.stringify(payload), {
     status,
     headers: { "Content-Type": "application/json" },
@@ -186,9 +186,9 @@ function errorResponse(target, error, fallback) {
 
 export function installApiIdentityFetchBridge(target = globalThis) {
   if (!target || typeof target.fetch !== "function") return null;
-  if (target.fetch?.[BRIDGE_MARKER]) return target.fetch;
+  if (target.fetch[BRIDGE_MARKER]) return target.fetch;
 
-  const storage = target?.localStorage;
+  const storage = target.localStorage;
   pruneTeamCache(storage);
   prunePlayerCache(storage);
   prunePlayerProfileCache(storage);
