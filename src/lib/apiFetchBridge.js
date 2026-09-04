@@ -169,8 +169,7 @@ function parseRows(body) {
 }
 
 function jsonResponse(target, payload, status = 200) {
-  const ResponseCtor = target.Response || globalThis.Response;
-  return new ResponseCtor(JSON.stringify(payload), {
+  return new target.Response(JSON.stringify(payload), {
     status,
     headers: { "Content-Type": "application/json" },
   });
