@@ -34,11 +34,16 @@ if ((source.split(combinedImport).length - 1) !== 1) {
   throw new Error('Authenticated persistence import must exist exactly once after enhancement.')
 }
 
-const earlyMarker = 'const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});'
+const legacyEarlyMarker = 'const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});'
+const earlyMarker = 'const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email),expectedTeamId:p.teamId||""});'
+if (!source.includes(earlyMarker) && source.includes(legacyEarlyMarker)) {
+  source = source.replace(legacyEarlyMarker, earlyMarker)
+}
+
 const restoreBoundary = 'if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);\nsetUser({email:normalizeEmail(p.email),role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});'
 const earlyReplacement = `if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);
 await DB.set("sl:session",{email:normalizeEmail(p.email)});
-const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});
+const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email),expectedTeamId:p.teamId||""});
 if(!postAuthHydration.ok)emitReleaseDiagnostic("post_auth_collection_hydration_incomplete",{email:normalizeEmail(p.email),failures:Array.isArray(postAuthHydration.failures)?postAuthHydration.failures.slice(0,8):[]});
 await hydratePersistedData();
 setUser({email:normalizeEmail(p.email),role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});`
@@ -98,4 +103,4 @@ if (authSource.includes('hydrateAuthenticatedCollectionsToStorage') || authSourc
 }
 
 fs.writeFileSync(authPath, authSource.replace(/\n/g, authLineEnding))
-console.log('Applied identity-verified registered hydration before the mobile workspace becomes interactive, with no delayed auth reload.')
+console.log('Applied identity- and team-verified registered hydration before the mobile workspace becomes interactive, with no delayed auth reload.')
