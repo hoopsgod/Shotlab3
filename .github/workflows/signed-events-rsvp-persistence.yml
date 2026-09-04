@@ -13,6 +13,7 @@ on:
       - "src/lib/rsvpSyncOwnership.js"
       - "src/lib/schedulePersistenceService.js"
       - "scripts/apply-phase3d-rsvp-state-ownership.mjs"
+      - "scripts/apply-post-auth-persistence-hydration.mjs"
       - "scripts/run-route-enhancers.mjs"
       - "migrations/043_events_rsvps_signed_api_boundary.sql"
       - "tests/signed-events-rsvp-persistence.test.mjs"
