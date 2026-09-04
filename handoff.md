@@ -39,27 +39,25 @@
 ## Phase 3D problem
 
 - The signed RSVP API uses replacement semantics: Coach writes own the team RSVP collection; Player writes own that Player's RSVP collection.
-- `DB.get("sl:rsvps")` already has a canonical RSVP normalization/merge path, but registered post-auth hydration still replaced `sl:rsvps` directly from remote state.
-- RSVP mutations update React/local storage before remote confirmation, while the generic persistence adapter did not identify a failed RSVP write as pending truth.
-- A failed RSVP addition could therefore disappear after a later signed hydration.
-- A failed RSVP removal could be resurrected by stale remote truth.
-- The generic adapter also skipped remote persistence when the intended RSVP replacement collection was empty, so removing the final RSVP could fail to reach the server at all.
+- Registered post-auth hydration could replace intended local RSVP state with stale remote truth after a failed write.
+- A failed RSVP addition could disappear after hydration; a failed removal could be resurrected.
+- The generic adapter also skipped remote persistence when the intended RSVP replacement collection was empty, so removing the final RSVP could fail to reach the server.
 
 ## Phase 3D implementation
 
-- Add an identity-keyed pending marker (`sl:rp:<identity>` -> active team) so failed RSVP truth is scoped to both requester and team without carrying duplicate state machinery.
-- Mark RSVP replacement writes pending before the signed API request and clear the marker only after server success.
-- While that marker is active for the signed-in identity/team, signed RSVP reads use the intended local collection rather than stale remote state.
-- Preserve that same pending local collection through registered post-auth hydration; expose `pending: ["sl:rsvps"]` in hydration results so unsynced truth remains explicit.
-- Treat `sl:rsvps` as a signed replacement collection so an empty collection still reaches `/v1/rsvps` and can delete the final response remotely.
+- Use one pending marker, `sl:rp`, whose value is the normalized requester and active team joined by a tab. The marker is valid only for that exact identity/team pair.
+- Mark signed RSVP replacement writes pending before the API request and clear the marker only after confirmed server success.
+- Keep the active RSVP team in the RSVP-private `sl:session.rsvpTeamId` field during post-auth hydration. Do not write shared `sl:session.teamId`; shared UI state must remain Demo/registered-parity neutral.
+- While the marker matches the signed-in identity/team, signed RSVP reads use the intended local collection and post-auth hydration skips the stale `/v1/rsvps` read. Hydration reports `pending: ["sl:rsvps"]` so unsynced truth is explicit.
+- Treat `sl:rsvps` as a signed replacement collection and allow an empty normalized RSVP array through the Supabase adapter so deleting the final response reaches `/v1/rsvps`.
 - Keep Events, S&C, API authorization, database schema, layout, typography, and visual baselines unchanged.
-- Preserve the existing production JavaScript budget by compacting duplicate legacy persistence descriptors and replacing a behavior-equivalent two-value schedule `Set` lookup during route enhancement; no budget was raised.
+- Preserve the existing production JavaScript budget by reusing bridge storage context, compacting duplicate legacy persistence descriptors, and replacing a behavior-equivalent two-value schedule `Set` lookup; no budget was raised.
 
 ## Validation target
 
 Before merge readiness:
 
-- Phase 3D focused RSVP ownership tests pass for failed addition, failed final deletion, identity scoping, successful confirmation, signed reads, and post-auth hydration.
+- Phase 3D focused RSVP ownership tests pass for failed addition, failed final deletion, identity/team scoping, successful confirmation, signed reads, and post-auth hydration.
 - Existing signed Events/RSVP authorization and remote RSVP normalization/merge tests pass.
 - Production build/performance budget stays green.
 - Existing Phase 1A/1B/1C mobile guardrails stay green.
