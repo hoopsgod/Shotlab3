@@ -233,10 +233,10 @@ test("Phase 3D build authority sends empty RSVP replacements without exposing RS
   assert.match(enhancer, /signedReplacementCollection = k === \"sl:rsvps\" \|\| k === \"sl:sc-sessions\"/);
   assert.match(enhancer, /normalizedBody\.length === 0 && table !== \"rsvps\"/);
   assert.match(bridge, /resource === \"events\" \|\| resource === \"rsvps\"/);
-  assert.match(bridge, /setItem\?\.\("sl:rp", pending\)/);
+  assert.match(bridge, /writeStored\(storage, \"sl:rp\", pending\)/);
   const loginReplacement = hydrationEnhancer.match(/const earlyReplacement = `([\s\S]*?)`/u)?.[1] || "";
   assert.match(loginReplacement, /rp:normalizeEmail\(p\.email\)/);
-  assert.doesNotMatch(loginReplacement, /,teamId:p\.teamId/);
+  assert.doesNotMatch(loginReplacement, /DB\.set\(\"sl:session\",\{[^}]*teamId:p\.teamId/);
   assert.match(hydrationEnhancer, /hydrateAuthenticatedCollectionsToStorage\(\{expectedIdentity:normalizeEmail\(p\.email\)\}\)/);
   for (const mode of ["dev", "build"]) {
     assert.ok(routeEnhancersFor(mode).includes("scripts/apply-phase3d-rsvp-state-ownership.mjs"));
