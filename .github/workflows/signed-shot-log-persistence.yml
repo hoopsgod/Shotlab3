@@ -67,7 +67,17 @@ jobs:
       - name: Verify Player home-shot save path
         shell: bash
         run: |
-          node --test --test-name-pattern='^(?!(index\.html does not use a MutationObserver workaround to hide Team Sync panel|stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do|Demo Player logs 123 shots locally without Team Sync warning or retry repair|Demo Player session shot logs are removed on logout while registered shots remain)$).*' tests/player-home-shot-logging-save-path.test.mjs
+          set -o pipefail
+          node --test --test-name-pattern='^(?!(index\.html does not use a MutationObserver workaround to hide Team Sync panel|stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do|Demo Player logs 123 shots locally without Team Sync warning or retry repair|Demo Player session shot logs are removed on logout while registered shots remain)$).*' tests/player-home-shot-logging-save-path.test.mjs 2>&1 | tee player-home-shot-save-path.log
+
+      - name: Upload Player home-shot failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-home-shot-save-path-failure
+          path: player-home-shot-save-path.log
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Verify current sandbox capability boundary
         run: node --test tests/demo-capability-boundary.test.mjs
