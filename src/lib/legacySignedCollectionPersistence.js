@@ -3,6 +3,7 @@ import { mergeHydratedRows } from "./remotePersistence.js";
 import { readRsvpSyncPending } from "./rsvpSyncOwnership.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
+const clean = (value) => String(value ?? "").trim();
 
 const DEMO_IDENTITIES = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const APP_SESSION_KEY = "sl:session";
@@ -63,6 +64,16 @@ function registeredSessionIdentity(storage) {
   return email;
 }
 
+function registeredSessionTeamId(storage, requester = "") {
+  const session = readJson(storage, APP_SESSION_KEY);
+  const sessionTeamId = clean(session?.teamId || session?.team_id);
+  if (sessionTeamId) return sessionTeamId;
+  const identity = normalizeIdentity(requester || session?.email || session?.userEmail || session?.user_id);
+  const players = readJson(storage, "sl:players");
+  const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === identity);
+  return clean(actor?.teamId || actor?.team_id);
+}
+
 export function readLegacyRegisteredIdentity({
   storage = globalThis?.localStorage,
   supabaseAuthEnabled = false,
@@ -113,6 +124,7 @@ async function hydrateGroup({
   fetchImpl,
   storage,
   requester,
+  teamId = "",
   attempts = DEFAULT_GROUP_ATTEMPTS,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
 }) {
@@ -139,7 +151,7 @@ async function hydrateGroup({
           }
           const localRows = readJson(storage, binding.storageKey);
           const rsvpPending = binding.storageKey === "sl:rsvps"
-            && readRsvpSyncPending({ storage, requester });
+            && readRsvpSyncPending({ storage, requester, teamId });
           const rows = binding.storageKey === "sl:shotlogs"
             ? mergeHydratedRows(binding.storageKey, localRows, payload[binding.field])
             : rsvpPending
@@ -166,6 +178,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   fetchImpl = globalThis?.fetch,
   storage = globalThis?.localStorage,
   expectedIdentity = "",
+  expectedTeamId = "",
   sessionWaitMs = DEFAULT_SESSION_WAIT_MS,
   sessionPollMs = DEFAULT_SESSION_POLL_MS,
   groupAttempts = DEFAULT_GROUP_ATTEMPTS,
@@ -185,6 +198,8 @@ export async function hydrateAuthenticatedCollectionsToStorage({
     return { ok: false, hydrated: [], pending: [], failures: [session.error], identity: session.identity || "" };
   }
 
+  const activeTeamId = clean(expectedTeamId || registeredSessionTeamId(storage, session.identity));
+
   // These signed GETs are independent and write distinct storage keys. Running them
   // concurrently keeps registered mobile login bounded by the slowest collection
   // instead of the sum of every collection latency, while each group retains its own
@@ -195,6 +210,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
       fetchImpl,
       storage,
       requester: session.identity,
+      teamId: activeTeamId,
       attempts: groupAttempts,
       retryDelayMs,
     })),
@@ -238,7 +254,11 @@ export async function requestLegacySignedCollection({
   const requester = readLegacyRegisteredIdentity({ storage, supabaseAuthEnabled });
   if (!config || method !== "GET" || !requester || typeof fetchImpl !== "function") return null;
 
-  if (String(table || "") === "rsvps" && readRsvpSyncPending({ storage, requester })) {
+  if (String(table || "") === "rsvps" && readRsvpSyncPending({
+    storage,
+    requester,
+    teamId: registeredSessionTeamId(storage, requester),
+  })) {
     return {
       data: mergeHydratedRows("sl:rsvps", readJson(storage, "sl:rsvps"), []),
       error: null,
