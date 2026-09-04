@@ -47,11 +47,11 @@
 
 - Use one pending marker, `sl:rp`, whose value is the normalized requester and active team joined by a tab. The marker is valid only for that exact identity/team pair.
 - Mark signed RSVP replacement writes pending before the API request and clear the marker only after confirmed server success.
-- Keep the active RSVP team in the RSVP-private `sl:session.rsvpTeamId` field during post-auth hydration. Do not write shared `sl:session.teamId`; shared UI state must remain Demo/registered-parity neutral.
-- While the marker matches the signed-in identity/team, signed RSVP reads use the intended local collection and post-auth hydration skips the stale `/v1/rsvps` read. Hydration reports `pending: ["sl:rsvps"]` so unsynced truth is explicit.
+- Store the same compact RSVP identity/team scope in the RSVP-private `sl:session.rp` field during post-auth hydration. Do not write shared `sl:session.teamId`; shared UI state must remain Demo/registered-parity neutral.
+- While the pending marker matches `sl:session.rp`, signed RSVP reads use the intended local collection and post-auth hydration skips the stale `/v1/rsvps` read. Hydration reports `pending: ["sl:rsvps"]` so unsynced truth is explicit.
 - Treat `sl:rsvps` as a signed replacement collection and allow an empty normalized RSVP array through the Supabase adapter so deleting the final response reaches `/v1/rsvps`.
 - Keep Events, S&C, API authorization, database schema, layout, typography, and visual baselines unchanged.
-- Preserve the existing production JavaScript budget by reusing bridge storage context, compacting duplicate legacy persistence descriptors, and replacing a behavior-equivalent two-value schedule `Set` lookup; no budget was raised.
+- Preserve the existing production JavaScript budget by reusing bridge storage context, consolidating defensive bridge storage writes, compacting duplicate legacy persistence descriptors, and replacing a behavior-equivalent two-value schedule `Set` lookup; no budget was raised.
 
 ## Validation target
 
