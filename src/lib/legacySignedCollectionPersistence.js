@@ -53,16 +53,7 @@ function registeredSessionIdentity(storage) {
   return !email || email === "demo@shotlab.app" || email === "coach.demo@shotlab.app" ? "" : email;
 }
 
-function rsvpPending(storage, requester) {
-  const session = readJson(storage, APP_SESSION_KEY);
-  let teamId = session?.rsvpTeamId || session?.teamId || session?.team_id;
-  if (!teamId) {
-    const players = readJson(storage, "sl:players");
-    const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
-    teamId = actor?.teamId || actor?.team_id;
-  }
-  return storage?.getItem?.("sl:rp") === `${requester}\t${String(teamId || "").trim()}`;
-}
+const rsvpPending = (storage) => storage?.getItem?.("sl:rp") === readJson(storage, APP_SESSION_KEY)?.rp;
 
 export function readLegacyRegisteredIdentity({ storage = globalThis?.localStorage, supabaseAuthEnabled = false } = {}) {
   return supabaseAuthEnabled ? "" : registeredSessionIdentity(storage);
@@ -164,7 +155,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
     return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
   }
 
-  const pendingRsvps = rsvpPending(storage, session.identity);
+  const pendingRsvps = rsvpPending(storage);
   const results = await Promise.all(
     AUTHENTICATED_COLLECTION_GROUPS.map((group) => pendingRsvps && group[0] === "/v1/rsvps"
       ? { hydrated: ["sl:rsvps"] }
@@ -202,7 +193,7 @@ export async function requestLegacySignedCollection({
   const config = LEGACY_SIGNED_COLLECTIONS[table];
   const requester = readLegacyRegisteredIdentity({ storage, supabaseAuthEnabled });
   if (!config || method !== "GET" || !requester || typeof fetchImpl !== "function") return null;
-  if (table === "rsvps" && rsvpPending(storage, requester)) {
+  if (table === "rsvps" && rsvpPending(storage)) {
     const rows = readJson(storage, "sl:rsvps");
     return { data: Array.isArray(rows) ? rows : [], error: null, storageMode: "local_pending" };
   }
