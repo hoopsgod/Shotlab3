@@ -3,8 +3,8 @@
 ## Accepted baseline
 
 - Base branch: `march-3-reset-85393dd`
-- Frozen merge baseline: `cc5ee5278e15a832a721cd1eb9984048b01c6c85` (PR #1525 merged)
-- PR #1520, #1524, and #1525 are closed. Do not reopen their mobile-axis, assignment-state, or coach follow-up ownership work unless a regression test proves a break.
+- Frozen merge baseline: `71e14e4d532febf3dde2df052e0b4b4fa048e44e` (PR #1526 merged)
+- PR #1520, #1524, #1525, and #1526 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, or shot-log ownership work unless a regression test proves a break.
 
 ## Protected contracts
 
@@ -14,15 +14,16 @@
 - Preserve Phase 2 CSS/layout authority.
 - Preserve Phase 3A assignment state/service ownership.
 - Preserve Phase 3B coach follow-up state/service ownership.
+- Preserve Phase 3C shot-log hydration/state ownership.
 - Preserve production performance budgets and exact-head Cloudflare certification.
 - No desktop redesign, feature expansion, visual-baseline rewrite, or guardrail allowlist broadening.
 
 ## Current work
 
-- Phase: **3C — Shot-log post-auth hydration and state ownership**
-- Branch: `agent/phase3c-shot-log-state-ownership`
-- Base: `cc5ee5278e15a832a721cd1eb9984048b01c6c85`
-- Data domain: `sl:shotlogs` / signed shot-log reads and hydration only.
+- Phase: **3D — RSVP replacement and pending-sync state ownership**
+- Branch: `agent/phase3d-rsvp-state-ownership`
+- Base: `71e14e4d532febf3dde2df052e0b4b4fa048e44e`
+- Data domain: `sl:rsvps` / signed RSVP collection reads, replacement writes, and post-auth hydration only.
 
 ## Phase 3 rules
 
@@ -35,28 +36,30 @@
 7. Add focused service/selector tests plus an integration/source contract for each slice.
 8. Do not merge without explicit authorization.
 
-## Phase 3C problem
+## Phase 3D problem
 
-- `remotePersistence.mergeHydratedRows("sl:shotlogs", ...)` already owns shot-log reconciliation semantics.
-- That merge keeps unmatched failed/local retry rows and lets remote rows replace matching IDs as authoritative `remote_saved` truth.
-- Registered post-auth hydration in `legacySignedCollectionPersistence.js` bypassed that policy and wrote `/v1/shot-logs` directly over `sl:shotlogs`.
-- A login or post-auth hydration could therefore erase a locally retained failed shot record before it was retried, even though the application already had a correct domain merge policy.
+- The signed RSVP API uses replacement semantics: Coach writes own the team RSVP collection; Player writes own that Player's RSVP collection.
+- `DB.get("sl:rsvps")` already has a canonical RSVP normalization/merge path, but registered post-auth hydration still replaced `sl:rsvps` directly from remote state.
+- RSVP mutations update React/local storage before remote confirmation, while the generic persistence adapter did not identify a failed RSVP write as pending truth.
+- A failed RSVP addition could therefore disappear after a later signed hydration.
+- A failed RSVP removal could be resurrected by stale remote truth.
+- The generic adapter also skipped remote persistence when the intended RSVP replacement collection was empty, so removing the final RSVP could fail to reach the server at all.
 
-## Phase 3C implementation
+## Phase 3D implementation
 
-- Route post-auth `sl:shotlogs` hydration through the existing `mergeHydratedRows` shot-log policy before storage replacement.
-- Keep all other authenticated collection hydration behavior unchanged.
-- Preserve unmatched failed local rows as local retry truth.
-- Let matching remote rows replace stale local copies and become `remote_saved` / `remote` authority.
-- Add a focused integration contract that proves both behaviors through the real post-auth hydrator.
-- No API route, database migration, auth rule, geometry rule, visual layout, or shot-entry product behavior change.
+- Add identity/team-scoped `sl:rsvps-sync-pending` ownership state.
+- Mark RSVP replacement writes pending before the signed API request and clear the marker only after server success.
+- While that marker is active for the signed-in identity, signed RSVP reads use the intended local collection rather than stale remote state.
+- Preserve that same pending local collection through registered post-auth hydration; expose `pending: ["sl:rsvps"]` in hydration results so unsynced truth remains explicit.
+- Treat `sl:rsvps` as a signed replacement collection so an empty collection still reaches `/v1/rsvps` and can delete the final response remotely.
+- Keep Events, S&C, API authorization, database schema, layout, typography, and visual baselines unchanged.
 
 ## Validation target
 
 Before merge readiness:
 
-- Phase 3C focused shot-log hydration ownership test passes.
-- Existing signed shot-log persistence and remote hydration merge tests pass.
+- Phase 3D focused RSVP ownership tests pass for failed addition, failed final deletion, identity scoping, successful confirmation, signed reads, and post-auth hydration.
+- Existing signed Events/RSVP authorization and remote RSVP normalization/merge tests pass.
 - Production build/performance budget stays green.
 - Existing Phase 1A/1B/1C mobile guardrails stay green.
 - Demo/registered parity, Phase 5 Hardening, and Production Acceptance stay green.
