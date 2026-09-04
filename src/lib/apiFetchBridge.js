@@ -284,8 +284,8 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
-          const pending = !isEvents && readActorContext(storage);
-          if (pending) try { storage?.setItem?.("sl:rp", `${pending.requester}\t${pending.teamId}`); } catch {}
+          const pending = !isEvents && readSession(storage)?.rp;
+          if (pending) try { storage?.setItem?.("sl:rp", pending); } catch {}
           const result = isEvents ? await schedulePersistence.syncEvents(rows) : await schedulePersistence.syncRsvps(rows);
           if (pending) try { storage?.removeItem?.("sl:rp"); } catch {}
           return jsonResponse(target, result.rows, 200);
