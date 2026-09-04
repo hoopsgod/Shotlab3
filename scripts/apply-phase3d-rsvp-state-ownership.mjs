@@ -43,4 +43,22 @@ if ((supabaseSource.split(phase3dEmptyWriteGuard).length - 1) !== 1) {
 }
 
 fs.writeFileSync(supabasePath, supabaseSource.replace(/\n/g, supabaseLineEnding))
-console.log('Applied Phase 3D RSVP replacement ownership through App and the Supabase adapter, including empty authoritative syncs.')
+
+const bridgePath = path.resolve(process.cwd(), 'src/lib/apiFetchBridge.js')
+const rawBridgeSource = fs.readFileSync(bridgePath, 'utf8')
+const bridgeLineEnding = rawBridgeSource.includes('\r\n') ? '\r\n' : '\n'
+let bridgeSource = rawBridgeSource.replace(/\r\n/g, '\n')
+const scheduleSet = 'const SIGNED_SCHEDULE_RESOURCES = new Set(["events", "rsvps"]);\n'
+const scheduleSetLookup = 'return SIGNED_SCHEDULE_RESOURCES.has(resource) ? resource : "";'
+const compactScheduleLookup = 'return resource === "events" || resource === "rsvps" ? resource : "";'
+
+if (bridgeSource.includes(scheduleSetLookup)) {
+  if (!bridgeSource.includes(scheduleSet)) throw new Error('Schedule resource set declaration is missing before Phase 3D compaction.')
+  bridgeSource = bridgeSource.replace(scheduleSet, '').replace(scheduleSetLookup, compactScheduleLookup)
+}
+if (!bridgeSource.includes(compactScheduleLookup) || bridgeSource.includes('SIGNED_SCHEDULE_RESOURCES')) {
+  throw new Error('Phase 3D schedule bridge compaction did not converge to the expected behavior-equivalent lookup.')
+}
+fs.writeFileSync(bridgePath, bridgeSource.replace(/\n/g, bridgeLineEnding))
+
+console.log('Applied Phase 3D RSVP replacement ownership with compact signed-schedule routing and empty authoritative syncs.')
