@@ -84,6 +84,7 @@ test("Phase 3D pending RSVP truth is scoped to the registered identity and team"
     updatedAt: 123,
   });
   assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID })?.pending, true);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: "team-other" }), null);
   assert.equal(readRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), null);
   assert.equal(clearRsvpSyncPending({ storage, requester: "other@shotlab.test", teamId: TEAM_ID }), false);
   assert.ok(storage.getItem(RSVP_SYNC_PENDING_KEY));
@@ -166,6 +167,7 @@ test("Phase 3D post-auth hydration preserves pending RSVP additions and pending 
       storage,
       fetchImpl: async (path) => response(payloads[path]),
       expectedIdentity: EMAIL,
+      expectedTeamId: TEAM_ID,
       groupAttempts: 1,
       sessionWaitMs: 20,
       sessionPollMs: 1,
@@ -177,11 +179,38 @@ test("Phase 3D post-auth hydration preserves pending RSVP additions and pending 
   }
 });
 
-test("Phase 3D build authority sends even an empty RSVP collection through replacement sync", () => {
+test("Phase 3D post-auth hydration ignores pending RSVP truth from a different team", async () => {
+  const storage = registeredStorage([LOCAL_RSVP]);
+  markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID });
+  const activeTeamId = "team-phase3d-new";
+  const remoteCurrentTeamRsvp = { ...REMOTE_STALE_RSVP, id: "rsvp-current-team", team_id: activeTeamId };
+  const payloads = hydrationPayloads([remoteCurrentTeamRsvp]);
+
+  const result = await hydrateAuthenticatedCollectionsToStorage({
+    storage,
+    fetchImpl: async (path) => response(payloads[path]),
+    expectedIdentity: EMAIL,
+    expectedTeamId: activeTeamId,
+    groupAttempts: 1,
+    sessionWaitMs: 20,
+    sessionPollMs: 1,
+  });
+
+  assert.equal(result.ok, true, result.failures.join(" | "));
+  assert.equal(result.pending.includes("sl:rsvps"), false);
+  assert.deepEqual(JSON.parse(storage.getItem("sl:rsvps")), [remoteCurrentTeamRsvp]);
+});
+
+test("Phase 3D build authority sends empty RSVP replacement syncs and carries active team into post-auth hydration", () => {
   const enhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
+  const hydrationEnhancer = readFileSync("scripts/apply-post-auth-persistence-hydration.mjs", "utf8");
   assert.match(
     enhancer,
     /signedReplacementCollection = k === \"sl:rsvps\" \|\| k === \"sl:sc-sessions\"/,
+  );
+  assert.match(
+    hydrationEnhancer,
+    /expectedIdentity:normalizeEmail\(p\.email\),expectedTeamId:p\.teamId\|\|\"\"/,
   );
   for (const mode of ["dev", "build"]) {
     assert.ok(routeEnhancersFor(mode).includes("scripts/apply-phase3d-rsvp-state-ownership.mjs"));
