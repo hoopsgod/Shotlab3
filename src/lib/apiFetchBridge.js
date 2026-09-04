@@ -200,10 +200,11 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   const strengthPersistence = createStrengthConditioningPersistenceService({ fetchImpl: originalFetch, storage });
 
   const wrappedFetch = async (input, init = {}) => {
-    const strengthResource = signedStrengthResourceFor(input, target);
+    const signedResource = signedSupabaseResourceFor(input, target);
+    const method = signedResource ? methodFor(input, init) : "";
+    const strengthResource = signedResource === "sc_sessions" ? "sessions" : signedResource === "sc_rsvps" ? "rsvps" : signedResource === "sc_logs" ? "logs" : "";
     if (strengthResource) {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await strengthPersistence.loadState();
           return jsonResponse(target, result[strengthResource], 200);
@@ -220,9 +221,8 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedTeamResourceFor(input, target)) {
+    if (signedResource === "teams") {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await teamPersistence.loadTeams();
           writeStored(storage, "sl:teams", JSON.stringify(result.rows));
@@ -238,9 +238,8 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedPlayerResourceFor(input, target)) {
+    if (signedResource === "players") {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerIdentityPersistence.loadPlayers();
           writeStored(storage, "sl:players", JSON.stringify(result.rows));
@@ -256,9 +255,8 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedPlayerProfileResourceFor(input, target)) {
+    if (signedResource === "player_profiles") {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerProfilePersistence.loadProfiles();
           writeStored(storage, "sl:player-profiles", JSON.stringify(result.rows));
@@ -274,10 +272,9 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    const scheduleResource = signedScheduleResourceFor(input, target);
+    const scheduleResource = signedResource === "events" || signedResource === "rsvps" ? signedResource : "";
     if (scheduleResource) {
       try {
-        const method = methodFor(input, init);
         const isEvents = scheduleResource === "events";
         if (method === "GET") {
           const result = isEvents ? await schedulePersistence.loadEvents() : await schedulePersistence.loadRsvps();
