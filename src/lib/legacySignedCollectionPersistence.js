@@ -1,6 +1,6 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { mergeHydratedRows } from "./remotePersistence.js";
-import { readRsvpSyncPending, readScheduleContext } from "./schedulePersistenceService.js";
+import { isRsvpSyncPending, readScheduleContext } from "./schedulePersistenceService.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
@@ -82,9 +82,7 @@ export async function waitForRegisteredSession({
 
   while (true) {
     const current = registeredSessionIdentity(storage);
-    if (current && (!expected || current === expected)) {
-      return { ok: true, identity: current };
-    }
+    if (current && (!expected || current === expected)) return { ok: true, identity: current };
     if (Date.now() >= deadline) {
       return {
         ok: false,
@@ -97,11 +95,7 @@ export async function waitForRegisteredSession({
 }
 
 async function readJsonResponse(response) {
-  try {
-    return await response.json();
-  } catch {
-    return {};
-  }
+  try { return await response.json(); } catch { return {}; }
 }
 
 function signedHeaders(storage, requester = "") {
@@ -139,11 +133,11 @@ async function hydrateGroup({
           }
           const localRows = readJson(storage, binding.storageKey);
           const rsvpPending = binding.storageKey === "sl:rsvps"
-            && readRsvpSyncPending({ storage, requester, teamId });
+            && isRsvpSyncPending(storage, requester, teamId);
           const rows = binding.storageKey === "sl:shotlogs"
             ? mergeHydratedRows(binding.storageKey, localRows, payload[binding.field])
             : rsvpPending
-              ? mergeHydratedRows(binding.storageKey, localRows, [])
+              ? (Array.isArray(localRows) ? localRows : [])
               : payload[binding.field];
           storage.setItem(binding.storageKey, JSON.stringify(rows));
           hydrated.push(binding.storageKey);
@@ -186,11 +180,6 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   }
 
   const activeTeamId = String(expectedTeamId || readScheduleContext(storage).teamId || "").trim();
-
-  // These signed GETs are independent and write distinct storage keys. Running them
-  // concurrently keeps registered mobile login bounded by the slowest collection
-  // instead of the sum of every collection latency, while each group retains its own
-  // retry/fail-closed behavior.
   const results = await Promise.all(
     AUTHENTICATED_COLLECTION_GROUPS.map((group) => hydrateGroup({
       group,
@@ -221,7 +210,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   return {
     ok: failures.length === 0,
     hydrated: [...new Set(hydrated)],
-    pending: readRsvpSyncPending({ storage, requester: session.identity, teamId: activeTeamId }) ? ["sl:rsvps"] : [],
+    pending: isRsvpSyncPending(storage, session.identity, activeTeamId) ? ["sl:rsvps"] : [],
     failures: [...new Set(failures)],
     identity: session.identity,
     identityHydrated,
@@ -239,9 +228,10 @@ export async function requestLegacySignedCollection({
   const requester = readLegacyRegisteredIdentity({ storage, supabaseAuthEnabled });
   if (!config || method !== "GET" || !requester || typeof fetchImpl !== "function") return null;
 
-  if (String(table || "") === "rsvps" && readRsvpSyncPending({ storage, requester, teamId: readScheduleContext(storage).teamId })) {
+  if (String(table || "") === "rsvps" && isRsvpSyncPending(storage, requester, readScheduleContext(storage).teamId)) {
+    const localRows = readJson(storage, "sl:rsvps");
     return {
-      data: mergeHydratedRows("sl:rsvps", readJson(storage, "sl:rsvps"), []),
+      data: Array.isArray(localRows) ? localRows : [],
       error: null,
       storageMode: "local_pending",
     };
