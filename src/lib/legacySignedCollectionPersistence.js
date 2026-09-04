@@ -1,5 +1,6 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { mergeHydratedRows } from "./remotePersistence.js";
+import { readRsvpSyncPending } from "./rsvpSyncOwnership.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
@@ -129,19 +130,26 @@ async function hydrateGroup({
         lastFailure = String(payload?.error || response?.status || "failed");
       } else {
         const hydrated = [];
+        const pending = [];
         const missingFields = [];
         for (const binding of group.fields) {
           if (!Array.isArray(payload?.[binding.field])) {
             missingFields.push(binding.field);
             continue;
           }
+          const localRows = readJson(storage, binding.storageKey);
+          const rsvpPending = binding.storageKey === "sl:rsvps"
+            && readRsvpSyncPending({ storage, requester });
           const rows = binding.storageKey === "sl:shotlogs"
-            ? mergeHydratedRows(binding.storageKey, readJson(storage, binding.storageKey), payload[binding.field])
-            : payload[binding.field];
+            ? mergeHydratedRows(binding.storageKey, localRows, payload[binding.field])
+            : rsvpPending
+              ? mergeHydratedRows(binding.storageKey, localRows, [])
+              : payload[binding.field];
           storage.setItem(binding.storageKey, JSON.stringify(rows));
           hydrated.push(binding.storageKey);
+          if (rsvpPending) pending.push(binding.storageKey);
         }
-        if (!missingFields.length) return { ok: true, hydrated };
+        if (!missingFields.length) return { ok: true, hydrated, pending };
         lastFailure = `missing_fields:${missingFields.join(",")}`;
       }
     } catch (error) {
@@ -151,7 +159,7 @@ async function hydrateGroup({
     if (attempt < maxAttempts) await delay(retryDelayMs * attempt);
   }
 
-  return { ok: false, hydrated: [], failure: `${group.path}:${lastFailure}` };
+  return { ok: false, hydrated: [], pending: [], failure: `${group.path}:${lastFailure}` };
 }
 
 export async function hydrateAuthenticatedCollectionsToStorage({
@@ -164,7 +172,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
 } = {}) {
   if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") {
-    return { ok: false, hydrated: [], failures: ["storage_unavailable"], identity: "" };
+    return { ok: false, hydrated: [], pending: [], failures: ["storage_unavailable"], identity: "" };
   }
 
   const session = await waitForRegisteredSession({
@@ -174,7 +182,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
     pollMs: sessionPollMs,
   });
   if (!session.ok) {
-    return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
+    return { ok: false, hydrated: [], pending: [], failures: [session.error], identity: session.identity || "" };
   }
 
   // These signed GETs are independent and write distinct storage keys. Running them
@@ -193,9 +201,11 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   );
 
   const hydrated = [];
+  const pending = [];
   const failures = [];
   for (const result of results) {
     hydrated.push(...result.hydrated);
+    pending.push(...(result.pending || []));
     if (!result.ok) failures.push(result.failure);
   }
 
@@ -210,6 +220,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   return {
     ok: failures.length === 0,
     hydrated: [...new Set(hydrated)],
+    pending: [...new Set(pending)],
     failures: [...new Set(failures)],
     identity: session.identity,
     identityHydrated,
@@ -226,6 +237,15 @@ export async function requestLegacySignedCollection({
   const config = LEGACY_SIGNED_COLLECTIONS[String(table || "")];
   const requester = readLegacyRegisteredIdentity({ storage, supabaseAuthEnabled });
   if (!config || method !== "GET" || !requester || typeof fetchImpl !== "function") return null;
+
+  if (String(table || "") === "rsvps" && readRsvpSyncPending({ storage, requester })) {
+    return {
+      data: mergeHydratedRows("sl:rsvps", readJson(storage, "sl:rsvps"), []),
+      error: null,
+      storageMode: "local_pending",
+      syncPending: true,
+    };
+  }
 
   try {
     const response = await fetchImpl(config.path, {
