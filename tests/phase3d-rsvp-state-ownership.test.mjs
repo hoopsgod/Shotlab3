@@ -133,6 +133,27 @@ test("Phase 3D successful RSVP replacement clears pending truth", async () => {
   assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), null);
 });
 
+test("Phase 3D final RSVP removal reaches the replacement API as an explicit empty collection", async () => {
+  const storage = registeredStorage([]);
+  let calls = 0;
+  const service = createSchedulePersistenceService({
+    storage,
+    fetchImpl: async (path, init = {}) => {
+      calls += 1;
+      assert.equal(path, "/v1/rsvps");
+      assert.equal(init.method, "POST");
+      assert.deepEqual(JSON.parse(init.body), { team_id: TEAM_ID, rsvps: [] });
+      return response({ ok: true, storage_mode: "signed_api", rsvps: [], deleted_count: 1 });
+    },
+  });
+
+  const saved = await service.syncRsvps([], { teamId: TEAM_ID });
+  assert.equal(saved.ok, true);
+  assert.equal(saved.deletedCount, 1);
+  assert.equal(calls, 1);
+  assert.equal(readRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID }), null);
+});
+
 test("Phase 3D legacy signed RSVP reads preserve pending local truth without contacting stale remote state", async () => {
   const storage = registeredStorage([LOCAL_RSVP]);
   markRsvpSyncPending({ storage, requester: EMAIL, teamId: TEAM_ID });
@@ -201,12 +222,16 @@ test("Phase 3D post-auth hydration ignores pending RSVP truth from a different t
   assert.deepEqual(JSON.parse(storage.getItem("sl:rsvps")), [remoteCurrentTeamRsvp]);
 });
 
-test("Phase 3D build authority sends empty RSVP replacement syncs and carries active team into post-auth hydration", () => {
+test("Phase 3D build authority sends empty RSVP replacement syncs through both App and the Supabase adapter", () => {
   const enhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
   const hydrationEnhancer = readFileSync("scripts/apply-post-auth-persistence-hydration.mjs", "utf8");
   assert.match(
     enhancer,
     /signedReplacementCollection = k === \"sl:rsvps\" \|\| k === \"sl:sc-sessions\"/,
+  );
+  assert.match(
+    enhancer,
+    /normalizedBody\.length === 0 && table !== \"rsvps\"/,
   );
   assert.match(
     hydrationEnhancer,
