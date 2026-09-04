@@ -206,13 +206,13 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       try {
         if (method === "GET") {
           const result = await strengthPersistence.loadState();
-          return jsonResponse(target, result[strengthResource], 200);
+          return jsonResponse(target, result[strengthResource]);
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
           const methodName = `sync${strengthResource[0].toUpperCase()}${strengthResource.slice(1)}`;
           const result = await strengthPersistence[methodName](rows);
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -225,11 +225,11 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         if (method === "GET") {
           const result = await teamPersistence.loadTeams();
           writeStored(storage, "sl:teams", JSON.stringify(result.rows));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const result = await teamPersistence.syncTeams(parseRows(init?.body));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -242,11 +242,11 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         if (method === "GET") {
           const result = await playerIdentityPersistence.loadPlayers();
           writeStored(storage, "sl:players", JSON.stringify(result.rows));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const result = await playerIdentityPersistence.syncPlayers(parseRows(init?.body), { replace: true });
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -259,11 +259,11 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         if (method === "GET") {
           const result = await playerProfilePersistence.loadProfiles();
           writeStored(storage, "sl:player-profiles", JSON.stringify(result.rows));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const result = await playerProfilePersistence.syncProfiles(parseRows(init?.body));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -277,7 +277,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const isEvents = scheduleResource === "events";
         if (method === "GET") {
           const result = isEvents ? await schedulePersistence.loadEvents() : await schedulePersistence.loadRsvps();
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
@@ -285,7 +285,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           if (pending) writeStored(storage, "sl:rp", pending);
           const result = isEvents ? await schedulePersistence.syncEvents(rows) : await schedulePersistence.syncRsvps(rows);
           if (pending) writeStored(storage, "sl:rp", null);
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
