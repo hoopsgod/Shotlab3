@@ -2,7 +2,6 @@ import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
-const RSVP_PENDING_KEY = "sl:rsvps-sync-pending";
 
 function parseStored(storage, key, fallback) {
   try {
@@ -19,10 +18,8 @@ function readContext(storage = globalThis?.localStorage) {
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
   const players = parseStored(storage, "sl:players", []);
   const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
-  return {
-    requester,
-    teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id),
-  };
+  const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id);
+  return { requester, teamId };
 }
 
 async function readJson(response) {
@@ -41,21 +38,19 @@ export function createSchedulePersistenceService({
   fetchImpl = globalThis?.fetch,
   storage = globalThis?.localStorage,
 } = {}) {
-  const headers = (requester, extra = {}) => buildApiIdentityHeaders({ requester, storage, headers: extra });
+  const headers = (extra = {}) => {
+    const context = readContext(storage);
+    return buildApiIdentityHeaders({ requester: context.requester, storage, headers: extra });
+  };
 
   const loadCollection = async (resource, field, teamId = "") => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId);
-    if (resource === "rsvps" && context.requester && activeTeamId
-      && storage?.getItem?.(RSVP_PENDING_KEY) === `${context.requester}\t${activeTeamId}`) {
-      const rows = parseStored(storage, "sl:rsvps", []);
-      return { ok: true, storageMode: "local_pending", rows: Array.isArray(rows) ? rows : [] };
-    }
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/${resource}${query}`, {
       method: "GET",
-      headers: headers(context.requester),
+      headers: headers(),
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_load_failed`);
@@ -71,20 +66,13 @@ export function createSchedulePersistenceService({
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId || rows?.[0]?.team_id || rows?.[0]?.teamId);
     if (!activeTeamId) throw new Error(`${resource}_team_required`);
-    const rsvp = resource === "rsvps";
-    if (rsvp && context.requester) {
-      try { storage?.setItem?.(RSVP_PENDING_KEY, `${context.requester}\t${activeTeamId}`); } catch {}
-    }
     const response = await fetchImpl(`/v1/${resource}`, {
       method: "POST",
-      headers: headers(context.requester, { "Content-Type": "application/json" }),
+      headers: headers({ "Content-Type": "application/json" }),
       body: JSON.stringify({ team_id: activeTeamId, [field]: Array.isArray(rows) ? rows : [] }),
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_sync_failed`);
-    if (rsvp) {
-      try { storage?.removeItem?.(RSVP_PENDING_KEY); } catch {}
-    }
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
