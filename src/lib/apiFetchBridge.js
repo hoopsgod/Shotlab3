@@ -6,7 +6,6 @@ import { createTeamPersistenceService } from "./teamPersistenceService.js";
 import { createStrengthConditioningPersistenceService } from "./strengthConditioningPersistenceService.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
-const SIGNED_SCHEDULE_RESOURCES = new Set(["events", "rsvps"]);
 
 function parseStored(storage, key, fallback) {
   try {
@@ -130,7 +129,7 @@ function signedSupabaseResourceFor(input, target = globalThis) {
 
 function signedScheduleResourceFor(input, target = globalThis) {
   const resource = signedSupabaseResourceFor(input, target);
-  return SIGNED_SCHEDULE_RESOURCES.has(resource) ? resource : "";
+  return resource === "events" || resource === "rsvps" ? resource : "";
 }
 
 function signedPlayerProfileResourceFor(input, target = globalThis) {
@@ -284,7 +283,10 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
+          const pending = !isEvents && readActorContext(target?.localStorage);
+          if (pending) try { target?.localStorage?.setItem?.("sl:rp", `${pending.requester}\t${pending.teamId}`); } catch {}
           const result = isEvents ? await schedulePersistence.syncEvents(rows) : await schedulePersistence.syncRsvps(rows);
+          if (pending) try { target?.localStorage?.removeItem?.("sl:rp"); } catch {}
           return jsonResponse(target, result.rows, 200);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
