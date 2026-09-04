@@ -16,6 +16,13 @@ function parseStored(storage, key, fallback) {
   }
 }
 
+function writeStored(storage, key, value) {
+  try {
+    if (value === null) storage?.removeItem?.(key);
+    else storage?.setItem?.(key, value);
+  } catch {}
+}
+
 function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
@@ -52,9 +59,7 @@ function pruneTeamCache(storage = globalThis?.localStorage) {
   const teams = parseStored(storage, "sl:teams", []);
   if (!Array.isArray(teams) || !teams.length || !teamId) return Array.isArray(teams) ? teams : [];
   const filtered = teams.filter((row) => String(row?.id || row?.teamId || row?.team_id || "").trim() === teamId);
-  if (filtered.length !== teams.length) {
-    try { storage?.setItem?.("sl:teams", JSON.stringify(filtered)); } catch {}
-  }
+  if (filtered.length !== teams.length) writeStored(storage, "sl:teams", JSON.stringify(filtered));
   return filtered;
 }
 
@@ -70,9 +75,7 @@ function prunePlayerCache(storage = globalThis?.localStorage) {
     }
     return false;
   });
-  if (filtered.length !== players.length) {
-    try { storage?.setItem?.("sl:players", JSON.stringify(filtered)); } catch {}
-  }
+  if (filtered.length !== players.length) writeStored(storage, "sl:players", JSON.stringify(filtered));
   return filtered;
 }
 
@@ -89,9 +92,7 @@ function prunePlayerProfileCache(storage = globalThis?.localStorage) {
   } else {
     return profiles;
   }
-  if (filtered.length !== profiles.length) {
-    try { storage?.setItem?.("sl:player-profiles", JSON.stringify(filtered)); } catch {}
-  }
+  if (filtered.length !== profiles.length) writeStored(storage, "sl:player-profiles", JSON.stringify(filtered));
   return filtered;
 }
 
@@ -224,7 +225,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const method = methodFor(input, init);
         if (method === "GET") {
           const result = await teamPersistence.loadTeams();
-          try { storage?.setItem?.("sl:teams", JSON.stringify(result.rows)); } catch {}
+          writeStored(storage, "sl:teams", JSON.stringify(result.rows));
           return jsonResponse(target, result.rows, 200);
         }
         if (method === "POST") {
@@ -242,7 +243,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerIdentityPersistence.loadPlayers();
-          try { storage?.setItem?.("sl:players", JSON.stringify(result.rows)); } catch {}
+          writeStored(storage, "sl:players", JSON.stringify(result.rows));
           return jsonResponse(target, result.rows, 200);
         }
         if (method === "POST") {
@@ -260,7 +261,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerProfilePersistence.loadProfiles();
-          try { storage?.setItem?.("sl:player-profiles", JSON.stringify(result.rows)); } catch {}
+          writeStored(storage, "sl:player-profiles", JSON.stringify(result.rows));
           return jsonResponse(target, result.rows, 200);
         }
         if (method === "POST") {
@@ -285,9 +286,9 @@ export function installApiIdentityFetchBridge(target = globalThis) {
         if (method === "POST") {
           const rows = parseRows(init?.body);
           const pending = !isEvents && readSession(storage)?.rp;
-          if (pending) try { storage?.setItem?.("sl:rp", pending); } catch {}
+          if (pending) writeStored(storage, "sl:rp", pending);
           const result = isEvents ? await schedulePersistence.syncEvents(rows) : await schedulePersistence.syncRsvps(rows);
-          if (pending) try { storage?.removeItem?.("sl:rp"); } catch {}
+          if (pending) writeStored(storage, "sl:rp", null);
           return jsonResponse(target, result.rows, 200);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
