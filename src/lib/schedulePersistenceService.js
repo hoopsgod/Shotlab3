@@ -1,4 +1,5 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+import { clearRsvpSyncPending, markRsvpSyncPending, readRsvpSyncPending } from "./rsvpSyncOwnership.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
@@ -47,6 +48,15 @@ export function createSchedulePersistenceService({
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId);
+    if (resource === "rsvps" && readRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId })) {
+      const localRows = parseStored(storage, "sl:rsvps", []);
+      return {
+        ok: true,
+        storageMode: "local_pending",
+        rows: Array.isArray(localRows) ? localRows : [],
+        syncPending: true,
+      };
+    }
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/${resource}${query}`, {
       method: "GET",
@@ -66,6 +76,10 @@ export function createSchedulePersistenceService({
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId || rows?.[0]?.team_id || rows?.[0]?.teamId);
     if (!activeTeamId) throw new Error(`${resource}_team_required`);
+    const isRsvpCollection = resource === "rsvps";
+    if (isRsvpCollection) {
+      markRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId });
+    }
     const response = await fetchImpl(`/v1/${resource}`, {
       method: "POST",
       headers: headers({ "Content-Type": "application/json" }),
@@ -73,6 +87,9 @@ export function createSchedulePersistenceService({
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_sync_failed`);
+    if (isRsvpCollection) {
+      clearRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId });
+    }
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
