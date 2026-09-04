@@ -2,7 +2,6 @@ import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
-const RSVP_SYNC_PENDING_KEY = "sl:rsvps-sync-pending";
 
 function parseStored(storage, key, fallback) {
   try {
@@ -13,7 +12,7 @@ function parseStored(storage, key, fallback) {
   }
 }
 
-export function readScheduleContext(storage = globalThis?.localStorage) {
+function readContext(storage = globalThis?.localStorage) {
   const rawSession = parseStored(storage, "sl:session", null);
   const session = Array.isArray(rawSession) ? rawSession[0] : rawSession;
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
@@ -23,26 +22,6 @@ export function readScheduleContext(storage = globalThis?.localStorage) {
     requester,
     teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id),
   };
-}
-
-const rsvpPendingToken = (requester, teamId) => {
-  const identity = normalizeIdentity(requester);
-  const team = clean(teamId);
-  return identity && team ? `${identity}\t${team}` : "";
-};
-
-export function isRsvpSyncPending(storage, requester, teamId) {
-  const token = rsvpPendingToken(requester, teamId);
-  return Boolean(token && storage?.getItem?.(RSVP_SYNC_PENDING_KEY) === token);
-}
-
-function setRsvpSyncPending(storage, requester, teamId, pending) {
-  const token = rsvpPendingToken(requester, teamId);
-  if (!token) return;
-  try {
-    if (pending) storage?.setItem?.(RSVP_SYNC_PENDING_KEY, token);
-    else if (storage?.getItem?.(RSVP_SYNC_PENDING_KEY) === token) storage?.removeItem?.(RSVP_SYNC_PENDING_KEY);
-  } catch {}
 }
 
 async function readJson(response) {
@@ -65,12 +44,8 @@ export function createSchedulePersistenceService({
 
   const loadCollection = async (resource, field, teamId = "") => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
-    const context = readScheduleContext(storage);
+    const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId);
-    if (resource === "rsvps" && isRsvpSyncPending(storage, context.requester, activeTeamId)) {
-      const localRows = parseStored(storage, "sl:rsvps", []);
-      return { ok: true, storageMode: "local_pending", rows: Array.isArray(localRows) ? localRows : [] };
-    }
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/${resource}${query}`, {
       method: "GET",
@@ -87,11 +62,9 @@ export function createSchedulePersistenceService({
 
   const syncCollection = async (resource, field, rows = [], teamId = "") => {
     if (typeof fetchImpl !== "function") throw new Error(`${resource}_api_unavailable`);
-    const context = readScheduleContext(storage);
+    const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId || rows?.[0]?.team_id || rows?.[0]?.teamId);
     if (!activeTeamId) throw new Error(`${resource}_team_required`);
-    const isRsvp = resource === "rsvps";
-    if (isRsvp) setRsvpSyncPending(storage, context.requester, activeTeamId, true);
     const response = await fetchImpl(`/v1/${resource}`, {
       method: "POST",
       headers: headers(context.requester, { "Content-Type": "application/json" }),
@@ -99,7 +72,6 @@ export function createSchedulePersistenceService({
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_sync_failed`);
-    if (isRsvp) setRsvpSyncPending(storage, context.requester, activeTeamId, false);
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
@@ -113,8 +85,8 @@ export function createSchedulePersistenceService({
     syncEvents: (events, { teamId = "" } = {}) => syncCollection("events", "events", events, teamId),
     loadRsvps: ({ teamId = "" } = {}) => loadCollection("rsvps", "rsvps", teamId),
     syncRsvps: (rsvps, { teamId = "" } = {}) => syncCollection("rsvps", "rsvps", rsvps, teamId),
-    readContext: () => readScheduleContext(storage),
+    readContext: () => readContext(storage),
   };
 }
 
-export const __testUtils = { readContext: readScheduleContext };
+export const __testUtils = { readContext };
