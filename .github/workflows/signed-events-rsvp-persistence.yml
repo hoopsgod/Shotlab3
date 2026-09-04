@@ -10,7 +10,6 @@ on:
       - "src/lib/apiFetchBridge.js"
       - "src/lib/apiIdentityHeaders.js"
       - "src/lib/legacySignedCollectionPersistence.js"
-      - "src/lib/rsvpSyncOwnership.js"
       - "src/lib/schedulePersistenceService.js"
       - "src/lib/supabase.js"
       - "scripts/apply-phase3d-rsvp-state-ownership.mjs"
