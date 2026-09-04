@@ -18,8 +18,7 @@ function readContext(storage = globalThis?.localStorage) {
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
   const players = parseStored(storage, "sl:players", []);
   const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
-  const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id);
-  return { requester, teamId };
+  return { requester, teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id) };
 }
 
 async function readJson(response) {
@@ -38,10 +37,7 @@ export function createSchedulePersistenceService({
   fetchImpl = globalThis?.fetch,
   storage = globalThis?.localStorage,
 } = {}) {
-  const headers = (extra = {}) => {
-    const context = readContext(storage);
-    return buildApiIdentityHeaders({ requester: context.requester, storage, headers: extra });
-  };
+  const headers = (requester, extra = {}) => buildApiIdentityHeaders({ requester, storage, headers: extra });
 
   const loadCollection = async (resource, field, teamId = "") => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
@@ -50,7 +46,7 @@ export function createSchedulePersistenceService({
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/${resource}${query}`, {
       method: "GET",
-      headers: headers(),
+      headers: headers(context.requester),
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_load_failed`);
@@ -66,13 +62,20 @@ export function createSchedulePersistenceService({
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId || rows?.[0]?.team_id || rows?.[0]?.teamId);
     if (!activeTeamId) throw new Error(`${resource}_team_required`);
+    const pendingKey = resource === "rsvps" && context.requester ? `sl:rp:${context.requester}` : "";
+    if (pendingKey) {
+      try { storage?.setItem?.(pendingKey, activeTeamId); } catch {}
+    }
     const response = await fetchImpl(`/v1/${resource}`, {
       method: "POST",
-      headers: headers({ "Content-Type": "application/json" }),
+      headers: headers(context.requester, { "Content-Type": "application/json" }),
       body: JSON.stringify({ team_id: activeTeamId, [field]: Array.isArray(rows) ? rows : [] }),
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_sync_failed`);
+    if (pendingKey) {
+      try { storage?.removeItem?.(pendingKey); } catch {}
+    }
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
