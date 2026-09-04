@@ -55,7 +55,7 @@ function registeredSessionIdentity(storage) {
 
 function rsvpPending(storage, requester) {
   const session = readJson(storage, APP_SESSION_KEY);
-  let teamId = session?.teamId || session?.team_id;
+  let teamId = session?.rsvpTeamId || session?.teamId || session?.team_id;
   if (!teamId) {
     const players = readJson(storage, "sl:players");
     const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
@@ -152,7 +152,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
 } = {}) {
   if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") {
-    return { ok: false, hydrated: [], pending: [], failures: ["storage_unavailable"], identity: "" };
+    return { ok: false, hydrated: [], failures: ["storage_unavailable"], identity: "" };
   }
   const session = await waitForRegisteredSession({
     storage,
@@ -161,7 +161,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
     pollMs: sessionPollMs,
   });
   if (!session.ok) {
-    return { ok: false, hydrated: [], pending: [], failures: [session.error], identity: session.identity || "" };
+    return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
   }
 
   const pendingRsvps = rsvpPending(storage, session.identity);
