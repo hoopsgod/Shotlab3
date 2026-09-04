@@ -10,11 +10,15 @@ on:
       - "functions/v1/shot-logs/**"
       - "src/lib/apiFetchBridge.js"
       - "src/lib/apiIdentityHeaders.js"
+      - "src/lib/legacySignedCollectionPersistence.js"
+      - "src/lib/remotePersistence.js"
       - "src/lib/scorePersistenceService.js"
       - "src/lib/shotLogPersistenceService.js"
       - "src/lib/supabase.js"
       - "migrations/042_shot_logs_signed_api_boundary.sql"
       - "tests/signed-shot-log-persistence.test.mjs"
+      - "tests/remote-persistence-hydration-merge.test.mjs"
+      - "tests/phase3c-shot-log-hydration-ownership.test.mjs"
       - "tests/home-shots-legacy-profile-fallback-middleware.test.mjs"
       - "tests/home-shots-log-route.test.mjs"
       - "tests/home-shots-roster-identity.test.mjs"
@@ -47,9 +51,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify signed shot-log authorization and persistence contracts
+      - name: Verify signed shot-log authorization, hydration, and persistence contracts
         run: |
           node --test tests/signed-shot-log-persistence.test.mjs
+          node --test tests/remote-persistence-hydration-merge.test.mjs tests/phase3c-shot-log-hydration-ownership.test.mjs
           node --test tests/home-shots-legacy-profile-fallback-middleware.test.mjs
           node --test tests/home-shots-log-route.test.mjs tests/home-shots-roster-identity.test.mjs
           node --test tests/player-home-shot-logging-save-path.test.mjs
