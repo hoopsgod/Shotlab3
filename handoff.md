@@ -47,12 +47,13 @@
 
 ## Phase 3D implementation
 
-- Add identity/team-scoped `sl:rsvps-sync-pending` ownership state.
+- Add an identity-keyed pending marker (`sl:rp:<identity>` -> active team) so failed RSVP truth is scoped to both requester and team without carrying duplicate state machinery.
 - Mark RSVP replacement writes pending before the signed API request and clear the marker only after server success.
-- While that marker is active for the signed-in identity, signed RSVP reads use the intended local collection rather than stale remote state.
+- While that marker is active for the signed-in identity/team, signed RSVP reads use the intended local collection rather than stale remote state.
 - Preserve that same pending local collection through registered post-auth hydration; expose `pending: ["sl:rsvps"]` in hydration results so unsynced truth remains explicit.
 - Treat `sl:rsvps` as a signed replacement collection so an empty collection still reaches `/v1/rsvps` and can delete the final response remotely.
 - Keep Events, S&C, API authorization, database schema, layout, typography, and visual baselines unchanged.
+- Preserve the existing production JavaScript budget by compacting duplicate legacy persistence descriptors and replacing a behavior-equivalent two-value schedule `Set` lookup during route enhancement; no budget was raised.
 
 ## Validation target
 
