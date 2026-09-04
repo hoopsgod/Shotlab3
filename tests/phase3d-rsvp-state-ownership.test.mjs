@@ -30,7 +30,7 @@ function response(payload, status = 200) {
 
 function registeredStorage(rsvps = []) {
   return memoryStorage([
-    ["sl:session", JSON.stringify({ email: EMAIL, teamId: TEAM_ID, role: "player" })],
+    ["sl:session", JSON.stringify({ email: EMAIL, rsvpTeamId: TEAM_ID, role: "player" })],
     ["sl:players", JSON.stringify([{ id: "player-phase3d", email: EMAIL, teamId: TEAM_ID, role: "player" }])],
     ["sl:rsvps", JSON.stringify(rsvps)],
   ]);
@@ -207,7 +207,7 @@ test("Phase 3D post-auth hydration ignores pending RSVP truth from a different t
   const storage = registeredStorage([LOCAL_RSVP]);
   markPending(storage);
   const activeTeamId = "team-phase3d-new";
-  storage.setItem("sl:session", JSON.stringify({ email: EMAIL, teamId: activeTeamId, role: "player" }));
+  storage.setItem("sl:session", JSON.stringify({ email: EMAIL, rsvpTeamId: activeTeamId, role: "player" }));
   const remoteCurrentTeamRsvp = { ...REMOTE_STALE_RSVP, id: "rsvp-current-team", team_id: activeTeamId };
   const payloads = hydrationPayloads([remoteCurrentTeamRsvp]);
 
@@ -225,7 +225,7 @@ test("Phase 3D post-auth hydration ignores pending RSVP truth from a different t
   assert.deepEqual(JSON.parse(storage.getItem("sl:rsvps")), [remoteCurrentTeamRsvp]);
 });
 
-test("Phase 3D build authority sends empty RSVP replacements and carries current team context without widening hydration API", () => {
+test("Phase 3D build authority sends empty RSVP replacements without exposing RSVP team scope to shared UI state", () => {
   const enhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
   const hydrationEnhancer = readFileSync("scripts/apply-post-auth-persistence-hydration.mjs", "utf8");
   const bridge = readFileSync("src/lib/apiFetchBridge.js", "utf8");
@@ -233,7 +233,8 @@ test("Phase 3D build authority sends empty RSVP replacements and carries current
   assert.match(enhancer, /normalizedBody\.length === 0 && table !== \"rsvps\"/);
   assert.match(bridge, /resource === \"events\" \|\| resource === \"rsvps\"/);
   assert.match(bridge, /setItem\?\.\("sl:rp", `\$\{pending\.requester\}\\t\$\{pending\.teamId\}`\)/);
-  assert.match(hydrationEnhancer, /DB\.set\("sl:session",\{email:normalizeEmail\(p\.email\),teamId:p\.teamId\|\|\"\"\}\)/);
+  assert.match(hydrationEnhancer, /DB\.set\("sl:session",\{email:normalizeEmail\(p\.email\),rsvpTeamId:p\.teamId\|\|\"\"\}\)/);
+  assert.doesNotMatch(hydrationEnhancer, /DB\.set\("sl:session",\{email:normalizeEmail\(p\.email\),teamId:p\.teamId/);
   assert.match(hydrationEnhancer, /hydrateAuthenticatedCollectionsToStorage\(\{expectedIdentity:normalizeEmail\(p\.email\)\}\)/);
   for (const mode of ["dev", "build"]) {
     assert.ok(routeEnhancersFor(mode).includes("scripts/apply-phase3d-rsvp-state-ownership.mjs"));
