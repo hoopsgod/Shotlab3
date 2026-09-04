@@ -1,4 +1,5 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+import { mergeHydratedRows } from "./remotePersistence.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
@@ -103,11 +104,7 @@ async function readJsonResponse(response) {
 }
 
 function signedHeaders(storage, requester = "") {
-  return buildApiIdentityHeaders({
-    requester,
-    storage,
-    headers: { Accept: "application/json" },
-  });
+  return buildApiIdentityHeaders({ requester, storage });
 }
 
 async function hydrateGroup({
@@ -125,7 +122,6 @@ async function hydrateGroup({
     try {
       const response = await fetchImpl(group.path, {
         method: "GET",
-        credentials: "same-origin",
         headers: signedHeaders(storage, requester),
       });
       const payload = await readJsonResponse(response);
@@ -139,7 +135,10 @@ async function hydrateGroup({
             missingFields.push(binding.field);
             continue;
           }
-          storage.setItem(binding.storageKey, JSON.stringify(payload[binding.field]));
+          const rows = binding.storageKey === "sl:shotlogs"
+            ? mergeHydratedRows(binding.storageKey, readJson(storage, binding.storageKey), payload[binding.field])
+            : payload[binding.field];
+          storage.setItem(binding.storageKey, JSON.stringify(rows));
           hydrated.push(binding.storageKey);
         }
         if (!missingFields.length) return { ok: true, hydrated };
@@ -231,7 +230,6 @@ export async function requestLegacySignedCollection({
   try {
     const response = await fetchImpl(config.path, {
       method: "GET",
-      credentials: "same-origin",
       headers: signedHeaders(storage, requester),
     });
     const payload = await readJsonResponse(response);
