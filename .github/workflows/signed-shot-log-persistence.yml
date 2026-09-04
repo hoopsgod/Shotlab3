@@ -36,30 +36,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  diagnose-player-home-shot:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Capture Player home-shot save-path output
-        shell: bash
-        run: |
-          set -o pipefail
-          node --test --test-name-pattern='^(?!(index\.html does not use a MutationObserver workaround to hide Team Sync panel|stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do|Demo Player logs 123 shots locally without Team Sync warning or retry repair|Demo Player session shot logs are removed on logout while registered shots remain)$).*' tests/player-home-shot-logging-save-path.test.mjs 2>&1 | tee player-home-shot-save-path.log
-      - name: Upload Player home-shot output
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: player-home-shot-save-path-output
-          path: player-home-shot-save-path.log
-          if-no-files-found: error
-          retention-days: 1
-
   signed-shot-log-persistence:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -82,7 +58,7 @@ jobs:
       - name: Verify home-shot route and roster identity
         run: node --test tests/home-shots-log-route.test.mjs tests/home-shots-roster-identity.test.mjs
       - name: Verify Player home-shot save path
-        run: node --test --test-name-pattern='^(?!(index\.html does not use a MutationObserver workaround to hide Team Sync panel|stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do|Demo Player logs 123 shots locally without Team Sync warning or retry repair|Demo Player session shot logs are removed on logout while registered shots remain)$).*' tests/player-home-shot-logging-save-path.test.mjs
+        run: node --test --test-skip-pattern='^(index\.html does not use a MutationObserver workaround to hide Team Sync panel|stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do|Demo Player logs 123 shots locally without Team Sync warning or retry repair|Demo Player session shot logs are removed on logout while registered shots remain)$' tests/player-home-shot-logging-save-path.test.mjs
       - name: Verify current sandbox capability boundary
         run: node --test tests/demo-capability-boundary.test.mjs
       - name: Verify production build
