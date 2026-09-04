@@ -2,6 +2,7 @@ import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
+const RSVP_PENDING_KEY = "sl:rsvps-sync-pending";
 
 function parseStored(storage, key, fallback) {
   try {
@@ -46,6 +47,11 @@ export function createSchedulePersistenceService({
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId);
+    if (resource === "rsvps" && context.requester && activeTeamId
+      && storage?.getItem?.(RSVP_PENDING_KEY) === `${context.requester}\t${activeTeamId}`) {
+      const rows = parseStored(storage, "sl:rsvps", []);
+      return { ok: true, storageMode: "local_pending", rows: Array.isArray(rows) ? rows : [] };
+    }
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/${resource}${query}`, {
       method: "GET",
@@ -65,6 +71,10 @@ export function createSchedulePersistenceService({
     const context = readContext(storage);
     const activeTeamId = clean(teamId || context.teamId || rows?.[0]?.team_id || rows?.[0]?.teamId);
     if (!activeTeamId) throw new Error(`${resource}_team_required`);
+    const rsvp = resource === "rsvps";
+    if (rsvp && context.requester) {
+      try { storage?.setItem?.(RSVP_PENDING_KEY, `${context.requester}\t${activeTeamId}`); } catch {}
+    }
     const response = await fetchImpl(`/v1/${resource}`, {
       method: "POST",
       headers: headers(context.requester, { "Content-Type": "application/json" }),
@@ -72,6 +82,9 @@ export function createSchedulePersistenceService({
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_sync_failed`);
+    if (rsvp) {
+      try { storage?.removeItem?.(RSVP_PENDING_KEY); } catch {}
+    }
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
