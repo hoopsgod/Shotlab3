@@ -64,7 +64,11 @@ jobs:
         run: node --test tests/home-shots-log-route.test.mjs tests/home-shots-roster-identity.test.mjs
 
       - name: Verify Player home-shot save path
-        run: node --test tests/player-home-shot-logging-save-path.test.mjs
+        shell: bash
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          node --test tests/player-home-shot-logging-save-path.test.mjs 2>&1 | tee test-results/player-home-shot-save-path.log
 
       - name: Verify production build
         run: npm run build
