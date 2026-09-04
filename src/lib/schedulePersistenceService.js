@@ -23,37 +23,26 @@ export function readScheduleContext(storage = globalThis?.localStorage) {
   return { requester, teamId };
 }
 
+const rsvpPendingToken = (requester, teamId) => {
+  const identity = normalizeIdentity(requester);
+  const team = clean(teamId);
+  return identity && team ? `${identity}\t${team}` : "";
+};
+
 export function readRsvpSyncPending({ storage = globalThis?.localStorage, requester = "", teamId = "" } = {}) {
-  const current = String(storage?.getItem?.(RSVP_SYNC_PENDING_KEY) || "");
-  if (!current) return false;
-  const [markerRequester, markerTeamId = ""] = current.split("\t");
-  const expectedRequester = normalizeIdentity(requester);
-  const expectedTeamId = clean(teamId);
-  return Boolean(markerRequester
-    && (!expectedRequester || markerRequester === expectedRequester)
-    && (!expectedTeamId || markerTeamId === expectedTeamId));
+  const token = rsvpPendingToken(requester, teamId);
+  return Boolean(token && storage?.getItem?.(RSVP_SYNC_PENDING_KEY) === token);
 }
 
 export function markRsvpSyncPending({ storage = globalThis?.localStorage, requester = "", teamId = "" } = {}) {
-  const normalizedRequester = normalizeIdentity(requester);
-  if (!normalizedRequester || typeof storage?.setItem !== "function") return false;
-  try {
-    storage.setItem(RSVP_SYNC_PENDING_KEY, `${normalizedRequester}\t${clean(teamId)}`);
-    return true;
-  } catch {
-    return false;
-  }
+  const token = rsvpPendingToken(requester, teamId);
+  if (!token || typeof storage?.setItem !== "function") return false;
+  try { storage.setItem(RSVP_SYNC_PENDING_KEY, token); return true; } catch { return false; }
 }
 
 export function clearRsvpSyncPending({ storage = globalThis?.localStorage, requester = "", teamId = "" } = {}) {
-  if (!readRsvpSyncPending({ storage, requester, teamId })) return false;
-  try {
-    if (typeof storage?.removeItem === "function") storage.removeItem(RSVP_SYNC_PENDING_KEY);
-    else storage?.setItem?.(RSVP_SYNC_PENDING_KEY, "");
-    return true;
-  } catch {
-    return false;
-  }
+  if (!readRsvpSyncPending({ storage, requester, teamId }) || typeof storage?.removeItem !== "function") return false;
+  try { storage.removeItem(RSVP_SYNC_PENDING_KEY); return true; } catch { return false; }
 }
 
 async function readJson(response) {
