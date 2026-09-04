@@ -12,6 +12,7 @@ on:
       - "src/lib/legacySignedCollectionPersistence.js"
       - "src/lib/rsvpSyncOwnership.js"
       - "src/lib/schedulePersistenceService.js"
+      - "src/lib/supabase.js"
       - "scripts/apply-phase3d-rsvp-state-ownership.mjs"
       - "scripts/apply-post-auth-persistence-hydration.mjs"
       - "scripts/run-route-enhancers.mjs"
