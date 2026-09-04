@@ -1,8 +1,8 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
-import { clearRsvpSyncPending, markRsvpSyncPending, readRsvpSyncPending } from "./rsvpSyncOwnership.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const clean = (value) => String(value ?? "").trim();
+const RSVP_SYNC_PENDING_KEY = "sl:rsvps-sync-pending";
 
 function parseStored(storage, key, fallback) {
   try {
@@ -13,7 +13,7 @@ function parseStored(storage, key, fallback) {
   }
 }
 
-function readContext(storage = globalThis?.localStorage) {
+export function readScheduleContext(storage = globalThis?.localStorage) {
   const rawSession = parseStored(storage, "sl:session", null);
   const session = Array.isArray(rawSession) ? rawSession[0] : rawSession;
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
@@ -21,6 +21,39 @@ function readContext(storage = globalThis?.localStorage) {
   const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
   const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id);
   return { requester, teamId };
+}
+
+export function readRsvpSyncPending({ storage = globalThis?.localStorage, requester = "", teamId = "" } = {}) {
+  const current = String(storage?.getItem?.(RSVP_SYNC_PENDING_KEY) || "");
+  if (!current) return false;
+  const [markerRequester, markerTeamId = ""] = current.split("\t");
+  const expectedRequester = normalizeIdentity(requester);
+  const expectedTeamId = clean(teamId);
+  return Boolean(markerRequester
+    && (!expectedRequester || markerRequester === expectedRequester)
+    && (!expectedTeamId || markerTeamId === expectedTeamId));
+}
+
+export function markRsvpSyncPending({ storage = globalThis?.localStorage, requester = "", teamId = "" } = {}) {
+  const normalizedRequester = normalizeIdentity(requester);
+  if (!normalizedRequester || typeof storage?.setItem !== "function") return false;
+  try {
+    storage.setItem(RSVP_SYNC_PENDING_KEY, `${normalizedRequester}\t${clean(teamId)}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearRsvpSyncPending({ storage = globalThis?.localStorage, requester = "", teamId = "" } = {}) {
+  if (!readRsvpSyncPending({ storage, requester, teamId })) return false;
+  try {
+    if (typeof storage?.removeItem === "function") storage.removeItem(RSVP_SYNC_PENDING_KEY);
+    else storage?.setItem?.(RSVP_SYNC_PENDING_KEY, "");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function readJson(response) {
@@ -40,22 +73,17 @@ export function createSchedulePersistenceService({
   storage = globalThis?.localStorage,
 } = {}) {
   const headers = (extra = {}) => {
-    const context = readContext(storage);
+    const context = readScheduleContext(storage);
     return buildApiIdentityHeaders({ requester: context.requester, storage, headers: extra });
   };
 
   const loadCollection = async (resource, field, teamId = "") => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
-    const context = readContext(storage);
+    const context = readScheduleContext(storage);
     const activeTeamId = clean(teamId || context.teamId);
     if (resource === "rsvps" && readRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId })) {
       const localRows = parseStored(storage, "sl:rsvps", []);
-      return {
-        ok: true,
-        storageMode: "local_pending",
-        rows: Array.isArray(localRows) ? localRows : [],
-        syncPending: true,
-      };
+      return { ok: true, storageMode: "local_pending", rows: Array.isArray(localRows) ? localRows : [] };
     }
     const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
     const response = await fetchImpl(`/v1/${resource}${query}`, {
@@ -73,13 +101,11 @@ export function createSchedulePersistenceService({
 
   const syncCollection = async (resource, field, rows = [], teamId = "") => {
     if (typeof fetchImpl !== "function") throw new Error(`${resource}_api_unavailable`);
-    const context = readContext(storage);
+    const context = readScheduleContext(storage);
     const activeTeamId = clean(teamId || context.teamId || rows?.[0]?.team_id || rows?.[0]?.teamId);
     if (!activeTeamId) throw new Error(`${resource}_team_required`);
     const isRsvpCollection = resource === "rsvps";
-    if (isRsvpCollection) {
-      markRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId });
-    }
+    if (isRsvpCollection) markRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId });
     const response = await fetchImpl(`/v1/${resource}`, {
       method: "POST",
       headers: headers({ "Content-Type": "application/json" }),
@@ -87,9 +113,7 @@ export function createSchedulePersistenceService({
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) throw requestError(body, response, `${resource}_sync_failed`);
-    if (isRsvpCollection) {
-      clearRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId });
-    }
+    if (isRsvpCollection) clearRsvpSyncPending({ storage, requester: context.requester, teamId: activeTeamId });
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
@@ -103,8 +127,8 @@ export function createSchedulePersistenceService({
     syncEvents: (events, { teamId = "" } = {}) => syncCollection("events", "events", events, teamId),
     loadRsvps: ({ teamId = "" } = {}) => loadCollection("rsvps", "rsvps", teamId),
     syncRsvps: (rsvps, { teamId = "" } = {}) => syncCollection("rsvps", "rsvps", rsvps, teamId),
-    readContext: () => readContext(storage),
+    readContext: () => readScheduleContext(storage),
   };
 }
 
-export const __testUtils = { readContext };
+export const __testUtils = { readContext: readScheduleContext };
