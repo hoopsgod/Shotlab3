@@ -22,4 +22,25 @@ if ((source.split(phase3dAuthority).length - 1) !== 1) {
 }
 
 fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
-console.log('Applied Phase 3D RSVP replacement collection authority, including empty authoritative syncs.')
+
+const supabasePath = path.resolve(process.cwd(), 'src/lib/supabase.js')
+const rawSupabaseSource = fs.readFileSync(supabasePath, 'utf8')
+const supabaseLineEnding = rawSupabaseSource.includes('\r\n') ? '\r\n' : '\n'
+let supabaseSource = rawSupabaseSource.replace(/\r\n/g, '\n')
+const previousEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0) {'
+const phase3dEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps") {'
+
+if (!supabaseSource.includes(phase3dEmptyWriteGuard)) {
+  const occurrences = supabaseSource.split(previousEmptyWriteGuard).length - 1
+  if (occurrences !== 1) {
+    throw new Error(`Expected exactly one empty-write short-circuit before Phase 3D, found ${occurrences}.`)
+  }
+  supabaseSource = supabaseSource.replace(previousEmptyWriteGuard, phase3dEmptyWriteGuard)
+}
+
+if ((supabaseSource.split(phase3dEmptyWriteGuard).length - 1) !== 1) {
+  throw new Error('Phase 3D must allow exactly one RSVP empty replacement write through the Supabase adapter.')
+}
+
+fs.writeFileSync(supabasePath, supabaseSource.replace(/\n/g, supabaseLineEnding))
+console.log('Applied Phase 3D RSVP replacement ownership through App and the Supabase adapter, including empty authoritative syncs.')
