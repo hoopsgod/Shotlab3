@@ -3,8 +3,8 @@
 ## Accepted baseline
 
 - Base branch: `march-3-reset-85393dd`
-- Frozen merge baseline: `71e14e4d532febf3dde2df052e0b4b4fa048e44e` (PR #1526 merged)
-- PR #1520, #1524, #1525, and #1526 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, or shot-log ownership work unless a regression test proves a break.
+- Frozen merge baseline: `87c824aa4624f166b7ad9326ad08ea8b548e5dc4` (PR #1527 merged)
+- PR #1520, #1524, #1525, #1526, and #1527 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, shot-log, or RSVP ownership work unless a regression test proves a break.
 
 ## Protected contracts
 
@@ -15,15 +15,16 @@
 - Preserve Phase 3A assignment state/service ownership.
 - Preserve Phase 3B coach follow-up state/service ownership.
 - Preserve Phase 3C shot-log hydration/state ownership.
+- Preserve Phase 3D RSVP replacement/pending-sync state ownership.
 - Preserve production performance budgets and exact-head Cloudflare certification.
 - No desktop redesign, feature expansion, visual-baseline rewrite, or guardrail allowlist broadening.
 
 ## Current work
 
-- Phase: **3D — RSVP replacement and pending-sync state ownership**
-- Branch: `agent/phase3d-rsvp-state-ownership`
-- Base: `71e14e4d532febf3dde2df052e0b4b4fa048e44e`
-- Data domain: `sl:rsvps` / signed RSVP collection reads, replacement writes, and post-auth hydration only.
+- Phase: **3E — player drill-score pending-sync and hydration state ownership**
+- Branch: `agent/phase3e-score-state-ownership`
+- Base: `87c824aa4624f166b7ad9326ad08ea8b548e5dc4`
+- Data domain: `sl:scores` / signed player drill-score writes, startup reads, and registered post-auth hydration only.
 
 ## Phase 3 rules
 
@@ -36,30 +37,37 @@
 7. Add focused service/selector tests plus an integration/source contract for each slice.
 8. Do not merge without explicit authorization.
 
-## Phase 3D problem
+## Phase 3E problem
 
-- The signed RSVP API uses replacement semantics: Coach writes own the team RSVP collection; Player writes own that Player's RSVP collection.
-- Registered post-auth hydration could replace intended local RSVP state with stale remote truth after a failed write.
-- A failed RSVP addition could disappear after hydration; a failed removal could be resurrected.
-- The generic adapter also skipped remote persistence when the intended RSVP replacement collection was empty, so removing the final RSVP could fail to reach the server.
+- Player drill-score writes persist `sl:scores` locally before the existing strict signed remote write completes.
+- A failed `/v1/scores` write can therefore leave a newer intended score safely retained in local storage while the UI correctly reports that team-dashboard sync failed.
+- Startup `DB.get("sl:scores")` currently prefers any non-empty remote score set over the local collection, so a reload can hide the newer failed local score before post-auth hydration runs.
+- Registered post-auth hydration also replaces `sl:scores` wholesale with `/v1/scores`, so it can erase the retained failed score entirely.
+- A blanket local/remote union is not acceptable because authorized score deletion exists and stale non-pending local rows must not be resurrected.
 
-## Phase 3D implementation
+## Phase 3E implementation
 
-- Use one pending marker, `sl:rp`, whose value is the normalized requester and active team joined by a tab. The marker is valid only for that exact identity/team pair.
-- Mark signed RSVP replacement writes pending before the API request and clear the marker only after confirmed server success.
-- Store the same compact RSVP identity/team scope in the RSVP-private `sl:session.rp` field during post-auth hydration. Do not write shared `sl:session.teamId`; shared UI state must remain Demo/registered-parity neutral.
-- While the pending marker matches `sl:session.rp`, signed RSVP reads use the intended local collection and post-auth hydration skips the stale `/v1/rsvps` read. Hydration reports `pending: ["sl:rsvps"]` so unsynced truth is explicit.
-- Treat `sl:rsvps` as a signed replacement collection and allow an empty normalized RSVP array through the Supabase adapter so deleting the final response reaches `/v1/rsvps`.
-- Keep Events, S&C, API authorization, database schema, layout, typography, and visual baselines unchanged.
-- Preserve the existing production JavaScript budget by reusing bridge storage context, consolidating defensive bridge storage writes, compacting duplicate legacy persistence descriptors, and replacing a behavior-equivalent two-value schedule `Set` lookup; no budget was raised.
+- Use one compact pending-score sidecar, `sl:sp`, containing the exact normalized requester, team, and failed/in-flight score IDs.
+- Mark score IDs pending before the signed score POST and remove only the IDs confirmed by a successful server response.
+- Validate pending ownership against the registered session identity and the existing private identity/team scope token before preserving local score truth.
+- Reconcile score startup reads and post-auth hydration through the same score-domain policy: remote rows remain authoritative; only locally retained rows whose exact IDs are still marked pending may survive when absent remotely.
+- When a pending ID appears remotely, remote truth replaces the local copy and the marker is cleared for that ID.
+- A successful authorized delete of the current player's score collection clears that player's pending score ownership for the deleted team.
+- `sl:program-scores`, shot logs, RSVP, S&C, API authorization, database schema, layout, typography, and visual baselines remain unchanged.
+- Do not raise the existing JavaScript or CSS performance budgets. The post-#1527 baseline has only 13 bytes of gzip margin, so runtime additions must be offset with behavior-equivalent compaction if necessary.
 
 ## Validation target
 
 Before merge readiness:
 
-- Phase 3D focused RSVP ownership tests pass for failed addition, failed final deletion, identity/team scoping, successful confirmation, signed reads, and post-auth hydration.
-- Existing signed Events/RSVP authorization and remote RSVP normalization/merge tests pass.
-- Production build/performance budget stays green.
+- A failed signed score write remains explicitly pending and survives both startup reads and post-auth hydration.
+- Non-pending local scores absent from successful remote truth are not preserved by the Phase 3E reconciliation path.
+- Matching remote score rows become authoritative and clear matching pending IDs.
+- Pending score state is isolated by identity and team and cannot leak across a team switch.
+- Successful own-score deletion clears stale pending ownership for that player/team.
+- `sl:program-scores` behavior remains unchanged.
+- Existing signed score authorization/persistence tests pass.
+- Production build/performance budget stays green without raising limits.
 - Existing Phase 1A/1B/1C mobile guardrails stay green.
-- Demo/registered parity, Phase 5 Hardening, and Production Acceptance stay green.
+- Demo/registered parity, Phase 5 Hardening, Phase 3 Release Certification, and Production Acceptance stay green.
 - Cloudflare Pages succeeds on the exact final PR head.
