@@ -139,14 +139,16 @@ test('registered post-auth hydration keeps a failed local score without preservi
   assert.deepEqual(JSON.parse(storage.getItem('sl:scores')).map((row) => row.id), [remote.id, SCORE.id]);
 });
 
-test('Phase 3E is a score-only startup/hydration contract and is registered after Phase 3D', () => {
+test('Phase 3E keeps score ownership out of App.jsx and centralizes score-only pending state after Phase 3D', () => {
   const enhancer = fs.readFileSync(new URL('../scripts/apply-phase3e-score-state-ownership.mjs', import.meta.url), 'utf8');
   const routes = fs.readFileSync(new URL('../scripts/run-route-enhancers.mjs', import.meta.url), 'utf8');
   const hydration = fs.readFileSync(new URL('../src/lib/legacySignedCollectionPersistence.js', import.meta.url), 'utf8');
+  const app = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
   assert.match(enhancer, /hasPendingScoreRows/);
   assert.match(enhancer, /reconcilePendingScoreRows/);
-  assert.match(enhancer, /k===\"sl:scores\"/);
+  assert.match(enhancer, /App\.jsx remains uninjected/);
+  assert.doesNotMatch(app, /hasPendingScoreRows|reconcilePendingScoreRows/);
   assert.doesNotMatch(enhancer, /sl:program-scores/);
   assert.ok(routes.indexOf('apply-phase3e-score-state-ownership.mjs') > routes.indexOf('apply-phase3d-rsvp-state-ownership.mjs'));
   assert.match(hydration, /storageKey === \"sl:scores\"[\s\S]*reconcilePendingScoreRows/);
