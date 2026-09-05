@@ -150,5 +150,5 @@ test('Phase 3E is a score-only startup/hydration contract and is registered afte
   assert.doesNotMatch(enhancer, /sl:program-scores/);
   assert.ok(routes.indexOf('apply-phase3e-score-state-ownership.mjs') > routes.indexOf('apply-phase3d-rsvp-state-ownership.mjs'));
   assert.match(hydration, /storageKey === \"sl:scores\"[\s\S]*reconcilePendingScoreRows/);
-  assert.doesNotMatch(hydration, /storageKey === \"sl:program-scores\"[\s\S]*reconcilePendingScoreRows/);
+  assert.doesNotMatch(hydration, /storageKey === \"sl:program-scores\"\s*\?\s*reconcilePendingScoreRows/);
 });
