@@ -1,5 +1,6 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { mergeHydratedRows } from "./remotePersistence.js";
+import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const APP_SESSION_KEY = "sl:session";
@@ -118,7 +119,9 @@ async function hydrateGroup({
           }
           const rows = storageKey === "sl:shotlogs"
             ? mergeHydratedRows(storageKey, readJson(storage, storageKey), payload[field])
-            : payload[field];
+            : storageKey === "sl:scores"
+              ? reconcilePendingScoreRows({ storage, requester, localRows: readJson(storage, storageKey), remoteRows: payload[field] })
+              : payload[field];
           storage.setItem(storageKey, JSON.stringify(rows));
           hydrated.push(storageKey);
         }
@@ -176,7 +179,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({
   return {
     ok: failures.length === 0,
     hydrated: [...new Set(hydrated)],
-    pending: pendingRsvps ? ["sl:rsvps"] : [],
+    pending: [pendingRsvps ? "sl:rsvps" : "", hasPendingScoreRows(storage, session.identity) ? "sl:scores" : ""].filter(Boolean),
     failures: [...new Set(failures)],
     identity: session.identity,
     identityHydrated,
