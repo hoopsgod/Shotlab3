@@ -6,27 +6,33 @@ import { createTeamPersistenceService } from "./teamPersistenceService.js";
 import { createStrengthConditioningPersistenceService } from "./strengthConditioningPersistenceService.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
-const SIGNED_SCHEDULE_RESOURCES = new Set(["events", "rsvps"]);
 
 function parseStored(storage, key, fallback) {
   try {
-    const raw = storage?.getItem?.(key);
+    const raw = storage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
   } catch {
     return fallback;
   }
 }
 
+function writeStored(storage, key, value) {
+  try {
+    if (value === null) storage.removeItem(key);
+    else storage.setItem(key, value);
+  } catch {}
+}
+
 function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
 
-function readSession(storage = globalThis?.localStorage) {
+function readSession(storage = globalThis.localStorage) {
   const parsed = parseStored(storage, "sl:session", null);
   return Array.isArray(parsed) ? parsed[0] : parsed;
 }
 
-function readRequester(storage = globalThis?.localStorage) {
+function readRequester(storage = globalThis.localStorage) {
   const session = readSession(storage);
   return normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
 }
@@ -35,7 +41,7 @@ function isDemoRequester(requester) {
   return requester === "coach.demo@shotlab.app" || requester === "demo@shotlab.app";
 }
 
-function readActorContext(storage = globalThis?.localStorage) {
+function readActorContext(storage = globalThis.localStorage) {
   const session = readSession(storage);
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
   const players = parseStored(storage, "sl:players", []);
@@ -47,19 +53,17 @@ function readActorContext(storage = globalThis?.localStorage) {
   };
 }
 
-function pruneTeamCache(storage = globalThis?.localStorage) {
+function pruneTeamCache(storage = globalThis.localStorage) {
   const { requester, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
   const teams = parseStored(storage, "sl:teams", []);
   if (!Array.isArray(teams) || !teams.length || !teamId) return Array.isArray(teams) ? teams : [];
   const filtered = teams.filter((row) => String(row?.id || row?.teamId || row?.team_id || "").trim() === teamId);
-  if (filtered.length !== teams.length) {
-    try { storage?.setItem?.("sl:teams", JSON.stringify(filtered)); } catch {}
-  }
+  if (filtered.length !== teams.length) writeStored(storage, "sl:teams", JSON.stringify(filtered));
   return filtered;
 }
 
-function prunePlayerCache(storage = globalThis?.localStorage) {
+function prunePlayerCache(storage = globalThis.localStorage) {
   const { requester, role, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
   const players = parseStored(storage, "sl:players", []);
@@ -71,13 +75,11 @@ function prunePlayerCache(storage = globalThis?.localStorage) {
     }
     return false;
   });
-  if (filtered.length !== players.length) {
-    try { storage?.setItem?.("sl:players", JSON.stringify(filtered)); } catch {}
-  }
+  if (filtered.length !== players.length) writeStored(storage, "sl:players", JSON.stringify(filtered));
   return filtered;
 }
 
-function prunePlayerProfileCache(storage = globalThis?.localStorage) {
+function prunePlayerProfileCache(storage = globalThis.localStorage) {
   const { requester, role, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
   const profiles = parseStored(storage, "sl:player-profiles", []);
@@ -90,9 +92,7 @@ function prunePlayerProfileCache(storage = globalThis?.localStorage) {
   } else {
     return profiles;
   }
-  if (filtered.length !== profiles.length) {
-    try { storage?.setItem?.("sl:player-profiles", JSON.stringify(filtered)); } catch {}
-  }
+  if (filtered.length !== profiles.length) writeStored(storage, "sl:player-profiles", JSON.stringify(filtered));
   return filtered;
 }
 
@@ -130,7 +130,7 @@ function signedSupabaseResourceFor(input, target = globalThis) {
 
 function signedScheduleResourceFor(input, target = globalThis) {
   const resource = signedSupabaseResourceFor(input, target);
-  return SIGNED_SCHEDULE_RESOURCES.has(resource) ? resource : "";
+  return resource === "events" || resource === "rsvps" ? resource : "";
 }
 
 function signedPlayerProfileResourceFor(input, target = globalThis) {
@@ -169,8 +169,7 @@ function parseRows(body) {
 }
 
 function jsonResponse(target, payload, status = 200) {
-  const ResponseCtor = target?.Response || globalThis.Response;
-  return new ResponseCtor(JSON.stringify(payload), {
+  return new target.Response(JSON.stringify(payload), {
     status,
     headers: { "Content-Type": "application/json" },
   });
@@ -186,32 +185,34 @@ function errorResponse(target, error, fallback) {
 
 export function installApiIdentityFetchBridge(target = globalThis) {
   if (!target || typeof target.fetch !== "function") return null;
-  if (target.fetch?.[BRIDGE_MARKER]) return target.fetch;
+  if (target.fetch[BRIDGE_MARKER]) return target.fetch;
 
-  pruneTeamCache(target?.localStorage);
-  prunePlayerCache(target?.localStorage);
-  prunePlayerProfileCache(target?.localStorage);
+  const storage = target.localStorage;
+  pruneTeamCache(storage);
+  prunePlayerCache(storage);
+  prunePlayerProfileCache(storage);
   const originalFetch = target.fetch.bind(target);
-  const schedulePersistence = createSchedulePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const playerProfilePersistence = createPlayerProfilePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const playerIdentityPersistence = createPlayerIdentityPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const teamPersistence = createTeamPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
-  const strengthPersistence = createStrengthConditioningPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
+  const schedulePersistence = createSchedulePersistenceService({ fetchImpl: originalFetch, storage });
+  const playerProfilePersistence = createPlayerProfilePersistenceService({ fetchImpl: originalFetch, storage });
+  const playerIdentityPersistence = createPlayerIdentityPersistenceService({ fetchImpl: originalFetch, storage });
+  const teamPersistence = createTeamPersistenceService({ fetchImpl: originalFetch, storage });
+  const strengthPersistence = createStrengthConditioningPersistenceService({ fetchImpl: originalFetch, storage });
 
   const wrappedFetch = async (input, init = {}) => {
-    const strengthResource = signedStrengthResourceFor(input, target);
+    const signedResource = signedSupabaseResourceFor(input, target);
+    const method = signedResource ? methodFor(input, init) : "";
+    const strengthResource = signedResource === "sc_sessions" ? "sessions" : signedResource === "sc_rsvps" ? "rsvps" : signedResource === "sc_logs" ? "logs" : "";
     if (strengthResource) {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await strengthPersistence.loadState();
-          return jsonResponse(target, result[strengthResource], 200);
+          return jsonResponse(target, result[strengthResource]);
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
           const methodName = `sync${strengthResource[0].toUpperCase()}${strengthResource.slice(1)}`;
           const result = await strengthPersistence[methodName](rows);
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -219,17 +220,16 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedTeamResourceFor(input, target)) {
+    if (signedResource === "teams") {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await teamPersistence.loadTeams();
-          try { target?.localStorage?.setItem?.("sl:teams", JSON.stringify(result.rows)); } catch {}
-          return jsonResponse(target, result.rows, 200);
+          writeStored(storage, "sl:teams", JSON.stringify(result.rows));
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const result = await teamPersistence.syncTeams(parseRows(init?.body));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -237,17 +237,16 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedPlayerResourceFor(input, target)) {
+    if (signedResource === "players") {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerIdentityPersistence.loadPlayers();
-          try { target?.localStorage?.setItem?.("sl:players", JSON.stringify(result.rows)); } catch {}
-          return jsonResponse(target, result.rows, 200);
+          writeStored(storage, "sl:players", JSON.stringify(result.rows));
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const result = await playerIdentityPersistence.syncPlayers(parseRows(init?.body), { replace: true });
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -255,17 +254,16 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedPlayerProfileResourceFor(input, target)) {
+    if (signedResource === "player_profiles") {
       try {
-        const method = methodFor(input, init);
         if (method === "GET") {
           const result = await playerProfilePersistence.loadProfiles();
-          try { target?.localStorage?.setItem?.("sl:player-profiles", JSON.stringify(result.rows)); } catch {}
-          return jsonResponse(target, result.rows, 200);
+          writeStored(storage, "sl:player-profiles", JSON.stringify(result.rows));
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const result = await playerProfilePersistence.syncProfiles(parseRows(init?.body));
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -273,19 +271,21 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    const scheduleResource = signedScheduleResourceFor(input, target);
+    const scheduleResource = signedResource === "events" || signedResource === "rsvps" ? signedResource : "";
     if (scheduleResource) {
       try {
-        const method = methodFor(input, init);
         const isEvents = scheduleResource === "events";
         if (method === "GET") {
           const result = isEvents ? await schedulePersistence.loadEvents() : await schedulePersistence.loadRsvps();
-          return jsonResponse(target, result.rows, 200);
+          return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
           const rows = parseRows(init?.body);
+          const pending = !isEvents && readSession(storage)?.rp;
+          if (pending) writeStored(storage, "sl:rp", pending);
           const result = isEvents ? await schedulePersistence.syncEvents(rows) : await schedulePersistence.syncRsvps(rows);
-          return jsonResponse(target, result.rows, 200);
+          if (pending) writeStored(storage, "sl:rp", null);
+          return jsonResponse(target, result.rows);
         }
         return jsonResponse(target, { error: "method_not_allowed" }, 405);
       } catch (error) {
@@ -295,7 +295,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
 
     if (!apiPathFor(input, target)) return originalFetch(input, init);
     const currentHeaders = new Headers(init?.headers || (typeof input === "object" && input?.headers ? input.headers : undefined));
-    const identityHeaders = buildApiIdentityHeaders({ requester: readRequester(target?.localStorage), storage: target?.localStorage });
+    const identityHeaders = buildApiIdentityHeaders({ requester: readRequester(storage), storage });
     for (const [key, value] of Object.entries(identityHeaders)) {
       if (value && !currentHeaders.has(key)) currentHeaders.set(key, value);
     }

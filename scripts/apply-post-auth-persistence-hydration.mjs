@@ -35,10 +35,25 @@ if ((source.split(combinedImport).length - 1) !== 1) {
 }
 
 const earlyMarker = 'const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});'
+const phase3dTeamArgumentMarker = 'const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email),expectedTeamId:p.teamId||""});'
+if (source.includes(phase3dTeamArgumentMarker)) source = source.replace(phase3dTeamArgumentMarker, earlyMarker)
+
+const legacyEarlySession = `await DB.set("sl:session",{email:normalizeEmail(p.email)});
+${earlyMarker}`
+const sharedTeamEarlySession = `await DB.set("sl:session",{email:normalizeEmail(p.email),teamId:p.teamId||""});
+${earlyMarker}`
+const rsvpTeamEarlySession = `await DB.set("sl:session",{email:normalizeEmail(p.email),rsvpTeamId:p.teamId||""});
+${earlyMarker}`
+const rsvpScopeEarlySession = `await DB.set("sl:session",{email:normalizeEmail(p.email),rp:normalizeEmail(p.email)+"\\t"+(p.teamId||"")});
+${earlyMarker}`
+if (source.includes(sharedTeamEarlySession)) source = source.replace(sharedTeamEarlySession, rsvpScopeEarlySession)
+if (source.includes(rsvpTeamEarlySession)) source = source.replace(rsvpTeamEarlySession, rsvpScopeEarlySession)
+if (source.includes(legacyEarlySession)) source = source.replace(legacyEarlySession, rsvpScopeEarlySession)
+
 const restoreBoundary = 'if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);\nsetUser({email:normalizeEmail(p.email),role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});'
 const earlyReplacement = `if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);
-await DB.set("sl:session",{email:normalizeEmail(p.email)});
-const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});
+await DB.set("sl:session",{email:normalizeEmail(p.email),rp:normalizeEmail(p.email)+"\\t"+(p.teamId||"")});
+${earlyMarker}
 if(!postAuthHydration.ok)emitReleaseDiagnostic("post_auth_collection_hydration_incomplete",{email:normalizeEmail(p.email),failures:Array.isArray(postAuthHydration.failures)?postAuthHydration.failures.slice(0,8):[]});
 await hydratePersistedData();
 setUser({email:normalizeEmail(p.email),role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});`
@@ -98,4 +113,4 @@ if (authSource.includes('hydrateAuthenticatedCollectionsToStorage') || authSourc
 }
 
 fs.writeFileSync(authPath, authSource.replace(/\n/g, authLineEnding))
-console.log('Applied identity-verified registered hydration before the mobile workspace becomes interactive, with no delayed auth reload.')
+console.log('Applied identity-verified registered hydration with a compact RSVP-only scope token before the mobile workspace becomes interactive, with no delayed auth reload.')
