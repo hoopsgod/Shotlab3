@@ -116,7 +116,7 @@ async function hydrateGroup({
             missingFields.push(field);
             continue;
           }
-          const rows = storageKey === "sl:shotlogs"
+          const rows = storageKey === "sl:shotlogs" || field === "events"
             ? mergeHydratedRows(storageKey, readJson(storage, storageKey), payload[field])
             : payload[field];
           storage.setItem(storageKey, JSON.stringify(rows));
