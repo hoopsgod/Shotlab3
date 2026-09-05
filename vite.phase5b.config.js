@@ -6,6 +6,7 @@ import { createLegacyRuntimeCssExtractionPlugin } from './scripts/legacy-runtime
 const APP_SUFFIX = '/src/App.jsx'
 const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";'
 const SHARED_SECONDARY_PAGE_FRAGMENT = '/src/components/SecondaryPageSystem'
+const SHARED_CLEAN_TEAM_LOGO_FRAGMENT = '/src/components/useCleanTeamLogo.js'
 const SHARED_PREMIUM_WORKSPACE_STYLE = '/src/styles/PremiumWorkspace.css'
 const CORE_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/schedulePersistenceService.js',
@@ -67,7 +68,11 @@ export default defineConfig(async (environment) => {
           manualChunks(id, api) {
             const moduleId = normalizeModuleId(id)
             if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
-            if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
+            if (
+              moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT)
+              || moduleId.includes(SHARED_CLEAN_TEAM_LOGO_FRAGMENT)
+              || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)
+            ) return 'AuthenticatedUi'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
           },
         },
