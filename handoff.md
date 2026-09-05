@@ -3,8 +3,8 @@
 ## Accepted baseline
 
 - Base branch: `march-3-reset-85393dd`
-- Frozen merge baseline: `71e14e4d532febf3dde2df052e0b4b4fa048e44e` (PR #1526 merged)
-- PR #1520, #1524, #1525, and #1526 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, or shot-log ownership work unless a regression test proves a break.
+- Frozen merge baseline: `87c824aa4624f166b7ad9326ad08ea8b548e5dc4` (PR #1527 merged)
+- PR #1520, #1524, #1525, #1526, and #1527 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, shot-log, or RSVP ownership work unless a regression test proves a break.
 
 ## Protected contracts
 
@@ -15,15 +15,16 @@
 - Preserve Phase 3A assignment state/service ownership.
 - Preserve Phase 3B coach follow-up state/service ownership.
 - Preserve Phase 3C shot-log hydration/state ownership.
+- Preserve Phase 3D RSVP replacement/pending-sync ownership.
 - Preserve production performance budgets and exact-head Cloudflare certification.
 - No desktop redesign, feature expansion, visual-baseline rewrite, or guardrail allowlist broadening.
 
 ## Current work
 
-- Phase: **3D — RSVP replacement and pending-sync state ownership**
-- Branch: `agent/phase3d-rsvp-state-ownership`
-- Base: `71e14e4d532febf3dde2df052e0b4b4fa048e44e`
-- Data domain: `sl:rsvps` / signed RSVP collection reads, replacement writes, and post-auth hydration only.
+- Phase: **3E — Events hydration/state ownership**
+- Branch: `agent/phase3e-event-hydration-ownership`
+- Base: `87c824aa4624f166b7ad9326ad08ea8b548e5dc4`
+- Data domain: `sl:events` / registered post-auth Events hydration only.
 
 ## Phase 3 rules
 
@@ -36,30 +37,30 @@
 7. Add focused service/selector tests plus an integration/source contract for each slice.
 8. Do not merge without explicit authorization.
 
-## Phase 3D problem
+## Phase 3E problem
 
-- The signed RSVP API uses replacement semantics: Coach writes own the team RSVP collection; Player writes own that Player's RSVP collection.
-- Registered post-auth hydration could replace intended local RSVP state with stale remote truth after a failed write.
-- A failed RSVP addition could disappear after hydration; a failed removal could be resurrected.
-- The generic adapter also skipped remote persistence when the intended RSVP replacement collection was empty, so removing the final RSVP could fail to reach the server.
+- Coach event creation intentionally persists through `P("sl:events", ..., { strictLocal:true })`, so a valid event may exist locally before remote persistence is complete.
+- `remotePersistence.mergeHydratedRows("sl:events", ...)` already defines the canonical reconciliation policy: keep local-only events and let matching remote IDs replace stale local copies.
+- Registered post-auth hydration bypassed that existing policy and wrote `/v1/events` directly over `sl:events`.
+- A later login/hydration could therefore erase a valid local-only event whenever the remote Events payload was stale or incomplete.
 
-## Phase 3D implementation
+## Phase 3E implementation
 
-- Use one pending marker, `sl:rp`, whose value is the normalized requester and active team joined by a tab. The marker is valid only for that exact identity/team pair.
-- Mark signed RSVP replacement writes pending before the API request and clear the marker only after confirmed server success.
-- Store the same compact RSVP identity/team scope in the RSVP-private `sl:session.rp` field during post-auth hydration. Do not write shared `sl:session.teamId`; shared UI state must remain Demo/registered-parity neutral.
-- While the pending marker matches `sl:session.rp`, signed RSVP reads use the intended local collection and post-auth hydration skips the stale `/v1/rsvps` read. Hydration reports `pending: ["sl:rsvps"]` so unsynced truth is explicit.
-- Treat `sl:rsvps` as a signed replacement collection and allow an empty normalized RSVP array through the Supabase adapter so deleting the final response reaches `/v1/rsvps`.
-- Keep Events, S&C, API authorization, database schema, layout, typography, and visual baselines unchanged.
-- Preserve the existing production JavaScript budget by reusing bridge storage context, consolidating defensive bridge storage writes, compacting duplicate legacy persistence descriptors, and replacing a behavior-equivalent two-value schedule `Set` lookup; no budget was raised.
+- Route only the Events binding in registered post-auth hydration through the existing `mergeHydratedRows` policy.
+- Preserve local-only Events rows when remote hydration is incomplete.
+- Let matching remote Event IDs remain authoritative.
+- Keep RSVP pending ownership, shot-log merge ownership, all other authenticated collection hydration, API authorization, database schema, layout, typography, and visual baselines unchanged.
+- Add a focused integration contract using the real post-auth hydrator and include it in the existing Signed Events/RSVP persistence workflow.
+- Do not raise the production JavaScript budget; keep the runtime delta minimal because the accepted baseline is already near the hard ceiling.
 
 ## Validation target
 
 Before merge readiness:
 
-- Phase 3D focused RSVP ownership tests pass for failed addition, failed final deletion, identity/team scoping, successful confirmation, signed reads, and post-auth hydration.
-- Existing signed Events/RSVP authorization and remote RSVP normalization/merge tests pass.
-- Production build/performance budget stays green.
+- Phase 3E focused event hydration ownership test passes.
+- Existing signed Events/RSVP and Phase 3D RSVP contracts pass unchanged.
+- Existing event visibility/create-flow and remote event merge contracts stay green.
+- Production build/performance budget stays green without a budget increase.
 - Existing Phase 1A/1B/1C mobile guardrails stay green.
 - Demo/registered parity, Phase 5 Hardening, and Production Acceptance stay green.
 - Cloudflare Pages succeeds on the exact final PR head.
