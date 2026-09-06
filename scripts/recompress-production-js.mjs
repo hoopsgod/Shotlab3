@@ -17,7 +17,7 @@ async function listJavaScriptFiles(directory) {
 
 async function recompress(file) {
   const source = await readFile(file, 'utf8')
-  const appOwned = /^App(?:DomainServices)?-/.test(path.basename(file))
+  const appOwned = !/^react-vendor-/.test(path.basename(file))
   const result = await minify(source, {
     ecma: 2022,
     module: true,
