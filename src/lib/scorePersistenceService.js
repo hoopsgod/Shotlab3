@@ -1,6 +1,4 @@
-import { installApiIdentityFetchBridge, normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiFetchBridge.js";
-
-if (typeof window !== "undefined") installApiIdentityFetchBridge(window);
+import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiFetchBridge.js";
 
 const id = (row) => String(row?.id || "").trim();
 const team = (row) => String(row?.team_id || row?.teamId || "").trim();
