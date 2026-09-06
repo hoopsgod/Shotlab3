@@ -3,6 +3,7 @@ import { normalizeIdentity, parseStored, readRequester, readSession, requestSign
 import { readActorContext } from "./apiIdentityHeaders.js";
 import { scPendingMask } from "./strengthConditioningPersistenceService.js";
 import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
+import { reconcilePendingProgramScoreRows } from "./programScorePersistenceService.js";
 
 const SC_PATH="/v1/strength-conditioning",SC_KEYS=["sl:sc-sessions","sl:sc-rsvps","sl:sc-logs"];
 
@@ -39,6 +40,7 @@ async function hydrateGroup([path,...bindings],fetchImpl,storage,requester,attem
         if(!Array.isArray(rows)){complete=false;continue}
         if(storageKey==="sl:shotlogs")rows=mergeHydratedRows(storageKey,parseStored(storage,storageKey),rows);
         else if(storageKey === "sl:scores")rows=reconcilePendingScoreRows({storage,requester,localRows:parseStored(storage,storageKey),remoteRows:rows});
+        else if(storageKey==="sl:program-scores")rows=reconcilePendingProgramScoreRows({storage,requester,localRows:parseStored(storage,storageKey,[]),remoteRows:rows});
         storage.setItem(storageKey,JSON.stringify(rows));hydrated.push(storageKey);
       }
       if(complete)return hydrated;failure="missing_fields";

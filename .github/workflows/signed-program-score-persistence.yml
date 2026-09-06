@@ -1,0 +1,61 @@
+name: Signed Program Score Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/_utils/supabase.js"
+      - "functions/v1/program-scores/**"
+      - "src/lib/programScorePersistenceService.js"
+      - "src/lib/legacySignedCollectionPersistence.js"
+      - "src/lib/supabase.js"
+      - "migrations/048_program_scores_signed_api_boundary.sql"
+      - "tests/coach-verified-program-results.test.mjs"
+      - "tests/phase3-program-score-state-ownership.test.mjs"
+      - "handoff.md"
+      - ".github/workflows/signed-program-score-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-program-score-persistence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-program-score-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Program score authorization and ownership contracts
+        run: |
+          node --test tests/coach-verified-program-results.test.mjs
+          node --test tests/phase3-program-score-state-ownership.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-program-score-persistence-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
