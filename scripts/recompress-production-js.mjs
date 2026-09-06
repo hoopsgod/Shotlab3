@@ -21,7 +21,7 @@ async function recompress(file) {
     ecma: 2022,
     module: true,
     compress: {
-      passes: 5,
+      passes: 10,
       toplevel: true,
       pure_funcs: ['console.log', 'console.debug', 'console.info'],
     },
