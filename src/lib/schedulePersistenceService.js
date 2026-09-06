@@ -1,4 +1,9 @@
-import { cleanValue as clean, readActorContext, requestError, requestSignedJson, signedStorageMode } from "./apiIdentityHeaders.js";
+import { cleanValue as clean, parseStored, readActorContext, requestError, requestSignedJson, signedStorageMode } from "./apiIdentityHeaders.js";
+
+const EP = "sl:ep";
+const eventScope = (storage, teamId = "") => { const c = readActorContext(storage), t = clean(teamId || c.teamId); return c.requester && t ? `${c.requester}\t${t}` : ""; };
+const eventPending = (storage, teamId = "") => { const scope = eventScope(storage, teamId); return Boolean(scope && storage?.getItem?.(EP) === scope); };
+const writePending = (storage, value) => { try { value ? storage?.setItem?.(EP, value) : storage?.removeItem?.(EP); } catch {} };
 
 function readContext(storage = globalThis?.localStorage) {
   const { requester, teamId } = readActorContext(storage);
@@ -38,13 +43,21 @@ export function createSchedulePersistenceService({
     };
   };
 
+  const syncEvents = async (events, { teamId = "" } = {}) => {
+    const scope = eventScope(storage, teamId || events?.[0]?.team_id || events?.[0]?.teamId);
+    if (scope) writePending(storage, scope);
+    const result = await syncCollection("events", "events", events, teamId);
+    if (scope && storage?.getItem?.(EP) === scope) writePending(storage, "");
+    return result;
+  };
+
   return {
-    loadEvents: ({ teamId = "" } = {}) => loadCollection("events", "events", teamId),
-    syncEvents: (events, { teamId = "" } = {}) => syncCollection("events", "events", events, teamId),
+    loadEvents: ({ teamId = "" } = {}) => eventPending(storage, teamId) ? Promise.resolve({ ok: true, storageMode: "local_pending", rows: parseStored(storage, "sl:events", []) }) : loadCollection("events", "events", teamId),
+    syncEvents,
     loadRsvps: ({ teamId = "" } = {}) => loadCollection("rsvps", "rsvps", teamId),
     syncRsvps: (rsvps, { teamId = "" } = {}) => syncCollection("rsvps", "rsvps", rsvps, teamId),
     readContext: () => readContext(storage),
   };
 }
 
-export const __testUtils = { readContext };
+export const __testUtils = { readContext, eventScope, eventPending };

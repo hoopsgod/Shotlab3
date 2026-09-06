@@ -8,8 +8,10 @@ let source = rawSource.replace(/\r\n/g, '\n')
 
 const previousAuthority = 'const signedReplacementCollection = k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const phase3dAuthority = 'const signedReplacementCollection = k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
+const oldEventAuthority = 'const signedReplacementCollection = k === "sl:events" || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
+const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 
-if (!source.includes(phase3dAuthority)) {
+if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) && !source.includes(eventAuthority)) {
   const occurrences = source.split(previousAuthority).length - 1
   if (occurrences !== 1) {
     throw new Error(`Expected exactly one signed replacement collection authority before Phase 3D, found ${occurrences}.`)
@@ -17,7 +19,7 @@ if (!source.includes(phase3dAuthority)) {
   source = source.replace(previousAuthority, phase3dAuthority)
 }
 
-if ((source.split(phase3dAuthority).length - 1) !== 1) {
+if ((source.split(phase3dAuthority).length - 1) + (source.split(oldEventAuthority).length - 1) + (source.split(eventAuthority).length - 1) !== 1) {
   throw new Error('Phase 3D RSVP replacement authority must exist exactly once after enhancement.')
 }
 
@@ -29,8 +31,9 @@ const supabaseLineEnding = rawSupabaseSource.includes('\r\n') ? '\r\n' : '\n'
 let supabaseSource = rawSupabaseSource.replace(/\r\n/g, '\n')
 const previousEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0) {'
 const phase3dEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps") {'
+const eventEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps" && table !== "events") {'
 
-if (!supabaseSource.includes(phase3dEmptyWriteGuard)) {
+if (!supabaseSource.includes(phase3dEmptyWriteGuard) && !supabaseSource.includes(eventEmptyWriteGuard)) {
   const occurrences = supabaseSource.split(previousEmptyWriteGuard).length - 1
   if (occurrences !== 1) {
     throw new Error(`Expected exactly one empty-write short-circuit before Phase 3D, found ${occurrences}.`)
@@ -38,7 +41,7 @@ if (!supabaseSource.includes(phase3dEmptyWriteGuard)) {
   supabaseSource = supabaseSource.replace(previousEmptyWriteGuard, phase3dEmptyWriteGuard)
 }
 
-if ((supabaseSource.split(phase3dEmptyWriteGuard).length - 1) !== 1) {
+if ((supabaseSource.split(phase3dEmptyWriteGuard).length - 1) + (supabaseSource.split(eventEmptyWriteGuard).length - 1) !== 1) {
   throw new Error('Phase 3D must allow exactly one RSVP empty replacement write through the Supabase adapter.')
 }
 
