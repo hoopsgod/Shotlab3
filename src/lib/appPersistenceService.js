@@ -4,6 +4,7 @@ import { isDemoAccount } from "./demoMode.js";
 
 const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const PENDING_DEMO_TTL_MS = 30_000;
+const PRIORITY_PENDING_KEY = "sl:cp";
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const asPriorityMap = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
 const sanitizePriorityMap = (value) => Object.fromEntries(
@@ -125,6 +126,7 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     const localPriorities = sanitizePriorityMap(await db.get(STORAGE_KEYS.coachPriorities));
     const { requester } = await getRequesterContext();
     if (!requester || isDemoAccount(requester)) return localPriorities;
+    const pending = await db.get(PRIORITY_PENDING_KEY);
 
     try {
       const response = await fetchImpl("/v1/team-priorities", {
@@ -148,6 +150,11 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
       );
       const remotePriorities = sanitizePriorityMap(remoteWithMetadata);
       const merged = { ...localPriorities, ...remotePriorities };
+      if (pending?.r === requester) {
+        for (const teamId of (Array.isArray(pending.t) ? pending.t : [])) {
+          if (localPriorities[teamId]) merged[teamId] = localPriorities[teamId];
+        }
+      }
       await db.set(STORAGE_KEYS.coachPriorities, merged, { strictLocal: true });
       return merged;
     } catch {
@@ -174,6 +181,8 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     }
 
     const deliveredTeamIds = [];
+    const pending = { r: requester, t: entries.map(([teamId]) => teamId) };
+    await db.set(PRIORITY_PENDING_KEY, pending, { strictLocal: true });
     let storageMode = "team_remote";
     let authoritativeLocalWrite = false;
     for (const [teamId, teamPriorities] of entries) {
@@ -202,6 +211,8 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
         authoritativeLocalWrite = true;
       }
       deliveredTeamIds.push(teamId);
+      pending.t = pending.t.filter((id) => id !== teamId);
+      await db.set(PRIORITY_PENDING_KEY, pending, { strictLocal: true });
     }
 
     if (authoritativeLocalWrite) {
