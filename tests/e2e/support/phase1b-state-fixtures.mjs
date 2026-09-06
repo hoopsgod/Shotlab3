@@ -161,8 +161,19 @@ async function installSafeRoutes(page, fixture) {
     teamId: PHASE1B_TEAM_ID,
     hide_from_leaderboards: role === 'coach',
   };
+  const signedEvents = (fixture.storage['sl:events'] || []).map((event) => ({
+    id: event.id,
+    team_id: event.teamId || event.team_id,
+    title: event.title,
+    date: event.date,
+    time: event.time,
+    location: event.location,
+    description: event.desc || event.description || '',
+    type: event.type,
+  }));
   await page.route('**/v1/legacy-auth/restore', (route) => fulfillJson(route, { ok: true, profile }));
   await page.route('**/v1/teams/restore-context', (route) => fulfillJson(route, { ok: true, team }));
+  await page.route('**/v1/events**', (route) => fulfillJson(route, { ok: true, storage_mode: 'signed_api', events: signedEvents }));
   await page.route('**/v1/season-archives', (route) => fulfillJson(route, { ok: true, archives: [] }));
   await page.route('**/v1/leaderboards/home-shots**', (route) => fulfillJson(route, { leaderboard: [] }));
   await page.route('**/v1/coach/players/provision**', (route) => fulfillJson(route, { ok: true, invitations: [] }));

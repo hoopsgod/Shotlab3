@@ -46,6 +46,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-release-auth-session-recovery.mjs',
   'scripts/apply-legacy-signed-collection-reads.mjs',
   'scripts/apply-phase3d-rsvp-state-ownership.mjs',
+  'scripts/apply-phase3-events-replacement-ownership.mjs',
   'scripts/apply-phase3e-score-state-ownership.mjs',
   'scripts/apply-post-auth-persistence-hydration.mjs',
   'scripts/apply-mobile-secondary-page-parity-app.mjs',

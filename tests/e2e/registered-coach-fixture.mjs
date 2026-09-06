@@ -4,6 +4,25 @@ const REGISTERED_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const DEFAULT_AUTH_USER_ID = '99999999-9999-4999-8999-999999999999';
 const DEFAULT_PLAYER_AUTH_USER_ID = '88888888-8888-4888-8888-888888888888';
 
+async function installSignedEventsRoute(page, storage) {
+  let events = Array.isArray(storage?.['sl:events']) ? storage['sl:events'] : [];
+  await page.route('**/v1/events**', async (route) => {
+    if (route.request().method().toUpperCase() === 'POST') {
+      try {
+        const body = route.request().postDataJSON();
+        events = Array.isArray(body?.events) ? body.events : [];
+      } catch {
+        events = [];
+      }
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, storage_mode: 'signed', events }),
+    });
+  });
+}
+
 /**
  * Boots a deterministic registered Coach without borrowing ShotLab's canonical
  * Demo identity. Bespoke dashboard/acceptance fixtures must use this boundary
@@ -48,6 +67,7 @@ export async function enterSeededRegisteredCoach(page, {
     }
   }, { seededStorage: signedStorage });
 
+  await installSignedEventsRoute(page, storage);
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -131,6 +151,7 @@ export async function enterSeededRegisteredPlayer(page, {
     }
   }, { seededStorage: signedStorage });
 
+  await installSignedEventsRoute(page, storage);
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',

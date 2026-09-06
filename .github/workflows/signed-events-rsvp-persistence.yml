@@ -13,6 +13,7 @@ on:
       - "src/lib/schedulePersistenceService.js"
       - "src/lib/supabase.js"
       - "scripts/apply-phase3d-rsvp-state-ownership.mjs"
+      - "scripts/apply-phase3-events-replacement-ownership.mjs"
       - "scripts/apply-post-auth-persistence-hydration.mjs"
       - "scripts/run-route-enhancers.mjs"
       - "migrations/043_events_rsvps_signed_api_boundary.sql"
@@ -20,6 +21,7 @@ on:
       - "tests/events-visibility-rsvp-contract.test.mjs"
       - "tests/remotePersistence-rsvps.test.mjs"
       - "tests/phase3d-rsvp-state-ownership.test.mjs"
+      - "tests/phase3-events-replacement-ownership.test.mjs"
       - "docs/signed-events-rsvp-persistence.md"
       - ".github/workflows/signed-events-rsvp-persistence.yml"
   workflow_dispatch:
@@ -54,6 +56,7 @@ jobs:
           node --test tests/events-visibility-rsvp-contract.test.mjs
           node --test tests/remotePersistence-rsvps.test.mjs
           node --test tests/phase3d-rsvp-state-ownership.test.mjs
+          node --test tests/phase3-events-replacement-ownership.test.mjs
 
       - name: Verify production build
         run: npm run build

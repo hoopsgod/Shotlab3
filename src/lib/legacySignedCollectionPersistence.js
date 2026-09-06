@@ -1,5 +1,6 @@
 import { mergeHydratedRows } from "./remotePersistence.js";
 import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
+import { readActorContext } from "./apiIdentityHeaders.js";
 import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
 
 const SC_PATH = "/v1/strength-conditioning";
@@ -35,6 +36,10 @@ const registeredIdentity = (storage) => {
   return !email || email === "demo@shotlab.app" || email === "coach.demo@shotlab.app" ? "" : email;
 };
 const rsvpPending = (storage) => storage?.getItem?.("sl:rp") === readSession(storage)?.rp;
+const eventPending = (storage) => {
+  const { requester, teamId } = readActorContext(storage);
+  return Boolean(requester && teamId && storage?.getItem?.("sl:ep") === `${requester}\t${teamId}`);
+};
 
 export function readLegacyRegisteredIdentity({ storage = globalThis?.localStorage, supabaseAuthEnabled = false } = {}) {
   return supabaseAuthEnabled ? "" : registeredIdentity(storage);
@@ -80,11 +85,12 @@ export async function hydrateAuthenticatedCollectionsToStorage({ fetchImpl = glo
   if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") return { ok: false, hydrated: [], failures: ["storage_unavailable"], identity: "" };
   const session = await waitForRegisteredSession({ storage, expectedIdentity, timeoutMs: sessionWaitMs, pollMs: sessionPollMs });
   if (!session.ok) return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
-  const pendingRsvps = rsvpPending(storage), results = await Promise.all(GROUPS.map((group) => pendingRsvps && group[0] === "/v1/rsvps" ? ["sl:rsvps"] : hydrateGroup(group, fetchImpl, storage, session.identity, groupAttempts, retryDelayMs)));
+  const pendingEvents = eventPending(storage), pendingRsvps = rsvpPending(storage);
+  const results = await Promise.all(GROUPS.map((group) => pendingEvents && group[0] === "/v1/events" ? ["sl:events"] : pendingRsvps && group[0] === "/v1/rsvps" ? ["sl:rsvps"] : hydrateGroup(group, fetchImpl, storage, session.identity, groupAttempts, retryDelayMs)));
   const hydrated = results.filter(Array.isArray).flat(), failures = results.filter((result) => !Array.isArray(result));
   const players = parseStored(storage, "sl:players"), identityHydrated = Array.isArray(players) && players.some((row) => normalizeIdentity(row?.email) === session.identity);
   if (!identityHydrated) failures.push("sl:players:authenticated_identity_missing");
-  return { ok: !failures.length, hydrated: [...new Set(hydrated)], pending: [pendingRsvps ? "sl:rsvps" : "", hasPendingScoreRows(storage, session.identity) ? "sl:scores" : ""].filter(Boolean), failures: [...new Set(failures)], identity: session.identity, identityHydrated };
+  return { ok: !failures.length, hydrated: [...new Set(hydrated)], pending: [pendingEvents ? "sl:events" : "", pendingRsvps ? "sl:rsvps" : "", hasPendingScoreRows(storage, session.identity) ? "sl:scores" : ""].filter(Boolean), failures: [...new Set(failures)], identity: session.identity, identityHydrated };
 }
 
 function configFor(table) {
@@ -96,6 +102,10 @@ function configFor(table) {
 export async function requestLegacySignedCollection({ table, method = "GET", fetchImpl = globalThis?.fetch, storage = globalThis?.localStorage, supabaseAuthEnabled = false } = {}) {
   const config = configFor(table), requester = supabaseAuthEnabled ? "" : registeredIdentity(storage);
   if (!config || method !== "GET" || !requester || typeof fetchImpl !== "function") return null;
+  if (table === "events" && eventPending(storage)) {
+    const rows = parseStored(storage, "sl:events");
+    return { data: Array.isArray(rows) ? rows : [], error: null, storageMode: "local_pending" };
+  }
   if (table === "rsvps" && rsvpPending(storage)) {
     const rows = parseStored(storage, "sl:rsvps");
     return { data: Array.isArray(rows) ? rows : [], error: null, storageMode: "local_pending" };
