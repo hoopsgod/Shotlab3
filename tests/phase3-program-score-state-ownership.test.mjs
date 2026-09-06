@@ -49,6 +49,7 @@ test("pending marker from another requester or team has no hydration authority",
   const service=createProgramScorePersistenceService({storage,fetchImpl:async()=>response([])});
   assert.deepEqual((await service.loadProgramScores()).programScores,[]);
   storage.setItem("sl:pp","player@example.com\tteam-b\tforeign");
+  assert.deepEqual((await service.loadProgramScores()).programScores,[]);
   assert.deepEqual((await service.loadProgramScores({teamId:"team-a"})).programScores,[]);
 });
 
@@ -95,6 +96,6 @@ test("Program ownership stays isolated from the protected home-score contract",(
   const score=fs.readFileSync(new URL("../src/lib/scorePersistenceService.js",import.meta.url),"utf8");
   assert.match(program,/sl:pp/);
   assert.match(legacy,/reconcilePendingProgramScoreRows/);
+  assert.match(legacy,/storageKey === "sl:scores"/);
   assert.match(score,/sl:sp/);
-  assert.match(score,/storageKey === "sl:scores"/);
 });

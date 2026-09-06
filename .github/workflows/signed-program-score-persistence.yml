@@ -7,7 +7,9 @@ on:
     paths:
       - "functions/_utils/supabase.js"
       - "functions/v1/program-scores/**"
+      - "src/lib/pendingIdPersistence.js"
       - "src/lib/programScorePersistenceService.js"
+      - "src/lib/scorePersistenceService.js"
       - "src/lib/legacySignedCollectionPersistence.js"
       - "src/lib/supabase.js"
       - "migrations/048_program_scores_signed_api_boundary.sql"
@@ -45,6 +47,9 @@ jobs:
         run: |
           node --test tests/coach-verified-program-results.test.mjs
           node --test tests/phase3-program-score-state-ownership.test.mjs
+
+      - name: Verify protected home-score ownership contract
+        run: node --test tests/phase3e-score-state-ownership.test.mjs
 
       - name: Verify production build
         run: npm run build
