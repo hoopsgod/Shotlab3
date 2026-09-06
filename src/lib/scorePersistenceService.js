@@ -24,7 +24,7 @@ const team = (row) => String(row?.team_id || row?.teamId || "").trim();
 const owner = (storage, requester = "") => {
   let parts;
   try { parts = String(storage?.getItem?.("sl:sp") || "").split("\t"); } catch { return null; }
-  const current = readSession(storage), identity = normalizeIdentity(requester || readRequester(storage));
+  const current = readSession(storage), identity = normalizeIdentity(requester || current?.email || current?.userEmail || current?.user_id);
   return parts[2] && parts[0] === identity && (!current?.rp || current.rp === `${identity}\t${parts[1]}`) ? parts : null;
 };
 const save = (storage, parts) => {
@@ -36,29 +36,24 @@ export const hasPendingScoreRows = (storage = globalThis?.localStorage, requeste
 export function reconcilePendingScoreRows({ storage = globalThis?.localStorage, requester = "", localRows = [], remoteRows = [] } = {}) {
   const remote = Array.isArray(remoteRows) ? remoteRows : [], parts = owner(storage, requester);
   if (!parts) return remote;
-  const remoteIds = new Set(remote.map(id));
+  const remoteIds = remote.map(id);
   const local = (Array.isArray(localRows) ? localRows : []).filter((row) => {
     const rowId = id(row);
-    return parts.includes(rowId, 2) && !remoteIds.has(rowId) && normalizeIdentity(row?.email || row?.player_email) === parts[0] && team(row) === parts[1];
+    return parts.includes(rowId, 2) && !remoteIds.includes(rowId) && normalizeIdentity(row?.email || row?.player_email) === parts[0] && team(row) === parts[1];
   });
   save(storage, [parts[0], parts[1], ...local.map(id)]);
   return remote.concat(local);
 }
 
-export async function requestSignedJson(fetchImpl, path, method, requester, storage, data) {
+export async function requestSignedBody(fetchImpl, path, method, storage, data, fallback) {
   const response = await fetchImpl(path, {
     method,
-    headers: buildApiIdentityHeaders({ requester, storage, headers: data == null ? {} : { "Content-Type": "application/json" } }),
+    headers: buildApiIdentityHeaders({ requester: readRequester(storage), storage, headers: data == null ? {} : { "Content-Type": "application/json" } }),
     ...(data == null ? {} : { body: JSON.stringify(data) }),
   });
   let body;
   try { body = await response.json(); } catch { body = {}; }
-  return [response, body];
-}
-
-export async function requestSignedBody(fetchImpl, path, method, storage, data, fallback) {
-  const [response, body] = await requestSignedJson(fetchImpl, path, method, readRequester(storage), storage, data);
-  if (!response?.ok || body?.error) {
+  if (!response?.ok || body?.ok === false || body?.error) {
     const code = String(body?.error || fallback), error = new Error(code);
     error.code = code; error.status = Number(response?.status || 0); error.body = body; throw error;
   }
@@ -84,8 +79,8 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
     if (!rows.length) return { ok: true, scores: [], storageMode: "local_only" };
     const identity = readRequester(storage), teamId = team(rows[0]), parts = owner(storage, identity);
     if (identity && teamId) save(storage, [identity, teamId, ...new Set([...(parts?.[1] === teamId ? parts.slice(2) : []), ...rows.map(id).filter(Boolean)])]);
-    const body = await request("POST", { scores: rows }), confirmed = Array.isArray(body?.scores) ? body.scores : [], pending = owner(storage, identity);
-    if (pending?.[1] === teamId) save(storage, [identity, teamId, ...pending.slice(2).filter((value) => !confirmed.some((row) => id(row) === value))]);
+    const body = await request("POST", { scores: rows }), confirmed = Array.isArray(body?.scores) ? body.scores : [];
+    reconcilePendingScoreRows({ storage, requester: identity, localRows: parseStored(storage, "sl:scores", rows), remoteRows: confirmed });
     return signedResult(body, { scores: confirmed });
   };
 

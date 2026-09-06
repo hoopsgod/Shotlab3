@@ -1,5 +1,5 @@
 import { mergeHydratedRows } from "./remotePersistence.js";
-import { hasPendingScoreRows, normalizeIdentity, parseStored, readRequester, readSession, reconcilePendingScoreRows, requestSignedJson } from "./scorePersistenceService.js";
+import { hasPendingScoreRows, normalizeIdentity, parseStored, readRequester, readSession, reconcilePendingScoreRows, requestSignedBody } from "./scorePersistenceService.js";
 
 const SC_PATH = "/v1/strength-conditioning";
 
@@ -51,34 +51,27 @@ export async function waitForRegisteredSession({ storage = globalThis?.localStor
   }
 }
 
-async function get(fetchImpl, path, storage, requester) {
-  const [response, payload] = await requestSignedJson(fetchImpl, path, "GET", requester, storage);
-  return { response, payload, failed: !response?.ok || payload?.ok === false || payload?.error };
-}
-
 async function hydrateGroup(group, fetchImpl, storage, requester, attempts, retryDelayMs) {
   const [path, ...bindings] = group, maxAttempts = Math.max(1, Number(attempts) || 1);
   let failure = "failed";
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const result = await get(fetchImpl, path, storage, requester), hydrated = [];
-      if (!result.failed) {
-        let complete = true;
-        for (let index = 0; index < bindings.length; index += 2) {
-          const field = bindings[index], storageKey = bindings[index + 1], remote = result.payload?.[field];
-          if (!Array.isArray(remote)) { complete = false; continue; }
-          const rows = storageKey === "sl:shotlogs"
-            ? mergeHydratedRows(storageKey, parseStored(storage, storageKey), remote)
-            : storageKey === "sl:scores"
-              ? reconcilePendingScoreRows({ storage, requester, localRows: parseStored(storage, storageKey), remoteRows: remote })
-              : remote;
-          storage.setItem(storageKey, JSON.stringify(rows));
-          hydrated.push(storageKey);
-        }
-        if (complete) return hydrated;
-        failure = "missing_fields";
-      } else failure = String(result.payload?.error || result.response?.status || "failed");
-    } catch (error) { failure = String(error?.message || "failed"); }
+      const payload = await requestSignedBody(fetchImpl, path, "GET", storage, null, "failed"), hydrated = [];
+      let complete = true;
+      for (let index = 0; index < bindings.length; index += 2) {
+        const field = bindings[index], storageKey = bindings[index + 1], remote = payload?.[field];
+        if (!Array.isArray(remote)) { complete = false; continue; }
+        const rows = storageKey === "sl:shotlogs"
+          ? mergeHydratedRows(storageKey, parseStored(storage, storageKey), remote)
+          : storageKey === "sl:scores"
+            ? reconcilePendingScoreRows({ storage, requester, localRows: parseStored(storage, storageKey), remoteRows: remote })
+            : remote;
+        storage.setItem(storageKey, JSON.stringify(rows));
+        hydrated.push(storageKey);
+      }
+      if (complete) return hydrated;
+      failure = "missing_fields";
+    } catch (error) { failure = String(error?.body?.error || error?.status || error?.message || "failed"); }
     if (attempt < maxAttempts) await delay(retryDelayMs * attempt);
   }
   return `${path}:${failure}`;
@@ -119,17 +112,10 @@ export async function requestLegacySignedCollection({ table, method = "GET", fet
     return { data: Array.isArray(rows) ? rows : [], error: null, storageMode: "local_pending" };
   }
   try {
-    const result = await get(fetchImpl, config[0], storage, requester);
-    if (result.failed) return {
-      data: null,
-      error: {
-        code: String(result.payload?.error || `signed_collection_http_${result.response?.status || 0}`),
-        message: String(result.payload?.message || result.payload?.error || "signed_collection_load_failed"),
-        status: Number(result.response?.status || 0),
-      },
-    };
-    return { data: Array.isArray(result.payload?.[config[1]]) ? result.payload[config[1]] : [], error: null, storageMode: String(result.payload?.storage_mode || "signed_api") };
+    const payload = await requestSignedBody(fetchImpl, config[0], "GET", storage, null, "signed_collection_load_failed");
+    return { data: Array.isArray(payload?.[config[1]]) ? payload[config[1]] : [], error: null, storageMode: String(payload?.storage_mode || "signed_api") };
   } catch (error) {
-    return { data: null, error: { code: String(error?.code || "signed_collection_load_failed"), message: String(error?.message || "signed_collection_load_failed"), status: Number(error?.status || 0) } };
+    const payload = error?.body || {}, status = Number(error?.status || 0);
+    return { data: null, error: { code: String(payload?.error || (status ? `signed_collection_http_${status}` : error?.code || "signed_collection_load_failed")), message: String(payload?.message || payload?.error || error?.message || "signed_collection_load_failed"), status } };
   }
 }
