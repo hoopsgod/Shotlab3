@@ -10,8 +10,9 @@ const previousAuthority = 'const signedReplacementCollection = k === "sl:sc-sess
 const phase3dAuthority = 'const signedReplacementCollection = k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const oldEventAuthority = 'const signedReplacementCollection = k === "sl:events" || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
+const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
 
-if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) && !source.includes(eventAuthority)) {
+if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) && !source.includes(eventAuthority) && !source.includes(strengthAuthority)) {
   const occurrences = source.split(previousAuthority).length - 1
   if (occurrences !== 1) {
     throw new Error(`Expected exactly one signed replacement collection authority before Phase 3D, found ${occurrences}.`)
@@ -19,8 +20,8 @@ if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) &&
   source = source.replace(previousAuthority, phase3dAuthority)
 }
 
-if ((source.split(phase3dAuthority).length - 1) + (source.split(oldEventAuthority).length - 1) + (source.split(eventAuthority).length - 1) !== 1) {
-  throw new Error('Phase 3D RSVP replacement authority must exist exactly once after enhancement.')
+if ((source.split(phase3dAuthority).length - 1) + (source.split(oldEventAuthority).length - 1) + (source.split(eventAuthority).length - 1) + (source.split(strengthAuthority).length - 1) !== 1) {
+  throw new Error('Phase 3D RSVP replacement authority or its successor must exist exactly once after enhancement.')
 }
 
 fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
@@ -32,8 +33,9 @@ let supabaseSource = rawSupabaseSource.replace(/\r\n/g, '\n')
 const previousEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0) {'
 const phase3dEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps") {'
 const eventEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps" && table !== "events") {'
+const strengthEmptyWriteGuard = 'if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps" && table !== "events" && !/^sc_(sessions|rsvps|logs)$/.test(table)) {'
 
-if (!supabaseSource.includes(phase3dEmptyWriteGuard) && !supabaseSource.includes(eventEmptyWriteGuard)) {
+if (!supabaseSource.includes(phase3dEmptyWriteGuard) && !supabaseSource.includes(eventEmptyWriteGuard) && !supabaseSource.includes(strengthEmptyWriteGuard)) {
   const occurrences = supabaseSource.split(previousEmptyWriteGuard).length - 1
   if (occurrences !== 1) {
     throw new Error(`Expected exactly one empty-write short-circuit before Phase 3D, found ${occurrences}.`)
@@ -41,8 +43,8 @@ if (!supabaseSource.includes(phase3dEmptyWriteGuard) && !supabaseSource.includes
   supabaseSource = supabaseSource.replace(previousEmptyWriteGuard, phase3dEmptyWriteGuard)
 }
 
-if ((supabaseSource.split(phase3dEmptyWriteGuard).length - 1) + (supabaseSource.split(eventEmptyWriteGuard).length - 1) !== 1) {
-  throw new Error('Phase 3D must allow exactly one RSVP empty replacement write through the Supabase adapter.')
+if ((supabaseSource.split(phase3dEmptyWriteGuard).length - 1) + (supabaseSource.split(eventEmptyWriteGuard).length - 1) + (supabaseSource.split(strengthEmptyWriteGuard).length - 1) !== 1) {
+  throw new Error('Phase 3D must allow exactly one RSVP empty replacement write or a successor boundary through the Supabase adapter.')
 }
 
 fs.writeFileSync(supabasePath, supabaseSource.replace(/\n/g, supabaseLineEnding))

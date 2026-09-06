@@ -7,11 +7,17 @@ on:
     paths:
       - "functions/v1/strength-conditioning/**"
       - "src/lib/strengthConditioningPersistenceService.js"
+      - "src/lib/legacySignedCollectionPersistence.js"
       - "src/lib/apiFetchBridge.js"
       - "src/lib/appDataModels.js"
       - "src/lib/remotePersistence.js"
       - "src/App.jsx"
+      - "scripts/apply-phase3-strength-conditioning-state-ownership.mjs"
+      - "scripts/apply-phase3-events-replacement-ownership.mjs"
+      - "scripts/apply-phase3d-rsvp-state-ownership.mjs"
+      - "scripts/run-route-enhancers.mjs"
       - "migrations/052_strength_conditioning_signed_api.sql"
+      - "tests/phase3-strength-conditioning-state-ownership.test.mjs"
       - "tests/signed-strength-conditioning-persistence.test.mjs"
       - "tests/sc-session-log-contract.test.mjs"
       - "tests/events-visibility-rsvp-contract.test.mjs"
@@ -43,8 +49,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify S&C authorization, privacy, and persistence contracts
-        run: node --test tests/signed-strength-conditioning-persistence.test.mjs tests/sc-session-log-contract.test.mjs tests/events-visibility-rsvp-contract.test.mjs tests/remote-persistence-shape.test.mjs
+      - name: Verify S&C authorization, ownership, privacy, and persistence contracts
+        run: node --test tests/phase3-strength-conditioning-state-ownership.test.mjs tests/signed-strength-conditioning-persistence.test.mjs tests/sc-session-log-contract.test.mjs tests/events-visibility-rsvp-contract.test.mjs tests/remote-persistence-shape.test.mjs
 
       - name: Verify production build
         run: npm run build

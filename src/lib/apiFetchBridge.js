@@ -178,9 +178,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           return jsonResponse(target, result[strengthResource]);
         }
         if (method === "POST") {
-          const rows = parseRows(init?.body);
-          const methodName = `sync${strengthResource[0].toUpperCase()}${strengthResource.slice(1)}`;
-          const result = await strengthPersistence[methodName](rows);
+          const result = await strengthPersistence.sync(strengthResource, parseRows(init?.body));
           return jsonResponse(target, result.rows);
         }
         return methodNotAllowed(target);

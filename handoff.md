@@ -3,8 +3,8 @@
 ## Accepted baseline
 
 - Base branch: `march-3-reset-85393dd`
-- Frozen merged baseline: `4fc7fdc729282e7996af545c5e8146ce74fc01d7` (PR #1531 merged)
-- PR #1520, #1524, #1525, #1526, #1527, #1529, #1530, and #1531 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, shot-log, RSVP, score-state, training-catalog, or coach-priority ownership work unless a regression test proves a break.
+- Frozen merged baseline: `df7023cac110bc011da4d306eb89f5dbf5c44625` (PR #1532 merged)
+- PR #1520, #1524, #1525, #1526, #1527, #1529, #1530, #1531, and #1532 are closed. Do not reopen their mobile-axis, assignment, coach follow-up, shot-log, RSVP, score-state, training-catalog, coach-priority, or Events ownership work unless a regression test proves a break.
 
 ## Protected contracts
 
@@ -12,104 +12,81 @@
 - Preserve Phase 1B Demo/registered state parity.
 - Preserve Phase 1C focused visual/runtime guardrails.
 - Preserve Phase 2 CSS/layout authority.
-- Preserve Phase 3A assignment state/service ownership.
-- Preserve Phase 3B coach follow-up state/service ownership.
-- Preserve Phase 3C shot-log hydration/state ownership.
-- Preserve Phase 3D RSVP replacement/pending-sync state ownership.
-- Preserve Phase 3E player drill-score pending-sync/hydration ownership.
-- Preserve merged PR #1530 training-catalog read-only hydration ownership.
-- Preserve merged PR #1531 coach-priority failed-delivery ownership.
+- Preserve completed Phase 3 assignment, coach-follow-up, shot-log, RSVP, score, training-catalog, coach-priority, and Events ownership contracts.
 - Preserve production performance budgets and exact-head Cloudflare certification.
-- No desktop redesign, feature expansion, visual-baseline rewrite, guardrail allowlist broadening, dependency upgrade, API authorization expansion, or database-schema expansion.
+- No UI/CSS/layout redesign, visual-baseline rewrite, dependency upgrade, allowlist broadening, API authorization expansion, or database-schema expansion.
 
 ## Current work
 
-- Phase: **Phase 3 closure — Events replacement/hydration ownership**
-- Branch: `agent/phase3-events-replacement-ownership`
-- Base: `4fc7fdc729282e7996af545c5e8146ce74fc01d7`
-- PR: `#1532`
-- Data domain: `sl:events` / signed team Events replacement writes, startup reads, and registered post-auth hydration only.
+- Phase: **Phase 3 closure — Strength & Conditioning replacement-state ownership**
+- Branch: `agent/phase3-strength-conditioning-state-ownership`
+- Base: `df7023cac110bc011da4d306eb89f5dbf5c44625`
+- Data domain: `sl:sc-sessions`, `sl:sc-rsvps`, `sl:sc-logs` / signed `/v1/strength-conditioning` replacement state only.
 
-## Phase 3 rules
+## S&C ownership problem
 
-1. One data domain per PR.
-2. Stabilize selectors/services/state ownership before new product work.
-3. Loading, empty, success, degraded local data, denied, and failure states must not be silently conflated.
-4. Preserve usable local fallback data during remote failures, but never give ordinary stale local data authority over successful remote truth.
-5. Route/domain failures must remain recoverable and must not blank unrelated app surfaces.
-6. No typography, spacing, layout, or decorative changes except minimal truthful state messaging.
-7. Add focused service/selector tests plus an integration/source contract for each slice.
-8. Do not merge without explicit authorization after exact-head certification.
+- Registered S&C mutations are local-first and then perform strict signed replacement writes. A failed write therefore leaves valid intended local state that startup or post-auth hydration can overwrite with older remote state.
+- `/v1/strength-conditioning` writes one resource at a time (`sessions`, `rsvps`, or `logs`) and replacement semantics delete omitted rows. Coach session deletion can require three sequential replacements: sessions, linked RSVPs, and linked logs.
+- A coarse domain-wide pending marker is unsafe because one resource may succeed while a later resource fails.
+- Startup hydration rewrites migrated S&C collections through generic `DB.set`; those cache rewrites must not become signed replacement mutations.
+- The legacy Supabase empty-array guard can short-circuit an intentional final S&C collection deletion before it reaches the signed endpoint.
+- Successful remote empty collections must remain authoritative after pending ownership clears; blanket local/remote union is not acceptable under replacement semantics.
 
-## Events ownership problem
+## S&C ownership correction
 
-- Coach Events mutations are local-first. Event creation uses `strictLocal:true`, while event removal also updates `sl:events` locally before signed replacement delivery is known.
-- `/v1/events` is an authenticated team-wide replacement endpoint. Omitted events are intentionally deleted, and their RSVPs are deleted with them.
-- A failed Events replacement can therefore leave valid intended local truth that later startup or post-auth hydration can overwrite.
-- Deleting the final event is a special case: the legacy adapter normally short-circuits empty write arrays, so the actual coach deletion path must explicitly authorize `events: []` to reach the signed replacement endpoint.
-- Startup `DB.get()` also treats empty arrays as no data; without an explicit Events authority rule, a successful authoritative empty remote collection can fall back to stale local Events.
-- Old draft PR #1528 proposed preserving every local-only event during hydration. That blanket union is unsafe under replacement semantics because it can resurrect intentionally deleted Events. Do not revive or merge #1528 as written.
-
-## Events ownership correction
-
-- Use compact pending marker `sl:ep`, scoped to normalized requester identity plus exact team ID.
-- Mark an Events replacement pending immediately before the signed `/v1/events` POST begins. A failed or interrupted replacement leaves the marker and intended local collection intact.
-- While the exact requester/team marker is pending, signed Events reads return the intended local collection and post-auth hydration skips the stale remote Events read. This includes an intentionally empty local collection after a failed final-event deletion.
-- Pending ownership from another requester/team has no authority over the active team.
-- Clear `sl:ep` only after the signed replacement succeeds. After it clears, remote Events truth is authoritative again.
-- Only the explicit coach `removeEvent` path sets `{replace:true}` on `sl:events`; this allows an intentional final-event deletion to send `events: []` while ordinary empty cache/initialization writes remain non-authoritative and do not hit the signed Events endpoint.
-- Keep the Supabase adapter capable of carrying an authorized empty Events replacement once `DB.set` has explicitly selected replacement mode.
-- Make a successful Events startup read authoritative even when the returned collection is empty; only `local_pending` Events reads retain local authority.
-- Do not use blanket local/remote union reconciliation for registered Events authority.
-- Preserve RSVP ownership, authorization, endpoint/database behavior, UI, CSS, visual baselines, and all performance budgets.
-
-## Closure finding from first PR head
-
-- Exact head `57bc53bd36ef758b3df9429033326d9c0975880e` passed the focused Signed Events/RSVP workflow, Production Performance Budget, Phase 3 Release Certification, Production Acceptance, and several supporting suites.
-- Broader registered runtime checks correctly failed because the first implementation treated every empty `sl:events` write as a remote replacement. Runtime parity captured `[remote-persist] upsert failed {key: sl:events, table: events, ...}` during a harmless registered empty Events write.
-- That failure is treated as a real authority defect, not a visual flake. The repair narrows empty Events replacement to the explicit coach deletion path only. All prior exact-head results are diagnostic only; full certification must rerun on the repaired head.
-
-## Confirmed remaining ownership queue
-
-After this Events slice, the remaining confirmed state-authority domains are:
-
-1. **Strength & Conditioning replacement state** — `sl:sc-sessions`, `sl:sc-rsvps`, and `sl:sc-logs` use local-first strict remote replacement writes; startup/post-auth remote truth can erase failed local intent. Treat S&C as one endpoint/domain and preserve deletion semantics.
-2. **Program scores** — `sl:program-scores` uses local-first strict remote score writes, but Phase 3E intentionally excluded it; startup/post-auth hydration can hide a failed local Program result. Existing authorized player-score deletion means blanket union is not acceptable.
-3. **Player identity collection** — `sl:players` mutations use local-first persistence and signed replacement-capable sync; startup can merge, but post-auth hydration replaces the collection. Pending/replacement ownership must not resurrect intentionally removed identities.
-4. **Player profile collection** — `sl:player-profiles` mutations use local-first persistence and upsert-only signed sync; post-auth hydration can overwrite failed local additions/edits. Preserve only explicitly pending local truth.
-5. **Team metadata/branding** — `sl:teams` updates such as join-code regeneration and branding use local-first persistence; successful remote reads can replace undelivered local updates, including at startup. Team creation itself remains a separate remote-confirmed create flow and should not be redesigned.
-
-Not in the remaining queue:
-
-- Assignments, coach follow-ups, shot logs, RSVPs, `sl:scores`, training catalog, and coach priorities are already protected by completed ownership slices.
-- Challenges use remote-confirmed registered writes before local cache/state updates.
-- Season archives are inserted into local/archive state only after durable remote persistence succeeds.
-
-Do not combine the confirmed queue into one PR. Preserve one-domain-per-PR sequencing and exact-head certification after each accepted merge baseline.
-
-## Release rule
-
-- Target merged baseline `4fc7fdc729282e7996af545c5e8146ce74fc01d7` directly.
-- Keep old draft PR #1528 separate; PR #1532 supersedes its unsafe reconciliation model.
-- Re-run all required exact-head certification on the final repaired PR head.
-- Do not raise JavaScript or CSS performance budgets.
-- Do not merge this slice without explicit authorization after certification.
+- Use compact pending marker `sl:scp`, scoped to normalized requester + exact team + a per-resource bitmask: sessions=1, RSVPs=2, logs=4.
+- Set only the active resource bit immediately before its signed POST. Leave that bit set on network/API/malformed-response failure. Clear only that resource bit after confirmed success.
+- Preserve other pending bits during partial success so a three-resource session deletion can reconcile independently.
+- Pending ownership from another requester/team has no authority.
+- Pending startup reads return the exact local resource, including an intentionally empty collection and legacy local row shapes.
+- Post-auth hydration fetches the shared S&C state once, preserves only resources whose exact pending bit is active, and accepts remote truth for confirmed resources.
+- Successful non-pending S&C reads are remote-authoritative even when `[]`.
+- Make S&C generic startup/cache rewrites local-only. Only the real S&C mutation paths opt into signed replacement with `{replace:true}`.
+- Allow explicitly authorized empty S&C replacement arrays through the Supabase adapter so final deletions reach `/v1/strength-conditioning`.
+- Preserve existing coach/player authorization, player-owned replacement scope, session deletion semantics, Demo-local behavior, UI/CSS, and all performance budgets.
 
 ## Validation target
 
 Before merge readiness:
 
-- Failed Events addition preserves the exact local intended collection and records pending ownership for the same requester/team.
-- Failed final-event deletion preserves an explicit pending empty Events collection and sends `events: []` when retried.
-- Ordinary empty Events cache/initialization writes do not become remote replacement requests.
-- Pending signed Events reads do not contact stale remote state.
-- Post-auth hydration skips Events while the exact requester/team replacement is pending and reports `sl:events` as pending.
-- Pending ownership from another team/requester cannot override successful current-team remote truth.
-- Successful Events replacement clears the exact pending marker.
-- Once pending clears, successful remote Events truth is authoritative, including an intentionally empty remote collection.
-- Existing signed Events/RSVP authorization, RSVP Phase 3D ownership, event visibility/create-flow, and replacement deletion contracts remain green.
-- The new Events enhancer runs in both dev and production build orchestration and remains idempotent with the prior RSVP enhancer.
+- Failed non-empty and empty S&C replacements preserve exact local intended truth and set the correct requester/team/resource bit.
+- Partial multi-resource failure preserves only unresolved resource ownership; successful retries clear only confirmed bits.
+- Pending startup reads do not contact stale remote state for that resource.
+- Post-auth hydration preserves pending resources while remote wins nonpending resources from the same response.
+- Cross-requester/team pending state cannot override current remote truth.
+- Successful remote empty S&C collections remain authoritative after pending clears.
+- Startup/cache rewrites do not issue signed S&C replacement writes.
+- Real add/delete/RSVP/log mutations explicitly use replacement authority, including `[]` final deletions.
+- Existing signed S&C authorization/privacy/replacement tests remain green.
+- Route enhancers remain idempotent in both dev and build orchestration.
 - Production build/performance budget stays green without raising limits.
-- Existing Phase 1A/1B/1C mobile guardrails stay green.
-- Demo/registered parity, Phase 3 Release Certification, Phase 5 Hardening, Production Acceptance, and supporting release suites stay green.
+- Phase 1A/1B/1C, Demo/registered parity, Phase 3 Release Certification, Phase 5 Hardening, Production Acceptance, and supporting release suites remain green.
 - Cloudflare Pages succeeds on the exact final PR head.
+
+## Performance warning
+
+Accepted PR #1532 exact-head performance left only:
+
+- JS gzip: `364,872 / 365,000` — **128 bytes headroom**
+- CSS gzip: `87,987 / 88,000` — **13 bytes headroom**
+
+Do not raise either budget. Any S&C runtime growth must fit or be offset by same-domain compaction.
+
+## Remaining ownership queue
+
+After S&C, keep one domain per PR in this order unless new evidence changes risk:
+
+1. **Program scores** — `sl:program-scores` local-first strict writes can be hidden by later remote state; authorized deletion means blanket union is unsafe.
+2. **Player identity collection** — `sl:players` local-first mutations plus replacement-capable sync require pending/replacement ownership without resurrecting removed identities.
+3. **Player profiles** — `sl:player-profiles` local-first additions/edits can be overwritten; preserve only explicitly pending local truth.
+4. **Team metadata/branding** — `sl:teams` local-first metadata updates can be replaced by remote reads; team creation remains a separate remote-confirmed flow.
+
+Not in the queue: assignments, coach follow-ups, shot logs, RSVPs, `sl:scores`, training catalog, coach priorities, Events, challenges, or season archives.
+
+## Release rule
+
+- Target merged baseline `df7023cac110bc011da4d306eb89f5dbf5c44625` directly.
+- Keep this PR to the S&C endpoint/domain only.
+- Do not raise performance budgets or alter visual baselines to pass.
+- Re-run exact-head certification on the final PR head.
+- Do not merge without explicit authorization after certification.
