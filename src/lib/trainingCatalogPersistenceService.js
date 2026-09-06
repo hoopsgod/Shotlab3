@@ -84,15 +84,10 @@ export function createTrainingCatalogPersistenceService({
         programDrills: Array.isArray(localProgramDrills) ? localProgramDrills.filter(isCustomDrill) : [],
       };
     }
-    const localRows = customTrainingCatalog(localHomeDrills, localProgramDrills);
-    if (!loaded.rows.length && loaded.canWrite && localRows.length) {
-      const promoted = await syncCatalog({
-        teamId: loaded.teamId || teamId,
-        homeDrills: localHomeDrills,
-        programDrills: localProgramDrills,
-      });
-      return { ...promoted, canWrite: true, useRemote: true, promotedLocalCatalog: true };
-    }
+
+    // Successful registered hydration is read-only. Remote truth, including an
+    // intentionally empty catalog, must never trigger a write that resurrects
+    // stale local drills. Explicit coach saves remain the only sync authority.
     return { ...loaded, useRemote: true, promotedLocalCatalog: false };
   };
 
