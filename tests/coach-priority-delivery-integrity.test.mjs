@@ -49,6 +49,7 @@ test("team priorities hydrate from the remote team source and override stale loc
   const db = makeDb({
     "sl:session": { email: "player@example.com" },
     "sl:coach-priorities": { "team-a": LOCAL_PRIORITY },
+    "sl:cp": { r: "coach@example.com", t: ["team-a"] },
   });
   const calls = [];
   const service = createAppPersistenceService({
@@ -97,6 +98,7 @@ test("coach priority publishing writes local fallback and posts team-scoped guid
   assert.equal(calls[0].body.priorities.priorityDrillText, "Remote drill");
   assert.equal(db.values.get("sl:coach-priorities")["team-a"].todayFocusText, "Remote team focus");
   assert.equal(db.values.get("sl:coach-priorities")["team-a"].updatedAt, SERVER_UPDATED_AT);
+  assert.deepEqual(db.values.get("sl:cp"), { r: "coach@example.com", t: [] });
   assert.equal(db.writes.at(-1).options.strictLocal, true);
 });
 
@@ -123,18 +125,54 @@ test("Phase 1 keeps demo priority reads and writes local without production requ
   assert.equal(db.values.get("sl:coach-priorities")["demo-team"].todayFocusText, "Remote team focus");
 });
 
-test("failed remote delivery preserves the local draft and rejects the publish attempt", async () => {
+test("failed remote delivery remains pending through hydration and clears only after a successful retry", async () => {
+  const undelivered = {
+    ...REMOTE_PRIORITY,
+    todayFocusText: "Undelivered local focus",
+    updatedAt: "2026-07-29T04:00:00.000Z",
+  };
   const db = makeDb({ "sl:session": { email: "coach@example.com" } });
+  let failPost = true;
   const service = createAppPersistenceService({
     db,
-    fetchImpl: async () => makeResponse(500, { error: "priority_write_failed" }),
+    fetchImpl: async (url, options = {}) => {
+      if (String(options.method || "GET").toUpperCase() === "POST") {
+        if (failPost) return makeResponse(500, { error: "priority_write_failed" });
+        const posted = JSON.parse(options.body);
+        return makeResponse(200, {
+          ok: true,
+          storage_mode: "team_remote",
+          priorities: posted.priorities,
+          updated_at: SERVER_UPDATED_AT,
+        });
+      }
+      return makeResponse(200, {
+        ok: true,
+        storage_mode: "team_remote",
+        priorities_by_team: { "team-a": REMOTE_PRIORITY },
+        metadata_by_team: { "team-a": { updatedAt: SERVER_UPDATED_AT, updatedBy: "coach@example.com" } },
+      });
+    },
   });
 
   await assert.rejects(
-    () => service.savePlayerPriorities({ "team-a": REMOTE_PRIORITY }),
+    () => service.savePlayerPriorities({ "team-a": undelivered }),
     (error) => error?.code === "priority_write_failed",
   );
-  assert.equal(db.values.get("sl:coach-priorities")["team-a"].todayFocusText, "Remote team focus");
+  assert.equal(db.values.get("sl:coach-priorities")["team-a"].todayFocusText, "Undelivered local focus");
+  assert.deepEqual(db.values.get("sl:cp"), { r: "coach@example.com", t: ["team-a"] });
+
+  const hydratedWhilePending = await service.getPlayerPriorities();
+  assert.equal(hydratedWhilePending["team-a"].todayFocusText, "Undelivered local focus");
+
+  failPost = false;
+  const retried = await service.savePlayerPriorities(hydratedWhilePending);
+  assert.equal(retried.ok, true);
+  assert.deepEqual(retried.deliveredTeamIds, ["team-a"]);
+  assert.deepEqual(db.values.get("sl:cp"), { r: "coach@example.com", t: [] });
+
+  const hydratedAfterDelivery = await service.getPlayerPriorities();
+  assert.equal(hydratedAfterDelivery["team-a"].todayFocusText, "Remote team focus");
 });
 
 test("the compatibility bridge stamps the existing coach save flow and reports delivery truthfully", async () => {
