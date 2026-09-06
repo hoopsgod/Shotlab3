@@ -56,25 +56,27 @@ export async function requestSignedJson(fetchImpl, path, method, requester, stor
   return [response, body];
 }
 
+export async function requestSignedBody(fetchImpl, path, method, storage, data, fallback) {
+  const [response, body] = await requestSignedJson(fetchImpl, path, method, readRequester(storage), storage, data);
+  if (!response?.ok || body?.error) {
+    const code = String(body?.error || fallback), error = new Error(code);
+    error.code = code; error.status = Number(response?.status || 0); error.body = body; throw error;
+  }
+  return body;
+}
+
+export const signedResult = (body, extra) => ({ ok: true, storageMode: String(body?.storage_mode || "signed_api"), ...extra });
+
 export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, storage = globalThis?.localStorage } = {}) {
-  const request = async (method, data, teamId = "") => {
+  const request = (method, data, teamId = "") => {
     if (typeof fetchImpl !== "function") throw new Error("score_api_unavailable");
-    const [response, body] = await requestSignedJson(fetchImpl, `/v1/scores${teamId ? `?team_id=${encodeURIComponent(teamId)}` : ""}`, method, readRequester(storage), storage, data);
-    if (!response?.ok || body?.error) {
-      const code = String(body?.error || `score_${method === "GET" ? "load" : method === "POST" ? "write" : "delete"}_failed`), error = new Error(code);
-      error.code = code; error.status = Number(response?.status || 0); error.body = body; throw error;
-    }
-    return body;
+    return requestSignedBody(fetchImpl, `/v1/scores${teamId ? `?team_id=${encodeURIComponent(teamId)}` : ""}`, method, storage, data, `score_${method === "GET" ? "load" : method === "POST" ? "write" : "delete"}_failed`);
   };
 
   const loadScores = async ({ teamId = "" } = {}) => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, scores: [] };
     const body = await request("GET", null, String(teamId || "").trim());
-    return {
-      ok: true,
-      storageMode: String(body?.storage_mode || "signed_api"),
-      scores: reconcilePendingScoreRows({ storage, requester: readRequester(storage), localRows: parseStored(storage, "sl:scores", []), remoteRows: Array.isArray(body?.scores) ? body.scores : [] }),
-    };
+    return signedResult(body, { scores: reconcilePendingScoreRows({ storage, requester: readRequester(storage), localRows: parseStored(storage, "sl:scores", []), remoteRows: Array.isArray(body?.scores) ? body.scores : [] }) });
   };
 
   const upsertScores = async (scores = []) => {
@@ -84,7 +86,7 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
     if (identity && teamId) save(storage, [identity, teamId, ...new Set([...(parts?.[1] === teamId ? parts.slice(2) : []), ...rows.map(id).filter(Boolean)])]);
     const body = await request("POST", { scores: rows }), confirmed = Array.isArray(body?.scores) ? body.scores : [], pending = owner(storage, identity);
     if (pending?.[1] === teamId) save(storage, [identity, teamId, ...pending.slice(2).filter((value) => !confirmed.some((row) => id(row) === value))]);
-    return { ok: true, storageMode: String(body?.storage_mode || "signed_api"), scores: confirmed };
+    return signedResult(body, { scores: confirmed });
   };
 
   const deletePlayerScores = async ({ teamId = "", playerIdentity = "" } = {}) => {
@@ -92,7 +94,7 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
     if (!teamIdValue || !player) throw new Error("score_delete_identity_required");
     const body = await request("DELETE", { team_id: teamIdValue, player_identity: player });
     if (owner(storage, player)?.[1] === teamIdValue) save(storage, []);
-    return { ok: true, storageMode: String(body?.storage_mode || "signed_api"), deletedCount: Number(body?.deleted_count || 0) };
+    return signedResult(body, { deletedCount: Number(body?.deleted_count || 0) });
   };
 
   return { loadScores, upsertScores, deletePlayerScores };

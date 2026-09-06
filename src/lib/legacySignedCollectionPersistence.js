@@ -65,15 +65,15 @@ async function hydrateGroup(group, fetchImpl, storage, requester, attempts, retr
       if (!result.failed) {
         let complete = true;
         for (let index = 0; index < bindings.length; index += 2) {
-          const field = bindings[index], key = bindings[index + 1], remote = result.payload?.[field];
+          const field = bindings[index], storageKey = bindings[index + 1], remote = result.payload?.[field];
           if (!Array.isArray(remote)) { complete = false; continue; }
-          const rows = key === "sl:shotlogs"
-            ? mergeHydratedRows(key, parseStored(storage, key), remote)
-            : key === "sl:scores"
-              ? reconcilePendingScoreRows({ storage, requester, localRows: parseStored(storage, key), remoteRows: remote })
+          const rows = storageKey === "sl:shotlogs"
+            ? mergeHydratedRows(storageKey, parseStored(storage, storageKey), remote)
+            : storageKey === "sl:scores"
+              ? reconcilePendingScoreRows({ storage, requester, localRows: parseStored(storage, storageKey), remoteRows: remote })
               : remote;
-          storage.setItem(key, JSON.stringify(rows));
-          hydrated.push(key);
+          storage.setItem(storageKey, JSON.stringify(rows));
+          hydrated.push(storageKey);
         }
         if (complete) return hydrated;
         failure = "missing_fields";
