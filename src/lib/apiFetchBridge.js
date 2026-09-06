@@ -239,54 +239,30 @@ export function installApiIdentityFetchBridge(target = globalThis) {
       }
     }
 
-    if (signedResource === "teams") {
+    const directResource = signedResource === "teams" || signedResource === "players" || signedResource === "player_profiles";
+    if (directResource) {
       try {
         if (method === "GET") {
-          const result = await teamPersistence.loadTeams();
-          writeStored(storage, "sl:teams", JSON.stringify(result.rows));
+          const result = signedResource === "teams"
+            ? await teamPersistence.loadTeams()
+            : signedResource === "players"
+              ? await playerIdentityPersistence.loadPlayers()
+              : await playerProfilePersistence.loadProfiles();
+          writeStored(storage, `sl:${signedResource.replace("_", "-")}`, JSON.stringify(result.rows));
           return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
-          const result = await teamPersistence.syncTeams(parseRows(init?.body));
+          const rows = parseRows(init?.body);
+          const result = signedResource === "teams"
+            ? await teamPersistence.syncTeams(rows)
+            : signedResource === "players"
+              ? await playerIdentityPersistence.syncPlayers(rows, { replace: true })
+              : await playerProfilePersistence.syncProfiles(rows);
           return jsonResponse(target, result.rows);
         }
         return methodNotAllowed(target);
       } catch (error) {
-        return errorResponse(target, error, "team_api_failed");
-      }
-    }
-
-    if (signedResource === "players") {
-      try {
-        if (method === "GET") {
-          const result = await playerIdentityPersistence.loadPlayers();
-          writeStored(storage, "sl:players", JSON.stringify(result.rows));
-          return jsonResponse(target, result.rows);
-        }
-        if (method === "POST") {
-          const result = await playerIdentityPersistence.syncPlayers(parseRows(init?.body), { replace: true });
-          return jsonResponse(target, result.rows);
-        }
-        return methodNotAllowed(target);
-      } catch (error) {
-        return errorResponse(target, error, "player_api_failed");
-      }
-    }
-
-    if (signedResource === "player_profiles") {
-      try {
-        if (method === "GET") {
-          const result = await playerProfilePersistence.loadProfiles();
-          writeStored(storage, "sl:player-profiles", JSON.stringify(result.rows));
-          return jsonResponse(target, result.rows);
-        }
-        if (method === "POST") {
-          const result = await playerProfilePersistence.syncProfiles(parseRows(init?.body));
-          return jsonResponse(target, result.rows);
-        }
-        return methodNotAllowed(target);
-      } catch (error) {
-        return errorResponse(target, error, "profile_api_failed");
+        return errorResponse(target, error, signedResource === "teams" ? "team_api_failed" : signedResource === "players" ? "player_api_failed" : "profile_api_failed");
       }
     }
 
