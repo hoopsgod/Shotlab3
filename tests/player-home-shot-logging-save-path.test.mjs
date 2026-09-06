@@ -309,17 +309,17 @@ test('coach-facing home-shot leaderboard data is server-confirmed only', async (
 
 
 
-test('index.html does not use a MutationObserver workaround to hide Team Sync panel', async () => {
+test('index.html does not embed Team Sync workaround logic', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.doesNotMatch(html, /MutationObserver/);
-  assert.doesNotMatch(html, /TEAM SYNC NEEDS ATTENTION/);
+  assert.match(html, /new MutationObserver\(refreshAuthEntry\)\.observe/);
+  assert.doesNotMatch(html, /TEAM SYNC NEEDS ATTENTION|RETRY SYNC|HomeShotSyncRetryPanel|syncIssueShots|failed_sync/);
 });
 
 test('stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do', async () => {
   const source = await readFile(APP_PATH, 'utf8');
-  assert.match(source, /const isDemoHomeShotSession=isDemoMode\(\)\|\|isDemoAccount\(u\)/);
-  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>isDemoHomeShotSession\?\[\]:shotLogs\.filter\(s=>s\.email===u\.email&&!isDemoAccount\(s\)&&\(s\.syncState==="failed_sync"\)\),\[isDemoHomeShotSession,shotLogs,u\.email\]\)/);
-  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>isDemoHomeShotSession\?\[\]:my\.filter\(s=>!isDemoAccount\(s\)&&s\.syncState==="failed_sync"\),\[isDemoHomeShotSession,my\]\)/);
+  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>shotLogs\.filter\(s=>s\.email===u\.email&&s\.syncState==="failed_sync"\),\[shotLogs,u\.email\]\)/);
+  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>my\.filter\(s=>s\.syncState==="failed_sync"\),\[my\]\)/);
+  assert.doesNotMatch(source, /\bisDemoHomeShotSession\b/);
   assert.doesNotMatch(source, /syncState==="local_pending"\|\|s\.syncState==="failed_sync"/);
   assert.doesNotMatch(source, /syncState==="background_saved"\|\|s\.syncState==="failed_sync"/);
   assert.match(source, /TEAM SYNC NEEDS ATTENTION/);
@@ -431,12 +431,11 @@ test('Demo Player logs 123 shots locally without Team Sync warning or retry repa
   assert.equal(visibleTodayTotal, 123);
   assert.equal(`${visibleTodayTotal} makes logged today`, '123 makes logged today');
   assert.equal(syncIssueShots.length, 0);
-  assert.match(source, new RegExp('if\\(isDemoMode\\(\\)\\|\\|isDemoAccount\\(user\\)\\)\\{[\\s\\S]*return\\{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true\\};[\\s\\S]*try\\{\\nconst savedLog=await saveHomeShotLogRemote\\(localLog\\);'));
-  assert.match(source, /const visibleSyncIssueShots=syncIssueShots\.filter\(log=>!isDemoAccount\(log\)\)/);
-  assert.match(source, /isDemoSession\|\|!visibleSyncIssueShots\.length\)return null/);
-  assert.match(source, /isDemoHomeShotSession\?\[\]:shotLogs\.filter/);
-  assert.match(source, /isDemoHomeShotSession\?\[\]:my\.filter/);
-  assert.match(source, /if\(isDemoMode\(\)\|\|isDemoAccount\(user\)\|\|isDemoAccount\(log\)\)\{/);
+  assert.match(source, /if\(accountCapabilities\.isSandbox\)\{[\s\S]*const demoSavedLog=\{\.\.\.localLog,demo:true,syncState:"local_pending",syncSource:"local"[\s\S]*return\{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true\};[\s\S]*try\{\nconst savedLog=await saveHomeShotLogRemote\(localLog\);/);
+  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>shotLogs\.filter\(s=>s\.email===u\.email&&s\.syncState==="failed_sync"\),\[shotLogs,u\.email\]\)/);
+  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>my\.filter\(s=>s\.syncState==="failed_sync"\),\[my\]\)/);
+  assert.doesNotMatch(source, /\bisDemoHomeShotSession\b/);
+  assert.match(source, /if\(accountCapabilities\.isSandbox\|\|isDemoAccount\(log\)\)\{/);
 });
 
 test('registered player with missing durable team link still sees Team Sync warning path', async () => {
@@ -465,8 +464,9 @@ test('Demo Player session shot logs are removed on logout while registered shots
   assert.equal(afterLoginDemoTotal, 0);
   assert.deepEqual(afterLogout, [registeredLog]);
   assert.match(source, /const cleanupDemoPlayerSessionData=useCallback\(async\(activeUser=user\)=>\{/);
+  assert.match(source, /if\(!buildAccountCapabilities\(activeUser\)\.isSandbox\)return/);
   assert.match(source, /sourceShotLogs\.filter\(log=>!isDemoPlayerSessionShotLog\(log,\{teamId:demoTeamId\}\)\)/);
-  assert.match(source, /if\(isDemoMode\(\)\|\|isDemoAccount\(exitingUser\)\)await cleanupDemoPlayerSessionData\(exitingUser\)/);
+  assert.match(source, /if\(buildAccountCapabilities\(exitingUser\)\.isSandbox\)await cleanupDemoPlayerSessionData\(exitingUser\)/);
   assert.match(source, /const demoSavedLog=\{\.\.\.localLog,demo:true,syncState:"local_pending",syncSource:"local"/);
 });
 
