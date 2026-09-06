@@ -27,9 +27,7 @@ const GROUPS = [
   [SC_PATH, "sessions", "sl:sc-sessions", "rsvps", "sl:sc-rsvps", "logs", "sl:sc-logs"],
 ];
 
-export const AUTHENTICATED_COLLECTION_STORAGE_KEYS = /* @__PURE__ */ Object.freeze(
-  GROUPS.flatMap(([, ...bindings]) => bindings.filter((_, index) => index % 2)),
-);
+export const AUTHENTICATED_COLLECTION_STORAGE_KEYS = /* @__PURE__ */ Object.freeze(GROUPS.flatMap(([, ...bindings]) => bindings.filter((_, index) => index % 2)));
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const registeredIdentity = (storage) => {
@@ -52,10 +50,10 @@ export async function waitForRegisteredSession({ storage = globalThis?.localStor
   }
 }
 
-async function hydrateGroup(group, fetchImpl, storage, requester, attempts, retryDelayMs) {
-  const [path, ...bindings] = group, maxAttempts = Math.max(1, Number(attempts) || 1);
+async function hydrateGroup([path, ...bindings], fetchImpl, storage, requester, attempts, retryDelayMs) {
+  const maxAttempts = Math.max(1, Number(attempts) || 1);
   let failure = "failed";
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const payload = await requestSignedBody(fetchImpl, path, "GET", storage, null, "failed"), hydrated = [];
       let complete = true;
@@ -82,21 +80,11 @@ export async function hydrateAuthenticatedCollectionsToStorage({ fetchImpl = glo
   if (typeof fetchImpl !== "function" || typeof storage?.setItem !== "function") return { ok: false, hydrated: [], failures: ["storage_unavailable"], identity: "" };
   const session = await waitForRegisteredSession({ storage, expectedIdentity, timeoutMs: sessionWaitMs, pollMs: sessionPollMs });
   if (!session.ok) return { ok: false, hydrated: [], failures: [session.error], identity: session.identity || "" };
-  const pendingRsvps = rsvpPending(storage);
-  const results = await Promise.all(GROUPS.map((group) => pendingRsvps && group[0] === "/v1/rsvps"
-    ? ["sl:rsvps"]
-    : hydrateGroup(group, fetchImpl, storage, session.identity, groupAttempts, retryDelayMs)));
+  const pendingRsvps = rsvpPending(storage), results = await Promise.all(GROUPS.map((group) => pendingRsvps && group[0] === "/v1/rsvps" ? ["sl:rsvps"] : hydrateGroup(group, fetchImpl, storage, session.identity, groupAttempts, retryDelayMs)));
   const hydrated = results.filter(Array.isArray).flat(), failures = results.filter((result) => !Array.isArray(result));
   const players = parseStored(storage, "sl:players"), identityHydrated = Array.isArray(players) && players.some((row) => normalizeIdentity(row?.email) === session.identity);
   if (!identityHydrated) failures.push("sl:players:authenticated_identity_missing");
-  return {
-    ok: failures.length === 0,
-    hydrated: [...new Set(hydrated)],
-    pending: [pendingRsvps ? "sl:rsvps" : "", hasPendingScoreRows(storage, session.identity) ? "sl:scores" : ""].filter(Boolean),
-    failures: [...new Set(failures)],
-    identity: session.identity,
-    identityHydrated,
-  };
+  return { ok: !failures.length, hydrated: [...new Set(hydrated)], pending: [pendingRsvps ? "sl:rsvps" : "", hasPendingScoreRows(storage, session.identity) ? "sl:scores" : ""].filter(Boolean), failures: [...new Set(failures)], identity: session.identity, identityHydrated };
 }
 
 function configFor(table) {
@@ -116,7 +104,7 @@ export async function requestLegacySignedCollection({ table, method = "GET", fet
     const payload = await requestSignedBody(fetchImpl, config[0], "GET", storage, null, "signed_collection_load_failed");
     return { data: Array.isArray(payload?.[config[1]]) ? payload[config[1]] : [], error: null, storageMode: signedStorageMode(payload) };
   } catch (error) {
-    const payload = error?.body || {}, status = Number(error?.status || 0);
-    return { data: null, error: { code: String(payload?.error || (status ? `signed_collection_http_${status}` : error?.code || "signed_collection_load_failed")), message: String(payload?.message || payload?.error || error?.message || "signed_collection_load_failed"), status } };
+    const payload = error?.body || {}, status = Number(error?.status || 0), fallback = "signed_collection_load_failed";
+    return { data: null, error: { code: String(payload?.error || (status ? `signed_collection_http_${status}` : error?.code || fallback)), message: String(payload?.message || payload?.error || error?.message || fallback), status } };
   }
 }
