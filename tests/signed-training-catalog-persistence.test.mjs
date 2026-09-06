@@ -182,7 +182,7 @@ test("coach synchronization is team-scoped and removes only omitted custom drill
   }
 });
 
-test("client promotion preserves existing local custom drills and never uploads static defaults", async () => {
+test("successful empty remote hydration is authoritative and only an explicit sync may write local custom drills", async () => {
   const storage = memoryStorage([
     ["sl:session", JSON.stringify({ email: "coach@example.com", teamId: "team-a", role: "coach" })],
     ["sl:players", JSON.stringify([{ email: "coach@example.com", teamId: "team-a", role: "coach" }])],
@@ -197,17 +197,28 @@ test("client promotion preserves existing local custom drills and never uploads 
         return Response.json({ ok: true, storage_mode: "signed_api", team_id: "team-a", can_write: true, drills: [] });
       }
       const body = JSON.parse(init.body);
-      return Response.json({ ok: true, storage_mode: "signed_api", team_id: "team-a", drills: body.drills });
+      return Response.json({ ok: true, storage_mode: "signed_api", team_id: "team-a", drills: body.drills, deleted_count: 0 });
     },
   });
   const defaultHome = { id: "demo-home-1", name: "Static default", mode: "home", isDefaultDemo: true };
-  const result = await service.hydrateCatalog({
+  const hydrated = await service.hydrateCatalog({
     localHomeDrills: [defaultHome, CUSTOM_HOME],
     localProgramDrills: [CUSTOM_PROGRAM],
   });
-  assert.equal(result.promotedLocalCatalog, true);
-  assert.deepEqual(result.homeDrills.map((row) => row.id), [CUSTOM_HOME.id]);
-  assert.deepEqual(result.programDrills.map((row) => row.id), [CUSTOM_PROGRAM.id]);
+
+  assert.equal(hydrated.promotedLocalCatalog, false);
+  assert.deepEqual(hydrated.homeDrills, []);
+  assert.deepEqual(hydrated.programDrills, []);
+  assert.equal(requests.length, 1);
+  assert.equal(String(requests[0].init.method || "GET").toUpperCase(), "GET");
+
+  const synced = await service.syncCatalog({
+    homeDrills: [defaultHome, CUSTOM_HOME],
+    programDrills: [CUSTOM_PROGRAM],
+  });
+  assert.equal(synced.ok, true);
+  assert.equal(requests.length, 2);
+  assert.equal(String(requests[1].init.method || "").toUpperCase(), "POST");
   const posted = JSON.parse(requests[1].init.body);
   assert.deepEqual(posted.drills.map((row) => row.id).sort(), [CUSTOM_HOME.id, CUSTOM_PROGRAM.id].sort());
   assert.equal(posted.drills.some((row) => row.id === defaultHome.id), false);
