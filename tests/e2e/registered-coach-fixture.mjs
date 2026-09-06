@@ -23,6 +23,39 @@ async function installSignedEventsRoute(page, storage) {
   });
 }
 
+async function installSignedStrengthConditioningRoute(page, storage, teamId) {
+  let sessions = Array.isArray(storage?.['sl:sc-sessions']) ? storage['sl:sc-sessions'] : [];
+  let rsvps = Array.isArray(storage?.['sl:sc-rsvps']) ? storage['sl:sc-rsvps'] : [];
+  let logs = Array.isArray(storage?.['sl:sc-logs']) ? storage['sl:sc-logs'] : [];
+  await page.route('**/v1/strength-conditioning**', async (route) => {
+    let resource = '', rows = [];
+    if (route.request().method().toUpperCase() === 'POST') {
+      try {
+        const body = route.request().postDataJSON();
+        resource = String(body?.resource || '');
+        rows = Array.isArray(body?.rows) ? body.rows : [];
+        if (resource === 'sessions') sessions = rows;
+        else if (resource === 'rsvps') rsvps = rows;
+        else if (resource === 'logs') logs = rows;
+      } catch {}
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        storage_mode: 'signed',
+        team_id: teamId,
+        can_write_sessions: true,
+        sessions,
+        rsvps,
+        logs,
+        ...(resource ? { resource, rows, deleted_count: 0 } : {}),
+      }),
+    });
+  });
+}
+
 /**
  * Boots a deterministic registered Coach without borrowing ShotLab's canonical
  * Demo identity. Bespoke dashboard/acceptance fixtures must use this boundary
@@ -68,6 +101,7 @@ export async function enterSeededRegisteredCoach(page, {
   }, { seededStorage: signedStorage });
 
   await installSignedEventsRoute(page, storage);
+  await installSignedStrengthConditioningRoute(page, storage, teamId);
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -152,6 +186,7 @@ export async function enterSeededRegisteredPlayer(page, {
   }, { seededStorage: signedStorage });
 
   await installSignedEventsRoute(page, storage);
+  await installSignedStrengthConditioningRoute(page, storage, teamId);
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
