@@ -1,5 +1,6 @@
 import { mergeHydratedRows } from "./remotePersistence.js";
-import { hasPendingScoreRows, normalizeIdentity, parseStored, readRequester, readSession, reconcilePendingScoreRows, requestSignedBody } from "./scorePersistenceService.js";
+import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
+import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
 
 const SC_PATH = "/v1/strength-conditioning";
 
@@ -113,7 +114,7 @@ export async function requestLegacySignedCollection({ table, method = "GET", fet
   }
   try {
     const payload = await requestSignedBody(fetchImpl, config[0], "GET", storage, null, "signed_collection_load_failed");
-    return { data: Array.isArray(payload?.[config[1]]) ? payload[config[1]] : [], error: null, storageMode: String(payload?.storage_mode || "signed_api") };
+    return { data: Array.isArray(payload?.[config[1]]) ? payload[config[1]] : [], error: null, storageMode: signedStorageMode(payload) };
   } catch (error) {
     const payload = error?.body || {}, status = Number(error?.status || 0);
     return { data: null, error: { code: String(payload?.error || (status ? `signed_collection_http_${status}` : error?.code || "signed_collection_load_failed")), message: String(payload?.message || payload?.error || error?.message || "signed_collection_load_failed"), status } };

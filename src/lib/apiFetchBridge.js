@@ -7,7 +7,7 @@ import { createStrengthConditioningPersistenceService } from "./strengthConditio
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 
-function parseStored(storage, key, fallback) {
+export function parseStored(storage, key, fallback) {
   try {
     const raw = storage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -16,25 +16,42 @@ function parseStored(storage, key, fallback) {
   }
 }
 
-function writeStored(storage, key, value) {
+export function writeStored(storage, key, value) {
   try {
     if (value === null) storage.removeItem(key);
     else storage.setItem(key, value);
   } catch {}
 }
 
-function normalizeIdentity(value) {
+export function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
 
-function readSession(storage = globalThis.localStorage) {
+export function readSession(storage = globalThis.localStorage) {
   const parsed = parseStored(storage, "sl:session", null);
   return Array.isArray(parsed) ? parsed[0] : parsed;
 }
 
-function readRequester(storage = globalThis.localStorage) {
+export function readRequester(storage = globalThis.localStorage) {
   const session = readSession(storage);
   return normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+}
+
+export const signedStorageMode = (body) => String(body?.storage_mode || "signed_api");
+
+export async function requestSignedBody(fetchImpl, path, method, storage, data, fallback) {
+  const response = await fetchImpl(path, {
+    method,
+    headers: buildApiIdentityHeaders({ requester: readRequester(storage), storage, headers: data == null ? {} : { "Content-Type": "application/json" } }),
+    ...(data == null ? {} : { body: JSON.stringify(data) }),
+  });
+  let body;
+  try { body = await response.json(); } catch { body = {}; }
+  if (!response?.ok || body?.ok === false || body?.error) {
+    const code = String(body?.error || fallback), error = new Error(code);
+    error.code = code; error.status = Number(response?.status || 0); error.body = body; throw error;
+  }
+  return body;
 }
 
 function isDemoRequester(requester) {
@@ -183,6 +200,8 @@ function errorResponse(target, error, fallback) {
   );
 }
 
+const methodNotAllowed = (target) => jsonResponse(target, { error: "method_not_allowed" }, 405);
+
 export function installApiIdentityFetchBridge(target = globalThis) {
   if (!target || typeof target.fetch !== "function") return null;
   if (target.fetch[BRIDGE_MARKER]) return target.fetch;
@@ -201,7 +220,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   const wrappedFetch = async (input, init = {}) => {
     const signedResource = signedSupabaseResourceFor(input, target);
     const method = signedResource ? methodFor(input, init) : "";
-    const strengthResource = signedResource === "sc_sessions" ? "sessions" : signedResource === "sc_rsvps" ? "rsvps" : signedResource === "sc_logs" ? "logs" : "";
+    const strengthResource = signedResource.startsWith("sc_") ? signedResource.slice(3) : "";
     if (strengthResource) {
       try {
         if (method === "GET") {
@@ -214,7 +233,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           const result = await strengthPersistence[methodName](rows);
           return jsonResponse(target, result.rows);
         }
-        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+        return methodNotAllowed(target);
       } catch (error) {
         return errorResponse(target, error, "strength_conditioning_api_failed");
       }
@@ -231,7 +250,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           const result = await teamPersistence.syncTeams(parseRows(init?.body));
           return jsonResponse(target, result.rows);
         }
-        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+        return methodNotAllowed(target);
       } catch (error) {
         return errorResponse(target, error, "team_api_failed");
       }
@@ -248,7 +267,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           const result = await playerIdentityPersistence.syncPlayers(parseRows(init?.body), { replace: true });
           return jsonResponse(target, result.rows);
         }
-        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+        return methodNotAllowed(target);
       } catch (error) {
         return errorResponse(target, error, "player_api_failed");
       }
@@ -265,7 +284,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           const result = await playerProfilePersistence.syncProfiles(parseRows(init?.body));
           return jsonResponse(target, result.rows);
         }
-        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+        return methodNotAllowed(target);
       } catch (error) {
         return errorResponse(target, error, "profile_api_failed");
       }
@@ -287,7 +306,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           if (pending) writeStored(storage, "sl:rp", null);
           return jsonResponse(target, result.rows);
         }
-        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+        return methodNotAllowed(target);
       } catch (error) {
         return errorResponse(target, error, "schedule_api_failed");
       }
