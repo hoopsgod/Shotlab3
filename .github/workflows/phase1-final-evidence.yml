@@ -1,0 +1,292 @@
+name: Phase 1 Final Evidence Gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify-frozen-phase1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FROZEN_SHA: beb4c0e4387de405235f432648be79abad2a4493
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+
+    steps:
+      - name: Check out exact frozen production SHA
+        uses: actions/checkout@v4
+        with:
+          ref: beb4c0e4387de405235f432648be79abad2a4493
+
+      - name: Prove exact frozen authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$FROZEN_SHA"
+          printf 'Frozen production SHA: %s\n' "$actual"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install production dependencies and evidence tooling
+        run: |
+          npm ci
+          npm install --no-save @playwright/test@1.55.1 @axe-core/playwright@4.10.2
+          npx playwright install --with-deps chromium
+
+      - name: Build exact frozen production bundle
+        run: npm run build
+
+      - name: Start exact frozen preview
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/phase1-final-evidence-vite.log 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/phase1-final-evidence-vite.log
+          exit 1
+
+      - name: Generate SHA-bound evidence specification
+        shell: bash
+        run: |
+          cat > tests/e2e/phase1-final-evidence.generated.spec.mjs <<'EOF'
+          import { test, expect } from '@playwright/test';
+          import AxeBuilder from '@axe-core/playwright';
+          import fs from 'node:fs';
+          import path from 'node:path';
+
+          const OUT = path.resolve('artifacts/phase1-final-evidence');
+          fs.mkdirSync(path.join(OUT, 'wide'), { recursive: true });
+          fs.mkdirSync(path.join(OUT, 'accessibility'), { recursive: true });
+
+          async function installRoutes(target) {
+            await target.route('**/v1/season-archives', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, archives: [] }) }));
+            await target.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ leaderboard: [] }) }));
+            await target.route('**/v1/coach/players/provision**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, invitations: [] }) }));
+            await target.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+          }
+
+          async function enterDemo(page, role) {
+            await page.goto('/?demo=1');
+            await page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true }).click();
+            await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
+          }
+
+          async function noOverflow(page, label) {
+            const widths = await page.evaluate(() => ({
+              viewport: window.innerWidth,
+              root: document.documentElement.scrollWidth,
+              body: document.body.scrollWidth,
+            }));
+            expect(widths.root, `${label}: document overflow`).toBeLessThanOrEqual(widths.viewport + 2);
+            expect(widths.body, `${label}: body overflow`).toBeLessThanOrEqual(widths.viewport + 2);
+            return widths;
+          }
+
+          async function clickVisible(locator) {
+            const count = await locator.count();
+            for (let index = 0; index < count; index += 1) {
+              const item = locator.nth(index);
+              if (await item.isVisible().catch(() => false)) {
+                await item.click();
+                return true;
+              }
+            }
+            return false;
+          }
+
+          async function openDestination(page, name, key) {
+            const before = page.url();
+            const candidates = [
+              page.getByRole('button', { name, exact: true }),
+              page.getByRole('link', { name, exact: true }),
+              page.locator(`[data-nav-key="${key}"]`),
+            ];
+            for (const candidate of candidates) {
+              if (await clickVisible(candidate)) {
+                await page.waitForTimeout(250);
+                if (page.url() !== before || await page.getByText(name, { exact: true }).count()) return;
+              }
+            }
+            throw new Error(`Could not open visible destination ${name} (${key}) from ${before}`);
+          }
+
+          async function axeSurface(page, surface) {
+            const result = await new AxeBuilder({ page }).analyze();
+            const record = {
+              surface,
+              url: page.url(),
+              violations: result.violations.map((v) => ({
+                id: v.id,
+                impact: v.impact,
+                description: v.description,
+                help: v.help,
+                nodes: v.nodes.length,
+              })),
+            };
+            fs.writeFileSync(path.join(OUT, 'accessibility', `${surface}.json`), `${JSON.stringify(record, null, 2)}\n`);
+            const blockers = result.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+            expect(blockers, `${surface}: serious/critical axe violations`).toEqual([]);
+          }
+
+          async function keyboardFocus(page, surface) {
+            let focused = null;
+            for (let attempt = 0; attempt < 16; attempt += 1) {
+              await page.keyboard.press('Tab');
+              focused = await page.evaluate(() => {
+                const el = document.activeElement;
+                if (!el || el === document.body || el === document.documentElement) return null;
+                const style = getComputedStyle(el);
+                const name = (el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '').trim();
+                const visibleIndicator = (style.outlineStyle !== 'none' && style.outlineWidth !== '0px') || style.boxShadow !== 'none';
+                return { tag: el.tagName, name, visibleIndicator };
+              });
+              if (focused?.name) break;
+            }
+            expect(focused, `${surface}: keyboard did not reach a named focus target`).toBeTruthy();
+            expect(focused.name, `${surface}: focused control has no accessible name`).not.toBe('');
+            expect(focused.visibleIndicator, `${surface}: focused control has no visible focus indicator`).toBeTruthy();
+          }
+
+          test('Gate 1 — 768/1024/1280 Coach and Player baseline evidence has no horizontal overflow', async ({ browser }) => {
+            const manifest = { frozenSha: process.env.FROZEN_SHA, widths: [], captures: [] };
+            for (const width of [768, 1024, 1280]) {
+              for (const role of ['coach', 'player']) {
+                const context = await browser.newContext({ viewport: { width, height: 1000 } });
+                await installRoutes(context);
+                const page = await context.newPage();
+                try {
+                  await enterDemo(page, role);
+                  await noOverflow(page, `${role}-home-${width}`);
+                  const homePath = path.join(OUT, 'wide', `${role}-home-${width}.png`);
+                  await page.screenshot({ path: homePath, fullPage: true });
+                  manifest.captures.push(path.relative(OUT, homePath));
+
+                  const destination = role === 'coach' ? { name: 'Players', key: 'players' } : { name: 'Train', key: 'train' };
+                  await openDestination(page, destination.name, destination.key);
+                  await noOverflow(page, `${role}-${destination.key}-${width}`);
+                  const destinationPath = path.join(OUT, 'wide', `${role}-${destination.key}-${width}.png`);
+                  await page.screenshot({ path: destinationPath, fullPage: true });
+                  manifest.captures.push(path.relative(OUT, destinationPath));
+                  manifest.widths.push({ width, role, home: true, destination: destination.key, noOverflow: true });
+                } finally {
+                  await context.close();
+                }
+              }
+            }
+            expect(manifest.captures).toHaveLength(12);
+            fs.writeFileSync(path.join(OUT, 'wide-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+          });
+
+          test('Gate 2 — formal accessibility baseline across Auth, Coach Home/Players, Player Home/Train/Progress', async ({ browser }) => {
+            const surfaces = [];
+
+            {
+              const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+              await installRoutes(context);
+              const page = await context.newPage();
+              try {
+                await page.goto('/?demo=1');
+                await expect(page.getByRole('button', { name: 'Coach demo', exact: true })).toBeVisible();
+                await axeSurface(page, 'auth');
+                await keyboardFocus(page, 'auth');
+                await noOverflow(page, 'auth');
+                surfaces.push('auth');
+              } finally { await context.close(); }
+            }
+
+            for (const role of ['coach', 'player']) {
+              const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+              await installRoutes(context);
+              const page = await context.newPage();
+              try {
+                await enterDemo(page, role);
+                const homeName = `${role}-home`;
+                await axeSurface(page, homeName);
+                await keyboardFocus(page, homeName);
+                await noOverflow(page, homeName);
+                expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), `${homeName}: reduced motion preference`).toBeTruthy();
+                surfaces.push(homeName);
+
+                const destinations = role === 'coach'
+                  ? [{ name: 'Players', key: 'players' }]
+                  : [{ name: 'Train', key: 'train' }, { name: 'Progress', key: 'progress' }];
+                for (const destination of destinations) {
+                  await openDestination(page, destination.name, destination.key);
+                  const surfaceName = `${role}-${destination.key}`;
+                  await axeSurface(page, surfaceName);
+                  await keyboardFocus(page, surfaceName);
+                  await noOverflow(page, surfaceName);
+                  surfaces.push(surfaceName);
+                }
+              } finally { await context.close(); }
+            }
+
+            // WCAG 1.4.10 reflow proxy: a 1280 CSS-pixel canvas at 200% zoom exposes ~640 CSS pixels.
+            for (const role of ['coach', 'player']) {
+              const context = await browser.newContext({ viewport: { width: 640, height: 900 } });
+              await installRoutes(context);
+              const page = await context.newPage();
+              try {
+                await enterDemo(page, role);
+                await noOverflow(page, `${role}-home-200pct-reflow`);
+              } finally { await context.close(); }
+            }
+
+            expect(surfaces.sort()).toEqual(['auth', 'coach-home', 'coach-players', 'player-home', 'player-progress', 'player-train'].sort());
+            fs.writeFileSync(path.join(OUT, 'accessibility-manifest.json'), `${JSON.stringify({ frozenSha: process.env.FROZEN_SHA, surfaces, axeThreshold: 'zero serious/critical', keyboardFocus: true, reducedMotion: true, reflow200PercentProxy: '1280px / 2 = 640px, no horizontal overflow' }, null, 2)}\n`);
+          });
+          EOF
+
+      - name: Run the two final Phase 1 evidence gates
+        env:
+          FROZEN_SHA: beb4c0e4387de405235f432648be79abad2a4493
+        run: npx playwright test tests/e2e/phase1-final-evidence.generated.spec.mjs --config=playwright.acceptance.config.mjs --project=mobile-chromium --reporter=line --timeout=120000 --retries=0
+
+      - name: Record closure manifest
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/phase1-final-evidence
+          cat > artifacts/phase1-final-evidence/closure-authority.json <<EOF
+          {
+            "frozenProductionSha": "$FROZEN_SHA",
+            "source": "exact frozen production checkout",
+            "wideEvidenceWidths": [768, 1024, 1280],
+            "wideEvidenceSurfaces": ["coach-home", "coach-players", "player-home", "player-train"],
+            "accessibilitySurfaces": ["auth", "coach-home", "coach-players", "player-home", "player-train", "player-progress"]
+          }
+          EOF
+
+      - name: Upload Phase 1 final evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-final-evidence-beb4c0e
+          path: artifacts/phase1-final-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-final-evidence-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/phase1-final-evidence-vite.log
+          if-no-files-found: ignore
+          retention-days: 14
