@@ -6,6 +6,7 @@ if (typeof window !== "undefined") installApiIdentityFetchBridge(window);
 const norm = (value) => String(value || "").trim().toLowerCase();
 const scoreId = (row) => String(row?.id || "").trim();
 const scoreTeam = (row) => String(row?.team_id || row?.teamId || "").trim();
+const mode = (body) => String(body?.storage_mode || "signed_api");
 function stored(storage, key) {
   try { return JSON.parse(storage?.getItem?.(key) || "null"); } catch { return null; }
 }
@@ -30,12 +31,13 @@ export function reconcilePendingScoreRows({ storage = globalThis?.localStorage, 
   const remote = Array.isArray(remoteRows) ? remoteRows : [];
   const current = pending(storage, requester);
   if (!current) return remote;
-  const ids = remote.map(scoreId);
-  const local = (Array.isArray(localRows) ? localRows : []).filter((row) =>
-    current.slice(2).includes(scoreId(row))
-    && !ids.includes(scoreId(row))
-    && norm(row?.email || row?.player_email) === current[0]
-    && scoreTeam(row) === current[1]);
+  const remoteIds = remote.map(scoreId);
+  const pendingIds = current.slice(2);
+  const local = (Array.isArray(localRows) ? localRows : []).filter((row) => {
+    const id = scoreId(row);
+    return pendingIds.includes(id) && !remoteIds.includes(id)
+      && norm(row?.email || row?.player_email) === current[0] && scoreTeam(row) === current[1];
+  });
   save(storage, [current[0], current[1], ...local.map(scoreId)]);
   return [...remote, ...local];
 }
@@ -48,19 +50,16 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
   const request = async (method, payload, teamId = "") => {
     const response = await fetchImpl(`/v1/scores${method === "GET" && teamId ? `?team_id=${encodeURIComponent(teamId)}` : ""}`, {
       method,
-      headers: buildApiIdentityHeaders({
-        requester: requester(),
-        storage,
-        headers: method === "GET" ? {} : { "Content-Type": "application/json" },
-      }),
+      headers: buildApiIdentityHeaders({ requester: requester(), storage, headers: method === "GET" ? {} : { "Content-Type": "application/json" } }),
       ...(payload ? { body: JSON.stringify(payload) } : {}),
     });
     let body;
     try { body = await response.json(); } catch { body = {}; }
     if (!response?.ok || body?.error) {
       const fallback = method === "GET" ? "score_load_failed" : method === "POST" ? "score_write_failed" : "score_delete_failed";
-      const error = new Error(String(body?.error || fallback));
-      error.code = String(body?.error || fallback);
+      const code = String(body?.error || fallback);
+      const error = new Error(code);
+      error.code = code;
       error.status = Number(response?.status || 0);
       error.body = body;
       throw error;
@@ -71,11 +70,10 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
   const loadScores = async ({ teamId = "" } = {}) => {
     if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, scores: [] };
     const body = await request("GET", null, String(teamId || "").trim());
-    const remote = Array.isArray(body?.scores) ? body.scores : [];
     return {
       ok: true,
-      storageMode: String(body?.storage_mode || "signed_api"),
-      scores: reconcilePendingScoreRows({ storage, requester: requester(), localRows: stored(storage, "sl:scores") || [], remoteRows: remote }),
+      storageMode: mode(body),
+      scores: reconcilePendingScoreRows({ storage, requester: requester(), localRows: stored(storage, "sl:scores") || [], remoteRows: Array.isArray(body?.scores) ? body.scores : [] }),
     };
   };
 
@@ -86,8 +84,7 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
     const teamId = scoreTeam(rows[0]);
     if (identity && teamId) {
       const current = pending(storage, identity);
-      const prior = current?.[1] === teamId ? current.slice(2) : [];
-      save(storage, [identity, teamId, ...new Set([...prior, ...rows.map(scoreId).filter(Boolean)])]);
+      save(storage, [identity, teamId, ...new Set([...(current?.[1] === teamId ? current.slice(2) : []), ...rows.map(scoreId).filter(Boolean)])]);
     }
     if (typeof fetchImpl !== "function") throw new Error("score_api_unavailable");
     const body = await request("POST", { scores: rows });
@@ -97,7 +94,7 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
       const ids = confirmed.map(scoreId);
       save(storage, [identity, teamId, ...current.slice(2).filter((value) => !ids.includes(value))]);
     }
-    return { ok: true, storageMode: String(body?.storage_mode || "signed_api"), scores: confirmed };
+    return { ok: true, storageMode: mode(body), scores: confirmed };
   };
 
   const deletePlayerScores = async ({ teamId = "", playerIdentity = "" } = {}) => {
@@ -107,7 +104,7 @@ export function createScorePersistenceService({ fetchImpl = globalThis?.fetch, s
     if (typeof fetchImpl !== "function") throw new Error("score_api_unavailable");
     const body = await request("DELETE", { team_id: teamIdValue, player_identity: player });
     if (pending(storage, player)?.[1] === teamIdValue) save(storage, []);
-    return { ok: true, storageMode: String(body?.storage_mode || "signed_api"), deletedCount: Number(body?.deleted_count || 0) };
+    return { ok: true, storageMode: mode(body), deletedCount: Number(body?.deleted_count || 0) };
   };
 
   return { loadScores, upsertScores, deletePlayerScores };
