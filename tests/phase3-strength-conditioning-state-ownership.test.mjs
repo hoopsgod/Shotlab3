@@ -187,7 +187,7 @@ test("S&C build authority keeps cache rewrites read-only and requires explicit e
   const eventEnhancer = readFileSync("scripts/apply-phase3-events-replacement-ownership.mjs", "utf8");
   const rsvpEnhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
 
-  assert.match(enhancer, /const scReplacement=k\.startsWith\("sl:sc-"\),signedReplacementCollection=k==="sl:rsvps"&&options\?\.replace===true\|\|k==="sl:events"&&options\?\.replace===true\|\|scReplacement&&options\?\.strictRemote===true/);
+  assert.match(enhancer, /const scReplacement=k\.startsWith\("sl:sc-"\),signedReplacementCollection=\(k==="sl:rsvps"\|\|k==="sl:events"\)&&options\?\.replace===true\|\|scReplacement&&options\?\.strictRemote===true/);
   assert.match(enhancer, /!scReplacement\|\|signedReplacementCollection/);
   assert.match(enhancer, /source:pending\?"local":"remote"/);
   assert.match(enhancer, /\^sc_\(sessions\|rsvps\|logs\)\$/);
