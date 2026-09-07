@@ -1,4 +1,4 @@
-import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
+import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiIdentityHeaders.js";
 import { markPendingIds, pendingPlayer, pendingTeam, reconcilePendingIds } from "./scorePersistenceService.js";
 
 const KEY="sl:pp";

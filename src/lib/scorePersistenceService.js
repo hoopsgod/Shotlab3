@@ -1,4 +1,4 @@
-import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiFetchBridge.js";
+import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
 
 export const pendingId=(row)=>String(row?.id||"").trim(),pendingTeam=(row)=>String(row?.team_id||row?.teamId||"").trim(),pendingPlayer=(row)=>normalizeIdentity(row?.email||row?.player_email);
 export const pendingOwner=(storage,key,requester="")=>{let marker;try{marker=String(storage?.getItem?.(key)||"")}catch{return null}const session=readSession(storage),identity=normalizeIdentity(requester)||readRequester(storage);return marker.startsWith(`${identity}\t`)&&(!session?.rp||marker.startsWith(`${session.rp}\t`))?marker.split("\t"):null};
