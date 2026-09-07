@@ -5,6 +5,13 @@ import { minify } from 'terser'
 
 const DIST_DIR = path.resolve(process.cwd(), 'dist')
 const gzipBytes = (value) => gzipSync(value, { level: 9 }).byteLength
+const CANDIDATE_OPTIONS = [
+  { passes: 5, quoteStyle: 0 },
+  { passes: 5, quoteStyle: 1 },
+  { passes: 5, quoteStyle: 2 },
+  { passes: 3, quoteStyle: 0 },
+  { passes: 8, quoteStyle: 0 },
+]
 
 async function listJavaScriptFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
@@ -17,12 +24,12 @@ async function listJavaScriptFiles(directory) {
   return files
 }
 
-async function minifyCandidate(source, quoteStyle) {
+async function minifyCandidate(source, { passes, quoteStyle }) {
   const result = await minify(source, {
     ecma: 2022,
     module: true,
     compress: {
-      passes: 5,
+      passes,
       toplevel: true,
       pure_funcs: ['console.log', 'console.debug', 'console.info'],
     },
@@ -34,7 +41,7 @@ async function minifyCandidate(source, quoteStyle) {
 
 async function recompress(file) {
   const source = await readFile(file, 'utf8')
-  const candidates = await Promise.all([0, 1, 2].map((quoteStyle) => minifyCandidate(source, quoteStyle)))
+  const candidates = await Promise.all(CANDIDATE_OPTIONS.map((options) => minifyCandidate(source, options)))
   const output = candidates.reduce((best, candidate) => {
     const bestGzip = gzipBytes(best)
     const candidateGzip = gzipBytes(candidate)

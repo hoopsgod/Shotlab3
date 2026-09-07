@@ -14,7 +14,7 @@ const projectRef = (() => {
 const SESSION_KEY = "sl:supabase-session";
 const LEGACY_TOKEN_KEY = "sl:supabase-access-token";
 const APP_SESSION_KEY = "sl:session";
-const APP_PERSISTENCE_TABLES = new Set(["teams", "players", "player_profiles", "scores", "program_scores", "shot_logs", "events", "rsvps", "sessions"]);
+const isAppPersistenceTable = (table) => /^(teams|players|player_profiles|scores|program_scores|shot_logs|events|rsvps|sessions)$/.test(table);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const scorePersistence = createScorePersistenceService({
   fetchImpl: (...args) => globalThis.fetch(...args),
@@ -76,7 +76,7 @@ const alignBulkObjectKeys = (rows = []) => {
 };
 
 export const normalizeRestWriteBody = (table, body) => {
-  const sourceRows = toRows(body).filter((row) => row && typeof row === "object");
+  const sourceRows = Array.isArray(body) ? body : body && typeof body === "object" ? [body] : [];
   let rows = sourceRows;
   if (table === "teams") rows = rows.map(normalizeTeamWriteRow).filter(Boolean);
   if (table === "player_profiles") rows = rows.map(normalizePlayerProfileWriteRow);
@@ -136,26 +136,6 @@ const buildHeaders = ({ upsert = false } = {}) => {
   if (upsert) headers.Prefer = "resolution=merge-duplicates,return=representation";
   return headers;
 };
-const persistenceError = (error, fallback) => ({
-  data: null,
-  error: {
-    code: String(error?.code || fallback),
-    message: String(error?.message || fallback),
-    status: Number(error?.status || 0),
-    details: error?.body || null,
-  },
-});
-const refreshStoredSession = async (refreshToken) => {
-  const response = await fetch(`${baseUrl}/auth/v1/token?grant_type=refresh_token`, {
-    method: "POST",
-    headers: buildHeaders(),
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok || !(payload?.access_token || payload?.refresh_token)) return null;
-  storeSession(payload);
-  return payload;
-};
 
 const scoreApiRequest = async ({ method = "GET", body } = {}) => {
   try {
@@ -166,7 +146,15 @@ const scoreApiRequest = async ({ method = "GET", body } = {}) => {
     const result = await scorePersistence.upsertScores(toRows(body));
     return { data: result.scores, error: null };
   } catch (error) {
-    return persistenceError(error, "score_api_failed");
+    return {
+      data: null,
+      error: {
+        code: String(error?.code || "score_api_failed"),
+        message: String(error?.message || "score_api_failed"),
+        status: Number(error?.status || 0),
+        details: error?.body || null,
+      },
+    };
   }
 };
 
@@ -179,7 +167,15 @@ const programScoreApiRequest = async ({ method = "GET", body } = {}) => {
     const result = await programScorePersistence.upsertProgramScores(toRows(body));
     return { data: result.programScores, error: null };
   } catch (error) {
-    return persistenceError(error, "program_score_api_failed");
+    return {
+      data: null,
+      error: {
+        code: String(error?.code || "program_score_api_failed"),
+        message: String(error?.message || "program_score_api_failed"),
+        status: Number(error?.status || 0),
+        details: error?.body || null,
+      },
+    };
   }
 };
 
@@ -191,16 +187,24 @@ const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
     const result = await shotLogPersistence.loadShotLogs();
     return { data: result.shotLogs, error: null };
   } catch (error) {
-    return persistenceError(error, "shot_log_api_failed");
+    return {
+      data: null,
+      error: {
+        code: String(error?.code || "shot_log_api_failed"),
+        message: String(error?.message || "shot_log_api_failed"),
+        status: Number(error?.status || 0),
+        details: error?.body || null,
+      },
+    };
   }
 };
 
 const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
-  if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table)) {
-    const demo = isDemoPersistenceSession();
-    if (demo || !hasAuthenticatedPersistenceSession()) {
-      return { data: toRows(body), error: null, skipped: demo ? "demo_local_only" : "unauthenticated_local_only" };
-    }
+  if (method !== "GET" && isAppPersistenceTable(table) && isDemoPersistenceSession()) {
+    return { data: toRows(body), error: null, skipped: "demo_local_only" };
+  }
+  if (method !== "GET" && isAppPersistenceTable(table) && !hasAuthenticatedPersistenceSession()) {
+    return { data: toRows(body), error: null, skipped: "unauthenticated_local_only" };
   }
 
   const normalizedBody = method === "GET" ? body : normalizeRestWriteBody(table, body);
@@ -314,8 +318,14 @@ export const supabase = {
       const expiresAt = Number(stored?.expires_at || 0);
       const isExpired = expiresAt ? Date.now() >= (expiresAt * 1000) - 30_000 : false;
       if ((!token || isExpired) && refreshToken) {
-        const refreshPayload = await refreshStoredSession(refreshToken);
-        if (refreshPayload) {
+        const refreshRes = await fetch(`${baseUrl}/auth/v1/token?grant_type=refresh_token`, {
+          method: "POST",
+          headers: buildHeaders(),
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        const refreshPayload = await refreshRes.json().catch(() => ({}));
+        if (refreshRes.ok && (refreshPayload?.access_token || refreshPayload?.refresh_token)) {
+          storeSession(refreshPayload);
           token = refreshPayload.access_token || token;
           refreshToken = refreshPayload.refresh_token || refreshToken;
         } else {
@@ -326,8 +336,14 @@ export const supabase = {
       if (!token) return { data: { session: null }, error: null };
       let response = await fetch(`${baseUrl}/auth/v1/user`, { headers: { apikey: anonKey, Authorization: `Bearer ${token}` } });
       if (!response.ok && response.status === 401 && refreshToken) {
-        const refreshPayload = await refreshStoredSession(refreshToken);
-        if (refreshPayload) {
+        const refreshRes = await fetch(`${baseUrl}/auth/v1/token?grant_type=refresh_token`, {
+          method: "POST",
+          headers: buildHeaders(),
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        const refreshPayload = await refreshRes.json().catch(() => ({}));
+        if (refreshRes.ok && (refreshPayload?.access_token || refreshPayload?.refresh_token)) {
+          storeSession(refreshPayload);
           token = refreshPayload.access_token || token;
           refreshToken = refreshPayload.refresh_token || refreshToken;
           response = await fetch(`${baseUrl}/auth/v1/user`, { headers: { apikey: anonKey, Authorization: `Bearer ${token}` } });
