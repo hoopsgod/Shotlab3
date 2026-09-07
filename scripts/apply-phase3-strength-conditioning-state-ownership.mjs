@@ -8,7 +8,7 @@ let app = rawApp.replace(/\r\n/g, '\n')
 
 const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const priorStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
-const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"&&options?.replace===true||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
 if (!app.includes(strengthAuthority)) {
   if (app.includes(priorStrengthAuthority)) {
     app = app.replace(priorStrengthAuthority, strengthAuthority)
