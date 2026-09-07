@@ -5,7 +5,7 @@ import { createPlayerIdentityPersistenceService } from "./playerIdentityPersiste
 import { createTeamPersistenceService } from "./teamPersistenceService.js";
 import { createStrengthConditioningPersistenceService } from "./strengthConditioningPersistenceService.js";
 
-export { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
+export { normalizeIdentity, parseStored, pendingOwner, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 
@@ -234,7 +234,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   return wrappedFetch;
 }
 
-export const __testUtils = import.meta.env?.PROD === true ? {} : {
+export const __testUtils = {
   apiPathFor,
   readRequester,
   pruneTeamCache,

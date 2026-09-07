@@ -1,9 +1,9 @@
-import { cleanValue as clean, filterPlayerRows, parseStored, readActorContext as readContext, readStorage, requestSignedBody, writeStored } from "./apiIdentityHeaders.js";
+import { cleanValue as clean, filterPlayerRows, parseStored, pendingOwner, readActorContext as readContext, requestSignedBody, writeStored } from "./apiIdentityHeaders.js";
 
 const KEY="sl:ip";
 export const readPendingPlayerRows=(storage=globalThis?.localStorage,teamId="")=>{
-  const context=readContext(storage);context.teamId=clean(teamId||context.teamId);
-  if(!context.requester||readStorage(storage,KEY)!==`${context.requester}\t${context.teamId}`)return null;
+  const context=readContext(storage);context.teamId=clean(teamId||context.teamId);const owner=pendingOwner(storage,KEY,context.requester,context.teamId);
+  if(owner?.length!==2||owner[1]!==context.teamId)return null;
   return filterPlayerRows(parseStored(storage,"sl:players",[]),context);
 };
 

@@ -1,6 +1,5 @@
 import { mergeHydratedRows } from "./remotePersistence.js";
-import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
-import { readActorContext } from "./apiIdentityHeaders.js";
+import { normalizeIdentity, parseStored, pendingOwner, readActorContext, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiIdentityHeaders.js";
 import { readPendingPlayerRows } from "./playerIdentityPersistenceService.js";
 import { scPendingMask } from "./strengthConditioningPersistenceService.js";
 import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
@@ -17,7 +16,7 @@ export const AUTHENTICATED_COLLECTION_STORAGE_KEYS=/* @__PURE__ */Object.freeze(
 const delay=(ms)=>new Promise((resolve)=>setTimeout(resolve,ms));
 const registeredIdentity=(storage)=>{const email=readRequester(storage);return !email||email==="demo@shotlab.app"||email==="coach.demo@shotlab.app"?"":email};
 const rsvpPending=(storage)=>storage?.getItem?.("sl:rp")===readSession(storage)?.rp;
-const eventPending=(storage)=>{const{requester,teamId}=readActorContext(storage);return Boolean(requester&&teamId&&storage?.getItem?.("sl:ep")===`${requester}\t${teamId}`)};
+const eventPending=(storage)=>{const{requester,teamId}=readActorContext(storage);return pendingOwner(storage,"sl:ep",requester,teamId)?.length===2};
 
 export async function waitForRegisteredSession({storage=globalThis?.localStorage,expectedIdentity="",timeoutMs=4_000,pollMs=25}={}){
   const expected=normalizeIdentity(expectedIdentity),deadline=Date.now()+Number(timeoutMs||0);

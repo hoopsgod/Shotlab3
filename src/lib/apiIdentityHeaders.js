@@ -33,6 +33,8 @@ export function readRequester(storage = globalThis?.localStorage) {
   return normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
 }
 
+export const pendingOwner=(storage,key,requester="",teamId="")=>{const marker=readStorage(storage,key),session=readSession(storage),identity=normalizeIdentity(requester)||readRequester(storage),team=cleanValue(teamId||session?.teamId||session?.team_id),scope=cleanValue(session?.rp)||(identity&&team?`${identity}\t${team}`:identity);return scope&&(marker===scope||marker.startsWith(`${scope}\t`))?marker.split("\t"):null};
+
 export function readActorContext(storage = globalThis?.localStorage) {
   const session = readSession(storage);
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
