@@ -1,9 +1,9 @@
 import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiFetchBridge.js";
 
-export const pendingId=(row)=>String(row?.id||"").trim(),pendingTeam=(row)=>String(row?.team_id||row?.teamId||"").trim(),pendingPlayer=(row)=>normalizeIdentity(row?.email||row?.player_email||row?.playerEmail||row?.player_id||row?.playerId);
+export const pendingId=(row)=>String(row?.id||"").trim(),pendingTeam=(row)=>String(row?.team_id||row?.teamId||"").trim(),pendingPlayer=(row)=>normalizeIdentity(row?.email||row?.player_email);
 export const pendingOwner=(storage,key,requester="")=>{let marker;try{marker=String(storage?.getItem?.(key)||"")}catch{return null}const session=readSession(storage),identity=normalizeIdentity(requester)||readRequester(storage);return marker.startsWith(`${identity}\t`)&&(!session?.rp||marker.startsWith(`${session.rp}\t`))?marker.split("\t"):null};
 export const savePending=(storage,key,parts)=>writeStored(storage,key,parts[2]?parts.join("\t"):null);
-export const markPendingIds=(storage,key,rows=[])=>{const requester=readRequester(storage),teamId=pendingTeam(rows[0]),parts=pendingOwner(storage,key,requester);if(requester&&teamId)savePending(storage,key,[...new Set([...(parts?.[1]===teamId?parts:[requester,teamId]),...rows.filter((row)=>pendingTeam(row)===teamId).map(pendingId).filter(Boolean)])])};
+export const markPendingIds=(storage,key,rows=[])=>{const requester=readRequester(storage),teamId=pendingTeam(rows[0]),parts=pendingOwner(storage,key,requester);if(requester&&teamId)savePending(storage,key,[...new Set([...(parts?.[1]===teamId?parts:[requester,teamId]),...rows.map(pendingId).filter(Boolean)])])};
 
 export function reconcilePendingIds({storage=globalThis?.localStorage,key,requester="",teamId="",localRows=[],remoteRows=[],own=false}={}){const remote=Array.isArray(remoteRows)?remoteRows:[],parts=pendingOwner(storage,key,requester);if(!parts||(teamId&&parts[1]!==String(teamId||"").trim()))return remote;const local=(Array.isArray(localRows)?localRows:[]).filter((row)=>{const rowId=pendingId(row);return parts.includes(rowId,2)&&!remote.some((item)=>pendingId(item)===rowId)&&pendingTeam(row)===parts[1]&&(!own||pendingPlayer(row)===parts[0])});savePending(storage,key,[parts[0],parts[1],...local.map(pendingId)]);return remote.concat(local)}
 
