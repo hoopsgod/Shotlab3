@@ -23,12 +23,16 @@ test('sl:events app hydration keeps Supabase-style description row visible witho
   assert.equal(event.desc, 'Team run');
 });
 
-test('sl:players hydration preserves local player when remote is incomplete', () => {
-  const local = [{ id: 'p1', teamId: 't1', email: 'a@b.com', name: 'A', role: 'player' }];
-  const remote = [{ id: 'p1', team_id: '', email: 'a@b.com' }];
+test('sl:players confirmed hydration is remote-authoritative and does not resurrect local-only identity state', () => {
+  const local = [
+    { id: 'p1', teamId: 't1', email: 'a@b.com', name: 'Local Name', role: 'player' },
+    { id: 'local-only', teamId: 't1', email: 'gone@b.com', name: 'Removed', role: 'player' },
+  ];
+  const remote = [{ id: 'p1', team_id: null, email: 'a@b.com', name: 'Remote Name', role: 'player' }];
   const merged = mergeHydratedRows('sl:players', local, remote);
-  assert.equal(merged.length, 1);
-  assert.equal(merged[0].name, 'A');
+  assert.deepEqual(merged.map((row) => row.id), ['p1']);
+  assert.equal(merged[0].name, 'Remote Name');
+  assert.equal(merged[0].teamId, null);
 });
 
 test('sl:player-profiles preserves userId null shell and fallback id', () => {

@@ -1,20 +1,13 @@
-import { buildApiIdentityHeaders, normalizeIdentity, parseStored, readActorContext, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiIdentityHeaders.js";
+import { buildApiIdentityHeaders, filterPlayerRows, normalizeIdentity, parseStored, readActorContext, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
 import { createSchedulePersistenceService } from "./schedulePersistenceService.js";
 import { createPlayerProfilePersistenceService } from "./playerProfilePersistenceService.js";
 import { createPlayerIdentityPersistenceService } from "./playerIdentityPersistenceService.js";
 import { createTeamPersistenceService } from "./teamPersistenceService.js";
 import { createStrengthConditioningPersistenceService } from "./strengthConditioningPersistenceService.js";
 
-export { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiIdentityHeaders.js";
+export { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
-
-export function writeStored(storage, key, value) {
-  try {
-    if (value === null) storage.removeItem(key);
-    else storage.setItem(key, value);
-  } catch {}
-}
 
 function isDemoRequester(requester) {
   return requester === "coach.demo@shotlab.app" || requester === "demo@shotlab.app";
@@ -31,17 +24,11 @@ function pruneTeamCache(storage = globalThis.localStorage) {
 }
 
 function prunePlayerCache(storage = globalThis.localStorage) {
-  const { requester, role, teamId } = readActorContext(storage);
-  if (!requester || isDemoRequester(requester)) return [];
+  const context = readActorContext(storage);
+  if (!context.requester || isDemoRequester(context.requester)) return [];
   const players = parseStored(storage, "sl:players", []);
   if (!Array.isArray(players) || !players.length) return [];
-  const filtered = players.filter((row) => {
-    if (normalizeIdentity(row?.email) === requester) return true;
-    if ((role === "coach" || role === "assistant_coach") && teamId) {
-      return String(row?.teamId || row?.team_id || "").trim() === teamId;
-    }
-    return false;
-  });
+  const filtered = filterPlayerRows(players, context);
   if (filtered.length !== players.length) writeStored(storage, "sl:players", JSON.stringify(filtered));
   return filtered;
 }
@@ -203,10 +190,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
-          const rows = parseRows(init?.body);
-          const result = signedResource === "players"
-            ? await service[sync](rows, { replace: true })
-            : await service[sync](rows);
+          const result = await service[sync](parseRows(init?.body));
           return jsonResponse(target, result.rows);
         }
         return methodNotAllowed(target);

@@ -331,24 +331,7 @@ export const mergeHydratedRows = (key, localRows, remoteRows) => {
     remote.map(normalizeEventRowForApp).filter(Boolean).forEach((row) => byId.set(row.id, row));
     return Array.from(byId.values());
   }
-  if (key === "sl:players") {
-    const merged = [];
-    const idx = new Map();
-    const keyFor = (row) => row.id || `${row.email}::${row.teamId}`;
-    for (const row of local.map(normalizePlayerRowForApp).filter(Boolean)) {
-      idx.set(keyFor(row), merged.push(row) - 1);
-    }
-    for (const row of remote.map(normalizePlayerRowForApp).filter(Boolean)) {
-      const k = keyFor(row);
-      if (idx.has(k)) {
-        // Remote membership fields are authoritative, including an explicit
-        // null teamId used for roster removal. Preserve populated local profile
-        // fields when an older or partial API response omits them.
-        merged[idx.get(k)] = { ...merged[idx.get(k)], ...row };
-      } else idx.set(k, merged.push(row) - 1);
-    }
-    return merged;
-  }
+  if (key === "sl:players") return remote.map(normalizePlayerRowForApp).filter(Boolean);
   if (key === "sl:player-profiles") {
     const merged = [];
     const idx = new Map();
