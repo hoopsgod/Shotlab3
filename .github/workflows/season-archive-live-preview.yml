@@ -40,7 +40,12 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          if [ "$EVENT_NAME" != "pull_request" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "url=https://shotlab3.pages.dev" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$EVENT_NAME" = "push" ]; then
             for attempt in $(seq 1 30); do
               checks="$(gh api \
                 -H "Accept: application/vnd.github+json" \
