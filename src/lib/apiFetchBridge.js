@@ -234,7 +234,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   return wrappedFetch;
 }
 
-export const __testUtils = {
+export const __testUtils = import.meta.env?.PROD === true ? {} : {
   apiPathFor,
   readRequester,
   pruneTeamCache,
