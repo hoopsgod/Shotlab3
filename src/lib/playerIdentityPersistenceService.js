@@ -1,16 +1,17 @@
 import { cleanValue as clean, parseStored, readActorContext as readContext, requestSignedBody, signedStorageMode } from "./apiIdentityHeaders.js";
 
 const KEY="sl:ip",setPending=(storage,value)=>{try{storage?.setItem?.(KEY,value)}catch{}};
-const pendingContext=(storage,teamId="")=>{const context=readContext(storage);context.teamId=clean(teamId||context.teamId);let marker="";try{marker=storage?.getItem?.(KEY)||""}catch{}return context.requester&&marker===`${context.requester}\t${context.teamId}`?context:null};
-const pendingRows=(storage,context)=>{const rows=parseStored(storage,"sl:players",[]);return Array.isArray(rows)?rows.filter((row)=>clean(row?.email).toLowerCase()===context.requester||((context.role==="coach"||context.role==="assistant_coach")&&clean(row?.team_id??row?.teamId)===context.teamId)):[]};
-
-export const hasPendingPlayerRows=(storage=globalThis?.localStorage,teamId="")=>!!pendingContext(storage,teamId);
-export const reconcilePendingPlayerRows=({storage=globalThis?.localStorage,teamId="",remoteRows=[]}={})=>{const context=pendingContext(storage,teamId);return context?pendingRows(storage,context):Array.isArray(remoteRows)?remoteRows:[]};
+export const readPendingPlayerRows=(storage=globalThis?.localStorage,teamId="")=>{
+  const context=readContext(storage);context.teamId=clean(teamId||context.teamId);let marker="";try{marker=storage?.getItem?.(KEY)||""}catch{}
+  if(!context.requester||marker!==`${context.requester}\t${context.teamId}`)return null;
+  const rows=parseStored(storage,"sl:players",[]);
+  return Array.isArray(rows)?rows.filter((row)=>clean(row?.email).toLowerCase()===context.requester||((context.role==="coach"||context.role==="assistant_coach")&&clean(row?.team_id??row?.teamId)===context.teamId)):[];
+};
 
 export function createPlayerIdentityPersistenceService({fetchImpl=globalThis?.fetch,storage=globalThis?.localStorage}={}){
   const loadPlayers=async({teamId=""}={})=>{
-    const pending=pendingContext(storage,teamId);
-    if(pending)return{ok:true,storageMode:"local_pending",rows:pendingRows(storage,pending)};
+    const pending=readPendingPlayerRows(storage,teamId);
+    if(pending!==null)return{ok:true,storageMode:"local_pending",rows:pending};
     if(typeof fetchImpl!=="function")return{ok:false,unavailable:true,rows:[]};
     const activeTeamId=clean(teamId||readContext(storage).teamId),query=activeTeamId?`?team_id=${encodeURIComponent(activeTeamId)}`:"",body=await requestSignedBody(fetchImpl,`/v1/players${query}`,"GET",storage,null,"player_load_failed");
     return{ok:true,storageMode:signedStorageMode(body),rows:Array.isArray(body?.players)?body.players:[]};
