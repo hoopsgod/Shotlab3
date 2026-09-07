@@ -3,19 +3,12 @@ import { getRosterIdentityKeys, isActiveRosterPlayerForTeam } from "./rosterIden
 
 const clean = (value) => String(value ?? "").trim();
 let programScoreRowSequence = 0;
-export const scoreToNumber = (value) => {
-  if (value === "" || value === null || value === undefined) return null;
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
-};
-
-export const drillAllowsZeroScore = (drill = {}) => drill?.allowZeroScore === true || drill?.minScore === 0;
 
 export const validateProgramDrillScore = (value, drill = {}) => {
-  const score = scoreToNumber(value);
-  if (score === null) return { ok: false, error: "Score is required." };
+  const score = value === "" || value === null || value === undefined ? null : Number(value);
+  if (!Number.isFinite(score)) return { ok: false, error: "Score is required." };
   if (score < 0) return { ok: false, error: "Score cannot be negative." };
-  if (score === 0 && !drillAllowsZeroScore(drill)) return { ok: false, error: "Score must be greater than 0." };
+  if (score === 0 && drill?.allowZeroScore !== true && drill?.minScore !== 0) return { ok: false, error: "Score must be greater than 0." };
   const rawMax = drill?.max;
   const max = rawMax === null || rawMax === undefined || rawMax === "" ? null : Number(rawMax);
   if (max !== null && Number.isFinite(max) && score > max) return { ok: false, error: `Score cannot exceed ${max}.` };
@@ -73,22 +66,13 @@ export const normalizeProgramScoreRow = (row = {}) => {
     ...row,
     id: clean(row?.id),
     email,
-    playerEmail: email,
-    player_email: email,
     playerId,
-    player_id: playerId,
     teamId,
-    team_id: teamId,
     name: clean(row?.name || row?.playerName || row?.player_name),
-    playerName: clean(row?.playerName || row?.player_name || row?.name),
-    player_name: clean(row?.player_name || row?.playerName || row?.name),
     drillId,
-    drill_id: drillId,
     drillName: clean(row?.drillName || row?.drill_name),
-    drill_name: clean(row?.drill_name || row?.drillName),
     score,
     date: row?.date || row?.session_date || "",
-    session_date: row?.session_date || row?.date || "",
     ts: Number(row?.ts || Date.parse(row?.logged_at || row?.created_at || row?.date || 0) || 0),
     src: "program",
   };
@@ -105,7 +89,7 @@ export const getProgramScoresForDrill = (programScores = [], drillId) => {
   if (!targetDrillId && !targetDrillName) return [];
   return getAllProgramScoreRows(programScores).filter((score) =>
     (targetDrillId && score.drillId === targetDrillId) ||
-    (targetDrillName && clean(score.drillName || score.drill_name) === targetDrillName)
+    (targetDrillName && score.drillName === targetDrillName)
   );
 };
 
@@ -113,7 +97,7 @@ export const getProgramScoresForPlayer = (programScores = [], userEmail, teamId)
   const targetEmail = normalizePlayerDataEmail(userEmail);
   const targetTeamId = clean(teamId);
   return getAllProgramScoreRows(programScores).filter((score) => {
-    if (targetEmail && normalizePlayerDataEmail(score.email || score.player_email) !== targetEmail && normalizePlayerDataEmail(score.playerId || score.player_id) !== targetEmail) return false;
+    if (targetEmail && score.email !== targetEmail && score.playerId !== targetEmail) return false;
     if (targetTeamId && score.teamId && score.teamId !== targetTeamId) return false;
     return true;
   });
@@ -124,12 +108,13 @@ export const getProgramDrillBreakdownRows = (programDrills = [], programScores =
   return (Array.isArray(programDrills) ? programDrills : []).map((drill) => {
     const drillId = clean(drill?.id || drill?.drill_id || drill?.key || drill?.slug || drill?.name);
     const drillName = clean(drill?.name || drill?.drillName || drill?.drill_name);
-    const rows = playerScores.filter((score) => score.drillId === drillId || (drillName && clean(score.drillName || score.drill_name) === drillName)).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    const rows = playerScores.filter((score) => score.drillId === drillId || (drillName && score.drillName === drillName)).sort((a, b) => (a.ts || 0) - (b.ts || 0));
     const last10 = rows.slice(-10).map((score) => score.score);
     const pb = rows.reduce((max, score) => Math.max(max, score.score), 0);
     const avg = rows.length ? Math.round((rows.reduce((sum, score) => sum + score.score, 0) / rows.length) * 10) / 10 : 0;
-    const firstAvg = last10.slice(0, Math.ceil(last10.length / 2)).reduce((a, b) => a + b, 0) / (Math.ceil(last10.length / 2) || 1);
-    const secondAvg = last10.slice(Math.ceil(last10.length / 2)).reduce((a, b) => a + b, 0) / (Math.floor(last10.length / 2) || 1);
+    const half = Math.ceil(last10.length / 2);
+    const firstAvg = last10.slice(0, half).reduce((a, b) => a + b, 0) / (half || 1);
+    const secondAvg = last10.slice(half).reduce((a, b) => a + b, 0) / (last10.length - half || 1);
     return {
       ...drill,
       id: drillId,
@@ -154,29 +139,30 @@ export const getProgramLeaderboardRows = (programScores = [], programDrillId, pl
   const selectedDrillId = clean(programDrillId?.id || programDrillId?.drill_id || programDrillId?.key || programDrillId?.slug || programDrillId);
   const selectedDrillName = clean(programDrillId?.name || programDrillId?.drillName || programDrillId?.drill_name);
   const rosterPlayers = (Array.isArray(players) ? players : []).filter((p) => p?.role !== "coach");
-  const rosterTeamId = clean(programDrillId?.teamId || programDrillId?.team_id || rosterPlayers.find((p) => clean(p?.teamId || p?.team_id))?.teamId || rosterPlayers.find((p) => clean(p?.teamId || p?.team_id))?.team_id);
+  const rosterTeamPlayer = rosterPlayers.find((p) => clean(p?.teamId || p?.team_id));
+  const rosterTeamId = clean(programDrillId?.teamId || programDrillId?.team_id || rosterTeamPlayer?.teamId || rosterTeamPlayer?.team_id);
   const hiddenKeys = new Set(rosterPlayers.filter(isPlayerHiddenFromActiveLeaderboards).flatMap((p) => getRosterIdentityKeys(p)));
   const activePlayers = rosterPlayers.filter((p) => rosterTeamId ? isActiveRosterPlayerForTeam(p, rosterTeamId) : !isPlayerHiddenFromActiveLeaderboards(p));
   const requireRosterMatch = activePlayers.length > 0;
   const byPlayer = new Map();
   drillScores.forEach((score) => {
-    const key = rowPlayerKey(score);
+    const key = score.playerId;
     if (!key || hiddenKeys.has(key)) return;
     const player = activePlayers.find((p) => getRosterIdentityKeys(p).includes(key));
     if (requireRosterMatch && !player) return;
-    const email = normalizePlayerDataEmail(player?.email) || rowEmail(score);
-    const scoreName = clean(score?.name || score?.playerName || score?.player_name);
+    const email = normalizePlayerDataEmail(player?.email) || score.email;
+    const scoreName = score.name;
     const fallbackName = email ? email.split("@")[0] : key;
     const displayName = clean(player?.name || (scoreName.toLowerCase() === "player" ? "" : scoreName) || fallbackName);
     const existing = byPlayer.get(key) || { playerId: key, player_id: key, email, name: displayName, displayName, player_display_name: displayName, total: 0, score: 0, total_home_shots: 0, attempts: 0, drillId: selectedDrillId || score.drillId, drillName: selectedDrillName || score.drillName };
-    const attemptScore = Number(score?.score || 0);
+    const attemptScore = score.score;
     existing.attempts += 1;
     existing.total = Math.max(existing.total, attemptScore);
     existing.score = existing.total;
     existing.total_home_shots = existing.total;
     byPlayer.set(key, existing);
   });
-  const rows = [...byPlayer.values()].sort((a, b) => b.total - a.total || String(a.name).localeCompare(String(b.name))).map((row, index) => ({ ...row, rank: index + 1 }));
+  const rows = [...byPlayer.values()].sort((a, b) => b.total - a.total || a.name.localeCompare(b.name)).map((row, index) => ({ ...row, rank: index + 1 }));
   return Number.isFinite(limit) ? rows.slice(0, limit) : rows;
 };
 

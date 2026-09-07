@@ -189,8 +189,9 @@ test('program drill completion waits for successful save result', () => {
   assert.match(source, /await P\("sl:program-scores",nextProgramScores,setProgramScores,\{strictRemote:true,remoteRows:\[scoreRow\]\}\)/);
   assert.match(source, /if\(!saveResult\?\.ok\)\{setSubmitting\(false\);return;\}/);
   assert.match(source, /setSaved\(true\)/);
-  assert.equal(source.includes('return <button key={d.id} className="ch" onClick={()=>setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:"#131821"'), true);
-  assert.equal(source.includes('return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:"#131821"'), false);
+  const programDrillRow = 'className={`player-drill-row player-drill-row--program ${done?"is-complete":""} ${isPriority&&!done?"is-priority":""}`}';
+  assert.equal(source.includes(`${programDrillRow} onClick={()=>setActive(d)}`), true);
+  assert.equal(source.includes(`${programDrillRow} onClick={()=>!done&&setActive(d)}`), false);
 });
 
 test('leaderboards hub Program Drills path uses program score selectors while At Home stays on home leaderboard rows', () => {

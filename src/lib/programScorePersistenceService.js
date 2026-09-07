@@ -1,30 +1,13 @@
-import { normalizeIdentity, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
+import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
+import { markPendingIds, pendingPlayer, pendingTeam, reconcilePendingIds } from "./scorePersistenceService.js";
 
-export function createProgramScorePersistenceService({ fetchImpl = globalThis?.fetch, storage = globalThis?.localStorage } = {}) {
-  const request = (method, data, teamId = "") => {
-    if (typeof fetchImpl !== "function") throw new Error("program_score_api_unavailable");
-    return requestSignedBody(fetchImpl, `/v1/program-scores${teamId ? `?team_id=${encodeURIComponent(teamId)}` : ""}`, method, storage, data, `program_score_${method === "GET" ? "load" : method === "POST" ? "write" : "delete"}_failed`);
-  };
+const KEY="sl:pp";
+export function reconcilePendingProgramScoreRows(options={}){return reconcilePendingIds({...options,key:KEY,teamId:options.teamId||pendingTeam(readSession(options.storage))})}
 
-  const loadProgramScores = async ({ teamId = "" } = {}) => {
-    if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, programScores: [] };
-    const body = await request("GET", null, String(teamId || "").trim());
-    return { ok: true, storageMode: signedStorageMode(body), programScores: Array.isArray(body?.program_scores) ? body.program_scores : [] };
-  };
-
-  const upsertProgramScores = async (programScores = []) => {
-    const rows = Array.isArray(programScores) ? programScores : [programScores];
-    if (!rows.length) return { ok: true, programScores: [], storageMode: "local_only" };
-    const body = await request("POST", { program_scores: rows });
-    return { ok: true, storageMode: signedStorageMode(body), programScores: Array.isArray(body?.program_scores) ? body.program_scores : [] };
-  };
-
-  const deletePlayerProgramScores = async ({ teamId = "", playerIdentity = "" } = {}) => {
-    const normalizedTeamId = String(teamId || "").trim(), normalizedPlayer = normalizeIdentity(playerIdentity);
-    if (!normalizedTeamId || !normalizedPlayer) throw new Error("program_score_delete_identity_required");
-    const body = await request("DELETE", { team_id: normalizedTeamId, player_identity: normalizedPlayer });
-    return { ok: true, storageMode: signedStorageMode(body), deletedCount: Number(body?.deleted_count || 0) };
-  };
-
-  return { loadProgramScores, upsertProgramScores, deletePlayerProgramScores };
+export function createProgramScorePersistenceService({fetchImpl=globalThis?.fetch,storage=globalThis?.localStorage}={}){
+  const request=(method,data,teamId="")=>requestSignedBody(fetchImpl,`/v1/program-scores${teamId?`?team_id=${encodeURIComponent(teamId)}`:""}`,method,storage,data,`program_score_${method==="GET"?"load":method==="POST"?"write":"delete"}_failed`);
+  const loadProgramScores=async({teamId=""}={})=>{const local=parseStored(storage,"sl:program-scores",[]);if(typeof fetchImpl!=="function")return{ok:false,unavailable:true,programScores:reconcilePendingProgramScoreRows({storage,teamId,localRows:local,remoteRows:[]})};const body=await request("GET",null,String(teamId||"").trim());return{ok:true,storageMode:signedStorageMode(body),programScores:reconcilePendingProgramScoreRows({storage,teamId,localRows:local,remoteRows:body?.program_scores})}};
+  const upsertProgramScores=async(programScores=[])=>{const rows=Array.isArray(programScores)?programScores:[programScores];if(!rows.length)return{ok:true,programScores:[],storageMode:"local_only"};const identity=readRequester(storage);markPendingIds(storage,KEY,rows);const body=await request("POST",{program_scores:rows}),confirmed=Array.isArray(body?.program_scores)?body.program_scores:[];reconcilePendingProgramScoreRows({storage,requester:identity,localRows:parseStored(storage,"sl:program-scores",rows),remoteRows:confirmed});return{ok:true,storageMode:signedStorageMode(body),programScores:confirmed}};
+  const deletePlayerProgramScores=async({teamId="",playerIdentity=""}={})=>{const teamIdValue=String(teamId||"").trim(),player=normalizeIdentity(playerIdentity);if(!teamIdValue||!player)throw new Error("program_score_delete_identity_required");const body=await request("DELETE",{team_id:teamIdValue,player_identity:player});reconcilePendingProgramScoreRows({storage,teamId:teamIdValue,localRows:(parseStored(storage,"sl:program-scores",[])||[]).filter((row)=>pendingPlayer(row)!==player),remoteRows:[]});return{ok:true,storageMode:signedStorageMode(body),deletedCount:Number(body?.deleted_count||0)}};
+  return{loadProgramScores,upsertProgramScores,deletePlayerProgramScores};
 }
