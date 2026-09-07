@@ -21,6 +21,7 @@ const CORE_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/leaderboardService.js',
   '/src/lib/gameStatAnalytics.js',
   '/src/lib/gameStatPersistenceService.js',
+  '/src/lib/playerDailyCommandCenter.js',
   '/src/lib/supabase.js',
   '/src/lib/releaseAuthService.js',
   '/src/lib/runtimeReleaseReadiness.js',
