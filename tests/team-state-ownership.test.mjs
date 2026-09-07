@@ -36,6 +36,14 @@ test("successful retry clears pending field ownership and restores remote author
  assert.equal(pendingTeamRows(storage,[]),null);assert.deepEqual((await service.loadTeams()).rows[0].branding,STALE);
 });
 
+test("successful transport retains ownership for a branding choice the response did not confirm",async()=>{
+ const storage=storageFor();
+ const service=createTeamPersistenceService({storage,fetchImpl:async()=>response({ok:true,teams:[structuredClone(REMOTE)]})});
+ await service.syncTeams([{id:TEAM,branding:DESIRED}]);
+ const row=pendingTeamRows(storage,[structuredClone(REMOTE)])[0];
+ assert.deepEqual(row.branding,DESIRED);
+});
+
 test("pending team ownership is requester/team scoped and cannot be created by a Player session",async()=>{
  const storage=storageFor();await failSync(storage,{id:TEAM,branding:DESIRED});
  storage.setItem("sl:session",JSON.stringify({email:"other@example.com",role:"coach",teamId:"team-b"}));storage.setItem("sl:players",JSON.stringify([{id:"other",email:"other@example.com",role:"coach",team_id:"team-b"}]));storage.setItem("sl:teams",JSON.stringify([{...LOCAL,id:"team-b"}]));
