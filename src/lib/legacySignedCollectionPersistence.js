@@ -1,5 +1,6 @@
 import { mergeHydratedRows } from "./remotePersistence.js";
-import { normalizeIdentity, parseStored, readActorContext, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiIdentityHeaders.js";
+import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
+import { readActorContext } from "./apiIdentityHeaders.js";
 import { readPendingPlayerRows } from "./playerIdentityPersistenceService.js";
 import { scPendingMask } from "./strengthConditioningPersistenceService.js";
 import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
