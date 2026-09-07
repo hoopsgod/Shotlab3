@@ -8,8 +8,10 @@ on:
       - "functions/v1/player-profiles/**"
       - "src/lib/playerProfilePersistenceService.js"
       - "src/lib/apiFetchBridge.js"
+      - "src/lib/legacySignedCollectionPersistence.js"
       - "migrations/045_player_profiles_signed_api_boundary.sql"
       - "tests/signed-player-profile-persistence.test.mjs"
+      - "tests/player-profile-state-ownership.test.mjs"
       - "tests/coach-player-invitation-contract.test.mjs"
       - "tests/coach-player-invitation-service.test.mjs"
       - "tests/e2e/coach-player-invitation.spec.mjs"
@@ -43,7 +45,7 @@ jobs:
 
       - name: Verify signed profile authorization contracts
         run: |
-          node --test tests/signed-player-profile-persistence.test.mjs
+          node --test tests/signed-player-profile-persistence.test.mjs tests/player-profile-state-ownership.test.mjs
           node --test tests/team-memberships-confirm-context-route.test.mjs tests/teams-restore-context-route.test.mjs
           node --test tests/coach-player-invitation-contract.test.mjs tests/coach-player-invitation-service.test.mjs
 

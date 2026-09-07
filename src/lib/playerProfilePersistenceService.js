@@ -1,47 +1,9 @@
-import { cleanValue as clean, readActorContext as readContext, requestError, requestSignedJson, signedStorageMode } from "./apiIdentityHeaders.js";
-
-export function createPlayerProfilePersistenceService({
-  fetchImpl = globalThis?.fetch,
-  storage = globalThis?.localStorage,
-} = {}) {
-  const loadProfiles = async ({ teamId = "" } = {}) => {
-    if (typeof fetchImpl !== "function") return { ok: false, unavailable: true, rows: [] };
-    const context = readContext(storage);
-    const activeTeamId = clean(teamId || context.teamId);
-    const query = activeTeamId ? `?team_id=${encodeURIComponent(activeTeamId)}` : "";
-    const [body, response] = await requestSignedJson(fetchImpl, `/v1/player-profiles${query}`, "GET", storage);
-    if (!response?.ok || body?.error) throw requestError(body, response, "profile_load_failed");
-    return {
-      ok: true,
-      storageMode: signedStorageMode(body),
-      rows: Array.isArray(body?.profiles) ? body.profiles : [],
-    };
-  };
-
-  const syncProfiles = async (profiles = [], { teamId = "" } = {}) => {
-    if (typeof fetchImpl !== "function") throw new Error("profile_api_unavailable");
-    const context = readContext(storage);
-    const activeTeamId = clean(teamId || context.teamId || profiles?.[0]?.team_id || profiles?.[0]?.teamId);
-    if (!activeTeamId) throw new Error("profile_team_required");
-    const scopedProfiles = (Array.isArray(profiles) ? profiles : []).filter((row) => {
-      const rowTeamId = clean(row?.team_id || row?.teamId);
-      return !rowTeamId || rowTeamId === activeTeamId;
-    });
-    const [body, response] = await requestSignedJson(fetchImpl, "/v1/player-profiles", "POST", storage, { team_id: activeTeamId, profiles: scopedProfiles });
-    if (!response?.ok || body?.error) throw requestError(body, response, "profile_sync_failed");
-    return {
-      ok: true,
-      storageMode: signedStorageMode(body),
-      rows: Array.isArray(body?.profiles) ? body.profiles : [],
-      ignoredCount: Number(body?.ignored_count || 0),
-    };
-  };
-
-  return {
-    loadProfiles,
-    syncProfiles,
-    readContext: () => readContext(storage),
-  };
+import{cleanValue as c,normalizeIdentity as n,parseStored,readActorContext as a,readStorage,requestSignedBody,writeStored}from"./apiIdentityHeaders.js";
+const K="sl:pp",p=(s,t="")=>{let u=a(s),x=readStorage(s,K).split("\t");u.teamId=c(t||u.teamId);return u.requester&&x[0]===u.requester&&x[1]===u.teamId?[u,x.slice(2).filter(Boolean)]:0};
+export const pendingProfileRows=(s=globalThis?.localStorage,r=[],t="")=>{let q=p(s,t);if(!q)return null;let[u,i]=q,l=parseStored(s,"sl:player-profiles",[]).filter(x=>i.includes(c(x?.id))&&c(x?.team_id||x?.teamId)===u.teamId&&(u.role!=="player"||n(x?.user_id||x?.userId||x?.email||x?.player_email)===u.requester)),d=l.map(x=>c(x?.id));return[...r.filter(x=>!d.includes(c(x?.id))),...l]};
+const w=(s,u,i,z)=>{let q=p(s,u.teamId)?.[1]||[],v=z?q.filter(x=>!i.includes(x)):[...q,...i];u.requester&&writeStored(s,K,v.length?[u.requester,u.teamId,...v].join("\t"):"")};
+export function createPlayerProfilePersistenceService({fetchImpl:f=globalThis?.fetch,storage:s=globalThis?.localStorage}={}){
+ const loadProfiles=async({teamId:t=""}={})=>{if(typeof f!=="function")return{rows:pendingProfileRows(s,[],t)||[]};let u=a(s),v=c(t||u.teamId),b=await requestSignedBody(f,`/v1/player-profiles${v?`?team_id=${encodeURIComponent(v)}`:""}`,"GET",s,null,"profile_load_failed"),r=b?.profiles||[],q=pendingProfileRows(s,r,v);return{storageMode:q?"local_pending":b?.storage_mode||"signed_api",rows:q||r}};
+ const syncProfiles=async(r=[],{teamId:t=""}={})=>{if(typeof f!=="function")throw Error("profile_api_unavailable");let u=a(s),v=c(t||u.teamId||r?.[0]?.team_id||r?.[0]?.teamId);if(!v)throw Error("profile_team_required");u.teamId=v;r=(Array.isArray(r)?r:[]).filter(x=>{let t=c(x?.team_id||x?.teamId);return!t||t===v});let i=r.map(x=>c(x?.id)).filter(Boolean);w(s,u,i);let b=await requestSignedBody(f,"/v1/player-profiles","POST",s,{team_id:v,profiles:r},"profile_sync_failed");w(s,u,i,1);return{rows:b?.profiles||[]}};
+ return{loadProfiles,syncProfiles}
 }
-
-export const __testUtils = { readContext };
