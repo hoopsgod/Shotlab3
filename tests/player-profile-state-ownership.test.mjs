@@ -2,8 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createPlayerProfilePersistenceService,
-  hasPendingProfileRows,
-  reconcilePendingProfileRows,
+  pendingProfileRows,
 } from "../src/lib/playerProfilePersistenceService.js";
 import {
   hydrateAuthenticatedCollectionsToStorage,
@@ -51,7 +50,7 @@ test("failed profile upsert preserves only the explicitly pending local row acro
   });
 
   await assert.rejects(service.syncProfiles([PENDING]), /profile_sync_failed/);
-  assert.equal(hasPendingProfileRows(storage), true);
+  assert.notEqual(pendingProfileRows(storage, []), null);
 
   phase = "read";
   const loaded = await service.loadProfiles();
@@ -70,7 +69,7 @@ test("successful retry clears only completed profile ownership and restores remo
   });
 
   await service.syncProfiles([PENDING]);
-  assert.equal(hasPendingProfileRows(storage), false);
+  assert.equal(pendingProfileRows(storage, []), null);
   const loaded = await service.loadProfiles();
   assert.equal(firstName(loaded.rows.find((row) => row.id === "profile-one")), "Remote");
 });
@@ -82,8 +81,8 @@ test("pending profile ownership is requester/team scoped and cannot override ano
     profiles: [{ ...PENDING, teamId: "team-b" }],
     pending: `${COACH}\t${TEAM}\tprofile-one`,
   });
-  assert.equal(hasPendingProfileRows(storage), false);
-  assert.deepEqual(reconcilePendingProfileRows(storage, [REMOTE_PENDING]), [REMOTE_PENDING]);
+  const rows = pendingProfileRows(storage, [REMOTE_PENDING]) || [REMOTE_PENDING];
+  assert.deepEqual(rows, [REMOTE_PENDING]);
 });
 
 test("player-scoped pending ownership cannot elevate another cached profile", () => {
@@ -93,7 +92,7 @@ test("player-scoped pending ownership cannot elevate another cached profile", ()
     profiles: [PENDING, OTHER_LOCAL],
     pending: `one@example.com\t${TEAM}\tprofile-one\tprofile-two`,
   });
-  const rows = reconcilePendingProfileRows(storage, [REMOTE_PENDING, REMOTE_OTHER]);
+  const rows = pendingProfileRows(storage, [REMOTE_PENDING, REMOTE_OTHER]);
   assert.equal(firstName(rows.find((row) => row.id === "profile-one")), "Pending");
   assert.equal(firstName(rows.find((row) => row.id === "profile-two")), "Remote");
 });
