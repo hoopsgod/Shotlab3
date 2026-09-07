@@ -126,6 +126,15 @@ const sanitizeAuthError = (payload, fallbackCode, fallbackMessage, status) => {
   if (!safe.message) safe.message = safe.error_description || safe.msg || safe.error || fallbackMessage;
   return safe;
 };
+const persistenceError = (error, fallback) => ({
+  data: null,
+  error: {
+    code: String(error?.code || fallback),
+    message: String(error?.message || fallback),
+    status: Number(error?.status || 0),
+    details: error?.body || null,
+  },
+});
 
 const buildHeaders = ({ upsert = false } = {}) => {
   const headers = {
@@ -146,15 +155,7 @@ const scoreApiRequest = async ({ method = "GET", body } = {}) => {
     const result = await scorePersistence.upsertScores(toRows(body));
     return { data: result.scores, error: null };
   } catch (error) {
-    return {
-      data: null,
-      error: {
-        code: String(error?.code || "score_api_failed"),
-        message: String(error?.message || "score_api_failed"),
-        status: Number(error?.status || 0),
-        details: error?.body || null,
-      },
-    };
+    return persistenceError(error, "score_api_failed");
   }
 };
 
@@ -167,15 +168,7 @@ const programScoreApiRequest = async ({ method = "GET", body } = {}) => {
     const result = await programScorePersistence.upsertProgramScores(toRows(body));
     return { data: result.programScores, error: null };
   } catch (error) {
-    return {
-      data: null,
-      error: {
-        code: String(error?.code || "program_score_api_failed"),
-        message: String(error?.message || "program_score_api_failed"),
-        status: Number(error?.status || 0),
-        details: error?.body || null,
-      },
-    };
+    return persistenceError(error, "program_score_api_failed");
   }
 };
 
@@ -187,24 +180,16 @@ const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
     const result = await shotLogPersistence.loadShotLogs();
     return { data: result.shotLogs, error: null };
   } catch (error) {
-    return {
-      data: null,
-      error: {
-        code: String(error?.code || "shot_log_api_failed"),
-        message: String(error?.message || "shot_log_api_failed"),
-        status: Number(error?.status || 0),
-        details: error?.body || null,
-      },
-    };
+    return persistenceError(error, "shot_log_api_failed");
   }
 };
 
 const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
-  if (method !== "GET" && isAppPersistenceTable(table) && isDemoPersistenceSession()) {
-    return { data: toRows(body), error: null, skipped: "demo_local_only" };
-  }
-  if (method !== "GET" && isAppPersistenceTable(table) && !hasAuthenticatedPersistenceSession()) {
-    return { data: toRows(body), error: null, skipped: "unauthenticated_local_only" };
+  if (method !== "GET" && isAppPersistenceTable(table)) {
+    const demo = isDemoPersistenceSession();
+    if (demo || !hasAuthenticatedPersistenceSession()) {
+      return { data: toRows(body), error: null, skipped: demo ? "demo_local_only" : "unauthenticated_local_only" };
+    }
   }
 
   const normalizedBody = method === "GET" ? body : normalizeRestWriteBody(table, body);
