@@ -187,19 +187,19 @@ test("S&C build authority keeps cache rewrites read-only and requires explicit e
   const eventEnhancer = readFileSync("scripts/apply-phase3-events-replacement-ownership.mjs", "utf8");
   const rsvpEnhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
 
-  assert.match(enhancer, /const scReplacement=k\.startsWith\("sl:sc-"\),signedReplacementCollection=\(k==="sl:rsvps"\|\|k==="sl:events"\)&&options\?\.replace===true\|\|scReplacement&&options\?\.strictRemote===true/);
+  assert.match(enhancer, /const scReplacement=k\.startsWith\("sl:sc-"\),signedReplacementCollection=\(k==="sl:rsvps"\|\|k==="sl:events"\)&&options===true\|\|scReplacement&&options\?\.strictRemote===true/);
   assert.match(enhancer, /!scReplacement\|\|signedReplacementCollection/);
   assert.match(enhancer, /source:pending\?"local":"remote"/);
   assert.match(enhancer, /\^sc_\(sessions\|rsvps\|logs\)\$/);
-  assert.match(enhancer, /rsvps\.filter\(r=>!isSelf\(r\)\),setRsvps,\{replace:true\}/);
-  assert.match(enhancer, /result\.rsvps,setRsvps,\{replace:true\}/);
-  assert.match(enhancer, /event_rsvp_removed[^\n]+replace:true|replace:true[^\n]+event_rsvp_removed/);
-  assert.match(enhancer, /deletion\.rsvps,setRsvps,\{replace:true\}/);
-  assert.match(enhancer, /r\.playerId===email[^\n]+setRsvps,\{replace:true\}/);
+  assert.match(enhancer, /rsvps\.filter\(r=>!isSelf\(r\)\),setRsvps,true/);
+  assert.match(enhancer, /result\.rsvps,setRsvps,true/);
+  assert.match(enhancer, /event_rsvp_removed[^\n]+setRsvps,true|setRsvps,true[^\n]+event_rsvp_removed/);
+  assert.match(enhancer, /deletion\.events,setEvents,true/);
+  assert.match(enhancer, /deletion\.rsvps,setRsvps,true/);
+  assert.match(enhancer, /r\.playerId===email[^\n]+setRsvps,true/);
   assert.doesNotMatch(enhancer, /setScSessions,\{strictRemote:true,replace:true\}/);
-  assert.match(eventEnhancer, /strengthAuthority/);
   assert.match(eventEnhancer, /explicitRsvpStrengthAuthority/);
-  assert.match(rsvpEnhancer, /strengthAuthority/);
+  assert.match(eventEnhancer, /strictDelete/);
   assert.match(rsvpEnhancer, /explicitRsvpStrengthAuthority/);
   for (const mode of ["dev", "build"]) {
     assert.ok(routeEnhancersFor(mode).includes("scripts/apply-phase3-strength-conditioning-state-ownership.mjs"));
