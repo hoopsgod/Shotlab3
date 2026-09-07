@@ -13,6 +13,8 @@ const CORE_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/playerIdentityPersistenceService.js',
   '/src/lib/teamPersistenceService.js',
   '/src/lib/strengthConditioningPersistenceService.js',
+  '/src/lib/apiFetchBridge.js',
+  '/src/lib/legacySignedCollectionPersistence.js',
   '/src/lib/programScorePersistenceService.js',
   '/src/lib/scorePersistenceService.js',
   '/src/lib/shotLogPersistenceService.js',
