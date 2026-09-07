@@ -24,11 +24,11 @@ function pruneTeamCache(storage = globalThis.localStorage) {
 }
 
 function prunePlayerCache(storage = globalThis.localStorage) {
-  const { requester, role, teamId } = readActorContext(storage);
-  if (!requester || isDemoRequester(requester)) return [];
+  const context = readActorContext(storage);
+  if (!context.requester || isDemoRequester(context.requester)) return [];
   const players = parseStored(storage, "sl:players", []);
   if (!Array.isArray(players) || !players.length) return [];
-  const filtered = filterPlayerRows(players, requester, role, teamId);
+  const filtered = filterPlayerRows(players, context);
   if (filtered.length !== players.length) writeStored(storage, "sl:players", JSON.stringify(filtered));
   return filtered;
 }
@@ -190,10 +190,7 @@ export function installApiIdentityFetchBridge(target = globalThis) {
           return jsonResponse(target, result.rows);
         }
         if (method === "POST") {
-          const rows = parseRows(init?.body);
-          const result = signedResource === "players"
-            ? await service[sync](rows, { replace: true })
-            : await service[sync](rows);
+          const result = await service[sync](parseRows(init?.body));
           return jsonResponse(target, result.rows);
         }
         return methodNotAllowed(target);
