@@ -96,6 +96,6 @@ test("Program ownership stays isolated from the protected home-score contract",(
   const score=fs.readFileSync(new URL("../src/lib/scorePersistenceService.js",import.meta.url),"utf8");
   assert.match(program,/sl:pp/);
   assert.match(legacy,/reconcilePendingProgramScoreRows/);
-  assert.match(legacy,/storageKey === "sl:scores"/);
+  assert.match(legacy,/storageKey\s*===\s*"sl:scores"/);
   assert.match(score,/sl:sp/);
 });
