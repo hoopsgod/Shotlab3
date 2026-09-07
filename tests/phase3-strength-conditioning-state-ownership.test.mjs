@@ -182,15 +182,20 @@ test("S&C pending ownership from another team cannot override successful current
   assert.deepEqual(JSON.parse(storage.getItem("sl:sc-logs")), [currentLog]);
 });
 
-test("S&C build authority makes cache rewrites read-only and real strict mutations replacements", () => {
+test("S&C build authority keeps cache rewrites read-only and requires explicit empty RSVP replacements", () => {
   const enhancer = readFileSync("scripts/apply-phase3-strength-conditioning-state-ownership.mjs", "utf8");
   const eventEnhancer = readFileSync("scripts/apply-phase3-events-replacement-ownership.mjs", "utf8");
   const rsvpEnhancer = readFileSync("scripts/apply-phase3d-rsvp-state-ownership.mjs", "utf8");
 
-  assert.match(enhancer, /const scReplacement=k\.startsWith\("sl:sc-"\),signedReplacementCollection=[^;]+scReplacement&&options\?\.strictRemote===true/);
+  assert.match(enhancer, /const scReplacement=k\.startsWith\("sl:sc-"\),signedReplacementCollection=k==="sl:rsvps"&&options\?\.replace===true\|\|k==="sl:events"&&options\?\.replace===true\|\|scReplacement&&options\?\.strictRemote===true/);
   assert.match(enhancer, /!scReplacement\|\|signedReplacementCollection/);
   assert.match(enhancer, /source:pending\?"local":"remote"/);
   assert.match(enhancer, /\^sc_\(sessions\|rsvps\|logs\)\$/);
+  assert.match(enhancer, /rsvps\.filter\(r=>!isSelf\(r\)\),setRsvps,\{replace:true\}/);
+  assert.match(enhancer, /result\.rsvps,setRsvps,\{replace:true\}/);
+  assert.match(enhancer, /event_rsvp_removed[^\n]+replace:true|replace:true[^\n]+event_rsvp_removed/);
+  assert.match(enhancer, /deletion\.rsvps,setRsvps,\{replace:true\}/);
+  assert.match(enhancer, /r\.playerId===email[^\n]+setRsvps,\{replace:true\}/);
   assert.doesNotMatch(enhancer, /setScSessions,\{strictRemote:true,replace:true\}/);
   assert.match(eventEnhancer, /strengthAuthority/);
   assert.match(rsvpEnhancer, /strengthAuthority/);
