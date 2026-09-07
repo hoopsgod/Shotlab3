@@ -2,8 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createPlayerIdentityPersistenceService,
-  hasPendingPlayerRows,
-  reconcilePendingPlayerRows,
+  readPendingPlayerRows,
 } from "../src/lib/playerIdentityPersistenceService.js";
 import {
   hydrateAuthenticatedCollectionsToStorage,
@@ -42,12 +41,12 @@ test("failed coach replacement preserves the same-team local roster snapshot acr
   });
 
   await assert.rejects(service.syncPlayers(local), /player_sync_failed/);
-  assert.equal(hasPendingPlayerRows(storage), true);
+  assert.notEqual(readPendingPlayerRows(storage), null);
 
   phase = "read";
   const loaded = await service.loadPlayers();
   assert.equal(loaded.rows.find((row) => row.id === "player-id")?.name, "Pending Name");
-  assert.equal(hasPendingPlayerRows(storage), true);
+  assert.notEqual(readPendingPlayerRows(storage), null);
 });
 
 test("failed requester deletion stays absent instead of being resurrected by stale remote identity truth", async () => {
@@ -67,7 +66,7 @@ test("failed requester deletion stays absent instead of being resurrected by sta
   phase = "read";
   const loaded = await service.loadPlayers();
   assert.deepEqual(loaded.rows, []);
-  assert.equal(hasPendingPlayerRows(storage), true);
+  assert.deepEqual(readPendingPlayerRows(storage), []);
 });
 
 test("successful retry clears pending ownership so subsequent remote truth is authoritative", async () => {
@@ -89,7 +88,7 @@ test("successful retry clears pending ownership so subsequent remote truth is au
   });
 
   await service.syncPlayers(pending);
-  assert.equal(hasPendingPlayerRows(storage), false);
+  assert.equal(readPendingPlayerRows(storage), null);
   const loaded = await service.loadPlayers();
   assert.equal(loaded.rows.find((row) => row.id === "player-id")?.name, "Confirmed Remote");
 });
@@ -100,9 +99,7 @@ test("pending player ownership is requester/team scoped and cannot override anot
     ["sl:players", JSON.stringify([{ id: "local", email: "other@example.com", role: "coach", team_id: "team-b" }])],
     ["sl:ip", `${COACH.email}\tteam-a`],
   ]);
-  const remote = [{ id: "remote", email: "other@example.com", role: "coach", team_id: "team-b" }];
-  assert.equal(hasPendingPlayerRows(storage), false);
-  assert.deepEqual(reconcilePendingPlayerRows({ storage, remoteRows: remote }), remote);
+  assert.equal(readPendingPlayerRows(storage), null);
 });
 
 test("legacy signed player reads use the same pending snapshot without contacting stale remote state", async () => {
@@ -132,7 +129,7 @@ test("post-auth hydration preserves pending requester deletion and reports it as
   const fetchImpl = async (input) => {
     const path = String(input).split("?")[0];
     if (path === "/v1/teams") return response({ ok: true, teams: [] });
-    if (path === "/v1/players") return response({ ok: true, players: [PLAYER] });
+    if (path === "/v1/players") throw new Error("pending_player_hydration_should_not_fetch");
     if (path === "/v1/player-profiles") return response({ ok: true, profiles: [] });
     if (path === "/v1/scores") return response({ ok: true, scores: [] });
     if (path === "/v1/program-scores") return response({ ok: true, program_scores: [] });
