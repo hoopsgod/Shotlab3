@@ -43,7 +43,7 @@ test('app-table writes stay local until a persistence identity exists', async ()
   }
 });
 
-test('registered app or Supabase auth state unlocks the existing remote persistence boundary', () => {
+test('registered app or Supabase auth state unlocks the existing remote persistence path', () => {
   const originalWindow = globalThis.window;
   const storage = makeStorage();
   globalThis.window = { localStorage: storage };
