@@ -43,7 +43,7 @@ test('app-table writes stay local until a persistence identity exists', async ()
   }
 });
 
-test('registered app or Supabase auth state unlocks the existing remote persistence path', () => {
+test('registered app or Supabase auth state unlocks the existing remote persistence boundary', () => {
   const originalWindow = globalThis.window;
   const storage = makeStorage();
   globalThis.window = { localStorage: storage };
@@ -68,7 +68,7 @@ test('demo-local persistence keeps precedence over the pre-auth guard', async ()
   ]);
   let fetchCalls = 0;
 
-  globalThis.window = { localStorage: storage };
+  globalThis.window = { localStorage: storage, sessionStorage: makeStorage(), location: { search: '' } };
   globalThis.fetch = async () => {
     fetchCalls += 1;
     throw new Error('unexpected network call');
