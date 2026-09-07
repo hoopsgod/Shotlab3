@@ -4,8 +4,6 @@ import { createCssModuleDeadSelectorPruner } from './scripts/css-module-dead-sel
 import { createLegacyRuntimeCssExtractionPlugin } from './scripts/legacy-runtime-css-extraction-plugin.mjs'
 
 const APP_SUFFIX = '/src/App.jsx'
-const API_FETCH_BRIDGE_SUFFIX = '/src/lib/apiFetchBridge.js'
-const API_FETCH_BRIDGE_TEST_UTILS = /export const __testUtils = \{[\s\S]*?\};\s*$/u
 const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";'
 const SHARED_SECONDARY_PAGE_FRAGMENT = '/src/components/SecondaryPageSystem'
 const SHARED_PREMIUM_WORKSPACE_STYLE = '/src/styles/PremiumWorkspace.css'
@@ -28,21 +26,6 @@ const CORE_DOMAIN_SERVICE_FRAGMENTS = [
 
 function normalizeModuleId(id = '') {
   return String(id).replaceAll('\\', '/')
-}
-
-function stripProductionBridgeTestUtils() {
-  return {
-    name: 'shotlab-strip-production-bridge-test-utils',
-    apply: 'build',
-    enforce: 'pre',
-    transform(source, id) {
-      if (!normalizeModuleId(id).endsWith(API_FETCH_BRIDGE_SUFFIX)) return null
-      if (!API_FETCH_BRIDGE_TEST_UTILS.test(source)) {
-        throw new Error('Production build expected apiFetchBridge __testUtils export is missing.')
-      }
-      return { code: source.replace(API_FETCH_BRIDGE_TEST_UTILS, 'export const __testUtils = {};'), map: null }
-    },
-  }
 }
 
 function ownCoachInteractiveStylesInWorkspace() {
@@ -71,7 +54,6 @@ export default defineConfig(async (environment) => {
     ...resolvedBase,
     plugins: [
       createLegacyRuntimeCssExtractionPlugin(),
-      stripProductionBridgeTestUtils(),
       ownCoachInteractiveStylesInWorkspace(),
       createCssModuleDeadSelectorPruner(),
       ...(resolvedBase.plugins || []),
