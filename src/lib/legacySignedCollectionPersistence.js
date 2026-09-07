@@ -40,8 +40,7 @@ async function hydrateGroup([path,...bindings],fetchImpl,storage,requester,attem
         const field=bindings[index],storageKey=bindings[index+1];let rows=mask&(1<<(index/2))?parseStored(storage,storageKey,[]):payload?.[field];
         if(!Array.isArray(rows)){complete=false;continue}
         if(storageKey==="sl:shotlogs")rows=mergeHydratedRows(storageKey,parseStored(storage,storageKey),rows);
-        else if(storageKey==="sl:players")rows=reconcilePendingPlayerRows({storage,remoteRows:rows});
-        else if(storageKey === "sl:scores")rows=reconcilePendingScoreRows({storage,requester,localRows:parseStored(storage,storageKey),remoteRows:rows});
+        else if(storageKey==="sl:scores")rows=reconcilePendingScoreRows({storage,requester,localRows:parseStored(storage,storageKey),remoteRows:rows});
         else if(storageKey==="sl:program-scores")rows=reconcilePendingProgramScoreRows({storage,requester,localRows:parseStored(storage,storageKey,[]),remoteRows:rows});
         storage.setItem(storageKey,JSON.stringify(rows));hydrated.push(storageKey);
       }
@@ -57,7 +56,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({fetchImpl=global
   const session=await waitForRegisteredSession({storage,expectedIdentity,timeoutMs:sessionWaitMs,pollMs:sessionPollMs});
   if(!session.ok)return{ok:false,hydrated:[],failures:[session.error],identity:session.identity||""};
   const pendingPlayers=hasPendingPlayerRows(storage),pendingEvents=eventPending(storage),pendingRsvps=rsvpPending(storage),pendingStrength=scPendingMask(storage);
-  const results=await Promise.all(GROUPS.map((group)=>pendingEvents&&group[0]==="/v1/events"?["sl:events"]:pendingRsvps&&group[0]==="/v1/rsvps"?["sl:rsvps"]:hydrateGroup(group,fetchImpl,storage,session.identity,groupAttempts,retryDelayMs)));
+  const results=await Promise.all(GROUPS.map((group)=>pendingPlayers&&group[0]==="/v1/players"?["sl:players"]:pendingEvents&&group[0]==="/v1/events"?["sl:events"]:pendingRsvps&&group[0]==="/v1/rsvps"?["sl:rsvps"]:hydrateGroup(group,fetchImpl,storage,session.identity,groupAttempts,retryDelayMs)));
   const hydrated=results.filter(Array.isArray).flat(),failures=results.filter((result)=>!Array.isArray(result));
   const players=parseStored(storage,"sl:players"),identityHydrated=Array.isArray(players)&&players.some((row)=>normalizeIdentity(row?.email)===session.identity);
   if(!identityHydrated&&!pendingPlayers)failures.push("sl:players:authenticated_identity_missing");
