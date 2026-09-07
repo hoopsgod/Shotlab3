@@ -5,7 +5,7 @@ import { createPlayerIdentityPersistenceService } from "./playerIdentityPersiste
 import { createTeamPersistenceService } from "./teamPersistenceService.js";
 import { createStrengthConditioningPersistenceService } from "./strengthConditioningPersistenceService.js";
 
-export { normalizeIdentity, parseStored, pendingOwner, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
+export { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode, writeStored } from "./apiIdentityHeaders.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 
