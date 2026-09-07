@@ -7,7 +7,6 @@ on:
     paths:
       - "functions/_utils/supabase.js"
       - "functions/v1/program-scores/**"
-      - "src/lib/pendingIdPersistence.js"
       - "src/lib/programScorePersistenceService.js"
       - "src/lib/scorePersistenceService.js"
       - "src/lib/legacySignedCollectionPersistence.js"
