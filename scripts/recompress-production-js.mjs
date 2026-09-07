@@ -1,8 +1,10 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises'
+import { gzipSync } from 'node:zlib'
 import path from 'node:path'
 import { minify } from 'terser'
 
 const DIST_DIR = path.resolve(process.cwd(), 'dist')
+const gzipBytes = (value) => gzipSync(value, { level: 9 }).byteLength
 
 async function listJavaScriptFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
@@ -15,8 +17,7 @@ async function listJavaScriptFiles(directory) {
   return files
 }
 
-async function recompress(file) {
-  const source = await readFile(file, 'utf8')
+async function minifyCandidate(source, quoteStyle) {
   const result = await minify(source, {
     ecma: 2022,
     module: true,
@@ -26,10 +27,21 @@ async function recompress(file) {
       pure_funcs: ['console.log', 'console.debug', 'console.info'],
     },
     mangle: { toplevel: true },
-    format: { comments: false },
+    format: { comments: false, quote_style: quoteStyle },
   })
-  const output = result.code || source
-  if (Buffer.byteLength(output) >= Buffer.byteLength(source)) {
+  return result.code || source
+}
+
+async function recompress(file) {
+  const source = await readFile(file, 'utf8')
+  const candidates = await Promise.all([0, 1, 2].map((quoteStyle) => minifyCandidate(source, quoteStyle)))
+  const output = candidates.reduce((best, candidate) => {
+    const bestGzip = gzipBytes(best)
+    const candidateGzip = gzipBytes(candidate)
+    if (candidateGzip !== bestGzip) return candidateGzip < bestGzip ? candidate : best
+    return Buffer.byteLength(candidate) < Buffer.byteLength(best) ? candidate : best
+  }, source)
+  if (output === source) {
     return { changed: false, sourceBytes: Buffer.byteLength(source), outputBytes: Buffer.byteLength(source) }
   }
   await writeFile(file, output)
@@ -47,4 +59,4 @@ for (const file of files) {
   if (result.changed) changedFiles += 1
 }
 
-console.log(`Recompressed ${changedFiles}/${files.length} production JavaScript files with the existing Terser toolchain; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw.`)
+console.log(`Recompressed ${changedFiles}/${files.length} production JavaScript files with gzip-aware output selection; raw delta ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB.`)
