@@ -125,15 +125,11 @@ const clearSession = () => {
   window.localStorage?.removeItem(SESSION_KEY);
   window.localStorage?.removeItem(LEGACY_TOKEN_KEY);
 };
-const hasAuthenticatedPersistenceSession = () => {
-  if (typeof window === "undefined") return false;
-  const appSession = readJsonStorage(APP_SESSION_KEY);
-  const appEmail = String(appSession?.email || "").trim().toLowerCase();
-  if (appEmail) return true;
-  const stored = readStoredSession();
-  const legacyToken = window.localStorage?.getItem(LEGACY_TOKEN_KEY) || "";
-  return Boolean(String(stored?.access_token || legacyToken).trim());
-};
+const hasAuthenticatedPersistenceSession = () => typeof window !== "undefined" && Boolean(
+  readJsonStorage(APP_SESSION_KEY)?.email?.trim()
+  || readStoredSession()?.access_token?.trim()
+  || window.localStorage?.getItem(LEGACY_TOKEN_KEY)?.trim()
+);
 const AUTH_SAFE_FIELDS = ["status", "code", "message", "error", "error_description", "msg"];
 const sanitizeAuthError = (payload, fallbackCode, fallbackMessage, status) => {
   const src = payload && typeof payload === "object" ? payload : {};
@@ -225,11 +221,13 @@ const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
 };
 
 const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
-  if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table) && isDemoPersistenceSession()) {
-    return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped: "demo_local_only" };
-  }
-  if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table) && !hasAuthenticatedPersistenceSession()) {
-    return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped: "unauthenticated_local_only" };
+  if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table)) {
+    const skipped = isDemoPersistenceSession()
+      ? "demo_local_only"
+      : hasAuthenticatedPersistenceSession()
+        ? ""
+        : "unauthenticated_local_only";
+    if (skipped) return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped };
   }
 
   const normalizedBody = method === "GET" ? body : normalizeRestWriteBody(table, body);
