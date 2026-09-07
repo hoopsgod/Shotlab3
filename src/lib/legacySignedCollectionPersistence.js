@@ -1,7 +1,7 @@
 import { mergeHydratedRows } from "./remotePersistence.js";
 import { normalizeIdentity, parseStored, readRequester, readSession, requestSignedBody, signedStorageMode } from "./apiFetchBridge.js";
 import { readActorContext } from "./apiIdentityHeaders.js";
-import { hasPendingPlayerRows, reconcilePendingPlayerRows } from "./playerIdentityPersistenceService.js";
+import { readPendingPlayerRows } from "./playerIdentityPersistenceService.js";
 import { scPendingMask } from "./strengthConditioningPersistenceService.js";
 import { hasPendingScoreRows, reconcilePendingScoreRows } from "./scorePersistenceService.js";
 import { reconcilePendingProgramScoreRows } from "./programScorePersistenceService.js";
@@ -55,7 +55,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({fetchImpl=global
   if(typeof fetchImpl!=="function"||typeof storage?.setItem!=="function")return{ok:false,hydrated:[],failures:["storage_unavailable"],identity:""};
   const session=await waitForRegisteredSession({storage,expectedIdentity,timeoutMs:sessionWaitMs,pollMs:sessionPollMs});
   if(!session.ok)return{ok:false,hydrated:[],failures:[session.error],identity:session.identity||""};
-  const pendingPlayers=hasPendingPlayerRows(storage),pendingEvents=eventPending(storage),pendingRsvps=rsvpPending(storage),pendingStrength=scPendingMask(storage);
+  const pendingPlayerRows=readPendingPlayerRows(storage),pendingPlayers=pendingPlayerRows!==null,pendingEvents=eventPending(storage),pendingRsvps=rsvpPending(storage),pendingStrength=scPendingMask(storage);
   const results=await Promise.all(GROUPS.map((group)=>pendingPlayers&&group[0]==="/v1/players"?["sl:players"]:pendingEvents&&group[0]==="/v1/events"?["sl:events"]:pendingRsvps&&group[0]==="/v1/rsvps"?["sl:rsvps"]:hydrateGroup(group,fetchImpl,storage,session.identity,groupAttempts,retryDelayMs)));
   const hydrated=results.filter(Array.isArray).flat(),failures=results.filter((result)=>!Array.isArray(result));
   const players=parseStored(storage,"sl:players"),identityHydrated=Array.isArray(players)&&players.some((row)=>normalizeIdentity(row?.email)===session.identity);
@@ -71,7 +71,7 @@ export async function requestLegacySignedCollection({table,method="GET",fetchImp
   const scBit=config[0]===SC_PATH?(config[1][0]==="s"?1:config[1][0]==="r"?2:4):0;
   if(scBit&&scPendingMask(storage)&scBit){const rows=parseStored(storage,`sl:sc-${config[1]}`,[]);return{data:Array.isArray(rows)?rows:[],error:null,storageMode:"local_pending"}}
   const requester=supabaseAuthEnabled?"":registeredIdentity(storage);if(!requester||typeof fetchImpl!=="function")return null;
-  if(table==="players"&&hasPendingPlayerRows(storage))return{data:reconcilePendingPlayerRows({storage}),error:null,storageMode:"local_pending"};
+  const pendingPlayers=table==="players"?readPendingPlayerRows(storage):null;if(pendingPlayers!==null)return{data:pendingPlayers,error:null,storageMode:"local_pending"};
   if(table==="events"&&eventPending(storage)){const rows=parseStored(storage,"sl:events");return{data:Array.isArray(rows)?rows:[],error:null,storageMode:"local_pending"}}
   if(table==="rsvps"&&rsvpPending(storage)){const rows=parseStored(storage,"sl:rsvps");return{data:Array.isArray(rows)?rows:[],error:null,storageMode:"local_pending"}}
   try{const payload=await requestSignedBody(fetchImpl,config[0],"GET",storage,null,"signed_collection_load_failed");return{data:Array.isArray(payload?.[config[1]])?payload[config[1]]:[],error:null,storageMode:signedStorageMode(payload)}}
