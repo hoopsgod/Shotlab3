@@ -1,35 +1,6 @@
-import { cleanValue as clean, normalizeIdentity as identity, parseStored as stored, readActorContext, requestError, requestSignedJson } from "./apiIdentityHeaders.js";
-
-const teamIdFor = (row) => clean(row?.id || row?.teamId || row?.team_id);
-
-function readContext(storage = globalThis?.localStorage) {
-  const context = readActorContext(storage);
-  const teams = stored(storage, "sl:teams", []);
-  const sole = Array.isArray(teams) && teams.length === 1 ? teams[0] : null;
-  return {
-    requester: context.requester,
-    teamId: clean(context.teamId || teamIdFor(sole)),
-    role: identity(context.role || (sole ? "coach" : "")),
-  };
-}
-
-export function createTeamPersistenceService({ fetchImpl = globalThis?.fetch, storage = globalThis?.localStorage } = {}) {
-  const loadTeams = async ({ teamId = "" } = {}) => {
-    if (typeof fetchImpl !== "function") return { rows: [] };
-    const active = clean(teamId || readContext(storage).teamId);
-    const [body, response] = await requestSignedJson(fetchImpl, `/v1/teams${active ? `?team_id=${encodeURIComponent(active)}` : ""}`, "GET", storage);
-    if (!response?.ok || body?.error) throw requestError(body, response, "team_load_failed");
-    return { rows: Array.isArray(body?.teams) ? body.teams : [] };
-  };
-
-  const syncTeams = async (teams = []) => {
-    if (typeof fetchImpl !== "function") throw new Error("team_api_unavailable");
-    const [body, response] = await requestSignedJson(fetchImpl, "/v1/teams", "POST", storage, { teams: Array.isArray(teams) ? teams : [] });
-    if (!response?.ok || body?.error) throw requestError(body, response, "team_sync_failed");
-    return { rows: Array.isArray(body?.teams) ? body.teams : [] };
-  };
-
-  return { loadTeams, syncTeams, readContext: () => readContext(storage) };
-}
-
-export const __testUtils = { readContext, teamIdFor };
+import{cleanValue as c,parseStored as p,readActorContext as a,readStorage as R,requestSignedBody as S,writeStored as W}from"./apiIdentityHeaders.js";
+const K="sl:tp",id=x=>c(x?.id||x?.teamId||x?.team_id),C=(s=globalThis.localStorage)=>{let u=a(s),t=p(s,"sl:teams",[]),o=t.length==1&&t[0];return{...u,teamId:c(u.teamId||id(o)),role:u.role||(o?"coach":"")}},q=(s,t="")=>{let u=C(s),x=R(s,K).split("\t");u.teamId=c(t||u.teamId);return u.requester&&u.role.endsWith("coach")&&x[0]==u.requester&&x[1]==u.teamId?[u,+x[2]||0]:0};
+export const pendingTeamRows=(s=globalThis.localStorage,r=[],t="")=>{let z=q(s,t);if(!z)return null;let[u,f]=z,l=p(s,"sl:teams",[]).find(x=>id(x)===u.teamId),x=r.find(x=>id(x)===u.teamId);if(!l||!x)return r;f&1&&(x.name=l.name);f&2&&(x.join_code=l.joinCode??l.join_code);f&4&&(x.school=l.school);f&8&&(x.level=l.level);f&16&&(x.branding=l.branding);return r};
+const m=(r={})=>("name"in r)|(("joinCode"in r||"join_code"in r)<<1)|(("school"in r)<<2)|(("level"in r)<<3)|(("branding"in r)<<4),w=(s,u,f,z)=>{if(!u.requester||!u.role.endsWith("coach")||!u.teamId||!f)return;let x=q(s,u.teamId)?.[1]||0,v=z?x&~f:x|f;W(s,K,v?[u.requester,u.teamId,v].join("\t"):"")};
+export function createTeamPersistenceService({fetchImpl:f=globalThis.fetch,storage:s=globalThis.localStorage}={}){const loadTeams=async({teamId:t=""}={})=>{if(typeof f!="function")return{rows:[]};let v=c(t||C(s).teamId),b=await S(f,`/v1/teams${v?`?team_id=${encodeURIComponent(v)}`:""}`,"GET",s,null,"team_load_failed"),r=b?.teams||[],x=pendingTeamRows(s,r,v);return{rows:x||r}},syncTeams=async(r=[])=>{if(typeof f!="function")throw Error("team_api_unavailable");r=Array.isArray(r)?r:[];let u=C(s),v=r.find(x=>id(x)===u.teamId),g=m(v);w(s,u,g);let b=(await S(f,"/v1/teams","POST",s,{teams:r},"team_sync_failed")).teams||[],y=b.find(x=>id(x)===u.teamId);w(s,u,y&&(g<16||JSON.stringify(v.branding)==JSON.stringify(y.branding))?g:0,1);return{rows:b}};return{loadTeams,syncTeams,readContext:()=>C(s)}}
+export const __testUtils={readContext:C,teamIdFor:id};
