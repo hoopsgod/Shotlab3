@@ -11,7 +11,7 @@ const phase3dAuthority = 'const signedReplacementCollection = k === "sl:rsvps" |
 const oldEventAuthority = 'const signedReplacementCollection = k === "sl:events" || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
-const explicitRsvpStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"&&options?.replace===true||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const explicitRsvpStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
 
 if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) && !source.includes(eventAuthority) && !source.includes(strengthAuthority) && !source.includes(explicitRsvpStrengthAuthority)) {
   const occurrences = source.split(previousAuthority).length - 1
