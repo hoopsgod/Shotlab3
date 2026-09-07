@@ -198,7 +198,9 @@ test("S&C build authority keeps cache rewrites read-only and requires explicit e
   assert.match(enhancer, /r\.playerId===email[^\n]+setRsvps,\{replace:true\}/);
   assert.doesNotMatch(enhancer, /setScSessions,\{strictRemote:true,replace:true\}/);
   assert.match(eventEnhancer, /strengthAuthority/);
+  assert.match(eventEnhancer, /explicitRsvpStrengthAuthority/);
   assert.match(rsvpEnhancer, /strengthAuthority/);
+  assert.match(rsvpEnhancer, /explicitRsvpStrengthAuthority/);
   for (const mode of ["dev", "build"]) {
     assert.ok(routeEnhancersFor(mode).includes("scripts/apply-phase3-strength-conditioning-state-ownership.mjs"));
   }
