@@ -7,12 +7,14 @@ on:
     paths:
       - "functions/_utils/supabase.js"
       - "functions/v1/program-scores/**"
+      - "src/lib/programDrillScoring.js"
       - "src/lib/programScorePersistenceService.js"
       - "src/lib/scorePersistenceService.js"
       - "src/lib/legacySignedCollectionPersistence.js"
       - "src/lib/supabase.js"
       - "migrations/048_program_scores_signed_api_boundary.sql"
       - "tests/coach-verified-program-results.test.mjs"
+      - "tests/program-drill-scoring.test.mjs"
       - "tests/phase3-program-score-state-ownership.test.mjs"
       - "handoff.md"
       - ".github/workflows/signed-program-score-persistence.yml"
@@ -45,6 +47,7 @@ jobs:
       - name: Verify Program score authorization and ownership contracts
         run: |
           node --test tests/coach-verified-program-results.test.mjs
+          node --test tests/program-drill-scoring.test.mjs
           node --test tests/phase3-program-score-state-ownership.test.mjs
 
       - name: Verify protected home-score ownership contract
