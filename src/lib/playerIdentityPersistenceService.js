@@ -1,11 +1,10 @@
-import { cleanValue as clean, normalizeIdentity as identity, parseStored, readActorContext as readContext, requestSignedBody } from "./apiIdentityHeaders.js";
+import { cleanValue as clean, filterPlayerRows, parseStored, readActorContext as readContext, readStorage, requestSignedBody, writeStored } from "./apiIdentityHeaders.js";
 
-const KEY="sl:ip",setPending=(storage,value)=>{try{storage?.setItem?.(KEY,value)}catch{}};
+const KEY="sl:ip";
 export const readPendingPlayerRows=(storage=globalThis?.localStorage,teamId="")=>{
-  const context=readContext(storage);context.teamId=clean(teamId||context.teamId);let marker="";try{marker=storage?.getItem?.(KEY)||""}catch{}
-  if(!context.requester||marker!==`${context.requester}\t${context.teamId}`)return null;
-  const rows=parseStored(storage,"sl:players",[]);
-  return Array.isArray(rows)?rows.filter((row)=>identity(row?.email)===context.requester||(context.role.endsWith("coach")&&clean(row?.team_id??row?.teamId)===context.teamId)):[];
+  const context=readContext(storage);context.teamId=clean(teamId||context.teamId);
+  if(!context.requester||readStorage(storage,KEY)!==`${context.requester}\t${context.teamId}`)return null;
+  return filterPlayerRows(parseStored(storage,"sl:players",[]),context.requester,context.role,context.teamId);
 };
 
 export function createPlayerIdentityPersistenceService({fetchImpl=globalThis?.fetch,storage=globalThis?.localStorage}={}){
@@ -19,9 +18,9 @@ export function createPlayerIdentityPersistenceService({fetchImpl=globalThis?.fe
   const syncPlayers=async(players=[],{replace=true}={})=>{
     if(typeof fetchImpl!=="function")throw new Error("player_api_unavailable");
     const context=readContext(storage),isReplace=replace===true;
-    if(isReplace&&context.requester)setPending(storage,`${context.requester}\t${context.teamId}`);
+    if(isReplace&&context.requester)writeStored(storage,KEY,`${context.requester}\t${context.teamId}`);
     const body=await requestSignedBody(fetchImpl,"/v1/players","POST",storage,{players:Array.isArray(players)?players:[],replace:isReplace},"player_sync_failed");
-    setPending(storage,"");
+    writeStored(storage,KEY,"");
     return{rows:Array.isArray(body?.players)?body.players:[]};
   };
   return{loadPlayers,syncPlayers};

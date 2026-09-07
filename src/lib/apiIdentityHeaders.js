@@ -1,9 +1,18 @@
 export const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 export const cleanValue = (value) => String(value ?? "").trim();
 
-const readStorage = (storage, key) => {
+export const readStorage = (storage, key) => {
   try { return storage?.getItem?.(key) || ""; } catch { return ""; }
 };
+
+export const writeStored = (storage, key, value) => {
+  try { value === null ? storage.removeItem(key) : storage.setItem(key, value); } catch {}
+};
+
+export const filterPlayerRows = (rows, requester, role, teamId) => Array.isArray(rows) ? rows.filter((row) => (
+  normalizeIdentity(row?.email) === requester
+  || ((role === "coach" || role === "assistant_coach") && teamId && cleanValue(row?.team_id ?? row?.teamId) === teamId)
+)) : [];
 
 export function parseStored(storage, key, fallback) {
   try {
