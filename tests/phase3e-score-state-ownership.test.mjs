@@ -151,6 +151,6 @@ test('Phase 3E keeps score ownership out of App.jsx and centralizes score-only p
   assert.doesNotMatch(app, /hasPendingScoreRows|reconcilePendingScoreRows/);
   assert.doesNotMatch(enhancer, /sl:program-scores/);
   assert.ok(routes.indexOf('apply-phase3e-score-state-ownership.mjs') > routes.indexOf('apply-phase3d-rsvp-state-ownership.mjs'));
-  assert.match(hydration, /storageKey === \"sl:scores\"[\s\S]*reconcilePendingScoreRows/);
-  assert.doesNotMatch(hydration, /storageKey === \"sl:program-scores\"\s*\?\s*reconcilePendingScoreRows/);
+  assert.match(hydration, /storageKey\s*===\s*\"sl:scores\"[\s\S]*reconcilePendingScoreRows/);
+  assert.doesNotMatch(hydration, /storageKey\s*===\s*\"sl:program-scores\"\s*\?\s*reconcilePendingScoreRows/);
 });
