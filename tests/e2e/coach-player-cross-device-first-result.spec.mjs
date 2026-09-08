@@ -169,6 +169,7 @@ async function installRoutes(context, state) {
 
   await context.route("**/v1/team-priorities**", (route) => fulfillJson(route, { ok: true, priorities_by_team: {} }));
   await context.route("**/v1/season-archives**", (route) => fulfillJson(route, { ok: true, archives: [] }));
+  await context.route("**/v1/events**", (route) => fulfillJson(route, commonSeed["sl:events"]));
   await context.route("**/v1/coach/players/provision**", (route) => fulfillJson(route, { ok: true, invitations: [{ id: "invite-cross", player_name: "Ari Cross", player_email: PLAYER_EMAIL, status: state.claimed ? "claimed" : "sent" }] }));
   await context.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => {
     const requestUrl = route.request().url();
