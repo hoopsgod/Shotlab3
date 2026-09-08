@@ -6,6 +6,7 @@ on:
       - src/components/TeamStorePortal.jsx
       - src/lib/teamStore.js
       - src/teamStoreEntry.jsx
+      - scripts/apply-phase3-strength-conditioning-state-ownership.mjs
       - index.html
       - tests/e2e/team-store-production.spec.mjs
       - .github/workflows/team-store-production-gate.yml
@@ -21,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  checks: read
 
 concurrency:
   group: team-store-production-gate-${{ github.ref }}
@@ -30,12 +32,46 @@ jobs:
   team-store-release-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      ACCEPTANCE_BASE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.target_url || github.event_name == 'push' && 'https://shotlab3.pages.dev' || '' }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Resolve exact deployed target
+        if: github.event_name == 'push'
+        id: deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          for attempt in $(seq 1 30); do
+            checks="$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/commits/${CANDIDATE_SHA}/check-runs?per_page=100")"
+            conclusion="$(jq -r --arg sha "$CANDIDATE_SHA" '[.check_runs[] | select(.name == "Cloudflare Pages" and .head_sha == $sha)] | sort_by(.started_at) | last | .conclusion // empty' <<< "$checks")"
+            summary="$(jq -r --arg sha "$CANDIDATE_SHA" '[.check_runs[] | select(.name == "Cloudflare Pages" and .head_sha == $sha)] | sort_by(.started_at) | last | .output.summary // empty' <<< "$checks")"
+            preview_url="$(grep -oE 'https://[0-9a-f]+\.shotlab3\.pages\.dev' <<< "$summary" | head -n 1 || true)"
+
+            if [ "$conclusion" = "success" ] && [ -n "$preview_url" ] && curl --fail --silent --show-error --location "$preview_url" >/dev/null; then
+              echo "Exact-head Cloudflare deployment resolved for ${CANDIDATE_SHA}: ${preview_url}"
+              echo "url=${preview_url}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            case "$conclusion" in
+              failure|cancelled|timed_out|action_required)
+                echo "Cloudflare deployment failed for ${CANDIDATE_SHA} with conclusion ${conclusion}." >&2
+                exit 1
+                ;;
+            esac
+
+            echo "Waiting for exact-head Cloudflare deployment for ${CANDIDATE_SHA} (${attempt}/30)..."
+            sleep 10
+          done
+
+          echo "No successful exact-head Cloudflare deployment found for ${CANDIDATE_SHA}." >&2
+          exit 1
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -66,25 +102,17 @@ jobs:
 
       - name: Verify deployed Team Store after release
         if: github.event_name != 'pull_request'
+        env:
+          ACCEPTANCE_BASE_URL: ${{ github.event_name == 'push' && steps.deployment.outputs.url || inputs.target_url }}
         shell: bash
         run: |
           set -o pipefail
-          for attempt in $(seq 1 10); do
-            echo "Team Store production attempt ${attempt}/10 against ${ACCEPTANCE_BASE_URL}"
-            if npx playwright test tests/e2e/team-store-production.spec.mjs \
-              --config=playwright.acceptance.config.mjs \
-              --project=mobile-chromium \
-              --retries=0 \
-              --reporter=line 2>&1 | tee team-store-production-gate.txt; then
-              exit 0
-            fi
-            if [ "${attempt}" -lt 10 ]; then
-              echo "Cloudflare Pages may still be propagating; retrying in 30 seconds."
-              sleep 30
-            fi
-          done
-          echo "The deployed Team Store failed the release gate after 10 attempts."
-          exit 1
+          echo "Team Store deployed verification against ${ACCEPTANCE_BASE_URL}"
+          npx playwright test tests/e2e/team-store-production.spec.mjs \
+            --config=playwright.acceptance.config.mjs \
+            --project=mobile-chromium \
+            --retries=0 \
+            --reporter=line 2>&1 | tee team-store-production-gate.txt
 
       - name: Upload failure artifacts
         if: failure()

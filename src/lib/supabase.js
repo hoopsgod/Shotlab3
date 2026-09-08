@@ -1,4 +1,6 @@
 import { resolveExpiresAt } from "./authFlow.js";
+import { parseStored, readRequester, readSupabaseAccessToken } from "./apiIdentityHeaders.js";
+import { isDemoPersistenceSession } from "./demoMode.js";
 import { createProgramScorePersistenceService } from "./programScorePersistenceService.js";
 import { createScorePersistenceService } from "./scorePersistenceService.js";
 import { createShotLogPersistenceService } from "./shotLogPersistenceService.js";
@@ -12,10 +14,7 @@ const projectRef = (() => {
 })();
 const SESSION_KEY = "sl:supabase-session";
 const LEGACY_TOKEN_KEY = "sl:supabase-access-token";
-const APP_SESSION_KEY = "sl:session";
-const DEMO_MODE_KEY = "sl:demoMode";
-const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
-const APP_PERSISTENCE_TABLES = new Set(["teams", "players", "player_profiles", "scores", "program_scores", "shot_logs", "events", "rsvps", "sessions"]);
+const isAppPersistenceTable = (table) => /^(teams|players|player_profiles|scores|program_scores|shot_logs|events|rsvps|sessions)$/.test(table);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const scorePersistence = createScorePersistenceService({
   fetchImpl: (...args) => globalThis.fetch(...args),
@@ -33,23 +32,7 @@ const shotLogPersistence = createShotLogPersistenceService({
 const compactObject = (value = {}) => Object.fromEntries(
   Object.entries(value).filter(([, field]) => field !== undefined && field !== ""),
 );
-
-const readJsonStorage = (key) => {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage?.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
-const isDemoPersistenceSession = () => {
-  if (typeof window === "undefined") return false;
-  const session = readJsonStorage(APP_SESSION_KEY);
-  const email = String(session?.email || "").trim().toLowerCase();
-  return DEMO_EMAILS.has(email) || window.localStorage?.getItem(DEMO_MODE_KEY) === "true";
-};
+const toRows = (body) => Array.isArray(body) ? body : body ? [body] : [];
 
 const normalizeTeamWriteRow = (row = {}) => {
   const id = String(row.id || row.team_id || row.teamId || "").trim();
@@ -97,17 +80,7 @@ const notifyAuthStateChange = (event, session = null) => {
   }
 };
 
-const readStoredSession = () => {
-  try {
-    const raw = window.localStorage?.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-};
+const readStoredSession = () => parseStored(globalThis.window?.localStorage, SESSION_KEY, null);
 const storeSession = (payload) => {
   if (!payload) return;
   const session = {
@@ -125,6 +98,10 @@ const clearSession = () => {
   window.localStorage?.removeItem(SESSION_KEY);
   window.localStorage?.removeItem(LEGACY_TOKEN_KEY);
 };
+const hasAuthenticatedPersistenceSession = () => Boolean(
+  readRequester(globalThis.window?.localStorage)
+  || readSupabaseAccessToken(globalThis.window?.localStorage)
+);
 const AUTH_SAFE_FIELDS = ["status", "code", "message", "error", "error_description", "msg"];
 const sanitizeAuthError = (payload, fallbackCode, fallbackMessage, status) => {
   const src = payload && typeof payload === "object" ? payload : {};
@@ -155,7 +132,7 @@ const scoreApiRequest = async ({ method = "GET", body } = {}) => {
       const result = await scorePersistence.loadScores();
       return { data: result.scores, error: null };
     }
-    const result = await scorePersistence.upsertScores(Array.isArray(body) ? body : body ? [body] : []);
+    const result = await scorePersistence.upsertScores(toRows(body));
     return { data: result.scores, error: null };
   } catch (error) {
     return {
@@ -176,7 +153,7 @@ const programScoreApiRequest = async ({ method = "GET", body } = {}) => {
       const result = await programScorePersistence.loadProgramScores();
       return { data: result.programScores, error: null };
     }
-    const result = await programScorePersistence.upsertProgramScores(Array.isArray(body) ? body : body ? [body] : []);
+    const result = await programScorePersistence.upsertProgramScores(toRows(body));
     return { data: result.programScores, error: null };
   } catch (error) {
     return {
@@ -193,11 +170,7 @@ const programScoreApiRequest = async ({ method = "GET", body } = {}) => {
 
 const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
   if (method !== "GET") {
-    return {
-      data: Array.isArray(body) ? body : body ? [body] : [],
-      error: null,
-      skipped: "dedicated_home_shot_api",
-    };
+    return { data: toRows(body), error: null, skipped: "dedicated_home_shot_api" };
   }
   try {
     const result = await shotLogPersistence.loadShotLogs();
@@ -216,8 +189,11 @@ const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
 };
 
 const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
-  if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table) && isDemoPersistenceSession()) {
-    return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped: "demo_local_only" };
+  if (method !== "GET" && isAppPersistenceTable(table) && isDemoPersistenceSession()) {
+    return { data: toRows(body), error: null, skipped: "demo_local_only" };
+  }
+  if (method !== "GET" && isAppPersistenceTable(table) && !hasAuthenticatedPersistenceSession()) {
+    return { data: toRows(body), error: null, skipped: "unauthenticated_local_only" };
   }
 
   const normalizedBody = method === "GET" ? body : normalizeRestWriteBody(table, body);
@@ -257,7 +233,7 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
 
   const response = await fetch(url, {
     method,
-    headers: buildHeaders({ upsert, onConflict }),
+    headers: buildHeaders({ upsert }),
     body: normalizedBody ? JSON.stringify(normalizedBody) : undefined,
   });
 
@@ -296,7 +272,7 @@ export const supabase = {
       if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
       const response = await fetch(`${baseUrl}/auth/v1/signup`, {
         method: "POST",
-        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+        headers: buildHeaders(),
         body: JSON.stringify({ email, password }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -311,7 +287,7 @@ export const supabase = {
       if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
       const response = await fetch(`${baseUrl}/auth/v1/token?grant_type=password`, {
         method: "POST",
-        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+        headers: buildHeaders(),
         body: JSON.stringify({ email, password }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -325,15 +301,14 @@ export const supabase = {
     async getSession() {
       if (!hasConfig) return { data: { session: null }, error: null };
       const stored = readStoredSession();
-      const legacyToken = window.localStorage?.getItem(LEGACY_TOKEN_KEY) || "";
-      let token = stored?.access_token || legacyToken;
+      let token = readSupabaseAccessToken(window.localStorage);
       let refreshToken = stored?.refresh_token || "";
       const expiresAt = Number(stored?.expires_at || 0);
       const isExpired = expiresAt ? Date.now() >= (expiresAt * 1000) - 30_000 : false;
       if ((!token || isExpired) && refreshToken) {
         const refreshRes = await fetch(`${baseUrl}/auth/v1/token?grant_type=refresh_token`, {
           method: "POST",
-          headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+          headers: buildHeaders(),
           body: JSON.stringify({ refresh_token: refreshToken }),
         });
         const refreshPayload = await refreshRes.json().catch(() => ({}));
@@ -351,7 +326,7 @@ export const supabase = {
       if (!response.ok && response.status === 401 && refreshToken) {
         const refreshRes = await fetch(`${baseUrl}/auth/v1/token?grant_type=refresh_token`, {
           method: "POST",
-          headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+          headers: buildHeaders(),
           body: JSON.stringify({ refresh_token: refreshToken }),
         });
         const refreshPayload = await refreshRes.json().catch(() => ({}));
@@ -400,7 +375,7 @@ export const supabase = {
       upsert(values, options = {}) {
         return request(table, {
           method: "POST",
-          body: Array.isArray(values) ? values : [values],
+          body: toRows(values),
           upsert: true,
           onConflict: options.onConflict,
         });
@@ -414,6 +389,7 @@ export const __testUtils = {
   normalizeRestWriteBody,
   alignBulkObjectKeys,
   isDemoPersistenceSession,
+  hasAuthenticatedPersistenceSession,
   scoreApiRequest,
   programScoreApiRequest,
   shotLogApiRequest,

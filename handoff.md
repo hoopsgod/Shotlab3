@@ -20,7 +20,7 @@
 
 - Phase: **Post-Phase-3 product-validation closure**
 - Branch: `agent/post-phase3-product-validation`
-- Base: `fcb3b1abc4f1b18cf0ad72991a3427b3c34ad990`
+- Base: `57f9596d5de23926c017a83fb71e4f56ff5863d5`
 - Scope: commit the deterministic route-enhancer output already covered by repository regression contracts: registered Events/S&C replacement hydration, precise RSVP presentation, Player In Season parity, and mobile S&C row containment.
 - Do not broaden this slice into the visual redesign, onboarding, monetization, or architecture recommendations from the product evaluation.
 
@@ -81,3 +81,14 @@ Not in the queue: Player identities, Player profiles, assignments, coach follow-
 - Do not raise performance budgets or alter visual baselines to pass.
 - Re-run exact-head certification on the final PR head.
 - Do not merge without explicit authorization after certification.
+
+## PR #1545 merge-readiness closure
+
+- Integrated the current merged base so Cloudflare head builds contain the same signed persistence boundaries exercised by GitHub merge builds.
+- Retained the base's explicit boolean RSVP/Event deletion authority; empty startup cache rewrites have no replacement authority.
+- Extracted unchanged ConfettiBurst and CourtDivider into TrainingCelebration.jsx to keep App.jsx below the existing 500,000-byte source ceiling.
+- Updated the legacy S&C assertion to verify explicit replacement versus cache hydration behavior for all three S&C collections.
+- Updated the historical drawer source assertion to enforce the existing team-brand surface token and fallback, retaining the text/contrast declarations and visual baseline.
+- Fresh local verification: 49 focused persistence/parity checks, 59 release/decomposition checks, and 59 release-hardening checks pass.
+- Production budget and exact final-head CI/Cloudflare browser evidence must be recorded on PR #1545 before merge certification.
+- Do not merge without explicit user authorization.

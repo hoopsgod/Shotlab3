@@ -11,8 +11,10 @@ const phase3dAuthority = 'const signedReplacementCollection = k === "sl:rsvps" |
 const oldEventAuthority = 'const signedReplacementCollection = k === "sl:events" || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const objectRsvpStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const explicitRsvpStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options===true||scReplacement&&options?.strictRemote===true;'
 
-if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) && !source.includes(eventAuthority) && !source.includes(strengthAuthority)) {
+if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) && !source.includes(eventAuthority) && !source.includes(strengthAuthority) && !source.includes(objectRsvpStrengthAuthority) && !source.includes(explicitRsvpStrengthAuthority)) {
   const occurrences = source.split(previousAuthority).length - 1
   if (occurrences !== 1) {
     throw new Error(`Expected exactly one signed replacement collection authority before Phase 3D, found ${occurrences}.`)
@@ -20,7 +22,7 @@ if (!source.includes(phase3dAuthority) && !source.includes(oldEventAuthority) &&
   source = source.replace(previousAuthority, phase3dAuthority)
 }
 
-if ((source.split(phase3dAuthority).length - 1) + (source.split(oldEventAuthority).length - 1) + (source.split(eventAuthority).length - 1) + (source.split(strengthAuthority).length - 1) !== 1) {
+if ((source.split(phase3dAuthority).length - 1) + (source.split(oldEventAuthority).length - 1) + (source.split(eventAuthority).length - 1) + (source.split(strengthAuthority).length - 1) + (source.split(objectRsvpStrengthAuthority).length - 1) + (source.split(explicitRsvpStrengthAuthority).length - 1) !== 1) {
   throw new Error('Phase 3D RSVP replacement authority or its successor must exist exactly once after enhancement.')
 }
 

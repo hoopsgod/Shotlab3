@@ -7,13 +7,62 @@ const appLineEnding = rawApp.includes('\r\n') ? '\r\n' : '\n'
 let app = rawApp.replace(/\r\n/g, '\n')
 
 const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
-const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const priorStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const objectStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options===true||scReplacement&&options?.strictRemote===true;'
 if (!app.includes(strengthAuthority)) {
-  const occurrences = app.split(eventAuthority).length - 1
-  if (occurrences !== 1) throw new Error(`Expected Events replacement authority exactly once before S&C ownership, found ${occurrences}.`)
-  app = app.replace(eventAuthority, strengthAuthority)
+  if (app.includes(objectStrengthAuthority)) {
+    app = app.replace(objectStrengthAuthority, strengthAuthority)
+  } else if (app.includes(priorStrengthAuthority)) {
+    app = app.replace(priorStrengthAuthority, strengthAuthority)
+  } else {
+    const occurrences = app.split(eventAuthority).length - 1
+    if (occurrences !== 1) throw new Error(`Expected Events replacement authority exactly once before S&C ownership, found ${occurrences}.`)
+    app = app.replace(eventAuthority, strengthAuthority)
+  }
 }
-if ((app.split(strengthAuthority).length - 1) !== 1) throw new Error('S&C replacement authority must exist exactly once.')
+if ((app.split(strengthAuthority).length - 1) !== 1) throw new Error('S&C replacement authority with explicit RSVP replacement must exist exactly once.')
+
+function requireExplicitReplacement(prior, next, label) {
+  if (app.includes(next)) return
+  const occurrences = app.split(prior).length - 1
+  if (occurrences !== 1) throw new Error(`Expected ${label} mutation boundary exactly once, found ${occurrences}.`)
+  app = app.replace(prior, next)
+}
+
+// Non-empty RSVP writes remain ordinary upserts. Only actions that can intentionally
+// reduce the authoritative collection to [] receive replacement authority. A strict
+// boolean sentinel keeps that authority explicit without carrying repeated option objects.
+requireExplicitReplacement(
+  'await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps);',
+  'await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps,true);',
+  'account deletion RSVP',
+)
+requireExplicitReplacement(
+  'P("sl:rsvps",result.rsvps,setRsvps),',
+  'P("sl:rsvps",result.rsvps,setRsvps,true),',
+  'season archive RSVP',
+)
+requireExplicitReplacement(
+  'if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}',
+  'if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps,true);trackEvent("event_rsvp_removed",{eventId:eid});}',
+  'player RSVP removal',
+)
+requireExplicitReplacement(
+  'await P("sl:events",deletion.events,setEvents,{replace:true});',
+  'await P("sl:events",deletion.events,setEvents,true);',
+  'event deletion event',
+)
+requireExplicitReplacement(
+  'await P("sl:rsvps",deletion.rsvps,setRsvps);return deletion',
+  'await P("sl:rsvps",deletion.rsvps,setRsvps,true);return deletion',
+  'event deletion RSVP',
+)
+requireExplicitReplacement(
+  'await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};',
+  'await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps,true)};',
+  'coach RSVP removal',
+)
 
 const writeBoundary = 'if (table && (remoteRows.length > 0 || signedReplacementCollection)) {'
 const strengthWriteBoundary = 'if(table&&(remoteRows.length||signedReplacementCollection)&&(!scReplacement||signedReplacementCollection)) {'
@@ -49,4 +98,4 @@ if (!supabase.includes(strengthEmptyGuard)) {
 if ((supabase.split(strengthEmptyGuard).length - 1) !== 1) throw new Error('S&C adapter must allow explicit empty replacement writes exactly once.')
 fs.writeFileSync(supabasePath, supabase.replace(/\n/g, supabaseLineEnding))
 
-console.log('Applied pending-aware S&C replacement ownership with strict mutation-only remote writes.')
+console.log('Applied pending-aware S&C ownership with strict mutation-only RSVP and S&C replacement writes.')

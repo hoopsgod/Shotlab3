@@ -8,27 +8,93 @@ on:
     branches:
       - march-3-reset-85393dd
     paths:
+      - "src/lib/supabase.js"
       - "tests/e2e/season-archive-live-preview.spec.mjs"
       - ".github/workflows/season-archive-live-preview.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: read
+  checks: read
 
 concurrency:
-  group: season-archive-production-smoke-${{ github.event.pull_request.number || github.ref }}
+  group: season-archive-live-preview-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   live-preview-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      LIVE_PREVIEW_URL: https://shotlab3.pages.dev
 
     steps:
-      - name: Check out repository
+      - name: Check out exact candidate
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Resolve exact deployed target
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "url=https://shotlab3.pages.dev" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$EVENT_NAME" = "push" ]; then
+            for attempt in $(seq 1 30); do
+              checks="$(gh api \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${GITHUB_REPOSITORY}/commits/${CANDIDATE_SHA}/check-runs?per_page=100")"
+              conclusion="$(jq -r --arg sha "$CANDIDATE_SHA" '[.check_runs[] | select(.name == "Cloudflare Pages" and .head_sha == $sha)] | sort_by(.started_at) | last | .conclusion // empty' <<< "$checks")"
+              summary="$(jq -r --arg sha "$CANDIDATE_SHA" '[.check_runs[] | select(.name == "Cloudflare Pages" and .head_sha == $sha)] | sort_by(.started_at) | last | .output.summary // empty' <<< "$checks")"
+              preview_url="$(grep -oE 'https://[0-9a-f]+\.shotlab3\.pages\.dev' <<< "$summary" | head -n 1 || true)"
+
+              if [ "$conclusion" = "success" ] && [ -n "$preview_url" ] && curl --fail --silent --show-error --location "$preview_url" >/dev/null; then
+                echo "Exact-head Cloudflare deployment resolved for ${CANDIDATE_SHA}: ${preview_url}"
+                echo "url=${preview_url}" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+
+              case "$conclusion" in
+                failure|cancelled|timed_out|action_required)
+                  echo "Cloudflare deployment failed for ${CANDIDATE_SHA} with conclusion ${conclusion}." >&2
+                  exit 1
+                  ;;
+              esac
+
+              echo "Waiting for exact-head Cloudflare deployment for ${CANDIDATE_SHA} (${attempt}/30)..."
+              sleep 10
+            done
+
+            echo "No successful exact-head Cloudflare deployment found for ${CANDIDATE_SHA}." >&2
+            exit 1
+          fi
+
+          short_sha="${CANDIDATE_SHA:0:7}"
+          pr_number="${{ github.event.pull_request.number }}"
+          for attempt in $(seq 1 30); do
+            comments="$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments?per_page=100")"
+            preview_url="$(jq -r --arg sha "$short_sha" '[.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($sha)) | .body | capture("https://(?<host>[0-9a-f]+\\.shotlab3\\.pages\\.dev)") | "https://" + .host][0] // empty' <<< "$comments")"
+
+            if [ -n "$preview_url" ] && curl --fail --silent --show-error --location "$preview_url" >/dev/null; then
+              echo "Exact-head preview resolved for ${CANDIDATE_SHA}: ${preview_url}"
+              echo "url=${preview_url}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            echo "Waiting for Cloudflare preview comment for ${CANDIDATE_SHA} (${attempt}/30)..."
+            sleep 10
+          done
+
+          echo "No successful exact-head Cloudflare preview found for ${CANDIDATE_SHA}." >&2
+          exit 1
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -45,7 +111,9 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run deployed production smoke test
+      - name: Run deployed smoke test
+        env:
+          LIVE_PREVIEW_URL: ${{ steps.target.outputs.url }}
         run: |
           set +e
           npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium-desktop --reporter=line > live-preview-smoke.txt 2>&1
@@ -57,7 +125,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-production-smoke-artifacts
+          name: season-archive-live-preview-smoke-artifacts
           path: |
             live-preview-smoke.txt
             playwright-report/

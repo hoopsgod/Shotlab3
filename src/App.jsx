@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 
+import { ConfettiBurst, CourtDivider } from "./components/TrainingCelebration.jsx";
 import Auth from "./components/AuthWorkspace.jsx";
 import { BrandBackdrop, BrandWordmark, SLLogo } from "./components/ShotLabBrand.jsx";
 import { _DESKTOP_SHELL_CSS, _PAGE_SIGNATURE_CSS, _PLAYER_COMPACT_DASHBOARD_CSS, _STYLES_CSS } from "./styles/appLegacyStyles.js";
@@ -382,7 +383,7 @@ const DB = {
     if ((k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
       console.warn("[remote-persist] buildRemoteRows dropped all rows", { key: k, inputCount: v.length });
     }
-    const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;
+    const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options===true||scReplacement&&options?.strictRemote===true;
     if(table&&(remoteRows.length||signedReplacementCollection)&&(!scReplacement||signedReplacementCollection)) {
       try {
         if (strictRemote && isShotLabDebugMode()) {
@@ -1305,7 +1306,7 @@ setDemoMode(false);
 await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
 await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
 await P("sl:program-scores",programScores.filter(s=>!isSelf(s)),setProgramScores);
-await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps);
+await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps,true);
 await P("sl:shotlogs",shotLogs.filter(s=>!isSelf(s)),setShotLogs);
 await P("sl:challenges",challenges.filter(c=>String(c?.from||"").trim().toLowerCase()!==e&&String(c?.to||"").trim().toLowerCase()!==e),setChallenges);
 await P("sl:sc-rsvps",scRsvps.filter(r=>!isSelf(r)),setScRsvps);
@@ -1473,7 +1474,7 @@ await Promise.all([
 P("sl:players",result.players,setPlayers),
 P("sl:scores",result.scores.filter(s=>(s.src||"home")!=="program"),setScores),
 P("sl:program-scores",result.scores.filter(s=>s.src==="program"),setProgramScores),
-P("sl:rsvps",result.rsvps,setRsvps),
+P("sl:rsvps",result.rsvps,setRsvps,true),
 P("sl:shotlogs",result.shotLogs,setShotLogs),
 P("sl:challenges",result.challenges,setChallenges),
 P("sl:sc-rsvps",result.scRsvps,setScRsvps),
@@ -1539,11 +1540,11 @@ const removeDrill=async(id)=>{if(user?.role!=="coach")return;return persistTrain
 const updateProgramDrill=async(id,up)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};return persistTrainingCatalog(drills,programDrills.map(d=>String(d.id)===String(id)?{...d,...up,id:d.id}:d))};
 const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};const inSeason=isInSeasonProgramDrill(drill);if(!inSeason&&countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};if(inSeason&&countCustomInSeasonProgramDrills(programDrills)>=30)return{ok:false,err:"In Season drill limit reached (30 custom drills)."};return persistTrainingCatalog(drills,[...programDrills,{...drill,id:drill?.id||Date.now(),mode:"program",inSeason}])};
 const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills,programDrills.filter(d=>String(d.id)!==String(id)))};
-const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
+const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps,true);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
 const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return{ok:false};const eventPayload={...ev,id:genId("event"),teamId:user.teamId,ownerCoachId:user.email};
 try{await P("sl:events",[...events,eventPayload],setEvents,{strictLocal:true});trackEvent("event_created",{eventType:ev.type||"run"});return{ok:true};}catch(error){console.error("event_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),eventTitle:String(ev?.title||"")});trackEvent("event_create_failed",{eventType:ev?.type||"run",error:String(error?.message||"unknown")});throw error;}};
-const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamEvent({events,rsvps,eventId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;await P("sl:events",deletion.events,setEvents,{replace:true});await P("sl:rsvps",deletion.rsvps,setRsvps);return deletion};
-const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
+const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamEvent({events,rsvps,eventId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;await P("sl:events",deletion.events,setEvents,true);await P("sl:rsvps",deletion.rsvps,setRsvps,true);return deletion};
+const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps,true)};
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
 const persistLocalShotLogs=(nextLogs)=>{try{window.storage?.set("sl:shotlogs",JSON.stringify(nextLogs),true);}catch(e){}};
 const saveHomeShotLogRemote=async(log)=>{
@@ -4683,8 +4684,6 @@ function SectionHero({icon,title,subtitle,accent=VOLT,deco,isCoach=false}){retur
 function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
 function SH({t,s,isCoach=false}){return <AppHeader variant="utility" eyebrow={s||undefined} title={t} brandLockup={isCoach?<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>:null} />}
 function Av({n,sz=36,style:x,email,isCoach=false}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${VOLT}44,${VOLT}22)`,border:`2px solid ${VOLT}55`,color:VOLT,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${VOLT}22${isCoach?", 0 0 0 4px rgba(200, 255, 0, 0.15)":""}`,...x}}>{(n||"?")[0].toUpperCase()}</div>}
-function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#C8FF00","#C8FF00","#FFFFFF"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
-function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
 function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"14px 0"}}><div style={{height:1,background:BORDER_CLR,flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT}}/><div style={{height:1,background:BORDER_CLR,flex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
 function Empty({t,action,onTap,cta="GET STARTED",ctaVariant="primary",icon=<DrillIcon type="sb" size={48} color="#555555"/>,hint="Next best action: complete one session to activate this panel"}){const hasAction=typeof onTap==="function";return <div className="state-fade" style={{textAlign:"center",padding:"40px 20px",borderRadius:16,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.08)"}}><div style={{opacity:.9,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#777777"}}>{icon}</div><p className="u-allcaps-long" style={{fontFamily:FD,color:LIGHT,fontSize:18,marginTop:14,lineHeight:1.2}}>{t}</p>{action&&<p className="u-secondary-text" style={{fontFamily:FB,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:320}}>{action}</p>}{hasAction?<button onClick={onTap} className={`btn-v ${ctaVariant==="secondary"?"cta-secondary":"cta-primary"}`} style={{marginTop:14}}>{cta}</button>:<div style={{marginTop:12,fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase"}}>{hint}</div>}</div>}

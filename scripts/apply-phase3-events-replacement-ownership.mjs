@@ -10,22 +10,26 @@ const priorAuthority = 'const signedReplacementCollection = k === "sl:rsvps" || 
 const oldEventAuthority = 'const signedReplacementCollection = k === "sl:events" || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const eventAuthority = 'const signedReplacementCollection = (k==="sl:events"&&options?.replace===true) || k === "sl:rsvps" || k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";'
 const strengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=k==="sl:rsvps"||k==="sl:events"&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const objectRsvpStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options?.replace===true||scReplacement&&options?.strictRemote===true;'
+const explicitRsvpStrengthAuthority = 'const scReplacement=k.startsWith("sl:sc-"),signedReplacementCollection=(k==="sl:rsvps"||k==="sl:events")&&options===true||scReplacement&&options?.strictRemote===true;'
 if (app.includes(oldEventAuthority)) app = app.replace(oldEventAuthority, eventAuthority)
-if (!app.includes(eventAuthority) && !app.includes(strengthAuthority)) {
+if (!app.includes(eventAuthority) && !app.includes(strengthAuthority) && !app.includes(objectRsvpStrengthAuthority) && !app.includes(explicitRsvpStrengthAuthority)) {
   const occurrences = app.split(priorAuthority).length - 1
   if (occurrences !== 1) throw new Error(`Expected Phase 3D replacement authority exactly once before Events ownership, found ${occurrences}.`)
   app = app.replace(priorAuthority, eventAuthority)
 }
-if ((app.split(eventAuthority).length - 1) + (app.split(strengthAuthority).length - 1) !== 1) throw new Error('Events replacement authority or its S&C successor must exist exactly once.')
+if ((app.split(eventAuthority).length - 1) + (app.split(strengthAuthority).length - 1) + (app.split(objectRsvpStrengthAuthority).length - 1) + (app.split(explicitRsvpStrengthAuthority).length - 1) !== 1) throw new Error('Events replacement authority or its S&C successor must exist exactly once.')
 
 const priorDelete = 'await P("sl:events",deletion.events,setEvents);await P("sl:rsvps",deletion.rsvps,setRsvps);return deletion'
 const explicitDelete = 'await P("sl:events",deletion.events,setEvents,{replace:true});await P("sl:rsvps",deletion.rsvps,setRsvps);return deletion'
-if (!app.includes(explicitDelete)) {
+const explicitRsvpDelete = 'await P("sl:events",deletion.events,setEvents,{replace:true});await P("sl:rsvps",deletion.rsvps,setRsvps,{replace:true});return deletion'
+const strictDelete = 'await P("sl:events",deletion.events,setEvents,true);await P("sl:rsvps",deletion.rsvps,setRsvps,true);return deletion'
+if (!app.includes(explicitDelete) && !app.includes(explicitRsvpDelete) && !app.includes(strictDelete)) {
   const occurrences = app.split(priorDelete).length - 1
   if (occurrences !== 1) throw new Error(`Expected coach event deletion persistence boundary exactly once, found ${occurrences}.`)
   app = app.replace(priorDelete, explicitDelete)
 }
-if ((app.split(explicitDelete).length - 1) !== 1) throw new Error('Explicit coach event deletion replacement must exist exactly once.')
+if ((app.split(explicitDelete).length - 1) + (app.split(explicitRsvpDelete).length - 1) + (app.split(strictDelete).length - 1) !== 1) throw new Error('Explicit coach event deletion replacement must exist exactly once.')
 
 const readBoundary = '        }\n        const localRows = hasData(local) ? buildAppRows(k, local, { source: "local" }) : [];'
 const eventReadAuthority = '        }\n        if(k==="sl:events"&&!isDemoPersistenceSession()&&Array.isArray(data)&&signedRead?.storageMode!=="local_pending")return buildAppRows(k,data,{source:"remote"});\n        const localRows = hasData(local) ? buildAppRows(k, local, { source: "local" }) : [];'
