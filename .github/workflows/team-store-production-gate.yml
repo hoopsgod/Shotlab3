@@ -6,6 +6,7 @@ on:
       - src/components/TeamStorePortal.jsx
       - src/lib/teamStore.js
       - src/teamStoreEntry.jsx
+      - scripts/apply-phase3-strength-conditioning-state-ownership.mjs
       - index.html
       - tests/e2e/team-store-production.spec.mjs
       - .github/workflows/team-store-production-gate.yml
