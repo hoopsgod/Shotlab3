@@ -123,12 +123,12 @@ for (const viewport of VIEWPORTS) {
       };
     });
 
-    // Coach Home keeps a larger identity mark than secondary pages, but the current
-    // compact mobile authority intentionally scales it from 80px to 92px here.
-    expect(metrics.mark.width).toBeGreaterThanOrEqual(80);
-    expect(metrics.mark.width).toBeLessThanOrEqual(96);
-    expect(metrics.mark.height).toBeGreaterThanOrEqual(80);
-    expect(metrics.mark.height).toBeLessThanOrEqual(96);
+    // Coach Home intentionally carries hero-level crest presence like Player Home.
+    // Keep the approved 104px floor / 120px cap tightly bounded across phones.
+    expect(metrics.mark.width).toBeGreaterThanOrEqual(104);
+    expect(metrics.mark.width).toBeLessThanOrEqual(121);
+    expect(metrics.mark.height).toBeGreaterThanOrEqual(104);
+    expect(metrics.mark.height).toBeLessThanOrEqual(121);
     expect(metrics.imageStyle.objectFit).toBe('contain');
     expect(metrics.image.left).toBeGreaterThanOrEqual(metrics.mark.left - 1);
     expect(metrics.image.right).toBeLessThanOrEqual(metrics.mark.right + 1);
