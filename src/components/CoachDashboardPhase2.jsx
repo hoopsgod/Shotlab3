@@ -52,7 +52,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
           <MetricGrid items={[
             { label: "Weekly makes", value: model.weeklyMakes },
             { label: "Weekly actions", value: model.weeklyActions },
-            { label: "Event readiness", value: `${model.attendanceRate}%` },
+            { label: "Upcoming RSVPs", value: `${model.rsvpRate}%` },
             { label: "S&C completion", value: `${model.scCompletionRate}%` },
           ]} />
           <div className={styles.drawerActions}>
@@ -60,7 +60,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
             <button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} onClick={onShowActivity}>Show Activity</button>
           </div>
           <DashboardSection eyebrow="Current week" title="Development pulse" summary="A decision-ready summary of volume, attendance, and training compliance." compact>
-            <DashboardProgress value={model.attendanceRate} max={100} label="Event readiness" detail={`${model.attendanceConfirmed} of ${model.attendancePossible}`} />
+            <DashboardProgress value={model.rsvpRate} max={100} label="Upcoming RSVP coverage" detail={`${model.rsvpResponded} of ${model.rsvpPossible}`} />
             <div style={{ height: 10 }} />
             <DashboardProgress value={model.scCompletionRate} max={100} label="S&C completion" detail={`${model.scCompleted} of ${model.scCommitted}`} />
             <div className={styles.compactMetricGrid}>
@@ -100,8 +100,8 @@ export function CoachEventIntelligenceDrawer({ model, onClose, onManageAttendanc
       {model ? (
         <>
           <MetricGrid items={[
-            { label: "Confirmed", value: model.confirmed.length },
-            { label: "Missing", value: model.missing.length },
+            { label: "RSVP'd", value: model.respondedPlayers.length },
+            { label: "Awaiting RSVP", value: model.awaitingResponse.length },
             { label: "Response rate", value: `${model.responseRate}%` },
             { label: "Walk-ins", value: model.walkIns.length },
           ]} />
@@ -109,14 +109,14 @@ export function CoachEventIntelligenceDrawer({ model, onClose, onManageAttendanc
             <button type="button" className={styles.drawerAction} onClick={onManageAttendance}>Manage Attendance</button>
             <button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} onClick={onOpenSchedule}>Open Schedule</button>
           </div>
-          <DashboardSection eyebrow="Readiness" title="Attendance response" summary={model.description} compact>
-            <DashboardProgress value={model.responseRate} max={100} label="Roster response" detail={`${model.confirmed.length} confirmed`} />
+          <DashboardSection eyebrow="Practice readiness" title="Next-session RSVP coverage" summary={model.description} compact>
+            <DashboardProgress value={model.responseRate} max={100} label="Roster response" detail={`${model.respondedPlayers.length} RSVP'd`} />
           </DashboardSection>
-          <DashboardSection eyebrow="Confirmed" title="Available players" summary="Players currently attached to this event." compact>
-            {model.confirmed.length ? <div className={styles.personList}>{model.confirmed.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>Ready</em></div>)}</div> : <EmptyState label="Response status" kind="attendance">No confirmed players yet.</EmptyState>}
+          <DashboardSection eyebrow="RSVP'd" title="Responses received" summary="Rostered players with an RSVP recorded for this event." compact>
+            {model.respondedPlayers.length ? <div className={styles.personList}>{model.respondedPlayers.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>RSVP'd</em></div>)}</div> : <EmptyState label="Response status" kind="attendance">No confirmed players yet.</EmptyState>}
           </DashboardSection>
-          <DashboardSection eyebrow="Follow-up" title="Missing responses" summary="Players who still need an RSVP touchpoint." compact>
-            {model.missing.length ? <div className={styles.personList}>{model.missing.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>Follow up</em></div>)}</div> : <EmptyState label="Follow-up cleared" tone="positive" kind="complete">Every rostered player has responded.</EmptyState>}
+          <DashboardSection eyebrow="Follow-up" title="Awaiting RSVP" summary="Players who still need an RSVP touchpoint." compact>
+            {model.awaitingResponse.length ? <div className={styles.personList}>{model.awaitingResponse.map((player) => <div className={styles.personRow} key={player.email || player.id || player.name}><div><strong>{player.name || player.email}</strong><span>{player.email || "Roster player"}</span></div><em>Follow up</em></div>)}</div> : <EmptyState label="Follow-up cleared" tone="positive" kind="complete">Every rostered player has responded.</EmptyState>}
           </DashboardSection>
         </>
       ) : null}
