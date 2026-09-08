@@ -62,14 +62,14 @@ export function deriveCoachFollowUpQueue({ records = [], roster = [], teamId = "
   };
 }
 
-export function readCoachFollowUpQueueContext(storage = globalThis?.localStorage) {
+export function readCoachFollowUpQueueContext(storage = globalThis?.localStorage, requestedTeamId = "") {
   const sessionRaw = parse(storage?.getItem?.("sl:session"), {});
   const session = Array.isArray(sessionRaw) ? sessionRaw[0] : sessionRaw;
   const requester = identity(session?.email || session?.userEmail || session?.user_id);
   const players = parse(storage?.getItem?.("sl:players"), []);
   const profiles = parse(storage?.getItem?.("sl:player-profiles"), []);
   const actor = safeArray(players).find((player) => identity(player?.email) === requester);
-  const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id);
+  const teamId = clean(requestedTeamId || session?.teamId || session?.team_id || actor?.teamId || actor?.team_id);
   const roster = getCoachRosterPlayers({ players, playerProfiles: profiles, teamId }).filter((row) => !isCoachRosterRow(row));
   return { requester, teamId, roster };
 }

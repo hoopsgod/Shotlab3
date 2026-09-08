@@ -59,6 +59,32 @@ test("active roster includes only current players on the coach team", () => {
   ]);
 });
 
+test("email-only app sessions resolve the coach team from the stored identity row", async () => {
+  const storage = memoryStorage({
+    "sl:session": { email: "coach@example.com" },
+    "sl:players": players,
+  });
+  const roster = readActiveCoachRoster({ storage });
+  assert.deepEqual(roster.map((row) => row.playerIdentity), [
+    "ack@example.com",
+    "assigned@example.com",
+    "complete@example.com",
+    "open@example.com",
+    "started@example.com",
+  ]);
+  let requestedUrl = "";
+  const result = await loadCoachAssignmentAccountability({
+    storage,
+    fetchImpl: async (url) => {
+      requestedUrl = url;
+      return { ok: true, json: async () => ({ ok: true, storage_mode: "team_remote", assignments: [] }) };
+    },
+  });
+  assert.equal(requestedUrl, `/v1/player-assignments?team_id=${teamId}`);
+  assert.equal(result.model.hasRoster, true);
+  assert.equal(result.model.total, 5);
+});
+
 test("accountability model reports every state and prioritizes the next coach action", () => {
   const roster = players
     .filter((player) => player.role === "player" && player.teamId === teamId)
