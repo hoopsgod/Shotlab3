@@ -1,0 +1,47 @@
+name: Temporary Phase 1C 320 Baseline Restore
+
+on:
+  pull_request:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  restore-reviewed-baseline:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'agent/coach-accountability-team-context'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 1
+
+      - name: Download reviewed Phase 1C evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/phase1c-reviewed
+          mkdir -p /tmp/phase1c-reviewed
+          gh run download 34179242864 \
+            --repo "${{ github.repository }}" \
+            --name phase1c-focused-mobile-visual-runtime-4235c4b7ba2ab1744559ed1465ac42bb9c9b5704 \
+            --dir /tmp/phase1c-reviewed
+          ACTUAL="$(find /tmp/phase1c-reviewed -type f -name 'coach-home-edge-320-actual.png' -print -quit)"
+          test -n "$ACTUAL"
+          file "$ACTUAL" | grep -q 'PNG image data'
+          cp "$ACTUAL" tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-home-edge-320-mobile-chromium-linux.png
+
+      - name: Commit reviewed baseline only
+        run: |
+          TARGET='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-home-edge-320-mobile-chromium-linux.png'
+          git add -- "$TARGET"
+          if git diff --cached --quiet; then
+            echo 'Reviewed baseline already matches.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Restore reviewed Coach Home 320 visual baseline'
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
