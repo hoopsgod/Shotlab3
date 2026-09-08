@@ -5,6 +5,7 @@ import path from 'node:path';
 const OUTPUT = path.resolve(process.cwd(), 'artifacts/coach-mobile-identity-computed');
 fs.mkdirSync(OUTPUT, { recursive: true });
 const VIEWPORTS = [
+  { width: 320, height: 844 },
   { width: 375, height: 844 },
   { width: 390, height: 844 },
   { width: 430, height: 932 },
@@ -123,12 +124,12 @@ for (const viewport of VIEWPORTS) {
       };
     });
 
-    // Coach Home keeps a larger identity mark than secondary pages, but the current
-    // compact mobile authority intentionally scales it from 80px to 92px here.
-    expect(metrics.mark.width).toBeGreaterThanOrEqual(80);
-    expect(metrics.mark.width).toBeLessThanOrEqual(96);
-    expect(metrics.mark.height).toBeGreaterThanOrEqual(80);
-    expect(metrics.mark.height).toBeLessThanOrEqual(96);
+    // Coach Home intentionally carries hero-level crest presence like Player Home.
+    // Keep the approved 104px floor / 120px cap tightly bounded across phones.
+    expect(metrics.mark.width).toBeGreaterThanOrEqual(104);
+    expect(metrics.mark.width).toBeLessThanOrEqual(121);
+    expect(metrics.mark.height).toBeGreaterThanOrEqual(104);
+    expect(metrics.mark.height).toBeLessThanOrEqual(121);
     expect(metrics.imageStyle.objectFit).toBe('contain');
     expect(metrics.image.left).toBeGreaterThanOrEqual(metrics.mark.left - 1);
     expect(metrics.image.right).toBeLessThanOrEqual(metrics.mark.right + 1);
@@ -138,11 +139,57 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.mark.right).toBeLessThanOrEqual(viewport.width);
 
     const identityRegionHeight = metrics.identity.bottom - metrics.header.top;
-    // The approved compact Coach Home identity measures about 124-126px at the
-    // narrow phone widths. Keep a real collapse floor without enforcing the stale
-    // 128px pre-compaction minimum that rejected otherwise valid current geometry.
+    // The widest approved Coach Home identity is exact: 24px hero offset + 20px
+    // content inset + the 120px crest = 164px. Keep one pixel of render tolerance.
     expect(identityRegionHeight).toBeGreaterThanOrEqual(120);
-    expect(identityRegionHeight).toBeLessThanOrEqual(160);
+    expect(identityRegionHeight).toBeLessThanOrEqual(165);
+
+    const pulseMetrics = await page.evaluate(() => {
+      const score = document.querySelector('.mcHealthScore');
+      const lead = score?.closest('.mcPulseLead');
+      const heading = lead?.querySelector('h2');
+      if (!score || !lead || !heading) return null;
+      const original = score.textContent;
+      const samples = [];
+      for (const value of ['0%', '50%', '100%']) {
+        score.textContent = value;
+        const scoreRect = score.getBoundingClientRect();
+        const leadRect = lead.getBoundingClientRect();
+        const headingRect = heading.getBoundingClientRect();
+        samples.push({
+          value,
+          left: scoreRect.left,
+          right: scoreRect.right,
+          top: scoreRect.top,
+          bottom: scoreRect.bottom,
+          width: scoreRect.width,
+          leadLeft: leadRect.left,
+          leadRight: leadRect.right,
+          leadTop: leadRect.top,
+          leadBottom: leadRect.bottom,
+          leadWidth: leadRect.width,
+          headingRight: headingRect.right,
+          fontSize: Number.parseFloat(getComputedStyle(score).fontSize),
+        });
+      }
+      score.textContent = original;
+      return {
+        samples,
+        overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+      };
+    });
+    expect(pulseMetrics).not.toBeNull();
+    for (const sample of pulseMetrics.samples) {
+      expect(sample.fontSize).toBeGreaterThanOrEqual(36);
+      expect(sample.fontSize).toBeLessThanOrEqual(44);
+      expect(sample.left).toBeGreaterThanOrEqual(sample.headingRight + 12);
+      expect(sample.right).toBeLessThanOrEqual(sample.leadRight + 1);
+      expect(sample.top).toBeGreaterThanOrEqual(sample.leadTop - 1);
+      expect(sample.bottom).toBeLessThanOrEqual(sample.leadBottom + 1);
+      expect(sample.width).toBeLessThanOrEqual(sample.leadWidth * 0.35);
+    }
+    expect(pulseMetrics.overflow).toBeLessThanOrEqual(1);
+
     // The compact Coach Home hierarchy uses the program/team name as a quiet
     // eyebrow while the current coaching decision is the dominant headline.
     expect(metrics.teamIdentitySize).toBeGreaterThanOrEqual(10);
