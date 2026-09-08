@@ -149,10 +149,10 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   expect(home.identityBackground).toBe("none");
   expect(home.decisionBackground).toBe("none");
   expect(home.titleColor).toBe("rgb(245, 248, 249)");
-  // Coach Home retains a larger identity mark than secondary pages, but the
-  // current compact authority intentionally scales it within 80–96px.
-  expect(home.crestWidth).toBeGreaterThanOrEqual(80);
-  expect(home.crestWidth).toBeLessThanOrEqual(96);
+  // Coach Home intentionally carries hero-level crest presence like Player Home.
+  // Keep the approved 104px floor / 120px cap tightly bounded at 390px too.
+  expect(home.crestWidth).toBeGreaterThanOrEqual(104);
+  expect(home.crestWidth).toBeLessThanOrEqual(121);
   await expectNoHorizontalOverflow(page);
 
   // Phase 4 deliberately retires the stacked Players decision card on mobile.

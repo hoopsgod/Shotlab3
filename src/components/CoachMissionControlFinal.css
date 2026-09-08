@@ -11,7 +11,7 @@
 .mcShellV3 .mcSectionHead h2,.mcShellV3 .mcPulseLead h2{margin:5px 0 0;color:inherit;font:760 18px/1 var(--mc-native);letter-spacing:-.035em}
 .mcShellV3 .mcSectionHead>b{display:grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#d92d3d;color:#fff;font:800 10px/1 var(--mc-native)}
 .mcShellV3 .mcPulseLead{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:18px}
-.mcShellV3 .mcHealthScore{color:#f6f8f8;font:820 54px/.86 var(--mc-native);letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+.mcShellV3 .mcHealthScore{color:#f6f8f8;font:820 clamp(36px,10vw,44px)/.9 var(--mc-native);letter-spacing:-.07em;font-variant-numeric:tabular-nums}
 .mcShellV3 .mcPulseRail{position:relative;height:12px;margin-top:26px;overflow:hidden;background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 calc(10% - 2px),transparent calc(10% - 2px) 10%)}
 .mcShellV3 .mcPulseRail>span{position:absolute;inset:0 auto 0 0;background:repeating-linear-gradient(90deg,var(--mc,#c8ff1a) 0 calc(10% - 2px),transparent calc(10% - 2px) 10%)}
 .mcShellV3 .mcPulseCaption{display:grid;gap:5px;margin-top:14px}.mcShellV3 .mcPulseCaption span{color:var(--mc,#c8ff1a);font:720 12px/1.2 var(--mc-native)}.mcShellV3 .mcPulseCaption small{color:var(--mc-surface-copy);font:500 10px/1.4 var(--mc-native)}
