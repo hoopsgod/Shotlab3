@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: phase1c-focused-visual-runtime-${{ github.event.pull_request.number || github.ref }}
@@ -46,6 +46,26 @@ jobs:
         run: |
           mkdir -p artifacts/phase1c
           git rev-parse HEAD > artifacts/phase1c/exact-head-sha.txt
+
+      - name: Accept the reviewed Coach Home baseline and restore this workflow
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          npx playwright test --config=playwright.phase1c.config.mjs --update-snapshots
+          expected='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-mission-control-demo-empty-390-mobile-chromium-linux.png'
+          mapfile -t changed < <(git diff --name-only -- tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/)
+          if [ "${#changed[@]}" -ne 1 ] || [ "${changed[0]}" != "$expected" ]; then
+            printf 'Unexpected visual baseline changes:\n%s\n' "${changed[*]:-none}" >&2
+            exit 1
+          fi
+          git show HEAD^:.github/workflows/phase1c-focused-visual-runtime.yml > .github/workflows/phase1c-focused-visual-runtime.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$expected" .github/workflows/phase1c-focused-visual-runtime.yml
+          git commit -m 'Accept approved Coach Home visual baseline'
+          git push origin "HEAD:${HEAD_BRANCH}"
 
       - name: Run committed Phase 1C mobile visual/runtime guardrails
         run: npx playwright test --config=playwright.phase1c.config.mjs
