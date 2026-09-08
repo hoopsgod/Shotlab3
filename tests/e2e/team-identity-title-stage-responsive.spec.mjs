@@ -201,10 +201,11 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
     expect(result.decisionTop).toBeGreaterThanOrEqual(result.identityBottom - 1);
     expect(result.decisionTop).toBeLessThanOrEqual(result.identityBottom + 48);
     expect(result.realityTop).toBeGreaterThanOrEqual(result.decisionBottom);
-    expect(result.crestWidth).toBeGreaterThanOrEqual(80);
-    expect(result.crestWidth).toBeLessThanOrEqual(96);
-    expect(result.crestHeight).toBeGreaterThanOrEqual(80);
-    expect(result.crestHeight).toBeLessThanOrEqual(96);
+    // Coach Home intentionally uses the same hero-level crest scale as Player Home.
+    expect(result.crestWidth).toBeGreaterThanOrEqual(104);
+    expect(result.crestWidth).toBeLessThanOrEqual(121);
+    expect(result.crestHeight).toBeGreaterThanOrEqual(104);
+    expect(result.crestHeight).toBeLessThanOrEqual(121);
     expect(result.height).toBeGreaterThanOrEqual(334);
     expect(result.height).toBeLessThanOrEqual(500);
     if (result.objectFit !== "fallback") expect(result.objectFit).toBe("contain");
