@@ -161,7 +161,7 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
 
   expect(metrics.teamName.startsWith(teamName)).toBe(true);
   // Difficult branding remains compact without restoring the retired 382px+
-  // decorative void or 96px+ mobile Coach mark.
+  // decorative void while preserving the approved hero-level Coach crest.
   expect(metrics.hero.height).toBeGreaterThanOrEqual(340);
   expect(metrics.hero.height).toBeLessThanOrEqual(500);
   expect(metrics.identity.height).toBeGreaterThanOrEqual(80);
@@ -176,10 +176,10 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
   expect(metrics.decisionTitle.top).toBeGreaterThanOrEqual(metrics.identity.bottom - 1);
   expect(metrics.decisionTitle.top).toBeLessThanOrEqual(metrics.identity.bottom + 48);
   expect(metrics.realityTop).toBeGreaterThanOrEqual(metrics.decisionTitle.bottom);
-  expect(metrics.crest.width).toBeGreaterThanOrEqual(80);
-  expect(metrics.crest.width).toBeLessThanOrEqual(96);
-  expect(metrics.crest.height).toBeGreaterThanOrEqual(80);
-  expect(metrics.crest.height).toBeLessThanOrEqual(96);
+  expect(metrics.crest.width).toBeGreaterThanOrEqual(104);
+  expect(metrics.crest.width).toBeLessThanOrEqual(121);
+  expect(metrics.crest.height).toBeGreaterThanOrEqual(104);
+  expect(metrics.crest.height).toBeLessThanOrEqual(121);
   expect(metrics.hero.left).toBeGreaterThanOrEqual(-1);
   expect(metrics.hero.right).toBeLessThanOrEqual(metrics.viewport.width + 1);
   expect(metrics.overflow.document).toBeLessThanOrEqual(1);
