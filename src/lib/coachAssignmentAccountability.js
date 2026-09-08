@@ -11,9 +11,12 @@ const parse = (value, fallback) => {
 function sessionContext(storage = globalThis?.localStorage) {
   const raw = parse(storage?.getItem?.("sl:session"), {});
   const session = Array.isArray(raw) ? raw[0] : raw;
+  const requester = identity(session?.email || session?.userEmail || session?.user_id);
+  const players = parse(storage?.getItem?.("sl:players"), []);
+  const actor = (Array.isArray(players) ? players : []).find((player) => identity(player?.email) === requester);
   return {
-    teamId: clean(session?.teamId || session?.team_id, 180),
-    requester: identity(session?.email || session?.userEmail || session?.user_id),
+    teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id, 180),
+    requester,
   };
 }
 
