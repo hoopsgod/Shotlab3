@@ -1,21 +1,10 @@
 import { loadTeamPlayerAssignments } from "./playerAssignmentService.js";
+import { readCoachFollowUpQueueContext } from "./coachFollowUpQueue.js";
 
 const STATES = ["unassigned", "assigned", "acknowledged", "started", "completed"];
 const PRIORITY = new Map(STATES.map((state, index) => [state, index]));
 const clean = (value, max = 4000) => String(value ?? "").trim().slice(0, max);
 const identity = (value) => clean(value, 320).toLowerCase();
-const parse = (value, fallback) => {
-  try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
-};
-
-function sessionContext(storage = globalThis?.localStorage) {
-  const raw = parse(storage?.getItem?.("sl:session"), {});
-  const session = Array.isArray(raw) ? raw[0] : raw;
-  return {
-    teamId: clean(session?.teamId || session?.team_id, 180),
-    requester: identity(session?.email || session?.userEmail || session?.user_id),
-  };
-}
 
 function playerIdentity(player = {}) {
   return [player?.email, player?.player_email, player?.playerId, player?.player_id, player?.userId, player?.user_id, player?.id]
@@ -27,26 +16,11 @@ function playerName(player = {}, fallback = "Player") {
   return clean(player?.name || player?.displayName || player?.display_name || [player?.firstName, player?.lastName].filter(Boolean).join(" ") || fallback, 320);
 }
 
-function activePlayer(player = {}, teamId = "") {
-  const role = identity(player?.role || (player?.isCoach ? "coach" : "player"));
-  const playerTeamId = clean(player?.teamId || player?.team_id, 180);
-  const rosterStatus = identity(player?.rosterStatus || player?.roster_status);
-  return role === "player"
-    && playerTeamId === teamId
-    && rosterStatus !== "removed"
-    && !player?.removedFromTeamId
-    && !player?.removed_from_team_id
-    && player?.hideFromLeaderboards !== true
-    && player?.hide_from_leaderboards !== true;
-}
-
 export function readActiveCoachRoster({ teamId = "", storage = globalThis?.localStorage } = {}) {
-  const context = sessionContext(storage);
+  const context = readCoachFollowUpQueueContext(storage, teamId);
   const activeTeamId = clean(teamId || context.teamId, 180);
-  const players = parse(storage?.getItem?.("sl:players"), []);
   const byIdentity = new Map();
-  for (const player of Array.isArray(players) ? players : []) {
-    if (!activePlayer(player, activeTeamId)) continue;
+  for (const player of context.roster) {
     const email = playerIdentity(player);
     if (!email || byIdentity.has(email)) continue;
     byIdentity.set(email, {
@@ -144,7 +118,7 @@ export async function loadCoachAssignmentAccountability({
   storage = globalThis?.localStorage,
   fetchImpl = globalThis?.fetch,
 } = {}) {
-  const context = sessionContext(storage);
+  const context = readCoachFollowUpQueueContext(storage);
   const activeTeamId = clean(teamId || context.teamId, 180);
   const roster = readActiveCoachRoster({ teamId: activeTeamId, storage });
   const result = await loadTeamPlayerAssignments({ teamId: activeTeamId, storage, fetchImpl });
@@ -154,4 +128,4 @@ export async function loadCoachAssignmentAccountability({
   };
 }
 
-export const __testUtils = { sessionContext, playerIdentity, activePlayer };
+export const __testUtils = { playerIdentity };
