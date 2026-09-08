@@ -10,7 +10,7 @@ test("Coach Home production mobile parity uses the Player Home hero crest scale"
   assert.doesNotMatch(phase1Closure, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
 });
 
-test("Program Pulse percentage stays subordinate to its label on narrow Coach Home layouts", () => {
-  assert.match(coachFinalCss, /\.mcHealthScore\{[^}]*font:820 44px\/\.86 var\(--mc-native\)/);
-  assert.doesNotMatch(coachFinalCss, /\.mcHealthScore\{[^}]*font:820 54px\/\.86 var\(--mc-native\)/);
+test("Program Pulse percentage stays subordinate and responsive on narrow Coach Home layouts", () => {
+  assert.match(coachFinalCss, /\.mcHealthScore\{[^}]*font:820 clamp\(36px,10vw,44px\)\/\.9 var\(--mc-native\)/);
+  assert.doesNotMatch(coachFinalCss, /\.mcHealthScore\{[^}]*font:820 (?:54px|44px)\/\.86 var\(--mc-native\)/);
 });
