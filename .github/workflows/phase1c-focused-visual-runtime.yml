@@ -47,24 +47,33 @@ jobs:
           mkdir -p artifacts/phase1c
           git rev-parse HEAD > artifacts/phase1c/exact-head-sha.txt
 
-      - name: Accept the reviewed Coach Home baseline and restore this workflow
+      - name: Accept the reviewed Coach Home baselines and restore this workflow
         if: github.event_name == 'pull_request'
         env:
           HEAD_BRANCH: ${{ github.head_ref }}
         run: |
           set -euo pipefail
           npx playwright test --config=playwright.phase1c.config.mjs --update-snapshots
-          expected='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-mission-control-demo-empty-390-mobile-chromium-linux.png'
-          mapfile -t changed < <(git diff --name-only -- tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/)
-          if [ "${#changed[@]}" -ne 1 ] || [ "${changed[0]}" != "$expected" ]; then
-            printf 'Unexpected visual baseline changes:\n%s\n' "${changed[*]:-none}" >&2
+          snapshot_root='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots'
+          cat > /tmp/expected-snapshots.txt <<'EOF'
+          tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-home-branding-stress-390-mobile-chromium-linux.png
+          tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-home-edge-320-mobile-chromium-linux.png
+          tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-home-edge-430-mobile-chromium-linux.png
+          tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-mission-control-demo-empty-390-mobile-chromium-linux.png
+          tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-mission-control-registered-empty-390-mobile-chromium-linux.png
+          EOF
+          git diff --name-only -- "$snapshot_root" | sort > /tmp/actual-snapshots.txt
+          sort -o /tmp/expected-snapshots.txt /tmp/expected-snapshots.txt
+          if ! diff -u /tmp/expected-snapshots.txt /tmp/actual-snapshots.txt; then
+            echo 'Unexpected visual baseline change set; refusing to commit.' >&2
             exit 1
           fi
-          git show HEAD^:.github/workflows/phase1c-focused-visual-runtime.yml > .github/workflows/phase1c-focused-visual-runtime.yml
+          git fetch --no-tags --depth=1 origin 16b41cd2d7898cff2c7855f493ce25e67842a9ac
+          git show 16b41cd2d7898cff2c7855f493ce25e67842a9ac:.github/workflows/phase1c-focused-visual-runtime.yml > .github/workflows/phase1c-focused-visual-runtime.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "$expected" .github/workflows/phase1c-focused-visual-runtime.yml
-          git commit -m 'Accept approved Coach Home visual baseline'
+          git add "$snapshot_root" .github/workflows/phase1c-focused-visual-runtime.yml
+          git commit -m 'Accept approved Coach Home visual baselines'
           git push origin "HEAD:${HEAD_BRANCH}"
 
       - name: Run committed Phase 1C mobile visual/runtime guardrails
