@@ -197,7 +197,7 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
   }
 
   const normalizedBody = method === "GET" ? body : normalizeRestWriteBody(table, body);
-  if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0) {
+  if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0 && table !== "rsvps" && table !== "events" && !/^sc_(sessions|rsvps|logs)$/.test(table)) {
     return { data: [], error: null, skipped: "no_compatible_rows" };
   }
 

@@ -51,7 +51,7 @@ test("Phase 5B Event Intelligence drawer owns high-contrast dark-surface tokens"
   assert.match(css, /coach-event-intelligence-drawer/);
   assert.match(css, /--text-1:\s*#f7fafb/);
   assert.match(css, /--text-2:\s*#b8c3c8/);
-  assert.match(css, /aside section[^}]*background:[^}]*#0f1214[^}]*!important/s);
+  assert.match(css, /aside section[^}]*background:[^}]*var\(--team-brand-surface-deep,#071820\)[^}]*!important/s);
   assert.match(css, /drawerActionSecondary[^}]*color:\s*#f7fafb\s*!important/s);
 });
 

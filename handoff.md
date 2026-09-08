@@ -3,7 +3,7 @@
 ## Accepted baseline
 
 - Base branch: `march-3-reset-85393dd`
-- Frozen merged baseline: `bba37240e689ecf19e7a187df0f50e957aa9baae` (PR #1536 merged)
+- Frozen merged baseline: `fcb3b1abc4f1b18cf0ad72991a3427b3c34ad990` (PR #1537 merged)
 - PR #1520, #1524, #1525, #1526, #1527, #1529, #1530, #1531, #1532, #1533, #1534, #1535, and #1536 are closed. Do not reopen completed mobile-axis, assignment, coach follow-up, shot-log, RSVP, score, training-catalog, coach-priority, Events, Strength & Conditioning, Program-score, Player-identity, or Player-profile work unless a regression test proves a break.
 
 ## Protected contracts
@@ -18,10 +18,11 @@
 
 ## Current work
 
-- Phase: **Phase 3 closure — Team metadata/branding pending ownership**
-- Branch: `agent/phase3-team-state-ownership`
-- Base: `bba37240e689ecf19e7a187df0f50e957aa9baae`
-- Data domain: `sl:teams` / signed `/v1/teams` metadata upsert state only.
+- Phase: **Post-Phase-3 product-validation closure**
+- Branch: `agent/post-phase3-product-validation`
+- Base: `57f9596d5de23926c017a83fb71e4f56ff5863d5`
+- Scope: commit the deterministic route-enhancer output already covered by repository regression contracts: registered Events/S&C replacement hydration, precise RSVP presentation, Player In Season parity, and mobile S&C row containment.
+- Do not broaden this slice into the visual redesign, onboarding, monetization, or architecture recommendations from the product evaluation.
 
 ## Team ownership problem
 
@@ -69,14 +70,25 @@ Do not raise either budget. The Team ownership implementation must fit inside th
 
 ## Remaining ownership queue
 
-This Team metadata/branding slice is the final documented Phase 3 ownership domain. Do not invent another ownership phase after it unless new regression evidence identifies a concrete authority bug.
+Phase 3 ownership is complete through merged PR #1537. Do not invent another ownership phase unless new regression evidence identifies a concrete authority bug.
 
 Not in the queue: Player identities, Player profiles, assignments, coach follow-ups, shot logs, RSVPs, `sl:scores`, Program scores, training catalog, coach priorities, Events, Strength & Conditioning, challenges, or season archives.
 
 ## Release rule
 
-- Target merged baseline `bba37240e689ecf19e7a187df0f50e957aa9baae` directly.
-- Keep this PR to Team metadata/branding ownership only.
+- Target merged baseline `fcb3b1abc4f1b18cf0ad72991a3427b3c34ad990` directly.
+- Keep this PR to the documented post-Phase-3 validation corrections only.
 - Do not raise performance budgets or alter visual baselines to pass.
 - Re-run exact-head certification on the final PR head.
 - Do not merge without explicit authorization after certification.
+
+## PR #1545 merge-readiness closure
+
+- Integrated the current merged base so Cloudflare head builds contain the same signed persistence boundaries exercised by GitHub merge builds.
+- Retained the base's explicit boolean RSVP/Event deletion authority; empty startup cache rewrites have no replacement authority.
+- Extracted unchanged ConfettiBurst and CourtDivider into TrainingCelebration.jsx to keep App.jsx below the existing 500,000-byte source ceiling.
+- Updated the legacy S&C assertion to verify explicit replacement versus cache hydration behavior for all three S&C collections.
+- Updated the historical drawer source assertion to enforce the existing team-brand surface token and fallback, retaining the text/contrast declarations and visual baseline.
+- Fresh local verification: 49 focused persistence/parity checks, 59 release/decomposition checks, and 59 release-hardening checks pass.
+- Production budget and exact final-head CI/Cloudflare browser evidence must be recorded on PR #1545 before merge certification.
+- Do not merge without explicit user authorization.

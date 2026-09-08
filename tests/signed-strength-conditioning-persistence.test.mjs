@@ -317,7 +317,13 @@ test("migration and application integration enforce a service-only signed bounda
   assert.doesNotMatch(migration, /create policy/i);
   assert.match(locationMigration, /alter table if exists public\.sc_sessions[\s\S]*add column if not exists location text/i);
   assert.match(dataModels, /\[STORAGE_KEYS\.scSessions\]: "sc_sessions"/);
-  assert.match(app, /const signedReplacementCollection = k === "sl:sc-sessions" \|\| k === "sl:sc-rsvps" \|\| k === "sl:sc-logs"/);
+  const replacement = app.match(/const scReplacement=.*?;/)?.[0];
+  assert.ok(replacement, "signed replacement authority must exist");
+  const isReplacement = new Function("k", "options", `${replacement}return signedReplacementCollection;`);
+  for (const key of ["sl:sc-sessions", "sl:sc-rsvps", "sl:sc-logs"]) {
+    assert.equal(isReplacement(key, { strictRemote: true }), true, `${key}: explicit mutation replaces even an empty collection`);
+    assert.equal(isReplacement(key, {}), false, `${key}: cache hydration cannot replace remote truth`);
+  }
   assert.match(app, /await DB\.set\("sl:sc-sessions",m\.scSM\);\s*await Promise\.all/);
   assert.match(app, /strictLocal:true,strictRemote:true/);
 });
