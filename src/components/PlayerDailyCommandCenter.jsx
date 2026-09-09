@@ -110,6 +110,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           className={styles.primaryButton}
           style={iconButtonStyle}
           data-testid="player-daily-primary-action"
+          data-coach-drill={primary.source === "coach" ? primary.title : ""}
           data-state={primaryWorking ? "working" : "idle"}
           aria-busy={primaryWorking || undefined}
           disabled={primaryWorking}
@@ -130,7 +131,6 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         data-command-role="coach-priority"
         data-layout-role="supporting-evidence"
         data-freshness={coachSignal.freshness || "unknown"}
-        data-priority-drill={coachSignal.stale ? "" : coachSignal.priorityDrill || ""}
         aria-label="Coach assignment"
         style={{
           "--coach-signal-accent": coachSignal.stale ? "#ffb547" : "var(--team-brand-primary,var(--accent,#c8ff1a))",
