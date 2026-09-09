@@ -74,6 +74,11 @@ test("registered Coach hydration preserves trusted remote shot-log provenance du
   assert.match(appSource, /const coachVisibleShotLogs=scopedShotLogs\.filter\(l=>l\.syncState==="remote_saved"&&l\.syncSource==="remote"\)/);
 });
 
+test("production build keeps Demo Coach sample activity visible without relaxing registered shot-log trust", () => {
+  assert.match(signedReadsEnhancerSource, /const coachShotVisibilityNeedle = 'const coachVisibleShotLogs=scopedShotLogs\.filter/);
+  assert.match(signedReadsEnhancerSource, /const coachShotVisibilityReplacement = 'const coachVisibleShotLogs=accountCapabilities\.isSandbox\?scopedShotLogs:scopedShotLogs\.filter\(l=>l\.syncState==="remote_saved"&&l\.syncSource==="remote"\);'/);
+});
+
 test("remaining coach pages receive actionable operational controls", () => {
   assert.match(appSource, /coachDrillIntelligenceRows/);
   assert.match(appSource, /visibleHomeDrills/);
