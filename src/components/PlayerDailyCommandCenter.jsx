@@ -14,37 +14,6 @@ const coachSignalIcon = (signal = {}) => signal.stale ? "clock" : signal.freshne
 const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
 const compactCoachValueStyle = { fontSize: 12.5, lineHeight: 1.26, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" };
 
-const withDailyRevealIntent = (action = {}) => {
-  if (action?.reveal || action?.focus || action?.drillId) return action;
-  if (action?.kind === "shots" || action?.kind === "first-training") {
-    return { ...action, focus: "shot-tracker", reveal: { focusLabel: "SHOTS MADE" } };
-  }
-  if (action?.kind === "event-rsvp") {
-    const matchText = String(action.title || "").replace(/^Confirm\s+/i, "").replace(/^Set RSVP for\s+/i, "").trim();
-    return {
-      ...action,
-      reveal: {
-        containerTestId: "player-events-operational-list",
-        ...(matchText ? { matchText } : {}),
-        activate: "expand",
-        focusButtonText: "RSVP",
-      },
-    };
-  }
-  if (action?.kind === "sc-rsvp") {
-    const matchText = String(action.title || "").replace(/^Commit to\s+/i, "").replace(/^Review\s+/i, "").trim();
-    return {
-      ...action,
-      reveal: {
-        containerTestId: "player-strength-operational-panel",
-        ...(matchText ? { matchText } : {}),
-        focusButtonText: "RSVP",
-      },
-    };
-  }
-  return action;
-};
-
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
   const feedbackTimer = useRef(null);
@@ -86,11 +55,10 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   const progressShouldOpen = dailyComplete || primary.urgency === "urgent";
 
   const runAction = (action) => {
-    const routedAction = withDailyRevealIntent(action);
-    const key = actionKey(routedAction);
+    const key = actionKey(action);
     setActiveAction(key);
-    onAction?.(routedAction);
-    scheduleWorkspaceActionReveal(routedAction);
+    onAction?.(action);
+    scheduleWorkspaceActionReveal(action);
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     feedbackTimer.current = setTimeout(() => setActiveAction(""), 900);
   };
@@ -162,6 +130,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         data-command-role="coach-priority"
         data-layout-role="supporting-evidence"
         data-freshness={coachSignal.freshness || "unknown"}
+        data-priority-drill={coachSignal.stale ? "" : coachSignal.priorityDrill || ""}
         aria-label="Coach assignment"
         style={{
           "--coach-signal-accent": coachSignal.stale ? "#ffb547" : "var(--team-brand-primary,var(--accent,#c8ff1a))",
