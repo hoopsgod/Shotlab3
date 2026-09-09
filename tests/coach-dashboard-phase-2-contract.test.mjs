@@ -5,6 +5,7 @@ import fs from "node:fs";
 const appSource = fs.readFileSync("src/App.jsx", "utf8");
 const componentSource = fs.readFileSync("src/components/CoachDashboardPhase2.jsx", "utf8");
 const selectorSource = fs.readFileSync("src/lib/coachOperationalIntelligence.js", "utf8");
+const signedCollectionSource = fs.readFileSync("src/lib/legacySignedCollectionPersistence.js", "utf8");
 
 test("phase two imports the reusable operational layer into the coach shell", () => {
   assert.match(appSource, /CoachPlayerIntelligenceDrawer/);
@@ -23,6 +24,11 @@ test("player and event drawers preserve full profile and attendance workflows", 
   assert.match(appSource, /onManageAttendance/);
   assert.match(componentSource, /coach-player-intelligence-drawer/);
   assert.match(componentSource, /coach-event-intelligence-drawer/);
+});
+
+test("registered Coach player intelligence reads shot logs through the signed API boundary", () => {
+  assert.match(appSource, /requestLegacySignedCollection\(\{table,fetchImpl:/);
+  assert.match(signedCollectionSource, /table==="shot_logs"\)return\["\/v1\/shot-logs","shot_logs"\]/);
 });
 
 test("remaining coach pages receive actionable operational controls", () => {
