@@ -5,19 +5,9 @@ import { assignmentReadState, loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVE
 import styles from "./PlayerCoachAssignmentCard.module.css";
 
 const actionFor = (state = "assigned") => state === "assigned" ? { action: "acknowledge", label: "Acknowledge assignment" } : state === "acknowledged" ? { action: "start", label: "Start assignment" } : state === "started" ? { action: "complete", label: "Mark assignment complete" } : null;
-const normalize = (value) => String(value ?? "").replace(/\s+/g, " ").trim().toLowerCase();
 const formatDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-};
-
-const openMatchingCoachPriority = (record = {}) => {
-  const root = document.querySelector('[data-testid="player-daily-command-center"]');
-  const action = root?.querySelector('[data-testid="player-daily-primary-action"]');
-  const drill = normalize(root?.querySelector('[data-testid="player-coach-priority-signal"]')?.dataset?.priorityDrill);
-  if (!drill || !normalize(record.assignmentText).includes(drill) || !/start coach priority/i.test(action?.textContent || "")) return false;
-  action.click();
-  return true;
 };
 
 export default function PlayerCoachAssignmentCard() {
@@ -88,7 +78,11 @@ export default function PlayerCoachAssignmentCard() {
       setAssignment(updatedAssignment);
       setError(!result.ok);
       setMessage(result.message || (result.ok ? "Assignment updated." : "Assignment status could not be updated. Try again."));
-      if (result.ok && next.action === "start") window.setTimeout(() => openMatchingCoachPriority(updatedAssignment), 0);
+      if (result.ok && next.action === "start") {
+        const action = document.querySelector('[data-testid="player-daily-primary-action"]');
+        const drill = String(action?.dataset?.coachDrill || "").toLowerCase();
+        if (drill && String(updatedAssignment.assignmentText || "").toLowerCase().includes(drill)) action.click();
+      }
     } catch {
       setError(true);
       setMessage("Assignment status could not be updated. Try again.");
