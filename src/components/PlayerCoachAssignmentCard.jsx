@@ -12,18 +12,11 @@ const formatDate = (value) => {
 };
 
 const openMatchingCoachPriority = (record = {}) => {
-  if (typeof document === "undefined") return false;
-  const commandCenter = document.querySelector('[data-testid="player-daily-command-center"]');
-  const coachSignal = commandCenter?.querySelector?.('[data-testid="player-coach-priority-signal"]');
-  const primaryAction = commandCenter?.querySelector?.('[data-testid="player-daily-primary-action"]');
-  if (!coachSignal || !primaryAction || !/start coach priority/i.test(primaryAction.textContent || "")) return false;
-
-  const priorityItem = Array.from(coachSignal.querySelectorAll("div")).find((node) => normalize(node.firstElementChild?.textContent) === "priority drill");
-  const priorityDrill = normalize(priorityItem?.children?.[1]?.textContent);
-  const assignmentText = normalize(record?.assignmentText || record?.assignment_text);
-  if (!priorityDrill || !assignmentText || !assignmentText.includes(priorityDrill)) return false;
-
-  primaryAction.click();
+  const root = document.querySelector('[data-testid="player-daily-command-center"]');
+  const action = root?.querySelector('[data-testid="player-daily-primary-action"]');
+  const drill = normalize(root?.querySelector('[data-testid="player-coach-priority-signal"]')?.dataset?.priorityDrill);
+  if (!drill || !normalize(record.assignmentText).includes(drill) || !/start coach priority/i.test(action?.textContent || "")) return false;
+  action.click();
   return true;
 };
 
@@ -95,9 +88,7 @@ export default function PlayerCoachAssignmentCard() {
       setAssignment(updatedAssignment);
       setError(!result.ok);
       setMessage(result.message || (result.ok ? "Assignment updated." : "Assignment status could not be updated. Try again."));
-      if (result.ok && next.action === "start") {
-        window.setTimeout(() => openMatchingCoachPriority(updatedAssignment), 0);
-      }
+      if (result.ok && next.action === "start") window.setTimeout(() => openMatchingCoachPriority(updatedAssignment), 0);
     } catch {
       setError(true);
       setMessage("Assignment status could not be updated. Try again.");
