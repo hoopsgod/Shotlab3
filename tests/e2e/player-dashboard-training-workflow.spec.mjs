@@ -213,6 +213,14 @@ test("registered Player completes the coach-priority drill, proves persistence, 
   await expect(closeout).toBeVisible({ timeout: 10_000 });
   await closeout.getByTestId("player-session-done").click();
 
+  // The drill was launched from Home, so Done for today must return to Home and
+  // immediately reflect the completed priority instead of dumping the player elsewhere.
+  await expect(commandCenter).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("player-daily-primary-action")).toHaveText("Continue shooting");
+  await expectNoHorizontalOverflow(page);
+
+  // Verify the saved result also changed the operational training state.
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   const workspace = page.getByTestId("player-at-home-workspace");
   await expect(workspace).toBeVisible({ timeout: 10_000 });
   const filterRail = page.getByTestId("player-at-home-filter-rail");
