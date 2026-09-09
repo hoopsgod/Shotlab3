@@ -1,53 +1,33 @@
 const normalize = (value) => String(value ?? "").replace(/\s+/g, " ").trim().toLowerCase();
 
-const supportsSmoothMotion = () => {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return true;
-  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const findTextElement = (root, text, selector, partial = false) => {
+  const wanted = normalize(text);
+  if (!root || !wanted) return null;
+  return Array.from(root.querySelectorAll(selector)).find((node) => {
+    const value = normalize(node.textContent);
+    return partial ? value.includes(wanted) : value === wanted;
+  }) || null;
 };
 
-const findExactTextElement = (root, text) => {
-  const wanted = normalize(text);
-  if (!root || !wanted || typeof root.querySelectorAll !== "function") return null;
-  const nodes = root.querySelectorAll("h1,h2,h3,h4,[role='heading'],label,button,div,span");
-  return Array.from(nodes).find((node) => normalize(node.textContent) === wanted) || null;
-};
+const findExactTextElement = (root, text) =>
+  findTextElement(root, text, "h1,h2,h3,h4,[role='heading'],label,button,div,span");
 
 const findLabeledControl = (root, labelText) => {
   const label = findExactTextElement(root, labelText);
   if (!label) return null;
-  if (label.control) return label.control;
-  return label.parentElement?.querySelector?.("input,select,textarea,button") || null;
+  return label.control || label.parentElement?.querySelector?.("input,select,textarea,button") || null;
 };
 
-const findButtonByText = (root, text) => {
-  const wanted = normalize(text);
-  if (!root || !wanted || typeof root.querySelectorAll !== "function") return null;
-  return Array.from(root.querySelectorAll("button")).find((button) => normalize(button.textContent).includes(wanted)) || null;
-};
-
-const pulse = (element) => {
-  if (!element || !supportsSmoothMotion() || typeof element.animate !== "function") return;
-  element.animate(
-    [
-      { transform: "scale(1)", boxShadow: "0 0 0 rgba(200,255,0,0)" },
-      { transform: "scale(1.01)", boxShadow: "0 0 0 3px rgba(200,255,0,0.28)" },
-      { transform: "scale(1)", boxShadow: "0 0 0 rgba(200,255,0,0)" },
-    ],
-    { duration: 760, easing: "ease-out" },
-  );
-};
+const findButtonByText = (root, text) => findTextElement(root, text, "button", true);
 
 const revealControl = (control, scrollTarget = control) => {
   if (!control) return false;
-  scrollTarget?.scrollIntoView?.({ behavior: supportsSmoothMotion() ? "smooth" : "auto", block: "center" });
-  window.setTimeout(() => control.focus?.({ preventScroll: true }), supportsSmoothMotion() ? 180 : 0);
-  pulse(scrollTarget);
+  scrollTarget?.scrollIntoView?.({ block: "center" });
+  control.focus?.({ preventScroll: true });
   return true;
 };
 
-const revealIntent = (action = {}) => action?.reveal || null;
-
-export const hasWorkspaceRevealIntent = (action = {}) => Boolean(action?.focus || revealIntent(action));
+export const hasWorkspaceRevealIntent = (action = {}) => Boolean(action?.focus || action?.reveal);
 
 export const scheduleWorkspaceActionReveal = (action = {}, options = {}) => {
   if (typeof window === "undefined" || typeof document === "undefined" || !hasWorkspaceRevealIntent(action)) return null;
@@ -57,9 +37,9 @@ export const scheduleWorkspaceActionReveal = (action = {}, options = {}) => {
 
   const attemptReveal = () => {
     attempts += 1;
-    const intent = revealIntent(action) || {};
+    const intent = action.reveal || {};
     const container = intent.containerTestId
-      ? document.querySelector(`[data-testid="${String(intent.containerTestId).replace(/"/g, '\\"')}"]`)
+      ? document.querySelector(`[data-testid="${intent.containerTestId}"]`)
       : document;
 
     if (!container) {
@@ -78,20 +58,18 @@ export const scheduleWorkspaceActionReveal = (action = {}, options = {}) => {
       const card = matchedText.closest?.(".ch") || matchedText.closest?.("button") || matchedText.parentElement || matchedText;
       const cardScope = card?.parentElement || card;
       const expandedAction = intent.activate === "expand" && card?.matches?.("button");
-      const expandedContentPresent = expandedAction && Boolean(findButtonByText(cardScope, intent.focusButtonText || "RSVP"));
-      if (expandedAction && !expandedContentPresent) card.click?.();
+      if (expandedAction && !findButtonByText(cardScope, intent.focusButtonText || "RSVP")) card.click?.();
 
-      const finish = () => {
+      window.setTimeout(() => {
         const focusTarget = intent.focusButtonText
           ? findButtonByText(cardScope, intent.focusButtonText)
           : card?.matches?.("button") ? card : null;
         revealControl(focusTarget || card, card);
-      };
-      window.setTimeout(finish, expandedAction ? 80 : 0);
+      }, expandedAction ? 80 : 0);
       return;
     }
 
-    if (intent.containerTestId && !intent.matchText && container !== document) {
+    if (intent.containerTestId && !intent.matchText) {
       revealControl(container, container);
       return;
     }
