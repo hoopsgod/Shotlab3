@@ -50,7 +50,7 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
   ];
 
   return (
-    <SecondaryPageShell testId="coach-players-interactive-dashboard">
+    <SecondaryPageShell testId="coach-players-interactive-dashboard" className="secondaryPageShell--embeddedHeader">
       <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
       <CoachRoutePerformanceStage
         kind="players"

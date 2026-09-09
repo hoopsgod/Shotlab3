@@ -1,22 +1,10 @@
-.secondaryPageShell.secondaryPageShell--embeddedHeader {
-  padding-bottom: 0;
+#root .secondaryPageShell.secondaryPageShell--embeddedHeader {
+  padding-bottom: 0 !important;
 }
 
 @media (max-width: 760px) {
   .secondaryPageShell.secondaryPageShell--embeddedHeader {
     gap: 18px;
-    padding-bottom: 0;
-  }
-
-  /* Registered Coach routes now own one canonical 20px outer rail. Keep the
-     title frame and title stage inside that rail; no negative-margin breakout,
-     no compensating width arithmetic, and no browser-dependent re-expansion. */
-  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame,
-  .performance-shell--coach .secondaryPageShell > .teamIdentityTitleStageFrame > .teamIdentityTitleStage {
-    width: 100%;
-    max-width: 100%;
-    margin-inline: 0;
-    box-sizing: border-box;
   }
 
   /* The build-time Phase 4D enhancer assigns this stable class to the shared
