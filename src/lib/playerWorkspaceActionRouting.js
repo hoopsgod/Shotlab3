@@ -1,5 +1,7 @@
 const normalize = (value) => String(value ?? "").replace(/\s+/g, " ").trim().toLowerCase();
 
+const reduceMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
 const findTextElement = (root, text, selector, partial = false) => {
   const wanted = normalize(text);
   if (!root || !wanted) return null;
@@ -22,8 +24,9 @@ const findButtonByText = (root, text) => findTextElement(root, text, "button", t
 
 const revealControl = (control, scrollTarget = control) => {
   if (!control) return false;
-  scrollTarget?.scrollIntoView?.({ block: "center" });
-  control.focus?.({ preventScroll: true });
+  const smooth = !reduceMotion();
+  scrollTarget?.scrollIntoView?.({ behavior: smooth ? "smooth" : "auto", block: "center" });
+  window.setTimeout(() => control.focus?.({ preventScroll: true }), smooth ? 180 : 0);
   return true;
 };
 
