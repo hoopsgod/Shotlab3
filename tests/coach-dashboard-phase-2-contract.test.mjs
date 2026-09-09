@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { requestLegacySignedCollection } from "../src/lib/legacySignedCollectionPersistence.js";
 
 const appSource = fs.readFileSync("src/App.jsx", "utf8");
 const componentSource = fs.readFileSync("src/components/CoachDashboardPhase2.jsx", "utf8");
@@ -29,6 +30,42 @@ test("player and event drawers preserve full profile and attendance workflows", 
 test("registered Coach player intelligence reads shot logs through the signed API boundary", () => {
   assert.match(appSource, /requestLegacySignedCollection\(\{table,fetchImpl:/);
   assert.match(signedCollectionSource, /table==="shot_logs"\)return\["\/v1\/shot-logs","shot_logs"\]/);
+});
+
+test("registered Coach shot-log adapter resolves the signed endpoint and requester identity", async () => {
+  const coachEmail = "workflow.coach@shotlab.app";
+  const values = new Map([["sl:session", JSON.stringify({ email: coachEmail })]]);
+  const storage = {
+    getItem(key) { return values.has(key) ? values.get(key) : null; },
+    setItem(key, value) { values.set(key, String(value)); },
+  };
+  const calls = [];
+  const result = await requestLegacySignedCollection({
+    table: "shot_logs",
+    storage,
+    fetchImpl: async (path, options = {}) => {
+      calls.push({ path: String(path), headers: new Headers(options.headers || {}) });
+      return Response.json({
+        ok: true,
+        storage_mode: "signed_api",
+        shot_logs: [{
+          id: "workflow-shot-ari",
+          email: "ari.workflow@example.com",
+          player_id: "workflow-ari",
+          team_id: "team-coach-player-workflow",
+          made: 33,
+          date: "2026-09-09",
+        }],
+      });
+    },
+  });
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].path, "/v1/shot-logs");
+  assert.equal(calls[0].headers.get("x-user-id"), coachEmail);
+  assert.equal(result.error, null);
+  assert.equal(result.data[0].made, 33);
+  assert.equal(result.data[0].email, "ari.workflow@example.com");
 });
 
 test("remaining coach pages receive actionable operational controls", () => {
