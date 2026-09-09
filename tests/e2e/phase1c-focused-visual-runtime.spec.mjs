@@ -181,7 +181,7 @@ async function replaceDemoCollections(page, fixture) {
   }, { storage: fixture.storage });
 }
 
-async function createSession(browser, { role, scenario, mode, width }) {
+async function createSession(browser, { role, scenario, mode, width, route }) {
   const context = await browser.newContext({
     viewport: { width, height: HEIGHT },
     screen: { width, height: HEIGHT },
@@ -193,6 +193,9 @@ async function createSession(browser, { role, scenario, mode, width }) {
   await installPhase1CFixedTime(page);
   const guard = attachPhase1CRuntimeGuard(page, `${role}-${scenario}-${mode}-${width}`);
   const fixture = buildPhase1BFixture({ role, scenario, mode });
+  // Coach Home visual snapshots exercise geometry/branding, not shot-log ownership.
+  // Keep them independent of trusted basketball activity, which has dedicated persistence/parity coverage.
+  if (role === 'coach' && route === 'home') fixture.storage['sl:shotlogs'] = [];
   await installPhase1CRoutes(page, fixture);
 
   if (mode === 'demo') {
