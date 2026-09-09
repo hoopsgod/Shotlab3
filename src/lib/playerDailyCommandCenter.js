@@ -8,6 +8,7 @@ const safeNumber = (value) => {
 const clean = (value) => String(value ?? "").trim();
 const key = (value) => clean(value).toLowerCase();
 const clampPct = (value) => Math.max(0, Math.min(100, Math.round(safeNumber(value))));
+const rsvpReveal = (matchText) => ({ matchText, activate: "expand", focusButtonText: "RSVP" });
 
 const identityMatches = (row = {}, userEmail = "") => {
   const target = key(userEmail);
@@ -72,6 +73,7 @@ const buildFirstResultTask = (drill = null) => {
       ? `Use ${recommendation} as your focus, then log the makes from one completed set to create your baseline.`
       : "Log the makes from one completed shooting set to create your baseline and activate progress tracking.",
     target: "log-drill",
+    focus: "shot-tracker",
     actionLabel: "Log first result",
     estimatedMinutes: 5,
     urgency: "priority",
@@ -158,12 +160,14 @@ export const derivePlayerDailyCommandCenter = ({
 
   const tasks = [];
   if (urgentEvent) {
+    const title = clean(urgentEvent.title) || "team event";
     tasks.push({
       id: `event-rsvp:${urgentEvent.id}`,
       kind: "event-rsvp",
-      title: `Confirm ${clean(urgentEvent.title) || "team event"}`,
+      title: `Confirm ${title}`,
       detail: `${dateValue(urgentEvent)} · ${clean(urgentEvent.time) || "Time TBD"}`,
       target: "program",
+      reveal: rsvpReveal(title),
       actionLabel: "Confirm attendance",
       estimatedMinutes: 1,
       urgency: "urgent",
@@ -183,6 +187,7 @@ export const derivePlayerDailyCommandCenter = ({
         title: `${remaining} makes to close today’s target`,
         detail: `${safeNumber(todayMakes)} of ${Math.max(1, safeNumber(dailyGoal))} makes logged`,
         target: "log-drill",
+        focus: "shot-tracker",
         actionLabel: safeNumber(todayMakes) > 0 ? "Continue shooting" : "Log first makes",
         estimatedMinutes: Math.max(5, Math.ceil(remaining / 10)),
         urgency: "priority",
@@ -192,12 +197,14 @@ export const derivePlayerDailyCommandCenter = ({
   }
 
   if (urgentSc) {
+    const title = clean(urgentSc.sport || urgentSc.title) || "S&C session";
     tasks.push({
       id: `sc-rsvp:${urgentSc.id}`,
       kind: "sc-rsvp",
-      title: `Commit to ${clean(urgentSc.sport || urgentSc.title) || "S&C session"}`,
+      title: `Commit to ${title}`,
       detail: `${dateValue(urgentSc)} · ${clean(urgentSc.time) || "Time TBD"}`,
       target: "sc",
+      reveal: rsvpReveal(title),
       actionLabel: "Open S&C",
       estimatedMinutes: 1,
       urgency: "urgent",
@@ -210,12 +217,14 @@ export const derivePlayerDailyCommandCenter = ({
     if (incompleteProgram[0]) tasks.push(buildDrillTask(incompleteProgram[0]));
   }
   if (missingEvents[0]) {
+    const title = clean(missingEvents[0].title) || "team event";
     tasks.push({
       id: `event-rsvp:${missingEvents[0].id}`,
       kind: "event-rsvp",
-      title: `Set RSVP for ${clean(missingEvents[0].title) || "team event"}`,
+      title: `Set RSVP for ${title}`,
       detail: `${dateValue(missingEvents[0])} · ${clean(missingEvents[0].time) || "Time TBD"}`,
       target: "program",
+      reveal: rsvpReveal(title),
       actionLabel: "Review event",
       estimatedMinutes: 1,
       urgency: "normal",
@@ -223,12 +232,14 @@ export const derivePlayerDailyCommandCenter = ({
     });
   }
   if (missingSc[0]) {
+    const title = clean(missingSc[0].sport || missingSc[0].title) || "S&C session";
     tasks.push({
       id: `sc-rsvp:${missingSc[0].id}`,
       kind: "sc-rsvp",
-      title: `Review ${clean(missingSc[0].sport || missingSc[0].title) || "S&C session"}`,
+      title: `Review ${title}`,
       detail: `${dateValue(missingSc[0])} · ${clean(missingSc[0].time) || "Time TBD"}`,
       target: "sc",
+      reveal: rsvpReveal(title),
       actionLabel: "Review session",
       estimatedMinutes: 1,
       urgency: "normal",
