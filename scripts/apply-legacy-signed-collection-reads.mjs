@@ -48,5 +48,13 @@ if (!source.includes(shotLogMigrationReplacement)) {
   source = source.replace(shotLogMigrationNeedle, shotLogMigrationReplacement)
 }
 
+const coachShotVisibilityNeedle = 'const coachVisibleShotLogs=scopedShotLogs.filter(l=>l.syncState==="remote_saved"&&l.syncSource==="remote");'
+const coachShotVisibilityReplacement = 'const coachVisibleShotLogs=accountCapabilities.isSandbox?scopedShotLogs:scopedShotLogs.filter(l=>l.syncState==="remote_saved"&&l.syncSource==="remote");'
+
+if (!source.includes(coachShotVisibilityReplacement)) {
+  if (!source.includes(coachShotVisibilityNeedle)) throw new Error('Could not find Coach shot-log trust boundary in src/App.jsx.')
+  source = source.replace(coachShotVisibilityNeedle, coachShotVisibilityReplacement)
+}
+
 fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
-console.log('Applied legacy signed collection reads and preserved remote shot-log provenance during registered hydration.')
+console.log('Applied legacy signed collection reads, preserved remote shot-log provenance, and kept sandbox Coach sample activity visible without relaxing registered trust.')
