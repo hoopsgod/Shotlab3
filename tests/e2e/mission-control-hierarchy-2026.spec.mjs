@@ -154,8 +154,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
 
   expect(isTransparent(presentation.identityBackground)).toBe(true);
   expect(presentation.identityBackgroundImage).toBe("none");
-  expect(presentation.identityHeight).toBeGreaterThanOrEqual(80);
-  expect(presentation.identityHeight).toBeLessThanOrEqual(100);
+  // Coach Home crest geometry was intentionally enlarged and certified in #1546.
+  // Keep this integrated presentation gate aligned with that exact mobile contract.
+  expect(presentation.identityHeight).toBeGreaterThanOrEqual(104);
+  expect(presentation.identityHeight).toBeLessThanOrEqual(121);
   expect(presentation.programIdentitySize).toBeGreaterThanOrEqual(10);
   expect(presentation.programIdentitySize).toBeLessThanOrEqual(12);
   expect(presentation.programIdentityTransform).toBe("uppercase");
@@ -169,10 +171,10 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.decisionTitleTop).toBeLessThanOrEqual(presentation.identityBottom + 32);
 
   expect(presentation.heroMarkDisplay).not.toBe("none");
-  expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(80);
-  expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(80);
-  expect(presentation.heroMarkWidth).toBeLessThanOrEqual(94);
-  expect(presentation.heroMarkHeight).toBeLessThanOrEqual(94);
+  expect(presentation.heroMarkWidth).toBeGreaterThanOrEqual(104);
+  expect(presentation.heroMarkHeight).toBeGreaterThanOrEqual(104);
+  expect(presentation.heroMarkWidth).toBeLessThanOrEqual(121);
+  expect(presentation.heroMarkHeight).toBeLessThanOrEqual(121);
   if (presentation.heroLogoObjectFit !== "fallback") expect(presentation.heroLogoObjectFit).toBe("contain");
 
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);

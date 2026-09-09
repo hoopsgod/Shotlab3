@@ -114,10 +114,6 @@
     box-sizing: border-box !important;
   }
 
-  html body #root .performance-shell--coach .secondaryPageShell [data-visual-role="primary-decision"] {
-    margin-inline: 0 !important;
-  }
-
   html body #root .performance-shell--coach .shared-dashboard-back-action {
     margin-bottom: 0 !important;
   }

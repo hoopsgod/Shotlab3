@@ -23,7 +23,7 @@ test('paid Coach mobile containment delegates dynamic route-root shapes to runti
 });
 
 test('secondary Coach title stages stay on the source rail while final authority bounds the shared grid', () => {
-  assert.match(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100%;[\s\S]*max-width:\s*100%;[\s\S]*margin-inline:\s*0;/);
+  assert.doesNotMatch(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
   assert.doesNotMatch(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,/);

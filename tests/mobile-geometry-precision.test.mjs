@@ -6,6 +6,8 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 const authority = read('src/styles/AuthenticatedVisualAuthority2026.css');
 const finalAxis = read('src/styles/MobileViewportAxisAuthority2026.css');
 const dashboards = read('src/components/CoachInteractiveDashboards.css');
+const secondaryPremium = read('src/components/SecondaryPagePremiumMobile.css');
+const titleStage = read('src/components/TeamIdentityTitleStage.css');
 const metrics = read('src/components/PlayerMetricHierarchy.module.css');
 const secondaryPages = read('src/components/SecondaryPageSystem.css');
 const centering = read('public/shotlab-mobile-centering-reconciliation.css');
@@ -35,7 +37,9 @@ test('Coach secondary routes use one outer rail with bounded mobile grid content
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell[^{]*\{[^}]*padding-inline:\s*0 !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*,[\s\S]*player-primary-logging-region \.player-logging-input\s*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
-  assert.match(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame,[\s\S]*width:\s*100%;[\s\S]*max-width:\s*100%;[\s\S]*margin-inline:\s*0;/);
+  assert.doesNotMatch(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame/);
+  assert.match(secondaryPremium, /\.teamIdentityTitleStageFrame,[\s\S]*min-width:\s*0;[\s\S]*max-width:\s*100%;[\s\S]*box-sizing:\s*border-box;/);
+  assert.match(titleStage, /\.teamIdentityTitleStage\s*\{[\s\S]*width:\s*100%;/);
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
   assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);

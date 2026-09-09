@@ -179,6 +179,30 @@ async function certify(page, contract, label, browserName) {
   writeEvidence(label.replace(/[^a-z0-9-]+/gi, "-").toLowerCase(), evidence);
 }
 
+async function expectCoachPlayersRosterHandoff(page, label) {
+  const handoff = await page.evaluate(() => {
+    const dashboard = document.querySelector('[data-testid="coach-players-interactive-dashboard"]');
+    const toolbar = document.querySelector('[data-testid="coach-players-toolbar"]');
+    const roster = document.querySelector('#coach-roster-operations');
+    if (!dashboard || !toolbar || !roster) return null;
+    const dashboardRect = dashboard.getBoundingClientRect();
+    const toolbarRect = toolbar.getBoundingClientRect();
+    const rosterRect = roster.getBoundingClientRect();
+    return {
+      dashboardBottom: dashboardRect.bottom,
+      toolbarBottom: toolbarRect.bottom,
+      rosterTop: rosterRect.top,
+      dashboardToRosterGap: rosterRect.top - dashboardRect.bottom,
+      toolbarToRosterGap: rosterRect.top - toolbarRect.bottom,
+      dashboardPaddingBottom: Number.parseFloat(getComputedStyle(dashboard).paddingBottom) || 0,
+    };
+  });
+  expect(handoff, `${label}: Players dashboard, toolbar, and roster must all exist`).not.toBeNull();
+  expect(handoff.dashboardPaddingBottom, `${label}: nested Players shell must not reserve standalone dock clearance`).toBeLessThanOrEqual(1);
+  expect(handoff.dashboardToRosterGap, `${label}: Players dashboard must hand off directly to roster work`).toBeLessThanOrEqual(48);
+  expect(handoff.toolbarToRosterGap, `${label}: filter controls must not be separated from roster by dead vertical space`).toBeLessThanOrEqual(48);
+}
+
 for (const viewport of MOBILE_GEOMETRY_WIDTHS) {
   test(`authentication sign-in and registration geometry at ${viewport.width}px`, async ({ browser }, testInfo) => {
     const context = await createContext(browser, viewport);
@@ -201,7 +225,9 @@ for (const viewport of MOBILE_GEOMETRY_WIDTHS) {
       try {
         await certify(session.page, CONTRACTS.coachHome, `${mode}-coach-home-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
         await navigate(session.page, "players", "coach-players-interactive-dashboard", browserName);
-        await certify(session.page, CONTRACTS.coachPlayers, `${mode}-coach-players-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
+        const playersLabel = `${mode}-coach-players-${heightLabel(viewport)}-${testInfo.project.name}`;
+        await certify(session.page, CONTRACTS.coachPlayers, playersLabel, browserName);
+        await expectCoachPlayersRosterHandoff(session.page, playersLabel);
         await navigate(session.page, "events", "coach-events-interactive-dashboard", browserName);
         await certify(session.page, CONTRACTS.coachEvents, `${mode}-coach-events-${heightLabel(viewport)}-${testInfo.project.name}`, browserName);
       } finally {

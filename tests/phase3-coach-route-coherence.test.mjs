@@ -47,8 +47,8 @@ test("route identity resolves route context before incidental title words", () =
 
 test("embedded generic headers do not create a second page-sized bottom reserve", () => {
   assert.match(dashboards, /className="secondaryPageShell--embeddedHeader"/);
-  assert.match(embeddedCss, /secondaryPageShell--embeddedHeader[\s\S]*padding-bottom:\s*0/);
-  assert.doesNotMatch(embeddedCss, /!important/);
+  assert.match(embeddedCss, /#root \.secondaryPageShell\.secondaryPageShell--embeddedHeader\s*\{[^}]*padding-bottom:\s*0\s*!important/);
+  assert.match(embeddedCss, /\.secondaryPageShell\.secondaryPageShell--embeddedHeader\s*\{[^}]*gap:\s*18px/);
 });
 
 test("coach route stages have distinct visual identities without a global override layer", () => {
