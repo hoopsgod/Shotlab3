@@ -40,5 +40,13 @@ if (!source.includes(marker)) {
   source = source.replace(needle, replacement)
 }
 
+const shotLogMigrationNeedle = 'const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:"local"})).filter(Boolean);'
+const shotLogMigrationReplacement = 'const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:(l?.syncSource==="remote"||l?.sync_source==="remote")?"remote":"local"})).filter(Boolean);'
+
+if (!source.includes(shotLogMigrationReplacement)) {
+  if (!source.includes(shotLogMigrationNeedle)) throw new Error('Could not find shot-log migration provenance boundary in src/App.jsx.')
+  source = source.replace(shotLogMigrationNeedle, shotLogMigrationReplacement)
+}
+
 fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
-console.log('Applied legacy signed collection reads to registered persistence hydration.')
+console.log('Applied legacy signed collection reads and preserved remote shot-log provenance during registered hydration.')
