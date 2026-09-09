@@ -25,6 +25,7 @@ const seedData = {
   "sl:shotlogs": [{
     id: "workflow-shot-ari",
     email: PLAYER_EMAIL,
+    player_email: PLAYER_EMAIL,
     name: "Ari Workflow",
     player_id: "workflow-ari",
     team_id: TEAM_ID,
@@ -55,6 +56,25 @@ async function installRoutes(context, state) {
   await context.route("**/v1/legacy-auth/restore", async (route) => fulfill(route, {
     ok: true,
     profile: { email: COACH_EMAIL, name: "Workflow Coach", role: "coach", team_id: TEAM_ID },
+  }));
+
+  // Registered hydration treats these signed collections as authoritative. Keep the
+  // fixture aligned with production ownership instead of relying on localStorage rows
+  // that a successful remote hydration is allowed to replace.
+  await context.route("**/v1/teams**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", teams: seedData["sl:teams"] }));
+  await context.route("**/v1/players**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", players: seedData["sl:players"] }));
+  await context.route("**/v1/player-profiles**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", profiles: seedData["sl:player-profiles"] }));
+  await context.route("**/v1/scores**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", scores: seedData["sl:scores"] }));
+  await context.route("**/v1/program-scores**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", program_scores: seedData["sl:program-scores"] }));
+  await context.route("**/v1/shot-logs**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", shot_logs: seedData["sl:shotlogs"] }));
+  await context.route("**/v1/events**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", events: seedData["sl:events"] }));
+  await context.route("**/v1/rsvps**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", rsvps: seedData["sl:rsvps"] }));
+  await context.route("**/v1/strength-conditioning**", (route) => fulfill(route, {
+    ok: true,
+    storage_mode: "team_remote",
+    sessions: seedData["sl:sc-sessions"],
+    rsvps: seedData["sl:sc-rsvps"],
+    logs: seedData["sl:sc-logs"],
   }));
 
   await context.route("**/v1/player-assignments**", async (route) => {
