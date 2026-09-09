@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer.js";
 import { derivePlayerPerformanceNarrative } from "../lib/playerPerformanceNarrative.js";
+import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import { ExperienceSignal, ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
 import ShotLabSignatureField from "./ShotLabSignatureField.jsx";
@@ -57,6 +58,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
     const key = actionKey(action);
     setActiveAction(key);
     onAction?.(action);
+    scheduleWorkspaceActionReveal(action);
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     feedbackTimer.current = setTimeout(() => setActiveAction(""), 900);
   };
@@ -108,6 +110,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           className={styles.primaryButton}
           style={iconButtonStyle}
           data-testid="player-daily-primary-action"
+          data-coach-drill={primary.source === "coach" ? primary.title : ""}
           data-state={primaryWorking ? "working" : "idle"}
           aria-busy={primaryWorking || undefined}
           disabled={primaryWorking}
