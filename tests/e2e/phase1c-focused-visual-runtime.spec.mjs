@@ -202,7 +202,11 @@ async function createSession(browser, { role, scenario, mode, width, route }) {
     await page.goto('/?demo=1');
     const demoButton = page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true });
     await expect(demoButton).toBeVisible({ timeout: 20_000 });
+    const assignmentHistorySettled = role === 'coach'
+      ? page.waitForResponse((response) => response.request().method() === 'GET' && new URL(response.url()).pathname === '/v1/player-assignment-history')
+      : null;
     await demoButton.click();
+    if (assignmentHistorySettled) await assignmentHistorySettled;
     await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
     await replaceDemoCollections(page, fixture);
     await page.reload();
