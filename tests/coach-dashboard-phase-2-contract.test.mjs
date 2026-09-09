@@ -7,6 +7,7 @@ const appSource = fs.readFileSync("src/App.jsx", "utf8");
 const componentSource = fs.readFileSync("src/components/CoachDashboardPhase2.jsx", "utf8");
 const selectorSource = fs.readFileSync("src/lib/coachOperationalIntelligence.js", "utf8");
 const signedCollectionSource = fs.readFileSync("src/lib/legacySignedCollectionPersistence.js", "utf8");
+const signedReadsEnhancerSource = fs.readFileSync("scripts/apply-legacy-signed-collection-reads.mjs", "utf8");
 
 test("phase two imports the reusable operational layer into the coach shell", () => {
   assert.match(appSource, /CoachPlayerIntelligenceDrawer/);
@@ -66,6 +67,11 @@ test("registered Coach shot-log adapter resolves the signed endpoint and request
   assert.equal(result.error, null);
   assert.equal(result.data[0].made, 33);
   assert.equal(result.data[0].email, "ari.workflow@example.com");
+});
+
+test("registered Coach hydration preserves trusted remote shot-log provenance during migration", () => {
+  assert.match(signedReadsEnhancerSource, /source:\(l\?\.syncSource==="remote"\|\|l\?\.sync_source==="remote"\)\?"remote":"local"/);
+  assert.match(appSource, /const coachVisibleShotLogs=scopedShotLogs\.filter\(l=>l\.syncState==="remote_saved"&&l\.syncSource==="remote"\)/);
 });
 
 test("remaining coach pages receive actionable operational controls", () => {
