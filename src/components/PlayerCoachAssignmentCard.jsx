@@ -74,14 +74,13 @@ export default function PlayerCoachAssignmentCard() {
     setMessage("Saving…");
     try {
       const result = await updatePlayerAssignmentState({ teamId: assignment.teamId, action: next.action });
-      const updatedAssignment = result.assignment || assignment;
-      setAssignment(updatedAssignment);
+      setAssignment(result.assignment || assignment);
       setError(!result.ok);
-      setMessage(result.message || (result.ok ? "Assignment updated." : "Assignment status could not be updated. Try again."));
+      setMessage(result.message);
       if (result.ok && next.action === "start") {
-        const action = document.querySelector('[data-testid="player-daily-primary-action"]');
-        const drill = String(action?.dataset?.coachDrill || "").toLowerCase();
-        if (drill && String(updatedAssignment.assignmentText || "").toLowerCase().includes(drill)) action.click();
+        const action = document.querySelector("[data-coach-drill]");
+        const drill = action?.dataset.coachDrill?.toLowerCase();
+        if (drill && assignment.assignmentText.toLowerCase().includes(drill)) action.click();
       }
     } catch {
       setError(true);
