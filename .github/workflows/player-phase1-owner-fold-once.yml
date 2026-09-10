@@ -30,7 +30,6 @@ jobs:
                   raise SystemExit(f"missing expected source block in {path}: {old[:90]!r}")
               p.write_text(source.replace(old, new, 1))
 
-          # Remove the extra cascade edge; the existing Player modules own these repairs.
           replace(
               "src/components/PlayerOperationalWorkspace.jsx",
               'import "../styles/PlayerPhase1MobileReadability.css";\n',
@@ -116,7 +115,6 @@ jobs:
             text-wrap: pretty;
           }''')
 
-          # Source contract now certifies the real owning authorities rather than an override file.
           Path("tests/player-phase1-mobile-layout-readability.test.mjs").write_text(r'''import test from 'node:test';
           import assert from 'node:assert/strict';
           import { readFile } from 'node:fs/promises';
@@ -163,9 +161,8 @@ jobs:
           test('Player Home progress information wraps instead of ellipsizing', () => {
             assert.match(home, /playerProgressDisclosure\s*>\s*summary strong\s*\{[^}]*overflow:\s*visible[^}]*text-overflow:\s*clip[^}]*white-space:\s*normal/);
           });
-          '''.replace(/^          /gm, ''))
+          ''')
 
-          # Preserve Demo state by navigating through the product shell, not hard-reloading routes.
           e2e = Path("tests/e2e/player-phase1-mobile-layout-readability.spec.mjs")
           source = e2e.read_text()
           old_routes = '''const ROUTES = [
