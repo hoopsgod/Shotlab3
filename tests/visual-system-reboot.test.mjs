@@ -33,8 +33,11 @@ test("runtime reboot layers cannot compete with source-owned Coach Hero or secon
 test("reboot uses restrained typography controls and responsive support behavior", () => {
   assert.match(source, /SF Pro Display/);
   assert.match(source, /SF Pro Text/);
-  assert.match(source, /@media \(max-width: 760px\)/);
-  assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(3/);
+  assert.match(source, /@media \(max-width: 760px\)[\s\S]*mcAssignmentStateFacts[\s\S]*repeat\(5/);
+  assert.match(source, /@media \(max-width: 420px\)[\s\S]*mcAssignmentStateFacts[\s\S]*repeat\(6/);
+  assert.match(source, /mcAssignmentStateFact[\s\S]*grid-column:\s*span 3/);
+  assert.match(source, /mcAssignmentStateFact:nth-child\(n\+3\)[\s\S]*grid-column:\s*span 2/);
+  assert.doesNotMatch(source, /mcAssignmentStateFacts\s*\{[^}]*repeat\(3/);
   assert.match(source, /prefers-reduced-motion/);
 });
 

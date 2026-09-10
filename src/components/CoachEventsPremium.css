@@ -178,7 +178,7 @@
   }
 
   [data-testid="coach-events-decision-brief"] [data-route-stage-metric-label] {
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: 0.07em;
     overflow: visible;
     text-overflow: clip;
@@ -216,7 +216,7 @@
     border: 1px solid rgba(23, 26, 24, 0.12);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.78);
-    color: #7a827c;
+    color: #59636a;
     box-shadow: none;
   }
 
@@ -236,7 +236,7 @@
   }
 
   [data-testid="coach-events-filter-rail"] > label input::placeholder {
-    color: #7a827c !important;
+    color: #59636a !important;
     opacity: 1 !important;
   }
 
@@ -386,7 +386,7 @@
   }
 
   [data-testid="coach-events-decision-brief"] [data-route-stage-metric-label] {
-    font-size: 7.5px;
+    font-size: 10px;
     letter-spacing: 0.055em;
   }
 

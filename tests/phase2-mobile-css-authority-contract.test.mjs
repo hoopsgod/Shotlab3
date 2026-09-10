@@ -45,7 +45,7 @@ test('Phase 2 keeps generic mobile containment in CSS and dynamic Coach route ow
   );
 });
 
-test('Coach secondary filters keep one scoped horizontal owner', () => {
+test('Coach secondary filters keep scoped horizontal ownership with explicit wrapping exceptions', () => {
   assert.doesNotMatch(
     finalAxisAuthority,
     /\[data-visual-role="filter-rail"\]/,
@@ -53,7 +53,13 @@ test('Coach secondary filters keep one scoped horizontal owner', () => {
   );
   assert.match(
     secondaryMobile,
+    /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\):not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{[^}]*overflow-x:\s*auto\s*!important/,
+    'secondary rails other than Players and Events must retain one scoped horizontal owner',
+  );
+  assert.doesNotMatch(
+    secondaryMobile,
     /\.secondaryPageToolbar\s+\[data-visual-role="filter-rail"\]:not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{[^}]*overflow-x:\s*auto\s*!important/,
+    'Coach Players must not be pulled back into the shared horizontal-scroll authority',
   );
   assert.match(
     secondaryMobile,

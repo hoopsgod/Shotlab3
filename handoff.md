@@ -1,94 +1,35 @@
-# ShotLab Phase Handoff
+# ShotLab Phase 1 — Mobile Layout / Readability Repair Handoff
 
-## Accepted baseline
+## Pull request
 
-- Base branch: `march-3-reset-85393dd`
-- Frozen merged baseline: `fcb3b1abc4f1b18cf0ad72991a3427b3c34ad990` (PR #1537 merged)
-- PR #1520, #1524, #1525, #1526, #1527, #1529, #1530, #1531, #1532, #1533, #1534, #1535, and #1536 are closed. Do not reopen completed mobile-axis, assignment, coach follow-up, shot-log, RSVP, score, training-catalog, coach-priority, Events, Strength & Conditioning, Program-score, Player-identity, or Player-profile work unless a regression test proves a break.
+- PR: #1550 — https://github.com/hoopsgod/Shotlab3/pull/1550
+- Branch: `agent/phase1-mobile-layout-readability-repair`
+- Base: `march-3-reset-85393dd`
+- Merge: intentionally not performed by this closure pass.
+- Exact head SHA, live GitHub check state, and Cloudflare Pages deployment status must be taken from the PR's final exact-head certification comment. This file avoids embedding a self-referential commit SHA.
 
-## Protected contracts
+## Scope
 
-- Preserve Phase 1A mobile geometry and horizontal-axis guardrails.
-- Preserve Phase 1B Demo/registered state parity.
-- Preserve Phase 1C focused visual/runtime guardrails.
-- Preserve Phase 2 CSS/layout authority.
-- Preserve all completed Phase 3 ownership contracts.
-- Preserve production performance budgets and exact-head Cloudflare certification.
-- No UI/CSS/layout redesign, visual-baseline rewrite, dependency upgrade, allowlist broadening, API authorization expansion, or database-schema expansion.
+This Phase 1 pass is limited to mobile geometry, readability, deterministic evidence, and release guardrails. It does not redesign ShotLab, add product features, begin Phase 2, raise performance budgets, weaken assertions, broaden allowlists, or rewrite accepted visual baselines merely to make CI pass.
 
-## Current work
+Covered surfaces:
 
-- Phase: **Post-Phase-3 product-validation closure**
-- Branch: `agent/post-phase3-product-validation`
-- Base: `57f9596d5de23926c017a83fb71e4f56ff5863d5`
-- Scope: commit the deterministic route-enhancer output already covered by repository regression contracts: registered Events/S&C replacement hydration, precise RSVP presentation, Player In Season parity, and mobile S&C row containment.
-- Do not broaden this slice into the visual redesign, onboarding, monetization, or architecture recommendations from the product evaluation.
+- Sign-in input and CTA bounded/full-width geometry.
+- Coach Dashboard Program Pulse and assignment-status layout.
+- Players search/filter wrapping, page-overflow protection, and supporting-copy contrast.
+- Schedule one-column mobile filter composition and placeholder readability.
+- Drills metric label/detail wrapping and minimum readable sizes.
 
-## Team ownership problem
+## Deterministic acceptance evidence
 
-- Coach team identity/metadata can be committed locally before the signed `/v1/teams` POST is confirmed.
-- Branding explicitly follows that local-first sequence: the app save occurs before signed Team persistence verification.
-- If the POST fails, a later signed Team read or post-auth hydration can replace the locally intended values with stale remote values.
-- Team POST semantics are partial-field upserts, not collection replacement. One failed branding or metadata edit must therefore never make the entire Team row locally authoritative.
-- Team creation remains a separate server-confirmed route and is outside this ownership slice.
+The dedicated Phase 1 Playwright workflow exercises 320, 375, 390, 430, 768, and 1280 px widths. The 390 px run captures sign-in, dashboard, Players, Schedule, and Drills screenshots plus geometry/readability metrics. Baseline and candidate evidence use the same deterministic routes and startup synchronization so the gate measures the target UI rather than a transient loading/sync screen.
 
-## Ownership correction
+The assignment-status CSS contract has one effective authority: five columns where space permits, changing to a balanced 2+3 grid at phone widths of 420 px and below. Source-contract coverage prevents a higher-specificity runtime style from silently restoring the previous three-column override.
 
-- Use compact pending marker `sl:tp`, scoped to exact requester + active team.
-- Track only explicitly submitted mutable fields using a compact field mask: name, join code, school, level, and branding.
-- Mark those fields before the signed POST and retain them on network/API failure.
-- While pending, signed reads reconcile the active Team row field-by-field: only pending fields use the local value; all unrelated Team fields remain remote-authoritative.
-- Pending authority is created only for Coach-role active-team updates; Player sessions and other requester/team contexts cannot inherit it.
-- Successful signed sync clears only the submitted field mask, preserving any unrelated earlier pending fields.
-- Legacy signed Team reads and post-auth hydration use the same field-level reconciliation policy.
-- Preserve `/v1/teams` authorization, immutable ownership fields, join-code conflict rules, Demo-local behavior, Team creation semantics, UI/CSS, schema, and all prior Phase 3 contracts.
+## Registered Coach limitation
 
-## Focused validation target
+Deterministic demo and registered/parity guardrails remain part of release safety, but real registered-Coach visual confirmation still requires an authenticated account/session that CI can legitimately use. Do not describe that real-account visual check as completed unless it was actually performed on the exact certified head.
 
-Before merge readiness:
+## Certification rule
 
-- Failed branding save survives a stale signed read.
-- Fresh remote name/school/level/join-code values still win when only branding is pending.
-- Failed metadata updates preserve only the submitted metadata fields while fresh remote branding/peer fields still win.
-- Successful retry clears pending ownership and restores remote authority.
-- Cross-requester/team pending markers cannot override current remote truth.
-- Player sessions cannot create Team pending authority.
-- Legacy signed Team reads and post-auth hydration use the same field-level policy.
-- Existing signed Team authorization, branding, logo, context, invite, and production-acceptance tests remain green.
-- Production build/performance stays within the existing hard budgets.
-- Phase 1A/1B/1C, Demo/registered parity, Phase 3 Release Certification, Phase 5 Hardening, Production Acceptance, and supporting release suites remain green.
-- Cloudflare Pages succeeds on the exact final PR head.
-
-## Performance warning
-
-PR #1536's certified production tree left:
-
-- JS gzip: `364,665 / 365,000` — **335 bytes headroom**
-- CSS gzip: `87,987 / 88,000` — **13 bytes headroom**
-
-Do not raise either budget. The Team ownership implementation must fit inside the existing budgets or offset runtime growth without weakening tests or moving visual baselines.
-
-## Remaining ownership queue
-
-Phase 3 ownership is complete through merged PR #1537. Do not invent another ownership phase unless new regression evidence identifies a concrete authority bug.
-
-Not in the queue: Player identities, Player profiles, assignments, coach follow-ups, shot logs, RSVPs, `sl:scores`, Program scores, training catalog, coach priorities, Events, Strength & Conditioning, challenges, or season archives.
-
-## Release rule
-
-- Target merged baseline `fcb3b1abc4f1b18cf0ad72991a3427b3c34ad990` directly.
-- Keep this PR to the documented post-Phase-3 validation corrections only.
-- Do not raise performance budgets or alter visual baselines to pass.
-- Re-run exact-head certification on the final PR head.
-- Do not merge without explicit authorization after certification.
-
-## PR #1545 merge-readiness closure
-
-- Integrated the current merged base so Cloudflare head builds contain the same signed persistence boundaries exercised by GitHub merge builds.
-- Retained the base's explicit boolean RSVP/Event deletion authority; empty startup cache rewrites have no replacement authority.
-- Extracted unchanged ConfettiBurst and CourtDivider into TrainingCelebration.jsx to keep App.jsx below the existing 500,000-byte source ceiling.
-- Updated the legacy S&C assertion to verify explicit replacement versus cache hydration behavior for all three S&C collections.
-- Updated the historical drawer source assertion to enforce the existing team-brand surface token and fallback, retaining the text/contrast declarations and visual baseline.
-- Fresh local verification: 49 focused persistence/parity checks, 59 release/decomposition checks, and 59 release-hardening checks pass.
-- Production budget and exact final-head CI/Cloudflare browser evidence must be recorded on PR #1545 before merge certification.
-- Do not merge without explicit user authorization.
+Treat this PR as merge-ready only when the exact head has no unresolved in-scope review finding, the required exact-head test/build workflows are successful, and the Cloudflare Pages deployment for that same SHA is confirmed. Pending or skipped checks are not passes.
