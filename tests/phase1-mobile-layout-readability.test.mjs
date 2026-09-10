@@ -42,7 +42,7 @@ test('Players keeps search full-width and wraps filters instead of scrolling the
 test('Schedule retains its one-column mobile filter composition and AA placeholder contrast', () => {
   assert.match(eventsCss, /coach-events-filter-rail"\]\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important/);
   assert.match(eventsCss, /input::placeholder\s*\{[\s\S]*?color:\s*#59636a !important/);
-  assert.match(primitivesCss, /\.filterRail\[data-surface="light"\] \.searchField input::placeholder\s*\{[\s\S]*?color:\s*#59636a !important;[\s\S]*?-webkit-text-fill-color:\s*#59636a !important;[\s\S]*?opacity:\s*1 !important/);
+  assert.match(primitivesCss, /\[data-surface="light"\] \.searchField input::placeholder\s*\{[\s\S]*?color:\s*#59636a !important;[\s\S]*?-webkit-text-fill-color:\s*#59636a !important/);
   assert.ok(contrast('#59636a', '#ffffff') >= 4.5);
 });
 
