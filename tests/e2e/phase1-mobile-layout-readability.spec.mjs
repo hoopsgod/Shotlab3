@@ -28,6 +28,13 @@ async function installSafeRoutes(page) {
   await page.route('**/v1/coach/players/provision**', r => r.fulfill({ status:200, contentType:'application/json', body:'{"ok":true,"invitations":[]}' }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, r => r.fulfill({ status:200, contentType:'application/json', body:'[]' }));
 }
+async function waitForAuth(page) {
+  const card=page.locator('.auth-card-enter');
+  await expect(card).toBeVisible({timeout:30000});
+  await expect(card.locator('input[type="email"]')).toBeVisible();
+  await expect(card.locator('input[type="password"]')).toBeVisible();
+  await expect(card.locator(':scope > button.cta-primary')).toBeVisible();
+}
 async function freeze(page) {
   await page.addStyleTag({ content:'*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}' });
   await page.evaluate(() => document.fonts?.ready);
@@ -64,7 +71,7 @@ async function enterCoachDemo(page) {
 for (const viewport of VIEWPORTS) {
   test(`Phase 1 Coach surfaces remain bounded and readable at ${viewport.width}px`, async ({page}) => {
     const pageErrors=[]; page.on('pageerror', e => pageErrors.push(e.message));
-    await page.setViewportSize(viewport); await installSafeRoutes(page); await page.goto('/'); await freeze(page);
+    await page.setViewportSize(viewport); await installSafeRoutes(page); await page.goto('/'); await waitForAuth(page); await freeze(page);
 
     const auth=await page.evaluate(() => {
       const rect=(n)=>{const r=n.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}};
@@ -115,16 +122,26 @@ for (const viewport of VIEWPORTS) {
     const playerRail=page.getByTestId('coach-players-filter-rail'); await expect(playerRail).toBeVisible({timeout:10000});
     const players=await playerRail.evaluate(rail=>{
       const r=n=>{const b=n.getBoundingClientRect();return {left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width}};
-      const search=rail.querySelector('label'),group=rail.querySelector('[role="group"]'),summary=document.querySelector('[data-testid="coach-players-command-bar"] [class*="summary"]');
-      return {rail:r(rail),search:r(search),group:r(group),railScroll:rail.scrollWidth-rail.clientWidth,groupScroll:group.scrollWidth-group.clientWidth,summaryColor:getComputedStyle(summary).color};
+      const effectiveBackground=(node)=>{
+        for(let current=node;current;current=current.parentElement){
+          const value=getComputedStyle(current).backgroundColor;
+          const match=value.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+          if(!match) continue;
+          const alpha=match[4] == null ? 1 : Number(match[4]);
+          if(alpha >= .99) return `rgb(${match[1]}, ${match[2]}, ${match[3]})`;
+        }
+        return 'rgb(255, 255, 255)';
+      };
+      const search=rail.querySelector('label'),group=rail.querySelector('[role="group"]'),summary=document.querySelector('[data-testid="coach-players-command-bar"] [class*="summary"]'),style=getComputedStyle(rail);
+      return {rail:r(rail),search:r(search),group:r(group),railScroll:rail.scrollWidth-rail.clientWidth,groupScroll:group.scrollWidth-group.clientWidth,paddingLeft:parseFloat(style.paddingLeft)||0,paddingRight:parseFloat(style.paddingRight)||0,summaryColor:getComputedStyle(summary).color,summaryBackground:effectiveBackground(summary)};
     });
     await shot(page,viewport,'players');
     if (!CAPTURE_ONLY) {
       if (viewport.width <= 820) {
-        expect(close(players.search.left,players.rail.left,2)).toBe(true); expect(close(players.search.right,players.rail.right,2)).toBe(true);
+        expect(close(players.search.left,players.rail.left+players.paddingLeft,2)).toBe(true); expect(close(players.search.right,players.rail.right-players.paddingRight,2)).toBe(true);
         expect(players.group.top).toBeGreaterThanOrEqual(players.search.bottom-1); expect(players.railScroll).toBeLessThanOrEqual(1); expect(players.groupScroll).toBeLessThanOrEqual(1);
       }
-      const color=rgb(players.summaryColor); if (color) expect(contrast(color,[244,240,231])).toBeGreaterThanOrEqual(4.5);
+      const color=rgb(players.summaryColor),background=rgb(players.summaryBackground); if (color&&background) expect(contrast(color,background)).toBeGreaterThanOrEqual(4.5);
       await assertNoPageOverflow(page);
     }
 

@@ -162,11 +162,21 @@ body.mission-control-active .mcAssignmentAccountabilityRow {
   }
 
   body.mission-control-active .mcAssignmentStateFacts {
-    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body.mission-control-active .mcAssignmentStateFacts {
+    grid-template-columns: repeat(6,minmax(0,1fr)) !important;
   }
 
-  body.mission-control-active .mcAssignmentStateFact:nth-child(4),
-  body.mission-control-active .mcAssignmentStateFact:nth-child(5) {
+  body.mission-control-active .mcAssignmentStateFact {
+    grid-column: span 3 !important;
+  }
+
+  body.mission-control-active .mcAssignmentStateFact:nth-child(n+3) {
+    grid-column: span 2 !important;
     border-top: 1px solid var(--sl-line) !important;
   }
 }

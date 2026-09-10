@@ -7,6 +7,7 @@ const eventsCss = fs.readFileSync('src/components/CoachEventsPremium.css', 'utf8
 const routeCss = fs.readFileSync('src/components/CoachRoutePerformanceStage.module.css', 'utf8');
 const authCss = fs.readFileSync('public/shotlab-v12-auth-demo-entry.css', 'utf8');
 const assignment = fs.readFileSync('src/lib/coachAssignmentAccountabilityEnhancer.js', 'utf8');
+const reboot = fs.readFileSync('src/lib/visualSystemReboot.js', 'utf8');
 
 function channel(value) {
   const v = value / 255;
@@ -49,8 +50,11 @@ test('Drill performance evidence wraps instead of ellipsizing at tiny text sizes
   assert.match(routeCss, /\.metricDetail\s*\{[\s\S]*?font:\s*510 11px\/1\.3[\s\S]*?white-space:\s*normal[\s\S]*?overflow:\s*visible/);
 });
 
-test('assignment status uses an intentional five-column desktop and balanced mobile grid', () => {
+test('assignment status uses one five-column authority and a balanced 2+3 phone grid', () => {
   assert.match(assignment, /mcAssignmentStateFacts\{display:grid;grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(assignment, /@media\(max-width:420px\)[\s\S]*?grid-template-columns:repeat\(6,minmax\(0,1fr\)\)[\s\S]*?mcAssignmentStateFact\{grid-column:span 3\}[\s\S]*?nth-child\(n\+3\)\{grid-column:span 2\}/);
   assert.match(assignment, /mcAssignmentStateFact small[^}]*font-size:9px/);
+  assert.doesNotMatch(reboot, /mcAssignmentStateFacts\s*\{[^}]*grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(reboot, /@media \(max-width: 760px\)[\s\S]*?mcAssignmentStateFacts\s*\{[\s\S]*?repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(reboot, /@media \(max-width: 420px\)[\s\S]*?mcAssignmentStateFacts\s*\{[\s\S]*?repeat\(6,minmax\(0,1fr\)\)[\s\S]*?mcAssignmentStateFact\s*\{[\s\S]*?grid-column:\s*span 3 !important[\s\S]*?nth-child\(n\+3\)[\s\S]*?grid-column:\s*span 2 !important/);
 });
