@@ -8,6 +8,7 @@ const FINAL_A11Y_CSS = `${FINAL_A11Y_MARKER}
 [data-testid="auth-workspace"]>.fade-up,[data-testid="auth-workspace"] .auth-card-enter{animation:none!important;transition:none!important;opacity:1!important;transform:none!important;filter:none!important}
 [data-testid="auth-workspace"] button,[data-testid="auth-workspace"] input,[data-testid="auth-workspace"] a{opacity:1!important;filter:none!important}
 [data-testid="auth-workspace"] input::placeholder{color:#465159!important;opacity:1!important}
+[data-testid="coach-events-filter-rail"][data-surface="light"] input::placeholder{color:#59636a!important;-webkit-text-fill-color:#59636a!important;opacity:1!important}
 [data-testid="auth-workspace"] a[href$="privacy"]{color:#35434c!important;-webkit-text-fill-color:#35434c!important}
 [data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary{color:#f8fbf6!important;-webkit-text-fill-color:#f8fbf6!important}
 ${COACH_MOBILE_PARITY_MARKER}
