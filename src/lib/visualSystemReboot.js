@@ -2,6 +2,8 @@ const STYLE_ID = "shotlab-visual-system-reboot";
 
 export const VISUAL_SYSTEM_REBOOT_VERSION = "product-light-v3-mission-control";
 
+// This runtime reboot owns Mission Control support surfaces only; canonical
+// secondary-page title and layout authority remains in SecondaryPageSystem.
 const CSS = `
 :root {
   --sl-canvas: #f5f5f2;

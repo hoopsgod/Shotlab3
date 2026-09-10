@@ -219,6 +219,10 @@
   letter-spacing: -.008em;
 }
 .searchField input::placeholder { color: color-mix(in srgb, var(--text-3, #848b90) 85%, transparent); }
+.filterRail[data-surface="light"] .searchField input::placeholder {
+  color: #59636a;
+  opacity: 1;
+}
 .filterScroller { display: flex; gap: 7px; min-width: 0; overflow-x: auto; scrollbar-width: none; overscroll-behavior-inline: contain; }
 :global([data-testid="coach-events-filter-rail"]) > .filterScroller { width: 100%; gap: 6px; flex-wrap: wrap; overflow-x: visible; }
 .filterScroller::-webkit-scrollbar { display: none; }
