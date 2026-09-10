@@ -155,14 +155,16 @@ for (const viewport of VIEWPORTS) {
     const eventRail=page.getByTestId('coach-events-filter-rail'); await expect(eventRail).toBeVisible({timeout:10000});
     const schedule=await eventRail.evaluate(rail=>{
       const r=n=>{const b=n.getBoundingClientRect();return {left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width}};
-      const search=rail.querySelector('label'),group=rail.querySelector('[role="group"]'),input=rail.querySelector('input'),trailing=rail.lastElementChild;
-      return {rail:r(rail),search:r(search),group:r(group),trailing:r(trailing),placeholder:getComputedStyle(input,'::placeholder').color};
+      const search=rail.querySelector('label'),group=rail.querySelector('[role="group"]'),input=rail.querySelector('input'),trailing=rail.lastElementChild,style=getComputedStyle(rail);
+      return {rail:r(rail),search:r(search),group:r(group),trailing:r(trailing),railScroll:rail.scrollWidth-rail.clientWidth,groupScroll:group.scrollWidth-group.clientWidth,paddingLeft:parseFloat(style.paddingLeft)||0,paddingRight:parseFloat(style.paddingRight)||0,placeholder:getComputedStyle(input,'::placeholder').color};
     });
     await shot(page,viewport,'schedule');
     if (!CAPTURE_ONLY) {
       if (viewport.width <= 760) {
-        expect(close(schedule.search.left,schedule.rail.left,2)).toBe(true); expect(close(schedule.search.right,schedule.rail.right,2)).toBe(true);
+        expect(close(schedule.search.left,schedule.rail.left+schedule.paddingLeft,2)).toBe(true); expect(close(schedule.search.right,schedule.rail.right-schedule.paddingRight,2)).toBe(true);
+        expect(schedule.search.left).toBeGreaterThanOrEqual(schedule.rail.left-1); expect(schedule.search.right).toBeLessThanOrEqual(schedule.rail.right+1);
         expect(schedule.group.top).toBeGreaterThanOrEqual(schedule.search.bottom-1); expect(schedule.trailing.top).toBeGreaterThanOrEqual(schedule.group.bottom-1);
+        expect(schedule.railScroll).toBeLessThanOrEqual(1); expect(schedule.groupScroll).toBeLessThanOrEqual(1);
         const color=rgb(schedule.placeholder); if (color) expect(contrast(color,[255,255,255])).toBeGreaterThanOrEqual(4.5);
       }
       await assertNoPageOverflow(page);
