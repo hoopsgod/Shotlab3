@@ -1,0 +1,100 @@
+name: Phase 1 Mobile Layout Readability
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase1-mobile-layout-readability-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase1-layout-readability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASELINE_SHA: 27bf0c7856e51dd87906abe31aa8d605a9f5cabe
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify targeted source contracts
+        run: >-
+          node --test
+          tests/phase1-mobile-layout-readability.test.mjs
+          tests/coach-assignment-accountability.test.mjs
+          tests/registered-mobile-viewport-lock-contract.test.mjs
+          tests/mobile-horizontal-viewport-lock-contract.test.mjs
+
+      - name: Capture matching baseline evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/e2e/phase1-mobile-layout-readability.spec.mjs /tmp/phase1-mobile-layout-readability.spec.mjs
+          git checkout --detach "$BASELINE_SHA"
+          cp /tmp/phase1-mobile-layout-readability.spec.mjs tests/e2e/phase1-mobile-layout-readability.spec.mjs
+          PHASE1_CAPTURE_ONLY=1 PHASE1_EVIDENCE=before npx playwright test tests/e2e/phase1-mobile-layout-readability.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+          mkdir -p /tmp/phase1-evidence
+          cp -R artifacts/phase1-mobile-layout-readability/before /tmp/phase1-evidence/before
+          git reset --hard
+          git clean -fd
+          git checkout --detach "$HEAD_SHA"
+          mkdir -p artifacts/phase1-mobile-layout-readability
+          cp -R /tmp/phase1-evidence/before artifacts/phase1-mobile-layout-readability/before
+
+      - name: Validate repaired surfaces and capture after evidence
+        env:
+          PHASE1_EVIDENCE: after
+        run: npx playwright test tests/e2e/phase1-mobile-layout-readability.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Re-certify Program Pulse mobile geometry
+        run: npx playwright test tests/e2e/coach-mobile-identity-computed.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Build with unchanged performance budgets
+        run: npm run build:performance
+
+      - name: Upload before-after evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-mobile-layout-readability-evidence
+          path: |
+            artifacts/phase1-mobile-layout-readability/
+            artifacts/performance/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-mobile-layout-readability-failures
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
