@@ -3,8 +3,6 @@ const STYLE_ID = "shotlab-visual-system-reboot";
 export const VISUAL_SYSTEM_REBOOT_VERSION = "product-light-v3-mission-control";
 
 const CSS = `
-/* ShotLab product-light reboot owns Mission Control support surfaces only.
-   Coach Hero identity, crest, title, summary, decision metrics, CTA, and mobile control bar are source-owned. */
 :root {
   --sl-canvas: #f5f5f2;
   --sl-surface: #ffffff;
@@ -70,10 +68,6 @@ body.mission-control-active .mcTopBar button {
   box-shadow: none !important;
 }
 
-/* Light editorial support cards are shared by populated Demo and registered
-   experiences. The Coach activation plan is deliberately excluded: sparse or
-   onboarding registered accounts must keep the component-owned dark premium
-   material instead of degrading into a generic setup card. */
 body.mission-control-active .mcSection,
 body.mission-control-active [data-testid="coach-assignment-accountability"] {
   border: 1px solid var(--sl-line) !important;
