@@ -50,177 +50,91 @@ const CSS = `
   backdrop-filter:blur(24px) saturate(1.15);
 }
 .performance-shell .sidebar-nav .nav-title { color:#999b98 !important; }
-.performance-shell .sidebar-nav .nav-item {
-  color:#666b6e !important;
-  border-radius:13px !important;
-}
+.performance-shell .sidebar-nav .nav-item { color:#666b6e !important; border-radius:13px !important; }
 .performance-shell .sidebar-nav .nav-item:hover,
-.performance-shell .sidebar-nav .nav-item:focus-visible {
-  color:#17191b !important;
-  border-color:var(--pw-border) !important;
-  background:#fff !important;
-  transform:none !important;
-}
-.performance-shell .sidebar-nav .nav-item.is-active {
-  color:#151719 !important;
-  border-color:rgba(21,23,25,.07) !important;
-  background:#fff !important;
-  box-shadow:0 9px 28px rgba(25,28,30,.08), inset 3px 0 var(--pw-accent) !important;
-}
+.performance-shell .sidebar-nav .nav-item:focus-visible { color:#17191b !important; border-color:var(--pw-border) !important; background:#fff !important; transform:none !important; }
+.performance-shell .sidebar-nav .nav-item.is-active { color:#151719 !important; border-color:rgba(21,23,25,.07) !important; background:#fff !important; box-shadow:0 9px 28px rgba(25,28,30,.08), inset 3px 0 var(--pw-accent) !important; }
 
 .performance-shell .appHeader,
-.premium-screen .appHeader {
-  padding:clamp(22px,4vw,38px) !important;
-  border:1px solid rgba(21,23,25,.075) !important;
-  border-radius:26px !important;
-  background:
-    linear-gradient(125deg, color-mix(in srgb, var(--pw-accent) 5%, #fff), #fff 42%, #fdfcf9) !important;
-  box-shadow:var(--pw-shadow) !important;
-}
+.premium-screen .appHeader { padding:clamp(22px,4vw,38px) !important; border:1px solid rgba(21,23,25,.075) !important; border-radius:26px !important; background:linear-gradient(125deg, color-mix(in srgb, var(--pw-accent) 5%, #fff), #fff 42%, #fdfcf9) !important; box-shadow:var(--pw-shadow) !important; }
 .performance-shell .appHeader::before,
-.premium-screen .appHeader::before {
-  background:linear-gradient(115deg, var(--pw-accent-faint), transparent 42%) !important;
-}
+.premium-screen .appHeader::before { background:linear-gradient(115deg, var(--pw-accent-faint), transparent 42%) !important; }
 .performance-shell .appHeaderTitle,
-.premium-screen .appHeaderTitle {
-  color:#151719 !important;
-  font-size:clamp(34px,5vw,58px) !important;
-  line-height:.96 !important;
-  letter-spacing:-.018em !important;
-}
+.premium-screen .appHeaderTitle { color:#151719 !important; font-size:clamp(34px,5vw,58px) !important; line-height:.96 !important; letter-spacing:-.018em !important; }
 .performance-shell .appHeaderSubtitle,
 .premium-screen .appHeaderSubtitle { color:#6b7073 !important; font-size:14px !important; }
 .performance-shell .appHeaderEyebrow,
 .premium-screen .appHeaderEyebrow { color:#555b5e !important; }
 
-/*
- * Material authority is explicit. Stable legacy primitives remain listed by exact
- * class while migrated components opt in through data-surface. Never infer a
- * background or foreground from a class-name fragment such as "Card"/"Panel".
- */
+/* Material authority is explicit. */
 .performance-shell .accent-card,
 .performance-shell .premiumSummaryPanel,
 .performance-shell .premiumStatTile,
 .performance-shell .ch,
 .performance-shell [data-surface="light"],
-.premium-screen [data-surface="light"] {
-  border-color:var(--pw-border) !important;
-  color:#151719;
-}
+.premium-screen [data-surface="light"] { border-color:var(--pw-border) !important; color:#151719; }
 .performance-shell .accent-card,
 .performance-shell .premiumSummaryPanel,
 .performance-shell .ch,
 .performance-shell [data-surface="light"],
-.premium-screen [data-surface="light"] {
-  background:#fff !important;
-  box-shadow:0 12px 38px rgba(26,30,33,.065) !important;
-}
+.premium-screen [data-surface="light"] { background:#fff !important; box-shadow:0 12px 38px rgba(26,30,33,.065) !important; }
 .performance-shell .premiumSummaryPanel { border:0 !important; border-radius:26px !important; }
 .performance-shell .premiumSummaryPanel::after { opacity:.24; }
-.performance-shell .premiumStatGrid {
-  gap:10px !important;
-  border:0 !important;
-  background:transparent !important;
-}
-.performance-shell .premiumStatTile {
-  border:1px solid var(--pw-border) !important;
-  border-radius:16px !important;
-  background:#f7f6f2 !important;
-}
+.performance-shell .premiumStatGrid { gap:10px !important; border:0 !important; background:transparent !important; }
+.performance-shell .premiumStatTile { border:1px solid var(--pw-border) !important; border-radius:16px !important; background:#f7f6f2 !important; }
 .performance-shell .heroStatVal { color:#17191b !important; }
 .performance-shell .heroStatLbl { color:#818588 !important; }
 .performance-shell .ch:hover,
-.performance-shell .ch:focus-within {
-  transform:translateY(-2px);
-  background:#fff !important;
-  border-color:rgba(21,23,25,.13) !important;
-  box-shadow:var(--pw-shadow-raised) !important;
-}
+.performance-shell .ch:focus-within { transform:translateY(-2px); background:#fff !important; border-color:rgba(21,23,25,.13) !important; box-shadow:var(--pw-shadow-raised) !important; }
 
 .performance-shell .pageHeaderPill,
-.performance-shell .appHeaderAction {
-  border-color:var(--pw-border) !important;
-  background:#f7f6f2 !important;
-  color:#303437 !important;
-  box-shadow:none !important;
-}
+.performance-shell .appHeaderAction { border-color:var(--pw-border) !important; background:#f7f6f2 !important; color:#303437 !important; box-shadow:none !important; }
 .performance-shell .pageHeaderPillBrand,
 .performance-shell .cta-primary,
 .premium-screen .cta-primary,
-.performance-shell .btn-v.is-primary {
-  border-color:#17191b !important;
-  border-radius:var(--radius-md, 14px) !important;
-  background:#17191b !important;
-  color:#fff !important;
-  font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
-  box-shadow:0 12px 28px rgba(20,22,24,.16) !important;
-}
+.performance-shell .btn-v.is-primary { border-color:#17191b !important; border-radius:var(--radius-md, 14px) !important; background:#17191b !important; color:#fff !important; font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important; box-shadow:0 12px 28px rgba(20,22,24,.16) !important; }
 
 .performance-shell input,
 .performance-shell textarea,
 .performance-shell select,
 .premium-screen input,
 .premium-screen textarea,
-.premium-screen select {
-  border-color:var(--pw-border-strong) !important;
-  border-radius:var(--radius-md, 14px) !important;
-  background:#fff !important;
-  color:#17191b !important;
-  box-shadow:0 1px 0 rgba(255,255,255,.8), inset 0 1px 2px rgba(22,25,27,.025) !important;
-}
+.premium-screen select { border-color:var(--pw-border-strong) !important; border-radius:var(--radius-md, 14px) !important; background:#fff !important; color:#17191b !important; box-shadow:0 1px 0 rgba(255,255,255,.8), inset 0 1px 2px rgba(22,25,27,.025) !important; }
 .performance-shell input::placeholder,
 .performance-shell textarea::placeholder,
 .premium-screen input::placeholder,
 .premium-screen textarea::placeholder { color:#a1a4a5 !important; }
+/* Phase 1 route authority: this must outrank the injected generic placeholder rule. */
+html body .performance-shell.performance-shell [data-testid="coach-events-filter-rail"][data-surface="light"] input::placeholder,
+html body .premium-screen.premium-screen [data-testid="coach-events-filter-rail"][data-surface="light"] input::placeholder {
+  color:#59636a !important;
+  -webkit-text-fill-color:#59636a !important;
+  opacity:1 !important;
+}
 .performance-shell input:focus,
 .performance-shell textarea:focus,
 .performance-shell select:focus,
 .premium-screen input:focus,
 .premium-screen textarea:focus,
-.premium-screen select:focus {
-  border-color:color-mix(in srgb,var(--pw-accent) 65%,#202326) !important;
-  background:#fff !important;
-  box-shadow:0 0 0 4px var(--pw-accent-faint) !important;
-}
+.premium-screen select:focus { border-color:color-mix(in srgb,var(--pw-accent) 65%,#202326) !important; background:#fff !important; box-shadow:0 0 0 4px var(--pw-accent-faint) !important; }
 .performance-shell label,
 .premium-screen label { color:#74797c !important; }
 
-/*
- * Identity-neutral control contract. Route-level styles load on demand, so
- * geometry must be owned here to keep demo and registered sessions identical.
- */
+/* Identity-neutral control contract. */
 html body .performance-shell.performance-shell button:not(.mcPrimary),
-html body .premium-screen.premium-screen button:not(.mcPrimary) {
-  min-height:44px !important;
-}
+html body .premium-screen.premium-screen button:not(.mcPrimary) { min-height:44px !important; }
 html body .performance-shell.performance-shell .secondaryPageAction,
-html body .premium-screen.premium-screen .secondaryPageAction {
-  min-height:48px !important;
-}
+html body .premium-screen.premium-screen .secondaryPageAction { min-height:48px !important; }
 html body .performance-shell.performance-shell input,
 html body .performance-shell.performance-shell select,
 html body .premium-screen.premium-screen input,
-html body .premium-screen.premium-screen select {
-  min-height:48px !important;
-}
+html body .premium-screen.premium-screen select { min-height:48px !important; }
 html body .performance-shell.performance-shell select,
-html body .premium-screen.premium-screen select {
-  border-radius:14px !important;
-}
+html body .premium-screen.premium-screen select { border-radius:14px !important; }
 html body .performance-shell.performance-shell .btn-v,
-html body .premium-screen.premium-screen .btn-v {
-  font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
-}
-html body .ts-overlay.ts-overlay .ts-close {
-  width:44px !important;
-  min-width:44px !important;
-  height:44px !important;
-  min-height:44px !important;
-}
-html body .ts-overlay.ts-overlay select {
-  min-height:48px !important;
-  border-radius:14px !important;
-}
+html body .premium-screen.premium-screen .btn-v { font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important; }
+html body .ts-overlay.ts-overlay .ts-close { width:44px !important; min-width:44px !important; height:44px !important; min-height:44px !important; }
+html body .ts-overlay.ts-overlay select { min-height:48px !important; border-radius:14px !important; }
 
 .performance-shell p:not([data-command-role="primary"] p),
 .performance-shell small,
@@ -228,9 +142,7 @@ html body .ts-overlay.ts-overlay select {
 .premium-screen p,
 .premium-screen small,
 .premium-screen [data-copy-tone="muted"] { color:#6b7073; }
-
 .performance-shell .feedListItem:hover { background:#f7f6f2 !important; }
-
 .performance-shell button,
 .premium-screen button { transition:transform .16s ease, box-shadow .18s ease, background .18s ease !important; }
 .performance-shell button:active,
