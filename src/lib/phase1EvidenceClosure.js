@@ -4,11 +4,14 @@ const ROSTER_ROW = `${ROSTER_ROOT} > .fade-up > div[role="button"], ${ROSTER_ROO
 const QUEUED_INDEX = '[aria-label^="Queued action "]';
 const FINAL_A11Y_MARKER = "/* phase1-final-a11y */";
 const COACH_MOBILE_PARITY_MARKER = "/* coach-mobile-production-parity */";
+const SCHEDULE_PLACEHOLDER_MARKER = "/* schedule-placeholder-aa */";
+const SCHEDULE_PLACEHOLDER_CSS = `${SCHEDULE_PLACEHOLDER_MARKER}
+[data-testid="coach-events-filter-rail"][data-surface="light"] input::placeholder{color:#59636a!important;-webkit-text-fill-color:#59636a!important;opacity:1!important}`;
 const FINAL_A11Y_CSS = `${FINAL_A11Y_MARKER}
 [data-testid="auth-workspace"]>.fade-up,[data-testid="auth-workspace"] .auth-card-enter{animation:none!important;transition:none!important;opacity:1!important;transform:none!important;filter:none!important}
 [data-testid="auth-workspace"] button,[data-testid="auth-workspace"] input,[data-testid="auth-workspace"] a{opacity:1!important;filter:none!important}
 [data-testid="auth-workspace"] input::placeholder{color:#465159!important;opacity:1!important}
-[data-testid="coach-events-filter-rail"][data-surface="light"] input::placeholder{color:#59636a!important;-webkit-text-fill-color:#59636a!important;opacity:1!important}
+${SCHEDULE_PLACEHOLDER_CSS}
 [data-testid="auth-workspace"] a[href$="privacy"]{color:#35434c!important;-webkit-text-fill-color:#35434c!important}
 [data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary{color:#f8fbf6!important;-webkit-text-fill-color:#f8fbf6!important}
 ${COACH_MOBILE_PARITY_MARKER}
@@ -35,7 +38,10 @@ function ensureStyles() {
   const style = document.getElementById(STYLE_ID);
   if (!style) return false;
   if (!style.textContent.includes(FINAL_A11Y_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS}\n`;
-  else if (!style.textContent.includes(COACH_MOBILE_PARITY_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS.slice(FINAL_A11Y_CSS.indexOf(COACH_MOBILE_PARITY_MARKER))}\n`;
+  else {
+    if (!style.textContent.includes(SCHEDULE_PLACEHOLDER_MARKER)) style.textContent += `\n${SCHEDULE_PLACEHOLDER_CSS}\n`;
+    if (!style.textContent.includes(COACH_MOBILE_PARITY_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS.slice(FINAL_A11Y_CSS.indexOf(COACH_MOBILE_PARITY_MARKER))}\n`;
+  }
   if (document.head.lastElementChild !== style) document.head.appendChild(style);
   return true;
 }

@@ -43,6 +43,7 @@ test('Schedule retains its one-column mobile filter composition and AA placehold
   assert.match(eventsCss, /coach-events-filter-rail"\]\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important/);
   assert.match(eventsCss, /input::placeholder\s*\{[\s\S]*?color:\s*#59636a !important/);
   assert.match(evidenceClosure, /coach-events-filter-rail[^\n]*input::placeholder\{color:#59636a!important;-webkit-text-fill-color:#59636a!important;opacity:1!important\}/);
+  assert.match(evidenceClosure, /if \(!style\.textContent\.includes\(SCHEDULE_PLACEHOLDER_MARKER\)\) style\.textContent \+= `\\n\$\{SCHEDULE_PLACEHOLDER_CSS\}\\n`/);
   assert.ok(contrast('#59636a', '#ffffff') >= 4.5);
 });
 
