@@ -66,7 +66,7 @@ jobs:
           cp tests/e2e/player-phase1-mobile-layout-readability.spec.mjs /tmp/player-phase1-mobile-layout-readability.spec.mjs
           git checkout --detach "$BASELINE_SHA"
           cp /tmp/player-phase1-mobile-layout-readability.spec.mjs tests/e2e/player-phase1-mobile-layout-readability.spec.mjs
-          PLAYER_PHASE1_CAPTURE_ONLY=1 PLAYER_PHASE1_EVIDENCE=before npx playwright test tests/e2e/player-phase1-mobile-layout-readability.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+          PLAYER_PHASE1_CAPTURE_ONLY=1 PLAYER_PHASE1_EVIDENCE=before npx playwright test tests/e2e/player-phase1-mobile-layout-readability.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --grep "390px"
           mkdir -p /tmp/player-phase1-evidence
           cp -R artifacts/player-phase1-mobile-layout-readability/before /tmp/player-phase1-evidence/before
           git reset --hard
