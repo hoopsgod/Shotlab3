@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const coachCss = fs.readFileSync('src/styles/CoachInteractiveDashboard.css', 'utf8');
+const secondaryMobileCss = fs.readFileSync('src/components/SecondaryPagePremiumMobile.css', 'utf8');
 const eventsCss = fs.readFileSync('src/components/CoachEventsPremium.css', 'utf8');
 const routeCss = fs.readFileSync('src/components/CoachRoutePerformanceStage.module.css', 'utf8');
 const authCss = fs.readFileSync('public/shotlab-v12-auth-demo-entry.css', 'utf8');
@@ -31,6 +32,8 @@ test('Players keeps search full-width and wraps filters instead of scrolling the
   assert.match(coachCss, /coach-players-filter-rail"\]\{overflow:visible\}/);
   assert.match(coachCss, /coach-players-filter-rail"\]>div\[role="group"\]\{width:100%;flex-wrap:wrap;overflow-x:visible/);
   assert.doesNotMatch(coachCss, /coach-players-filter-rail"\]\{overflow-x:auto/);
+  assert.match(secondaryMobileCss, /filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\):not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{\s*display:\s*flex !important/);
+  assert.doesNotMatch(secondaryMobileCss, /filter-rail"\]:not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{\s*display:\s*flex !important/);
 });
 
 test('Schedule retains its one-column mobile filter composition and AA placeholder contrast', () => {
