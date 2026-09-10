@@ -105,6 +105,19 @@
     overflow-x: visible !important;
   }
 
+  .secondaryPageToolbar [data-testid="coach-players-filter-rail"] > label {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .secondaryPageToolbar [data-testid="coach-players-filter-rail"] input[type="search"] {
+    min-width: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   .secondaryPageToolbar [data-visual-role="filter-rail"]::-webkit-scrollbar {
     display: none;
   }
