@@ -27,6 +27,10 @@ body.mission-control-active [data-testid="mobile-navigation-dock"][data-navigati
   color: var(--team-brand-nav-active, #c8ff1a);
 }
 
+[data-testid="mobile-navigation-dock"][data-navigation-role="player"] button[data-active="true"] {
+  background: rgba(255, 255, 255, .06);
+}
+
 [data-testid="mobile-navigation-dock"] button:active {
   transform: scale(.96);
 }
@@ -83,12 +87,6 @@ body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
 [data-testid="mobile-navigation-groups"] [data-navigation-group] > header p {
   margin: 3px 0 0;
   font: 500 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-}
-
-[data-testid="mobile-navigation-groups"] [data-navigation-group] > div {
-  border-color: rgba(22, 25, 27, .08) !important;
-  background: rgba(255, 255, 255, .82) !important;
-  box-shadow: 0 8px 28px rgba(26, 29, 31, .045);
 }
 
 [data-testid="mobile-navigation-groups"] button {
