@@ -58,20 +58,6 @@ jobs:
               raise SystemExit('missing stale secondary baseline constant')
           secondary.write_text(s.replace(old, new, 1))
 
-          workflow = Path('.github/workflows/player-secondary-visual-evidence.yml')
-          s = workflow.read_text()
-          old = '          ref: 4bb11be8da71989a1d5935185ddeebd75e03ade4'
-          dynamic_base = '$' + "{{ github.event.pull_request.base.sha || '91e047247c180c640389958e78d553fe46dc76e5' }}"
-          new = '          ref: ' + dynamic_base
-          if old not in s:
-              raise SystemExit('missing stale workflow baseline ref')
-          s = s.replace(old, new, 1)
-          old = '          PLAYER_SECONDARY_BASELINE_ORIGIN: http://127.0.0.1:4174'
-          new = old + '\n          PLAYER_SECONDARY_BASELINE_SHA: ' + dynamic_base
-          if old not in s:
-              raise SystemExit('missing secondary baseline env block')
-          workflow.write_text(s.replace(old, new, 1))
-
           candidates = list(Path('/tmp/phase1c').rglob('player-progress-registered-populated-390-actual.png'))
           if len(candidates) != 1:
               raise SystemExit(f'expected one reviewed Progress actual, found {len(candidates)}')
