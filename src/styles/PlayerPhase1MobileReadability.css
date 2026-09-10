@@ -1,0 +1,82 @@
+/* Player Phase 1 — narrow mobile layout/readability authority.
+   This stylesheet is loaded after the Player workspace module and only targets
+   stable Player product-state attributes. It does not alter navigation,
+   business logic, or Coach composition. */
+
+/* Important Player workspace metrics must remain readable and carry meaning
+   without single-line clipping. */
+section[data-team-workspace][data-page-hierarchy="editorial"] [data-metric-role="label"][class] {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: #5f6962;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+section[data-team-workspace][data-page-hierarchy="editorial"] [data-metric-role="detail"][class] {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: #59635d;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Player Home progress disclosure titles are actionable information, not
+   decorative labels; allow them to wrap rather than ellipsize. */
+[data-testid="player-daily-command-center"] .playerProgressDisclosure > summary strong {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+/* Player Progress hero uses a dark gradient. These supporting labels are
+   intentionally solid so their runtime contrast is AA-safe throughout it. */
+[data-testid="player-progress-story-hero"] [data-testid="player-progress-story-topline"] > span:first-child,
+[data-testid="player-progress-story-hero"] [data-testid="player-progress-target-summary"] > span,
+[data-testid="player-progress-story-hero"] [data-testid="player-progress-metrics"] [data-performance-kind] span,
+[data-testid="player-progress-story-hero"] [data-testid="player-progress-metrics"] [data-performance-kind] small {
+  color: #b8c4c8;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+@media (max-width: 760px) {
+  /* Secondary Player filters should reflow inside the page instead of
+     becoming an independent sideways rail that can make the screen feel loose. */
+  div[data-player-workspace-filter-rail="true"][role="group"] {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    overscroll-behavior-inline: auto;
+    row-gap: 6px;
+  }
+
+  div[data-player-workspace-filter-rail="true"][role="group"] > button {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Identity and supporting copy remain readable at narrow phone widths and
+     are allowed to wrap naturally instead of being clamped away. */
+  [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"] .teamIdentityTitleStage__identityLine {
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"] .teamIdentityTitleStage__summary {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: initial;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
