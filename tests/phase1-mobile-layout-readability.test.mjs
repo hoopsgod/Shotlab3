@@ -34,6 +34,8 @@ test('Players keeps search full-width and wraps filters instead of scrolling the
   assert.doesNotMatch(coachCss, /coach-players-filter-rail"\]\{overflow-x:auto/);
   assert.match(secondaryMobileCss, /filter-rail"\]:not\(\[data-testid="coach-players-filter-rail"\]\):not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{\s*display:\s*flex !important/);
   assert.doesNotMatch(secondaryMobileCss, /filter-rail"\]:not\(\[data-testid="coach-events-filter-rail"\]\)\s*\{\s*display:\s*flex !important/);
+  assert.match(secondaryMobileCss, /\[data-testid="coach-players-filter-rail"\] > label\s*\{[\s\S]*?width:\s*100% !important;[\s\S]*?max-width:\s*100% !important;[\s\S]*?box-sizing:\s*border-box !important/);
+  assert.match(secondaryMobileCss, /\[data-testid="coach-players-filter-rail"\] input\[type="search"\]\s*\{[\s\S]*?padding-inline:\s*0 !important;[\s\S]*?box-sizing:\s*border-box !important/);
 });
 
 test('Schedule retains its one-column mobile filter composition and AA placeholder contrast', () => {
