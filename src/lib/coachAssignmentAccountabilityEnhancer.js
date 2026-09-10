@@ -14,15 +14,15 @@ const styles = `
 .mcAssignmentAccountability>*{position:relative;z-index:1}
 .mcAssignmentAccountabilityHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .mcAssignmentAccountabilityHead small,.mcAssignmentAccountabilityMeta,.mcAssignmentStateFact small,.mcAssignmentAccountabilityRow small,.mcAssignmentAccountabilityHistory summary,.mcAssignmentAccountabilityStatus{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.08em}
-.mcAssignmentAccountabilityHead small{display:block;color:var(--text-3,#7d898f);font-size:9px;font-weight:800}
+.mcAssignmentAccountabilityHead small{display:block;color:var(--text-3,#7d898f);font-size:10px;font-weight:800}
 .mcAssignmentAccountabilityHead h2{margin:4px 0 0;color:var(--text-1,#f4f7f8);font-family:'Bebas Neue',Impact,sans-serif;font-size:24px;font-weight:400;line-height:1;letter-spacing:.035em}
 .mcAssignmentAccountabilityBadge{display:grid;place-items:center;min-width:62px;height:34px;padding:0 11px;border:1px solid rgba(255,181,71,.42);border-radius:999px;background:rgba(255,181,71,.09);color:#ffca76;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
 .mcAssignmentAccountabilityBadge.is-clear{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 34%,transparent);background:color-mix(in srgb,var(--mc,#c8ff1a) 7%,transparent);color:var(--mc,#c8ff1a)}
-.mcAssignmentAccountabilityMeta{margin-top:8px;color:var(--text-2,#aab3b8);font-size:10px;font-weight:700;line-height:1.45}
-.mcAssignmentStateFacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:12px}
+.mcAssignmentAccountabilityMeta{margin-top:8px;color:var(--text-2,#aab3b8);font-size:11px;font-weight:700;line-height:1.45}
+.mcAssignmentStateFacts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:12px}
 .mcAssignmentStateFact{min-width:0;padding:9px 8px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.014);text-align:center}
 .mcAssignmentStateFact strong{display:block;color:var(--text-1,#f4f7f8);font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;font-weight:400;line-height:1}
-.mcAssignmentStateFact small{display:block;margin-top:4px;color:var(--text-3,#7d898f);font-size:7px;font-weight:800;line-height:1.2}
+.mcAssignmentStateFact small{display:block;margin-top:4px;color:var(--text-3,#7d898f);font-size:9px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
 .mcAssignmentStateFact.is-assigned{border-color:rgba(255,181,71,.20)}
 .mcAssignmentStateFact.is-acknowledged{border-color:rgba(183,165,255,.20)}
 .mcAssignmentStateFact.is-started{border-color:color-mix(in srgb,var(--mc-secondary,#77d7ff) 22%,rgba(255,255,255,.06))}
@@ -36,12 +36,12 @@ const styles = `
 .mcAssignmentAccountabilityRow.is-acknowledged .mcAssignmentAccountabilityDot{background:#b7a5ff;box-shadow:0 0 0 3px rgba(183,165,255,.09)}
 .mcAssignmentAccountabilityRow.is-started .mcAssignmentAccountabilityDot{background:var(--mc-secondary,#77d7ff);box-shadow:0 0 0 3px color-mix(in srgb,var(--mc-secondary,#77d7ff) 12%,transparent)}
 .mcAssignmentAccountabilityRow.is-completed .mcAssignmentAccountabilityDot{background:var(--mc,#c8ff1a);box-shadow:0 0 0 3px color-mix(in srgb,var(--mc,#c8ff1a) 12%,transparent)}
-.mcAssignmentAccountabilityRow span{min-width:0}.mcAssignmentAccountabilityRow strong{display:block;overflow:hidden;color:var(--text-1,#f4f7f8);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:12px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}.mcAssignmentAccountabilityRow small{display:block;margin-top:3px;overflow:hidden;color:var(--text-3,#7d898f);font-size:8px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.mcAssignmentAccountabilityRow em{color:var(--text-2,#aab3b8);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-style:normal;font-weight:700;white-space:nowrap}
+.mcAssignmentAccountabilityRow span{min-width:0}.mcAssignmentAccountabilityRow strong{display:block;overflow:hidden;color:var(--text-1,#f4f7f8);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:12px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}.mcAssignmentAccountabilityRow small{display:block;margin-top:3px;overflow:hidden;color:var(--text-3,#7d898f);font-size:10px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.mcAssignmentAccountabilityRow em{color:var(--text-2,#aab3b8);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:11px;font-style:normal;font-weight:700;white-space:nowrap}
 .mcAssignmentAccountabilityEmpty{margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.012);color:var(--text-2,#aab3b8);font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.mcAssignmentAccountabilityMore{margin:9px 0 0;color:var(--text-3,#7d898f);font:700 9px/1.4 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase}
-.mcAssignmentAccountabilityHistory{margin-top:12px;border-top:1px solid rgba(255,255,255,.07);padding-top:10px}.mcAssignmentAccountabilityHistory summary{min-height:32px;color:var(--text-2,#aab3b8);font-size:9px;font-weight:800;cursor:pointer}.mcAssignmentAccountabilityHistory[open] summary{margin-bottom:7px}
-.mcAssignmentAccountabilityStatus{margin-top:9px;color:var(--text-3,#7d898f);font-size:8px;font-weight:700;line-height:1.45}
-@media(max-width:420px){.mcAssignmentAccountabilityHead h2{font-size:21px}.mcAssignmentStateFacts{grid-template-columns:repeat(2,minmax(0,1fr))}.mcAssignmentStateFact:last-child{grid-column:1/-1}.mcAssignmentAccountabilityRow{grid-template-columns:9px minmax(0,1fr) auto}}
+.mcAssignmentAccountabilityMore{margin:9px 0 0;color:var(--text-3,#7d898f);font:700 10px/1.4 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase}
+.mcAssignmentAccountabilityHistory{margin-top:12px;border-top:1px solid rgba(255,255,255,.07);padding-top:10px}.mcAssignmentAccountabilityHistory summary{min-height:32px;color:var(--text-2,#aab3b8);font-size:10px;font-weight:800;cursor:pointer}.mcAssignmentAccountabilityHistory[open] summary{margin-bottom:7px}
+.mcAssignmentAccountabilityStatus{margin-top:9px;color:var(--text-3,#7d898f);font-size:10px;font-weight:700;line-height:1.45}
+@media(max-width:420px){.mcAssignmentAccountabilityHead h2{font-size:21px}.mcAssignmentStateFacts{grid-template-columns:repeat(6,minmax(0,1fr))}.mcAssignmentStateFact{grid-column:span 3}.mcAssignmentStateFact:nth-child(n+3){grid-column:span 2}.mcAssignmentAccountabilityRow{grid-template-columns:9px minmax(0,1fr) auto}}
 @media(prefers-reduced-motion:reduce){.mcAssignmentAccountabilityRow{transition:none}.mcAssignmentAccountabilityRow:hover,.mcAssignmentAccountabilityRow:focus-visible,.mcAssignmentAccountabilityRow:active{transform:none}}
 `;
 
