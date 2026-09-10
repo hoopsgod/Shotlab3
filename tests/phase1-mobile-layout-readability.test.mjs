@@ -5,6 +5,8 @@ import fs from 'node:fs';
 const coachCss = fs.readFileSync('src/styles/CoachInteractiveDashboard.css', 'utf8');
 const secondaryMobileCss = fs.readFileSync('src/components/SecondaryPagePremiumMobile.css', 'utf8');
 const eventsCss = fs.readFileSync('src/components/CoachEventsPremium.css', 'utf8');
+const primitives = fs.readFileSync('src/components/CoachDashboardPrimitives.jsx', 'utf8');
+const primitivesCss = fs.readFileSync('src/components/CoachDashboardPrimitives.module.css', 'utf8');
 const evidenceClosure = fs.readFileSync('src/lib/phase1EvidenceClosure.js', 'utf8');
 const routeCss = fs.readFileSync('src/components/CoachRoutePerformanceStage.module.css', 'utf8');
 const authCss = fs.readFileSync('public/shotlab-v12-auth-demo-entry.css', 'utf8');
@@ -42,6 +44,8 @@ test('Players keeps search full-width and wraps filters instead of scrolling the
 test('Schedule retains its one-column mobile filter composition and AA placeholder contrast', () => {
   assert.match(eventsCss, /coach-events-filter-rail"\]\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) !important/);
   assert.match(eventsCss, /input::placeholder\s*\{[\s\S]*?color:\s*#59636a !important/);
+  assert.match(primitives, /surface === "light" \? \{ "--dashboard-placeholder-color": "#59636a" \} : undefined/);
+  assert.match(primitivesCss, /input::placeholder \{ color: var\(--dashboard-placeholder-color, color-mix\(/);
   assert.match(evidenceClosure, /coach-events-filter-rail[^\n]*input::placeholder\{color:#59636a!important;-webkit-text-fill-color:#59636a!important;opacity:1!important\}/);
   assert.match(evidenceClosure, /getElementById\(STYLE_ID\) \|\| Object\.assign\(document\.createElement\("style"\), \{ id: STYLE_ID \}\)/);
   assert.doesNotMatch(evidenceClosure, /if \(!style\) return false/);

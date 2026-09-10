@@ -141,7 +141,7 @@ export function DashboardFilterRail({
   surface = "dark",
 }) {
   return (
-    <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail">
+    <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail" style={surface === "light" ? { "--dashboard-placeholder-color": "#59636a" } : undefined}>
       <label className={styles.searchField}>
         <span className={styles.srOnly}>Search dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
