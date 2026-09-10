@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const workspace = await readFile(new URL('../src/components/PlayerOperationalWorkspace.module.css', import.meta.url), 'utf8');
+const hierarchy = await readFile(new URL('../src/components/PlayerMetricHierarchy.module.css', import.meta.url), 'utf8');
 const progress = await readFile(new URL('../src/components/PlayerProgressStory.module.css', import.meta.url), 'utf8');
 const home = await readFile(new URL('../src/styles/CommandHierarchy2026.css', import.meta.url), 'utf8');
 const component = await readFile(new URL('../src/components/PlayerOperationalWorkspace.jsx', import.meta.url), 'utf8');
@@ -21,6 +22,7 @@ test('Player workspace metrics use readable floors and wrap meaningful copy', ()
   assert.match(workspace, /\.metricLabel,\.metricDetail\{[\s\S]*overflow:visible[\s\S]*text-overflow:clip[\s\S]*white-space:normal[\s\S]*overflow-wrap:anywhere/);
   assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricLabel\s*\{[\s\S]*color:#5f6962[\s\S]*font-size:11px/);
   assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricDetail\s*\{[\s\S]*color:#59635d[\s\S]*font-size:12px/);
+  assert.match(hierarchy, /@media\(max-width:700px\)[\s\S]*\.metricSupporting>span:last-child\{[^}]*font-size:12px!important/);
   for (const [foreground,background] of [['#5f6962','#f7f8f4'],['#59635d','#f7f8f4'],['#5f6962','#ffffff'],['#59635d','#ffffff']]) {
     assert.ok(contrast(hex(foreground),hex(background))>=4.5, `${foreground} must remain AA-safe on ${background}`);
   }
