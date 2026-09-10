@@ -191,7 +191,6 @@ async function createSession(browser, { role, scenario, mode, width }) {
   });
   const page = await context.newPage();
   await installPhase1CFixedTime(page);
-  const guard = attachPhase1CRuntimeGuard(page, `${role}-${scenario}-${mode}-${width}`);
   const fixture = buildPhase1BFixture({ role, scenario, mode });
   await installPhase1CRoutes(page, fixture);
 
@@ -224,6 +223,9 @@ async function createSession(browser, { role, scenario, mode, width }) {
 
   await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 });
+  // Bootstrap may deliberately reload the page, which aborts otherwise valid in-flight
+  // fixture requests. Observe the settled target surface, not setup navigation teardown.
+  const guard = attachPhase1CRuntimeGuard(page, `${role}-${scenario}-${mode}-${width}`);
   return { context, page, guard };
 }
 
