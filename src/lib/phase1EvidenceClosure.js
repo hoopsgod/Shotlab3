@@ -35,8 +35,7 @@ function cleanText(value) {
 
 function ensureStyles() {
   if (!document.head) return false;
-  const style = document.getElementById(STYLE_ID);
-  if (!style) return false;
+  const style = document.getElementById(STYLE_ID) || Object.assign(document.createElement("style"), { id: STYLE_ID });
   if (!style.textContent.includes(FINAL_A11Y_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS}\n`;
   else {
     if (!style.textContent.includes(SCHEDULE_PLACEHOLDER_MARKER)) style.textContent += `\n${SCHEDULE_PLACEHOLDER_CSS}\n`;
