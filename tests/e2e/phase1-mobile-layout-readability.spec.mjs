@@ -51,10 +51,10 @@ async function assertNoPageOverflow(page) {
 async function navigate(page, key) {
   let item=page.locator(`[data-nav-key="${key}"]:visible`).first();
   if (!(await item.count())) {
-    const desktopLabels={players:'Players',events:'Events',drills:'Drills'};
-    const desktopNav=page.locator('.sidebar-nav[aria-label="Coach navigation"]:visible');
+    const desktopLabels={players:/^Players$/,events:/^(Events|Sessions)$/,drills:/^Drills$/};
+    const desktopNav=page.getByRole('complementary',{name:'Coach navigation'});
     if (await desktopNav.count()) {
-      item=desktopNav.locator('.nav-item:visible').filter({hasText:desktopLabels[key]}).first();
+      item=desktopNav.getByRole('button',{name:desktopLabels[key]}).first();
     } else {
       const more=page.getByTestId('mobile-navigation-more');
       await expect(more).toBeVisible();
