@@ -1,0 +1,52 @@
+name: Player Phase 1 contrast harness patch once
+
+on:
+  push:
+    branches:
+      - agent/player-phase1-mobile-layout-readability-repair
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/player-phase1-mobile-layout-readability-repair
+          fetch-depth: 0
+      - name: Measure metric contrast against the rendered surface class
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tests/e2e/player-phase1-mobile-layout-readability.spec.mjs')
+          s = p.read_text()
+          old = '''      color: style.color,
+                left: rect.left,
+                right: rect.right,'''
+          new = '''      color: style.color,
+                darkSurface: (() => { const surface = getComputedStyle(node.parentElement); return surface.backgroundImage !== 'none' && surface.backgroundImage.includes('gradient'); })(),
+                left: rect.left,
+                right: rect.right,'''
+          if old not in s:
+              raise SystemExit('missing metric sample block')
+          s = s.replace(old, new, 1)
+          old = '''      const foreground = rgb(metric.color);
+                if (foreground) expect(contrast(foreground, [247, 248, 244])).toBeGreaterThanOrEqual(4.5);'''
+          new = '''      const foreground = rgb(metric.color);
+                const backgrounds = metric.darkSurface ? [[7, 24, 32], [11, 38, 51], [32, 57, 69]] : [[247, 248, 244], [255, 255, 255]];
+                if (foreground) for (const background of backgrounds) expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);'''
+          if old not in s:
+              raise SystemExit('missing contrast assertion block')
+          p.write_text(s.replace(old, new, 1))
+          Path('.github/workflows/player-phase1-test-patch-once.yml').unlink()
+          PY
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "test: measure Player metric contrast by rendered surface"
+          git push origin HEAD:agent/player-phase1-mobile-layout-readability-repair
