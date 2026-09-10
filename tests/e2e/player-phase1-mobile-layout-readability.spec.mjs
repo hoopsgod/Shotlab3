@@ -138,6 +138,7 @@ async function assertWorkspaceReadability(page, viewport, expectedWorkspace) {
       overflow: style.overflow,
       textOverflow: style.textOverflow,
       color: style.color,
+      darkSurface: (() => { const surface = getComputedStyle(node.parentElement); return surface.backgroundImage !== 'none' && surface.backgroundImage.includes('gradient'); })(),
       left: rect.left,
       right: rect.right,
     };
@@ -152,7 +153,8 @@ async function assertWorkspaceReadability(page, viewport, expectedWorkspace) {
       if (metric.role === 'label') expect(metric.fontSize).toBeGreaterThanOrEqual(11);
       if (metric.role === 'detail') expect(metric.fontSize).toBeGreaterThanOrEqual(12);
       const foreground = rgb(metric.color);
-      if (foreground) expect(contrast(foreground, [247, 248, 244])).toBeGreaterThanOrEqual(4.5);
+      const backgrounds = metric.darkSurface ? [[7, 24, 32], [11, 38, 51], [32, 57, 69]] : [[247, 248, 244], [255, 255, 255]];
+      if (foreground) for (const background of backgrounds) expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
     }
   }
 
