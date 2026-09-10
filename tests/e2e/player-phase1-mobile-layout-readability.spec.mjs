@@ -16,7 +16,7 @@ const VIEWPORTS = [
 const ROUTES = [
   { key: 'log-drill', workspace: 'at-home', name: 'train' },
   { key: 'duels', workspace: 'program', name: 'program' },
-  { key: 'events', workspace: 'events', name: 'events' },
+  { key: 'program', workspace: 'events', name: 'events' },
   { key: 'leaderboards', workspace: 'leaderboards', name: 'rankings' },
 ];
 
