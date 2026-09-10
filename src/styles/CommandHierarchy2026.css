@@ -76,14 +76,16 @@
   text-transform: uppercase;
 }
 .playerProgressDisclosure > summary strong {
-  overflow: hidden;
+  overflow: visible;
   color: #171a18;
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 720;
   letter-spacing: -.025em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 .playerProgressDisclosure > summary:focus-visible { outline: 3px solid rgba(126, 158, 30, .24); outline-offset: -3px; }
 .playerProgressDisclosureBody { padding: 0 0 16px; border-top: 1px solid rgba(23, 26, 24, .1); }

@@ -2,74 +2,45 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const authority = await readFile(new URL('../src/styles/PlayerPhase1MobileReadability.css', import.meta.url), 'utf8');
-const workspace = await readFile(new URL('../src/components/PlayerOperationalWorkspace.jsx', import.meta.url), 'utf8');
+const workspace = await readFile(new URL('../src/components/PlayerOperationalWorkspace.module.css', import.meta.url), 'utf8');
+const progress = await readFile(new URL('../src/components/PlayerProgressStory.module.css', import.meta.url), 'utf8');
+const home = await readFile(new URL('../src/styles/CommandHierarchy2026.css', import.meta.url), 'utf8');
+const component = await readFile(new URL('../src/components/PlayerOperationalWorkspace.jsx', import.meta.url), 'utf8');
 
-const channel = (value) => {
-  const v = value / 255;
-  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-};
-const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
-const hex = (value) => {
-  const match = String(value).match(/^#([0-9a-f]{6})$/i);
-  assert.ok(match, `expected six-digit hex color, received ${value}`);
-  return [0, 2, 4].map((offset) => Number.parseInt(match[1].slice(offset, offset + 2), 16));
-};
-const declaration = (selectorFragment, property) => {
-  const selectorIndex = authority.indexOf(selectorFragment);
-  assert.notEqual(selectorIndex, -1, `missing selector ${selectorFragment}`);
-  const open = authority.indexOf('{', selectorIndex);
-  const close = authority.indexOf('}', open);
-  const block = authority.slice(open + 1, close);
-  const match = block.match(new RegExp(`${property.replace('-', '\\-')}\\s*:\\s*([^;]+)`));
-  assert.ok(match, `missing ${property} in ${selectorFragment}`);
-  return match[1].trim();
-};
+const channel = (value) => { const v=value/255; return v<=.04045?v/12.92:((v+.055)/1.055)**2.4; };
+const luminance = ([r,g,b]) => .2126*channel(r)+.7152*channel(g)+.0722*channel(b);
+const contrast = (a,b) => (Math.max(luminance(a),luminance(b))+.05)/(Math.min(luminance(a),luminance(b))+.05);
+const hex = (value) => [0,2,4].map((offset)=>Number.parseInt(value.slice(1+offset,3+offset),16));
 
-test('Player Phase 1 authority is loaded after workspace modules and remains Player-scoped', () => {
-  const moduleImport = workspace.indexOf('PlayerMetricHierarchy.module.css');
-  const phaseImport = workspace.indexOf('PlayerPhase1MobileReadability.css');
-  assert.ok(moduleImport >= 0 && phaseImport > moduleImport, 'Phase 1 authority must load after Player workspace modules');
-  assert.doesNotMatch(authority, /\.coach-|data-coach|performance-shell--coach/i);
-  assert.doesNotMatch(authority, /html\s*\{|body\s*\{|overflow-x\s*:\s*hidden/i, 'do not mask element-level defects at document level');
+test('Player Phase 1 uses existing Player authorities without a global overflow mask', () => {
+  assert.doesNotMatch(component, /PlayerPhase1MobileReadability\.css/);
+  assert.doesNotMatch(workspace, /html\s*\{|body\s*\{|overflow-x\s*:\s*hidden/i);
 });
 
 test('Player workspace metrics use readable floors and wrap meaningful copy', () => {
-  assert.match(authority, /data-metric-role="label"[\s\S]*font-size:\s*11px/);
-  assert.match(authority, /data-metric-role="detail"[\s\S]*font-size:\s*12px/);
-  assert.match(authority, /data-metric-role="label"[\s\S]*white-space:\s*normal/);
-  assert.match(authority, /data-metric-role="detail"[\s\S]*white-space:\s*normal/);
-  assert.match(authority, /data-metric-role="label"[\s\S]*text-overflow:\s*clip/);
-  assert.match(authority, /data-metric-role="detail"[\s\S]*text-overflow:\s*clip/);
-
-  const detailColor = declaration('[data-metric-role="detail"]', 'color');
-  const labelColor = declaration('[data-metric-role="label"]', 'color');
-  for (const background of ['#ffffff', '#f7f8f4']) {
-    assert.ok(contrast(hex(detailColor), hex(background)) >= 4.5, `${detailColor} must remain AA-safe on ${background}`);
-    assert.ok(contrast(hex(labelColor), hex(background)) >= 4.5, `${labelColor} must remain AA-safe on ${background}`);
+  assert.match(workspace, /\.metricLabel,\.metricDetail\{[\s\S]*overflow:visible[\s\S]*text-overflow:clip[\s\S]*white-space:normal[\s\S]*overflow-wrap:anywhere/);
+  assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricLabel\s*\{[\s\S]*color:#5f6962[\s\S]*font-size:11px/);
+  assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricDetail\s*\{[\s\S]*color:#59635d[\s\S]*font-size:12px/);
+  for (const [foreground,background] of [['#5f6962','#f7f8f4'],['#59635d','#f7f8f4'],['#5f6962','#ffffff'],['#59635d','#ffffff']]) {
+    assert.ok(contrast(hex(foreground),hex(background))>=4.5, `${foreground} must remain AA-safe on ${background}`);
   }
 });
 
-test('mobile Player filter rails reflow instead of creating a sideways rail', () => {
-  assert.match(authority, /@media\s*\(max-width:\s*760px\)[\s\S]*data-player-workspace-filter-rail[\s\S]*flex-wrap:\s*wrap/);
-  assert.match(authority, /data-player-workspace-filter-rail[\s\S]*overflow-x:\s*visible/);
-  assert.match(authority, /data-player-workspace-filter-rail[\s\S]*scroll-snap-type:\s*none/);
+test('mobile Player filter rails and title support reflow inside the viewport', () => {
+  assert.match(workspace, /@media\(max-width:760px\)[\s\S]*filterRail\[data-player-workspace-filter-rail="true"\]\{[^}]*flex-wrap:wrap[^}]*overflow-x:visible[^}]*scroll-snap-type:none/);
+  assert.match(workspace, /filterRail\[data-player-workspace-filter-rail="true"\]\s*>\s*\.filterButton\{[^}]*white-space:normal/);
+  assert.match(workspace, /teamIdentityTitleStage__identityLine\)\{margin-bottom:6px;font-size:10px\}/);
+  assert.match(workspace, /teamIdentityTitleStage__summary\)\{[^}]*display:block[^}]*overflow:visible[^}]*-webkit-line-clamp:unset/);
 });
 
-test('Player Progress muted dark-surface labels are readable and AA-safe', () => {
-  assert.match(authority, /player-progress-story-hero[\s\S]*color:\s*#b8c4c8/);
-  assert.match(authority, /player-progress-story-hero[\s\S]*font-size:\s*11px/);
-  const foreground = hex('#b8c4c8');
-  for (const background of ['#071820', '#0b2633', '#203945']) {
-    assert.ok(contrast(foreground, hex(background)) >= 4.5, `Progress support text must remain AA-safe on ${background}`);
-  }
+test('Player Progress dark-surface labels are readable and AA-safe', () => {
+  assert.match(progress, /heroTopline\s*>\s*span:first-child\s*\{\s*color:\s*#b8c4c8/);
+  assert.match(progress, /targetPanelCopy\s*>\s*span\s*\{[^}]*#b8c4c8/);
+  assert.match(progress, /metricStrip span\s*\{[^}]*#b8c4c8/);
+  assert.match(progress, /metricStrip small\s*\{[^}]*#b8c4c8[^}]*font-size:\s*11px/);
+  for (const background of ['#071820','#0b2633','#203945']) assert.ok(contrast(hex('#b8c4c8'),hex(background))>=4.5);
 });
 
-test('Player information titles and mobile title-stage support wrap intentionally', () => {
-  assert.match(authority, /playerProgressDisclosure[\s\S]*white-space:\s*normal/);
-  assert.match(authority, /playerProgressDisclosure[\s\S]*text-overflow:\s*clip/);
-  assert.match(authority, /teamIdentityTitleStage__identityLine[\s\S]*font-size:\s*10px/);
-  assert.match(authority, /teamIdentityTitleStage__summary[\s\S]*-webkit-line-clamp:\s*unset/);
-  assert.match(authority, /teamIdentityTitleStage__summary[\s\S]*white-space:\s*normal/);
+test('Player Home progress information wraps instead of ellipsizing', () => {
+  assert.match(home, /playerProgressDisclosure\s*>\s*summary strong\s*\{[^}]*overflow:\s*visible[^}]*text-overflow:\s*clip[^}]*white-space:\s*normal/);
 });

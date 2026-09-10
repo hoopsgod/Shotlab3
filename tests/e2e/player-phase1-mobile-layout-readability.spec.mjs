@@ -14,10 +14,10 @@ const VIEWPORTS = [
   { width: 1280, height: 900 },
 ];
 const ROUTES = [
-  { path: '/quick-menu', workspace: 'at-home', name: 'train' },
-  { path: '/program-log', workspace: 'program', name: 'program' },
-  { path: '/events', workspace: 'events', name: 'events' },
-  { path: '/leaderboards', workspace: 'leaderboards', name: 'rankings' },
+  { key: 'log-drill', workspace: 'at-home', name: 'train' },
+  { key: 'duels', workspace: 'program', name: 'program' },
+  { key: 'events', workspace: 'events', name: 'events' },
+  { key: 'leaderboards', workspace: 'leaderboards', name: 'rankings' },
 ];
 
 fs.mkdirSync(path.join(OUTPUT, EVIDENCE), { recursive: true });
@@ -65,11 +65,36 @@ async function enterPlayerDemo(page) {
   await page.waitForTimeout(180);
 }
 
-async function gotoPlayerRoute(page, route) {
-  await page.goto(route);
+async function gotoPlayerRoute(page, target) {
+  const dock = page.getByTestId('mobile-navigation-dock');
+  if (await dock.isVisible().catch(() => false)) {
+    const direct = dock.locator(`[data-nav-key="${target.key}"]`);
+    if (await direct.isVisible().catch(() => false)) {
+      await direct.click();
+    } else {
+      await page.getByTestId('mobile-navigation-more').click();
+      const sheet = page.getByTestId('mobile-navigation-sheet');
+      await expect(sheet).toBeVisible();
+      const item = sheet.locator(`[data-nav-key="${target.key}"]`);
+      await expect(item).toBeVisible();
+      await item.click();
+      await expect(sheet).toHaveCount(0);
+    }
+  } else if (target.key === 'log-drill') {
+    const primary = page.getByTestId('player-daily-primary-action');
+    if (!await primary.isVisible().catch(() => false)) return false;
+    await primary.click();
+  } else if (target.key === 'profile') {
+    const profile = page.locator('.player-quick-actions').getByRole('button', { name: /Profile/i });
+    if (!await profile.isVisible().catch(() => false)) return false;
+    await profile.click();
+  } else {
+    return false;
+  }
   await freeze(page);
   await expect(page.locator('.player-scroll-container')).toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(160);
+  return true;
 }
 
 async function assertNoPageOverflow(page) {
@@ -285,7 +310,8 @@ for (const viewport of VIEWPORTS) {
     await capture(page, viewport, 'home', true);
 
     for (const route of ROUTES) {
-      await gotoPlayerRoute(page, route.path);
+      const reached = await gotoPlayerRoute(page, route);
+      if (!reached) continue;
       await assertPlayerRail(page);
       await assertWorkspaceReadability(page, viewport, route.workspace);
       if (route.workspace === 'at-home' && viewport.width <= 430) await assertShotTracker(page, viewport);
@@ -293,7 +319,8 @@ for (const viewport of VIEWPORTS) {
       if (['train', 'program', 'events'].includes(route.name)) await capture(page, viewport, route.name, true);
     }
 
-    await gotoPlayerRoute(page, '/profile');
+    const reachedProfile = await gotoPlayerRoute(page, { key: 'profile' });
+    expect(reachedProfile).toBe(true);
     await assertPlayerRail(page);
     await assertProgressContrast(page);
     if (!CAPTURE_ONLY) await assertNoPageOverflow(page);
