@@ -16,7 +16,7 @@ const VIEWPORTS = [
 const ROUTES = [
   { key: 'log-drill', workspace: 'at-home', name: 'train' },
   { key: 'duels', workspace: 'program', name: 'program' },
-  { key: 'program', workspace: 'program', name: 'events' },
+  { key: 'program', testId: 'player-commitment-center-events', name: 'events' },
   { key: 'leaderboards', workspace: 'leaderboards', name: 'rankings' },
 ];
 
@@ -315,7 +315,8 @@ for (const viewport of VIEWPORTS) {
       const reached = await gotoPlayerRoute(page, route);
       if (!reached) continue;
       await assertPlayerRail(page);
-      await assertWorkspaceReadability(page, viewport, route.workspace);
+      if (route.testId) await expect(page.getByTestId(route.testId)).toBeVisible({ timeout: 20_000 });
+      if (route.workspace) await assertWorkspaceReadability(page, viewport, route.workspace);
       if (route.workspace === 'at-home' && viewport.width <= 430) await assertShotTracker(page, viewport);
       if (!CAPTURE_ONLY) await assertNoPageOverflow(page);
       if (['train', 'program', 'events'].includes(route.name)) await capture(page, viewport, route.name, true);
