@@ -93,14 +93,14 @@
     overflow: hidden;
   }
 
-  .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-events-filter-rail"]) {
+  .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-players-filter-rail"]):not([data-testid="coach-events-filter-rail"]) {
     display: flex !important;
     gap: 9px !important;
     overflow-x: auto !important;
   }
 
-  /* Coach Players is the one mobile secondary surface whose nested chip group
-     owns horizontal scrolling. Keep the composite rail itself out of x-scroll. */
+  /* Coach Players owns a one-column composite rail on mobile: full-width search
+     first, then a wrapping chip group. Keep shared flex/scroll authority off it. */
   [data-testid="coach-players-filter-rail"] {
     overflow-x: visible !important;
   }
@@ -109,8 +109,8 @@
     display: none;
   }
 
-  /* Other secondary rails keep intrinsic child sizing. Coach Events is excluded
-     because its page-specific one-column filter layout wraps instead of scrolling. */
+  /* Other secondary rails keep intrinsic child sizing. Coach Players and Events
+     are excluded because their page-specific layouts wrap instead of scrolling. */
   .secondaryPageToolbar [data-visual-role="filter-rail"]:not([data-testid="coach-players-filter-rail"]):not([data-testid="coach-events-filter-rail"]) > * {
     flex: 0 0 auto;
     min-width: max-content;
