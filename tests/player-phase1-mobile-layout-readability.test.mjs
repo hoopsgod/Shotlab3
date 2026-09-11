@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
+// Final exact-head certification trigger; no runtime behavior or assertion thresholds change here.
 const workspace = await readFile(new URL('../src/components/PlayerOperationalWorkspace.module.css', import.meta.url), 'utf8');
 const hierarchy = await readFile(new URL('../src/components/PlayerMetricHierarchy.module.css', import.meta.url), 'utf8');
 const progress = await readFile(new URL('../src/components/PlayerProgressStory.module.css', import.meta.url), 'utf8');
