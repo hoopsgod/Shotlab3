@@ -4175,10 +4175,9 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   {tab==="in-season"&&<div className="page pageShell fade-up" data-accent="in-season" style={shellVars("in-season")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Season performance" title="In Season" summary="Manage in-season drill records, free throw standards, school leaderboards, and verified game-stat imports." status={`${customInSeasonDrillCount}/30 custom in-season drills`} metrics={[{key:"drills",label:"In Season Drills",value:programDrills.filter(d=>d?.isDefaultDemo||isInSeasonProgramDrill(d)).length,detail:"Team standards"},{key:"custom",label:"Custom Slots",value:`${customInSeasonDrillCount}/30`,detail:"Coach-created standards",tone:"info"},{key:"records",label:"Program Scores",value:safeProgramScores.length,detail:"Verified drill results",tone:"positive"},{key:"archives",label:"Archived Seasons",value:seasonArchives.length,detail:"Historical record books"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>setCoachPageMetric(key)} testId="coach-page-dashboard-in-season"/><InSeasonPerformanceHub role="coach" user={u} team={team} programDrills={programDrills} programScores={safeProgramScores} players={leaderboardPlayers} seasonArchives={seasonArchives} addProgramDrill={addInSeasonProgramDrill} updateProgramDrill={updateInSeasonProgramDrill} removeProgramDrill={removeProgramDrill} onOpenCoachScoreEntry={()=>setShowProgramScoreEntry(true)} />
   </div>}
 
-  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPlayersInteractiveDashboard metrics={coachPlayerDashboardMetrics} rows={coachPlayerDashboardRows} filter={playerDashboardFilter} query={playerDashboardQuery} onFilterChange={setPlayerDashboardFilter} onQueryChange={setPlayerDashboardQuery} onAddPlayer={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth",block:"start"})} onOpenArchives={()=>setTab("settings")}/><DashboardSection eyebrow="Account activation" title="Add a player" summary="Create the roster relationship and send a secure account setup invitation." action={{label:"View roster",onClick:()=>document.getElementById("coach-roster-operations")?.scrollIntoView({behavior:"smooth",block:"start"})}} testId="coach-player-invite-dashboard-section"><div id="coach-add-player-form">
-      <CoachPlayerInviteForm coach={u} teamId={u?.teamId||""} onProvisioned={()=>{void hydratePersistedData();}}/>
-    </div></DashboardSection>
+  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPlayersInteractiveDashboard metrics={coachPlayerDashboardMetrics} rows={coachPlayerDashboardRows} filter={playerDashboardFilter} query={playerDashboardQuery} onFilterChange={setPlayerDashboardFilter} onQueryChange={setPlayerDashboardQuery} onAddPlayer={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth",block:"start"})} onOpenArchives={()=>setTab("settings")}/>
     <div id="coach-roster-operations" className="coachDashboardOperationalContent">{filteredCoachPlayerDashboardRows.length===0&&<div className="coachDashboardNoResults">No players match the current dashboard filters.</div>}<CoachRoster players={filteredCoachRosterPlayers} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged} onRemovePlayer={removeRosterPlayer} onSelectPlayer={openPlayerIntelligence}/></div>
+    <DashboardSection eyebrow="Account activation" title="Add a player" summary="Create the roster relationship and send a secure account setup invitation." action={{label:"Back to roster",onClick:()=>document.getElementById("coach-roster-operations")?.scrollIntoView({behavior:"smooth",block:"start"})}} testId="coach-player-invite-dashboard-section"><div id="coach-add-player-form"><CoachPlayerInviteForm coach={u} teamId={u?.teamId||""} onProvisioned={()=>{void hydratePersistedData();}}/></div></DashboardSection>
   </div>}
 
   {tab==="settings"&&<SecondaryPageShell className="coachAdministrationWorkspace" testId="coach-administration-workspace">
@@ -4569,8 +4568,6 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
     return `${days} days ago`;
   };
 
-  const coachInsights=useMemo(()=>deriveCoachInsightSummary({roster:players,scores,shotLogs,today:todayStr()}),[players,scores,shotLogs]);
-
   const roster=useMemo(()=>{
     const enriched=players.filter(p=>p.role!=="coach").map(p=>{
       const playerScores=scores.filter(s=>s.email===p.email);
@@ -4606,14 +4603,8 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
     });
   },[players,scores,shotLogs,drills,sortBy,weekStartTs]);
 
-return <div className="fade-up">
-<SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PLAYER ROSTER" s={`${roster.length} PLAYERS`} identity/>
-<div style={{display:"grid",gap:8,marginBottom:14}}>
-  {[`Most engaged: ${coachInsights.engagedAthletes.slice(0,2).join(", ")||"No activity yet"}`,`Losing momentum: ${coachInsights.playersLosingMomentum.slice(0,2).join(", ")||"None"}`,`Team completion trend: ${coachInsights.teamCompletionTrend}`,`Weekly roster activity: ${coachInsights.weeklyActivityRate}%`].map((line)=><div key={line} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"8px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.02)"}}>{line}</div>)}
-</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
-
-<div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
+return <div className="fade-up coachRoster" data-testid="coach-roster-list">
+<div className="coachRoster__heading"><div><strong>{roster.length} player{roster.length===1?"":"s"}</strong><span>Open a profile for training history and coaching actions.</span></div>
   <label style={{display:"flex",alignItems:"center",gap:8,fontFamily:FB,fontSize:10,color:TOKENS.TEXT_SECONDARY,letterSpacing:"0.08em",textTransform:"uppercase"}}>
     Sort
     <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{height:34,padding:"0 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:9,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:600}}>
@@ -4625,41 +4616,28 @@ return <div className="fade-up">
 
 
 {roster.map(p=>{const rosterIdentity=p.email||p.profileId||p.playerId||p.id;const c=p.statusMeta.color;const isNudged=nudged.includes(rosterIdentity);
-  const circumference=2*Math.PI*12;
-  const ringOffset=p.weeklyCompletionPct===null?circumference:circumference-((p.weeklyCompletionPct/100)*circumference);
-  return <div key={rosterIdentity} role="button" tabIndex={0} onClick={()=>onSelectPlayer?.(p)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onSelectPlayer?.(p);}} style={{display:"flex",background:CARD_BG,borderRadius:14,marginBottom:10,border:`1px solid ${p.statusMeta.pill==="INACTIVE"?"var(--semantic-danger-border)":BORDER_CLR}`,overflow:"hidden",cursor:onSelectPlayer?"pointer":"default"}}>
+  return <article key={rosterIdentity} className="coachRosterCard" data-status={p.statusMeta.tone}>
     <div style={{width:5,background:c,flexShrink:0}}/>
-    <div style={{display:"flex",alignItems:"stretch",gap:12,padding:"14px 12px",flex:1}}>
-      <div style={{position:"relative",alignSelf:"center"}}>
-        <Av n={p.name} sz={40} email={p.email}/>
-      </div>
+    <div className="coachRosterCard__body">
+      <div className="coachRosterCard__initials" aria-hidden="true">{(p.name||"?").trim().slice(0,1).toUpperCase()}</div>
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginBottom:4}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
-            <span style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.name}</span>
-            {p.weeklyCompletionPct!==null&&<svg width="28" height="28" viewBox="0 0 28 28" aria-label={`Weekly completion ${p.weeklyCompletionPct}%`}>
-              <circle cx="14" cy="14" r="12" stroke="#333333" strokeWidth="3" fill="none"/>
-              <circle cx="14" cy="14" r="12" stroke={SUCCESS} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={ringOffset} transform="rotate(-90 14 14)"/>
-            </svg>}
-          </div>
+          <button type="button" className="coachRosterCard__profile" onClick={()=>onSelectPlayer?.(p)} aria-label={`Open ${p.name || "player"} profile`}><span>{p.name}</span><span aria-hidden="true">›</span></button>
           <SemanticStatus tone={p.statusMeta.tone} compact testId="semantic-roster-status">{p.statusMeta.pill}</SemanticStatus>
         </div>
-        <div style={{fontFamily:FB,color:"#FFFFFFB3",fontSize:11,lineHeight:1.55}}>
-          <div>Last Active: <span style={{color:VOLT,fontWeight:700}}>{formatLastActive(p.daysAgo)}</span></div>
-          <div>This Week: <span style={{color:VOLT,fontWeight:700}}>{p.weeklyActivityCount}</span> logs</div>
-          {p.weeklyCompletionPct!==null&&<div>Weekly Completion: <span style={{color:VOLT,fontWeight:700}}>{p.weeklyCompletionPct}%</span></div>}
+        <div className="coachRosterCard__metrics">
+          <div>Last active <strong>{formatLastActive(p.daysAgo)}</strong> · {p.weeklyActivityCount} log{p.weeklyActivityCount===1?"":"s"} this week</div>
+          {p.weeklyCompletionPct!==null&&<div>Training completion <strong>{p.weeklyCompletionPct}%</strong></div>}
         </div>
       </div>
       <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end",gap:8,minWidth:94}}>
     {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?INFO+"55":DANGER+"55"}`,background:isNudged?"var(--semantic-info-surface)":"var(--semantic-danger-surface)",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?INFO:DANGER,whiteSpace:"nowrap",width:"100%"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
-    <button onClick={(e)=>{e.stopPropagation();onRemovePlayer?.(rosterIdentity)}} style={{minHeight:34,padding:"0 12px",borderRadius:8,border:"1px solid #FF454533",background:"#FF454510",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",color:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>
-      REMOVE
-    </button>
+    <details className="coachRosterCard__manage"><summary>Manage</summary><button type="button" onClick={()=>onRemovePlayer?.(rosterIdentity)}>Remove from team</button></details>
       </div>
     </div>
-  </div>})}
+  </article>})}
   {Array.from({length:Math.max(0,4-roster.length)},(_,index)=><div key={"coach-roster-open-"+index}><div data-coach-roster-placeholder="true" style={{display:"flex",background:CARD_BG,borderRadius:14,minHeight:165,marginBottom:10,border:"1px dashed var(--stroke-2)",overflow:"hidden",opacity:.66}}><div style={{width:5,background:"var(--stroke-2)",flexShrink:0}}/><div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 12px",flex:1}}><div style={{width:42,height:42,borderRadius:999,border:"1px dashed var(--stroke-2)",display:"grid",placeItems:"center",fontFamily:FD,color:MUTED}}>—</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>OPEN ROSTER SLOT</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:4}}>A future team member will appear here.</div></div></div></div></div>)}
 
   </div>;

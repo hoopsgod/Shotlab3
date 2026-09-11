@@ -51,31 +51,16 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
 
   return (
     <SecondaryPageShell testId="coach-players-interactive-dashboard" className="secondaryPageShell--embeddedHeader">
-      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
-      <CoachRoutePerformanceStage
-        kind="players"
-        eyebrow="Decision brief"
-        title={briefing.decision.title}
-        detail={briefing.decision.detail}
-        tone={briefing.decision.tone}
-        action={resolvePlayerAction(briefing.decision.action, { onFilterChange, onAddPlayer })}
-        metrics={metricItems}
-        activeMetric={filter}
-        onMetricSelect={onFilterChange}
-        testId="coach-players-decision-brief"
-      >
-        <ExperienceSparkline values={briefing.engagementDistribution} label="Engagement spread" tone={briefing.decision.tone} testId="coach-players-engagement-sparkline" />
-      </CoachRoutePerformanceStage>
+      <SecondaryPageIntro eyebrow="Roster" title="Players" summary="Open a player to review recent training and progress." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }]} testId="coach-players-command-bar" compact />
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <DashboardFilterRail surface="light" searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
       </SecondaryPageToolbar>
-      <SecondaryPageEvidence testId="coach-players-insight-grid">
-        {briefing.insights.map((insight) => (
-          <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolvePlayerAction(insight.action, { onFilterChange, onAddPlayer })}>
-            {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
-          </DashboardInsightCard>
-        ))}
-      </SecondaryPageEvidence>
+      <details className="coachPlayersSecondary" data-testid="coach-players-secondary-intelligence">
+        <summary><span>Roster intelligence</span><span>Decision brief and team administration</span></summary>
+        <CoachRoutePerformanceStage kind="players" eyebrow="Decision brief" title={briefing.decision.title} detail={briefing.decision.detail} tone={briefing.decision.tone} action={resolvePlayerAction(briefing.decision.action, { onFilterChange, onAddPlayer })} metrics={metricItems} activeMetric={filter} onMetricSelect={onFilterChange} testId="coach-players-decision-brief"><ExperienceSparkline values={briefing.engagementDistribution} label="Engagement spread" tone={briefing.decision.tone} testId="coach-players-engagement-sparkline" /></CoachRoutePerformanceStage>
+        <SecondaryPageEvidence testId="coach-players-insight-grid">{briefing.insights.map((insight) => <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolvePlayerAction(insight.action, { onFilterChange, onAddPlayer })}>{insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}</DashboardInsightCard>)}</SecondaryPageEvidence>
+        <button type="button" className="coachPlayersAdministration" onClick={onOpenArchives}>Team &amp; Account</button>
+      </details>
     </SecondaryPageShell>
   );
 }
@@ -109,6 +94,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
         summary="Plan practices, games and team moments."
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
         testId="coach-events-command-bar"
+        compact
       />
       <CoachEventsMonthCalendar rows={rows} onOpenEvent={onOpenEvent} />
       <CoachRoutePerformanceStage
@@ -222,7 +208,7 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
 
   return (
     <SecondaryPageShell testId={testId} className="secondaryPageShell--embeddedHeader">
-      <SecondaryPageIntro eyebrow={displayEyebrow} title={displayTitle} summary={displaySummary} status={status} actions={actions} />
+      <SecondaryPageIntro eyebrow={displayEyebrow} title={displayTitle} summary={displaySummary} status={status} actions={actions} compact={testId === "coach-page-dashboard-drills"} />
       <CoachRoutePerformanceStage
         kind={model.isLeaderboardsPage ? "leaderboards" : undefined}
         eyebrow={model.decisionEyebrow}
