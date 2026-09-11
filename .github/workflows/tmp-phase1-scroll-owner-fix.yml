@@ -1,7 +1,7 @@
 name: Temporary Phase 1 scroll-owner fix
 on:
-  push:
-    branches: [agent/player-phase1-mobile-layout-readability-repair]
+  pull_request:
+    branches: [march-3-reset-85393dd]
 permissions:
   contents: write
 jobs:
