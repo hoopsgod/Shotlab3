@@ -85,12 +85,6 @@ body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
   font: 500 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
-[data-testid="mobile-navigation-groups"] [data-navigation-group] > div {
-  border-color: rgba(22, 25, 27, .08) !important;
-  background: rgba(255, 255, 255, .82) !important;
-  box-shadow: 0 8px 28px rgba(26, 29, 31, .045);
-}
-
 [data-testid="mobile-navigation-groups"] button {
   border-bottom-color: rgba(22, 25, 27, .07) !important;
   color: #555d62 !important;

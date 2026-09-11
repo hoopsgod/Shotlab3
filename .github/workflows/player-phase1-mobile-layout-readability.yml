@@ -1,0 +1,111 @@
+name: Player Phase 1 Mobile Layout Readability
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: player-phase1-mobile-layout-readability-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  player-phase1-layout-readability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      BASELINE_SHA: 91e047247c180c640389958e78d553fe46dc76e5
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify focused Player source contracts
+        run: >-
+          node --test
+          tests/player-phase1-mobile-layout-readability.test.mjs
+          tests/player-experience-phase-1-contract.test.mjs
+          tests/registered-mobile-viewport-lock-contract.test.mjs
+          tests/mobile-horizontal-viewport-lock-contract.test.mjs
+          tests/phase-3u-player-account-control.test.mjs
+          tests/mobile-navigation-contract.test.mjs
+
+      - name: Capture matching Player baseline evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/e2e/player-phase1-mobile-layout-readability.spec.mjs /tmp/player-phase1-mobile-layout-readability.spec.mjs
+          git checkout --detach "$BASELINE_SHA"
+          cp /tmp/player-phase1-mobile-layout-readability.spec.mjs tests/e2e/player-phase1-mobile-layout-readability.spec.mjs
+          PLAYER_PHASE1_CAPTURE_ONLY=1 PLAYER_PHASE1_EVIDENCE=before npx playwright test tests/e2e/player-phase1-mobile-layout-readability.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --grep "390px"
+          mkdir -p /tmp/player-phase1-evidence
+          cp -R artifacts/player-phase1-mobile-layout-readability/before /tmp/player-phase1-evidence/before
+          git reset --hard
+          git clean -fd
+          git checkout --detach "$HEAD_SHA"
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          mkdir -p artifacts/player-phase1-mobile-layout-readability
+          cp -R /tmp/player-phase1-evidence/before artifacts/player-phase1-mobile-layout-readability/before
+
+      - name: Validate Player Phase 1 and capture after evidence
+        env:
+          PLAYER_PHASE1_EVIDENCE: after
+        run: npx playwright test tests/e2e/player-phase1-mobile-layout-readability.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Re-certify existing Player geometry contracts
+        run: npx playwright test tests/e2e/mobile-geometry-precision-screenshots.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Build with unchanged production performance budgets
+        run: npm run build:performance
+
+      - name: Upload Player Phase 1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-phase1-mobile-layout-readability-evidence
+          path: |
+            artifacts/player-phase1-mobile-layout-readability/
+            artifacts/phase-3a-cross-screen-visual-audit/
+            artifacts/performance/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-phase1-mobile-layout-readability-failures
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

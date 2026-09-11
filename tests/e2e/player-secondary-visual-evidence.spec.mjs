@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/player-secondary-visual-evidence");
-const BASELINE_SHA = "4bb11be8da71989a1d5935185ddeebd75e03ade4";
+const BASELINE_SHA = process.env.PLAYER_SECONDARY_BASELINE_SHA || "91e047247c180c640389958e78d553fe46dc76e5";
 const BASELINE_ORIGIN = process.env.PLAYER_SECONDARY_BASELINE_ORIGIN || "http://127.0.0.1:4174";
 const PROTOTYPE_ORIGIN = process.env.PLAYER_SECONDARY_PROTOTYPE_ORIGIN || "http://127.0.0.1:4173";
 const PROTOTYPE_SHA = process.env.PLAYER_SECONDARY_PROTOTYPE_SHA || process.env.GITHUB_SHA || "local-checkout";

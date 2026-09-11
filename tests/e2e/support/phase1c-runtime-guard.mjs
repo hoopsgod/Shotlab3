@@ -114,7 +114,7 @@ export function attachPhase1CRuntimeGuard(page, label) {
 async function settleVisuals(page) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addStyleTag({ content: `
-    *,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;transition-duration:0s!important;transition-delay:0s!important;caret-color:transparent!important}
+    *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
     html,body{scrollbar-width:none!important}
     ::-webkit-scrollbar{display:none!important}
   ` });

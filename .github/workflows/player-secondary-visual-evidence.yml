@@ -34,7 +34,7 @@ jobs:
       - name: Check out exact production baseline
         uses: actions/checkout@v4
         with:
-          ref: 4bb11be8da71989a1d5935185ddeebd75e03ade4
+          ref: ${{ github.event.pull_request.base.sha || '91e047247c180c640389958e78d553fe46dc76e5' }}
           path: baseline
 
       - name: Set up Node
@@ -90,6 +90,7 @@ jobs:
         env:
           CI: ""
           PLAYER_SECONDARY_BASELINE_ORIGIN: http://127.0.0.1:4174
+          PLAYER_SECONDARY_BASELINE_SHA: ${{ github.event.pull_request.base.sha || '91e047247c180c640389958e78d553fe46dc76e5' }}
           PLAYER_SECONDARY_PROTOTYPE_ORIGIN: http://127.0.0.1:4173
           PLAYER_SECONDARY_PROTOTYPE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: npx playwright test tests/e2e/player-secondary-visual-evidence.spec.mjs --project=chromium-desktop --reporter=line
