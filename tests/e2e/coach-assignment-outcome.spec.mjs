@@ -108,7 +108,7 @@ test("Mission Control reports post-publication completion, opens exact player in
   const filteredRosterRows = page.locator("#coach-roster-operations .phase1RosterRow");
   await expect(filteredRosterRows).toHaveCount(1);
   await expect(filteredRosterRows.first()).not.toHaveAttribute("role", "button");
-  await expect(filteredRosterRows.first().locator('[data-phase1-open-profile="true"]')).toBeVisible();
+  await expect(filteredRosterRows.first().getByRole("button", { name: "Open Open Player profile", exact: true })).toBeVisible();
 
   const drawer = page.getByTestId("coach-player-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 20_000 });
