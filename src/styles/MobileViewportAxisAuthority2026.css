@@ -81,12 +81,9 @@
   html body #root .performance-shell--player.is-mobile .player-primary-logging-region .cta-secondary-link {
     min-height: 44px !important; padding-block: 9px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 12px !important;
   }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="value"] { color: #172019 !important; -webkit-text-fill-color: #172019 !important; }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="label"],
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-role="detail"] { color: #4f5a52 !important; -webkit-text-fill-color: #4f5a52 !important; }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-priority="primary"] [data-metric-role="value"] { color: #f8faf5 !important; -webkit-text-fill-color: #f8faf5 !important; }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-priority="primary"] [data-metric-role="label"],
-  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-priority="primary"] [data-metric-role="detail"] { color: #e8eee6 !important; -webkit-text-fill-color: #e8eee6 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-priority="supporting"] [data-metric-role="value"] { color: #172019 !important; -webkit-text-fill-color: #172019 !important; }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-priority="supporting"] [data-metric-role="label"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace] [data-metric-priority="supporting"] [data-metric-role="detail"] { color: #4f5a52 !important; -webkit-text-fill-color: #4f5a52 !important; }
   html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"],
   html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-layout-role="supporting-evidence"] { background-color: var(--team-brand-surface-deep, #2f4f24) !important; }
   html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-metric-role="value"],
