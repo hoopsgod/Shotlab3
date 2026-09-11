@@ -6,7 +6,7 @@ const ACTIVITY_SELECTOR = '[data-testid="coach-live-activity"]';
 const ROW_SELECTOR = `${ACTIVITY_SELECTOR} .mcTimeline > div`;
 const PLAYER_DRAWER_SELECTOR = '[data-testid="coach-player-intelligence-drawer"]';
 const PLAYER_STATS_ROW_SELECTOR = '#coach-roster-operations .phase1RosterRow';
-const PLAYER_PROFILE_ACTION_SELECTOR = '[data-phase1-open-profile="true"]';
+const PLAYER_PROFILE_ACTION_SELECTOR = 'button.coachRosterCard__profile';
 const PLAYER_DRAWER_RECOVERY_DELAYS = [650, 1500, 2800, 4500];
 
 const styles = `
