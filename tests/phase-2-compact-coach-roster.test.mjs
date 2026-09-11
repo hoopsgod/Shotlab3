@@ -17,8 +17,7 @@ test("Players has one title authority and an explicit profile action without nes
   const roster = app.slice(app.indexOf("function CoachRoster"), app.indexOf("// Text sanitizer"));
   assert.doesNotMatch(roster, /PLAYER ROSTER/);
   assert.match(roster, /aria-label=\{`Open \$\{p\.name \|\| "player"\} profile`\}/);
-  assert.match(roster, /<article key=\{rosterIdentity\}/);
-  assert.match(roster, /<details className="coachRosterCard__manage">/);
-  assert.match(roster, /Remove from team/);
+  assert.match(roster, /<article key=\{rosterIdentity\} className="phase1RosterRow coachRosterCard"/);
+  assert.match(roster, />REMOVE<\/button>/);
   assert.doesNotMatch(roster, /role="button"/);
 });

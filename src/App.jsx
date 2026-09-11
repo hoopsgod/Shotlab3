@@ -4616,7 +4616,7 @@ return <div className="fade-up coachRoster" data-testid="coach-roster-list">
 
 
 {roster.map(p=>{const rosterIdentity=p.email||p.profileId||p.playerId||p.id;const c=p.statusMeta.color;const isNudged=nudged.includes(rosterIdentity);
-  return <article key={rosterIdentity} className="coachRosterCard" data-status={p.statusMeta.tone}>
+  return <article key={rosterIdentity} className="phase1RosterRow coachRosterCard" data-status={p.statusMeta.tone}>
     <div style={{width:5,background:c,flexShrink:0}}/>
     <div className="coachRosterCard__body">
       <div className="coachRosterCard__initials" aria-hidden="true">{(p.name||"?").trim().slice(0,1).toUpperCase()}</div>
@@ -4634,7 +4634,7 @@ return <div className="fade-up coachRoster" data-testid="coach-roster-list">
     {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?INFO+"55":DANGER+"55"}`,background:isNudged?"var(--semantic-info-surface)":"var(--semantic-danger-surface)",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?INFO:DANGER,whiteSpace:"nowrap",width:"100%"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
-    <details className="coachRosterCard__manage"><summary>Manage</summary><button type="button" onClick={()=>onRemovePlayer?.(rosterIdentity)}>Remove from team</button></details>
+    <button type="button" onClick={()=>onRemovePlayer?.(rosterIdentity)}>REMOVE</button>
       </div>
     </div>
   </article>})}
