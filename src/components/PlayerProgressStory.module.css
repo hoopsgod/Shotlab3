@@ -122,6 +122,8 @@
 .metricStrip span { display: block; color: #b8c4c8; }
 .metricStrip strong { display: block; margin-top: 5px; color: #f8faf5; font-size: 22px; line-height: 1; letter-spacing: -.025em; }
 .metricStrip small { margin-left: 2px; color: #b8c4c8; font-size: 11px; }
+.metricStrip [data-performance-kind] span,
+.metricStrip [data-performance-kind] small { font-size: 11px; }
 
 .readoutHeader {
   align-items: end;
