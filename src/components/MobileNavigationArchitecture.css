@@ -27,10 +27,6 @@ body.mission-control-active [data-testid="mobile-navigation-dock"][data-navigati
   color: var(--team-brand-nav-active, #c8ff1a);
 }
 
-[data-testid="mobile-navigation-dock"][data-navigation-role="player"] button[data-active="true"] {
-  background: rgba(255, 255, 255, .06);
-}
-
 [data-testid="mobile-navigation-dock"] button:active {
   transform: scale(.96);
 }
