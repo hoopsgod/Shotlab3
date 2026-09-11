@@ -1,6 +1,6 @@
 const STYLE_ID = "shotlab-phase1-evidence-closure";
 const ROSTER_ROOT = "#coach-roster-operations";
-const ROSTER_ROW = `${ROSTER_ROOT} > .fade-up > div[role="button"], ${ROSTER_ROOT} > div[role="button"]`;
+const ROSTER_ROW = `${ROSTER_ROOT} .phase1RosterRow, ${ROSTER_ROOT} > .fade-up > div[role="button"], ${ROSTER_ROOT} > div[role="button"]`;
 const QUEUED_INDEX = '[aria-label^="Queued action "]';
 const FINAL_A11Y_MARKER = "/* phase1-final-a11y */";
 const COACH_MOBILE_PARITY_MARKER = "/* coach-mobile-production-parity */";
@@ -61,6 +61,12 @@ function ensureRosterProfileButton(row) {
 
   const existingButton = row.querySelector('[data-phase1-open-profile="true"]');
   if (existingButton) return true;
+
+  const phase2ProfileButton = row.querySelector("button.coachRosterCard__profile");
+  if (phase2ProfileButton) {
+    phase2ProfileButton.dataset.phase1OpenProfile = "true";
+    return true;
+  }
 
   const button = document.createElement("button");
   button.type = "button";
