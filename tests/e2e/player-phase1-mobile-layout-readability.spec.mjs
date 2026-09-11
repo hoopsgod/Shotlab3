@@ -131,6 +131,24 @@ async function assertWorkspaceReadability(page, viewport, expectedWorkspace) {
   const metrics = await workspace.locator('[data-metric-role="label"], [data-metric-role="detail"]').evaluateAll((nodes) => nodes.map((node) => {
     const style = getComputedStyle(node);
     const rect = node.getBoundingClientRect();
+    const isTransparent = (value) => value === 'transparent' || /^rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0(?:\.0+)?\s*\)$/i.test(value);
+    let surfaceColor = 'rgba(0, 0, 0, 0)';
+    let darkSurface = false;
+    let surfaceNode = node;
+    while (surfaceNode) {
+      const surface = getComputedStyle(surfaceNode);
+      if (surface.backgroundImage !== 'none' && surface.backgroundImage.includes('gradient')) {
+        darkSurface = true;
+        surfaceColor = surface.backgroundColor;
+        break;
+      }
+      if (!isTransparent(surface.backgroundColor)) {
+        surfaceColor = surface.backgroundColor;
+        break;
+      }
+      if (surfaceNode.matches?.('[data-team-workspace]')) break;
+      surfaceNode = surfaceNode.parentElement;
+    }
     return {
       role: node.dataset.metricRole,
       fontSize: Number.parseFloat(style.fontSize),
@@ -138,8 +156,8 @@ async function assertWorkspaceReadability(page, viewport, expectedWorkspace) {
       overflow: style.overflow,
       textOverflow: style.textOverflow,
       color: style.color,
-      surfaceColor: getComputedStyle(node.parentElement).backgroundColor,
-      darkSurface: (() => { const surface = getComputedStyle(node.parentElement); return surface.backgroundImage !== 'none' && surface.backgroundImage.includes('gradient'); })(),
+      surfaceColor,
+      darkSurface,
       left: rect.left,
       right: rect.right,
     };
