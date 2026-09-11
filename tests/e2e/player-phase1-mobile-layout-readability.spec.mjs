@@ -354,9 +354,12 @@ for (const viewport of VIEWPORTS) {
     if (!CAPTURE_ONLY && viewport.width <= 430) {
       const dock = page.getByTestId('mobile-navigation-dock');
       if (await dock.isVisible()) {
-        const scroll = page.locator('.player-scroll-container');
-        await scroll.evaluate((node) => node.scrollTo({ top: node.scrollHeight, left: 0, behavior: 'auto' }));
-        await page.waitForTimeout(80);
+        await page.evaluate(async () => {
+          const nested = document.querySelector('.player-scroll-container');
+          const scroller = nested && nested.scrollHeight > nested.clientHeight + 1 ? nested : document.scrollingElement;
+          scroller?.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: 'auto' });
+          await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        });
         const access = await page.evaluate(() => {
           const dockNode = document.querySelector('[data-testid="mobile-navigation-dock"]');
           const story = document.querySelector('[data-testid="player-progress-story"]');
