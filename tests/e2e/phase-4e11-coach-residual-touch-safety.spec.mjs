@@ -89,18 +89,18 @@ test("Phase 4E.11 closes measured Coach default-state touch targets on current r
   await expect(inviteSection).toBeVisible({ timeout: 20_000 });
   await inviteSection.scrollIntoViewIfNeeded();
   await settle(page);
-  const viewRoster = inviteSection.getByRole("button", { name: "View roster" });
-  const viewRosterEvidence = await measureControl(viewRoster, "View roster");
+  const backToRoster = inviteSection.getByRole("button", { name: "Back to roster" });
+  const backToRosterEvidence = await measureControl(backToRoster, "Back to roster");
   const rosterTarget = page.locator("#coach-roster-operations");
   const beforeScroll = await page.evaluate(() => document.querySelector(".coach-scroll-container")?.scrollTop || 0);
-  await viewRoster.click();
+  await backToRoster.click();
   await page.waitForTimeout(500);
   const afterScroll = await page.evaluate(() => document.querySelector(".coach-scroll-container")?.scrollTop || 0);
-  expect(afterScroll, "View roster must advance the Coach workspace toward roster operations").toBeGreaterThanOrEqual(beforeScroll);
+  expect(afterScroll, "Back to roster must advance the Coach workspace toward roster operations").toBeGreaterThanOrEqual(beforeScroll);
   await expect(rosterTarget).toBeAttached();
   await inviteSection.scrollIntoViewIfNeeded();
   await settle(page);
-  await inviteSection.screenshot({ path: path.join(OUTPUT_DIR, "coach-players-view-roster.png"), animations: "disabled" });
+  await inviteSection.screenshot({ path: path.join(OUTPUT_DIR, "coach-players-back-to-roster.png"), animations: "disabled" });
 
   await navigateByKey(page, "leaderboards");
   const dashboard = page.getByTestId("coach-page-dashboard-leaderboards");
@@ -150,7 +150,7 @@ test("Phase 4E.11 closes measured Coach default-state touch targets on current r
 
   fs.writeFileSync(path.join(OUTPUT_DIR, "coach-residual-touch-safety.json"), JSON.stringify({
     horizontal,
-    viewRoster: viewRosterEvidence,
+    backToRoster: backToRosterEvidence,
     leaderboardMetrics: {
       rankedPlayers: rankedEvidence,
       currentLeader: currentLeaderEvidence,
