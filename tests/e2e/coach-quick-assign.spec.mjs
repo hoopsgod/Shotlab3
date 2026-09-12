@@ -174,7 +174,7 @@ test("coach reuses recent assignment text for an unassigned player without overw
   const filteredRosterRows = page.locator("#coach-roster-operations .phase1RosterRow");
   await expect(filteredRosterRows).toHaveCount(1);
   await expect(filteredRosterRows.first()).not.toHaveAttribute("role", "button");
-  await expect(filteredRosterRows.first().locator('[data-phase1-open-profile="true"]')).toBeVisible();
+  await expect(filteredRosterRows.first().getByRole("button", { name: `Open ${PLAYER_NAME} profile`, exact: true })).toBeVisible();
   await expect(page.getByRole("dialog", { name: PLAYER_NAME, exact: true })).toBeVisible({ timeout: 20_000 });
 
   const widths = await page.evaluate(() => ({

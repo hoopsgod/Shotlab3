@@ -162,9 +162,10 @@ async function enterCoachDemo(page) {
 async function openSeasonArchivePanel(page) {
   const panel = page.getByTestId("coach-season-archive");
   if (!(await panel.isVisible().catch(() => false))) {
-    const teamAccountButton = page
-      .getByTestId("coach-players-command-bar")
-      .getByRole("button", { name: "Team & Account", exact: true });
+    const secondary = page.getByTestId("coach-players-secondary-intelligence");
+    await expect(secondary).toBeVisible({ timeout: 15_000 });
+    if (!(await secondary.getAttribute("open"))) await secondary.locator("summary").click();
+    const teamAccountButton = secondary.getByRole("button", { name: "Team & Account", exact: true });
     await expect(teamAccountButton).toBeVisible({ timeout: 15_000 });
     await teamAccountButton.click();
   }

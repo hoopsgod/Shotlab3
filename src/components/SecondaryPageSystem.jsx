@@ -19,7 +19,7 @@ const mobileDecisionLayout=()=>typeof window!=="undefined"&&Math.min(window.inne
 
 export function SecondaryPageShell({children,testId,className=""}){return <section className={["secondaryPageShell",className].filter(Boolean).join(" ")} data-testid={testId} data-page-hierarchy="editorial" data-surface="light" data-visual-role="secondary-page">{children}</section>}
 
-export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],backAction=null,titleSize="auto",testId,icon}){
+export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],backAction=null,titleSize="auto",testId,icon,compact=false}){
   const displayTitle=normalizeTitle(title);
   const iconName=icon||iconFor(`${eyebrow} ${title} ${displayTitle}`);
   return <div className="teamIdentityTitleStageFrame" data-layout-role="title-and-operations" data-title-stage-family="editorial">
@@ -35,7 +35,7 @@ export function SecondaryPageIntro({eyebrow,title,summary,status,actions=[],back
       titleSize={titleSize}
       brandTreatment="compact"
       testId={testId}
-      className="secondaryPageTitleStage"
+      className={`secondaryPageTitleStage${compact?" secondaryPageTitleStage--compact":""}`}
       dataLayoutRole="editorial-header"
       dataVisualRole="page-intro"
       dataPageKind={iconName}

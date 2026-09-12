@@ -147,7 +147,10 @@ test("Coach visual system remains integrated across command and management pages
   await expect(inviteForm).toBeVisible({ timeout: 20_000 });
   await capture(page, "06b-coach-player-add");
 
-  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Team & Account", exact: true }).click();
+  const secondary = page.getByTestId("coach-players-secondary-intelligence");
+  await expect(secondary).toBeVisible({ timeout: 20_000 });
+  if (!(await secondary.evaluate((node) => node.open))) await secondary.locator("summary").click();
+  await secondary.getByRole("button", { name: "Team & Account", exact: true }).click();
   await expect(page.getByTestId("coach-administration-workspace")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-season-archive")).toBeVisible();
   await expect(page.getByText("Start a New Season", { exact: true })).toBeVisible();
