@@ -5,6 +5,7 @@
 @import "./MissionControlHierarchy2026.css";
 @import "./MissionControlCascadeLock2026.css";
 @import "./Phase3SurfaceContracts.css";
+@import "./Phase3AppWideCoherence2026.css";
 @import "./CoachRoleVisualConvergence2026.css";
 
 :root {
@@ -120,6 +121,35 @@
 
   html body #root .performance-shell--coach .shared-dashboard-back-action + .secondaryPageShell {
     padding-top: max(14px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
+  }
+
+  /* Player intelligence uses a fixed avatar track plus a genuinely flexible text
+   * track. This prevents the 390px identity copy from collapsing to min-content
+   * width and spelling player names one character per line. */
+  .performance-shell--coach .coachPlayerProfileHero__identity {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 14px !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero__identity > :first-child {
+    width: 64px !important;
+    justify-self: start !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero__identity > div {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero__headline {
+    min-width: 0 !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero h2 {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero p {
+    overflow-wrap: anywhere !important;
   }
 
   /* Mobile Coach secondary pages are editorial, not billboard surfaces. */

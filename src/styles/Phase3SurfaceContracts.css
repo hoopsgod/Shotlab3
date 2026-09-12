@@ -160,8 +160,12 @@
   box-sizing: border-box;
 }
 
+/* Keep readable words as the minimum heading unit. `anywhere` makes a shrinkable
+ * flex/grid heading report a one-character min-content width, which can turn a
+ * normal player name into a vertical column on 320–430px screens. */
 [data-visual-role="secondary-page"] :is(h1, h2, h3) {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
   text-wrap: balance;
 }
 

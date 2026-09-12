@@ -5,7 +5,6 @@
   --surface-1: #ffffff !important;
   --surface-2: #ffffff !important;
   --surface-3: #f8f7f2 !important;
-  --surface-inset: #eeece5 !important;
   --text-1: #111a21 !important;
   --text-2: #44515b !important;
   --text-3: #65717a !important;
@@ -14,18 +13,15 @@
   --shadow-0: none !important;
   --shadow-1: 0 1px 2px rgba(17,26,33,.04), 0 8px 24px rgba(7,28,40,.055) !important;
   --shadow-2: 0 2px 4px rgba(17,26,33,.05), 0 18px 44px rgba(7,28,40,.075) !important;
-  --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
   --radius-xl: 24px;
   --radius-card: 18px !important;
   --space-1: 4px;
-  --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
-  --space-8: 32px;
   --layout-gutter: clamp(16px, 4.65vw, 20px);
   --touch-target: 44px;
   --control-height: 48px;
@@ -60,10 +56,7 @@
   --tracking-wide: .08em !important;
   --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  --performance-ink: #071c28;
   --performance-surface: #0a2633;
-  --performance-copy: #f5f8f9;
-  --performance-muted: #afbdc4;
   --shell-rail-surface: #071c28;
   --shell-rail-surface-raised: #0c2a38;
   --shell-rail-ink: #f5f8f9;
@@ -74,12 +67,8 @@
   --sl-muted: var(--text-2);
   --sl-line: var(--stroke-1);
   --sl-line-strong: var(--stroke-2);
-  --insight-rail-canvas: #f0f1ed;
   --insight-rail-ink: #111a21;
   --insight-rail-muted: #65717a;
-  --insight-card-surface: #081f2a;
-  --insight-card-copy: #f5f8f9;
-  --insight-card-muted: #b6c3c9;
   --insight-card-radius: var(--radius-lg);
 }
 
