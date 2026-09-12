@@ -27,12 +27,12 @@ Make ShotLab unmistakably ShotLab across Coach and Player without changing produ
 ## Implemented on the Phase 4 branch
 
 - Shared `SecondaryPageDecision` dark decision surfaces retain the accepted Phase 3 treatment without adding a duplicate signature or watermark layer.
-- `CoachRoutePerformanceStage` now reuses the same ShotLab court/trajectory signature instead of relying only on generic route watermarks.
+- Coach route stages retain the accepted watermark and dark-decision hierarchy; new signature layers are not added where Phase 3 baselines already own the composition.
 - Coach route metrics now reuse `ShotLabPerformanceMark`, resolving existing metric labels/keys into rank, streak, PB, or milestone geometry without changing the underlying values or click behavior.
 - `ShotLabPerformanceMark` now supports decorative use so repeated visual marks do not create duplicate screen-reader announcements.
-- Performance numerals use the established ShotLab condensed athletic type stack with tabular-number alignment, tighter geometry, and reduced generic badge weight.
-- Player Progress and leaderboard surfaces retain their existing performance-mark usage, creating a shared Coach/Player visual vocabulary rather than a second component family.
-- Focused source regression coverage protects the signature primitive on performance stages, prevents duplicate editorial treatment, and preserves truthful metric values and existing action behavior.
+- Player performance numerals use the established ShotLab condensed athletic type stack with tabular-number alignment and reduced generic badge weight.
+- Player Progress and leaderboard surfaces retain their existing performance-mark usage without introducing a second component family or changing Coach metric geometry.
+- Focused source regression coverage protects the signature-treatment boundary, preserves truthful metric values, and preserves existing action behavior.
 
 ## Why the implementation stops here before more decoration
 

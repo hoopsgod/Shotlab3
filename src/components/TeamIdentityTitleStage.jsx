@@ -23,8 +23,8 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
   if (!status && !actionItems.length) return null;
 
   const runAction = (action) => {
-    if (action.disabled || typeof action.onClick !== "function") return;
     const key = action.key || action.label;
+    if (action.disabled || workingKey === key || typeof action.onClick !== "function") return;
     setWorkingKey(key);
     action.onClick();
     if (feedbackTimer.current) window.clearTimeout(feedbackTimer.current);
@@ -51,7 +51,8 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
             type="button"
             className={index === 0 ? "teamIdentityTitleStage__action teamIdentityTitleStage__action--primary" : "teamIdentityTitleStage__action"}
             onClick={() => runAction(action)}
-            disabled={action.disabled || working}
+            disabled={action.disabled}
+            aria-disabled={working || undefined}
             aria-busy={working || undefined}
             data-working={working ? "true" : undefined}
             data-action-state={working ? "working" : "idle"}

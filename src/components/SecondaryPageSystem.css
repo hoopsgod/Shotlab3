@@ -54,8 +54,3 @@
  .coachAdministrationPulse{padding:15px 0 0;border-top:1px solid rgba(255,255,255,.1);border-left:0}.coachSeasonArchiveForm,.coachAdministrationGrid{grid-template-columns:1fr}.coachSeasonArchivePanel{padding:17px;border-radius:18px}.coachSeasonArchivePanel>.cta-primary{width:100%!important}.seasonArchiveStats{grid-template-columns:repeat(2,minmax(0,1fr))}.seasonArchiveStat:nth-child(odd){border-left:0}.seasonArchiveStat:nth-child(n+3){border-top:1px solid var(--sl-line,rgba(23,26,24,.1))}
 }
 @media(prefers-reduced-motion:reduce){.secondaryPageDecision button{transition:none}.secondaryPageDecision button:active:not(:disabled){transform:none}.secondaryPageDecision::after{filter:none}}
-.secondaryPageDecision button[data-working="true"] {
-  cursor: progress;
-  filter: saturate(.72);
-  pointer-events: none;
-}

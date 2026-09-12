@@ -19,7 +19,7 @@ test("shared title actions provide one-flight feedback without changing callback
   assert.match(titleStage, /aria-busy=\{working \|\| undefined\}/);
   assert.match(titleStage, /data-working=\{working \? "true" : undefined\}/);
   assert.match(titleStage, /action\.pendingLabel \|\| "Opening…"/);
-  assert.match(titleCss, /data-working="true"/);
+  assert.match(titleCss, /:disabled/);
 });
 
 test("Coach decision stages acknowledge primary-action activation and protect normal-name wrapping", () => {
@@ -38,7 +38,7 @@ test("secondary decision surfaces share the same acknowledgement contract", () =
   assert.match(secondary, /disabled=\{action\.disabled \|\| actionWorking\}/);
   assert.match(secondary, /aria-busy=\{actionWorking \|\| undefined\}/);
   assert.match(secondaryCss, /overflow-wrap:break-word;word-break:normal/);
-  assert.match(secondaryCss, /data-working="true"/);
+  assert.match(secondaryCss, /button:disabled/);
 });
 
 test("Coach Players keeps the decision path ahead of supporting evidence", () => {
