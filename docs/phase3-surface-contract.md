@@ -1,0 +1,1 @@
+Light surfaces own dark foregrounds; dark surfaces own light foregrounds; raw team colors do not directly control readable text. Surface semantics, not class/test-id substring matching, determine foreground.
