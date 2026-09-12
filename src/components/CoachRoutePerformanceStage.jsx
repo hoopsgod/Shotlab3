@@ -46,14 +46,6 @@ const readableMetricValue = (metric) => {
   return String(value);
 };
 
-const resolveMetricMarkKind = (metric = {}) => {
-  const signal = `${metric.key || ""} ${metric.label || ""} ${metric.displayLabel || ""}`.toLowerCase();
-  if (/rank|leader|place/.test(signal)) return "rank";
-  if (/streak|rhythm|active day/.test(signal)) return "streak";
-  if (/personal best|\bpb\b|best/.test(signal)) return "pb";
-  return "milestone";
-};
-
 function StageMetric({ metric, active, onSelect, routeKind }) {
   const interactive = Boolean(onSelect && metric?.key);
   const Component = interactive ? "button" : "div";
@@ -126,7 +118,7 @@ export default function CoachRoutePerformanceStage({
         <ShotLabIcon name={icon} size={118} />
       </div>
 
-      <div className={styles.topline} style={{ position: "relative", zIndex: 1 }}>
+      <div className={styles.topline}>
         <span className={styles.routeMark} aria-hidden="true">
           <ShotLabIcon name={icon} size={20} />
         </span>
@@ -156,7 +148,7 @@ export default function CoachRoutePerformanceStage({
       {children ? <div className={styles.visual} data-visual-role="decision-evidence">{children}</div> : null}
 
       {visibleMetrics.length ? (
-        <div className={styles.metricRail} style={{ position: "relative", zIndex: 1 }} data-visual-role="performance-evidence" aria-label="Current performance signals">
+        <div className={styles.metricRail} data-visual-role="performance-evidence" aria-label="Current performance signals">
           {visibleMetrics.map((metric) => (
             <StageMetric
               key={metric.key || metric.label}
