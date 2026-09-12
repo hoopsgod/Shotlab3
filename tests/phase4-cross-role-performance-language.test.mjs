@@ -35,3 +35,12 @@ test("performance marks can be decorative without duplicating accessible announc
   assert.match(performanceMark, /aria-hidden=\{decorative \? "true" : undefined\}/);
   assert.match(performanceMark, /aria-label=\{decorative \? undefined : \(aria \|\| "Performance mark"\)\}/);
 });
+
+test("Phase 4 Player performance surfaces use semantic ShotLab arrows instead of text glyphs", () => {
+  assert.match(playerProgress, /import ShotLabIcon from "\.\/ShotLabIcon\.jsx"/);
+  assert.match(playerProgress, /<ShotLabIcon name="arrow" size=\{15\} aria-hidden="true"/);
+  assert.match(leaderboard, /import ShotLabIcon from "\.\/ShotLabIcon\.jsx"/);
+  assert.match(leaderboard, /<ShotLabIcon name="arrow" size=\{14\} aria-hidden="true"/);
+  assert.doesNotMatch(playerProgress, /→/);
+  assert.doesNotMatch(leaderboard, /→/);
+});
