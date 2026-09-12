@@ -12,12 +12,10 @@
 .performance-shell--coach .coach-scroll-container {
   --coach-2026-canvas: var(--team-brand-page-wash, #f4f1e9);
   --coach-2026-paper: #ffffff;
-  --coach-2026-paper-soft: #f8f7f2;
   --coach-2026-navy: var(--team-brand-surface-deep, #071820);
   --coach-2026-navy-2: var(--team-brand-surface-elevated, #0b2633);
   --coach-2026-ink: #111a21;
   --coach-2026-muted: #5f6a71;
-  --coach-2026-dim: #78838a;
   --coach-2026-line: rgba(17, 26, 33, .10);
   --coach-2026-line-strong: rgba(17, 26, 33, .16);
   --coach-2026-lime: var(--team-brand-primary, var(--accent, #c8ff1a));

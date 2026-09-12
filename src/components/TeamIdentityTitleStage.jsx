@@ -51,7 +51,7 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
             type="button"
             className={index === 0 ? "teamIdentityTitleStage__action teamIdentityTitleStage__action--primary" : "teamIdentityTitleStage__action"}
             onClick={() => runAction(action)}
-            disabled={action.disabled}
+            disabled={action.disabled || working}
             aria-disabled={working || undefined}
             aria-busy={working || undefined}
             data-working={working ? "true" : undefined}
