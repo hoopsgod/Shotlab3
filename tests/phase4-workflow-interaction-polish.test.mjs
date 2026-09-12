@@ -27,8 +27,8 @@ test("Coach decision stages acknowledge primary-action activation and protect no
   assert.match(coachStage, /onClick=\{runAction\}/);
   assert.match(coachStage, /disabled=\{action\.disabled \|\| actionWorking\}/);
   assert.match(coachStage, /aria-busy=\{actionWorking \|\| undefined\}/);
-  assert.match(coachCss, /overflow-wrap: break-word/);
-  assert.match(coachCss, /word-break: normal/);
+  assert.match(coachCss, /text-wrap: balance/);
+  assert.match(coachCss, /min-width: 0/);
   assert.match(coachCss, /data-working="true"/);
 });
 
@@ -37,7 +37,7 @@ test("secondary decision surfaces share the same acknowledgement contract", () =
   assert.match(secondary, /onClick=\{runAction\}/);
   assert.match(secondary, /disabled=\{action\.disabled \|\| actionWorking\}/);
   assert.match(secondary, /aria-busy=\{actionWorking \|\| undefined\}/);
-  assert.match(secondaryCss, /overflow-wrap:break-word;word-break:normal/);
+  assert.match(secondaryCss, /overflow-wrap:anywhere/);
   assert.match(secondaryCss, /button:disabled/);
 });
 

@@ -118,8 +118,7 @@
   font: 810 clamp(30px, 5vw, 39px)/.96 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.048em;
   text-wrap: balance;
-  overflow-wrap: break-word;
-  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .detail {
@@ -338,10 +337,4 @@
 @media (prefers-reduced-motion: reduce) {
   .stage .action { transition: none; }
   .stage .action:active:not(:disabled) { transform: none; }
-}
-.stage .metricLabel,
-.stage .metricDetail {
-  overflow-wrap: break-word;
-  word-break: normal;
-  hyphens: none;
 }

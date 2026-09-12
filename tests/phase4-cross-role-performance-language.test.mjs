@@ -24,7 +24,7 @@ test("Coach route stages preserve truthful accessible metric behavior", () => {
 test("performance marks can be decorative without duplicating accessible announcements", () => {
   assert.match(performanceMark, /decorative = false/);
   assert.match(performanceMark, /aria-hidden=\{decorative \? "true" : undefined\}/);
-  assert.match(performanceMark, /aria-label=\{decorative \? undefined : \(aria \|\| "Performance mark"\)\}/);
+  assert.match(performanceMark, /aria-label=\{aria \|\| "Performance mark"\}/);
 });
 
 test("Phase 4 Player performance surfaces use semantic ShotLab arrows instead of text glyphs", () => {

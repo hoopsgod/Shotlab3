@@ -40,7 +40,7 @@ export default function ShotLabPerformanceMark({
       data-testid={testId}
       data-performance-kind={resolvedKind}
       aria-hidden={decorative ? "true" : undefined}
-      aria-label={decorative ? undefined : (aria || "Performance mark")}
+      aria-label={aria || "Performance mark"}
     >
       <div className={styles.glyph}>
         <MarkGeometry kind={resolvedKind} />
