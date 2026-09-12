@@ -20,8 +20,6 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
     if (feedbackTimer.current) window.clearTimeout(feedbackTimer.current);
   }, []);
 
-  if (!status && !actionItems.length) return null;
-
   const runAction = (action) => {
     const key = action.key || action.label;
     if (action.disabled || workingKey === key || typeof action.onClick !== "function") return;
@@ -30,6 +28,8 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
     if (feedbackTimer.current) window.clearTimeout(feedbackTimer.current);
     feedbackTimer.current = window.setTimeout(() => setWorkingKey(""), 900);
   };
+
+  if (!status && !actionItems.length) return null;
 
   return (
     <div
