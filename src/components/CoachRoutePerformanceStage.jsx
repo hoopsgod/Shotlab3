@@ -76,8 +76,8 @@ function StageMetric({ metric, active, onSelect, routeKind }) {
       className={cx(styles.metric, active && styles.metricActive)}
       data-route-stage-metric
     >
-      <div className={styles.metricPresentation}>
-        <div className={styles.metricMark} data-route-stage-metric-value>
+      <div style={{ display: "grid", gridTemplateColumns: "38px minmax(0,1fr)", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <div style={{ minWidth: 0 }} data-route-stage-metric-value>
           <ShotLabPerformanceMark
             kind={resolveMetricMarkKind(metric)}
             value={value}
@@ -86,7 +86,7 @@ function StageMetric({ metric, active, onSelect, routeKind }) {
             decorative
           />
         </div>
-        <div className={styles.metricCopy}>
+        <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
           <span className={styles.metricLabel} data-route-stage-metric-label>{routeDisplayLabel || metric.displayLabel || metric.label}</span>
           {metric.detail ? <span className={styles.metricDetail} data-route-stage-metric-detail>{metric.detail}</span> : null}
         </div>
@@ -122,12 +122,12 @@ export default function CoachRoutePerformanceStage({
       data-route-kind={routeKind}
       data-tone={tone}
     >
-      <ShotLabSignatureField variant={signatureVariant} className={styles.signatureField} />
+      <ShotLabSignatureField variant={signatureVariant} style={{ opacity: .34, zIndex: 0 }} />
       <div className={styles.watermark} aria-hidden="true">
         <ShotLabIcon name={icon} size={118} />
       </div>
 
-      <div className={styles.topline}>
+      <div className={styles.topline} style={{ position: "relative", zIndex: 1 }}>
         <span className={styles.routeMark} aria-hidden="true">
           <ShotLabIcon name={icon} size={20} />
         </span>
@@ -148,7 +148,7 @@ export default function CoachRoutePerformanceStage({
       {children ? <div className={styles.visual} data-visual-role="decision-evidence">{children}</div> : null}
 
       {visibleMetrics.length ? (
-        <div className={styles.metricRail} data-visual-role="performance-evidence" aria-label="Current performance signals">
+        <div className={styles.metricRail} style={{ position: "relative", zIndex: 1 }} data-visual-role="performance-evidence" aria-label="Current performance signals">
           {visibleMetrics.map((metric) => (
             <StageMetric
               key={metric.key || metric.label}
