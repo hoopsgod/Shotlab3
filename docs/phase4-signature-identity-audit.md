@@ -24,6 +24,20 @@ Make ShotLab unmistakably ShotLab across Coach and Player without changing produ
 7. Interaction polish: restrained pressed/focus/loading/reduced-motion behavior with no animation for animation's sake.
 8. Coach/Player product-family parity: Coach remains denser and operational; Player remains more motivational, but both visibly share the same ShotLab signature system.
 
+## Implemented on the Phase 4 branch
+
+- Shared `SecondaryPageDecision` dark performance surfaces now reuse the existing `ShotLabSignatureField` court language at restrained opacity beneath interactive content.
+- `CoachRoutePerformanceStage` now reuses the same ShotLab court/trajectory signature instead of relying only on generic route watermarks.
+- Coach route metrics now reuse `ShotLabPerformanceMark`, resolving existing metric labels/keys into rank, streak, PB, or milestone geometry without changing the underlying values or click behavior.
+- `ShotLabPerformanceMark` now supports decorative use so repeated visual marks do not create duplicate screen-reader announcements.
+- Performance numerals use the established ShotLab condensed athletic type stack with tabular-number alignment, tighter geometry, and reduced generic badge weight.
+- Player Progress and leaderboard surfaces retain their existing performance-mark usage, creating a shared Coach/Player visual vocabulary rather than a second component family.
+- Focused source regression coverage protects the shared signature primitive, cross-role performance-mark usage, truthful metric values, and existing action behavior.
+
+## Why the implementation stops here before more decoration
+
+The strongest Phase 4 gains are now systemic. Additional court graphics, shadows, badges, or motion added page-by-page would increase visual noise and recreate the fragmentation Phase 3 removed. Remaining work is certification-driven: only defects revealed by exact-head build, runtime, parity, accessibility, responsive, or screenshot evidence should justify additional product-facing changes.
+
 ## Non-negotiable guardrails
 
 - No authentication, Supabase, schema, routing, navigation, roster, scoring, shot logging, event, RSVP, attendance, archive, leaderboard-calculation, persistence, permission, or Team Store behavior changes.
@@ -35,6 +49,6 @@ Make ShotLab unmistakably ShotLab across Coach and Player without changing produ
 - Demo and registered experiences must continue to share the production component tree.
 - Primary acceptance viewport remains 390x844, with 375, 430, and representative desktop verification.
 
-## First implementation seam
+## Certification gate
 
-Start with the existing `ShotLabSignatureField` and `ShotLabPerformanceMark` primitives. Expand use only on surfaces where basketball identity or performance meaning is real. The first visual pass should target one Coach decision/performance surface and one Player performance surface, verify that the signature language feels related rather than duplicated, then scale the pattern to other eligible destinations.
+Phase 4 is not merge-ready until the exact current head has passed the relevant production build, performance budget, Demo/registered parity, focused visual/runtime, accessibility/touch, and responsive checks; the exact-head Cloudflare deployment is successful; and fresh rendered evidence confirms the new signature/performance treatment improves rather than crowds the major Coach and Player screens. Phase 4 must remain stacked behind Phase 3 until PR #1553 is accepted and the dependency is resolved.
