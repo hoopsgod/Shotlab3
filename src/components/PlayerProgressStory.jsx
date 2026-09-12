@@ -4,6 +4,7 @@ import { derivePlayerProgressStory } from "../lib/playerProgressStory.js";
 import styles from "./PlayerProgressStory.module.css";
 import ShotLabSignatureField from "./ShotLabSignatureField.jsx";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
+import ShotLabIcon from "./ShotLabIcon.jsx";
 import { ShotLabPerformanceCourt } from "./PlayerDailyPrimitives.jsx";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 
@@ -52,7 +53,7 @@ export default function PlayerProgressStory({
       </div>
       <div className={styles.readoutHeader}><div><span>DEVELOPMENT READOUT</span><h3>What the work says now</h3></div><p>{story.evidenceLabel}</p></div>
       <div className={styles.signalGrid}><SignalCard {...story.strongest} testId="player-progress-strongest-signal" /><SignalCard {...story.opportunity} testId="player-progress-opportunity" /></div>
-      <article className={styles.nextFocus} data-testid="player-progress-next-focus"><div className={styles.nextFocusCopy}><span>{story.nextFocus.label}</span><strong>{story.nextFocus.title}</strong><p>{story.nextFocus.detail}</p></div><button type="button" data-testid="player-progress-start-focus" onClick={onStartTraining}><span>Start next focus</span><span aria-hidden="true">→</span></button></article>
+      <article className={styles.nextFocus} data-testid="player-progress-next-focus"><div className={styles.nextFocusCopy}><span>{story.nextFocus.label}</span><strong>{story.nextFocus.title}</strong><p>{story.nextFocus.detail}</p></div><button type="button" data-testid="player-progress-start-focus" onClick={onStartTraining}><span>Start next focus</span><ShotLabIcon name="arrow" size={15} aria-hidden="true" /></button></article>
       <div className={styles.detailRow}><div><span>WHY THIS READOUT</span><p>ShotLab separates comparable drill quality from simple practice frequency. It does not combine unrelated drill scores into a fake overall rating.</p></div><button type="button" data-testid="player-progress-open-profile" onClick={onOpenFullProfile}>Open full progress profile</button></div>
     </section>
   </>;
