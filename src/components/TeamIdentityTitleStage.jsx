@@ -55,7 +55,6 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
             aria-disabled={working || undefined}
             aria-busy={working || undefined}
             data-working={working ? "true" : undefined}
-            data-action-state={working ? "working" : "idle"}
             aria-label={action.ariaLabel || action.label}
           >{working ? action.pendingLabel || "Opening…" : action.label}</button>
         );
