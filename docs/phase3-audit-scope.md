@@ -1,0 +1,1 @@
+Audit includes Coach and Player secondary routes, auth entry, empty states, modals/drawers, settings/legal, Team Store, and 390px mobile geometry. Page-specific changes must follow shared-system fixes.
