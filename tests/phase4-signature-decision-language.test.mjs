@@ -19,7 +19,7 @@ test("decision signature remains decorative and below interactive content", () =
 });
 
 test("Phase 4 preserves the existing decision behavior contract", () => {
-  assert.match(secondary, /action\?<button type="button" onClick=\{action\.onClick\} disabled=\{action\.disabled\}/);
+  assert.match(secondary, /action\?<button type="button" onClick=\{runAction\} disabled=\{action\.disabled \|\| actionWorking\} aria-busy=\{actionWorking \|\| undefined\} data-working=/);
   assert.match(secondary, /children\?<div className="secondaryPageDecision__visual"/);
   assert.match(secondary, /data-surface="dark" data-visual-role="primary-decision"/);
 });
