@@ -1,6 +1,6 @@
 # ShotLab Phase 4 — Signature Visual Identity Audit
 
-Parent dependency: Phase 3 PR #1553 exact head `5e2e225bd6a211567992c4403e679cfdc87d2155`.
+Parent dependency: Phase 3 PR #1553 merged at `a70658cf7815a7049edfdca14ed80840a809ba16`.
 
 ## Objective
 
@@ -26,13 +26,13 @@ Make ShotLab unmistakably ShotLab across Coach and Player without changing produ
 
 ## Implemented on the Phase 4 branch
 
-- Shared `SecondaryPageDecision` dark performance surfaces now reuse the existing `ShotLabSignatureField` court language at restrained opacity beneath interactive content.
+- Shared `SecondaryPageDecision` dark decision surfaces retain the accepted Phase 3 treatment without adding a duplicate signature or watermark layer.
 - `CoachRoutePerformanceStage` now reuses the same ShotLab court/trajectory signature instead of relying only on generic route watermarks.
 - Coach route metrics now reuse `ShotLabPerformanceMark`, resolving existing metric labels/keys into rank, streak, PB, or milestone geometry without changing the underlying values or click behavior.
 - `ShotLabPerformanceMark` now supports decorative use so repeated visual marks do not create duplicate screen-reader announcements.
 - Performance numerals use the established ShotLab condensed athletic type stack with tabular-number alignment, tighter geometry, and reduced generic badge weight.
 - Player Progress and leaderboard surfaces retain their existing performance-mark usage, creating a shared Coach/Player visual vocabulary rather than a second component family.
-- Focused source regression coverage protects the shared signature primitive, cross-role performance-mark usage, truthful metric values, and existing action behavior.
+- Focused source regression coverage protects the signature primitive on performance stages, prevents duplicate editorial treatment, and preserves truthful metric values and existing action behavior.
 
 ## Why the implementation stops here before more decoration
 
@@ -51,4 +51,4 @@ The strongest Phase 4 gains are now systemic. Additional court graphics, shadows
 
 ## Certification gate
 
-Phase 4 is not merge-ready until the exact current head has passed the relevant production build, performance budget, Demo/registered parity, focused visual/runtime, accessibility/touch, and responsive checks; the exact-head Cloudflare deployment is successful; and fresh rendered evidence confirms the new signature/performance treatment improves rather than crowds the major Coach and Player screens. Phase 4 must remain stacked behind Phase 3 until PR #1553 is accepted and the dependency is resolved.
+Phase 4 is not merge-ready until the exact current head has passed the relevant production build, performance budget, Demo/registered parity, focused visual/runtime, accessibility/touch, and responsive checks; the exact-head Cloudflare deployment is successful; and fresh rendered evidence confirms the new signature/performance treatment improves rather than crowds the major Coach and Player screens. Phase 4 is based on the accepted Phase 3 merge commit above; any additional product-facing change remains certification-driven.
