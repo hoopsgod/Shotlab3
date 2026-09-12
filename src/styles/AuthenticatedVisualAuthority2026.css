@@ -123,6 +123,44 @@
     padding-top: max(14px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
   }
 
+  /* Player intelligence uses a fixed avatar track plus a genuinely flexible text
+   * track. This prevents the 390px identity copy from collapsing to min-content
+   * width and spelling player names one character per line. */
+  .performance-shell--coach .coachPlayerProfileHero__identity {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    align-items: start !important;
+    justify-content: stretch !important;
+    gap: 14px !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero__identity > :first-child {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    justify-self: start !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero__identity > div {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero h2 {
+    max-width: 100% !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-wrap: balance;
+  }
+  .performance-shell--coach .coachPlayerProfileHero p {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+  .performance-shell--coach .coachPlayerProfileHero__headline {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
   /* Mobile Coach secondary pages are editorial, not billboard surfaces. */
   .performance-shell--coach [data-visual-role="page-intro"][data-title-stage-family="editorial"] {
     --identity-crest: clamp(68px, 18vw, 76px);
