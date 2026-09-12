@@ -15,7 +15,7 @@ const playerDaily = read("src/components/PlayerDailyCommandCenter.jsx");
 test("shared title actions provide one-flight feedback without changing callbacks", () => {
   assert.match(titleStage, /useRef, useState/);
   assert.match(titleStage, /action\.onClick\(\)/);
-  assert.match(titleStage, /disabled=\{action\.disabled \|\| working\}/);
+  assert.match(titleStage, /disabled=\{action\.disabled\}\s*\{\.\.\.\(working \? \{ disabled: true \} : \{\}\)\}/);
   assert.match(titleStage, /aria-busy=\{working \|\| undefined\}/);
   assert.match(titleStage, /data-working=\{working \? "true" : undefined\}/);
   assert.match(titleStage, /action\.pendingLabel \|\| "Opening…"/);
