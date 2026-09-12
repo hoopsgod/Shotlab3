@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 import "./TeamIdentityTitleStage.css";
@@ -13,6 +13,22 @@ const initialsFor = (value) => {
 
 export function TeamIdentitySupportRail({ status = null, actions = [], external = false, className = "", ariaLabel = "Page status and actions" }) {
   const actionItems = Array.isArray(actions) ? actions.filter(Boolean) : [];
+  const [workingKey, setWorkingKey] = useState("");
+  const feedbackTimer = useRef(null);
+
+  useEffect(() => () => {
+    if (feedbackTimer.current) window.clearTimeout(feedbackTimer.current);
+  }, []);
+
+  const runAction = (action) => {
+    const key = action.key || action.label;
+    if (action.disabled || workingKey === key || typeof action.onClick !== "function") return;
+    setWorkingKey(key);
+    action.onClick();
+    if (feedbackTimer.current) window.clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = window.setTimeout(() => setWorkingKey(""), 900);
+  };
+
   if (!status && !actionItems.length) return null;
 
   return (
@@ -26,16 +42,23 @@ export function TeamIdentitySupportRail({ status = null, actions = [], external 
       aria-label={external ? ariaLabel : undefined}
     >
       {status ? <div className="teamIdentityTitleStage__status" aria-live="polite">{status}</div> : null}
-      {actionItems.length ? <div className="teamIdentityTitleStage__actions">{actionItems.map((action, index) => (
-        <button
-          key={action.key || action.label}
-          type="button"
-          className={index === 0 ? "teamIdentityTitleStage__action teamIdentityTitleStage__action--primary" : "teamIdentityTitleStage__action"}
-          onClick={action.onClick}
-          disabled={action.disabled}
-          aria-label={action.ariaLabel || action.label}
-        >{action.label}</button>
-      ))}</div> : null}
+      {actionItems.length ? <div className="teamIdentityTitleStage__actions">{actionItems.map((action, index) => {
+        const key = action.key || action.label;
+        const working = workingKey === key;
+        return (
+          <button
+            key={key || index}
+            type="button"
+            className={index === 0 ? "teamIdentityTitleStage__action teamIdentityTitleStage__action--primary" : "teamIdentityTitleStage__action"}
+            onClick={() => runAction(action)}
+            disabled={action.disabled}
+            aria-disabled={working || undefined}
+            aria-busy={working || undefined}
+            data-working={working ? "true" : undefined}
+            aria-label={action.ariaLabel || action.label}
+          >{working ? action.pendingLabel || "Opening…" : action.label}</button>
+        );
+      })}</div> : null}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import ShotLabIcon from "./ShotLabIcon.jsx";
 import styles from "./CoachRoutePerformanceStage.module.css";
 import "./CoachInteractiveDashboards.css";
@@ -87,6 +88,22 @@ export default function CoachRoutePerformanceStage({
   const routeKind = kind || resolveCoachRouteKind({ testId, title });
   const icon = ROUTE_ICONS[routeKind] || ROUTE_ICONS.default;
   const visibleMetrics = metrics.filter(Boolean).slice(0, 4);
+  const [workingAction, setWorkingAction] = useState("");
+  const actionTimer = useRef(null);
+
+  useEffect(() => () => {
+    if (actionTimer.current) window.clearTimeout(actionTimer.current);
+  }, []);
+
+  const actionKey = action ? (action.key || action.label || "stage-action") : "";
+  const actionWorking = Boolean(actionKey && workingAction === actionKey);
+  const runAction = () => {
+    if (!action || action.disabled || actionWorking || typeof action.onClick !== "function") return;
+    setWorkingAction(actionKey);
+    action.onClick();
+    if (actionTimer.current) window.clearTimeout(actionTimer.current);
+    actionTimer.current = window.setTimeout(() => setWorkingAction(""), 900);
+  };
 
   return (
     <section
@@ -112,8 +129,17 @@ export default function CoachRoutePerformanceStage({
         <div className={styles.title} role="heading" aria-level="2" data-route-stage-title>{title}</div>
         {detail ? <div className={styles.detail} data-route-stage-detail>{detail}</div> : null}
         {action ? (
-          <button type="button" className={styles.action} data-action-role="primary" onClick={action.onClick} disabled={action.disabled}>
-            <span>{action.label}</span>
+          <button
+            type="button"
+            className={styles.action}
+            data-action-role="primary"
+            data-action-state={actionWorking ? "working" : "idle"}
+            data-working={actionWorking ? "true" : undefined}
+            aria-busy={actionWorking || undefined}
+            onClick={runAction}
+            disabled={action.disabled || actionWorking}
+          >
+            <span>{actionWorking ? action.pendingLabel || "Opening…" : action.label}</span>
             <ShotLabIcon name="arrow" size={15} aria-hidden="true" />
           </button>
         ) : null}
