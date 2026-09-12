@@ -1,4 +1,6 @@
 import ShotLabIcon from "./ShotLabIcon.jsx";
+import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
+import ShotLabSignatureField from "./ShotLabSignatureField.jsx";
 import styles from "./CoachRoutePerformanceStage.module.css";
 import "./CoachInteractiveDashboards.css";
 import "../styles/CoachInteractiveDashboard.css";
@@ -45,17 +47,27 @@ const readableMetricValue = (metric) => {
   return String(value);
 };
 
+const resolveMetricMarkKind = (metric = {}) => {
+  const signal = `${metric.key || ""} ${metric.label || ""} ${metric.displayLabel || ""}`.toLowerCase();
+  if (/rank|leader|place/.test(signal)) return "rank";
+  if (/streak|rhythm|active day/.test(signal)) return "streak";
+  if (/personal best|\bpb\b|best/.test(signal)) return "pb";
+  return "milestone";
+};
+
 function StageMetric({ metric, active, onSelect, routeKind }) {
   const interactive = Boolean(onSelect && metric?.key);
   const Component = interactive ? "button" : "div";
+  const value = readableMetricValue(metric);
+  const accessibleLabel = `${metric.label}: ${value}${metric.detail ? ` · ${metric.detail}` : ""}`;
   const props = interactive
     ? {
         type: "button",
         onClick: () => onSelect(metric.key),
         "aria-pressed": active,
-        "aria-label": `${metric.label}: ${readableMetricValue(metric)}${metric.detail ? ` · ${metric.detail}` : ""}`,
+        "aria-label": accessibleLabel,
       }
-    : {};
+    : { "aria-label": accessibleLabel };
   const routeDisplayLabel = routeKind === "leaderboards" ? LEADERBOARD_METRIC_LABELS[metric?.key] : "";
 
   return (
@@ -64,9 +76,21 @@ function StageMetric({ metric, active, onSelect, routeKind }) {
       className={cx(styles.metric, active && styles.metricActive)}
       data-route-stage-metric
     >
-      <span className={styles.metricLabel} data-route-stage-metric-label>{routeDisplayLabel || metric.displayLabel || metric.label}</span>
-      <span className={styles.metricValue} data-route-stage-metric-value>{readableMetricValue(metric)}</span>
-      {metric.detail ? <span className={styles.metricDetail} data-route-stage-metric-detail>{metric.detail}</span> : null}
+      <div className={styles.metricPresentation}>
+        <div className={styles.metricMark} data-route-stage-metric-value>
+          <ShotLabPerformanceMark
+            kind={resolveMetricMarkKind(metric)}
+            value={value}
+            compact
+            surface="dark"
+            decorative
+          />
+        </div>
+        <div className={styles.metricCopy}>
+          <span className={styles.metricLabel} data-route-stage-metric-label>{routeDisplayLabel || metric.displayLabel || metric.label}</span>
+          {metric.detail ? <span className={styles.metricDetail} data-route-stage-metric-detail>{metric.detail}</span> : null}
+        </div>
+      </div>
     </Component>
   );
 }
@@ -87,6 +111,7 @@ export default function CoachRoutePerformanceStage({
   const routeKind = kind || resolveCoachRouteKind({ testId, title });
   const icon = ROUTE_ICONS[routeKind] || ROUTE_ICONS.default;
   const visibleMetrics = metrics.filter(Boolean).slice(0, 4);
+  const signatureVariant = routeKind === "leaderboards" ? "trajectoryVariant" : "court";
 
   return (
     <section
@@ -97,6 +122,7 @@ export default function CoachRoutePerformanceStage({
       data-route-kind={routeKind}
       data-tone={tone}
     >
+      <ShotLabSignatureField variant={signatureVariant} className={styles.signatureField} />
       <div className={styles.watermark} aria-hidden="true">
         <ShotLabIcon name={icon} size={118} />
       </div>
