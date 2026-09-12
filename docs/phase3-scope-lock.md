@@ -1,0 +1,1 @@
+Phase 3 remains visual/product-quality only. Do not alter auth, Supabase, navigation routes, roster behavior, scoring, events, archives, permissions, persistence, or Team Store behavior.
