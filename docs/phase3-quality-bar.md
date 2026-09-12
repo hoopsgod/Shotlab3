@@ -1,1 +1,0 @@
-Target: coherent premium 2026 sports-tech visual language with intentional typography, spacing, surfaces, actions, icons, safe areas, and no meaningful 390px clipping or overflow.

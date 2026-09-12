@@ -1,1 +1,0 @@
-Do not merge Phase 3 without explicit user authorization.

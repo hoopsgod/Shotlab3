@@ -1,1 +1,0 @@
-Protect title contrast, dark-surface contrast, selector safety, 390px geometry, Demo/registered structural parity, Coach/Player design coherence, and iPhone safe-area behavior.

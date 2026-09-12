@@ -1,1 +1,0 @@
-390x844 is the primary acceptance viewport. Protect intentional gutters, long names/titles, bottom navigation clearance, safe areas, modal/drawer width, forms, tables, and zero meaningful horizontal overflow.

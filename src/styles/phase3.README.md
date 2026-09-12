@@ -1,1 +1,0 @@
-Phase 3 visual contracts live in `Phase3Coherence.css` and must be imported by the app entry after the existing shared visual-system styles. Keep the file semantic and small; do not add wildcard class-name or test-id selectors as visual authority.

@@ -1,1 +1,0 @@
-Validation requires exact-head production build, focused Phase 3 guardrails, 390px Coach/Player review, and Cloudflare preview verification. Do not merge without explicit user authorization.

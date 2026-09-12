@@ -1,1 +1,0 @@
-New visual authority must use explicit semantic contracts or existing component-scoped classes; broad substring selectors such as [class*=hero], [class*=page], [data-testid*=signal], or [data-testid*=insight] are prohibited.
