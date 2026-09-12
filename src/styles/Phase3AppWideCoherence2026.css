@@ -1,0 +1,260 @@
+/*
+ * ShotLab Phase 3 (2026) — app-wide coherence contract.
+ *
+ * This layer deliberately styles only explicit surface, visual-role, layout-role,
+ * and action-role contracts. It must not infer material from class/test-id names.
+ * Coach, Player, demo, and registered sessions therefore receive the same visual
+ * rules from the same production component tree.
+ */
+:root {
+  --sl-coherence-canvas: #f7f5ef;
+  --sl-coherence-panel: #fffefb;
+  --sl-coherence-ink: #171a18;
+  --sl-coherence-body: #3f4842;
+  --sl-coherence-muted: #68706a;
+  --sl-coherence-line: rgba(23, 26, 24, .12);
+  --sl-coherence-line-strong: rgba(23, 26, 24, .18);
+  --sl-coherence-radius-feature: 22px;
+  --sl-coherence-radius-panel: 18px;
+  --sl-coherence-radius-control: 12px;
+  --sl-coherence-section-gap: 24px;
+  --sl-coherence-control-height: 44px;
+}
+
+[data-surface="light"] {
+  --surface-control-bg: var(--sl-coherence-panel);
+  --surface-control-border: var(--sl-coherence-line-strong);
+  --surface-control-fg: var(--sl-surface-light-title, #171a18);
+  --surface-control-placeholder: var(--sl-surface-light-muted, #68706a);
+  --surface-primary-bg: var(--team-brand-surface-deep, #202522);
+  --surface-primary-border: var(--team-brand-surface-deep, #202522);
+  --surface-primary-fg: #f9faf6;
+  --surface-secondary-bg: color-mix(in srgb, var(--team-brand-secondary-soft, rgba(156,163,175,.18)) 68%, #fff);
+  --surface-secondary-border: color-mix(in srgb, var(--team-brand-secondary-action, #64748b) 26%, var(--sl-coherence-line));
+  --surface-secondary-fg: color-mix(in srgb, var(--team-brand-secondary-action, #64748b) 64%, #27322b);
+  --surface-tertiary-fg: var(--sl-surface-light-muted, #68706a);
+}
+
+[data-surface="dark"] {
+  --surface-control-bg: rgba(255, 255, 255, .055);
+  --surface-control-border: rgba(255, 255, 255, .14);
+  --surface-control-fg: var(--sl-surface-dark-title, #f5f7f4);
+  --surface-control-placeholder: var(--sl-surface-dark-muted, #aeb7b0);
+  --surface-primary-bg: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 92%, white 8%);
+  --surface-primary-border: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 82%, white 18%);
+  --surface-primary-fg: #10150d;
+  --surface-secondary-bg: rgba(255, 255, 255, .055);
+  --surface-secondary-border: rgba(255, 255, 255, .14);
+  --surface-secondary-fg: var(--sl-surface-dark-title, #f5f7f4);
+  --surface-tertiary-fg: var(--sl-surface-dark-muted, #aeb7b0);
+}
+
+/* Shared secondary-page rhythm. Keep hierarchy coherent without forcing every
+ * destination into an identical card layout. */
+[data-visual-role="secondary-page"] {
+  gap: var(--sl-coherence-section-gap);
+  color: var(--surface-body, var(--sl-coherence-body));
+}
+
+[data-visual-role="page-intro"][data-surface="light"] {
+  color: var(--sl-coherence-ink);
+}
+
+[data-visual-role="page-intro"] .teamIdentityTitleStage__identityLine {
+  margin-bottom: 6px;
+}
+
+[data-visual-role="page-intro"] .teamIdentityTitleStage__summary {
+  max-width: 42ch;
+  margin-top: 8px;
+  line-height: 1.45;
+}
+
+[data-visual-role="page-intro"] .teamIdentityTitleStage__support {
+  margin-top: 10px;
+}
+
+/* Intentional dark emphasis surfaces are rare and restrained. */
+[data-visual-role="primary-decision"][data-surface="dark"] {
+  border-radius: var(--sl-coherence-radius-feature) !important;
+  box-shadow: 0 18px 42px rgba(25, 31, 26, .13) !important;
+}
+
+[data-visual-role="primary-decision"][data-surface="dark"] :is(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+/* Evidence and utilities read as editorial structure, not nested dashboard cards. */
+[data-visual-role="supporting-evidence"][data-surface="light"] {
+  border-color: var(--sl-coherence-line) !important;
+  box-shadow: none !important;
+}
+
+[data-visual-role="dashboard-section"][data-surface="light"] {
+  border-color: var(--sl-coherence-line) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-visual-role="insight-card"][data-surface="light"] {
+  border-color: var(--sl-coherence-line) !important;
+  border-radius: var(--sl-coherence-radius-panel) !important;
+  background: color-mix(in srgb, var(--sl-coherence-panel) 92%, transparent) !important;
+  box-shadow: none !important;
+}
+
+[data-visual-role="insight-card"][data-surface="dark"] {
+  border-radius: var(--sl-coherence-radius-panel) !important;
+}
+
+[data-visual-role="filter-rail"][data-surface="light"] {
+  border-color: var(--sl-coherence-line) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Controls inherit the nearest declared material. This explicitly defeats legacy
+ * shell-level dark input rules when a form is actually on a light surface. */
+[data-visual-role="secondary-page"] :is(input, select, textarea),
+[data-visual-role="detail-drawer"] :is(input, select, textarea) {
+  min-height: var(--sl-coherence-control-height);
+  border: 1px solid var(--surface-control-border) !important;
+  border-radius: var(--sl-coherence-radius-control) !important;
+  background: var(--surface-control-bg) !important;
+  color: var(--surface-control-fg) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+}
+
+[data-visual-role="secondary-page"] :is(input, textarea)::placeholder,
+[data-visual-role="detail-drawer"] :is(input, textarea)::placeholder {
+  color: var(--surface-control-placeholder) !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1;
+}
+
+[data-visual-role="secondary-page"] :is(input, select, textarea):focus-visible,
+[data-visual-role="detail-drawer"] :is(input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #71851f) 25%, transparent) !important;
+  outline-offset: 2px;
+}
+
+/* One action hierarchy across Coach and Player. Existing component layout remains
+ * authoritative; only semantic actions receive shared material treatment. */
+[data-action-role="primary"],
+[data-action-role="secondary"],
+[data-action-role="tertiary"],
+[data-action-role="destructive"] {
+  min-height: var(--sl-coherence-control-height);
+  border-radius: var(--sl-coherence-radius-control) !important;
+  font-weight: 720;
+  box-shadow: none !important;
+}
+
+[data-action-role="primary"] {
+  border-color: var(--surface-primary-border) !important;
+  background: var(--surface-primary-bg) !important;
+  color: var(--surface-primary-fg) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+[data-action-role="secondary"] {
+  border-color: var(--surface-secondary-border) !important;
+  background: var(--surface-secondary-bg) !important;
+  color: var(--surface-secondary-fg) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+[data-action-role="tertiary"] {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--surface-tertiary-fg) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+[data-action-role="destructive"] {
+  border-color: rgba(176, 52, 52, .24) !important;
+  background: rgba(176, 52, 52, .07) !important;
+  color: #8f2e2e !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+[data-surface="dark"] [data-action-role="destructive"] {
+  border-color: rgba(255, 124, 124, .28) !important;
+  background: rgba(255, 96, 96, .08) !important;
+  color: #ffb1b1 !important;
+}
+
+[data-action-role]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #71851f) 28%, transparent);
+  outline-offset: 2px;
+}
+
+[data-action-role]:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
+
+/* Section typography remains subordinate to the page title. */
+[data-visual-role="dashboard-section"] h2,
+[data-visual-role="supporting-evidence"] h2,
+[data-visual-role="supporting-evidence"] h3,
+[data-visual-role="insight-card"] h2 {
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+[data-visual-role="dashboard-section"] p,
+[data-visual-role="supporting-evidence"] p,
+[data-visual-role="insight-card"] p {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media (max-width: 430px) {
+  :root {
+    --sl-coherence-section-gap: 20px;
+    --sl-coherence-radius-feature: 20px;
+    --sl-coherence-radius-panel: 16px;
+  }
+
+  [data-visual-role="secondary-page"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  [data-visual-role="page-intro"] .teamIdentityTitleStage__summary {
+    max-width: 34ch;
+  }
+
+  [data-visual-role="primary-decision"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [data-visual-role="supporting-evidence"],
+  [data-visual-role="insight-grid"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [data-action-role="primary"],
+  [data-action-role="secondary"],
+  [data-action-role="tertiary"],
+  [data-action-role="destructive"] {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  [data-surface="light"] { --surface-control-border: rgba(23, 26, 24, .34); }
+  [data-surface="dark"] { --surface-control-border: rgba(255, 255, 255, .32); }
+  [data-visual-role="supporting-evidence"],
+  [data-visual-role="filter-rail"],
+  [data-visual-role="insight-card"] { border-color: currentColor !important; }
+}
