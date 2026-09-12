@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: phase1c-focused-visual-runtime-${{ github.event.pull_request.number || github.ref }}
@@ -24,7 +24,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 2
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -43,23 +42,27 @@ jobs:
       - name: Build exact production assets
         run: npm run build
 
-      - name: Regenerate only reviewed Players 390 baseline
+      - name: Record exact head
         run: |
-          npx playwright test --config=playwright.phase1c.config.mjs --grep "coach-players-registered-populated-390 focused visual/runtime contract" --update-snapshots=changed
+          mkdir -p artifacts/phase1c
+          git rev-parse HEAD > artifacts/phase1c/exact-head-sha.txt
 
-      - name: Commit baseline and restore closure workflow
-        env:
-          SNAPSHOT: tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-players-registered-populated-390-mobile-chromium-linux.png
-          BRANCH: ${{ github.event.pull_request.head.ref }}
-        run: |
-          git checkout HEAD^ -- .github/workflows/phase1c-focused-visual-runtime.yml
-          git add "$SNAPSHOT" .github/workflows/phase1c-focused-visual-runtime.yml
-          mapfile -t changed < <(git diff --cached --name-only)
-          printf 'staged: %s\n' "${changed[@]}"
-          test "${#changed[@]}" -eq 2
-          printf '%s\n' "${changed[@]}" | grep -Fxq '.github/workflows/phase1c-focused-visual-runtime.yml'
-          printf '%s\n' "${changed[@]}" | grep -Fxq "$SNAPSHOT"
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git commit -m "Update intentional Phase 2 Players visual baseline"
-          git push origin HEAD:"$BRANCH"
+      - name: Run committed Phase 1C mobile visual/runtime guardrails
+        run: npx playwright test --config=playwright.phase1c.config.mjs
+
+      - name: Re-run accepted Phase 1B mobile parity on Chromium
+        run: npx playwright test --config=playwright.phase1b.config.mjs --project=mobile-chromium
+
+      - name: Re-run accepted Phase 1A mobile geometry on Chromium
+        run: npm run test:e2e:phase1a -- --project=mobile-chromium
+
+      - name: Upload Phase 1C mobile evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1c-focused-mobile-visual-runtime-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/phase1c/
+            tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/
+          if-no-files-found: error
+          retention-days: 21
