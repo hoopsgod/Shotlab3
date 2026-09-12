@@ -2,7 +2,6 @@
  * Existing surface/role authorities own contrast and geometry; this layer only
  * normalizes the visual decisions that were still inconsistent across roles. */
 :root {
-  --sl-coherence-line: rgba(23, 26, 24, .12);
   --sl-coherence-radius-feature: 22px;
   --sl-coherence-radius-panel: 18px;
   --sl-coherence-radius-control: 12px;
@@ -11,10 +10,9 @@
 
 [data-surface="light"] {
   --coherence-primary-bg: var(--team-brand-surface-deep, #202522);
-  --coherence-primary-border: var(--team-brand-surface-deep, #202522);
   --coherence-primary-fg: #f9faf6;
   --coherence-secondary-bg: color-mix(in srgb, var(--team-brand-secondary-soft, rgba(156,163,175,.18)) 68%, #fff);
-  --coherence-secondary-border: color-mix(in srgb, var(--team-brand-secondary-action, #64748b) 26%, var(--sl-coherence-line));
+  --coherence-secondary-border: color-mix(in srgb, var(--team-brand-secondary-action, #64748b) 26%, rgba(23, 26, 24, .12));
   --coherence-secondary-fg: color-mix(in srgb, var(--team-brand-secondary-action, #64748b) 64%, #27322b);
 }
 
@@ -24,7 +22,7 @@
   --coherence-primary-fg: #10150d;
   --coherence-secondary-bg: rgba(255, 255, 255, .055);
   --coherence-secondary-border: rgba(255, 255, 255, .14);
-  --coherence-secondary-fg: var(--sl-surface-dark-title, #f5f7f4);
+  --coherence-secondary-fg: var(--sl-surface-dark-title);
 }
 
 [data-visual-role="secondary-page"] { gap: var(--sl-coherence-section-gap); }
@@ -44,7 +42,7 @@
 [data-visual-role="filter-rail"][data-surface="light"] { background: transparent !important; }
 
 [data-visual-role="insight-card"][data-surface="light"] {
-  border-color: var(--sl-coherence-line) !important;
+  border-color: rgba(23, 26, 24, .12) !important;
   border-radius: var(--sl-coherence-radius-panel) !important;
   background: rgba(255,255,255,.72) !important;
   box-shadow: none !important;
@@ -59,7 +57,7 @@
 }
 
 [data-action-role="primary"] {
-  border-color: var(--coherence-primary-border) !important;
+  border-color: var(--coherence-primary-border, var(--coherence-primary-bg)) !important;
   background: var(--coherence-primary-bg) !important;
   color: var(--coherence-primary-fg) !important;
   -webkit-text-fill-color: currentColor !important;
