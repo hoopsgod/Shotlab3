@@ -155,7 +155,9 @@ test("Phase 3 mobile contract protects responsive geometry, touch targets and iP
   assert.match(secondaryCss, /@media\s*\(max-width:\s*760px\)/);
   assert.match(titleStageCss, /@media\s*\(max-width:\s*390px\)/);
   assert.match(titleStageCss, /\.teamIdentityTitleStage--hero \{ --identity-crest: 104px; --identity-title: 46px; \}/);
-  assert.match(surfaceCss, /overflow-wrap:\s*anywhere/);
+  assert.match(surfaceCss, /overflow-wrap:\s*break-word/);
+  assert.match(surfaceCss, /word-break:\s*normal/);
+  assert.doesNotMatch(surfaceCss, /\[data-visual-role="secondary-page"\][\s\S]*:is\(h1, h2, h3\)[\s\S]*overflow-wrap:\s*anywhere/);
 });
 
 test("surface contract is role-neutral for Coach, Player, demo and registered sessions", () => {
