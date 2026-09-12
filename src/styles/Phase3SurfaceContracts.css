@@ -196,4 +196,36 @@
     max-width: 100%;
     line-height: .98;
   }
+
+  /* The player-detail performance hero previously kept its desktop two-column
+   * composition at 390px. That left the identity column narrower than a word and
+   * rendered normal names one letter per line. On mobile, identity and headline
+   * are two deliberate rows with normal word wrapping. */
+  .performance-shell--coach .coachPlayerProfileHero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .performance-shell--coach .coachPlayerProfileHero__identity,
+  .performance-shell--coach .coachPlayerProfileHero__identity > div {
+    min-width: 0;
+  }
+
+  .performance-shell--coach .coachPlayerProfileHero h2 {
+    max-width: 100%;
+    font-size: clamp(28px, 8.2vw, 34px);
+    line-height: 1;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  .performance-shell--coach .coachPlayerProfileHero__headline {
+    width: 100%;
+    min-width: 0;
+    padding: 16px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, .10);
+    text-align: left;
+  }
 }
