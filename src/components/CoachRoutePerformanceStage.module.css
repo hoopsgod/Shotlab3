@@ -118,7 +118,8 @@
   font: 810 clamp(30px, 5vw, 39px)/.96 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.048em;
   text-wrap: balance;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .detail {
@@ -179,6 +180,7 @@
   grid-auto-columns: minmax(126px, 1fr);
   overflow-x: auto;
   overscroll-behavior-inline: contain;
+  scroll-padding-inline: 16px;
   scrollbar-width: none;
   border-top: 1px solid rgba(220, 235, 241, .11);
   background: rgba(2, 13, 19, .18);
@@ -337,4 +339,15 @@
 @media (prefers-reduced-motion: reduce) {
   .stage .action { transition: none; }
   .stage .action:active:not(:disabled) { transform: none; }
+}
+.stage .action[data-working="true"] {
+  cursor: progress;
+  filter: saturate(.72);
+  pointer-events: none;
+}
+.stage .metricLabel,
+.stage .metricDetail {
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
 }

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import ShotLabIcon from "./ShotLabIcon";
 import ShotLabSignatureField from "./ShotLabSignatureField.jsx";
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
@@ -50,10 +51,27 @@ export function SecondaryPageToolbar({children,testId,label="Page tools"}){retur
 export function SecondaryPageDecision({eyebrow,title,detail,tone="neutral",action,children,testId,icon}){
   const iconName=icon||iconFor(`${eyebrow} ${title}`);
   const mobile=mobileDecisionLayout();
+  const [workingAction, setWorkingAction] = useState("");
+  const actionTimer = useRef(null);
+
+  useEffect(() => () => {
+    if (actionTimer.current) window.clearTimeout(actionTimer.current);
+  }, []);
+
+  const actionKey = action ? (action.key || action.label || "decision-action") : "";
+  const actionWorking = Boolean(actionKey && workingAction === actionKey);
+  const runAction = () => {
+    if (!action || action.disabled || actionWorking || typeof action.onClick !== "function") return;
+    setWorkingAction(actionKey);
+    action.onClick();
+    if (actionTimer.current) window.clearTimeout(actionTimer.current);
+    actionTimer.current = window.setTimeout(() => setWorkingAction(""), 900);
+  };
+
   const sectionStyle=mobile?{gridTemplateColumns:"40px minmax(0,1fr)",alignItems:"start",minHeight:0,gap:14,padding:"19px 17px 18px"}:undefined;
   const titleStyle=mobile?{maxWidth:"22ch",fontSize:29,lineHeight:1.02,overflowWrap:"normal",wordBreak:"normal"}:undefined;
   const copyStyle=mobile?{minWidth:0,width:"auto",position:"relative",zIndex:1}:{position:"relative",zIndex:1};
   const visualStyle=mobile?{gridColumn:"1 / -1",width:"100%",minWidth:0,padding:"15px 0 0",borderTop:"1px solid rgba(255,255,255,.09)",borderLeft:0,position:"relative",zIndex:1}:{position:"relative",zIndex:1};
-  return <section className="secondaryPageDecision" style={sectionStyle} data-tone={tone} data-testid={testId} data-layout-role="primary-decision" data-surface="dark" data-visual-role="primary-decision" data-page-kind={iconName} data-mobile-stage="performance"><ShotLabSignatureField variant="court" className="secondaryPageDecision__signature" style={{zIndex:0,opacity:mobile?.28:.24}} testId={testId?`${testId}-signature`:undefined}/><span className="secondaryPageDecision__icon" style={{position:"relative",zIndex:1}} aria-hidden="true"><ShotLabIcon name={iconName} size={23}/></span><div className="secondaryPageDecision__copy" style={copyStyle}>{eyebrow?<div className="secondaryPageDecision__eyebrow">{eyebrow}</div>:null}<h2 style={titleStyle}>{title}</h2>{detail?<p>{detail}</p>:null}{action?<button type="button" onClick={action.onClick} disabled={action.disabled}><span>{action.label}</span><ShotLabIcon name="arrow" size={16}/></button>:null}</div>{children?<div className="secondaryPageDecision__visual" style={visualStyle}>{children}</div>:null}</section>
+  return <section className="secondaryPageDecision" style={sectionStyle} data-tone={tone} data-testid={testId} data-layout-role="primary-decision" data-surface="dark" data-visual-role="primary-decision" data-page-kind={iconName} data-mobile-stage="performance"><ShotLabSignatureField variant="court" className="secondaryPageDecision__signature" style={{zIndex:0,opacity:mobile?.28:.24}} testId={testId?`${testId}-signature`:undefined}/><span className="secondaryPageDecision__icon" style={{position:"relative",zIndex:1}} aria-hidden="true"><ShotLabIcon name={iconName} size={23}/></span><div className="secondaryPageDecision__copy" style={copyStyle}>{eyebrow?<div className="secondaryPageDecision__eyebrow">{eyebrow}</div>:null}<h2 style={titleStyle}>{title}</h2>{detail?<p>{detail}</p>:null}{action?<button type="button" onClick={runAction} disabled={action.disabled || actionWorking} aria-busy={actionWorking || undefined} data-working={actionWorking ? "true" : undefined} data-action-state={actionWorking ? "working" : "idle"}><span>{actionWorking ? action.pendingLabel || "Opening…" : action.label}</span><ShotLabIcon name="arrow" size={16}/></button>:null}</div>{children?<div className="secondaryPageDecision__visual" style={visualStyle}>{children}</div>:null}</section>
 }
 export function SecondaryPageEvidence({children,testId,label="Supporting evidence"}){return <section className="secondaryPageEvidence" data-testid={testId} data-layout-role="supporting-evidence" data-surface="light" data-visual-role="supporting-evidence" aria-label={label}>{children}</section>}

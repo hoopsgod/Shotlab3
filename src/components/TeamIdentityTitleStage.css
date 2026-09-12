@@ -397,3 +397,12 @@
 @media (prefers-reduced-motion: reduce) {
   .teamIdentityTitleStage *, .teamIdentityTitleStage *::before, .teamIdentityTitleStage *::after { transition: none; animation: none; }
 }
+
+.teamIdentityTitleStage__action[data-working="true"] {
+  cursor: progress;
+  opacity: .72;
+  pointer-events: none;
+}
+.teamIdentityTitleStage__action:active:not(:disabled) {
+  transform: scale(.985);
+}
