@@ -61,16 +61,15 @@ async function seedStaleMobileScroll(page) {
       document.querySelector(".content-wrap"),
       document.scrollingElement,
     ].filter(Boolean);
+    const seededOwners = [];
 
     for (const candidate of candidates) {
       const max = Math.max(0, candidate.scrollHeight - candidate.clientHeight);
       if (max < 80) continue;
       candidate.scrollTop = Math.min(520, max);
-      if (candidate.scrollTop > 40) {
-        return { seeded: true, className: candidate.className || "document", scrollTop: candidate.scrollTop };
-      }
+      if (candidate.scrollTop > 40) seededOwners.push({ className: candidate.className || "document", scrollTop: candidate.scrollTop });
     }
-    return { seeded: false, className: "none", scrollTop: 0 };
+    return { seeded: seededOwners.length > 0, seededOwners };
   });
 }
 
