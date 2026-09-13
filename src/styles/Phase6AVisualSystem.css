@@ -1,0 +1,518 @@
+/*
+ * ShotLab Phase 6A visual authority
+ * Scope: shared visual tokens + Coach Home + Coach Players only.
+ * This layer is intentionally presentation-only: no route, data, auth, or behavior changes.
+ */
+
+:root {
+  --sl26-ink: #071820;
+  --sl26-ink-2: #0d2731;
+  --sl26-ink-3: #163743;
+  --sl26-paper: #f3efe5;
+  --sl26-paper-2: #faf7ef;
+  --sl26-line: rgba(7, 24, 32, 0.12);
+  --sl26-line-strong: rgba(7, 24, 32, 0.2);
+  --sl26-muted: #66747a;
+  --sl26-accent: var(--team-brand-accent, var(--pw-accent, var(--accent, #c8ff1a)));
+  --sl26-display: "Barlow Condensed", "Arial Narrow", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sl26-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
+  --sl26-shadow: 0 24px 60px rgba(6, 23, 31, 0.14);
+}
+
+/* ------------------------------
+   COACH HOME — decision first
+   ------------------------------ */
+
+.performance-shell--coach .mcShellV3 {
+  --mc-light: var(--sl26-paper);
+  --mc-ink: var(--sl26-ink);
+  --mc-copy: var(--sl26-muted);
+  background: var(--sl26-paper);
+  color: var(--sl26-ink);
+  font-family: var(--sl26-body);
+}
+
+.performance-shell--coach .mcShellV3 .missionControl {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.28), transparent 220px),
+    var(--sl26-paper);
+}
+
+.performance-shell--coach .mcShellV3 .mcHeader[data-testid="mission-control-team-header"] {
+  border-bottom-color: var(--sl26-line) !important;
+  background: color-mix(in srgb, var(--sl26-paper-2) 94%, transparent) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+}
+
+.performance-shell--coach .mcShellV3 .mcBrandCopy small,
+.performance-shell--coach .mcShellV3 .mcHero .mcEyebrow,
+.performance-shell--coach .mcShellV3 .mcSectionHead small,
+.performance-shell--coach .mcShellV3 .mcPulseLead small {
+  font-family: var(--sl26-body) !important;
+  font-weight: 780 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--mc, #c8ff1a) 16%, transparent), transparent 28%),
+    linear-gradient(140deg, color-mix(in srgb, var(--team-brand-surface-elevated, #12323e) 94%, #000 6%), var(--team-brand-surface-deep, #06151d) 68%) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--mc, #c8ff1a) 45%, transparent), transparent);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcProgramIdentity {
+  font-family: var(--sl26-display) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.025em !important;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero h1 {
+  text-wrap: balance;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcHeroContent > p {
+  color: #b8c4c8 !important;
+  max-width: 48ch;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip {
+  border-color: rgba(231, 240, 242, .14) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip button {
+  transition: background-color .16s ease, color .16s ease !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip button:hover {
+  background: rgba(255,255,255,.045) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip strong {
+  font-family: var(--sl26-display) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcHero .mcPrimary {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: color-mix(in srgb, var(--mc, #c8ff1a) 92%, white) !important;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--mc, #c8ff1a) 16%, transparent) !important;
+  font-weight: 820 !important;
+  letter-spacing: -.01em;
+}
+
+.performance-shell--coach .mcShellV3 .mcSection {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcSectionHead h2,
+.performance-shell--coach .mcShellV3 .mcPulseLead h2 {
+  font-family: var(--sl26-display) !important;
+  font-weight: 860 !important;
+  letter-spacing: -.02em !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcTeamHealth {
+  background:
+    linear-gradient(150deg, color-mix(in srgb, var(--team-brand-surface-elevated, #12323e) 92%, #000 8%), var(--team-brand-surface-deep, #06151d)) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcHealthScore {
+  font-family: var(--sl26-display) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.04em !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcAttention,
+.performance-shell--coach .mcShellV3 .mcActivity,
+.performance-shell--coach .mcShellV3 .mcNextSession {
+  background: var(--sl26-paper-2) !important;
+  border-color: var(--sl26-line) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcAttentionRow {
+  border-top-color: var(--sl26-line) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcAttentionRow.is-priority {
+  background: linear-gradient(90deg, rgba(217,139,40,.085), transparent 75%) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcAttentionRow.is-priority.is-danger {
+  background: linear-gradient(90deg, rgba(217,45,61,.075), transparent 75%) !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcTextLink,
+.performance-shell--coach .mcShellV3 .mcSecondaryAction {
+  color: var(--sl26-ink-2) !important;
+  font-weight: 780 !important;
+}
+
+.performance-shell--coach .mcShellV3 .mcActivationChapter {
+  background: var(--sl26-paper-2) !important;
+  border-top: 1px solid var(--sl26-line) !important;
+}
+
+/* ------------------------------
+   COACH PLAYERS — editorial roster
+   ------------------------------ */
+
+.performance-shell--coach .premium-roster-workspace,
+.premium-roster-workspace {
+  --pw-surface: var(--sl26-paper-2);
+  --pw-border: var(--sl26-line);
+  --pw-shadow: none;
+  color: var(--sl26-ink);
+  background: transparent;
+  font-family: var(--sl26-body);
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeader,
+.premium-roster-workspace .appHeader {
+  margin-bottom: 8px !important;
+  padding: 8px 0 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--sl26-line) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeaderIdentity,
+.premium-roster-workspace .appHeaderIdentity {
+  gap: 10px !important;
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeaderLeading,
+.premium-roster-workspace .appHeaderLeading {
+  width: 38px;
+  height: 38px;
+  margin-top: 1px !important;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--sl26-line);
+  border-radius: 10px;
+  background: var(--sl26-paper-2);
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeaderEyebrow,
+.premium-roster-workspace .appHeaderEyebrow {
+  margin-bottom: 4px !important;
+  color: var(--sl26-muted) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeaderTitle,
+.premium-roster-workspace .appHeaderTitle {
+  color: var(--sl26-ink) !important;
+  font-family: var(--sl26-display) !important;
+  font-size: clamp(38px, 8vw, 56px) !important;
+  font-weight: 900 !important;
+  line-height: .9 !important;
+  letter-spacing: -.025em !important;
+  text-transform: uppercase;
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeaderSubtitle,
+.premium-roster-workspace .appHeaderSubtitle {
+  max-width: 56ch !important;
+  color: var(--sl26-muted) !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+.performance-shell--coach .premium-roster-workspace .appHeaderAction,
+.premium-roster-workspace .appHeaderAction {
+  min-height: 42px !important;
+  border: 1px solid var(--sl26-ink) !important;
+  border-radius: 9px !important;
+  background: var(--sl26-ink) !important;
+  color: #f8f6ef !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"],
+.premium-roster-workspace [data-testid="coach-players-primary-objective"] {
+  position: relative;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 88% 16%, color-mix(in srgb, var(--pw-accent, #c8ff1a) 17%, transparent), transparent 27%),
+    linear-gradient(140deg, var(--team-brand-surface-elevated, #10303a), var(--team-brand-surface-deep, #06151d) 72%) !important;
+  box-shadow: var(--sl26-shadow) !important;
+  color: #f7f8f5 !important;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"]::after,
+.premium-roster-workspace [data-testid="coach-players-primary-objective"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 18px 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--pw-accent, #c8ff1a) 58%, transparent), transparent);
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"] h2,
+.premium-roster-workspace [data-testid="coach-players-primary-objective"] h2 {
+  max-width: 16ch;
+  color: #fff !important;
+  font-family: var(--sl26-display) !important;
+  font-size: clamp(34px, 8.5vw, 54px) !important;
+  font-weight: 900 !important;
+  line-height: .94 !important;
+  letter-spacing: -.025em !important;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"] p,
+.premium-roster-workspace [data-testid="coach-players-primary-objective"] p {
+  max-width: 48ch;
+  color: #bcc8cc !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"] button,
+.premium-roster-workspace [data-testid="coach-players-primary-objective"] button {
+  min-height: 46px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: color-mix(in srgb, var(--pw-accent, #c8ff1a) 92%, white) !important;
+  color: var(--team-brand-on-primary, #10170b) !important;
+  box-shadow: none !important;
+  font-weight: 820 !important;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-metrics"],
+.premium-roster-workspace [data-testid="coach-players-metrics"] {
+  overflow: hidden;
+  border: 0 !important;
+  border-block: 1px solid var(--sl26-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-metrics"] > *,
+.premium-roster-workspace [data-testid="coach-players-metrics"] > * {
+  border-left-color: var(--sl26-line) !important;
+  background: transparent !important;
+}
+
+.performance-shell--coach .premium-roster-workspace [data-testid="coach-players-metrics"] > * > :first-child,
+.premium-roster-workspace [data-testid="coach-players-metrics"] > * > :first-child {
+  color: var(--sl26-ink) !important;
+  font-family: var(--sl26-display) !important;
+  font-size: clamp(28px, 7vw, 42px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em !important;
+}
+
+.performance-shell--coach .premium-roster-workspace .roster-control-grid,
+.premium-roster-workspace .roster-control-grid {
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--sl26-line);
+}
+
+.performance-shell--coach .premium-roster-workspace .roster-control-grid input,
+.premium-roster-workspace .roster-control-grid input {
+  min-height: 46px !important;
+  border: 1px solid var(--sl26-line-strong) !important;
+  border-radius: 10px !important;
+  background: var(--sl26-paper-2) !important;
+  box-shadow: none !important;
+  color: var(--sl26-ink) !important;
+}
+
+.performance-shell--coach .premium-roster-workspace .roster-control-grid button,
+.premium-roster-workspace .roster-control-grid button {
+  min-height: 38px;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 780 !important;
+  letter-spacing: .06em;
+}
+
+.performance-shell--coach .premium-roster-workspace > :last-child,
+.premium-roster-workspace > :last-child {
+  box-shadow: none !important;
+}
+
+@media (max-width: 700px) {
+  .performance-shell--coach .mcShellV3 .mcHeader[data-testid="mission-control-team-header"] {
+    min-height: 54px !important;
+    padding-inline: 14px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
+    min-height: 362px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent {
+    min-height: 362px !important;
+    padding: 22px 18px 18px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcHeroIdentity {
+    grid-template-columns: minmax(0,1fr) 88px !important;
+    gap: 14px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcProgramIdentity {
+    font-size: clamp(38px, 12vw, 50px) !important;
+    line-height: .86 !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcHeroTeamMark {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero h1 {
+    margin-top: 14px !important;
+    font-size: 24px !important;
+    line-height: 1.02 !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcHeroContent > p {
+    margin-top: 6px !important;
+    font-size: 11px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip {
+    margin-top: 16px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip button {
+    min-height: 54px !important;
+    padding: 8px 12px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcRealityStrip strong {
+    font-size: 25px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcHero .mcPrimary {
+    min-height: 46px !important;
+    margin-top: 14px !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcFocusGrid,
+  .performance-shell--coach .mcShellV3 .mcLowerGrid {
+    gap: 0 !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcTeamHealth,
+  .performance-shell--coach .mcShellV3 .mcAttention,
+  .performance-shell--coach .mcShellV3 .mcActivity,
+  .performance-shell--coach .mcShellV3 .mcNextSession {
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-top: 1px solid var(--sl26-line) !important;
+    box-shadow: none !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcTeamHealth {
+    border-top-color: rgba(255,255,255,.08) !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace,
+  .premium-roster-workspace {
+    gap: 10px !important;
+    padding-bottom: 22px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace .appHeaderMain,
+  .premium-roster-workspace .appHeaderMain {
+    gap: 10px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace .appHeaderTools,
+  .premium-roster-workspace .appHeaderTools {
+    margin-left: 48px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"],
+  .premium-roster-workspace [data-testid="coach-players-primary-objective"] {
+    border-radius: 14px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace [data-testid="coach-players-primary-objective"] h2,
+  .premium-roster-workspace [data-testid="coach-players-primary-objective"] h2 {
+    font-size: 38px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace [data-testid="coach-players-metrics"],
+  .premium-roster-workspace [data-testid="coach-players-metrics"] {
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace [data-testid="coach-players-metrics"] > *,
+  .premium-roster-workspace [data-testid="coach-players-metrics"] > * {
+    min-width: 0;
+    padding-inline: 10px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace [data-testid="coach-players-metrics"] > * > :first-child,
+  .premium-roster-workspace [data-testid="coach-players-metrics"] > * > :first-child {
+    font-size: 30px !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace .roster-control-grid,
+  .premium-roster-workspace .roster-control-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+@media (min-width: 981px) {
+  .performance-shell--coach .mcShellV3 .mcRail {
+    background: linear-gradient(180deg, #071b25, #06151d 72%) !important;
+  }
+
+  .performance-shell--coach .mcShellV3 .mcRail nav button.is-active {
+    background: rgba(255,255,255,.06) !important;
+  }
+
+  .performance-shell--coach .premium-roster-workspace,
+  .premium-roster-workspace {
+    max-width: 1180px;
+    margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .performance-shell--coach .mcShellV3 *,
+  .premium-roster-workspace * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
