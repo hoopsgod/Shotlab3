@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const secondary = readFileSync("src/components/SecondaryPageSystem.jsx", "utf8");
-const css = readFileSync("src/components/CoachSecondaryExperience.css", "utf8");
+const sharedCss = readFileSync("src/components/CoachSecondaryExperience.css", "utf8");
+const drillsCss = readFileSync("public/shotlab-phase3g-coach-drills-hierarchy.css", "utf8");
+const strengthCss = readFileSync("public/shotlab-phase3k-coach-strength-hierarchy.css", "utf8");
 const phase6a = readFileSync("tests/phase6a-visual-system.test.mjs", "utf8");
 
 const requiredSurfaces = [
@@ -14,30 +16,41 @@ const requiredSurfaces = [
   "coach-branding-workspace",
 ];
 
-test("Phase 6B attaches one source-owned Coach secondary convergence stylesheet", () => {
+test("Phase 6B attaches one bounded shared Coach-secondary framing stylesheet", () => {
   assert.match(secondary, /import "\.\/CoachSecondaryExperience\.css";/);
   assert.equal((secondary.match(/CoachSecondaryExperience\.css/g) || []).length, 1);
-  for (const surface of requiredSurfaces) assert.match(css, new RegExp(surface));
+  for (const surface of requiredSurfaces) assert.match(sharedCss, new RegExp(surface));
 });
 
 test("Phase 6B keeps Phase 6A Coach Home and Players outside its selector authority", () => {
-  assert.doesNotMatch(css, /mission-control-active|mcShellV3|premium-roster-workspace|coach-players-primary-objective|coach-players-metrics/);
+  assert.doesNotMatch(sharedCss, /mission-control-active|mcShellV3|premium-roster-workspace|coach-players-primary-objective|coach-players-metrics/);
   assert.match(phase6a, /Coach Home and Players owners/);
 });
 
-test("Phase 6B convergence is presentation-only and protects mobile geometry", () => {
-  assert.match(css, /@media \(max-width: 390px\)/);
-  assert.match(css, /overflow-x:\s*clip/);
-  assert.match(css, /padding-inline:\s*14px/);
-  assert.match(css, /min-height:\s*44px/);
-  assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /supabase|localStorage|sessionStorage|fetch\(|permission|auth/i);
+test("shared Phase 6B framing is presentation-only and protects mobile geometry", () => {
+  assert.match(sharedCss, /@media \(max-width: 390px\)/);
+  assert.match(sharedCss, /overflow-x:\s*clip/);
+  assert.match(sharedCss, /padding-inline:\s*14px/);
+  assert.match(sharedCss, /min-height:\s*44px/);
+  assert.match(sharedCss, /:focus-visible/);
+  assert.match(sharedCss, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(sharedCss, /supabase|localStorage|sessionStorage|fetch\(|permission|auth/i);
 });
 
-test("Phase 6B reduces container chrome on core Coach operational surfaces", () => {
-  assert.match(css, /coach-drills-operational-panel[\s\S]*border-radius:\s*0/);
-  assert.match(css, /coach-drills-library-disclosure[\s\S]*border-block:/);
-  assert.match(css, /coachLeaderboardPulse[\s\S]*border-radius:\s*0/);
-  assert.match(css, /coachStrengthSupportingIntelligence[\s\S]*border-block:/);
+test("Drills and S&C converge inside their existing route-owned style authorities", () => {
+  assert.match(drillsCss, /coach-drills-operational-panel[\s\S]*border-top:1px solid var\(--phase3g-line\)!important/);
+  assert.match(drillsCss, /article\{[\s\S]*border-radius:0!important[\s\S]*background:transparent!important[\s\S]*box-shadow:none!important/);
+  assert.match(drillsCss, /coach-drills-library-disclosure\{[\s\S]*border-block:1px solid var\(--phase3g-line\)[\s\S]*border-radius:0/);
+  assert.match(strengthCss, /coach-strength-operational-panel[\s\S]*border-top:1px solid var\(--p3-line/);
+  assert.match(strengthCss, /coach-strength-operational-filters[\s\S]*padding:0!important[\s\S]*background:transparent!important/);
+  assert.match(strengthCss, /coach-strength-insight-grid[\s\S]*article[\s\S]*border-radius:0!important[\s\S]*background:transparent!important/);
+});
+
+test("route-owned convergence preserves practical mobile interaction contracts", () => {
+  assert.match(drillsCss, /min-height:44px!important/);
+  assert.match(strengthCss, /min-height:44px!important/);
+  assert.match(drillsCss, /prefers-reduced-motion:reduce/);
+  assert.match(strengthCss, /prefers-reduced-motion:reduce/);
+  assert.match(drillsCss, /:focus-visible/);
+  assert.match(strengthCss, /:focus-visible/);
 });

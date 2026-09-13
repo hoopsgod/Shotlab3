@@ -18,7 +18,7 @@ test('Phase 3G enhancer is guarded and runs after the accepted Phase 3F transfor
   assert.match(enhancer, /Phase 3G Coach Drills hierarchy already applied/);
 });
 
-test('Coach Drill library management becomes one closed-by-default native disclosure', () => {
+test('Coach Drill library management remains one closed-by-default native disclosure', () => {
   assert.match(enhancer, /data-testid=\"coach-drills-library-management\"/);
   assert.match(enhancer, /Manage drill library/);
   assert.match(enhancer, /player-facing drills/);
@@ -41,32 +41,47 @@ test('Coach Drills keeps every management capability behind or beside the disclo
   assert.match(enhancer, /updateDrill/);
 });
 
-test('Drill search, filters, and operational cards use the light native secondary system', () => {
+test('Drill search and filters use the Phase 6 editorial utility rail', () => {
   assert.match(css, /coach-drills-operational-filters/);
-  assert.match(css, /background:\s*rgba\(255\s*,\s*255\s*,\s*255\s*,\s*\.94\)/);
+  assert.match(css, /padding:0!important/);
+  assert.match(css, /border:0!important/);
+  assert.match(css, /background:transparent!important/);
+  assert.match(css, /label[\s\S]*min-height:46px!important[\s\S]*background:#fff!important/);
   assert.match(css, /button\[aria-pressed=\"true\"\]/);
-  assert.match(css, /coach-drills-operational-panel/);
-  assert.match(css, /article h2/);
-  assert.match(css, /--phase3g-ink:\s*#151915/);
+  assert.match(css, /--phase3g-ink:#151915/);
+});
+
+test('Drills operational evidence is flatter than the retired card grid', () => {
+  assert.match(css, /coach-drills-operational-panel[\s\S]*border-top:1px solid var\(--phase3g-line\)!important/);
+  assert.match(css, /coach-drills-operational-panel[\s\S]*article\{[\s\S]*border:0!important[\s\S]*border-radius:0!important[\s\S]*background:transparent!important[\s\S]*box-shadow:none!important/);
+  assert.match(css, /article\+article\{border-left:1px solid var\(--phase3g-line\)!important/);
+  assert.match(css, /@media \(max-width:720px\)[\s\S]*article\+article\{border-left:0!important;border-top:1px solid var\(--phase3g-line\)!important/);
 });
 
 test('Drills keeps one decision layer instead of repeating metric evidence twice', () => {
   assert.match(css, /coach-page-dashboard-drills-evidence/);
   assert.match(css, /coach-page-dashboard-drills-decision-brief/);
-  assert.match(css, /coach-page-dashboard-drills-evidence[^}]*display:\s*none\s*!important/s);
+  assert.match(css, /coach-page-dashboard-drills-evidence[^}]*display:none!important/s);
+});
+
+test('library management uses editorial separators instead of another outer card', () => {
+  assert.match(css, /coach-drills-library-disclosure\{[\s\S]*border:0[\s\S]*border-block:1px solid var\(--phase3g-line\)[\s\S]*border-radius:0[\s\S]*background:transparent[\s\S]*box-shadow:none/);
+  assert.match(css, /coach-drills-library-summary\{[\s\S]*min-height:64px/);
+  assert.match(css, /coach-drills-library-summary strong[\s\S]*Barlow Condensed/);
 });
 
 test('duplicate bottom Add Drill CTA is removed visually while the new-drill form remains available', () => {
-  assert.match(css, /\.coach-drills-library-disclosure\s*\+\s*\.btn-v\.cta-primary/);
-  assert.match(css, /display:\s*none\s*!important/);
+  assert.match(css, /\.coach-drills-library-disclosure\+\.btn-v\.cta-primary/);
+  assert.match(css, /display:none!important/);
   assert.match(enhancer, /NEW DRILL/);
 });
 
-test('Phase 3G authority loads after Phase 3F and keeps accessibility behavior explicit', () => {
+test('Phase 3G authority keeps accessibility behavior explicit', () => {
   assert.match(html, /shotlab-phase3f-profile-intelligence\.css[\s\S]*shotlab-phase3g-coach-drills-hierarchy\.css/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /touch-action:\s*manipulation/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /touch-action:manipulation/);
+  assert.match(css, /min-height:44px!important/);
 });
 
 test('rendered iPhone evidence verifies default and expanded Coach Drills states', () => {

@@ -1,6 +1,6 @@
-/* Canonical Coach secondary-experience convergence.
-   Phase 6A Coach Home/Players remain untouched; this file only aligns the remaining
-   Coach routes to their established editorial, team-branded hierarchy. */
+/* Canonical shared framing for Coach secondary experiences.
+   Page-specific details stay with their existing route owners. Phase 6A Coach
+   Home and Coach Players remain outside this selector authority. */
 
 :where(
   [data-testid="coach-events-interactive-dashboard"],
@@ -13,7 +13,6 @@
   --coach-secondary-ink: #071820;
   --coach-secondary-muted: #5f6d72;
   --coach-secondary-line: rgba(7,24,32,.12);
-  --coach-secondary-canvas: #faf7ef;
   color: var(--coach-secondary-ink);
 }
 
@@ -43,10 +42,7 @@
   max-width: 56ch;
 }
 
-:where(
-  #coach-drills-management,
-  .pageShell[data-accent="sc"]
-) {
+:where(#coach-drills-management,.pageShell[data-accent="sc"]) {
   width: min(100%,1080px);
   max-width: 1080px;
   min-width: 0;
@@ -54,12 +50,13 @@
   overflow-x: clip;
 }
 
-#coach-drills-management > :where(
+:where(
+  #coach-drills-management,
+  .pageShell[data-accent="sc"]
+) > :where(
   [data-testid="coach-page-dashboard-drills"],
   [data-testid="coach-drills-operational-panel"],
-  [data-testid="coach-drills-library-management"]
-),
-.pageShell[data-accent="sc"] > :where(
+  [data-testid="coach-drills-library-management"],
   [data-testid="coach-page-dashboard-strength"],
   [data-testid="coach-strength-operational-panel"]
 ) {
@@ -73,74 +70,7 @@
   [data-testid="coach-leaderboard-operational-panel"],
   [data-testid="coach-strength-operational-panel"]
 ) {
-  margin: 0;
-  padding: 16px 0 0;
-  border: 0;
-  border-top: 1px solid var(--coach-secondary-line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-:where(
-  [data-testid="coach-drills-operational-filters"],
-  [data-testid="coach-leaderboard-operational-filters"],
-  [data-testid="coach-strength-operational-filters"]
-) {
-  margin: 0 0 14px;
-}
-
-:where(
-  [data-testid="coach-drills-operational-panel"],
-  [data-testid="coach-strength-operational-panel"]
-) [data-visual-role="insight-grid"] {
-  gap: 0;
-  border-block: 1px solid var(--coach-secondary-line);
-}
-
-:where(
-  [data-testid="coach-drills-operational-panel"],
-  [data-testid="coach-strength-operational-panel"]
-) [data-visual-role="insight-card"] {
   min-width: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-#coach-drills-management .coach-drills-library-disclosure {
-  margin-top: 2px;
-  border: 0;
-  border-block: 1px solid var(--coach-secondary-line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-#coach-drills-management .coach-drills-library-summary {
-  min-height: 64px;
-  padding: 14px 2px;
-  background: transparent;
-  touch-action: manipulation;
-}
-
-#coach-drills-management .coach-drills-library-summary-copy > strong {
-  color: var(--coach-secondary-ink);
-  font-family: "Barlow Condensed","Arial Narrow",sans-serif;
-  font-size: clamp(22px,4vw,28px);
-  font-weight: 850;
-  line-height: 1;
-  letter-spacing: -.025em;
-  text-transform: uppercase;
-}
-
-#coach-drills-management .coach-drills-library-summary-copy > small {
-  color: var(--coach-secondary-muted);
-}
-
-#coach-drills-management .coach-drills-library-body {
-  padding: 4px 0 18px;
 }
 
 [data-testid="coach-events-interactive-dashboard"] {
@@ -169,44 +99,6 @@
   text-transform: uppercase;
 }
 
-[data-testid="coach-page-dashboard-leaderboards"] + [data-testid="coach-leaderboard-operational-panel"] {
-  margin-top: 2px;
-}
-
-[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
-  margin-bottom: 14px;
-  border: 0;
-  border-block: 1px solid var(--coach-secondary-line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-[data-testid="coach-leaderboard-operational-results"] {
-  border-top: 1px solid var(--coach-secondary-line);
-}
-
-[data-testid="coach-leaderboard-operational-results"] .coachLeaderboardRow {
-  min-height: 68px;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-[data-testid="coach-strength-operational-panel"] .coachStrengthSupportingIntelligence {
-  margin-top: 4px;
-  border: 0;
-  border-block: 1px solid var(--coach-secondary-line);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-[data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary {
-  min-height: 64px;
-  padding-block: 12px;
-  touch-action: manipulation;
-}
-
 [data-testid="coach-branding-workspace"],
 .coachAdministrationWorkspace {
   gap: 18px;
@@ -227,10 +119,7 @@
 }
 
 @media (max-width: 760px) {
-  :where(
-    #coach-drills-management,
-    .pageShell[data-accent="sc"]
-  ) {
+  :where(#coach-drills-management,.pageShell[data-accent="sc"]) {
     width: 100%;
     max-width: 100%;
     padding-inline: 14px;
@@ -263,47 +152,10 @@
   ) .secondaryPageTitleStage .teamIdentityTitleStage__action {
     min-height: 44px !important;
   }
-
-  :where(
-    [data-testid="coach-drills-operational-panel"],
-    [data-testid="coach-leaderboard-operational-panel"],
-    [data-testid="coach-strength-operational-panel"]
-  ) {
-    padding-top: 14px;
-  }
-
-  :where(
-    [data-testid="coach-drills-operational-filters"],
-    [data-testid="coach-leaderboard-operational-filters"],
-    [data-testid="coach-strength-operational-filters"]
-  ) {
-    max-width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  :where(
-    [data-testid="coach-drills-operational-filters"],
-    [data-testid="coach-leaderboard-operational-filters"],
-    [data-testid="coach-strength-operational-filters"]
-  )::-webkit-scrollbar {
-    display: none;
-  }
-
-  #coach-drills-management .coach-drills-library-summary,
-  [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary {
-    min-height: 56px;
-  }
 }
 
 @media (max-width: 390px) {
-  :where(
-    #coach-drills-management,
-    .pageShell[data-accent="sc"]
-  ) {
-    padding-inline: 14px;
-  }
-
+  :where(#coach-drills-management,.pageShell[data-accent="sc"]),
   [data-testid="coach-events-interactive-dashboard"] {
     padding-inline: 14px;
   }

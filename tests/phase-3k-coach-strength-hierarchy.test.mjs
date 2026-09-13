@@ -23,7 +23,7 @@ test('Phase 3K enhancer runs after accepted Phase 3J validation and remains guar
   assert.match(enhancer, /\$\{'\$\{commitments\}'\}/);
 });
 
-test('S&C supporting intelligence becomes one mobile disclosure without deleting compliance data', () => {
+test('S&C supporting intelligence remains one mobile disclosure without deleting compliance data', () => {
   assert.match(enhancer, /data-testid=\"coach-strength-supporting-intelligence\"/);
   assert.match(enhancer, /Compliance insights/);
   assert.match(enhancer, /Readiness & follow-up/);
@@ -36,53 +36,52 @@ test('S&C supporting intelligence becomes one mobile disclosure without deleting
   assert.match(enhancer, /DashboardProgress/);
 });
 
-test('S&C route joins the accepted light native secondary canvas', () => {
+test('S&C route keeps the accepted light native secondary canvas', () => {
   assert.match(css, /body:has\(\[data-testid=\"coach-page-dashboard-strength\"\]\)/);
   assert.match(css, /#root:has\(\[data-testid=\"coach-page-dashboard-strength\"\]\)[\s\S]*background:var\(--p3-canvas,#f4f5f1\)!important/);
   assert.match(css, /body:has\(\[data-testid=\"coach-page-dashboard-strength\"\]\) #root \.performance-shell/);
   assert.match(css, /body:has\(\[data-testid=\"coach-page-dashboard-strength\"\]\) \.performance-workspace::before[\s\S]*display:none!important/);
 });
 
-test('S&C keeps one header decision layer instead of repeating metric evidence', () => {
+test('S&C delegates metric presentation to the shared Phase 6 decision stage', () => {
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength\"\][\s\S]*padding-bottom:8px!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-evidence\"\][\s\S]*display:none!important/);
-  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\]/);
-  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\]\s*>\s*button[\s\S]*background:var\(--p3-surface,#fff\)!important/);
-  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] \[data-premium-metric-value\][\s\S]*color:var\(--p3-ink,#151a16\)!important/);
+  assert.doesNotMatch(css, /coach-page-dashboard-strength-metric-strip/);
 });
 
-test('S&C operational filters use the light native utility rail', () => {
-  assert.match(css, /\[data-testid=\"coach-strength-operational-filters\"\][\s\S]*background:var\(--p3-surface,#fff\)!important/);
-  assert.match(css, /\[data-testid=\"coach-strength-operational-filters\"\] label[\s\S]*background:var\(--p3-surface-soft,#f8f8f4\)!important/);
+test('S&C operational filters use a flat editorial utility rail', () => {
+  assert.match(css, /\[data-testid=\"coach-strength-operational-filters\"\][\s\S]*padding:0!important[\s\S]*border:0!important[\s\S]*background:transparent!important/);
+  assert.match(css, /\[data-testid=\"coach-strength-operational-filters\"\] label[\s\S]*min-height:46px!important[\s\S]*background:#fff!important/);
   assert.match(css, /\[data-testid=\"coach-strength-operational-filters\"\] button\[aria-pressed=\"true\"\]/);
+  assert.match(css, /\[data-testid=\"coach-strength-operational-filters\"\] button\{[\s\S]*min-height:44px!important/);
 });
 
 test('desktop preserves expanded S&C intelligence while iPhone defaults it closed', () => {
   assert.match(enhancer, /open=\{typeof window !== \"undefined\" && window\.innerWidth > 760\}/);
-  assert.match(css, /@media\s*\(min-width:\s*761px\)[\s\S]*coachStrengthSupportingSummary[\s\S]*display:\s*none/);
-  assert.match(css, /@media\s*\(max-width:\s*760px\)/);
+  assert.match(css, /@media\s*\(min-width:761px\)[\s\S]*coachStrengthSupportingSummary\{display:none\}/);
+  assert.match(css, /@media\s*\(max-width:760px\)/);
   assert.doesNotMatch(enhancer, /open=\{true\}/);
 });
 
-test('mobile compliance disclosure uses route-scoped native summary authority', () => {
+test('mobile compliance disclosure uses route-scoped editorial summary authority', () => {
   assert.match(css, /\.coachStrengthSupportingIntelligence/);
   assert.match(css, /\.coachStrengthSupportingSummary/);
-  assert.match(css, /min-height:68px/);
+  assert.match(css, /min-height:56px/);
   assert.match(css, /touch-action:manipulation/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /html body #root \.pageShell\[data-accent=\"sc\"\] \[data-testid=\"coach-strength-operational-panel\"\] \.coachStrengthSupportingSummary\s*>\s*\.coachStrengthSupportingSummaryCopy/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /html body #root \.pageShell\[data-accent=\"sc\"\] \[data-testid=\"coach-strength-operational-panel\"\] \.coachStrengthSupportingSummary>\.coachStrengthSupportingSummaryCopy/);
   assert.match(css, /all:unset!important/);
-  assert.match(css, /coachStrengthSupportingSummaryCopy::before[\s\S]*coachStrengthSupportingSummaryCopy::after[\s\S]*content:none!important/);
-  assert.match(css, /coachStrengthSupportingSummaryCopy\s*>\s*small[\s\S]*box-shadow:none!important[\s\S]*transform:none!important/);
+  assert.match(css, /coachStrengthSupportingSummary>\.coachStrengthSupportingSummaryCopy::before[\s\S]*coachStrengthSupportingSummary>\.coachStrengthSupportingSummaryCopy::after[\s\S]*content:none!important/);
+  assert.match(css, /coachStrengthSupportingSummaryCopy>small[\s\S]*box-shadow:none!important[\s\S]*transform:none!important/);
 });
 
-test('expanded S&C insight cards preserve light-surface contrast and readable controls', () => {
+test('expanded S&C insight evidence is readable without restoring card chrome', () => {
   assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article[\s\S]*--text-1:#171a18[\s\S]*--text-2:#5d665f/);
-  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article[\s\S]*background:linear-gradient\(180deg,#ffffff 0%,#f5f6f3 100%\)!important/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article[\s\S]*border:0!important[\s\S]*border-radius:0!important[\s\S]*background:transparent!important[\s\S]*box-shadow:none!important/);
   assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article h2[\s\S]*color:#171a18!important/);
   assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article p[\s\S]*color:#5d665f!important/);
-  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article button[\s\S]*color:#25321c!important/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article button[\s\S]*min-height:44px!important[\s\S]*color:#25321c!important/);
   assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article \[role=\"progressbar\"\][\s\S]*background:rgba\(23,26,24,\.10\)!important/);
 });
 
