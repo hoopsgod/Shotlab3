@@ -6,20 +6,6 @@
   [data-testid="coach-events-interactive-dashboard"],
   [data-testid="coach-page-dashboard-drills"],
   [data-testid="coach-page-dashboard-leaderboards"],
-  [data-testid="coach-page-dashboard-strength"],
-  [data-testid="coach-branding-workspace"],
-  .coachAdministrationWorkspace
-) {
-  --coach-secondary-ink: #071820;
-  --coach-secondary-muted: #5f6d72;
-  --coach-secondary-line: rgba(7,24,32,.12);
-  color: var(--coach-secondary-ink);
-}
-
-:where(
-  [data-testid="coach-events-interactive-dashboard"],
-  [data-testid="coach-page-dashboard-drills"],
-  [data-testid="coach-page-dashboard-leaderboards"],
   [data-testid="coach-page-dashboard-strength"]
 ) {
   gap: 14px;
@@ -43,7 +29,7 @@
 }
 
 :where(#coach-drills-management,.pageShell[data-accent="sc"]) {
-  width: min(100%,1080px);
+  width: 100%;
   max-width: 1080px;
   min-width: 0;
   margin-inline: auto;
@@ -65,11 +51,7 @@
   box-sizing: border-box;
 }
 
-:where(
-  [data-testid="coach-drills-operational-panel"],
-  [data-testid="coach-leaderboard-operational-panel"],
-  [data-testid="coach-strength-operational-panel"]
-) {
+[data-testid="coach-leaderboard-operational-panel"] {
   min-width: 0;
 }
 
@@ -89,8 +71,8 @@
 [data-testid="coach-events-interactive-dashboard"] .coachEventsMobileListHeading {
   margin-top: 2px;
   padding: 14px 2px 8px;
-  border-top: 1px solid var(--coach-secondary-line);
-  color: var(--coach-secondary-ink);
+  border-top: 1px solid var(--sl-line,rgba(7,24,32,.12));
+  color: var(--sl-ink,#071820);
   font-family: "Barlow Condensed","Arial Narrow",sans-serif;
   font-size: 24px;
   font-weight: 850;
@@ -120,8 +102,6 @@
 
 @media (max-width: 760px) {
   :where(#coach-drills-management,.pageShell[data-accent="sc"]) {
-    width: 100%;
-    max-width: 100%;
     padding-inline: 14px;
     box-sizing: border-box;
   }
@@ -155,7 +135,6 @@
 }
 
 @media (max-width: 390px) {
-  :where(#coach-drills-management,.pageShell[data-accent="sc"]),
   [data-testid="coach-events-interactive-dashboard"] {
     padding-inline: 14px;
   }
@@ -168,8 +147,7 @@
     [data-testid="coach-events-interactive-dashboard"]
   ) * {
     scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
+    transition: none !important;
+    animation: none !important;
   }
 }
