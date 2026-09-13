@@ -45,10 +45,17 @@ async function navigateByKey(page, key) {
 async function seedStaleMobileScroll(page) {
   return page.evaluate(() => {
     document.querySelector('[data-opening-position-scroll-seed="true"]')?.remove();
+    const shell = document.querySelector('.performance-shell.is-mobile[data-workspace-tab]');
+    const sourceRoute = shell?.dataset.workspaceTab;
+    if (!sourceRoute) return { seeded: false, seededOwners: [] };
+
     const style = document.createElement("style");
     style.dataset.openingPositionScrollSeed = "true";
     style.textContent = `
-      .player-scroll-container, .coach-scroll-container, .content-wrap {
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] .player-scroll-container,
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] .coach-scroll-container,
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] .coach-route-scroll-container,
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] > .shell-main > .content-wrap {
         padding-bottom: 1500px !important;
       }
     `;
@@ -57,19 +64,19 @@ async function seedStaleMobileScroll(page) {
     const candidates = [
       document.querySelector(".player-scroll-container"),
       document.querySelector(".coach-scroll-container"),
+      document.querySelector(".coach-route-scroll-container"),
       document.querySelector(".content-wrap"),
       document.scrollingElement,
     ].filter(Boolean);
+    const seededOwners = [];
 
     for (const candidate of candidates) {
       const max = Math.max(0, candidate.scrollHeight - candidate.clientHeight);
       if (max < 80) continue;
       candidate.scrollTop = Math.min(520, max);
-      if (candidate.scrollTop > 40) {
-        return { seeded: true, className: candidate.className || "document", scrollTop: candidate.scrollTop };
-      }
+      if (candidate.scrollTop > 40) seededOwners.push({ className: candidate.className || "document", scrollTop: candidate.scrollTop });
     }
-    return { seeded: false, className: "none", scrollTop: 0 };
+    return { seeded: seededOwners.length > 0, seededOwners };
   });
 }
 
@@ -85,7 +92,7 @@ async function assertOpeningPosition(page, expectedTitle, screenshotName) {
 
   const geometry = await stage.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const local = element.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
+    const local = element.closest(".player-scroll-container, .coach-scroll-container, .coach-route-scroll-container, .content-wrap");
     return {
       top: rect.top,
       bottom: rect.bottom,
@@ -124,8 +131,8 @@ test("Coach secondary heading opens fully visible and uses premium editorial aut
   await enterDemo(page, "coach");
   const seeded = await seedStaleMobileScroll(page);
   expect(seeded.seeded, `expected a stale Coach scroll seed, got ${JSON.stringify(seeded)}`).toBe(true);
-  await navigateByKey(page, "players");
-  await assertOpeningPosition(page, "Players", "coach-players-opening-390.png");
+  await navigateByKey(page, "events");
+  await assertOpeningPosition(page, "Events", "coach-events-opening-390.png");
 
   const titleStyle = await page.locator('[data-visual-role="page-intro"] [data-identity-role="page-title"]').evaluate((element) => {
     const style = getComputedStyle(element);

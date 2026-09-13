@@ -1,0 +1,78 @@
+/* Bounded Phase 6B framing. Route owners keep page-specific presentation. */
+
+:where(
+  [data-testid="coach-events-interactive-dashboard"],
+  [data-testid="coach-page-dashboard-drills"],
+  [data-testid="coach-page-dashboard-leaderboards"],
+  [data-testid="coach-page-dashboard-strength"]
+) {
+  min-width: 0;
+  gap: 14px;
+}
+
+:where(#coach-drills-management,.pageShell[data-accent="sc"]) {
+  width: 100%;
+  max-width: 1080px;
+  min-width: 0;
+  margin-inline: auto;
+  overflow-x: clip;
+}
+
+[data-testid="coach-events-interactive-dashboard"] .coachEventsMobileListHeading {
+  margin-top: 2px;
+  padding: 14px 2px 8px;
+  border-top: 1px solid var(--sl-line,rgba(7,24,32,.12));
+  color: var(--sl-ink,#071820);
+  font-size: 24px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+[data-testid="coach-branding-workspace"],
+.coachAdministrationWorkspace {
+  min-width: 0;
+  gap: 18px;
+}
+
+:where(
+  #coach-drills-management,
+  .pageShell[data-accent="sc"],
+  [data-testid="coach-events-interactive-dashboard"]
+) :is(button,a,input,select,summary):focus-visible {
+  outline: 3px solid color-mix(in srgb,var(--sl-accent,#71851f) 34%,transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  :where(#coach-drills-management,.pageShell[data-accent="sc"]) {
+    padding-inline: 14px;
+    box-sizing: border-box;
+  }
+
+  :where(
+    [data-testid="coach-page-dashboard-drills"],
+    [data-testid="coach-page-dashboard-leaderboards"],
+    [data-testid="coach-page-dashboard-strength"]
+  ) .secondaryPageTitleStage .teamIdentityTitleStage__action {
+    min-height: 44px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  [data-testid="coach-events-interactive-dashboard"] {
+    padding-inline: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    #coach-drills-management,
+    .pageShell[data-accent="sc"],
+    [data-testid="coach-events-interactive-dashboard"]
+  ) * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

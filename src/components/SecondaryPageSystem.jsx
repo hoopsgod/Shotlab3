@@ -6,6 +6,7 @@ import "./SecondaryPagePremiumMobile.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
 import "../styles/Phase2PremiumRosterLayer.css";
+import "./CoachSecondaryExperience.css";
 
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/strength|lifting|conditioning/,"strength"],[/activity|signal|feed/,"activity"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/program|brand|identity/,"program"],[/account|setting/,"settings"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";
