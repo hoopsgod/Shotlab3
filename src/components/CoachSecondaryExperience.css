@@ -1,6 +1,4 @@
-/* Canonical shared framing for Coach secondary experiences.
-   Page-specific details stay with their existing route owners. Phase 6A Coach
-   Home and Coach Players remain outside this selector authority. */
+/* Bounded Phase 6B framing. Route owners keep page-specific presentation. */
 
 :where(
   [data-testid="coach-events-interactive-dashboard"],
@@ -8,24 +6,8 @@
   [data-testid="coach-page-dashboard-leaderboards"],
   [data-testid="coach-page-dashboard-strength"]
 ) {
+  min-width: 0;
   gap: 14px;
-}
-
-:where(
-  [data-testid="coach-page-dashboard-drills"],
-  [data-testid="coach-page-dashboard-leaderboards"],
-  [data-testid="coach-page-dashboard-strength"]
-).secondaryPageShell--embeddedHeader {
-  padding-block: 0;
-  padding-inline: 0;
-}
-
-:where(
-  [data-testid="coach-page-dashboard-drills"],
-  [data-testid="coach-page-dashboard-leaderboards"],
-  [data-testid="coach-page-dashboard-strength"]
-) .teamIdentityTitleStage__summary {
-  max-width: 56ch;
 }
 
 :where(#coach-drills-management,.pageShell[data-accent="sc"]) {
@@ -36,44 +18,11 @@
   overflow-x: clip;
 }
 
-:where(
-  #coach-drills-management,
-  .pageShell[data-accent="sc"]
-) > :where(
-  [data-testid="coach-page-dashboard-drills"],
-  [data-testid="coach-drills-operational-panel"],
-  [data-testid="coach-drills-library-management"],
-  [data-testid="coach-page-dashboard-strength"],
-  [data-testid="coach-strength-operational-panel"]
-) {
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-[data-testid="coach-leaderboard-operational-panel"] {
-  min-width: 0;
-}
-
-[data-testid="coach-events-interactive-dashboard"] {
-  padding-top: 4px;
-}
-
-[data-testid="coach-events-interactive-dashboard"] [data-testid="coach-events-month-calendar"] {
-  margin-block: 0;
-  box-shadow: none;
-}
-
-[data-testid="coach-events-interactive-dashboard"] [data-testid="coach-events-decision-brief"] {
-  margin-top: 2px;
-}
-
 [data-testid="coach-events-interactive-dashboard"] .coachEventsMobileListHeading {
   margin-top: 2px;
   padding: 14px 2px 8px;
   border-top: 1px solid var(--sl-line,rgba(7,24,32,.12));
   color: var(--sl-ink,#071820);
-  font-family: "Barlow Condensed","Arial Narrow",sans-serif;
   font-size: 24px;
   font-weight: 850;
   line-height: 1;
@@ -83,12 +32,8 @@
 
 [data-testid="coach-branding-workspace"],
 .coachAdministrationWorkspace {
-  gap: 18px;
-}
-
-[data-testid="coach-branding-workspace"] .branding-industrial__workspace,
-.coachAdministrationWorkspace .coachAdministrationSection {
   min-width: 0;
+  gap: 18px;
 }
 
 :where(
@@ -104,25 +49,6 @@
   :where(#coach-drills-management,.pageShell[data-accent="sc"]) {
     padding-inline: 14px;
     box-sizing: border-box;
-  }
-
-  :where(
-    [data-testid="coach-events-interactive-dashboard"],
-    [data-testid="coach-page-dashboard-drills"],
-    [data-testid="coach-page-dashboard-leaderboards"],
-    [data-testid="coach-page-dashboard-strength"]
-  ) {
-    gap: 12px;
-  }
-
-  :where(
-    [data-testid="coach-page-dashboard-drills"],
-    [data-testid="coach-page-dashboard-leaderboards"],
-    [data-testid="coach-page-dashboard-strength"]
-  ) .secondaryPageTitleStage .teamIdentityTitleStage__summary {
-    max-width: 31ch;
-    font-size: 14px !important;
-    line-height: 1.42 !important;
   }
 
   :where(
@@ -146,7 +72,6 @@
     .pageShell[data-accent="sc"],
     [data-testid="coach-events-interactive-dashboard"]
   ) * {
-    scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;
   }
