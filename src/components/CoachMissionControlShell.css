@@ -1,8 +1,7 @@
 /* Coach Home legacy app-shell bridge and desktop rail containment.
-   CoachMissionControlTitleStage.css owns mounted Coach Home visual presentation.
-   These high-specificity rules neutralize the older authenticated shell and
-   establish only the structural containment that the legacy parent shell can
-   otherwise break; hero, section and page typography remain TitleStage-owned. */
+   CoachMissionControlTitleStage.css owns the main Coach Home composition.
+   This file neutralizes the older authenticated shell and owns the runtime
+   mobile compatibility rules required when the mounted shell is mobile. */
 body.mission-control-active [data-testid="coach-mini-header"],
 body.mission-control-active [data-testid="coach-dashboard-identity-header"],
 body.mission-control-active .coach-home-dashboard,
@@ -49,24 +48,21 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:700px){
- /* Coach Home had two competing introduction systems on iPhone: a utility header
-    plus a wide native-font hero. Players and Events have one editorial title stage.
-    Remove the duplicate mobile header so Coach Home also has one visual authority. */
+ /* Coach Home has one mobile identity stage. Keep the utility header out of flow
+    and preserve the Phase 6A decision-first hierarchy in the existing mobile owner. */
  body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none!important}
-
- /* Match the shared mobile editorial language used by Players and Events. The
-    condensed display face is the important correction: the old 42-44px native
-    face rendered much wider and visually larger even when the numeric px value
-    was similar. Keep the team/context copy compact and the support copy at 14px. */
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"]{min-height:334px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent{min-height:334px!important;padding:20px 18px 18px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{--coach-hero-crest:clamp(80px,21vw,92px)!important;gap:12px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{font:780 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.075em!important;text-transform:uppercase!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"]{min-height:362px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent{min-height:362px!important;padding:22px 18px 18px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{grid-template-columns:minmax(0,1fr) 88px!important;gap:14px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark{width:88px!important;height:88px!important;min-width:88px!important;min-height:88px!important;max-width:88px!important;max-height:88px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp(38px,12vw,50px)/.86 "Barlow Condensed","Arial Narrow",sans-serif!important;letter-spacing:-.025em!important;text-transform:uppercase!important;text-wrap:balance!important;overflow-wrap:anywhere!important}
  body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcEyebrow{font:720 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.055em!important;text-transform:uppercase!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:15ch!important;margin:12px 0 0!important;font:800 clamp(40px,10.2vw,44px)/.92 "Barlow Condensed","Arial Narrow",sans-serif!important;letter-spacing:-.02em!important;text-wrap:balance!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{max-width:36ch!important;margin:7px 0 0!important;font:520 14px/1.42 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip{margin-top:13px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{margin-top:11px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:16ch!important;margin:14px 0 0!important;font:760 24px/1.02 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:-.025em!important;text-wrap:balance!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{max-width:40ch!important;margin:6px 0 0!important;font:520 11px/1.45 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip{margin-top:16px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button{min-height:54px!important;padding:8px 12px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong{font-size:25px!important}
+ body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{min-height:46px!important;margin-top:14px!important}
 
  /* External bottom navigation overlaps the document flow. This is shell clearance,
     not Coach Home composition; the visual page still owns its own gutters. */

@@ -1,24 +1,32 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
-const css = readFileSync(new URL("../src/styles/Phase6AVisualSystem.css", import.meta.url), "utf8");
-const enhancer = readFileSync(new URL("../src/lib/coachHomeHierarchyEnhancer.js", import.meta.url), "utf8");
+const enhancerUrl = new URL("../src/lib/coachHomeHierarchyEnhancer.js", import.meta.url);
+const playersUrl = new URL("../src/screens/PlayersScreen.jsx", import.meta.url);
+const coachShellUrl = new URL("../src/components/CoachMissionControlShell.css", import.meta.url);
+const phase6AUrl = new URL("../src/styles/Phase6AVisualSystem.css", import.meta.url);
 
-test("Phase 6A visual authority stays bounded to Coach Home and Coach Players", () => {
-  assert.match(css, /\.performance-shell--coach \.mcShellV3/);
-  assert.match(css, /\.premium-roster-workspace/);
-  assert.match(css, /coach-players-primary-objective/);
-  assert.match(css, /coach-players-metrics/);
-  assert.match(css, /coach-mission-control/);
-  assert.match(css, /@media \(max-width: 700px\)/);
-  assert.doesNotMatch(css, /supabase|fetch\(|localStorage|sessionStorage/i);
+const enhancer = readFileSync(enhancerUrl, "utf8");
+const players = readFileSync(playersUrl, "utf8");
+const coachShell = readFileSync(coachShellUrl, "utf8");
+
+test("Phase 6A visual authority is consolidated into canonical Coach Home and Players owners", () => {
+  assert.equal(existsSync(phase6AUrl), false);
+  assert.match(coachShell, /coach-mission-control/);
+  assert.match(coachShell, /@media\(max-width:700px\)/);
+  assert.match(players, /premium-roster-workspace/);
+  assert.match(players, /TeamIdentityTitleStage/);
+  assert.match(players, /coach-players-primary-objective/);
+  assert.match(players, /coach-players-metrics/);
+  assert.doesNotMatch(`${coachShell}\n${players}`, /supabase|localStorage|sessionStorage/i);
 });
 
-test("Phase 6A authority is injected after optimized CSS without changing application behavior", () => {
-  assert.match(enhancer, /Phase6AVisualSystem\.css\?inline/);
-  assert.match(enhancer, /shotlab-phase6a-visual-authority/);
-  assert.match(enhancer, /dataset\.shotlabVisualSystem = "phase-6a"/);
-  assert.match(enhancer, /setTimeout\(\(\) =>/);
-  assert.match(enhancer, /document\.head\.appendChild\(style\)/);
+test("Coach Home hierarchy enhancer stays pure and Node-importable", async () => {
+  const module = await import(enhancerUrl);
+  assert.equal(typeof module.installCoachHomeHierarchyEnhancer, "function");
+  assert.match(enhancer, /shotlab-coach-home-hierarchy-cleanup/);
+  assert.match(enhancer, /coach-setup-checklist/);
+  assert.doesNotMatch(enhancer, /\.css\?inline|Phase6AVisualSystem|shotlab-phase6a-visual-authority/);
+  assert.doesNotMatch(enhancer, /setTimeout/);
 });
