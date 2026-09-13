@@ -228,6 +228,7 @@ export function installMobileHorizontalViewportLock() {
     routeKey = nextRoute;
     window.scrollTo(0, 0);
     shell.querySelector('.player-scroll-container, :scope > .shell-main > .content-wrap')?.scrollTo(0, 0);
+    findCoachRouteOwner()?.scrollTo(0, 0);
   };
 
   const scheduleCorrection = () => {
