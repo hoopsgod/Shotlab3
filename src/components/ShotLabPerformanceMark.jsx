@@ -28,6 +28,7 @@ export default function ShotLabPerformanceMark({
   compact = false,
   surface = "dark",
   tone = "accent",
+  decorative = false,
   className = "",
   testId,
 }) {
@@ -38,6 +39,7 @@ export default function ShotLabPerformanceMark({
       className={cx(styles.root, styles[resolvedKind], styles[`surface_${surface}`], styles[`tone_${tone}`], compact && styles.compact, className)}
       data-testid={testId}
       data-performance-kind={resolvedKind}
+      aria-hidden={decorative ? "true" : undefined}
       aria-label={aria || "Performance mark"}
     >
       <div className={styles.glyph}>

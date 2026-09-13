@@ -1,5 +1,6 @@
 import React from "react";
 import { resolveDataDisplayState } from "../lib/workspaceRecovery.js";
+import ShotLabIcon from "./ShotLabIcon.jsx";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 
@@ -132,14 +133,14 @@ export default function CompactLeaderboardPreviewCard({
       )}
       {typeof onViewAll === "function" ? (
         <div style={{ marginTop: 6 }}>
-          <button type="button" onClick={onViewAll} style={{ border:"none", background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, letterSpacing:"0.03em", minHeight:44, display:"inline-flex", alignItems:"center", padding:"0 4px", marginLeft:-4, cursor:"pointer" }}>
-            View all leaderboards →
+          <button type="button" onClick={onViewAll} style={{ border:"none", background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, letterSpacing:"0.03em", minHeight:44, display:"inline-flex", alignItems:"center", gap:6, padding:"0 4px", marginLeft:-4, cursor:"pointer" }}>
+            <span>View all leaderboards</span><ShotLabIcon name="arrow" size={14} aria-hidden="true" />
           </button>
         </div>
       ) : fullLeaderboardHref ? (
         <div style={{ marginTop: 6 }}>
-          <a href={fullLeaderboardHref} style={{ color: "var(--accent)", fontSize: 11, fontWeight: 700, textDecoration: "none", minHeight:44, display:"inline-flex", alignItems:"center", padding:"0 4px", marginLeft:-4 }}>
-            View all leaderboards →
+          <a href={fullLeaderboardHref} style={{ color: "var(--accent)", fontSize: 11, fontWeight: 700, textDecoration: "none", minHeight:44, display:"inline-flex", alignItems:"center", gap:6, padding:"0 4px", marginLeft:-4 }}>
+            <span>View all leaderboards</span><ShotLabIcon name="arrow" size={14} aria-hidden="true" />
           </a>
         </div>
       ) : null}

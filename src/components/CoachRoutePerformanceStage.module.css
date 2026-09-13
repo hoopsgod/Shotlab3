@@ -155,6 +155,8 @@
 .stage .action:hover:not(:disabled) { filter: brightness(1.025); transform: translateY(-1px); }
 .stage .action:active:not(:disabled) { transform: scale(.987); }
 .stage .action:disabled { opacity: .52; cursor: not-allowed; }
+
+.stage .action[data-working="true"] { cursor: progress; }
 .stage .action:focus-visible,
 .stage .metric:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--stage-accent) 34%, transparent);

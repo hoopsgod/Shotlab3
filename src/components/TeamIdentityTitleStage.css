@@ -397,3 +397,4 @@
 @media (prefers-reduced-motion: reduce) {
   .teamIdentityTitleStage *, .teamIdentityTitleStage *::before, .teamIdentityTitleStage *::after { transition: none; animation: none; }
 }
+
