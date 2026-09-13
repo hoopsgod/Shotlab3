@@ -133,11 +133,13 @@ test("Player Home remains immersive while Coach Home uses one verified brand-fir
 
   assert.match(coachShellCss, /@media\(max-width:700px\)/);
   assert.match(coachShellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
-  assert.match(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px!important\}/);
-  assert.match(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
-  assert.match(coachShellCss, /\.mcProgramIdentity\{font:780 11px\/1\.2/);
-  assert.match(coachShellCss, /h1\{[^}]*clamp\(40px,10\.2vw,44px\)[^}]*"Barlow Condensed"/);
-  assert.match(coachShellCss, /\.mcHeroContent>p\{[^}]*font:520 14px\/1\.42/);
+  assert.match(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
+  assert.match(coachShellCss, /\.mcHeroIdentity\{grid-template-columns:minmax\(0,1fr\) 88px!important;gap:14px!important\}/);
+  assert.match(coachShellCss, /\.mcHeroTeamMark\{width:88px!important;height:88px!important/);
+  assert.match(coachShellCss, /\.mcProgramIdentity\{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
+  assert.match(coachShellCss, /h1\{[^}]*font:760 24px\/1\.02 var\(--mc-native/);
+  assert.match(coachShellCss, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
+  assert.doesNotMatch(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
   assert.match(coachTitleCss, /object-fit:contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:100%/);
   assert.doesNotMatch(playerHeader, /!important|data-mobile-chrome="native-identity"/);
