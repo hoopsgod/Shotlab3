@@ -245,3 +245,53 @@
   .performance-shell--coach [data-visual-role="page-intro"] [data-identity-role="page-title"] { font-size: 36px; }
   .performance-shell--coach [data-visual-role="page-intro"].teamIdentityTitleStage--longTitle [data-identity-role="page-title"] { font-size: 32px; }
 }
+
+/* Phase 6D — Player performance finish.
+ * Keep the established Home/Progress identity while removing nested chrome and
+ * generic support-card treatment from the surfaces players touch every day. */
+.performance-shell--player [data-testid="player-workspace-state-shell"] {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+.performance-shell--player [data-testid="player-workspace-state-shell"] > [data-testid="player-workspace-empty-state"] {
+  width: 100% !important;
+  margin-inline: 0 !important;
+}
+.performance-shell--player [data-testid="player-progress-strongest-signal"],
+.performance-shell--player [data-testid="player-progress-opportunity"] {
+  min-height: 0 !important;
+  padding: 16px 2px 18px !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(17, 26, 33, .11) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.performance-shell--player [data-testid="player-progress-next-focus"] {
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+.performance-shell--player [data-testid="player-daily-primary-action"],
+.performance-shell--player [data-testid="player-progress-start-focus"],
+.performance-shell--player [data-testid="player-progress-open-profile"],
+.performance-shell--player [data-command-role="next-actions"] button,
+.performance-shell--player [data-testid="player-activation-loop"] button {
+  border-radius: 10px !important;
+}
+.performance-shell--player [data-testid="player-activation-loop"] {
+  border-inline: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+@media (min-width: 621px) {
+  .performance-shell--player [data-testid="player-progress-strongest-signal"] {
+    padding-right: 18px !important;
+  }
+  .performance-shell--player [data-testid="player-progress-opportunity"] {
+    padding-left: 18px !important;
+    border-left: 1px solid rgba(17, 26, 33, .11) !important;
+  }
+}
