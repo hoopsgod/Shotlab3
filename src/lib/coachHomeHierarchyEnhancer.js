@@ -1,3 +1,5 @@
+import "../styles/Phase6AVisualSystem.css";
+
 export const COACH_HOME_HIERARCHY_STYLE_ID = "shotlab-coach-home-hierarchy-cleanup";
 
 export const COACH_HOME_HIERARCHY_CSS = `
