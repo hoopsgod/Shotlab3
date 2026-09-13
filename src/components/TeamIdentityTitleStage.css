@@ -170,7 +170,7 @@
   min-height: 44px;
   padding: 0 14px;
   border: 1px solid rgba(21, 25, 24, .14);
-  border-radius: 12px;
+  border-radius: 10px;
   background: transparent;
   color: #202522;
   font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
@@ -397,4 +397,3 @@
 @media (prefers-reduced-motion: reduce) {
   .teamIdentityTitleStage *, .teamIdentityTitleStage *::before, .teamIdentityTitleStage *::after { transition: none; animation: none; }
 }
-
