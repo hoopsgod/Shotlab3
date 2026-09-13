@@ -223,14 +223,4 @@
   html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-layout-role="supporting-evidence"] > :nth-child(n+3) {
     border-top: 1px solid rgba(23,26,24,.1) !important;
   }
-
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-metric-role="value"] {
-    color: #f8faf5 !important;
-    -webkit-text-fill-color: #f8faf5 !important;
-  }
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-metric-role="label"],
-  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-metric-role="detail"] {
-    color: #e8eee6 !important;
-    -webkit-text-fill-color: #e8eee6 !important;
-  }
 }
