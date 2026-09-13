@@ -48,7 +48,7 @@ async function seedStaleMobileScroll(page) {
     const style = document.createElement("style");
     style.dataset.openingPositionScrollSeed = "true";
     style.textContent = `
-      .player-scroll-container, .coach-scroll-container, .content-wrap {
+      .player-scroll-container, .coach-scroll-container, .coach-route-scroll-container, .content-wrap {
         padding-bottom: 1500px !important;
       }
     `;
@@ -57,6 +57,7 @@ async function seedStaleMobileScroll(page) {
     const candidates = [
       document.querySelector(".player-scroll-container"),
       document.querySelector(".coach-scroll-container"),
+      document.querySelector(".coach-route-scroll-container"),
       document.querySelector(".content-wrap"),
       document.scrollingElement,
     ].filter(Boolean);
@@ -85,7 +86,7 @@ async function assertOpeningPosition(page, expectedTitle, screenshotName) {
 
   const geometry = await stage.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const local = element.closest(".player-scroll-container, .coach-scroll-container, .content-wrap");
+    const local = element.closest(".player-scroll-container, .coach-scroll-container, .coach-route-scroll-container, .content-wrap");
     return {
       top: rect.top,
       bottom: rect.bottom,
@@ -124,8 +125,8 @@ test("Coach secondary heading opens fully visible and uses premium editorial aut
   await enterDemo(page, "coach");
   const seeded = await seedStaleMobileScroll(page);
   expect(seeded.seeded, `expected a stale Coach scroll seed, got ${JSON.stringify(seeded)}`).toBe(true);
-  await navigateByKey(page, "players");
-  await assertOpeningPosition(page, "Players", "coach-players-opening-390.png");
+  await navigateByKey(page, "events");
+  await assertOpeningPosition(page, "Events", "coach-events-opening-390.png");
 
   const titleStyle = await page.locator('[data-visual-role="page-intro"] [data-identity-role="page-title"]').evaluate((element) => {
     const style = getComputedStyle(element);
