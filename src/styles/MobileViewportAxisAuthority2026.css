@@ -157,3 +157,70 @@
   html body #root .performance-shell--coach.is-mobile [data-visual-role="page-intro"][data-title-stage-family="editorial"],
   html body #root .performance-shell--coach.is-mobile [data-team-identity-stage="true"][data-title-stage-family="editorial"] { --identity-crest: 68px !important; }
 }
+
+/* Phase 5 final presentation restores responsive component contracts that are
+ * already defined in their source modules but can be reordered by the optimized
+ * production CSS bundle. Keep the correction inside the existing last-loaded
+ * mobile authority instead of adding page-specific component variants. */
+@media (max-width: 767px) {
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileHero {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileHero__identity {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileHero__headline {
+    display: flex !important;
+    align-items: end !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 15px 0 0 !important;
+    border-top: 1px solid rgba(255,255,255,.1) !important;
+    border-left: 0 !important;
+    text-align: left !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileHero__headline small {
+    max-width: 130px !important;
+    text-align: right !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileMetric:nth-child(3) {
+    border-left: 0 !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileMetric:nth-child(n+3) {
+    border-top: 1px solid var(--sl-line, rgba(23,26,24,.1)) !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileEvidence {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  html body #root .performance-shell--coach.is-mobile .coachPlayerProfileSection + .coachPlayerProfileSection {
+    border-top: 1px solid var(--sl-line, rgba(23,26,24,.1)) !important;
+    border-left: 0 !important;
+  }
+
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"],
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-layout-role="supporting-evidence"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] > *,
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-layout-role="supporting-evidence"] > * {
+    min-width: 0 !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] > :nth-child(odd),
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-layout-role="supporting-evidence"] > :nth-child(odd) {
+    border-left: 0 !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] > :nth-child(even),
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-layout-role="supporting-evidence"] > :nth-child(even) {
+    border-left: 1px solid rgba(23,26,24,.1) !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="at-home"] [data-layout-role="supporting-evidence"] > :nth-child(n+3),
+  html body #root .performance-shell--player.is-mobile [data-team-workspace="program"] [data-layout-role="supporting-evidence"] > :nth-child(n+3) {
+    border-top: 1px solid rgba(23,26,24,.1) !important;
+  }
+}
