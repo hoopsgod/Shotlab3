@@ -139,12 +139,13 @@
 .signalGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
 .signalCard {
   min-width: 0;
-  min-height: 150px;
-  padding: 17px;
-  border: 1px solid rgba(17,26,33,.09);
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(17,26,33,.04), 0 14px 34px rgba(17,26,33,.05);
+  min-height: 0;
+  padding: 16px 2px 18px;
+  border: 0;
+  border-top: 1px solid rgba(17,26,33,.11);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .signalCard > span { color: #65717a; }
 .signalCard strong { display: block; margin-top: 9px; color: #101a20; font-size: 20px; line-height: 1.06; letter-spacing: -.025em; }
@@ -156,10 +157,10 @@
   justify-content: space-between;
   gap: 18px;
   padding: 18px;
-  border-radius: 22px;
+  border-radius: 16px;
   border: 1px solid rgba(111,139,0,.18);
   background: #f7f8f4;
-  box-shadow: 0 1px 2px rgba(17,26,33,.04);
+  box-shadow: none;
 }
 .nextFocusCopy { min-width: 0; flex: 1; }
 .nextFocusCopy > span { color: #657b05; }
@@ -174,7 +175,7 @@
   gap: 22px;
   padding: 0 16px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   background: #c8ff1a;
   color: #101310;
   font-size: 12px;
@@ -196,7 +197,7 @@
   flex: 0 0 auto;
   min-height: 44px;
   border: 1px solid rgba(17,26,33,.10);
-  border-radius: 12px;
+  border-radius: 10px;
   background: #fff;
   color: #25323b;
   padding: 0 13px;
@@ -221,7 +222,6 @@
   .readoutHeader { display: grid; gap: 7px; }
   .readoutHeader > p { max-width: none; text-align: left; }
   .signalGrid { grid-template-columns: 1fr; }
-  .signalCard { min-height: 0; }
   .nextFocus { display: grid; gap: 14px; }
   .nextFocus button { width: 100%; }
   .detailRow { display: grid; gap: 12px; }
