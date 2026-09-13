@@ -16,7 +16,9 @@ This phase is not complete merely because Xcode compiles. It closes only after:
 
 ## Current certified baseline
 
-- Production base: `b8a593dc595277aa1020ab31ba34bca5b3005d8c`
+- Production base: `e7462d11328d863b5d63681511026429d89f99c0`
+- Accepted baseline anchor: `baseline/phase5-accepted-e7462d1`
+- Release candidate branch: `release/ios-1.0-build1-e7462d1`
 - Product: ShotLab
 - Bundle identifier: `com.shotlab.training`
 - Version/build: `1.0 (1)`
