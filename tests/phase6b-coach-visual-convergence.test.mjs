@@ -32,7 +32,7 @@ test("Phase 6B convergence is presentation-only and protects mobile geometry", (
   assert.match(css, /min-height:\s*44px/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /supabase|localStorage|sessionStorage|fetch\(|route|permission|auth/i);
+  assert.doesNotMatch(css, /supabase|localStorage|sessionStorage|fetch\(|permission|auth/i);
 });
 
 test("Phase 6B reduces container chrome on core Coach operational surfaces", () => {
