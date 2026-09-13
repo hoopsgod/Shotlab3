@@ -56,8 +56,10 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
   assertDeclaration(hero, "min-height", "382px");
   assert.match(declaration(programIdentity, "font") ?? "", /11px.*var\(--mc-native\)/);
   assert.match(declaration(heading, "font") ?? "", /clamp\(40px,9\.8vw,44px\).*var\(--mc-native\)/);
-  assert.match(shellMobile, /\.mcProgramIdentity\{font:780 11px\/1\.2 var\(--mc-native/);
-  assert.match(shellMobile, /h1\{max-width:15ch!important[\s\S]*font:800 clamp\(40px,10\.2vw,44px\)\/\.92 "Barlow Condensed"/);
+  assert.match(shellMobile, /\.mcProgramIdentity\{[^}]*font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
+  assert.match(shellMobile, /h1\{[^}]*max-width:16ch!important[^}]*font:760 24px\/1\.02 var\(--mc-native/);
+  assert.match(shellMobile, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
+  assert.match(shellMobile, /\.mcPrimary\{min-height:46px!important/);
   assertDeclaration(identity, "--coach-hero-crest", /^clamp\(96px,\s*26vw,\s*108px\)$/);
   assertDeclaration(image, "object-fit", "contain");
   assertDeclaration(image, "width", "100%");
