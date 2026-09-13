@@ -55,18 +55,20 @@ test('Coach Home keeps one source-owned hero while runtime shell bridge owns dev
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell > \.mcRail\{display:none!important\}/);
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*text-size-adjust:100%!important/);
   assert.match(mobileShellBlock, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
-  assert.match(mobileShellBlock, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px!important\}/);
-  assert.match(mobileShellBlock, /\.mcProgramIdentity\{font:780 11px\/1\.2/);
-  assert.match(mobileShellBlock, /h1\{[^}]*clamp\(40px,10\.2vw,44px\)[^}]*"Barlow Condensed"/);
-  assert.match(mobileShellBlock, /\.mcHeroContent>p\{[^}]*font:520 14px\/1\.42/);
+  assert.match(mobileShellBlock, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
+  assert.match(mobileShellBlock, /\.mcHeroIdentity\{grid-template-columns:minmax\(0,1fr\) 88px!important;gap:14px!important\}/);
+  assert.match(mobileShellBlock, /\.mcHeroTeamMark\{width:88px!important;height:88px!important/);
+  assert.match(mobileShellBlock, /\.mcProgramIdentity\{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
+  assert.match(mobileShellBlock, /h1\{[^}]*font:760 24px\/1\.02 var\(--mc-native/);
+  assert.match(mobileShellBlock, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
 });
 
 test('Coach mobile hierarchy intentionally uses one visible introduction instead of the retired utility-header-plus-hero stack', () => {
-  assert.match(mobileShellBlock, /Coach Home had two competing introduction systems on iPhone/);
-  assert.match(mobileShellBlock, /Remove the duplicate mobile header/);
-  assert.match(mobileShellBlock, /Match the shared mobile editorial language used by Players and Events/);
-  assert.doesNotMatch(mobileShellBlock, /\.mcProgramIdentity\{[^}]*clamp\(36px,\s*10\.2vw,\s*45px\)/);
-  assert.doesNotMatch(mobileShellBlock, /h1\{[^}]*clamp\(28px,\s*7\.6vw,\s*33px\)/);
+  assert.match(mobileShellBlock, /Coach Home has one mobile identity stage/);
+  assert.match(mobileShellBlock, /Keep the utility header out of flow/);
+  assert.match(mobileShellBlock, /preserve the Phase 6A decision-first hierarchy/);
+  assert.doesNotMatch(mobileShellBlock, /\.mcProgramIdentity\{font:780 11px\/1\.2/);
+  assert.doesNotMatch(mobileShellBlock, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px!important\}/);
 });
 
 test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {

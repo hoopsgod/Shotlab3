@@ -8,6 +8,7 @@ body.mission-control-active [data-testid="coach-setup-checklist"] {
 
 export function installCoachHomeHierarchyEnhancer() {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
+
   if (document.getElementById(COACH_HOME_HIERARCHY_STYLE_ID)) return true;
 
   const style = document.createElement("style");

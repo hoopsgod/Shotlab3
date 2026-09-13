@@ -117,10 +117,12 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.match(coachCommand, /CoachMissionControlTitleStage\.css/);
   assert.match(coachCommand, /CoachMissionControlShell\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
-  assert.match(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
-  assert.match(coachShellCss, /\.mcProgramIdentity\{font:780 11px\/1\.2 var\(--mc-native/);
-  assert.match(coachShellCss, /\sh1\{[^}]*clamp\(40px,10\.2vw,44px\)[^}]*"Barlow Condensed"/);
-  assert.match(coachShellCss, /min-height:334px!important/);
+  assert.match(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
+  assert.match(coachShellCss, /\.mcHeroIdentity\{grid-template-columns:minmax\(0,1fr\) 88px!important;gap:14px!important\}/);
+  assert.match(coachShellCss, /\.mcHeroTeamMark\{width:88px!important;height:88px!important/);
+  assert.match(coachShellCss, /\.mcProgramIdentity\{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
+  assert.match(coachShellCss, /\sh1\{[^}]*font:760 24px\/1\.02 var\(--mc-native/);
+  assert.doesNotMatch(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
   assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:\s*100%/);
   assert.doesNotMatch(secondaryCohesionCss, /background:rgba\(255,255,255,\.92\)!important/);
