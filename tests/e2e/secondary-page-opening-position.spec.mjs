@@ -45,10 +45,17 @@ async function navigateByKey(page, key) {
 async function seedStaleMobileScroll(page) {
   return page.evaluate(() => {
     document.querySelector('[data-opening-position-scroll-seed="true"]')?.remove();
+    const shell = document.querySelector('.performance-shell.is-mobile[data-workspace-tab]');
+    const sourceRoute = shell?.dataset.workspaceTab;
+    if (!sourceRoute) return { seeded: false, seededOwners: [] };
+
     const style = document.createElement("style");
     style.dataset.openingPositionScrollSeed = "true";
     style.textContent = `
-      .player-scroll-container, .coach-scroll-container, .coach-route-scroll-container, .content-wrap {
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] .player-scroll-container,
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] .coach-scroll-container,
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] .coach-route-scroll-container,
+      .performance-shell.is-mobile[data-workspace-tab="${sourceRoute}"] > .shell-main > .content-wrap {
         padding-bottom: 1500px !important;
       }
     `;
