@@ -63,8 +63,10 @@ test('Player workspaces own their editorial command and evidence hierarchy', () 
   assert.match(playerWorkspace, /data-page-hierarchy="editorial"/);
   assert.match(playerWorkspace, /dataLayoutRole="editorial-header"/);
   assert.match(playerWorkspace, /data-layout-role="supporting-evidence"/);
-  assert.match(playerWorkspaceCss, /\.commandBar\{[\s\S]*?background:transparent/);
+  assert.doesNotMatch(playerWorkspaceCss, /\.commandBar\s*\{/);
   assert.match(playerWorkspaceCss, /\.metrics\{[\s\S]*?border-block:1px solid/);
+  assert.match(playerWorkspaceCss, /\.metric\{[\s\S]*?border:0;[\s\S]*?background:transparent;/);
+  assert.match(playerWorkspaceCss, /\.filterRail\{[\s\S]*?border-bottom:1px solid/);
   assert.doesNotMatch(acceptanceCss, /\[class\*="commandBar"\]/);
   assert.doesNotMatch(acceptanceCss, /\[data-metric-priority/);
 });
