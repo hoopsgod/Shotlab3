@@ -24,7 +24,7 @@
   max-width:7.5ch;
   color:#f7faf4;
   font-family:"Barlow Condensed","Arial Narrow",var(--font-display,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif);
-  font-size:clamp(52px,14vw,62px);
+  font-size:clamp(52px,14vw,60px);
   font-weight:820;
   line-height:.84;
   letter-spacing:-.035em;
