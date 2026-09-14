@@ -3,7 +3,6 @@ const ROSTER_ROOT = "#coach-roster-operations";
 const ROSTER_ROW = `${ROSTER_ROOT} .phase1RosterRow, ${ROSTER_ROOT} > .fade-up > div[role="button"], ${ROSTER_ROOT} > div[role="button"]`;
 const QUEUED_INDEX = '[aria-label^="Queued action "]';
 const FINAL_A11Y_MARKER = "/* phase1-final-a11y */";
-const COACH_MOBILE_PARITY_MARKER = "/* coach-mobile-production-parity */";
 const SCHEDULE_PLACEHOLDER_MARKER = "/* schedule-placeholder-aa */";
 const SCHEDULE_PLACEHOLDER_CSS = `${SCHEDULE_PLACEHOLDER_MARKER}
 [data-testid="coach-events-filter-rail"][data-surface="light"] input::placeholder{color:#59636a!important;-webkit-text-fill-color:#59636a!important;opacity:1!important}`;
@@ -14,19 +13,6 @@ const FINAL_A11Y_CSS = `${FINAL_A11Y_MARKER}
 ${SCHEDULE_PLACEHOLDER_CSS}
 [data-testid="auth-workspace"] a[href$="privacy"]{color:#35434c!important;-webkit-text-fill-color:#35434c!important}
 [data-testid="coach-players-interactive-dashboard"] .teamIdentityTitleStage__action--primary{color:#f8fbf6!important;-webkit-text-fill-color:#f8fbf6!important}
-${COACH_MOBILE_PARITY_MARKER}
-@media(max-width:700px){
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"]{min-height:334px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent{min-height:334px!important;padding:20px 18px 18px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{--coach-hero-crest:clamp(104px,29vw,120px)!important;gap:12px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark{width:var(--coach-hero-crest)!important;height:var(--coach-hero-crest)!important;min-width:var(--coach-hero-crest)!important;min-height:var(--coach-hero-crest)!important;max-width:var(--coach-hero-crest)!important;max-height:var(--coach-hero-crest)!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{font:780 11px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;letter-spacing:.075em!important;text-transform:uppercase!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcEyebrow{font:720 11px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;letter-spacing:.055em!important;text-transform:uppercase!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:15ch!important;margin:12px 0 0!important;font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif!important;font-size:clamp(36px,9.4vw,40px)!important;font-weight:800!important;line-height:.94!important;letter-spacing:-.02em!important;text-wrap:balance!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{max-width:36ch!important;margin:7px 0 0!important;font:520 14px/1.42 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip{margin-top:13px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{margin-top:11px!important}
 }`;
 
 function cleanText(value) {
@@ -39,7 +25,6 @@ function ensureStyles() {
   if (!style.textContent.includes(FINAL_A11Y_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS}\n`;
   else {
     if (!style.textContent.includes(SCHEDULE_PLACEHOLDER_MARKER)) style.textContent += `\n${SCHEDULE_PLACEHOLDER_CSS}\n`;
-    if (!style.textContent.includes(COACH_MOBILE_PARITY_MARKER)) style.textContent += `\n${FINAL_A11Y_CSS.slice(FINAL_A11Y_CSS.indexOf(COACH_MOBILE_PARITY_MARKER))}\n`;
   }
   if (document.head.lastElementChild !== style) document.head.appendChild(style);
   return true;
