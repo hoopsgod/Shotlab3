@@ -60,7 +60,7 @@
 .detailRow>div{max-width:500px}
 .detailRow>div>span{color:#6d7771}
 .detailRow p{margin:6px 0 0;color:#69746d;font-size:11px;line-height:1.45}
-.detailRow button{flex:0 0 auto;min-height:42px;padding:0;border:0;border-bottom:1px solid rgba(17,27,22,.22);border-radius:0;background:transparent;color:#26342b;font-size:11px;font-weight:780;cursor:pointer}
+.detailRow button{flex:0 0 auto;min-height:48px;padding:0;border:0;border-bottom:1px solid rgba(17,27,22,.22);border-radius:0;background:transparent;color:#26342b;font-size:11px;font-weight:780;cursor:pointer}
 
 /* Progress uses the same integrated Player masthead without loading another global authority layer. */
 [data-page-kind="progress"][data-visual-role="player-team-workspace-title"]{--identity-crest:clamp(78px,20vw,92px);--player-accent:var(--team-brand-primary,#c8ff1a);overflow:hidden;padding:0 0 0 15px;border:0!important;border-radius:0!important;background:radial-gradient(circle at 92% 38%,color-mix(in srgb,var(--player-accent) 6%,transparent),transparent 29%)!important;box-shadow:none!important}
