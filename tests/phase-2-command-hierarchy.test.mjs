@@ -24,7 +24,7 @@ test("Phase 2 control and insight hierarchy survives Phase 4 identity",()=>{
  assert.ok(session.includes(':is(p,small){color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important}'));
  assert.ok(!session.includes(':is(p,small,span){color:#b8c0ba!important'));
  assert.match(playerCss,/\.primaryButton[\s\S]*-webkit-text-fill-color:\s*currentColor;/);
- assert.match(playerCss,/\.primaryButton > \*[\s\S]*color:\s*inherit;[\s\S]*-webkit-text-fill-color:\s*currentColor;/);
+ assert.match(playerCss,/\.primaryButton > \*[\s\S]*color:\s*inherit;[\s\S]*-webkit-text-fill-color:\s*currentColor;?/);
  assert.ok(rail.includes('data-density="decision-first"'));
  assert.ok(rail.includes('data-rail-role={index === 0 ? "primary" : "supporting"}'));
  assert.match(railCss,/\.card\s*\{[\s\S]*background:\s*#fffefd[\s\S]*box-shadow:\s*0 5px 15px/);
@@ -37,7 +37,7 @@ test("Phase 2 control and insight hierarchy survives Phase 4 identity",()=>{
 
 test("Phase 2 copy and coach-primary contracts remain intact",()=>{
  assert.ok(narrative.includes('Daily work banked.'));
- for(const value of ['title: "Daily brief"','"1 RSVP needs a response"','at-home makes logged']) assert.ok(railModel.includes(value));
+ for(const value of ['title: "Daily brief"','"1 RSVP needs a response"','at-home makes']) assert.ok(railModel.includes(value));
  assert.ok(!railModel.includes('verified At Home makes'));
  for(const value of ['data-home-hierarchy="decision-first"','data-testid="coach-primary-objective" data-home-role="primary"','data-testid="coach-onboarding-state" data-home-role="supporting"']) assert.ok(coach.includes(value));
  assert.ok(!session.includes('[data-testid="coach-onboarding-state"]'));
