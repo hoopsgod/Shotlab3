@@ -128,7 +128,7 @@
 .metricValue{color:var(--ink);font-family:"Barlow Condensed","Arial Narrow",var(--font-display,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif);font-size:25px;font-weight:790;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
 .metricLabel{margin-top:4px}
 .activation{margin-top:16px;border:0;border-top:1px solid rgba(23,26,24,.1);border-radius:0;background:transparent}
-.activation summary{min-height:46px;display:flex;align-items:center;padding:0;color:#334038;font-size:12px;font-weight:720;cursor:pointer;list-style:none}
+.activation summary{min-height:48px;display:flex;align-items:center;padding:0;color:#334038;font-size:12px;font-weight:720;cursor:pointer;list-style:none}
 .activation summary::-webkit-details-marker{display:none}
 .activationRows{padding:0 0 8px}
 .activationRow{gap:10px;min-height:44px;border-top:1px solid rgba(23,26,24,.08)}
