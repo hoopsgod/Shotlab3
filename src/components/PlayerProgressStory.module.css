@@ -20,7 +20,7 @@
 }
 .heroTopline,.heroGrid,.readoutHeader,.detailRow{display:flex}
 .heroTopline{position:relative;z-index:1;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.heroTopline>span:first-child,.playerLabel,.targetPanelCopy>span,.readoutHeader span,.signalCard>span,.nextFocusCopy>span,.detailRow>div>span{font-size:10px;font-weight:820;line-height:1;letter-spacing:.1em;text-transform:uppercase}
+.heroTopline>span:first-child,.playerLabel,.targetPanelCopy>span,.readoutHeader span,.signalCard>span,.nextFocusCopy>span,.detailRow>div>span{font-size:11px;font-weight:820;line-height:1;letter-spacing:.1em;text-transform:uppercase}
 .heroTopline>span:first-child{color:#aebbb1}
 .heroTopline>span:last-child{min-height:27px;display:inline-flex;align-items:center;padding:0 9px;border:1px solid color-mix(in srgb,var(--team-brand-primary,var(--accent)) 32%,transparent);border-radius:999px;background:color-mix(in srgb,var(--team-brand-primary,var(--accent)) 8%,transparent);color:var(--team-brand-primary,var(--accent,#c8ff1a));font-size:10px;font-weight:820}
 .heroGrid{position:relative;z-index:1;align-items:end;justify-content:space-between;gap:18px}
@@ -37,7 +37,7 @@
 .metricStrip>div{min-width:0;padding:13px 12px;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .metricStrip>div+div{border-left:1px solid rgba(255,255,255,.1)!important}
 .metricStrip :global([data-performance-kind]){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
-.metricStrip :global([data-performance-kind]) span,.metricStrip :global([data-performance-kind]) small{color:#aebbb1!important;font-size:10px!important;font-weight:760!important}
+.metricStrip :global([data-performance-kind]) span,.metricStrip :global([data-performance-kind]) small{color:#aebbb1!important;font-size:11px!important;font-weight:760!important}
 .metricStrip :global([data-performance-kind]) strong{color:#fff!important;font-family:"Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif!important;font-size:24px!important;font-weight:800!important;letter-spacing:-.02em!important}
 
 .readoutHeader{align-items:end;justify-content:space-between;gap:18px;padding:2px 1px 0}
