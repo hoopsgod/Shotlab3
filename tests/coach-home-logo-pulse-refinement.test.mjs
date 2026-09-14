@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 // Focused contracts for the approved Coach Home logo and Program Pulse refinement.
+const titleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 const phase1Closure = fs.readFileSync(new URL("../src/lib/phase1EvidenceClosure.js", import.meta.url), "utf8");
 const coachFinalCss = fs.readFileSync(new URL("../src/components/CoachMissionControlFinal.css", import.meta.url), "utf8");
 
 test("Coach Home production mobile parity uses the Player Home hero crest scale", () => {
-  assert.match(phase1Closure, /--coach-hero-crest:clamp\(104px,29vw,120px\)!important/);
-  assert.doesNotMatch(phase1Closure, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
+  assert.match(titleCss, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
+  assert.doesNotMatch(phase1Closure, /coach-mobile-production-parity|mcHeroTeamMark|--coach-hero-crest/);
 });
 
 test("Program Pulse percentage stays subordinate and responsive on narrow Coach Home layouts", () => {
