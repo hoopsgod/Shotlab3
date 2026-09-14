@@ -71,7 +71,7 @@
 [data-page-kind="progress"][data-visual-role="player-team-workspace-title"] [data-identity-role="page-title"]{max-width:none;white-space:nowrap;color:#111a15;font-family:"Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-size:clamp(46px,10vw,56px);font-weight:820;line-height:.84;letter-spacing:-.025em}
 [data-page-kind="progress"][data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__support){display:flex;align-items:center;justify-content:space-between;gap:10px 12px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(20,32,25,.07)}
 [data-page-kind="progress"][data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__status){color:#59645d;font-size:10px;font-weight:750}
-[data-page-kind="progress"][data-visual-role="player-team-workspace-title"] [data-identity-role="brand-panel"]{width:var(--identity-crest);height:var(--identity-crest);min-width:var(--identity-crest);align-self:center;margin:0;transform:scale(1.04)}
+[data-page-kind="progress"][data-visual-role="player-team-workspace-title"] [data-identity-role="brand-panel"]{width:var(--identity-crest);height:var(--identity-crest);min-width:var(--identity-crest);align-self:center;margin:0}
 [data-page-kind="progress"][data-visual-role="player-team-workspace-title"] [data-identity-role="brand-mark"]{filter:drop-shadow(0 12px 18px rgba(7,28,20,.18))}
 
 @media(max-width:620px){
