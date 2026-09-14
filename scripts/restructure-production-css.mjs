@@ -79,7 +79,11 @@ async function finalizeProductionCss(files) {
     // Dedupe/font-token passes run after the first CSSO pass. Re-run the same
     // standards-based restructure here so newly adjacent/equivalent rules can
     // collapse before Lightning CSS performs the final syntax compaction.
-    const restructured = restructureCss(source, relative, { coach: isCoachWorkspace });
+    // CSSO's final Coach workspace restructuring can merge otherwise distinct
+    // mobile rule contexts, which erased the component-owned is-mobile-shell
+    // authority after source compilation. Lightning CSS still minifies this
+    // bundle safely without changing its cascade structure.
+    const restructured = isCoachWorkspace ? source : restructureCss(source, relative, { coach: false });
     const output = compactProductionCss(restructured, path.basename(file));
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
