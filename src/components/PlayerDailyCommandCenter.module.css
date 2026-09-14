@@ -97,7 +97,7 @@
 
 .momentumSignal{margin-top:14px}
 .coachSignal{position:relative;margin-top:17px;padding:17px 2px 16px 10px;border:0;border-block:1px solid rgba(23,26,24,.1);background:transparent;box-shadow:none}
-.coachSignal::before{content:"";position:absolute;inset:17px auto 17px 0;width:2px;background:var(--coach-signal-accent,var(--team-brand-primary,var(--accent)))}
+.coachSignal::before{content:"";position:absolute;inset:17px auto 17px 0;width:3px;background:var(--coach-signal-accent,var(--team-brand-primary,var(--accent)))}
 .coachSignalHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .coachSignalEyebrow,.coachSignalLabel,.coachSignalStatus{font-weight:760;letter-spacing:.07em;text-transform:uppercase}
 .coachSignalEyebrow{color:color-mix(in srgb,var(--coach-signal-accent,var(--team-brand-primary,var(--accent))) 66%,#354039);font-size:10px}
