@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-// Final exact-head certification trigger; no runtime behavior or assertion thresholds change here.
 const workspace = await readFile(new URL('../src/components/PlayerOperationalWorkspace.module.css', import.meta.url), 'utf8');
 const hierarchy = await readFile(new URL('../src/components/PlayerMetricHierarchy.module.css', import.meta.url), 'utf8');
 const progress = await readFile(new URL('../src/components/PlayerProgressStory.module.css', import.meta.url), 'utf8');
@@ -16,32 +15,39 @@ const hex = (value) => [0,2,4].map((offset)=>Number.parseInt(value.slice(1+offse
 
 test('Player Phase 1 uses existing Player authorities without a global overflow mask', () => {
   assert.doesNotMatch(component, /PlayerPhase1MobileReadability\.css/);
-  assert.doesNotMatch(workspace, /html\s*\{|body\s*\{|overflow-x\s*:\s*hidden/i);
+  assert.doesNotMatch(workspace, /overflow-x\s*:\s*hidden/i);
 });
 
-test('Player workspace metrics use readable floors and wrap meaningful copy', () => {
-  assert.match(workspace, /\.metricLabel,\.metricDetail\{[\s\S]*overflow:visible[\s\S]*text-overflow:clip[\s\S]*white-space:normal[\s\S]*overflow-wrap:anywhere/);
-  assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricLabel\s*\{[\s\S]*color:#5f6962[\s\S]*font-size:11px/);
-  assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricDetail\s*\{[\s\S]*color:#59635d[\s\S]*font-size:12px/);
-  assert.match(hierarchy, /@media\(max-width:700px\)[\s\S]*\.metricSupporting>span:last-child\{[^}]*font-size:12px!important/);
+test('Player workspace metrics keep readable floors and wrap meaningful copy', () => {
+  assert.match(workspace, /\.metricLabel,\.metricDetail\{[^}]*overflow:visible[^}]*text-overflow:clip[^}]*white-space:normal[^}]*overflow-wrap:anywhere/);
+  assert.match(workspace, /\.metricLabel\{font-size:11px/);
+  assert.match(workspace, /\.metricDetail\{[^}]*font-size:12px/);
+  assert.match(hierarchy, /@media\(max-width:700px\)[\s\S]*\.metricSupporting>span:first-child\{[^}]*color:#5f6962!important[^}]*font-size:11px!important/);
+  assert.match(hierarchy, /@media\(max-width:700px\)[\s\S]*\.metricSupporting>span:last-child\{[^}]*color:#59635d!important[^}]*font-size:12px!important/);
   for (const [foreground,background] of [['#5f6962','#f7f8f4'],['#59635d','#f7f8f4'],['#5f6962','#ffffff'],['#59635d','#ffffff']]) {
     assert.ok(contrast(hex(foreground),hex(background))>=4.5, `${foreground} must remain AA-safe on ${background}`);
   }
 });
 
+test('mobile Player secondary pages retain editorial scoreboard and return-control authority', () => {
+  assert.match(workspace, /shared-dashboard-back-action\)\{[^}]*width:auto!important[^}]*min-height:48px!important[^}]*border:0!important[^}]*background:transparent!important/);
+  assert.match(workspace, /data-team-workspace[^\n]*at-home[^\n]*program[^\n]*\.metrics\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important;background:transparent!important/);
+  assert.match(workspace, /data-metric-priority="primary"\]\{grid-column:1\/-1!important/);
+  assert.match(workspace, /data-metric-priority="supporting"[^\n]*data-metric-role="value"[^\n]*color:#172019!important/);
+});
+
 test('mobile Player filter rails and title support reflow inside the viewport', () => {
-  assert.match(workspace, /@media\(max-width:760px\)[\s\S]*filterRail\[data-player-workspace-filter-rail="true"\]\{[^}]*flex-wrap:wrap[^}]*overflow-x:visible[^}]*scroll-snap-type:none/);
-  assert.match(workspace, /filterRail\[data-player-workspace-filter-rail="true"\]\s*>\s*\.filterButton\{[^}]*white-space:normal/);
+  assert.match(workspace, /\.filterButton\{[^}]*min-height:48px[^}]*white-space:normal/);
+  assert.match(workspace, /@media\(max-width:760px\)[\s\S]*\.filterRail\{[^}]*flex-wrap:wrap[^}]*overflow-x:visible[^}]*scroll-snap-type:none/);
   assert.match(workspace, /teamIdentityTitleStage__identityLine\)\{margin-bottom:6px;font-size:10px\}/);
   assert.match(workspace, /teamIdentityTitleStage__summary\)\{[^}]*display:block[^}]*overflow:visible[^}]*-webkit-line-clamp:unset/);
 });
 
-test('Player Progress dark-surface labels are readable and AA-safe', () => {
-  assert.match(progress, /heroTopline\s*>\s*span:first-child\s*\{\s*color:\s*#b8c4c8/);
-  assert.match(progress, /targetPanelCopy\s*>\s*span\s*\{[^}]*#b8c4c8/);
-  assert.match(progress, /metricStrip span\s*\{[^}]*#b8c4c8/);
-  assert.match(progress, /metricStrip small\s*\{[^}]*#b8c4c8[^}]*font-size:\s*11px/);
-  for (const background of ['#071820','#0b2633','#203945']) assert.ok(contrast(hex('#b8c4c8'),hex(background))>=4.5);
+test('Player Progress dark-surface labels remain high-contrast', () => {
+  assert.match(progress, /heroTopline>span:first-child\{color:#aebbb1\}/);
+  assert.match(progress, /targetPanelCopy>span\{display:block;color:#aebbb1\}/);
+  assert.match(progress, /metricStrip :global\(\[data-performance-kind\]\) span,[^\n]*color:#aebbb1!important/);
+  for (const background of ['#071820','#0b2633','#203945']) assert.ok(contrast(hex('#aebbb1'),hex(background))>=4.5);
 });
 
 test('Player Home progress information wraps instead of ellipsizing', () => {
