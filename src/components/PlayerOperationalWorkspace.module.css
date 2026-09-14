@@ -32,10 +32,10 @@
 .metricInteractive:hover,.metricInteractive:focus-visible{background:color-mix(in srgb,var(--team-brand-primary,var(--accent)) 5%,transparent)}
 .metricInteractive:active{transform:scale(.985)}
 .metricActive{background:color-mix(in srgb,var(--team-brand-primary,var(--accent)) 7%,transparent)}
-.metricLabel,.metricDetail{display:block;color:var(--muted);font-size:10px;line-height:1.2}
-.metricLabel{font-weight:790;letter-spacing:.075em;text-transform:uppercase}
+.metricLabel,.metricDetail{display:block;color:var(--muted);line-height:1.25;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere}
+.metricLabel{font-size:11px;font-weight:790;letter-spacing:.065em;text-transform:uppercase}
 .metricValue{display:block;margin-top:7px;color:var(--ink);font-family:"Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-size:31px;font-weight:800;line-height:.92;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
-.metricDetail{margin-top:7px;font-weight:560}
+.metricDetail{margin-top:7px;font-size:12px;font-weight:560}
 .metricInteractive:focus-visible,.filterButton:focus-visible,.emptyState button:focus-visible{outline:3px solid color-mix(in srgb,var(--team-brand-primary,var(--accent)) 30%,transparent);outline-offset:2px}
 
 .filterRail{
@@ -65,6 +65,7 @@
   font-weight:760;
   letter-spacing:.035em;
   text-transform:uppercase;
+  white-space:normal;
   cursor:pointer;
   scroll-snap-align:start;
 }
@@ -102,7 +103,7 @@
 [data-visual-role="player-team-workspace-title"] [data-identity-role="team-name"]{color:color-mix(in srgb,var(--player-accent) 58%,#304031)}
 [data-visual-role="player-team-workspace-title"] [data-identity-role="page-title"]{max-width:10ch;color:#111a15;font-family:"Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-size:clamp(46px,10vw,56px);font-weight:820;line-height:.84;letter-spacing:-.025em;text-wrap:balance}
 [data-visual-role="player-team-workspace-title"][data-title-word-count="1"] [data-identity-role="page-title"]{max-width:none;white-space:nowrap}
-[data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__summary){max-width:34ch;margin-top:10px;color:#66716a;font-size:13px;font-weight:540;line-height:1.4}
+[data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__summary){display:block;max-width:34ch;margin-top:10px;color:#66716a;font-size:13px;font-weight:540;line-height:1.4;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;-webkit-line-clamp:unset}
 [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__support){display:flex;align-items:center;justify-content:space-between;gap:10px 12px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(20,32,25,.07)}
 [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__status){color:#59645d;font-size:10px;font-weight:750}
 [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__status)::before{background:color-mix(in srgb,var(--player-accent) 76%,#58635c)}
@@ -111,16 +112,22 @@
 [data-visual-role="player-team-workspace-title"] [data-identity-role="brand-mark"]{filter:drop-shadow(0 12px 18px rgba(7,28,20,.18))}
 [data-visual-role="player-team-workspace-title"] [data-identity-role="brand-fallback"]{border-color:color-mix(in srgb,var(--player-accent) 18%,rgba(20,32,25,.13));border-radius:16px;background:color-mix(in srgb,var(--player-accent) 5%,transparent);color:#233028;font-size:22px}
 
+/* Final Player mobile authority can reassert legacy 2x2/dark metrics. The Player module
+   owns the newer scoreboard hierarchy and the minimal return affordance. */
+:global(html body #root .performance-shell--player.is-mobile .player-scroll-container > .shared-dashboard-back-action){width:auto!important;min-width:0!important;min-height:48px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#59655e!important;font-size:10px!important;font-weight:820!important;letter-spacing:.075em!important}
+:global(html body #root .performance-shell--player.is-mobile) .root[data-team-workspace]:is([data-team-workspace="at-home"],[data-team-workspace="program"]) .metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;background:transparent!important}
+:global(html body #root .performance-shell--player.is-mobile) .root[data-team-workspace]:is([data-team-workspace="at-home"],[data-team-workspace="program"]) .metrics>[data-metric-priority="primary"]{grid-column:1/-1!important}
+:global(html body #root .performance-shell--player.is-mobile) .root[data-team-workspace]:is([data-team-workspace="at-home"],[data-team-workspace="program"]) .metrics>[data-metric-priority="supporting"] [data-metric-role="value"]{color:#172019!important;-webkit-text-fill-color:#172019!important}
+:global(html body #root .performance-shell--player.is-mobile) .root[data-team-workspace]:is([data-team-workspace="at-home"],[data-team-workspace="program"]) .metrics>[data-metric-priority="supporting"] :is([data-metric-role="label"],[data-metric-role="detail"]){color:#5f6962!important;-webkit-text-fill-color:#5f6962!important}
+
 @media(max-width:760px){
   .root{gap:12px;margin-bottom:22px}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
   .metric{min-height:82px;padding:12px 13px}
-  .metric:nth-child(odd){border-left:0}
-  .metric:nth-child(n+3){border-top:1px solid rgba(20,32,25,.1)}
   .metricValue{font-size:29px}
   .filterRail{gap:16px;flex-wrap:wrap;overflow-x:visible;scroll-snap-type:none}
   [data-visual-role="player-team-workspace-title"][data-title-stage-family="editorial"]{--identity-crest:clamp(78px,21vw,88px);padding-left:15px}
   [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__inner){gap:10px;padding:5px 0 15px}
+  [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__identityLine){margin-bottom:6px;font-size:10px}
   [data-visual-role="player-team-workspace-title"] [data-identity-role="page-title"]{font-size:clamp(44px,11.8vw,50px)}
   [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__support){margin-top:10px;padding-top:9px}
 }
