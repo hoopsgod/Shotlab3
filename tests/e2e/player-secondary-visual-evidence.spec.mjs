@@ -123,14 +123,17 @@ async function captureSurfaceSet(page, origin, prefix) {
   return { homeControl };
 }
 
-test("capture immutable production before and exact-checkout prototype after at 390px", async ({ page }) => {
+test("capture production before and exact-checkout premium Player after at 390px", async ({ page }) => {
   test.setTimeout(150_000);
   await installSafeRoutes(page);
 
   const before = await captureSurfaceSet(page, BASELINE_ORIGIN, "before");
   const after = await captureSurfaceSet(page, PROTOTYPE_ORIGIN, "after");
 
-  expect(after.homeControl, "Player Dashboard/Home must remain the immutable visual control").toEqual(before.homeControl);
+  expect(after.homeControl.teamBrandPrimary).toBe(before.homeControl.teamBrandPrimary);
+  expect(after.homeControl.teamBrandSurfaceDeep).toBe(before.homeControl.teamBrandSurfaceDeep);
+  expect(after.homeControl.teamBrandSurfaceElevated).toBe(before.homeControl.teamBrandSurfaceElevated);
+  expect(after.homeControl.backgroundImage, "Phase 6D should materially upgrade Player Home while preserving team-brand tokens").not.toBe(before.homeControl.backgroundImage);
 
   fs.writeFileSync(path.join(OUTPUT_DIR, "evidence-manifest.json"), JSON.stringify({
     viewport: { width: 390, height: 844 },
