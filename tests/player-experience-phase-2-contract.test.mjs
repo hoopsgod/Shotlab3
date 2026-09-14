@@ -5,6 +5,7 @@ import fs from "node:fs";
 const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const componentSource = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const cssSource = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.module.css", import.meta.url), "utf8");
+const hierarchySource = fs.readFileSync(new URL("../src/components/PlayerMetricHierarchy.module.css", import.meta.url), "utf8");
 
 test("all remaining Player routes use the shared operational hierarchy", () => {
   [
@@ -35,15 +36,18 @@ test("At Home and Program expose operational filters without altering persistenc
   assert.match(appSource, /addScLog=\{addScLog\}/);
 });
 
-test("workspace components preserve mobile interaction and accessibility contracts", () => {
+test("workspace components preserve mobile interaction, scoreboard hierarchy, and accessibility contracts", () => {
   assert.match(componentSource, /aria-label=\{`\$\{model\.title\} metrics`\}/);
   assert.match(componentSource, /aria-pressed=\{activeMetric === metric\.id\}/);
   assert.match(componentSource, /role="group"/);
   assert.match(componentSource, /PlayerWorkspaceEmptyState/);
   assert.match(cssSource, /min-height:48px/);
-  assert.match(cssSource, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(cssSource, /border-block:1px solid/);
   assert.match(cssSource, /overflow-x:auto/);
+  assert.match(hierarchySource, /@media\(max-width:700px\)[\s\S]*\.metricsHierarchy\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
+  assert.match(hierarchySource, /\.metricPrimary\{grid-column:1\/-1!important/);
+  assert.match(hierarchySource, /\.metricSupporting>span:first-child\{[^}]*font-size:11px!important/);
+  assert.match(hierarchySource, /\.metricSupporting>span:last-child\{[^}]*font-size:12px!important/);
 });
 
 test("Phase 2 remains Player-only and introduces no schema or auth changes", () => {
