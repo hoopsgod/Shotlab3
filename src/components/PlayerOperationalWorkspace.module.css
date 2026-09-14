@@ -108,7 +108,7 @@
 [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__status){color:#59645d;font-size:10px;font-weight:750}
 [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__status)::before{background:color-mix(in srgb,var(--player-accent) 76%,#58635c)}
 [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__action){min-height:48px;padding-inline:14px;border:1px solid color-mix(in srgb,var(--player-accent) 70%,#758800 30%);border-radius:9px;background:color-mix(in srgb,var(--player-accent) 93%,white 7%);color:var(--team-brand-primary-text,#071007);box-shadow:0 8px 18px color-mix(in srgb,var(--player-accent) 12%,transparent);font-size:12px;font-weight:800}
-[data-visual-role="player-team-workspace-title"] [data-identity-role="brand-panel"]{width:var(--identity-crest);height:var(--identity-crest);min-width:var(--identity-crest);align-self:center;margin:0;transform:scale(1.04)}
+[data-visual-role="player-team-workspace-title"] [data-identity-role="brand-panel"]{width:var(--identity-crest);height:var(--identity-crest);min-width:var(--identity-crest);align-self:center;margin:0}
 [data-visual-role="player-team-workspace-title"] [data-identity-role="brand-mark"]{filter:drop-shadow(0 12px 18px rgba(7,28,20,.18))}
 [data-visual-role="player-team-workspace-title"] [data-identity-role="brand-fallback"]{border-color:color-mix(in srgb,var(--player-accent) 18%,rgba(20,32,25,.13));border-radius:16px;background:color-mix(in srgb,var(--player-accent) 5%,transparent);color:#233028;font-size:22px}
 
