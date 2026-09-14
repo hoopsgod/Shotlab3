@@ -23,7 +23,11 @@ test("Program Pulse material remains owned by the canonical title-stage layer", 
 
 
 test("Coach Home mobile hero has one component visual authority", () => {
-  const mobileAuthority = titleCss.match(/\/\* Phase 6E mobile Coach Home composition authority\. \*\/[\s\S]*?(?=@media\(max-width:350px\))/)?.[0] || "";
+  const authorityStart = titleCss.indexOf("/* Phase 6E mobile Coach Home composition authority.");
+  const authorityEnd = titleCss.indexOf("@media(max-width:350px)", authorityStart);
+  const mobileAuthority = authorityStart >= 0 && authorityEnd > authorityStart
+    ? titleCss.slice(authorityStart, authorityEnd)
+    : "";
   assert.match(mobileAuthority, /mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(mobileAuthority, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
   assert.match(mobileAuthority, /font-size:clamp\(36px,9\.4vw,40px\)/);
