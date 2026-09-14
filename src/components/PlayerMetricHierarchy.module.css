@@ -19,13 +19,13 @@
 @media(max-width:700px){
   .metricsHierarchy{grid-template-columns:repeat(3,minmax(0,1fr))!important;border-block:1px solid rgba(20,32,25,.11)!important;background:transparent!important}
   .metricPrimary{grid-column:1/-1!important;min-height:104px!important;padding:18px 18px 17px 21px!important;border-radius:0!important}
-  .metricPrimary>span:first-child{font-size:10px!important;font-weight:820!important;letter-spacing:.085em!important}
+  .metricPrimary>span:first-child{font-size:11px!important;font-weight:820!important;letter-spacing:.075em!important}
   .metricPrimary>span:nth-child(2){margin-top:6px!important;font-size:46px!important}
-  .metricPrimary>span:last-child{margin-top:8px!important;font-size:12px!important;line-height:1.2!important}
-  .metricSupporting{min-height:82px!important;padding:13px 9px 12px!important;border:0!important;border-top:1px solid rgba(20,32,25,.1)!important;border-radius:0!important}
+  .metricPrimary>span:last-child{margin-top:8px!important;font-size:12px!important;line-height:1.25!important}
+  .metricSupporting{min-height:88px!important;padding:13px 9px 12px!important;border:0!important;border-top:1px solid rgba(20,32,25,.1)!important;border-radius:0!important}
   .metricSupporting+.metricSupporting{border-left:1px solid rgba(20,32,25,.1)!important}
-  .metricSupporting>span:first-child{color:#69736d!important;font-size:9px!important;font-weight:800!important;line-height:1.08!important;letter-spacing:.045em!important}
+  .metricSupporting>span:first-child{color:#5f6962!important;font-size:11px!important;font-weight:800!important;line-height:1.12!important;letter-spacing:.035em!important}
   .metricSupporting>span:nth-child(2){margin-top:6px!important;color:#172019!important;font-size:25px!important;line-height:.9!important}
-  .metricSupporting>span:last-child{margin-top:6px!important;color:#69736d!important;font-size:10px!important;line-height:1.18!important}
+  .metricSupporting>span:last-child{margin-top:6px!important;color:#59635d!important;font-size:12px!important;line-height:1.2!important}
 }
-@media(max-width:390px){.metricSupporting{padding-inline:7px!important}.metricSupporting>span:nth-child(2){font-size:23px!important}}
+@media(max-width:390px){.metricSupporting{padding-inline:7px!important}.metricSupporting>span:nth-child(2){font-size:24px!important}}
