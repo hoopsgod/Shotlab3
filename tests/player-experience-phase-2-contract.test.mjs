@@ -45,7 +45,7 @@ test("workspace components preserve mobile interaction, scoreboard hierarchy, an
   assert.match(cssSource, /border-block:1px solid/);
   assert.match(cssSource, /overflow-x:auto/);
   assert.match(hierarchySource, /@media\(max-width:700px\)[\s\S]*\.metricsHierarchy\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
-  assert.match(hierarchySource, /\.metricPrimary\{grid-column:1\/-1!important/);
+  assert.match(hierarchySource, /\.metricPrimary\{[^}]*grid-column:\s*1\s*\/\s*-1!important;[^}]*\}/);
   assert.match(hierarchySource, /\.metricSupporting>span:first-child\{[^}]*font-size:11px!important/);
   assert.match(hierarchySource, /\.metricSupporting>span:last-child\{[^}]*font-size:12px!important/);
 });
