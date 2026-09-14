@@ -16,8 +16,7 @@
 
 @media(max-width:700px){
   .metricsHierarchy{grid-template-columns:repeat(3,minmax(0,1fr))!important;border-block:1px solid rgba(20,32,25,.11)!important;background:transparent!important}
-  .metricPrimary{
-    grid-column:1/-1!important;
+  .metricPrimary{grid-column:1/-1!important;
     min-height:104px!important;
     padding:18px 18px 17px 21px!important;
     border-radius:0!important;
