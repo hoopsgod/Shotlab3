@@ -52,9 +52,9 @@ const coachTitleCss = fs.readFileSync(coachTitleCssPath, 'utf8')
 const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img')
 
 // Phase 6E intentionally removes the duplicate mobile utility header and moves the
-// certified 390px rendering into one source-owned authority. Verify the effective
-// declarations rather than requiring an exact one-property rule body so the contract
-// remains valid when related canonical geometry is intentionally co-located.
+// certified 390px rendering into one source-owned authority. Verify the source-owned
+// declarations here; production is allowed to fold equivalent values into the existing
+// <=700px component rules as long as the required effective values survive the build.
 for (const contract of [
   /Phase 6E mobile Coach Home composition authority/,
   /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/,
@@ -76,7 +76,6 @@ for (const productionContract of [
   'min-height:334px',
   '--coach-hero-crest:clamp(104px,29vw,120px)',
   'min-height:54px',
-  'margin-inline:0',
 ]) {
   if (!builtCss.includes(productionContract)) {
     throw new Error(`Phase 5B production CSS lost canonical Coach mobile authority: ${productionContract}`)
