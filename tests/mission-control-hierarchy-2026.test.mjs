@@ -40,7 +40,7 @@ test("Mission Control preserves the interaction contract while mobile may hide d
   assert.match(commandCenter, /is-mobile-shell/);
 });
 
-test("Coach Home base composition stays source-owned and the runtime shell bridge owns the verified Phase 6A mobile authority", () => {
+test("Coach Home base composition stays source-owned while the runtime shell bridge owns only mobile containment", () => {
   assert.match(commandCenter, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(commandCenter, /import "\.\/CoachMissionControlShell\.css"/);
   assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
@@ -53,12 +53,18 @@ test("Coach Home base composition stays source-owned and the runtime shell bridg
   assert.match(titleCss, /\.mcPrimary\s*\{/);
 
   assert.match(shellCss, /\.mcShellV3\.is-mobile-shell > \.mcRail\{display:none!important\}/);
+  assert.match(shellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*overflow-x:clip!important/);
   assert.match(shellCss, /@media\(max-width:700px\)/);
-  assert.match(shellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
-  assert.match(shellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
-  assert.match(shellCss, /\.mcProgramIdentity\{[^}]*font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
-  assert.match(shellCss, /h1\{[^}]*max-width:16ch!important[^}]*font:760 24px\/1\.02 var\(--mc-native/);
-  assert.match(shellCss, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
+  assert.match(shellCss, /padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)!important/);
+  assert.doesNotMatch(shellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
+
+  assert.match(titleCss, /Phase 6E mobile Coach Home composition authority/);
+  assert.match(titleCss, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(titleCss, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/);
+  assert.match(titleCss, /\.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/);
+  assert.match(titleCss, /\.mcProgramIdentity\{font:780 11px\/1\.2 -apple-system/);
+  assert.match(titleCss, /h1\{max-width:15ch;margin:12px 0 0;font-family:"Barlow Condensed"/);
+  assert.match(titleCss, /\.mcHeroContent>p\{max-width:36ch;margin:7px 0 0;font:520 14px\/1\.42 -apple-system/);
 
   const supportCss = stripComments(css);
   assert.doesNotMatch(supportCss, /\.mcShellV3\b|\.missionControl\b|\.mcHero\b|\.mcSection\b/);
@@ -104,9 +110,10 @@ test("shared support tokens remain explicit light-surface values", () => {
 test("mobile hierarchy has one visible introduction and retains safe viewport containment", () => {
   assert.match(titleCss, /@media\s*\(\s*max-width:\s*700px\s*\)/);
   assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,1fr\) var\(--coach-hero-crest\)/);
+  assert.match(titleCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(shellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*overflow-x:clip!important/);
   assert.match(shellCss, /text-size-adjust:100%!important/);
-  assert.match(shellCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
+  assert.doesNotMatch(shellCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader/);
   assert.doesNotMatch(stripComments(css), /\.mcHeader\b/);
 });
 
