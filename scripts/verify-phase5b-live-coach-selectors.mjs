@@ -51,20 +51,35 @@ for (const sourceOwnedIdentityContract of [
 const coachTitleCss = fs.readFileSync(coachTitleCssPath, 'utf8')
 const mobile = mediaBlock(coachTitleCss, '(max-width:700px)')
 const header = ruleBlock(mobile, '.mcHeader[data-testid="mission-control-team-header"]')
-const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]')
-const identity = ruleBlock(mobile, '.mcHeroIdentity')
-const crest = ruleBlock(mobile, '.mcHeroTeamMark')
 const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img')
 
-assertDeclaration(header, 'min-height', '56px')
-assertDeclaration(header, 'grid-template-columns', '44px minmax(0,1fr) 44px')
-assertDeclaration(hero, 'min-height', '382px')
-assertDeclaration(identity, '--coach-hero-crest', /^clamp\(96px,\s*26vw,\s*108px\)$/)
-for (const property of ['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height']) {
-  assertDeclaration(crest, property, 'var(--coach-hero-crest)')
+// Phase 6E intentionally removes the duplicate mobile utility header and moves the
+// certified 390px hero geometry into the higher-specificity source-owned authority.
+// This recovery verifier must protect the live composition rather than the retired
+// 56px header / 382px hero baseline that no longer renders.
+assertDeclaration(header, 'display', 'none')
+for (const contract of [
+  /Phase 6E mobile Coach Home composition authority/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px;margin:0\}/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\)/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcFocusGrid\{margin-inline:0\}/,
+]) {
+  if (!contract.test(coachTitleCss)) {
+    throw new Error(`Phase 5B could not verify canonical Phase 6E Coach mobile authority: ${contract}`)
+  }
 }
 assertDeclaration(crestImage, 'width', '100%')
 assertDeclaration(crestImage, 'height', '100%')
 assertDeclaration(crestImage, 'object-fit', 'contain')
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, mobile header geometry, and base-owned crest containment verified`)
+for (const productionContract of [
+  '.mcShellV3.is-mobile-shell',
+  'min-height:334px',
+  '--coach-hero-crest:clamp(104px,29vw,120px)',
+]) {
+  if (!builtCss.includes(productionContract)) {
+    throw new Error(`Phase 5B production CSS lost canonical Coach mobile authority: ${productionContract}`)
+  }
+}
+
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, canonical 390px hero authority, and crest containment verified`)
