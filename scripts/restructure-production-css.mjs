@@ -10,6 +10,7 @@ const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const PHASE_6E_MARKER = "/* Phase 6E mobile Coach Home composition authority.";
 const MOBILE_700_MEDIA = /@media\s*\(\s*(?:max-width\s*:\s*700px|width\s*<=\s*700px)\s*\)\s*\{/gi;
+const MOBILE_350_MEDIA = /@media\s*\(\s*(?:max-width\s*:\s*350px|width\s*<=\s*350px)\s*\)\s*\{/gi;
 const RETIRED_MOBILE_HEADER_CHROME = /\.mcShellV3\s+(?:\.mcHeader\b|\.mcBrandLockup\b|\.mcBrandCopy\b|\.mcHeaderActions\b|\.mcBell\b|\.mcMobileMenu\b|\.mcHeaderTeamMark\b|\.mcTeamSelect\b)/;
 const COACH_STAGE = '.mcShellV3 .mcHero[data-team-identity-stage=coach-mission-control]';
 
@@ -176,20 +177,33 @@ function canonicalMobileRewrite(selector) {
   return null;
 }
 
-function foldCanonicalCoachMobile(css) {
+function transformMediaBlocks(css, mediaPattern, transformBody) {
   let cursor = 0;
   let output = "";
-  let removedHeaderArms = 0;
-  let rewrittenRules = 0;
-  MOBILE_700_MEDIA.lastIndex = 0;
+  let changes = 0;
+  mediaPattern.lastIndex = 0;
   let match;
-
-  while ((match = MOBILE_700_MEDIA.exec(css))) {
+  while ((match = mediaPattern.exec(css))) {
     const open = css.indexOf("{", match.index);
     const close = findBalancedClose(css, open);
     if (open < 0 || close < 0) break;
     const body = css.slice(open + 1, close);
-    const transformed = body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selector, declarations) => {
+    const transformed = transformBody(body);
+    output += css.slice(cursor, open + 1) + transformed.css + "}";
+    changes += transformed.changes || 0;
+    cursor = close + 1;
+    mediaPattern.lastIndex = cursor;
+  }
+  if (cursor === 0) return { css, changes: 0, rawBytesSaved: 0 };
+  output += css.slice(cursor);
+  return { css: output, changes, rawBytesSaved: Buffer.byteLength(css) - Buffer.byteLength(output) };
+}
+
+function foldCanonicalCoachMobile(css) {
+  let removedHeaderArms = 0;
+  let rewrittenRules = 0;
+  const result = transformMediaBlocks(css, MOBILE_700_MEDIA, (body) => {
+    const next = body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selector, declarations) => {
       if (selector.trim().startsWith("@")) return whole;
       const arms = selector.split(",").map((arm) => arm.trim()).filter(Boolean);
       if (!arms.length) return whole;
@@ -211,20 +225,34 @@ function foldCanonicalCoachMobile(css) {
       if (keptArms.length !== arms.length) return `${keptArms.join(",")}{${declarations}}`;
       return whole;
     });
+    return { css: next, changes: removedHeaderArms + rewrittenRules };
+  });
+  return { css: result.css, removedHeaderArms, rewrittenRules, rawBytesSaved: result.rawBytesSaved };
+}
 
-    output += css.slice(cursor, open + 1) + transformed + "}";
-    cursor = close + 1;
-    MOBILE_700_MEDIA.lastIndex = cursor;
-  }
+function pruneSupersededNarrowCoachMobile(css) {
+  let removedDeclarations = 0;
+  const result = transformMediaBlocks(css, MOBILE_350_MEDIA, (body) => {
+    const next = body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selector, declarations) => {
+      if (selector.trim().startsWith("@")) return whole;
+      const normalized = normalizeSelector(selector);
+      let removals = null;
+      if (normalized === `${COACH_STAGE} .mcHeroContent`) removals = ["padding-inline"];
+      else if (normalized === `${COACH_STAGE} .mcHeroIdentity`) removals = ["grid-template-columns"];
+      else if (normalized === `${COACH_STAGE} .mcHeroTeamMark`) removals = ["width", "height", "min-width", "min-height", "max-width", "max-height"];
+      else if (normalized === `${COACH_STAGE} h1`) removals = ["font-size"];
+      if (!removals) return whole;
 
-  if (cursor === 0) return { css, removedHeaderArms: 0, rewrittenRules: 0, rawBytesSaved: 0 };
-  output += css.slice(cursor);
-  return {
-    css: output,
-    removedHeaderArms,
-    rewrittenRules,
-    rawBytesSaved: Buffer.byteLength(css) - Buffer.byteLength(output),
-  };
+      const nextDeclarations = rewriteDeclarations(declarations, {}, removals);
+      if (nextDeclarations === declarations.trim()) return whole;
+      const before = declarations.split(";").filter(Boolean).length;
+      const after = nextDeclarations.split(";").filter(Boolean).length;
+      removedDeclarations += Math.max(0, before - after);
+      return nextDeclarations ? `${selector.trim()}{${nextDeclarations}}` : "";
+    });
+    return { css: next, changes: removedDeclarations };
+  });
+  return { css: result.css, removedDeclarations, rawBytesSaved: result.rawBytesSaved };
 }
 
 async function finalizeProductionCss(files) {
@@ -235,7 +263,9 @@ async function finalizeProductionCss(files) {
   let removedCompiledAuthorityRules = 0;
   let removedLegacyHeaderArms = 0;
   let foldedCoachRules = 0;
-  let foldRawDelta = 0;
+  let foldedCoachBytes = 0;
+  let narrowDeclarations = 0;
+  let narrowBytes = 0;
   const canonicalCoachMobileGuard = await loadCanonicalCoachMobileGuard();
 
   for (const file of files) {
@@ -262,7 +292,16 @@ async function finalizeProductionCss(files) {
       workingSource = folded.css;
       removedLegacyHeaderArms += folded.removedHeaderArms;
       foldedCoachRules += folded.rewrittenRules;
-      foldRawDelta += folded.rawBytesSaved;
+      foldedCoachBytes += folded.rawBytesSaved;
+
+      // The source-owned Phase 6E rules are more specific than the historical
+      // <=350px tweaks. Once authority is folded into the base <=700px rules for
+      // production, remove those narrow declarations so 320px keeps the same
+      // accepted computed values instead of reintroducing the superseded 92px crest.
+      const narrow = pruneSupersededNarrowCoachMobile(workingSource);
+      workingSource = narrow.css;
+      narrowDeclarations += narrow.removedDeclarations;
+      narrowBytes += narrow.rawBytesSaved;
     }
 
     const restructured = restructureCss(workingSource, relative, { coach: isCoachWorkspace });
@@ -277,7 +316,7 @@ async function finalizeProductionCss(files) {
     }
   }
 
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s); removed ${removedCompiledAuthorityRules} compiled Phase 6E rule(s); folded ${foldedCoachRules} certified Coach mobile rule(s); removed ${removedLegacyHeaderArms} unreachable mobile header selector arm(s); fold raw delta ${(foldRawDelta / 1024).toFixed(1)} KiB.`);
+  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s); removed ${removedCompiledAuthorityRules} compiled Phase 6E rule(s); folded ${foldedCoachRules} certified Coach mobile rule(s); removed ${removedLegacyHeaderArms} unreachable mobile header selector arm(s); fold raw delta ${(foldedCoachBytes / 1024).toFixed(1)} KiB; removed ${narrowDeclarations} superseded <=350px declaration(s) (${(narrowBytes / 1024).toFixed(1)} KiB raw).`);
 }
 
 async function main() {
