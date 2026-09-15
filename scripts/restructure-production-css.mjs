@@ -122,12 +122,12 @@ async function finalizeProductionCss(files) {
     // Re-run CSSO after selector/font dedupe so the large production stylesheet
     // retains budget headroom. Canonical Coach mobile rules are extracted by
     // selector rather than source order because earlier optimizer passes may merge
-    // or reorder them. Lightning CSS compacts the restored media block without
-    // allowing CSSO to prove its higher-specificity viewport authority redundant.
+    // or reorder them. Keep the restored rules out of another whole-block optimizer
+    // pass so their selector boundaries remain stable for exact-head certification.
     const restructured = restructureCss(workingSource, relative, { coach: false });
     let output = compactProductionCss(restructured, path.basename(file));
     if (coachMobileRules.length) {
-      const restoredAuthority = compactProductionCss(`@media(max-width:700px){${coachMobileRules.join("")}}`, path.basename(file));
+      const restoredAuthority = `@media(max-width:700px){${coachMobileRules.join("")}}`;
       output += restoredAuthority;
       assertCoachMobileAuthoritySurvives(output, relative);
     }
