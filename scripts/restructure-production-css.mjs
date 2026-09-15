@@ -54,8 +54,23 @@ function compactProductionCss(css, filename) {
   }).code.toString("utf8");
 }
 
+// Lightning CSS canonicalizes legacy min/max-width queries to Media Queries Level 4
+// range syntax. CSSO's restructuring pass does not safely round-trip that syntax and
+// can drop the entire responsive block when the already-compacted bundle is processed
+// a second time. Normalize only equivalent width ranges before every CSSO pass so the
+// optimizer remains idempotent across the two final-coach invocations.
+function normalizeMediaRangeSyntaxForCsso(css) {
+  const value = String.raw`([0-9]*\.?[0-9]+(?:px|em|rem))`;
+  return css
+    .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*<=\\s*width\\s*<=\\s*${value}\\s*\\)`, 'gi'), '@media(min-width:$1) and (max-width:$2)')
+    .replace(new RegExp(`@media\\s*\\(\\s*width\\s*<=\\s*${value}\\s*\\)`, 'gi'), '@media(max-width:$1)')
+    .replace(new RegExp(`@media\\s*\\(\\s*width\\s*>=\\s*${value}\\s*\\)`, 'gi'), '@media(min-width:$1)')
+    .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*<=\\s*width\\s*\\)`, 'gi'), '@media(min-width:$1)')
+    .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*>=\\s*width\\s*\\)`, 'gi'), '@media(max-width:$1)');
+}
+
 function restructureCss(css, filename, { coach = false } = {}) {
-  return minify(css, {
+  return minify(normalizeMediaRangeSyntaxForCsso(css), {
     filename,
     restructure: true,
     comments: false,
@@ -234,6 +249,19 @@ function assertCanonicalSourceAuthority(css, filename) {
   }
 }
 
+function assertCoachResponsiveAuthoritySurvived(css, filename) {
+  const required = [
+    'min-height:330px',
+    'min-height:354px',
+    'min-height:334px',
+    '--coach-hero-crest:',
+  ];
+  const missing = required.filter((contract) => !css.includes(contract));
+  if (missing.length) {
+    throw new Error(`Final Coach CSS compaction dropped responsive authority from ${filename}: ${missing.join(', ')}`);
+  }
+}
+
 async function loadCanonicalCoachMobileAuthority() {
   const source = await readFile(COACH_TITLE_SOURCE, "utf8");
   const marker = source.indexOf(PHASE_6E_MARKER);
@@ -279,9 +307,9 @@ async function finalizeProductionCss(files) {
     }
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
-    let workingSource = source;
+    let workingSource = normalizeMediaRangeSyntaxForCsso(source);
     if (isCoachWorkspace) {
-      const extracted = extractCoachMobileAuthority(source, relative);
+      const extracted = extractCoachMobileAuthority(workingSource, relative);
       const pruned = pruneSupersededCoachMobileHeaderChrome(extracted.css);
       const folded = foldCertifiedCoachMobileHero(pruned.css);
       workingSource = folded.css;
@@ -294,11 +322,14 @@ async function finalizeProductionCss(files) {
     // Re-run CSSO after selector/font dedupe to preserve the established bundle
     // budget. Phase 6E's runtime-gated declarations are first folded into the
     // component's compiled <=700px rules at identical computed values; only the
-    // hidden-header gate is restored afterward. This removes duplicate cascade
-    // bytes without weakening the source authority or visual contract.
+    // hidden-header gate is restored afterward. Normalizing Lightning CSS media
+    // range syntax before CSSO makes this pass safe and repeatable.
     const restructured = restructureCss(workingSource, relative, { coach: isCoachWorkspace });
     let output = compactProductionCss(restructured, path.basename(file));
-    if (isCoachWorkspace) output += canonicalCoachMobileAuthority;
+    if (isCoachWorkspace) {
+      output += canonicalCoachMobileAuthority;
+      assertCoachResponsiveAuthoritySurvived(output, relative);
+    }
 
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
