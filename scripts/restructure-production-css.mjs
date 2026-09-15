@@ -120,7 +120,7 @@ async function loadCanonicalCoachMobileAuthority() {
     throw new Error("Could not read the Phase 6E canonical Coach mobile source authority block.");
   }
   assertCanonicalSourceAuthority(authority, path.relative(process.cwd(), COACH_TITLE_SOURCE));
-  return authority;
+  return compactProductionCss(authority, path.basename(COACH_TITLE_SOURCE));
 }
 
 async function finalizeProductionCss(files) {
