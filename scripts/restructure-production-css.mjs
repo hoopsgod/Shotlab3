@@ -38,7 +38,7 @@ async function listCssFiles(directory) {
   const files = [];
   for (const entry of entries) {
     const fullPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await listCssFiles(fullPath));
+    if (entry.isDirectory()) files.push(...await listCssFiles(fullPath, predicate));
     else if (entry.isFile() && entry.name.endsWith(".css")) files.push(fullPath);
   }
   return files;
@@ -57,8 +57,7 @@ function compactProductionCss(css, filename) {
 // Lightning CSS canonicalizes legacy min/max-width queries to Media Queries Level 4
 // range syntax. CSSO's restructuring pass does not safely round-trip that syntax and
 // can drop the entire responsive block when the already-compacted bundle is processed
-// a second time. Normalize only equivalent width ranges before every CSSO pass so the
-// optimizer remains idempotent across the two final-coach invocations.
+// a second time. Normalize only equivalent width ranges before the repeated Coach pass.
 function normalizeMediaRangeSyntaxForCsso(css) {
   const value = String.raw`([0-9]*\.?[0-9]+(?:px|em|rem))`;
   return css
@@ -74,7 +73,7 @@ function hasModernMediaRangeSyntax(css) {
 }
 
 function restructureCss(css, filename, { coach = false } = {}) {
-  return minify(normalizeMediaRangeSyntaxForCsso(css), {
+  return minify(css, {
     filename,
     restructure: true,
     comments: false,
@@ -312,7 +311,7 @@ async function finalizeProductionCss(files) {
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     const isRepeatedCoachCompaction = isCoachWorkspace && hasModernMediaRangeSyntax(source);
-    let workingSource = normalizeMediaRangeSyntaxForCsso(source);
+    let workingSource = isCoachWorkspace ? normalizeMediaRangeSyntaxForCsso(source) : source;
     if (isCoachWorkspace) {
       const extracted = extractCoachMobileAuthority(workingSource, relative);
       const pruned = pruneSupersededCoachMobileHeaderChrome(extracted.css);
@@ -327,8 +326,7 @@ async function finalizeProductionCss(files) {
     // Re-run CSSO after selector/font dedupe to preserve the established bundle
     // budget. Phase 6E's runtime-gated declarations are first folded into the
     // component's compiled <=700px rules at identical computed values; only the
-    // hidden-header gate is restored afterward. Normalizing Lightning CSS media
-    // range syntax before CSSO makes this pass safe and repeatable.
+    // hidden-header gate is restored afterward.
     // Never feed a Lightning-CSS-compacted Coach bundle back through CSSO. CSSO
     // is safe on the source/legacy media syntax during the first final pass, but
     // repeated restructuring of the already-compacted responsive bundle can drop
