@@ -152,8 +152,9 @@ async function finalizeProductionCss(files) {
     // Re-run CSSO after selector/font dedupe so the large production stylesheet
     // retains budget headroom. The Phase 6E mobile authority is restored from its
     // source-owned component block after compaction, so final optimization cannot
-    // rewrite or prove away the certified 390px composition.
-    const restructured = restructureCss(workingSource, relative, { coach: false });
+    // rewrite or prove away the certified 390px composition. With that authority
+    // removed, identical Coach media blocks are safe to merge again.
+    const restructured = restructureCss(workingSource, relative, { coach: isCoachWorkspace });
     let output = compactProductionCss(restructured, path.basename(file));
     if (isCoachWorkspace) output += canonicalCoachMobileAuthority;
 
