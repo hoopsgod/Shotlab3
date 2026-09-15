@@ -7,7 +7,7 @@ const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
-const COACH_MOBILE_AUTHORITY_BLOCK = /body\.mission-control-active\s+\.mcShellV3\.is-mobile-shell\s+\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]\{[^{}]*\}(?:body\.mission-control-active\s+\.mcShellV3\.is-mobile-shell[^{}]*\{[^{}]*\})+?body\.mission-control-active\s+\.mcShellV3\.is-mobile-shell\s+\.mcLowerGrid\{[^{}]*\}/;
+const COACH_MOBILE_TARGET = /(?:\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]|\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]|\.mcFocusGrid\b|\.mcActivationChapter\b|\.mcLowerGrid\b)/;
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -61,10 +61,23 @@ function isProtectedFinalAuthority(file) {
   return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
 }
 
+function isCanonicalCoachMobileSelector(selector) {
+  const normalized = selector.replace(/\s+/g, " ").trim();
+  return normalized.includes(".mcShellV3.is-mobile-shell") && COACH_MOBILE_TARGET.test(normalized);
+}
+
 function extractCoachMobileAuthority(css, filename) {
-  const match = css.match(COACH_MOBILE_AUTHORITY_BLOCK);
-  if (!match) throw new Error(`Missing canonical Coach mobile authority before final CSS restructure: ${filename}`);
-  return match[0];
+  const rules = [];
+  const stripped = css.replace(/([^{}]+)\{([^{}]*)\}/g, (match, selector, body) => {
+    if (!isCanonicalCoachMobileSelector(selector)) return match;
+    rules.push(`${selector.trim()}{${body}}`);
+    return "";
+  });
+
+  if (rules.length < 8) {
+    throw new Error(`Missing canonical Coach mobile authority before final CSS restructure: ${filename} (${rules.length} rule(s) found)`);
+  }
+  return { css: stripped, rules };
 }
 
 function assertCoachMobileAuthoritySurvives(css, filename) {
@@ -84,7 +97,7 @@ async function finalizeProductionCss(files) {
   let outputBytes = 0;
   let changedFiles = 0;
   let protectedFiles = 0;
-  let protectedCoachBlocks = 0;
+  let protectedCoachRules = 0;
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
@@ -98,22 +111,23 @@ async function finalizeProductionCss(files) {
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     let workingSource = source;
-    let coachMobileAuthority = "";
+    let coachMobileRules = [];
     if (isCoachWorkspace) {
-      coachMobileAuthority = extractCoachMobileAuthority(source, relative);
-      workingSource = source.replace(coachMobileAuthority, "");
-      protectedCoachBlocks += 1;
+      const extracted = extractCoachMobileAuthority(source, relative);
+      workingSource = extracted.css;
+      coachMobileRules = extracted.rules;
+      protectedCoachRules += coachMobileRules.length;
     }
 
     // Re-run CSSO after selector/font dedupe so the large production stylesheet
-    // retains budget headroom. The canonical Coach mobile authority is extracted
-    // first because CSSO incorrectly proves those viewport rules redundant when
-    // later global selectors are present; Lightning CSS then compacts the restored
-    // block without changing its cascade semantics.
+    // retains budget headroom. Canonical Coach mobile rules are extracted by
+    // selector rather than source order because earlier optimizer passes may merge
+    // or reorder them. Lightning CSS compacts the restored media block without
+    // allowing CSSO to prove its higher-specificity viewport authority redundant.
     const restructured = restructureCss(workingSource, relative, { coach: false });
     let output = compactProductionCss(restructured, path.basename(file));
-    if (coachMobileAuthority) {
-      const restoredAuthority = compactProductionCss(`@media(max-width:700px){${coachMobileAuthority}}`, path.basename(file));
+    if (coachMobileRules.length) {
+      const restoredAuthority = compactProductionCss(`@media(max-width:700px){${coachMobileRules.join("")}}`, path.basename(file));
       output += restoredAuthority;
       assertCoachMobileAuthoritySurvives(output, relative);
     }
@@ -126,7 +140,7 @@ async function finalizeProductionCss(files) {
     }
   }
 
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachBlocks} canonical Coach mobile block(s).`);
+  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachRules} canonical Coach mobile rule(s).`);
 }
 
 async function main() {
