@@ -7,6 +7,7 @@ const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
+const COACH_MOBILE_AUTHORITY_BLOCK = /body\.mission-control-active\s+\.mcShellV3\.is-mobile-shell\s+\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]\{[^{}]*\}(?:body\.mission-control-active\s+\.mcShellV3\.is-mobile-shell[^{}]*\{[^{}]*\})+?body\.mission-control-active\s+\.mcShellV3\.is-mobile-shell\s+\.mcLowerGrid\{[^{}]*\}/;
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -60,11 +61,30 @@ function isProtectedFinalAuthority(file) {
   return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
 }
 
+function extractCoachMobileAuthority(css, filename) {
+  const match = css.match(COACH_MOBILE_AUTHORITY_BLOCK);
+  if (!match) throw new Error(`Missing canonical Coach mobile authority before final CSS restructure: ${filename}`);
+  return match[0];
+}
+
+function assertCoachMobileAuthoritySurvives(css, filename) {
+  const required = [
+    /\.mcShellV3\.is-mobile-shell\s+\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]\{[^{}]*display:none/,
+    /\.mcShellV3\.is-mobile-shell\s+\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]\{[^{}]*min-height:334px/,
+    /--coach-hero-crest:clamp\(104px,29vw,120px\)/,
+    /\.mcShellV3\.is-mobile-shell\s+\.mcFocusGrid\{[^{}]*margin-inline:0/,
+  ];
+  if (required.some((contract) => !contract.test(css))) {
+    throw new Error(`Canonical Coach mobile authority was lost during final CSS restructure: ${filename}`);
+  }
+}
+
 async function finalizeProductionCss(files) {
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
   let protectedFiles = 0;
+  let protectedCoachBlocks = 0;
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
@@ -75,14 +95,29 @@ async function finalizeProductionCss(files) {
       protectedFiles += 1;
       continue;
     }
-    // Dedupe/font-token passes run after the first CSSO pass. Re-run standards-
-    // based restructuring here so newly adjacent/equivalent rules can collapse
-    // before Lightning CSS performs final syntax compaction. Deliberately keep
-    // forceMediaMerge disabled in this final pass: Coach mobile authority depends
-    // on preserving distinct media-rule contexts, but does not need to skip CSSO
-    // restructuring altogether.
-    const restructured = restructureCss(source, relative, { coach: false });
-    const output = compactProductionCss(restructured, path.basename(file));
+
+    const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
+    let workingSource = source;
+    let coachMobileAuthority = "";
+    if (isCoachWorkspace) {
+      coachMobileAuthority = extractCoachMobileAuthority(source, relative);
+      workingSource = source.replace(coachMobileAuthority, "");
+      protectedCoachBlocks += 1;
+    }
+
+    // Re-run CSSO after selector/font dedupe so the large production stylesheet
+    // retains budget headroom. The canonical Coach mobile authority is extracted
+    // first because CSSO incorrectly proves those viewport rules redundant when
+    // later global selectors are present; Lightning CSS then compacts the restored
+    // block without changing its cascade semantics.
+    const restructured = restructureCss(workingSource, relative, { coach: false });
+    let output = compactProductionCss(restructured, path.basename(file));
+    if (coachMobileAuthority) {
+      const restoredAuthority = compactProductionCss(`@media(max-width:700px){${coachMobileAuthority}}`, path.basename(file));
+      output += restoredAuthority;
+      assertCoachMobileAuthoritySurvives(output, relative);
+    }
+
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -91,7 +126,7 @@ async function finalizeProductionCss(files) {
     }
   }
 
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`);
+  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachBlocks} canonical Coach mobile block(s).`);
 }
 
 async function main() {
