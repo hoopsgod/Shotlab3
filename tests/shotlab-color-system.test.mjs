@@ -47,12 +47,13 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
 
   const image = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img');
   assert.match(coachTitleCss, /Phase 6E mobile Coach Home composition authority/);
-  assert.match(coachTitleCss, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/);
-  assert.match(coachTitleCss, /\.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/);
-  assert.match(coachTitleCss, /\.mcProgramIdentity\{font:780 11px\/1\.2 -apple-system/);
-  assert.match(coachTitleCss, /h1\{max-width:15ch;margin:12px 0 0;font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif;font-size:clamp\(36px,9\.4vw,40px\)/);
-  assert.match(coachTitleCss, /\.mcHeroContent>p\{max-width:36ch;margin:7px 0 0;font:520 14px\/1\.42 -apple-system/);
-  assert.match(coachTitleCss, /\.mcPrimary\{margin-top:11px\}/);
+  assert.match(coachTitleCss, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin:0/);
+  assert.match(coachTitleCss, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest,88px\)[^}]*gap:12px/);
+  assert.match(coachTitleCss, /\.mcProgramIdentity\{[^}]*grid-row:1[^}]*font:780 11px\/1\.2 -apple-system/);
+  assert.match(coachTitleCss, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)/);
+  assert.match(coachTitleCss, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
+  assert.match(coachTitleCss, /\.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/);
+  assert.match(coachTitleCss, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
   assert.match(coachShellCss, /@media\(max-width:700px\)[\s\S]*padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)!important/);
   assert.doesNotMatch(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:|\.mcProgramIdentity\{|\.mcHeroIdentity\{|\.mcHeroTeamMark\{/);
   assertDeclaration(image, "object-fit", "contain");
