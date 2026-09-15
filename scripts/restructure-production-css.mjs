@@ -69,6 +69,10 @@ function normalizeMediaRangeSyntaxForCsso(css) {
     .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*>=\\s*width\\s*\\)`, 'gi'), '@media(max-width:$1)');
 }
 
+function hasModernMediaRangeSyntax(css) {
+  return /@media\s*\([^)]*(?:width\s*[<>]=|[<>]=\s*width)/i.test(css);
+}
+
 function restructureCss(css, filename, { coach = false } = {}) {
   return minify(normalizeMediaRangeSyntaxForCsso(css), {
     filename,
@@ -307,6 +311,7 @@ async function finalizeProductionCss(files) {
     }
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
+    const isRepeatedCoachCompaction = isCoachWorkspace && hasModernMediaRangeSyntax(source);
     let workingSource = normalizeMediaRangeSyntaxForCsso(source);
     if (isCoachWorkspace) {
       const extracted = extractCoachMobileAuthority(workingSource, relative);
@@ -324,7 +329,14 @@ async function finalizeProductionCss(files) {
     // component's compiled <=700px rules at identical computed values; only the
     // hidden-header gate is restored afterward. Normalizing Lightning CSS media
     // range syntax before CSSO makes this pass safe and repeatable.
-    const restructured = restructureCss(workingSource, relative, { coach: isCoachWorkspace });
+    // Never feed a Lightning-CSS-compacted Coach bundle back through CSSO. CSSO
+    // is safe on the source/legacy media syntax during the first final pass, but
+    // repeated restructuring of the already-compacted responsive bundle can drop
+    // valid breakpoint blocks. The second final pass only needs deterministic
+    // minification after font dedupe, so Lightning CSS is sufficient there.
+    const restructured = isRepeatedCoachCompaction
+      ? workingSource
+      : restructureCss(workingSource, relative, { coach: isCoachWorkspace });
     let output = compactProductionCss(restructured, path.basename(file));
     if (isCoachWorkspace) {
       output += canonicalCoachMobileAuthority;
