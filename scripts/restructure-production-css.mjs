@@ -52,8 +52,22 @@ function compactProductionCss(css, filename) {
   }).code.toString("utf8");
 }
 
+// Lightning CSS serializes legacy min/max-width queries as Media Queries Level 4
+// range syntax. CSSO can drop responsive blocks when an already-compacted bundle
+// is fed back through a second restructuring pass, so normalize equivalent ranges
+// before every CSSO invocation. This keeps the two --final-coach passes idempotent.
+function normalizeMediaRangeSyntaxForCsso(css) {
+  const value = String.raw`([0-9]*\.?[0-9]+(?:px|em|rem))`;
+  return css
+    .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*<=\\s*width\\s*<=\\s*${value}\\s*\\)`, 'gi'), '@media(min-width:$1) and (max-width:$2)')
+    .replace(new RegExp(`@media\\s*\\(\\s*width\\s*<=\\s*${value}\\s*\\)`, 'gi'), '@media(max-width:$1)')
+    .replace(new RegExp(`@media\\s*\\(\\s*width\\s*>=\\s*${value}\\s*\\)`, 'gi'), '@media(min-width:$1)')
+    .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*<=\\s*width\\s*\\)`, 'gi'), '@media(min-width:$1)')
+    .replace(new RegExp(`@media\\s*\\(\\s*${value}\\s*>=\\s*width\\s*\\)`, 'gi'), '@media(max-width:$1)');
+}
+
 function restructureCss(css, filename, { coach = false } = {}) {
-  return minify(css, {
+  return minify(normalizeMediaRangeSyntaxForCsso(css), {
     filename,
     restructure: true,
     comments: false,
