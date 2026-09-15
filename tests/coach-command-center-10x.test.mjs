@@ -114,7 +114,9 @@ test("mobile Coach Home remains brand-first, Pulse-first and touch-safe",()=>{
   assert.match(mobileTitle,/\.mcProgramIdentity/);
   assert.match(mobileTitle,/\.mcHeroTeamMark/);
   assert.match(mobileTitle,/\.mcTeamHealth/);
-  assert.match(mobileTitle,/safe-area-inset-top/);
+  assert.match(mobileTitle,/\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(titleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px;margin:0\}/);
+  assert.match(titleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\)/);
   assert.ok(source.indexOf("{pulsePanel}{attentionPanel}") > -1,"Program Pulse must precede Athlete Attention in source order");
   assert.match(navigationCss,/--mobile-tab-bar-height:\s*56px/);
   assert.match(navigationCss,/\.dockItem\s*\{[\s\S]*?min-height:\s*48px/);
