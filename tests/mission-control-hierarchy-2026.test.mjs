@@ -59,14 +59,14 @@ test("Coach Home base composition stays source-owned while the runtime shell bri
   assert.doesNotMatch(shellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
 
   assert.match(titleCss, /Phase 6E mobile Coach Home composition authority/);
-  assert.match(titleCss, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
-  assert.match(titleCss, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin:0/);
-  assert.match(titleCss, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest,88px\)[^}]*gap:12px/);
-  assert.match(titleCss, /\.mcProgramIdentity\{[^}]*grid-row:1[^}]*font:780 11px\/1\.2 -apple-system/);
+  assert.match(titleCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(titleCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/);
+  assert.match(titleCss, /\.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/);
+  assert.match(titleCss, /\.mcProgramIdentity\{font:780 11px\/1\.2 -apple-system/);
   assert.match(titleCss, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
   assert.match(titleCss, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
-  assert.match(titleCss, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
-  assert.match(titleCss, /\.mcFocusGrid\{margin-inline:0\}/);
+  assert.match(titleCss, /\.mcRealityStrip\{margin-top:13px\}/);
+  assert.match(titleCss, /\.mcPrimary\{margin-top:11px\}/);
 
   const supportCss = stripComments(css);
   assert.doesNotMatch(supportCss, /\.mcShellV3\b|\.missionControl\b|\.mcHero\b|\.mcSection\b/);
