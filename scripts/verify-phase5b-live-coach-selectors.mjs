@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { assertDeclaration, mediaBlock, ruleBlock } from '../tests/helpers/css-contract.mjs'
+import { assertDeclaration, ruleBlock } from '../tests/helpers/css-contract.mjs'
 
 const assetsDir = path.resolve('dist/assets')
 const coachSourcePath = path.resolve('src/components/CoachCommandCenter.jsx')
@@ -49,22 +49,37 @@ for (const sourceOwnedIdentityContract of [
 }
 
 const coachTitleCss = fs.readFileSync(coachTitleCssPath, 'utf8')
-const mobile = mediaBlock(coachTitleCss, '(max-width:700px)')
-const header = ruleBlock(mobile, '.mcHeader[data-testid="mission-control-team-header"]')
-const hero = ruleBlock(mobile, '.mcHero[data-team-identity-stage="coach-mission-control"]')
-const identity = ruleBlock(mobile, '.mcHeroIdentity')
-const crest = ruleBlock(mobile, '.mcHeroTeamMark')
 const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img')
 
-assertDeclaration(header, 'min-height', '56px')
-assertDeclaration(header, 'grid-template-columns', '44px minmax(0,1fr) 44px')
-assertDeclaration(hero, 'min-height', '382px')
-assertDeclaration(identity, '--coach-hero-crest', /^clamp\(96px,\s*26vw,\s*108px\)$/)
-for (const property of ['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height']) {
-  assertDeclaration(crest, property, 'var(--coach-hero-crest)')
+// Phase 6E intentionally removes the duplicate mobile utility header and moves the
+// certified 390px rendering into one source-owned authority. Verify the source-owned
+// declarations here; production is allowed to fold equivalent values into the existing
+// <=700px component rules as long as the required effective values survive the build.
+for (const contract of [
+  /Phase 6E mobile Coach Home composition authority/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/,
+]) {
+  if (!contract.test(coachTitleCss)) {
+    throw new Error(`Phase 5B could not verify canonical Phase 6E Coach mobile authority: ${contract}`)
+  }
 }
 assertDeclaration(crestImage, 'width', '100%')
 assertDeclaration(crestImage, 'height', '100%')
 assertDeclaration(crestImage, 'object-fit', 'contain')
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, mobile header geometry, and base-owned crest containment verified`)
+for (const productionContract of [
+  '.mcShellV3.is-mobile-shell',
+  'min-height:334px',
+  '--coach-hero-crest:clamp(104px,29vw,120px)',
+  'min-height:54px',
+]) {
+  if (!builtCss.includes(productionContract)) {
+    throw new Error(`Phase 5B production CSS lost canonical Coach mobile authority: ${productionContract}`)
+  }
+}
+
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, certified 390px hero geometry, touch targets, and crest containment verified`)

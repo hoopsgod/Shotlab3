@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertDeclaration, mediaBlock, ruleBlock } from "./helpers/css-contract.mjs";
+import { mediaBlock } from "./helpers/css-contract.mjs";
 
 const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8");
 const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy.jsx",import.meta.url),"utf8");
@@ -76,11 +76,10 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(coachShellCss,/mission-control-active/);
   assert.match(coachShellCss,/safe-area-inset-bottom/);
   assert.match(coachTitleCss,/Canonical Coach Home prototype-composition authority/);
-
-  const mobileTitle=mediaBlock(coachTitleCss,"(max-width:700px)");
-  const hero=ruleBlock(mobileTitle,'.mcHero[data-team-identity-stage="coach-mission-control"]');
-  const header=ruleBlock(mobileTitle,'.mcHeader[data-testid="mission-control-team-header"]');
-  assertDeclaration(hero,"min-height","382px");
-  assert.ok(header.includes("safe-area-inset-top"),"mobile header must preserve safe-area geometry");
+  assert.match(coachTitleCss,/Phase 6E mobile Coach Home composition authority/);
+  assert.match(coachTitleCss,/\.mcShellV3 \.mcHeader\[data-testid="mission-control-team-header"\]\{[^}]*position:relative/);
+  assert.match(coachTitleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(coachTitleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
+  assert.match(coachTitleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
   assert.equal((playerCommandCenterSource.match(/data-testid="player-daily-command-center"/g)||[]).length,1);
 });

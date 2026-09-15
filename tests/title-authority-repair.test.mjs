@@ -25,6 +25,11 @@ const demoBrandingEnhancer = read('scripts/apply-demo-team-branding.mjs');
 const demoData = read('src/lib/demoData.js');
 
 const mobileShellBlock = coachShellCss.match(/@media\(max-width:700px\)\{([\s\S]*)\}\s*$/)?.[1] || '';
+const coachMobileAuthorityStart = coachTitleCss.indexOf('/* Phase 6E mobile Coach Home composition authority.');
+const coachMobileAuthorityEnd = coachTitleCss.indexOf('@media(max-width:350px)', coachMobileAuthorityStart);
+const coachMobileAuthority = coachMobileAuthorityStart >= 0 && coachMobileAuthorityEnd > coachMobileAuthorityStart
+  ? coachTitleCss.slice(coachMobileAuthorityStart, coachMobileAuthorityEnd)
+  : '';
 
 test('shared semantic title primitive remains authoritative for reusable authenticated page titles', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -41,7 +46,7 @@ test('obsolete parallel secondary-page title authorities remain deleted', () => 
   assert.doesNotMatch(playerCompositionEnhancer, /PlayerCommitmentCenter|MOBILE_COMMITMENT_COMPOSITION_CSS|commitment runtime style anchor/);
 });
 
-test('Coach Home keeps one source-owned hero while runtime shell bridge owns device containment and final mobile parity', () => {
+test('Coach Home keeps one source-owned hero while runtime shell bridge owns only device containment', () => {
   assert.match(coach, /data-team-identity-stage="coach-mission-control"/);
   assert.match(coach, /mcHeroIdentity/);
   assert.match(coach, /mcProgramIdentity/);
@@ -54,21 +59,32 @@ test('Coach Home keeps one source-owned hero while runtime shell bridge owns dev
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell/);
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell > \.mcRail\{display:none!important\}/);
   assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*text-size-adjust:100%!important/);
-  assert.match(mobileShellBlock, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
-  assert.match(mobileShellBlock, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
-  assert.match(mobileShellBlock, /\.mcHeroIdentity\{grid-template-columns:minmax\(0,1fr\) 88px!important;gap:14px!important\}/);
-  assert.match(mobileShellBlock, /\.mcHeroTeamMark\{width:88px!important;height:88px!important/);
-  assert.match(mobileShellBlock, /\.mcProgramIdentity\{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
-  assert.match(mobileShellBlock, /h1\{[^}]*font:760 24px\/1\.02 var\(--mc-native/);
-  assert.match(mobileShellBlock, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
+  assert.match(mobileShellBlock, /padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)!important/);
+  assert.doesNotMatch(coachShellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
+
+  assert.match(coachMobileAuthority, /mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(coachMobileAuthority, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
+  assert.match(coachMobileAuthority, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
+  assert.match(coachMobileAuthority, /\.mcHeroTeamMark\{[^}]*width:var\(--coach-hero-crest\);height:var\(--coach-hero-crest\)/);
+  assert.match(coachMobileAuthority, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
+  assert.match(coachMobileAuthority, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
+  assert.match(coachMobileAuthority, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
+  assert.match(coachMobileAuthority, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
+  assert.match(coachMobileAuthority, /\.mcRealityStrip\{[^}]*margin-top:13px/);
+  assert.match(coachMobileAuthority, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
+  assert.match(coachMobileAuthority, /\.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/);
+  assert.match(coachMobileAuthority, /\.mcFocusGrid,[\s\S]*\.mcActivationChapter,[\s\S]*\.mcLowerGrid\{margin-inline:0\}/);
 });
 
-test('Coach mobile hierarchy intentionally uses one visible introduction instead of the retired utility-header-plus-hero stack', () => {
-  assert.match(mobileShellBlock, /Coach Home has one mobile identity stage/);
-  assert.match(mobileShellBlock, /Keep the utility header out of flow/);
-  assert.match(mobileShellBlock, /preserve the Phase 6A decision-first hierarchy/);
-  assert.doesNotMatch(mobileShellBlock, /\.mcProgramIdentity\{font:780 11px\/1\.2/);
-  assert.doesNotMatch(mobileShellBlock, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px!important\}/);
+test('Coach mobile hierarchy intentionally uses one visible introduction with TitleStage as the sole composition owner', () => {
+  assert.match(coachMobileAuthority, /Phase 6E mobile Coach Home composition authority/);
+  assert.match(coachMobileAuthority, /preserves the certified 390px rendering/);
+  assert.match(coachMobileAuthority, /component now owns the hero/);
+  assert.match(coachMobileAuthority, /global CSS owns[\s\S]*viewport containment and shell mechanics/);
+  assert.match(coachMobileAuthority, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(coachMobileAuthority, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
+  assert.match(coachMobileAuthority, /font-size:clamp\(36px,9\.4vw,40px\)/);
+  assert.doesNotMatch(mobileShellBlock, /mcHero|mcHeroIdentity|mcHeroTeamMark|mcProgramIdentity|mcEyebrow/);
 });
 
 test('secondary enhancer verifies title ownership instead of redesigning titles during builds', () => {

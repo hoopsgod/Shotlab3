@@ -48,23 +48,6 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3{display:grid!import
 }
 
 @media(max-width:700px){
- /* Coach Home has one mobile identity stage. Keep the utility header out of flow
-    and preserve the Phase 6A decision-first hierarchy in the existing mobile owner. */
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"]{min-height:362px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent{min-height:362px!important;padding:22px 18px 18px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{grid-template-columns:minmax(0,1fr) 88px!important;gap:14px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroIdentity{grid-template-columns:minmax(0,1fr) var(--coach-hero-crest,88px)!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark{width:88px!important;height:88px!important;min-width:88px!important;min-height:88px!important;max-width:88px!important;max-height:88px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcProgramIdentity{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp(38px,12vw,50px)/.86 "Barlow Condensed","Arial Narrow",sans-serif!important;letter-spacing:-.025em!important;text-transform:uppercase!important;text-wrap:balance!important;overflow-wrap:anywhere!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcEyebrow{font:720 11px/1.2 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:.055em!important;text-transform:uppercase!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] h1{max-width:16ch!important;margin:14px 0 0!important;font:760 24px/1.02 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important;letter-spacing:-.025em!important;text-wrap:balance!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent>p{max-width:40ch!important;margin:6px 0 0!important;font:520 11px/1.45 var(--mc-native,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip{margin-top:16px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button{min-height:54px!important;padding:8px 12px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip strong{font-size:25px!important}
- body.mission-control-active .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{min-height:46px!important;margin-top:14px!important}
-
  /* External bottom navigation overlaps the document flow. This is shell clearance,
     not Coach Home composition; the visual page still owns its own gutters. */
  body.mission-control-active .mcShellV3 .missionControl{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important}
