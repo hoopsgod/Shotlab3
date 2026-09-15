@@ -4,10 +4,12 @@ import { minify } from "csso";
 import { transform as transformCss } from "lightningcss";
 
 const DIST_DIR = path.resolve(process.cwd(), "dist");
+const COACH_TITLE_SOURCE = path.resolve(process.cwd(), "src/components/CoachMissionControlTitleStage.css");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const COACH_MOBILE_TARGET = /(?:\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]|\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]|\.mcFocusGrid\b|\.mcActivationChapter\b|\.mcLowerGrid\b)/;
+const PHASE_6E_MARKER = "/* Phase 6E mobile Coach Home composition authority.";
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -80,25 +82,45 @@ function extractCoachMobileAuthority(css, filename) {
   return { css: stripped, rules };
 }
 
-function assertCoachMobileAuthoritySurvives(css, filename) {
-  const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
-    selector: match[1].replace(/\s+/g, " ").trim(),
-    body: match[2].replace(/\s+/g, ""),
-  }));
-  const hasContract = (selectorPattern, declarationPattern) => blocks.some(({ selector, body }) => (
-    selector.includes(".mcShellV3.is-mobile-shell")
-    && selectorPattern.test(selector)
-    && declarationPattern.test(body)
-  ));
-  const required = [
-    hasContract(/\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]/, /display:none(?:;|$)/),
-    hasContract(/\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\](?:\s|,|$)/, /min-height:334px(?:;|$)/),
-    hasContract(/\.mcHeroIdentity\b/, /--coach-hero-crest:clamp\(104px,29vw,120px\)(?:;|$)/),
-    hasContract(/\.mcFocusGrid\b/, /margin-inline:0(?:;|$)/),
-  ];
-  if (required.some((present) => !present)) {
-    throw new Error(`Canonical Coach mobile authority was lost during final CSS restructure: ${filename}`);
+function readBalancedBlock(source, start) {
+  const open = source.indexOf("{", start);
+  if (open < 0) return "";
+  let depth = 0;
+  for (let index = open; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    else if (source[index] === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
   }
+  return "";
+}
+
+function assertCanonicalSourceAuthority(css, filename) {
+  const required = [
+    /\.mcShellV3\.is-mobile-shell\s+\.mcHeader\[data-testid=["']mission-control-team-header["']\]\{display:none\}/,
+    /\.mcShellV3\.is-mobile-shell\s+\.mcHero\[data-team-identity-stage=["']coach-mission-control["']\]\{min-height:334px;margin:0\}/,
+    /\.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);/,
+    /\.mcShellV3\.is-mobile-shell\s+\.mcFocusGrid\{margin-inline:0\}/,
+  ];
+  if (required.some((contract) => !contract.test(css))) {
+    throw new Error(`Canonical Coach mobile source authority is incomplete: ${filename}`);
+  }
+}
+
+async function loadCanonicalCoachMobileAuthority() {
+  const source = await readFile(COACH_TITLE_SOURCE, "utf8");
+  const marker = source.indexOf(PHASE_6E_MARKER);
+  const mediaStart = source.indexOf("@media(max-width:700px)", marker);
+  if (marker < 0 || mediaStart < 0) {
+    throw new Error("Could not locate the Phase 6E canonical Coach mobile source authority.");
+  }
+  const authority = readBalancedBlock(source, mediaStart);
+  if (!authority) {
+    throw new Error("Could not read the Phase 6E canonical Coach mobile source authority block.");
+  }
+  assertCanonicalSourceAuthority(authority, path.relative(process.cwd(), COACH_TITLE_SOURCE));
+  return authority;
 }
 
 async function finalizeProductionCss(files) {
@@ -107,6 +129,7 @@ async function finalizeProductionCss(files) {
   let changedFiles = 0;
   let protectedFiles = 0;
   let protectedCoachRules = 0;
+  const canonicalCoachMobileAuthority = await loadCanonicalCoachMobileAuthority();
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
@@ -120,26 +143,19 @@ async function finalizeProductionCss(files) {
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     let workingSource = source;
-    let coachMobileRules = [];
     if (isCoachWorkspace) {
       const extracted = extractCoachMobileAuthority(source, relative);
       workingSource = extracted.css;
-      coachMobileRules = extracted.rules;
-      protectedCoachRules += coachMobileRules.length;
+      protectedCoachRules += extracted.rules.length;
     }
 
     // Re-run CSSO after selector/font dedupe so the large production stylesheet
-    // retains budget headroom. Canonical Coach mobile rules are extracted by
-    // selector rather than source order because earlier optimizer passes may merge
-    // or reorder them. Keep the restored rules out of another whole-block optimizer
-    // pass so their selector boundaries remain stable for exact-head certification.
+    // retains budget headroom. The Phase 6E mobile authority is restored from its
+    // source-owned component block after compaction, so final optimization cannot
+    // rewrite or prove away the certified 390px composition.
     const restructured = restructureCss(workingSource, relative, { coach: false });
     let output = compactProductionCss(restructured, path.basename(file));
-    if (coachMobileRules.length) {
-      const restoredAuthority = `@media(max-width:700px){${coachMobileRules.join("")}}`;
-      output += restoredAuthority;
-      assertCoachMobileAuthoritySurvives(output, relative);
-    }
+    if (isCoachWorkspace) output += canonicalCoachMobileAuthority;
 
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
