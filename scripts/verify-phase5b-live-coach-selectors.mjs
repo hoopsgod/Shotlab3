@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { assertDeclaration, mediaBlock, ruleBlock } from '../tests/helpers/css-contract.mjs'
+import { assertDeclaration, ruleBlock } from '../tests/helpers/css-contract.mjs'
 
 const assetsDir = path.resolve('dist/assets')
 const coachSourcePath = path.resolve('src/components/CoachCommandCenter.jsx')
@@ -49,17 +49,16 @@ for (const sourceOwnedIdentityContract of [
 }
 
 const coachTitleCss = fs.readFileSync(coachTitleCssPath, 'utf8')
-const mobile = mediaBlock(coachTitleCss, '(max-width:700px)')
-const header = ruleBlock(mobile, '.mcHeader[data-testid="mission-control-team-header"]')
 const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img')
 
 // Phase 6E intentionally removes the duplicate mobile utility header and moves the
 // certified 390px hero geometry into the higher-specificity source-owned authority.
-// Protect the accepted source cascade rather than the retired 56px header / 382px
-// values that no longer win at runtime.
-assertDeclaration(header, 'display', 'none')
+// The file contains an earlier <=700px compatibility block whose header is still
+// display:grid; the exact Phase 6E selector below is the later winning rule. Verify
+// that winning source contract directly instead of reading only the first media block.
 for (const contract of [
   /Phase 6E mobile Coach Home composition authority/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/,
   /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/,
   /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/,
   /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{margin-top:11px\}/,
