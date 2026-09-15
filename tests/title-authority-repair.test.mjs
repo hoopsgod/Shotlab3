@@ -63,20 +63,21 @@ test('Coach Home keeps one source-owned hero while runtime shell bridge owns onl
   assert.doesNotMatch(coachShellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
 
   assert.match(coachMobileAuthority, /mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
-  assert.match(coachMobileAuthority, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin:0/);
-  assert.match(coachMobileAuthority, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest,88px\)[^}]*gap:12px/);
+  assert.match(coachMobileAuthority, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/);
+  assert.match(coachMobileAuthority, /\.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/);
   assert.match(coachMobileAuthority, /\.mcHeroTeamMark\{[^}]*width:var\(--coach-hero-crest\);height:var\(--coach-hero-crest\)/);
-  assert.match(coachMobileAuthority, /\.mcProgramIdentity\{[^}]*grid-row:1[^}]*font:780 11px\/1\.2 -apple-system/);
+  assert.match(coachMobileAuthority, /\.mcProgramIdentity\{font:780 11px\/1\.2 -apple-system/);
   assert.match(coachMobileAuthority, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
   assert.match(coachMobileAuthority, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
-  assert.match(coachMobileAuthority, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
-  assert.match(coachMobileAuthority, /\.mcFocusGrid\{margin-inline:0\}/);
+  assert.match(coachMobileAuthority, /\.mcRealityStrip\{margin-top:13px\}/);
+  assert.match(coachMobileAuthority, /\.mcPrimary\{margin-top:11px\}/);
 });
 
 test('Coach mobile hierarchy intentionally uses one visible introduction with TitleStage as the sole composition owner', () => {
   assert.match(coachMobileAuthority, /Phase 6E mobile Coach Home composition authority/);
-  assert.match(coachMobileAuthority, /component owns the certified mobile composition/);
-  assert.match(coachMobileAuthority, /Shell CSS is limited to[\s\S]*viewport containment and navigation clearance/);
+  assert.match(coachMobileAuthority, /preserves the certified 390px rendering/);
+  assert.match(coachMobileAuthority, /component now owns the hero/);
+  assert.match(coachMobileAuthority, /global CSS owns[\s\S]*viewport containment and shell mechanics/);
   assert.match(coachMobileAuthority, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(coachMobileAuthority, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
   assert.match(coachMobileAuthority, /font-size:clamp\(36px,9\.4vw,40px\)/);
