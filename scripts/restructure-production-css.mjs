@@ -81,13 +81,22 @@ function extractCoachMobileAuthority(css, filename) {
 }
 
 function assertCoachMobileAuthoritySurvives(css, filename) {
+  const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+    selector: match[1].replace(/\s+/g, " ").trim(),
+    body: match[2].replace(/\s+/g, ""),
+  }));
+  const hasContract = (selectorPattern, declarationPattern) => blocks.some(({ selector, body }) => (
+    selector.includes(".mcShellV3.is-mobile-shell")
+    && selectorPattern.test(selector)
+    && declarationPattern.test(body)
+  ));
   const required = [
-    /\.mcShellV3\.is-mobile-shell\s+\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]\{[^{}]*display:none/,
-    /\.mcShellV3\.is-mobile-shell\s+\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]\{[^{}]*min-height:334px/,
-    /--coach-hero-crest:clamp\(104px,29vw,120px\)/,
-    /\.mcShellV3\.is-mobile-shell\s+\.mcFocusGrid\{[^{}]*margin-inline:0/,
+    hasContract(/\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]/, /display:none(?:;|$)/),
+    hasContract(/\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\](?:\s|,|$)/, /min-height:334px(?:;|$)/),
+    hasContract(/\.mcHeroIdentity\b/, /--coach-hero-crest:clamp\(104px,29vw,120px\)(?:;|$)/),
+    hasContract(/\.mcFocusGrid\b/, /margin-inline:0(?:;|$)/),
   ];
-  if (required.some((contract) => !contract.test(css))) {
+  if (required.some((present) => !present)) {
     throw new Error(`Canonical Coach mobile authority was lost during final CSS restructure: ${filename}`);
   }
 }
