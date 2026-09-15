@@ -194,22 +194,25 @@ async function finalizeProductionCss(files) {
     let workingSource = source;
     if (isCoachWorkspace) {
       const extracted = extractCoachMobileAuthority(source, relative);
-      const pruned = pruneSupersededCoachMobileHeaderChrome(extracted.css);
-      workingSource = pruned.css;
+      workingSource = extracted.css;
       protectedCoachRules += extracted.rules.length;
-      retiredHeaderRules += pruned.removedRules;
-      retiredHeaderBytes += pruned.rawBytesSaved;
     }
 
     // Re-run CSSO after selector/font dedupe so the large production stylesheet
     // retains budget headroom. The Phase 6E mobile authority is restored from its
     // source-owned component block after compaction, so final optimization cannot
     // rewrite or prove away the certified 390px composition. The old mobile utility
-    // header is hidden by that canonical authority, so its superseded <=700px chrome
-    // is removed from production rather than paying for unreachable presentation.
+    // header is hidden by that canonical authority, so prune its superseded chrome
+    // after compaction; doing this last prevents restructuring from trading the dead
+    // rules for equivalent shared declaration groups elsewhere in the sheet.
     const restructured = restructureCss(workingSource, relative, { coach: isCoachWorkspace });
     let output = compactProductionCss(restructured, path.basename(file));
-    if (isCoachWorkspace) output += canonicalCoachMobileAuthority;
+    if (isCoachWorkspace) {
+      const pruned = pruneSupersededCoachMobileHeaderChrome(output);
+      output = pruned.css + canonicalCoachMobileAuthority;
+      retiredHeaderRules += pruned.removedRules;
+      retiredHeaderBytes += pruned.rawBytesSaved;
+    }
 
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
@@ -219,7 +222,7 @@ async function finalizeProductionCss(files) {
     }
   }
 
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachRules} canonical Coach mobile rule(s); removed ${retiredHeaderRules} superseded mobile header selector arm(s) (${(retiredHeaderBytes / 1024).toFixed(1)} KiB raw).`);
+  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachRules} canonical Coach mobile rule(s); removed ${retiredHeaderRules} superseded mobile header selector arm(s) after compaction (${(retiredHeaderBytes / 1024).toFixed(1)} KiB raw).`);
 }
 
 async function main() {
