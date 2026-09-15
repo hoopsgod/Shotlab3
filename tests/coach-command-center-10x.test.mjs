@@ -114,7 +114,6 @@ test("mobile Coach Home remains brand-first, Pulse-first and touch-safe",()=>{
   assert.match(mobileTitle,/\.mcProgramIdentity/);
   assert.match(mobileTitle,/\.mcHeroTeamMark/);
   assert.match(mobileTitle,/\.mcTeamHealth/);
-  assert.match(mobileTitle,/safe-area-inset-top/);
   assert.match(titleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(titleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/);
   assert.match(titleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/);

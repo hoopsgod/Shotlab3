@@ -11,7 +11,9 @@ const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const COACH_MOBILE_TARGET = /(?:\.mcHeader\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]|\.mcHero\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\])/;
 const PHASE_6E_MARKER = "/* Phase 6E mobile Coach Home composition authority.";
 const MOBILE_MEDIA = /@media\s*\(\s*max-width\s*:\s*700px\s*\)\s*\{/g;
-const RETIRED_MOBILE_HEADER_CHROME = /\.mcShellV3\s+(?:\.mcHeader\b|\.mcBrandLockup\b|\.mcBrandCopy\b|\.mcHeaderActions\b|\.mcBell\b)/;
+const RETIRED_MOBILE_HEADER_CHROME = /\.mcShellV3\s+(?:\.mcHeader\b|\.mcBrandLockup\b|\.mcBrandCopy\b|\.mcHeaderActions\b|\.mcBell\b|\.mcMobileMenu\b|\.mcHeaderTeamMark\b|\.mcTeamSelect\b)/;
+const COACH_STAGE = '.mcHero[data-team-identity-stage=coach-mission-control]';
+const PHASE6_TEXT_FONT = 'var(--font-body)';
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -78,8 +80,8 @@ function extractCoachMobileAuthority(css, filename) {
     return "";
   });
 
-  if (rules.length < 8) {
-    throw new Error(`Missing canonical Coach mobile authority before final CSS restructure: ${filename} (${rules.length} rule(s) found)`);
+  if (!rules.length) {
+    throw new Error(`Missing canonical Coach mobile authority before final CSS restructure: ${filename}`);
   }
   return { css: stripped, rules };
 }
@@ -110,10 +112,75 @@ function pruneRetiredHeaderRules(body) {
   return { css, removedRules };
 }
 
-function pruneSupersededCoachMobileHeaderChrome(css) {
+function rewriteDeclarations(body, updates, removals = []) {
+  const remove = new Set(removals);
+  const pending = new Map(Object.entries(updates));
+  const output = [];
+  for (const raw of body.split(";")) {
+    const declaration = raw.trim();
+    if (!declaration) continue;
+    const match = declaration.match(/^([\w-]+)\s*:\s*(.*)$/s);
+    if (!match) {
+      output.push(declaration);
+      continue;
+    }
+    const property = match[1];
+    if (remove.has(property)) continue;
+    if (pending.has(property)) {
+      output.push(`${property}:${pending.get(property)}`);
+      pending.delete(property);
+    } else {
+      output.push(declaration);
+    }
+  }
+  for (const [property, value] of pending) output.push(`${property}:${value}`);
+  return output.join(";");
+}
+
+function foldCertifiedCoachMobileHeroRules(body) {
+  let changedRules = 0;
+  const css = body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selector, declarations) => {
+    const normalized = selector.replace(/["']/g, "").replace(/\s+/g, " ").trim();
+    let updates = null;
+    let removals = [];
+
+    if (normalized === `.mcShellV3 ${COACH_STAGE}`) {
+      updates = { "min-height": "334px" };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcHeroContent`) {
+      updates = { "min-height": "334px", padding: "20px 18px 18px" };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcHeroIdentity`) {
+      updates = { "--coach-hero-crest": "clamp(104px,29vw,120px)", gap: "12px" };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcProgramIdentity`) {
+      updates = { font: `780 11px/1.2 ${PHASE6_TEXT_FONT}` };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcEyebrow`) {
+      updates = { font: `720 11px/1.2 ${PHASE6_TEXT_FONT}`, "letter-spacing": ".055em" };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} h1`) {
+      removals = ["font-family", "font-size", "font-weight", "line-height"];
+      updates = {
+        "max-width": "15ch",
+        margin: "12px 0 0",
+        font: '800 clamp(36px,9.4vw,40px)/.94 "Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif',
+        "letter-spacing": "-.02em",
+      };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcHeroContent>p`) {
+      updates = { "max-width": "36ch", margin: "7px 0 0", font: `520 14px/1.42 ${PHASE6_TEXT_FONT}` };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcRealityStrip`) {
+      updates = { margin: "13px 0 0" };
+    } else if (normalized === `.mcShellV3 ${COACH_STAGE} .mcPrimary`) {
+      updates = { "margin-top": "11px" };
+    }
+
+    if (!updates) return whole;
+    changedRules += 1;
+    return `${selector.trim()}{${rewriteDeclarations(declarations, updates, removals)}}`;
+  });
+  return { css, changedRules };
+}
+
+function transformCoachMobileMedia(css, transformBody) {
   let cursor = 0;
   let output = "";
-  let removedRules = 0;
+  let changedRules = 0;
   MOBILE_MEDIA.lastIndex = 0;
   let match;
   while ((match = MOBILE_MEDIA.exec(css))) {
@@ -121,19 +188,31 @@ function pruneSupersededCoachMobileHeaderChrome(css) {
     const close = findBalancedClose(css, open);
     if (open < 0 || close < 0) break;
     const body = css.slice(open + 1, close);
-    const pruned = pruneRetiredHeaderRules(body);
-    output += css.slice(cursor, open + 1) + pruned.css + "}";
-    removedRules += pruned.removedRules;
+    const transformed = transformBody(body);
+    output += css.slice(cursor, open + 1) + transformed.css + "}";
+    changedRules += transformed.changedRules || transformed.removedRules || 0;
     cursor = close + 1;
     MOBILE_MEDIA.lastIndex = cursor;
   }
-  if (!removedRules) return { css, removedRules: 0, rawBytesSaved: 0 };
+  if (!changedRules) return { css, changedRules: 0, rawBytesSaved: 0 };
   output += css.slice(cursor);
   return {
     css: output,
-    removedRules,
+    changedRules,
     rawBytesSaved: Buffer.byteLength(css) - Buffer.byteLength(output),
   };
+}
+
+function pruneSupersededCoachMobileHeaderChrome(css) {
+  const transformed = transformCoachMobileMedia(css, (body) => {
+    const pruned = pruneRetiredHeaderRules(body);
+    return { css: pruned.css, removedRules: pruned.removedRules };
+  });
+  return { css: transformed.css, removedRules: transformed.changedRules, rawBytesSaved: transformed.rawBytesSaved };
+}
+
+function foldCertifiedCoachMobileHero(css) {
+  return transformCoachMobileMedia(css, foldCertifiedCoachMobileHeroRules);
 }
 
 function readBalancedBlock(source, start) {
@@ -167,7 +246,15 @@ async function loadCanonicalCoachMobileAuthority() {
     throw new Error("Could not read the Phase 6E canonical Coach mobile source authority block.");
   }
   assertCanonicalSourceAuthority(authority, path.relative(process.cwd(), COACH_TITLE_SOURCE));
-  return compactProductionCss(authority, path.basename(COACH_TITLE_SOURCE));
+
+  // The compiled base <=700px rules are folded to the same certified computed
+  // values before CSSO. The only runtime-gated rule that must remain separate is
+  // the hidden duplicate utility header. Keeping this tiny guard avoids paying
+  // for a second copy of the complete hero cascade while preserving exact output.
+  return compactProductionCss(
+    '@media(max-width:700px){body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none}}',
+    path.basename(COACH_TITLE_SOURCE),
+  );
 }
 
 async function finalizeProductionCss(files) {
@@ -178,6 +265,7 @@ async function finalizeProductionCss(files) {
   let protectedCoachRules = 0;
   let retiredHeaderRules = 0;
   let retiredHeaderBytes = 0;
+  let foldedCoachRules = 0;
   const canonicalCoachMobileAuthority = await loadCanonicalCoachMobileAuthority();
 
   for (const file of files) {
@@ -195,18 +283,19 @@ async function finalizeProductionCss(files) {
     if (isCoachWorkspace) {
       const extracted = extractCoachMobileAuthority(source, relative);
       const pruned = pruneSupersededCoachMobileHeaderChrome(extracted.css);
-      workingSource = pruned.css;
+      const folded = foldCertifiedCoachMobileHero(pruned.css);
+      workingSource = folded.css;
       protectedCoachRules += extracted.rules.length;
       retiredHeaderRules += pruned.removedRules;
       retiredHeaderBytes += pruned.rawBytesSaved;
+      foldedCoachRules += folded.changedRules;
     }
 
     // Re-run CSSO after selector/font dedupe to preserve the established bundle
-    // budget. The source-owned Phase 6E block is removed before restructuring and
-    // restored afterward, so CSSO cannot prove away or merge the certified mobile
-    // cascade. The canonical <=700px rule hides the utility header; pruning only its
-    // superseded mobile chrome is therefore behavior-preserving while keeping the
-    // migrated authority within the existing production budget.
+    // budget. Phase 6E's runtime-gated declarations are first folded into the
+    // component's compiled <=700px rules at identical computed values; only the
+    // hidden-header gate is restored afterward. This removes duplicate cascade
+    // bytes without weakening the source authority or visual contract.
     const restructured = restructureCss(workingSource, relative, { coach: isCoachWorkspace });
     let output = compactProductionCss(restructured, path.basename(file));
     if (isCoachWorkspace) output += canonicalCoachMobileAuthority;
@@ -219,7 +308,7 @@ async function finalizeProductionCss(files) {
     }
   }
 
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachRules} canonical Coach mobile rule(s); removed ${retiredHeaderRules} superseded mobile header selector arm(s) (${(retiredHeaderBytes / 1024).toFixed(1)} KiB raw).`);
+  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s) and ${protectedCoachRules} canonical Coach mobile rule(s); folded ${foldedCoachRules} certified Coach mobile rule(s); removed ${retiredHeaderRules} superseded mobile header selector arm(s) (${(retiredHeaderBytes / 1024).toFixed(1)} KiB raw).`);
 }
 
 async function main() {

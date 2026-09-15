@@ -55,14 +55,14 @@ const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="c
 
 // Phase 6E intentionally removes the duplicate mobile utility header and moves the
 // certified 390px hero geometry into the higher-specificity source-owned authority.
-// This recovery verifier must protect the live composition rather than the retired
-// 56px header / 382px hero baseline that no longer renders.
+// Protect the accepted source cascade rather than the retired 56px header / 382px
+// values that no longer win at runtime.
 assertDeclaration(header, 'display', 'none')
 for (const contract of [
   /Phase 6E mobile Coach Home composition authority/,
-  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px;margin:0\}/,
-  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\)/,
-  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcFocusGrid\{margin-inline:0\}/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:334px\}/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{--coach-hero-crest:clamp\(104px,29vw,120px\);gap:12px\}/,
+  /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{margin-top:11px\}/,
 ]) {
   if (!contract.test(coachTitleCss)) {
     throw new Error(`Phase 5B could not verify canonical Phase 6E Coach mobile authority: ${contract}`)
@@ -82,4 +82,4 @@ for (const productionContract of [
   }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, canonical 390px hero authority, and crest containment verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, certified 390px hero geometry, and crest containment verified`)
