@@ -59,7 +59,7 @@ for (const contract of [
   /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/,
   /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/,
   /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip strong\{[^}]*font-size:20px/,
+  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/,
   /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/,
 ]) {
   if (!contract.test(coachTitleCss)) {
@@ -75,7 +75,7 @@ for (const productionContract of [
   'min-height:334px',
   '--coach-hero-crest:clamp(104px,29vw,120px)',
   'min-height:48px',
-  'font-size:20px',
+  'font:800 20px/.95 var(--mc-native)',
   'min-height:50px',
 ]) {
   if (!builtCss.includes(productionContract)) {
