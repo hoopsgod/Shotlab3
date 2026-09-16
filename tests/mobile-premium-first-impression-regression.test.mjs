@@ -147,7 +147,7 @@ test("Player Home remains immersive while Coach Home uses one verified brand-fir
   assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
   assert.match(mobile, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
   assert.match(mobile, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
-  assert.match(mobile, /\.mcRealityStrip\{[^}]*margin-top:13px/);
+  assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
   assert.match(mobile, /\.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/);
   assert.match(coachTitleCss, /object-fit:contain/);
