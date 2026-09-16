@@ -58,8 +58,9 @@ for (const contract of [
   /\.mcShellV3 \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/,
   /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/,
   /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/,
+  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/,
+  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip strong\{[^}]*font-size:20px/,
+  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/,
 ]) {
   if (!contract.test(coachTitleCss)) {
     throw new Error(`Phase 5B could not verify canonical Phase 6E Coach mobile authority: ${contract}`)
@@ -73,11 +74,13 @@ for (const productionContract of [
   '.mcShellV3.is-mobile-shell',
   'min-height:334px',
   '--coach-hero-crest:clamp(104px,29vw,120px)',
-  'min-height:54px',
+  'min-height:48px',
+  'font-size:20px',
+  'min-height:50px',
 ]) {
   if (!builtCss.includes(productionContract)) {
     throw new Error(`Phase 5B production CSS lost canonical Coach mobile authority: ${productionContract}`)
   }
 }
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, certified 390px hero geometry, touch targets, and crest containment verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, certified 390px hero geometry, green metric/CTA geometry, and crest containment verified`)
