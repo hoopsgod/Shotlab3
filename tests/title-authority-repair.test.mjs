@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS } from '../scripts/run-route-enhancers.mjs';
+import { mediaBlock } from './helpers/css-contract.mjs';
 
 const read = (path) => readFileSync(path, 'utf8');
 const stage = read('src/components/TeamIdentityTitleStage.jsx');
@@ -24,12 +25,8 @@ const playerCompositionEnhancer = read('scripts/apply-mobile-player-composition-
 const demoBrandingEnhancer = read('scripts/apply-demo-team-branding.mjs');
 const demoData = read('src/lib/demoData.js');
 
-const mobileShellBlock = coachShellCss.match(/@media\(max-width:700px\)\{([\s\S]*)\}\s*$/)?.[1] || '';
-const coachMobileAuthorityStart = coachTitleCss.indexOf('/* Phase 6E mobile Coach Home composition authority.');
-const coachMobileAuthorityEnd = coachTitleCss.indexOf('@media(max-width:350px)', coachMobileAuthorityStart);
-const coachMobileAuthority = coachMobileAuthorityStart >= 0 && coachMobileAuthorityEnd > coachMobileAuthorityStart
-  ? coachTitleCss.slice(coachMobileAuthorityStart, coachMobileAuthorityEnd)
-  : '';
+const mobileShellBlock = mediaBlock(coachShellCss, '(max-width:700px)');
+const coachMobileAuthority = mediaBlock(coachTitleCss, '(max-width:700px)');
 
 test('shared semantic title primitive remains authoritative for reusable authenticated page titles', () => {
   assert.match(stage, /data-team-identity-stage="true"/);
@@ -73,14 +70,14 @@ test('Coach Home keeps one source-owned hero while runtime shell bridge owns onl
   assert.match(coachMobileAuthority, /\.mcRealityStrip\{[^}]*margin-top:13px/);
   assert.match(coachMobileAuthority, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
   assert.match(coachMobileAuthority, /\.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/);
-  assert.match(coachMobileAuthority, /\.mcFocusGrid,[\s\S]*\.mcActivationChapter,[\s\S]*\.mcLowerGrid\{margin-inline:0\}/);
+  assert.match(coachMobileAuthority, /\.mcFocusGrid\{[^}]*margin:0/);
+  assert.match(coachMobileAuthority, /\.mcActivationChapter\{[^}]*margin:0/);
+  assert.match(coachMobileAuthority, /\.mcLowerGrid\{[^}]*margin:0/);
+  assert.doesNotMatch(coachMobileAuthority, /min-height:382px|clamp\(96px,26vw,108px\)/);
 });
 
 test('Coach mobile hierarchy intentionally uses one visible introduction with TitleStage as the sole composition owner', () => {
-  assert.match(coachMobileAuthority, /Phase 6E mobile Coach Home composition authority/);
-  assert.match(coachMobileAuthority, /preserves the certified 390px rendering/);
-  assert.match(coachMobileAuthority, /component now owns the hero/);
-  assert.match(coachMobileAuthority, /global CSS owns[\s\S]*viewport containment and shell mechanics/);
+  assert.match(coachTitleCss, /Phase 6E mobile Coach Home composition authority: one source-owned block/);
   assert.match(coachMobileAuthority, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(coachMobileAuthority, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
   assert.match(coachMobileAuthority, /font-size:clamp\(36px,9\.4vw,40px\)/);
