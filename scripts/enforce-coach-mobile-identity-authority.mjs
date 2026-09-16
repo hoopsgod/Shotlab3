@@ -79,10 +79,12 @@ async function main() {
   let violatingFiles = 0
   let violatingRules = 0
   const violations = []
+  let productionCss = ''
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('.css')) continue
     const file = path.join(DIST_ASSETS, entry.name)
     const source = await readFile(file, 'utf8')
+    productionCss += `\n${source}`
     const result = enforceCoachMobileIdentityAuthority(source)
     if (result.css === source) continue
     violatingFiles += 1
@@ -94,7 +96,21 @@ async function main() {
     const detail = violations.slice(0, 24).map((item) => `\n - ${item}`).join('')
     throw new Error(`Coach mobile identity authority verification failed: ${violatingRules} competing declaration set(s) remain across ${violatingFiles} production CSS asset(s). Fix the source authority instead of rewriting dist.${detail}`)
   }
-  console.log('Coach mobile identity authority verified: production CSS requires no post-build Coach rewrite.')
+
+  const requiredAuthority = [
+    ['hidden mobile utility header', /[^{}]*mission-control-team-header[^{}]*\{[^}]*display:none/],
+    ['334px Coach hero', /[^{}]*data-team-identity-stage=coach-mission-control[^{}]*\{[^}]*min-height:334px/],
+    ['104–120px crest contract', /[^{}]*\.mcHeroIdentity[^{}]*\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)/],
+    ['48px metric controls', /[^{}]*\.mcRealityStrip button[^{}]*\{[^}]*min-height:48px[^}]*padding:6px 12px/],
+    ['20px metric values', /[^{}]*\.mcRealityStrip strong[^{}]*\{[^}]*font:800 20px\/\.95/],
+    ['50px primary CTA', /[^{}]*\.mcPrimary[^{}]*\{[^}]*min-height:50px[^}]*margin-top:11px/],
+  ]
+  const missing = requiredAuthority.filter(([, pattern]) => !pattern.test(productionCss)).map(([label]) => label)
+  if (missing.length) {
+    throw new Error(`Coach mobile identity authority verification failed: optimized production CSS lost canonical source-owned authority (${missing.join(', ')}). Fix the optimizer/source pipeline; do not reconstruct CSS after build.`)
+  }
+
+  console.log('Coach mobile identity authority verified: canonical source authority survives production CSS with no post-build Coach rewrite.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })
