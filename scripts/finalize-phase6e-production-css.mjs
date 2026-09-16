@@ -13,7 +13,7 @@ const CANONICAL_SIGNATURES = [
   "--coach-hero-crest:clamp(104px,29vw,120px)",
   "min-height:54px",
 ];
-const RETIRED_HEADER_CLASSES = new Set([
+const RETIRED_HEADER_CLASSES = [
   "mcMobileMenu",
   "mcBrandLockup",
   "mcBrandCopy",
@@ -21,7 +21,7 @@ const RETIRED_HEADER_CLASSES = new Set([
   "mcBell",
   "mcHeaderTeamMark",
   "mcTeamSelect",
-]);
+];
 
 async function listCssFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -111,42 +111,16 @@ function isMax700MediaHeader(header) {
   return /max-width\s*:\s*700px/i.test(header) || /width\s*<=\s*700px/i.test(header);
 }
 
-function mediaBlocks(css) {
-  const blocks = [];
-  const pattern = /@media\b[^{}]*\{/gi;
-  let match;
-  while ((match = pattern.exec(css))) {
-    if (!isMax700MediaHeader(match[0])) continue;
-    const open = css.indexOf("{", match.index);
-    const close = findBalancedClose(css, open);
-    if (open < 0 || close < 0) continue;
-    blocks.push({ start: match.index, open, close, body: css.slice(open + 1, close) });
-    pattern.lastIndex = close + 1;
-  }
-  return blocks;
-}
-
 function parseRuleArms(body) {
   const rules = [];
   body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selectorText, declarations) => {
     if (selectorText.trim().startsWith("@")) return whole;
-    for (const arm of splitSelectorList(selectorText)) rules.push({ normalized: normalizeSelector(arm), declarations: declarations.trim() });
+    for (const arm of splitSelectorList(selectorText)) {
+      rules.push({ arm, normalized: normalizeSelector(arm), declarations: declarations.trim() });
+    }
     return whole;
   });
   return rules;
-}
-
-function isCanonicalMigrationArm(normalized) {
-  if (normalized === ".mcShellV3 .mcHeader[data-testid=mission-control-team-header]") return true;
-  if (normalized.includes("[data-team-identity-stage=coach-mission-control]")) return true;
-  return normalized === ".mcShellV3 .mcFocusGrid"
-    || normalized === ".mcShellV3 .mcActivationChapter"
-    || normalized === ".mcShellV3 .mcLowerGrid";
-}
-
-function isRetiredHiddenHeaderArm(normalized) {
-  if (normalized === ".mcShellV3 .mcHeader[data-testid=mission-control-team-header]") return false;
-  return [...RETIRED_HEADER_CLASSES].some((className) => normalized.includes(`.${className}`));
 }
 
 async function loadCanonicalCoachMobileAuthority() {
@@ -160,65 +134,64 @@ async function loadCanonicalCoachMobileAuthority() {
     if (!authority.includes(required)) throw new Error(`Canonical Coach mobile source authority is incomplete: ${required}`);
   }
 
-  const open = authority.indexOf("{");
-  const body = authority.slice(open + 1, -1);
-  const canonicalByArm = new Map();
-  for (const rule of parseRuleArms(body)) {
-    if (isCanonicalMigrationArm(rule.normalized)) canonicalByArm.set(rule.normalized, rule.declarations);
-  }
-  if (canonicalByArm.size < 12) throw new Error(`Canonical Coach mobile migration map is unexpectedly small: ${canonicalByArm.size} selector arm(s).`);
-  return canonicalByArm;
+  const compact = compactProductionCss(authority, path.basename(COACH_TITLE_SOURCE));
+  const open = compact.indexOf("{");
+  const close = compact.lastIndexOf("}");
+  if (open < 0 || close <= open) throw new Error("Could not compact canonical Coach mobile authority.");
+  const body = compact.slice(open + 1, close);
+  const selectorSet = new Set(parseRuleArms(body).map((rule) => rule.normalized));
+  if (selectorSet.size < 20) throw new Error(`Canonical Coach mobile authority is unexpectedly small: ${selectorSet.size} selector arm(s).`);
+  return { body, selectorSet };
 }
 
-function reconcileCoachMobileAuthority(css, canonicalByArm) {
-  const blocks = mediaBlocks(css);
-  if (!blocks.length) return { css, reconciledArms: 0, removedHeaderArms: 0, missingArms: [...canonicalByArm.keys()] };
+function isRetiredCoachMobileArm(normalized, canonicalSelectors) {
+  if (canonicalSelectors.has(normalized)) return true;
+  if (normalized.includes("[data-team-identity-stage=coach-mission-control]")) return true;
+  if (normalized.startsWith(".mcShellV3 .mcHeader")) return true;
+  return RETIRED_HEADER_CLASSES.some((className) => normalized.includes(`.${className}`));
+}
 
-  const seen = new Set();
-  let reconciledArms = 0;
-  let removedHeaderArms = 0;
+function replaceCoachMobileAuthority(css, canonical) {
+  const pattern = /@media\b[^{}]*\{/gi;
+  const blocks = [];
+  let match;
+  while ((match = pattern.exec(css))) {
+    if (!isMax700MediaHeader(match[0])) continue;
+    const open = css.indexOf("{", match.index);
+    const close = findBalancedClose(css, open);
+    if (open < 0 || close < 0) continue;
+    const body = css.slice(open + 1, close);
+    blocks.push({ start: match.index, open, close, body, ownsCoach: body.includes("coach-mission-control") });
+    pattern.lastIndex = close + 1;
+  }
+
+  const target = blocks.find((block) => block.ownsCoach);
+  if (!target) throw new Error("Could not locate optimized <=700px Coach workspace media authority.");
+
+  let removedArms = 0;
   let cursor = 0;
   let output = "";
-
   for (const block of blocks) {
     const transformed = block.body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selectorText, declarations) => {
       if (selectorText.trim().startsWith("@")) return whole;
-      const originalArms = splitSelectorList(selectorText);
-      if (!originalArms.length) return whole;
-      const passthrough = [];
-      const canonicalRules = [];
-
-      for (const arm of originalArms) {
-        const normalized = normalizeSelector(arm);
-        if (canonicalByArm.has(normalized)) {
-          canonicalRules.push(`${arm}{${canonicalByArm.get(normalized)}}`);
-          seen.add(normalized);
-          reconciledArms += 1;
-        } else if (isRetiredHiddenHeaderArm(normalized)) {
-          removedHeaderArms += 1;
-        } else {
-          passthrough.push(arm);
-        }
-      }
-
-      const pieces = [];
-      if (passthrough.length) pieces.push(`${passthrough.join(",")}{${declarations}}`);
-      pieces.push(...canonicalRules);
-      return pieces.join("");
+      const arms = splitSelectorList(selectorText);
+      if (!arms.length) return whole;
+      const kept = arms.filter((arm) => {
+        const remove = isRetiredCoachMobileArm(normalizeSelector(arm), canonical.selectorSet);
+        if (remove) removedArms += 1;
+        return !remove;
+      });
+      if (!kept.length) return "";
+      if (kept.length === arms.length) return whole;
+      return `${kept.join(",")}{${declarations}}`;
     });
 
-    output += css.slice(cursor, block.open + 1) + transformed + "}";
+    const replacementBody = block === target ? `${transformed}${canonical.body}` : transformed;
+    output += css.slice(cursor, block.open + 1) + replacementBody + "}";
     cursor = block.close + 1;
   }
   output += css.slice(cursor);
-
-  const missingArms = [...canonicalByArm.keys()].filter((arm) => !seen.has(arm));
-  if (missingArms.length) {
-    const missingRules = missingArms.map((arm) => `${arm}{${canonicalByArm.get(arm)}}`).join("");
-    output += `@media(max-width:700px){${missingRules}}`;
-  }
-
-  return { css: output, reconciledArms, removedHeaderArms, missingArms };
+  return { css: output, removedArms };
 }
 
 function hasCanonicalAuthority(css) {
@@ -226,14 +199,12 @@ function hasCanonicalAuthority(css) {
 }
 
 async function main() {
-  const canonicalByArm = await loadCanonicalCoachMobileAuthority();
+  const canonical = await loadCanonicalCoachMobileAuthority();
   const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
-  let removedHeaderArms = 0;
-  let reconciledArms = 0;
-  let missingArms = 0;
+  let removedArms = 0;
   let coachWorkspaceBundles = 0;
 
   for (const file of files) {
@@ -250,17 +221,15 @@ async function main() {
 
     if (isCoachWorkspace) {
       coachWorkspaceBundles += 1;
-      // CSSO has already done its structural work. Reconcile the emitted <=700px
-      // Coach rules after that pass so a second restructuring step cannot discard
-      // the later source-owned Phase 6E values. Lightning CSS then performs only
-      // syntax-level minification on the reconciled result.
-      const reconciled = reconcileCoachMobileAuthority(output, canonicalByArm);
-      removedHeaderArms += reconciled.removedHeaderArms;
-      reconciledArms += reconciled.reconciledArms;
-      missingArms += reconciled.missingArms.length;
-      output = compactProductionCss(reconciled.css, path.basename(file));
+      // Replace the old optimized <=700px Coach stage in situ rather than adding
+      // another copy. This preserves source ownership, removes the now-hidden
+      // utility-header chrome, and keeps the canonical stage ahead of the later
+      // <=350px/reduced-motion refinements that still belong after it.
+      const replaced = replaceCoachMobileAuthority(output, canonical);
+      output = replaced.css;
+      removedArms += replaced.removedArms;
       if (!hasCanonicalAuthority(output)) {
-        throw new Error("Phase 6E canonical Coach mobile authority did not survive post-restructure production reconciliation.");
+        throw new Error("Phase 6E canonical Coach mobile authority did not survive production replacement.");
       }
     }
 
@@ -272,7 +241,7 @@ async function main() {
   }
 
   if (coachWorkspaceBundles !== 1) throw new Error(`Expected exactly one Coach workspace CSS bundle; found ${coachWorkspaceBundles}.`);
-  console.log(`Phase 6E final production compaction changed ${changedFiles}/${files.length} CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; reconciled ${reconciledArms} canonical Coach mobile selector arm(s) in place; removed ${removedHeaderArms} unreachable hidden-header selector arm(s); restored ${missingArms} missing canonical selector arm(s) without duplicating the full mobile block.`);
+  console.log(`Phase 6E final production compaction changed ${changedFiles}/${files.length} CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; replaced ${removedArms} superseded/hidden Coach mobile selector arm(s) with the single canonical source-owned <=700px authority.`);
 }
 
 await main();
