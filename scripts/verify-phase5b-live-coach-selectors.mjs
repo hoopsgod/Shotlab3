@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { assertDeclaration, ruleBlock } from '../tests/helpers/css-contract.mjs'
 
 const assetsDir = path.resolve('dist/assets')
@@ -70,17 +71,9 @@ assertDeclaration(crestImage, 'width', '100%')
 assertDeclaration(crestImage, 'height', '100%')
 assertDeclaration(crestImage, 'object-fit', 'contain')
 
-for (const productionContract of [
-  '.mcShellV3.is-mobile-shell',
-  'min-height:334px',
-  '--coach-hero-crest:clamp(104px,29vw,120px)',
-  'min-height:48px',
-  'font:800 20px/.95 var(--mc-native)',
-  'min-height:50px',
-]) {
-  if (!builtCss.includes(productionContract)) {
-    throw new Error(`Phase 5B production CSS lost canonical Coach mobile authority: ${productionContract}`)
-  }
-}
+// The production optimizer may legally restructure declarations. Reuse the one
+// canonical production-aware authority verifier instead of duplicating brittle
+// post-minification string contracts here.
+execFileSync(process.execPath, ['scripts/enforce-coach-mobile-identity-authority.mjs'], { stdio: 'inherit' })
 
-console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, certified 390px hero geometry, green metric/CTA geometry, and crest containment verified`)
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); live Coach artwork, rail logo, hidden mobile utility header, certified 390px hero geometry, green metric/CTA geometry, and canonical optimized-production authority verified`)
