@@ -7,6 +7,8 @@ const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
+const COACH_MOBILE_MEDIA = "@media(max-width:700px){";
+const COACH_AUTHORITY_MARKERS = ["data-team-identity-stage=coach-mission-control", "--coach-hero-crest:clamp(104px,29vw,120px)", "min-height:334px", "min-height:48px", "min-height:50px"];
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -34,22 +36,47 @@ function compactProductionCss(css, filename) {
   return transformCss({ filename, code: Buffer.from(css), minify: true, sourceMap: false, errorRecovery: false }).code.toString("utf8");
 }
 
-function isCoachWorkspace(file) {
-  return COACH_WORKSPACE_ASSET.test(path.basename(file));
+function isCoachWorkspace(file) { return COACH_WORKSPACE_ASSET.test(path.basename(file)); }
+function structurallyMinify(css, filename) { return minify(css, { filename, restructure: true, comments: false, forceMediaMerge: false }).css; }
+
+function findBalancedBlockEnd(css, start) {
+  const open = css.indexOf("{", start);
+  if (open < 0) return -1;
+  let depth = 0;
+  for (let i = open; i < css.length; i += 1) {
+    if (css[i] === "{") depth += 1;
+    else if (css[i] === "}" && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+
+function protectCanonicalCoachMobileAuthority(css, filename) {
+  let cursor = 0;
+  while (true) {
+    const start = css.indexOf(COACH_MOBILE_MEDIA, cursor);
+    if (start < 0) break;
+    const end = findBalancedBlockEnd(css, start);
+    if (end < 0) throw new Error("Unbalanced Coach mobile media block during production CSS optimization.");
+    const block = css.slice(start, end);
+    if (COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) {
+      // Preserve the emitted source-owned block byte-for-byte and optimize only
+      // the CSS around it. This is protection, not reconstruction: no declarations
+      // are generated, copied from another layer, or appended after optimization.
+      const before = structurallyMinify(css.slice(0, start), `${filename}:before-coach-mobile`);
+      const after = structurallyMinify(css.slice(end), `${filename}:after-coach-mobile`);
+      return `${before}${block}${after}`;
+    }
+    cursor = end;
+  }
+  throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
 
 function restructureCss(css, filename) {
-  // CoachWorkspaces contains the source-owned responsive cascade. Structural
-  // optimizers may split canonical component rules from their declarations or
-  // change narrow-vs-broad media precedence. Keep that cascade source-ordered;
-  // the dedicated pruning/dedupe passes provide safe size recovery instead.
-  if (isCoachWorkspace(filename)) return minify(css, { filename, restructure: false, comments: false }).css;
-  return minify(css, { filename, restructure: true, comments: false, forceMediaMerge: false }).css;
+  if (isCoachWorkspace(filename)) return protectCanonicalCoachMobileAuthority(css, filename);
+  return structurallyMinify(css, filename);
 }
 
-function isProtectedFinalAuthority(file) {
-  return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
-}
+function isProtectedFinalAuthority(file) { return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file)); }
 
 async function finalizeProductionCss(files) {
   let sourceBytes = 0, outputBytes = 0, changedFiles = 0, protectedFiles = 0;
@@ -58,8 +85,8 @@ async function finalizeProductionCss(files) {
     const relative = path.relative(DIST_DIR, file);
     if (isProtectedFinalAuthority(file)) { sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(source); protectedFiles += 1; continue; }
     const restructured = restructureCss(source, relative);
-    // Lightning CSS also performs structural optimization when minifying. Do not
-    // run it over CoachWorkspaces after the source-order safety pass.
+    // The Coach authority block has already been preserved exactly; do not pass
+    // the recomposed Coach asset through a second structural minifier.
     const output = isCoachWorkspace(file) ? restructured : compactProductionCss(restructured, path.basename(file));
     sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(output);
     if (output !== source) { await writeFile(file, output); changedFiles += 1; }
