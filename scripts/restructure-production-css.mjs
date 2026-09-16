@@ -47,12 +47,15 @@ function compactProductionCss(css, filename) {
   }).code.toString("utf8");
 }
 
-function restructureCss(css, filename, { coach = false } = {}) {
+function restructureCss(css, filename) {
+  // Never force media-query merging. Coach Home intentionally layers <=700px
+  // component authority over broader <=980px supporting rules; forcing media
+  // blocks together allowed CSSO to discard the narrower source-owned contract.
   return minify(css, {
     filename,
     restructure: true,
     comments: false,
-    forceMediaMerge: coach,
+    forceMediaMerge: false,
   }).css;
 }
 
@@ -75,11 +78,10 @@ async function finalizeProductionCss(files) {
       protectedFiles += 1;
       continue;
     }
-    const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     // Dedupe/font-token passes run after the first CSSO pass. Re-run the same
     // standards-based restructure here so newly adjacent/equivalent rules can
     // collapse before Lightning CSS performs the final syntax compaction.
-    const restructured = restructureCss(source, relative, { coach: isCoachWorkspace });
+    const restructured = restructureCss(source, relative);
     const output = compactProductionCss(restructured, path.basename(file));
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
@@ -120,8 +122,7 @@ async function main() {
       protectedFiles += 1;
       continue;
     }
-    const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
-    const output = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
+    const output = restructureCss(source, path.relative(DIST_DIR, file));
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
