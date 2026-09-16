@@ -56,13 +56,13 @@ test('Coach prototype hierarchy is brand-aware, decision-first and intentionally
   assert.match(tablet, /clamp\(112px,17vw,142px\)/);
   assert.match(tablet, /font:760 28px\/1 var\(--mc-native\)/);
 
-  assert.match(mobile, /min-height:382px/);
-  assert.match(mobile, /--coach-hero-crest:clamp\(96px,26vw,108px\)/);
-  assert.match(mobile, /font:780 11px\/1\.2 var\(--mc-native\)/);
-  assert.match(mobile, /font:820 clamp\(40px,9\.8vw,44px\)\/\.94 var\(--mc-native\)/);
-  assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px/);
-  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px/);
-  assert.doesNotMatch(mobile, /clamp\(39px,10\.5vw,45px\)/);
+  assert.match(mobile, /min-height:334px/);
+  assert.match(mobile, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
+  assert.match(mobile, /font:780 11px\/1\.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif/);
+  assert.match(mobile, /h1\{[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)[^}]*font-weight:800[^}]*line-height:\.94/);
+  assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/);
+  assert.doesNotMatch(mobile, /min-height:382px|clamp\(96px,26vw,108px\)|clamp\(39px,10\.5vw,45px\)/);
 });
 
 test('legacy V2 cannot reorder Program Pulse behind athlete attention on mobile', () => {
