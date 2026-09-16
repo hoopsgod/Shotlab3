@@ -7,6 +7,7 @@ const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
+const POST_AUTH_FONTS_MODE = process.argv.includes("--post-auth-fonts");
 const COACH_MOBILE_MEDIA = /@media\s*\(max-width:\s*700px\)\s*\{/g;
 const COACH_AUTHORITY_MARKERS = [
   "coach-mission-control",
@@ -106,17 +107,30 @@ function assertCanonicalCoachMobileAuthority(css) {
     .map(([label]) => label);
   if (missing.length) {
     throw new Error(
-      `Canonical Coach mobile authority was lost during final production CSS optimization (${missing.join(", ")}). Fix the optimizer/source pipeline; do not reconstruct CSS after build.`,
+      `Canonical Coach mobile authority was lost during production CSS optimization (${missing.join(", ")}). Fix the optimizer/source pipeline; do not reconstruct CSS after build.`,
     );
   }
 }
 
-function restructureCss(css, filename, { finalCoach = false } = {}) {
-  if (isCoachWorkspace(filename) && !finalCoach) {
-    return protectCanonicalCoachMobileAuthority(css, filename);
-  }
-  const restructured = structurallyMinify(css, filename);
-  const output = compactProductionCss(restructured, path.basename(filename));
+function initialRestructure(css, filename) {
+  if (isCoachWorkspace(filename)) return protectCanonicalCoachMobileAuthority(css, filename);
+  return structurallyMinify(css, filename);
+}
+
+function finalRestructure(css, filename) {
+  const output = compactProductionCss(structurallyMinify(css, filename), path.basename(filename));
+  if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
+  return output;
+}
+
+function postAuthFontRestructure(css, filename) {
+  // The Coach bundle was already structurally compacted and certified before
+  // authenticated font tokens were substituted. Re-running CSSO here can merge
+  // the canonical mobile override declarations away. Only syntax-compact Coach
+  // at this stage; other bundles can still use the normal structural pass.
+  const output = isCoachWorkspace(filename)
+    ? compactProductionCss(css, path.basename(filename))
+    : finalRestructure(css, filename);
   if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
   return output;
 }
@@ -125,7 +139,7 @@ function isProtectedFinalAuthority(file) {
   return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
 }
 
-async function finalizeProductionCss(files) {
+async function finalizeProductionCss(files, mode) {
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
@@ -139,7 +153,9 @@ async function finalizeProductionCss(files) {
       protectedFiles += 1;
       continue;
     }
-    const output = restructureCss(source, relative, { finalCoach: true });
+    const output = mode === "post-auth-fonts"
+      ? postAuthFontRestructure(source, relative)
+      : finalRestructure(source, relative);
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -148,15 +164,15 @@ async function finalizeProductionCss(files) {
     }
   }
   console.log(
-    `Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`,
+    `${mode === "post-auth-fonts" ? "Post-font" : "Final"} production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`,
   );
 }
 
 async function main() {
   await stat(DIST_DIR);
-  if (FINAL_COACH_MODE) {
+  if (FINAL_COACH_MODE || POST_AUTH_FONTS_MODE) {
     const files = await listCssFiles(DIST_DIR);
-    await finalizeProductionCss(files);
+    await finalizeProductionCss(files, POST_AUTH_FONTS_MODE ? "post-auth-fonts" : "final-coach");
     return;
   }
 
@@ -174,7 +190,7 @@ async function main() {
       protectedFiles += 1;
       continue;
     }
-    const output = restructureCss(source, path.relative(DIST_DIR, file));
+    const output = initialRestructure(source, path.relative(DIST_DIR, file));
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
