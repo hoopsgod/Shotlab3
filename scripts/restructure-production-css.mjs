@@ -48,9 +48,12 @@ function compactProductionCss(css, filename) {
 }
 
 function restructureCss(css, filename) {
-  // Never force media-query merging. Coach Home intentionally layers <=700px
-  // component authority over broader <=980px supporting rules; forcing media
-  // blocks together allowed CSSO to discard the narrower source-owned contract.
+  // CoachWorkspaces contains intentionally overlapping responsive contexts whose
+  // cascade order is part of the product contract. Lightning CSS may compact its
+  // syntax, but cross-rule CSSO restructuring is not semantics-safe for this asset.
+  if (COACH_WORKSPACE_ASSET.test(path.basename(filename))) {
+    return compactProductionCss(css, path.basename(filename));
+  }
   return minify(css, {
     filename,
     restructure: true,
@@ -78,9 +81,6 @@ async function finalizeProductionCss(files) {
       protectedFiles += 1;
       continue;
     }
-    // Dedupe/font-token passes run after the first CSSO pass. Re-run the same
-    // standards-based restructure here so newly adjacent/equivalent rules can
-    // collapse before Lightning CSS performs the final syntax compaction.
     const restructured = restructureCss(source, relative);
     const output = compactProductionCss(restructured, path.basename(file));
     sourceBytes += Buffer.byteLength(source);
@@ -103,10 +103,6 @@ async function main() {
     return;
   }
 
-  // Remove unreferenced authority copies before enumerating the files that will be
-  // restructured. A retired stylesheet can be present in dist after Vite copies
-  // public assets but intentionally absent from index.html; listing first leaves a
-  // stale pathname that is unlinked moments later and then crashes the optimizer.
   const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
   const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
