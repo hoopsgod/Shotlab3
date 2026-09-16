@@ -8,7 +8,7 @@ const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const COACH_MOBILE_MEDIA = "@media(max-width:700px){";
-const COACH_AUTHORITY_MARKERS = ["data-team-identity-stage=coach-mission-control", "--coach-hero-crest:clamp(104px,29vw,120px)", "min-height:334px", "min-height:48px", "min-height:50px"];
+const COACH_AUTHORITY_MARKERS = ["coach-mission-control", "--coach-hero-crest:clamp(104px,29vw,120px)", "min-height:334px", "min-height:48px", "min-height:50px"];
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -32,10 +32,7 @@ async function listCssFiles(directory) {
   return files;
 }
 
-function compactProductionCss(css, filename) {
-  return transformCss({ filename, code: Buffer.from(css), minify: true, sourceMap: false, errorRecovery: false }).code.toString("utf8");
-}
-
+function compactProductionCss(css, filename) { return transformCss({ filename, code: Buffer.from(css), minify: true, sourceMap: false, errorRecovery: false }).code.toString("utf8"); }
 function isCoachWorkspace(file) { return COACH_WORKSPACE_ASSET.test(path.basename(file)); }
 function structurallyMinify(css, filename) { return minify(css, { filename, restructure: true, comments: false, forceMediaMerge: false }).css; }
 
@@ -59,9 +56,6 @@ function protectCanonicalCoachMobileAuthority(css, filename) {
     if (end < 0) throw new Error("Unbalanced Coach mobile media block during production CSS optimization.");
     const block = css.slice(start, end);
     if (COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) {
-      // Preserve the emitted source-owned block byte-for-byte and optimize only
-      // the CSS around it. This is protection, not reconstruction: no declarations
-      // are generated, copied from another layer, or appended after optimization.
       const before = structurallyMinify(css.slice(0, start), `${filename}:before-coach-mobile`);
       const after = structurallyMinify(css.slice(end), `${filename}:after-coach-mobile`);
       return `${before}${block}${after}`;
@@ -71,11 +65,7 @@ function protectCanonicalCoachMobileAuthority(css, filename) {
   throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
 
-function restructureCss(css, filename) {
-  if (isCoachWorkspace(filename)) return protectCanonicalCoachMobileAuthority(css, filename);
-  return structurallyMinify(css, filename);
-}
-
+function restructureCss(css, filename) { return isCoachWorkspace(filename) ? protectCanonicalCoachMobileAuthority(css, filename) : structurallyMinify(css, filename); }
 function isProtectedFinalAuthority(file) { return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file)); }
 
 async function finalizeProductionCss(files) {
@@ -85,8 +75,6 @@ async function finalizeProductionCss(files) {
     const relative = path.relative(DIST_DIR, file);
     if (isProtectedFinalAuthority(file)) { sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(source); protectedFiles += 1; continue; }
     const restructured = restructureCss(source, relative);
-    // The Coach authority block has already been preserved exactly; do not pass
-    // the recomposed Coach asset through a second structural minifier.
     const output = isCoachWorkspace(file) ? restructured : compactProductionCss(restructured, path.basename(file));
     sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(output);
     if (output !== source) { await writeFile(file, output); changedFiles += 1; }
