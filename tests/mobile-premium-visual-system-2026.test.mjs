@@ -130,7 +130,7 @@ test("Player and Coach Home identity use intentional shared/source-owned variant
   assert.match(mobile, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
   assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
   assert.match(mobile, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
-  assert.match(mobile, /\.mcRealityStrip\{[^}]*margin-top:13px/);
+  assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:54px[^}]*padding:8px 12px/);
   assert.match(mobile, /\.mcPrimary\{[^}]*min-height:46px[^}]*margin-top:11px/);
   assert.match(coachTitleCss, /object-fit:\s*contain/);
