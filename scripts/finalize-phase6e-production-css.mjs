@@ -62,7 +62,7 @@ function readBalancedBlock(source, start) {
   return close < 0 ? "" : source.slice(start, close + 1);
 }
 
-async function loadCanonicalCoachMobileAuthority() {
+async function validateCanonicalCoachMobileAuthority() {
   const source = await readFile(COACH_TITLE_SOURCE, "utf8");
   const marker = source.indexOf(PHASE_6E_MARKER);
   const mediaStart = source.indexOf("@media(max-width:700px)", marker);
@@ -83,43 +83,73 @@ async function loadCanonicalCoachMobileAuthority() {
       throw new Error(`Canonical Coach mobile source authority is incomplete: ${required}`);
     }
   }
+}
 
-  return compactProductionCss(authority, path.basename(COACH_TITLE_SOURCE));
+function runtimeGuard() {
+  return compactProductionCss(
+    '@media(max-width:700px){body.mission-control-active .mcShellV3.is-mobile-shell .mcHeader[data-testid="mission-control-team-header"]{display:none}}',
+    path.basename(COACH_TITLE_SOURCE),
+  );
 }
 
 function normalizeSelector(selector) {
   return selector.replace(/["']/g, "").replace(/\s+/g, " ").trim();
 }
 
-function removeDeclarations(declarations, properties) {
-  const remove = new Set(properties);
-  return declarations
+function rewriteDeclarations(declarations, updates, removals = []) {
+  const remove = new Set([...Object.keys(updates), ...removals]);
+  const kept = declarations
     .split(";")
     .map((declaration) => declaration.trim())
     .filter(Boolean)
     .filter((declaration) => {
       const property = declaration.match(/^([\w-]+)\s*:/)?.[1];
       return !property || !remove.has(property);
-    })
-    .join(";");
+    });
+  for (const [property, value] of Object.entries(updates)) kept.push(`${property}:${value}`);
+  return kept.join(";");
 }
 
-function supersededMobileProperties(selector) {
-  if (selector === COACH_STAGE) return ["min-height", "margin"];
-  if (selector === `${COACH_STAGE} .mcHeroContent`) return ["min-height", "padding"];
-  if (selector === `${COACH_STAGE} .mcHeroIdentity`) return ["--coach-hero-crest", "grid-template-columns", "gap"];
-  if (selector === `${COACH_STAGE} .mcHeroTeamMark`) return ["width", "height", "min-width", "min-height", "max-width", "max-height"];
-  if (selector === `${COACH_STAGE} .mcProgramIdentity`) return ["max-width", "color", "font", "letter-spacing", "text-transform", "text-wrap", "overflow-wrap"];
-  if (selector === `${COACH_STAGE} .mcEyebrow`) return ["grid-row", "font", "letter-spacing", "text-transform"];
-  if (selector === `${COACH_STAGE} h1`) return ["max-width", "margin", "font", "font-family", "font-size", "font-weight", "line-height", "letter-spacing", "text-wrap"];
-  if (selector === `${COACH_STAGE} .mcHeroContent>p`) return ["max-width", "margin", "font"];
-  if (selector === `${COACH_STAGE} .mcRealityStrip`) return ["margin"];
-  if (selector === `${COACH_STAGE} .mcRealityStrip button`) return ["min-height", "padding"];
-  if (selector === `${COACH_STAGE} .mcRealityStrip strong`) return ["font", "font-size"];
-  if (selector === `${COACH_STAGE} .mcPrimary`) return ["min-height", "margin-top"];
-  if (selector === ".mcShellV3 .mcFocusGrid") return ["margin"];
-  if (selector === ".mcShellV3 .mcActivationChapter") return ["margin"];
-  if (selector === ".mcShellV3 .mcLowerGrid") return ["margin"];
+function canonicalMobileRewrite(selector) {
+  if (selector === COACH_STAGE) {
+    return { updates: { "min-height": "334px", "margin-inline": "0" } };
+  }
+  if (selector === `${COACH_STAGE} .mcHeroContent`) {
+    return { updates: { "min-height": "334px", padding: "20px 18px 18px" } };
+  }
+  if (selector === `${COACH_STAGE} .mcHeroIdentity`) {
+    return { updates: { "--coach-hero-crest": "clamp(104px,29vw,120px)", "grid-template-columns": "minmax(0,1fr) var(--coach-hero-crest)", gap: "12px" } };
+  }
+  if (selector === `${COACH_STAGE} .mcHeroTeamMark`) {
+    return { updates: { width: "var(--coach-hero-crest)", height: "var(--coach-hero-crest)", "min-width": "var(--coach-hero-crest)", "min-height": "var(--coach-hero-crest)", "max-width": "var(--coach-hero-crest)", "max-height": "var(--coach-hero-crest)" } };
+  }
+  if (selector === `${COACH_STAGE} .mcProgramIdentity`) {
+    return { updates: { "max-width": "16ch", color: "#f8f8f4", font: '780 11px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif', "letter-spacing": ".075em", "text-transform": "uppercase", "text-wrap": "balance", "overflow-wrap": "anywhere" } };
+  }
+  if (selector === `${COACH_STAGE} .mcEyebrow`) {
+    return { updates: { "grid-row": "auto", font: '720 11px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif', "letter-spacing": ".055em", "text-transform": "uppercase" } };
+  }
+  if (selector === `${COACH_STAGE} h1`) {
+    return { updates: { "max-width": "15ch", margin: "12px 0 0", font: '800 clamp(36px,9.4vw,40px)/.94 "Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif', "letter-spacing": "-.02em", "text-wrap": "balance" }, removals: ["font-family", "font-size", "font-weight", "line-height"] };
+  }
+  if (selector === `${COACH_STAGE} .mcHeroContent>p`) {
+    return { updates: { "max-width": "36ch", margin: "7px 0 0", font: '520 14px/1.42 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif' } };
+  }
+  if (selector === `${COACH_STAGE} .mcRealityStrip`) {
+    return { updates: { margin: "13px 0 0" } };
+  }
+  if (selector === `${COACH_STAGE} .mcRealityStrip button`) {
+    return { updates: { "min-height": "54px", padding: "8px 12px" } };
+  }
+  if (selector === `${COACH_STAGE} .mcRealityStrip strong`) {
+    return { updates: { "font-size": "25px" } };
+  }
+  if (selector === `${COACH_STAGE} .mcPrimary`) {
+    return { updates: { "min-height": "46px", "margin-top": "11px" } };
+  }
+  if (selector === ".mcShellV3 .mcFocusGrid" || selector === ".mcShellV3 .mcActivationChapter" || selector === ".mcShellV3 .mcLowerGrid") {
+    return { updates: { "margin-inline": "0" } };
+  }
   return null;
 }
 
@@ -129,6 +159,10 @@ function supersededNarrowProperties(selector) {
   if (selector === `${COACH_STAGE} .mcHeroTeamMark`) return ["width", "height", "min-width", "min-height", "max-width", "max-height"];
   if (selector === `${COACH_STAGE} h1`) return ["font-size"];
   return null;
+}
+
+function removeDeclarations(declarations, properties) {
+  return rewriteDeclarations(declarations, {}, properties);
 }
 
 function rewriteMediaBlocks(css, mediaPattern, ruleRewriter) {
@@ -158,43 +192,70 @@ function rewriteMediaBlocks(css, mediaPattern, ruleRewriter) {
   return { css: output, changed };
 }
 
-function pruneSupersededCoachMobile(css) {
-  let removedHeaderArms = 0;
-  let prunedRules = 0;
-
-  const mobile = rewriteMediaBlocks(css, MOBILE_700_MEDIA, (wholeSelector, declarations, whole) => {
-    if (wholeSelector.trim().startsWith("@")) return whole;
-    const arms = wholeSelector.split(",").map((arm) => arm.trim()).filter(Boolean);
+function removeRetiredHeaderChrome(css) {
+  let removedArms = 0;
+  const result = rewriteMediaBlocks(css, MOBILE_700_MEDIA, (selector, declarations, whole) => {
+    if (selector.trim().startsWith("@")) return whole;
+    const arms = selector.split(",").map((arm) => arm.trim()).filter(Boolean);
     if (!arms.length) return whole;
-    const keptArms = arms.filter((arm) => !RETIRED_MOBILE_HEADER_CHROME.test(normalizeSelector(arm)));
-    removedHeaderArms += arms.length - keptArms.length;
-    if (!keptArms.length) return "";
-    if (keptArms.length === 1) {
-      const properties = supersededMobileProperties(normalizeSelector(keptArms[0]));
-      if (properties) {
-        const next = removeDeclarations(declarations, properties);
-        if (next !== declarations.trim()) prunedRules += 1;
-        if (!next) return "";
-        return `${keptArms[0]}{${next}}`;
-      }
-    }
-    if (keptArms.length !== arms.length) return `${keptArms.join(",")}{${declarations}}`;
+    const kept = arms.filter((arm) => !RETIRED_MOBILE_HEADER_CHROME.test(normalizeSelector(arm)));
+    removedArms += arms.length - kept.length;
+    if (!kept.length) return "";
+    if (kept.length !== arms.length) return `${kept.join(",")}{${declarations}}`;
     return whole;
   });
+  return { css: result.css, removedArms };
+}
 
+function foldCanonicalCoachMobile(css) {
+  let foldedRules = 0;
+  const mobile = rewriteMediaBlocks(css, MOBILE_700_MEDIA, (selector, declarations, whole) => {
+    if (selector.trim().startsWith("@")) return whole;
+    const arms = selector.split(",").map((arm) => arm.trim()).filter(Boolean);
+    if (!arms.length) return whole;
+
+    const untouched = [];
+    const rewritten = [];
+    for (const arm of arms) {
+      const rewrite = canonicalMobileRewrite(normalizeSelector(arm));
+      if (!rewrite) {
+        untouched.push(arm);
+        continue;
+      }
+      foldedRules += 1;
+      rewritten.push(`${arm}{${rewriteDeclarations(declarations, rewrite.updates, rewrite.removals)}}`);
+    }
+
+    if (!rewritten.length) return whole;
+    const preserved = untouched.length ? `${untouched.join(",")}{${declarations}}` : "";
+    return preserved + rewritten.join("");
+  });
+
+  let narrowPrunedRules = 0;
   const narrow = rewriteMediaBlocks(mobile.css, MOBILE_350_MEDIA, (selector, declarations, whole) => {
     if (selector.trim().startsWith("@")) return whole;
     const arms = selector.split(",").map((arm) => arm.trim()).filter(Boolean);
-    if (arms.length !== 1) return whole;
-    const properties = supersededNarrowProperties(normalizeSelector(arms[0]));
-    if (!properties) return whole;
-    const next = removeDeclarations(declarations, properties);
-    if (next !== declarations.trim()) prunedRules += 1;
-    if (!next) return "";
-    return `${arms[0]}{${next}}`;
+    if (!arms.length) return whole;
+
+    const untouched = [];
+    const rewritten = [];
+    for (const arm of arms) {
+      const properties = supersededNarrowProperties(normalizeSelector(arm));
+      if (!properties) {
+        untouched.push(arm);
+        continue;
+      }
+      const next = removeDeclarations(declarations, properties);
+      narrowPrunedRules += 1;
+      if (next) rewritten.push(`${arm}{${next}}`);
+    }
+
+    if (!rewritten.length && untouched.length === arms.length) return whole;
+    const preserved = untouched.length ? `${untouched.join(",")}{${declarations}}` : "";
+    return preserved + rewritten.join("");
   });
 
-  return { css: narrow.css, removedHeaderArms, prunedRules };
+  return { css: narrow.css, foldedRules, narrowPrunedRules };
 }
 
 function stripRuntimeGatedCoachAuthority(css) {
@@ -208,14 +269,16 @@ function stripRuntimeGatedCoachAuthority(css) {
 }
 
 async function main() {
+  await validateCanonicalCoachMobileAuthority();
+  const guard = runtimeGuard();
   const files = await listCssFiles(DIST_DIR);
-  const canonical = await loadCanonicalCoachMobileAuthority();
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
   let strippedRules = 0;
   let removedHeaderArms = 0;
-  let prunedRules = 0;
+  let foldedRules = 0;
+  let narrowPrunedRules = 0;
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
@@ -231,18 +294,25 @@ async function main() {
       const stripped = stripRuntimeGatedCoachAuthority(working);
       working = stripped.css;
       strippedRules += stripped.removed;
-      const pruned = pruneSupersededCoachMobile(working);
-      working = pruned.css;
-      removedHeaderArms += pruned.removedHeaderArms;
-      prunedRules += pruned.prunedRules;
+      const headerPruned = removeRetiredHeaderChrome(working);
+      working = headerPruned.css;
+      removedHeaderArms += headerPruned.removedArms;
     }
 
-    // Restore the pre-Phase-6E final compaction behavior for the legacy bundle.
-    // The canonical Coach mobile authority is isolated from this pass and restored
-    // afterward so existing app-wide visual baselines and CSS budgets remain stable.
+    // First recover the compact production shape that existed before Phase 6E.
+    // Only after that stable compaction do we fold the canonical mobile values into
+    // the surviving Coach rules, avoiding a duplicate high-specificity copy.
     const restructured = restructureCss(working, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
-    let output = compactProductionCss(restructured, path.basename(file));
-    if (isCoachWorkspace) output += canonical;
+    let outputSource = restructured;
+    if (isCoachWorkspace) {
+      const folded = foldCanonicalCoachMobile(outputSource);
+      outputSource = folded.css;
+      foldedRules += folded.foldedRules;
+      narrowPrunedRules += folded.narrowPrunedRules;
+    }
+
+    let output = compactProductionCss(outputSource, path.basename(file));
+    if (isCoachWorkspace) output += guard;
 
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -251,7 +321,7 @@ async function main() {
     }
   }
 
-  console.log(`Phase 6E final production compaction changed ${changedFiles}/${files.length} CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; stripped ${strippedRules} runtime-gated compiled rule(s); removed ${removedHeaderArms} unreachable mobile header selector arm(s); pruned ${prunedRules} superseded Coach mobile rule(s); restored canonical Coach mobile authority after compaction.`);
+  console.log(`Phase 6E final production compaction changed ${changedFiles}/${files.length} CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; stripped ${strippedRules} runtime-gated compiled rule(s); removed ${removedHeaderArms} unreachable mobile header selector arm(s); folded ${foldedRules} canonical Coach mobile rule(s); pruned ${narrowPrunedRules} superseded <=350px rule(s); retained only the runtime header guard as separate authority.`);
 }
 
 await main();
