@@ -6,12 +6,16 @@ import { transform as transformCss } from "lightningcss";
 const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_TITLE_SOURCE = path.resolve(process.cwd(), "src/components/CoachMissionControlTitleStage.css");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
-const AUTHORITY_BUNDLE_ASSET = /^shotlab-authority-\d+\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const PHASE_6E_MARKER = "/* Phase 6E mobile Coach Home composition authority";
 const MOBILE_700_MEDIA = /@media\s*\(\s*(?:max-width\s*:\s*700px|width\s*<=\s*700px)\s*\)\s*\{/gi;
 const RETIRED_MOBILE_HEADER_CHROME = /\.mcShellV3\s+(?:\.mcHeader\b|\.mcBrandLockup\b|\.mcBrandCopy\b|\.mcHeaderActions\b|\.mcBell\b|\.mcMobileMenu\b|\.mcHeaderTeamMark\b|\.mcTeamSelect\b)/;
 const COACH_STAGE = ".mcShellV3 .mcHero[data-team-identity-stage=coach-mission-control]";
+const CANONICAL_SIGNATURES = [
+  "min-height:334px",
+  "--coach-hero-crest:clamp(104px,29vw,120px)",
+  "min-height:54px",
+];
 
 async function listCssFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -73,9 +77,7 @@ async function loadCanonicalCoachMobileAuthority() {
   if (!authority) throw new Error("Could not read the Phase 6E canonical Coach mobile source authority block.");
 
   for (const required of [
-    "min-height:334px",
-    "--coach-hero-crest:clamp(104px,29vw,120px)",
-    "min-height:54px",
+    ...CANONICAL_SIGNATURES,
     "mission-control-team-header",
   ]) {
     if (!authority.includes(required)) {
@@ -166,6 +168,10 @@ function pruneSupersededCoachMobile(css) {
   return { css: output, removedHeaderArms, prunedRules };
 }
 
+function hasCanonicalAuthority(css) {
+  return CANONICAL_SIGNATURES.every((signature) => css.includes(signature));
+}
+
 async function main() {
   const canonical = await loadCanonicalCoachMobileAuthority();
   const files = await listCssFiles(DIST_DIR);
@@ -174,7 +180,8 @@ async function main() {
   let changedFiles = 0;
   let removedHeaderArms = 0;
   let prunedRules = 0;
-  let authorityBundles = 0;
+  let coachWorkspaceBundles = 0;
+  let restoredCoachAuthority = 0;
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
@@ -185,9 +192,9 @@ async function main() {
     }
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
-    const isAuthorityBundle = AUTHORITY_BUNDLE_ASSET.test(path.basename(file));
     let working = source;
     if (isCoachWorkspace) {
+      coachWorkspaceBundles += 1;
       const pruned = pruneSupersededCoachMobile(working);
       working = pruned.css;
       removedHeaderArms += pruned.removedHeaderArms;
@@ -196,9 +203,13 @@ async function main() {
 
     const restructured = restructureCss(working, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
     let output = compactProductionCss(restructured, path.basename(file));
-    if (isAuthorityBundle) {
-      output += canonical;
-      authorityBundles += 1;
+    if (isCoachWorkspace && !hasCanonicalAuthority(output)) {
+      // Keep the source-owned <=700px Coach composition in the same lazy CSS
+      // chunk as CoachCommandCenter. Restoring it to a root authority bundle
+      // breaks route ownership, defeats Phase 5B's live-asset contract, and
+      // costs materially more gzip because it loses the Coach selector dictionary.
+      output = compactProductionCss(`${output}${canonical}`, path.basename(file));
+      restoredCoachAuthority += 1;
     }
 
     outputBytes += Buffer.byteLength(output);
@@ -208,11 +219,14 @@ async function main() {
     }
   }
 
-  if (authorityBundles !== 1) {
-    throw new Error(`Expected exactly one production authority bundle for Phase 6E canonical co-compression; found ${authorityBundles}.`);
+  if (coachWorkspaceBundles !== 1) {
+    throw new Error(`Expected exactly one Coach workspace CSS bundle; found ${coachWorkspaceBundles}.`);
+  }
+  if (restoredCoachAuthority > 1) {
+    throw new Error(`Phase 6E canonical Coach mobile authority was restored more than once: ${restoredCoachAuthority}.`);
   }
 
-  console.log(`Phase 6E final production compaction changed ${changedFiles}/${files.length} CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; removed ${removedHeaderArms} unreachable mobile header selector arm(s); pruned ${prunedRules} superseded Coach mobile rule(s); preserved canonical Coach mobile authority in ${authorityBundles} production authority bundle.`);
+  console.log(`Phase 6E final production compaction changed ${changedFiles}/${files.length} CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; removed ${removedHeaderArms} unreachable mobile header selector arm(s); pruned ${prunedRules} superseded Coach mobile rule(s); canonical Coach mobile authority ${restoredCoachAuthority ? "restored to" : "already survived in"} the Coach workspace bundle.`);
 }
 
 await main();
