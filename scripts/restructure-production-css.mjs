@@ -7,6 +7,14 @@ const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
+const COACH_MOBILE_MEDIA = /@media\s*\(max-width:\s*700px\)\s*\{/g;
+const COACH_AUTHORITY_MARKERS = [
+  "coach-mission-control",
+  "--coach-hero-crest:clamp(104px,29vw,120px)",
+  "min-height:334px",
+  "min-height:48px",
+  "min-height:50px",
+];
 const COACH_AUTHORITY_CONTRACTS = [
   ["Coach identity stage", /coach-mission-control/],
   ["104–120px crest contract", /--coach-hero-crest:clamp\(104px,29vw,120px\)/],
@@ -62,10 +70,34 @@ function structurallyMinify(css, filename) {
     filename,
     restructure: true,
     comments: false,
-    // Keep media-query boundaries stable while still allowing normal selector
-    // and declaration restructuring inside the Coach workspace bundle.
     forceMediaMerge: false,
   }).css;
+}
+
+function findBalancedBlockEnd(css, start) {
+  const open = css.indexOf("{", start);
+  if (open < 0) return -1;
+  let depth = 0;
+  for (let i = open; i < css.length; i += 1) {
+    if (css[i] === "{") depth += 1;
+    else if (css[i] === "}" && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+
+function protectCanonicalCoachMobileAuthority(css, filename) {
+  COACH_MOBILE_MEDIA.lastIndex = 0;
+  for (const match of css.matchAll(COACH_MOBILE_MEDIA)) {
+    const start = match.index;
+    const end = findBalancedBlockEnd(css, start);
+    if (end < 0) throw new Error("Unbalanced Coach mobile media block during production CSS optimization.");
+    const block = css.slice(start, end);
+    if (!COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) continue;
+    const before = structurallyMinify(css.slice(0, start), `${filename}:before-coach-mobile`);
+    const after = structurallyMinify(css.slice(end), `${filename}:after-coach-mobile`);
+    return `${before}${block}${after}`;
+  }
+  throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
 
 function assertCanonicalCoachMobileAuthority(css) {
@@ -74,12 +106,15 @@ function assertCanonicalCoachMobileAuthority(css) {
     .map(([label]) => label);
   if (missing.length) {
     throw new Error(
-      `Canonical Coach mobile authority was lost during production CSS optimization (${missing.join(", ")}). Fix the optimizer/source pipeline; do not reconstruct CSS after build.`,
+      `Canonical Coach mobile authority was lost during final production CSS optimization (${missing.join(", ")}). Fix the optimizer/source pipeline; do not reconstruct CSS after build.`,
     );
   }
 }
 
-function restructureCss(css, filename) {
+function restructureCss(css, filename, { finalCoach = false } = {}) {
+  if (isCoachWorkspace(filename) && !finalCoach) {
+    return protectCanonicalCoachMobileAuthority(css, filename);
+  }
   const restructured = structurallyMinify(css, filename);
   const output = compactProductionCss(restructured, path.basename(filename));
   if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
@@ -104,7 +139,7 @@ async function finalizeProductionCss(files) {
       protectedFiles += 1;
       continue;
     }
-    const output = restructureCss(source, relative);
+    const output = restructureCss(source, relative, { finalCoach: true });
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
