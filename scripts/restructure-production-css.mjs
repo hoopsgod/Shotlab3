@@ -12,16 +12,9 @@ async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
   const html = await readFile(indexPath, "utf8");
   if (!html.includes("data-shotlab-authority-bundle")) return 0;
-
-  const referenced = new Set(
-    [...html.matchAll(/href=["'](?:\.\/|\/)?([^"'?]+\.css)(?:\?[^"']*)?["']/gi)]
-      .map((match) => path.basename(match[1])),
-  );
+  const referenced = new Set([...html.matchAll(/href=["'](?:\.\/|\/)?([^"'?]+\.css)(?:\?[^"']*)?["']/gi)].map((match) => path.basename(match[1])));
   const rootEntries = await readdir(DIST_DIR, { withFileTypes: true });
-  const staleAuthorities = rootEntries
-    .filter((entry) => entry.isFile() && /^shotlab-.*\.css$/i.test(entry.name) && !referenced.has(entry.name))
-    .map((entry) => entry.name);
-
+  const staleAuthorities = rootEntries.filter((entry) => entry.isFile() && /^shotlab-.*\.css$/i.test(entry.name) && !referenced.has(entry.name)).map((entry) => entry.name);
   await Promise.all(staleAuthorities.map((name) => unlink(path.join(DIST_DIR, name))));
   return staleAuthorities.length;
 }
@@ -38,28 +31,19 @@ async function listCssFiles(directory) {
 }
 
 function compactProductionCss(css, filename) {
-  return transformCss({
-    filename,
-    code: Buffer.from(css),
-    minify: true,
-    sourceMap: false,
-    errorRecovery: false,
-  }).code.toString("utf8");
+  return transformCss({ filename, code: Buffer.from(css), minify: true, sourceMap: false, errorRecovery: false }).code.toString("utf8");
 }
 
 function restructureCss(css, filename) {
-  // CoachWorkspaces contains intentionally overlapping responsive contexts whose
-  // cascade order is part of the product contract. Lightning CSS may compact its
-  // syntax, but cross-rule CSSO restructuring is not semantics-safe for this asset.
+  // CoachWorkspaces contains the source-owned responsive cascade. CSSO declaration
+  // restructuring can split a canonical component rule from its declarations and
+  // alter narrow-vs-broad media precedence. Keep that cascade intact and use
+  // syntax-only minification; dedicated dead-selector/declaration passes provide
+  // the safe size recovery for this asset.
   if (COACH_WORKSPACE_ASSET.test(path.basename(filename))) {
-    return compactProductionCss(css, path.basename(filename));
+    return minify(css, { filename, restructure: false, comments: false }).css;
   }
-  return minify(css, {
-    filename,
-    restructure: true,
-    comments: false,
-    forceMediaMerge: false,
-  }).css;
+  return minify(css, { filename, restructure: true, comments: false, forceMediaMerge: false }).css;
 }
 
 function isProtectedFinalAuthority(file) {
@@ -67,66 +51,32 @@ function isProtectedFinalAuthority(file) {
 }
 
 async function finalizeProductionCss(files) {
-  let sourceBytes = 0;
-  let outputBytes = 0;
-  let changedFiles = 0;
-  let protectedFiles = 0;
-
+  let sourceBytes = 0, outputBytes = 0, changedFiles = 0, protectedFiles = 0;
   for (const file of files) {
     const source = await readFile(file, "utf8");
     const relative = path.relative(DIST_DIR, file);
-    if (isProtectedFinalAuthority(file)) {
-      sourceBytes += Buffer.byteLength(source);
-      outputBytes += Buffer.byteLength(source);
-      protectedFiles += 1;
-      continue;
-    }
+    if (isProtectedFinalAuthority(file)) { sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(source); protectedFiles += 1; continue; }
     const restructured = restructureCss(source, relative);
     const output = compactProductionCss(restructured, path.basename(file));
-    sourceBytes += Buffer.byteLength(source);
-    outputBytes += Buffer.byteLength(output);
-    if (output !== source) {
-      await writeFile(file, output);
-      changedFiles += 1;
-    }
+    sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(output);
+    if (output !== source) { await writeFile(file, output); changedFiles += 1; }
   }
-
   console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`);
 }
 
 async function main() {
   await stat(DIST_DIR);
-
-  if (FINAL_COACH_MODE) {
-    const files = await listCssFiles(DIST_DIR);
-    await finalizeProductionCss(files);
-    return;
-  }
-
+  if (FINAL_COACH_MODE) { const files = await listCssFiles(DIST_DIR); await finalizeProductionCss(files); return; }
   const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
   const files = await listCssFiles(DIST_DIR);
-  let sourceBytes = 0;
-  let outputBytes = 0;
-  let changedFiles = 0;
-  let protectedFiles = 0;
-
+  let sourceBytes = 0, outputBytes = 0, changedFiles = 0, protectedFiles = 0;
   for (const file of files) {
     const source = await readFile(file, "utf8");
-    if (isProtectedFinalAuthority(file)) {
-      sourceBytes += Buffer.byteLength(source);
-      outputBytes += Buffer.byteLength(source);
-      protectedFiles += 1;
-      continue;
-    }
+    if (isProtectedFinalAuthority(file)) { sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(source); protectedFiles += 1; continue; }
     const output = restructureCss(source, path.relative(DIST_DIR, file));
-    sourceBytes += Buffer.byteLength(source);
-    outputBytes += Buffer.byteLength(output);
-    if (output !== source) {
-      await writeFile(file, output);
-      changedFiles += 1;
-    }
+    sourceBytes += Buffer.byteLength(source); outputBytes += Buffer.byteLength(output);
+    if (output !== source) { await writeFile(file, output); changedFiles += 1; }
   }
-
   console.log(`Removed ${removedAuthorityCopies} unreferenced visual-authority CSS copies.`);
   console.log(`Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`);
 }
