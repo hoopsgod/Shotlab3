@@ -120,7 +120,7 @@ function mediaBlocks(css) {
     const open = css.indexOf("{", match.index);
     const close = findBalancedClose(css, open);
     if (open < 0 || close < 0) continue;
-    blocks.push({ start: match.index, open, close, header: css.slice(match.index, open + 1), body: css.slice(open + 1, close) });
+    blocks.push({ start: match.index, open, close, body: css.slice(open + 1, close) });
     pattern.lastIndex = close + 1;
   }
   return blocks;
@@ -130,7 +130,7 @@ function parseRuleArms(body) {
   const rules = [];
   body.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selectorText, declarations) => {
     if (selectorText.trim().startsWith("@")) return whole;
-    for (const arm of splitSelectorList(selectorText)) rules.push({ arm, normalized: normalizeSelector(arm), declarations: declarations.trim() });
+    for (const arm of splitSelectorList(selectorText)) rules.push({ normalized: normalizeSelector(arm), declarations: declarations.trim() });
     return whole;
   });
   return rules;
@@ -167,7 +167,7 @@ async function loadCanonicalCoachMobileAuthority() {
     if (isCanonicalMigrationArm(rule.normalized)) canonicalByArm.set(rule.normalized, rule.declarations);
   }
   if (canonicalByArm.size < 12) throw new Error(`Canonical Coach mobile migration map is unexpectedly small: ${canonicalByArm.size} selector arm(s).`);
-  return { css: compactProductionCss(authority, path.basename(COACH_TITLE_SOURCE)), canonicalByArm };
+  return canonicalByArm;
 }
 
 function reconcileCoachMobileAuthority(css, canonicalByArm) {
@@ -226,7 +226,7 @@ function hasCanonicalAuthority(css) {
 }
 
 async function main() {
-  const canonical = await loadCanonicalCoachMobileAuthority();
+  const canonicalByArm = await loadCanonicalCoachMobileAuthority();
   const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
   let outputBytes = 0;
@@ -245,20 +245,23 @@ async function main() {
     }
 
     const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
-    let working = source;
+    const restructured = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
+    let output = compactProductionCss(restructured, path.basename(file));
+
     if (isCoachWorkspace) {
       coachWorkspaceBundles += 1;
-      const reconciled = reconcileCoachMobileAuthority(working, canonical.canonicalByArm);
-      working = reconciled.css;
+      // CSSO has already done its structural work. Reconcile the emitted <=700px
+      // Coach rules after that pass so a second restructuring step cannot discard
+      // the later source-owned Phase 6E values. Lightning CSS then performs only
+      // syntax-level minification on the reconciled result.
+      const reconciled = reconcileCoachMobileAuthority(output, canonicalByArm);
       removedHeaderArms += reconciled.removedHeaderArms;
       reconciledArms += reconciled.reconciledArms;
       missingArms += reconciled.missingArms.length;
-    }
-
-    const restructured = restructureCss(working, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
-    const output = compactProductionCss(restructured, path.basename(file));
-    if (isCoachWorkspace && !hasCanonicalAuthority(output)) {
-      throw new Error("Phase 6E canonical Coach mobile authority did not survive in-place production reconciliation.");
+      output = compactProductionCss(reconciled.css, path.basename(file));
+      if (!hasCanonicalAuthority(output)) {
+        throw new Error("Phase 6E canonical Coach mobile authority did not survive post-restructure production reconciliation.");
+      }
     }
 
     outputBytes += Buffer.byteLength(output);
