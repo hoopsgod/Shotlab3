@@ -118,23 +118,24 @@ function initialRestructure(css, filename) {
 }
 
 function finalRestructure(css, filename) {
-  const restructured = isCoachWorkspace(filename)
-    ? protectCanonicalCoachMobileAuthority(css, filename)
-    : structurallyMinify(css, filename);
-  const output = compactProductionCss(restructured, path.basename(filename));
-  if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
-  return output;
+  if (isCoachWorkspace(filename)) {
+    const output = protectCanonicalCoachMobileAuthority(css, filename);
+    assertCanonicalCoachMobileAuthority(output);
+    return output;
+  }
+  return compactProductionCss(structurallyMinify(css, filename), path.basename(filename));
 }
 
 function postAuthFontRestructure(css, filename) {
   // Font-stack substitution can expose fresh structural duplication across the
   // Coach bundle. Recompact everything around the canonical <=700px authority
-  // block while keeping that source-owned block out of CSSO's rule merging.
-  const output = isCoachWorkspace(filename)
-    ? compactProductionCss(protectCanonicalCoachMobileAuthority(css, filename), path.basename(filename))
-    : finalRestructure(css, filename);
-  if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
-  return output;
+  // block while keeping that block stable through the final stages.
+  if (isCoachWorkspace(filename)) {
+    const output = protectCanonicalCoachMobileAuthority(css, filename);
+    assertCanonicalCoachMobileAuthority(output);
+    return output;
+  }
+  return finalRestructure(css, filename);
 }
 
 function isProtectedFinalAuthority(file) {
