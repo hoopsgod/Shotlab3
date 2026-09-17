@@ -124,12 +124,11 @@ function finalRestructure(css, filename) {
 }
 
 function postAuthFontRestructure(css, filename) {
-  // The Coach bundle was already structurally compacted and certified before
-  // authenticated font tokens were substituted. Re-running CSSO here can merge
-  // the canonical mobile override declarations away. Only syntax-compact Coach
-  // at this stage; other bundles can still use the normal structural pass.
+  // Font-stack substitution can expose fresh structural duplication across the
+  // Coach bundle. Recompact everything around the canonical <=700px authority
+  // block while keeping that source-owned block out of CSSO's rule merging.
   const output = isCoachWorkspace(filename)
-    ? compactProductionCss(css, path.basename(filename))
+    ? compactProductionCss(protectCanonicalCoachMobileAuthority(css, filename), path.basename(filename))
     : finalRestructure(css, filename);
   if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
   return output;
