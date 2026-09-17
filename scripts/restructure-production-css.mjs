@@ -118,7 +118,10 @@ function initialRestructure(css, filename) {
 }
 
 function finalRestructure(css, filename) {
-  const output = compactProductionCss(structurallyMinify(css, filename), path.basename(filename));
+  const restructured = isCoachWorkspace(filename)
+    ? protectCanonicalCoachMobileAuthority(css, filename)
+    : structurallyMinify(css, filename);
+  const output = compactProductionCss(restructured, path.basename(filename));
   if (isCoachWorkspace(filename)) assertCanonicalCoachMobileAuthority(output);
   return output;
 }
