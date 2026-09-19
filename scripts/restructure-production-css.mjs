@@ -95,9 +95,13 @@ function extractCanonicalCoachMobileAuthority(css) {
 function splitCoachMobileAuthority(block) {
   const open = block.indexOf("{");
   const close = block.lastIndexOf("}");
+  if (open < 0 || close < 0) {
+    throw new Error("Canonical Coach mobile block is unbalanced before title-stage isolation.");
+  }
   const lowerSectionStart = block.indexOf(".mcShellV3 .mcFocusGrid", open + 1);
-  if (open < 0 || close < 0 || lowerSectionStart < 0) {
-    throw new Error("Canonical Coach mobile block could not be split at the lower-workspace boundary.");
+  if (lowerSectionStart < 0) {
+    // The first production pass already isolated the title-stage block.
+    return { protectedTitleStage: block, compressibleLowerWorkspace: "" };
   }
   const mediaHeader = block.slice(0, open + 1);
   const protectedTitleStage = `${block.slice(0, lowerSectionStart)}}`;
