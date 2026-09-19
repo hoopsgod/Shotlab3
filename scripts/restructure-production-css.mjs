@@ -8,6 +8,16 @@ const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const POST_AUTH_FONTS_MODE = process.argv.includes("--post-auth-fonts");
+const COACH_MOBILE_MEDIA = /@media\s*\(\s*max-width\s*:\s*700px\s*\)\s*\{/g;
+const COACH_AUTHORITY_MARKERS = [
+  "coach-mission-control",
+  "mission-control-team-header",
+  "--coach-hero-crest:clamp(104px,29vw,120px)",
+  "min-height:334px",
+  "min-height:48px",
+  "min-height:50px",
+];
+
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
   const html = await readFile(indexPath, "utf8");
@@ -58,8 +68,60 @@ function restructureCss(css, filename, { coach = false } = {}) {
   }).css;
 }
 
+function findBalancedBlockEnd(css, start) {
+  const open = css.indexOf("{", start);
+  if (open < 0) return -1;
+  let depth = 0;
+  for (let i = open; i < css.length; i += 1) {
+    if (css[i] === "{") depth += 1;
+    else if (css[i] === "}" && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+
+function extractCanonicalCoachMobileAuthority(css) {
+  COACH_MOBILE_MEDIA.lastIndex = 0;
+  for (const match of css.matchAll(COACH_MOBILE_MEDIA)) {
+    const start = match.index;
+    const end = findBalancedBlockEnd(css, start);
+    if (end < 0) throw new Error("Unbalanced Coach mobile media block during production CSS optimization.");
+    const block = css.slice(start, end);
+    if (!COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) continue;
+    return { start, end, block };
+  }
+  throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
+}
+
+function compactCoachCssPreservingAuthority(css, filename) {
+  const { start, end, block } = extractCanonicalCoachMobileAuthority(css);
+  const remainder = `${css.slice(0, start)}${css.slice(end)}`;
+
+  // The historical Coach bundle needs whole-bundle CSSO restructuring to stay
+  // inside the locked performance budget. Running that optimization over the
+  // canonical <=700px title-stage block can legally merge its media rules into
+  // other rules and change the rendered cascade. Remove only that one
+  // source-owned block, aggressively compact everything else, then append the
+  // same block as the final Coach mobile authority.
+  const compactRemainder = compactProductionCss(
+    restructureCss(remainder, `${filename}:without-coach-mobile-authority`, { coach: true }),
+    path.basename(filename),
+  );
+  const compactAuthority = minify(block, {
+    filename: `${filename}:coach-mobile-authority`,
+    restructure: false,
+    comments: false,
+    forceMediaMerge: false,
+  }).css;
+  return `${compactRemainder}${compactAuthority}`;
+}
+
 function isProtectedFinalAuthority(file) {
   return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
+}
+
+function optimizeCss(source, relative) {
+  if (isCoachWorkspace(relative)) return compactCoachCssPreservingAuthority(source, relative);
+  return compactProductionCss(restructureCss(source, relative), path.basename(relative));
 }
 
 async function finalizeProductionCss(files, mode) {
@@ -77,9 +139,7 @@ async function finalizeProductionCss(files, mode) {
       continue;
     }
 
-    const coach = isCoachWorkspace(file);
-    const restructured = restructureCss(source, relative, { coach });
-    const output = compactProductionCss(restructured, path.basename(file));
+    const output = optimizeCss(source, relative);
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -109,6 +169,7 @@ async function main() {
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
+    const relative = path.relative(DIST_DIR, file);
     if (isProtectedFinalAuthority(file)) {
       sourceBytes += Buffer.byteLength(source);
       outputBytes += Buffer.byteLength(source);
@@ -116,7 +177,9 @@ async function main() {
       continue;
     }
 
-    const output = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace(file) });
+    const output = isCoachWorkspace(file)
+      ? compactCoachCssPreservingAuthority(source, relative)
+      : restructureCss(source, relative);
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
