@@ -47,6 +47,7 @@ const CONTRACTS = {
       primaryRegion: '[data-testid="coach-players-command-bar"]',
     },
     centered: ["routeShell", "titleStage", "primaryRegion"],
+    localScrollSelectors: ['[data-testid="coach-players-filter-rail"] > [role="group"]'],
   },
   coachEvents: {
     targets: {
