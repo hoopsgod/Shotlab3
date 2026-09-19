@@ -94,9 +94,19 @@ function protectCanonicalCoachMobileAuthority(css, filename) {
     if (end < 0) throw new Error("Unbalanced Coach mobile media block during production CSS optimization.");
     const block = css.slice(start, end);
     if (!COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) continue;
-    const before = structurallyMinify(css.slice(0, start), `${filename}:before-coach-mobile`);
-    const after = structurallyMinify(css.slice(end), `${filename}:after-coach-mobile`);
-    return `${before}${block}${after}`;
+
+    // Remove the one source-owned authority block before structural CSSO so the
+    // rest of CoachWorkspaces can be optimized as one continuous stylesheet.
+    // Then syntax-minify (without restructuring) and append the authority block
+    // last so its source-owned declarations remain the final mobile authority.
+    const remainder = `${css.slice(0, start)}${css.slice(end)}`;
+    const compactRemainder = structurallyMinify(remainder, `${filename}:without-coach-mobile-authority`);
+    const compactAuthority = minify(block, {
+      filename: `${filename}:coach-mobile-authority`,
+      restructure: false,
+      comments: false,
+    }).css;
+    return `${compactRemainder}${compactAuthority}`;
   }
   throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
