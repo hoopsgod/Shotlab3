@@ -8,14 +8,6 @@ const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const POST_AUTH_FONTS_MODE = process.argv.includes("--post-auth-fonts");
-const COACH_MOBILE_MEDIA = /@media\s*\(max-width:\s*700px\)\s*\{/g;
-const COACH_AUTHORITY_MARKERS = [
-  "coach-mission-control",
-  "--coach-hero-crest:clamp(104px,29vw,120px)",
-  "min-height:334px",
-  "min-height:48px",
-  "min-height:50px",
-];
 const COACH_AUTHORITY_CONTRACTS = [
   ["Coach identity stage", /coach-mission-control/],
   ["104–120px crest contract", /--coach-hero-crest:clamp\(104px,29vw,120px\)/],
@@ -66,49 +58,13 @@ function isCoachWorkspace(file) {
   return COACH_WORKSPACE_ASSET.test(path.basename(file));
 }
 
-function structurallyMinify(css, filename) {
+function restructureCss(css, filename, { coach = false } = {}) {
   return minify(css, {
     filename,
     restructure: true,
     comments: false,
-    forceMediaMerge: false,
+    forceMediaMerge: coach,
   }).css;
-}
-
-function findBalancedBlockEnd(css, start) {
-  const open = css.indexOf("{", start);
-  if (open < 0) return -1;
-  let depth = 0;
-  for (let i = open; i < css.length; i += 1) {
-    if (css[i] === "{") depth += 1;
-    else if (css[i] === "}" && --depth === 0) return i + 1;
-  }
-  return -1;
-}
-
-function protectCanonicalCoachMobileAuthority(css, filename) {
-  COACH_MOBILE_MEDIA.lastIndex = 0;
-  for (const match of css.matchAll(COACH_MOBILE_MEDIA)) {
-    const start = match.index;
-    const end = findBalancedBlockEnd(css, start);
-    if (end < 0) throw new Error("Unbalanced Coach mobile media block during production CSS optimization.");
-    const block = css.slice(start, end);
-    if (!COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) continue;
-
-    // Remove the one source-owned authority block before structural CSSO so the
-    // rest of CoachWorkspaces can be optimized as one continuous stylesheet.
-    // Then syntax-minify (without restructuring) and append the authority block
-    // last so its source-owned declarations remain the final mobile authority.
-    const remainder = `${css.slice(0, start)}${css.slice(end)}`;
-    const compactRemainder = structurallyMinify(remainder, `${filename}:without-coach-mobile-authority`);
-    const compactAuthority = minify(block, {
-      filename: `${filename}:coach-mobile-authority`,
-      restructure: false,
-      comments: false,
-    }).css;
-    return `${compactRemainder}${compactAuthority}`;
-  }
-  throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
 
 function assertCanonicalCoachMobileAuthority(css) {
@@ -120,32 +76,6 @@ function assertCanonicalCoachMobileAuthority(css) {
       `Canonical Coach mobile authority was lost during production CSS optimization (${missing.join(", ")}). Fix the optimizer/source pipeline; do not reconstruct CSS after build.`,
     );
   }
-}
-
-function initialRestructure(css, filename) {
-  if (isCoachWorkspace(filename)) return protectCanonicalCoachMobileAuthority(css, filename);
-  return structurallyMinify(css, filename);
-}
-
-function finalRestructure(css, filename) {
-  if (isCoachWorkspace(filename)) {
-    const output = protectCanonicalCoachMobileAuthority(css, filename);
-    assertCanonicalCoachMobileAuthority(output);
-    return output;
-  }
-  return compactProductionCss(structurallyMinify(css, filename), path.basename(filename));
-}
-
-function postAuthFontRestructure(css, filename) {
-  // Font-stack substitution can expose fresh structural duplication across the
-  // Coach bundle. Recompact everything around the canonical <=700px authority
-  // block while keeping that block stable through the final stages.
-  if (isCoachWorkspace(filename)) {
-    const output = protectCanonicalCoachMobileAuthority(css, filename);
-    assertCanonicalCoachMobileAuthority(output);
-    return output;
-  }
-  return finalRestructure(css, filename);
 }
 
 function isProtectedFinalAuthority(file) {
@@ -166,9 +96,12 @@ async function finalizeProductionCss(files, mode) {
       protectedFiles += 1;
       continue;
     }
-    const output = mode === "post-auth-fonts"
-      ? postAuthFontRestructure(source, relative)
-      : finalRestructure(source, relative);
+
+    const coach = isCoachWorkspace(file);
+    const restructured = restructureCss(source, relative, { coach });
+    const output = compactProductionCss(restructured, path.basename(file));
+    if (coach) assertCanonicalCoachMobileAuthority(output);
+
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -177,7 +110,7 @@ async function finalizeProductionCss(files, mode) {
     }
   }
   console.log(
-    `${mode === "post-auth-fonts" ? "Post-font" : "Final"} production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`,
+    `${mode === "post-auth-fonts" ? "Post-font" : "Final"} production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`,
   );
 }
 
@@ -195,6 +128,7 @@ async function main() {
   let outputBytes = 0;
   let changedFiles = 0;
   let protectedFiles = 0;
+
   for (const file of files) {
     const source = await readFile(file, "utf8");
     if (isProtectedFinalAuthority(file)) {
@@ -203,7 +137,8 @@ async function main() {
       protectedFiles += 1;
       continue;
     }
-    const output = initialRestructure(source, path.relative(DIST_DIR, file));
+
+    const output = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace(file) });
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -211,6 +146,7 @@ async function main() {
       changedFiles += 1;
     }
   }
+
   console.log(`Removed ${removedAuthorityCopies} unreferenced visual-authority CSS copies.`);
   console.log(
     `Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`,
