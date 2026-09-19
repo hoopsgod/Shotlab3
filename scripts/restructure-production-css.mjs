@@ -92,32 +92,85 @@ function extractCanonicalCoachMobileAuthority(css) {
   throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
 
-function splitCoachMobileAuthority(block) {
+function protectedCoachProperties(selector) {
+  const normalized = selector.replace(/\s+/g, " ").trim();
+  if (normalized.includes("mission-control-team-header")) return new Set(["display"]);
+  if (/\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]$/.test(normalized)) {
+    return new Set(["min-height"]);
+  }
+  if (normalized.includes(".mcHeroContent>p") || normalized.includes(".mcHeroContent > p")) return "all";
+  if (normalized.endsWith(".mcHeroContent")) return new Set(["min-height", "padding"]);
+  if (normalized.endsWith(".mcHeroIdentity")) return "all";
+  if (normalized.endsWith(".mcHeroTeamMark")) return "all";
+  if (normalized.endsWith(".mcProgramIdentity")) return "all";
+  if (normalized.endsWith(".mcEyebrow")) return "all";
+  if (/\sh1$/.test(normalized)) return "all";
+  if (normalized.endsWith(".mcRealityStrip button")) return new Set(["min-height", "padding"]);
+  if (normalized.endsWith(".mcRealityStrip strong")) return "all";
+  if (normalized.endsWith(".mcPrimary")) return new Set(["min-height", "margin-top", "padding", "font-size"]);
+  return null;
+}
+
+function splitDeclarations(body, protectedProperties) {
+  if (protectedProperties === "all") return { protectedBody: body.trim(), compressibleBody: "" };
+  if (!protectedProperties) return { protectedBody: "", compressibleBody: body.trim() };
+
+  const protectedDeclarations = [];
+  const compressibleDeclarations = [];
+  const declarationPattern = /([-a-zA-Z0-9_]+)\s*:\s*([^;}]*)/g;
+  for (const match of body.matchAll(declarationPattern)) {
+    const declaration = `${match[1]}:${match[2].trim()}`;
+    if (protectedProperties.has(match[1].toLowerCase())) protectedDeclarations.push(declaration);
+    else compressibleDeclarations.push(declaration);
+  }
+  return {
+    protectedBody: protectedDeclarations.join(";"),
+    compressibleBody: compressibleDeclarations.join(";"),
+  };
+}
+
+function partitionCoachMobileAuthority(block) {
   const open = block.indexOf("{");
   const close = block.lastIndexOf("}");
-  if (open < 0 || close < 0) {
-    throw new Error("Canonical Coach mobile block is unbalanced before title-stage isolation.");
+  if (open < 0 || close < 0 || close <= open) {
+    throw new Error("Canonical Coach mobile block is unbalanced before declaration-level authority isolation.");
   }
-  const lowerSectionStart = block.indexOf(".mcShellV3 .mcFocusGrid", open + 1);
-  if (lowerSectionStart < 0) {
-    // The first production pass already isolated the title-stage block.
-    return { protectedTitleStage: block, compressibleLowerWorkspace: "" };
-  }
+
   const mediaHeader = block.slice(0, open + 1);
-  const protectedTitleStage = `${block.slice(0, lowerSectionStart)}}`;
-  const compressibleLowerWorkspace = `${mediaHeader}${block.slice(lowerSectionStart, close)}}`;
-  return { protectedTitleStage, compressibleLowerWorkspace };
+  const inner = block.slice(open + 1, close);
+  const protectedRules = [];
+  const compressibleRules = [];
+  const rulePattern = /([^{}]+)\{([^{}]*)\}/g;
+
+  for (const match of inner.matchAll(rulePattern)) {
+    const selector = match[1].trim();
+    const body = match[2].trim();
+    const { protectedBody, compressibleBody } = splitDeclarations(body, protectedCoachProperties(selector));
+    if (protectedBody) protectedRules.push(`${selector}{${protectedBody}}`);
+    if (compressibleBody) compressibleRules.push(`${selector}{${compressibleBody}}`);
+  }
+
+  if (!protectedRules.length) {
+    throw new Error("Canonical Coach mobile block produced no protected title-stage declarations.");
+  }
+  return {
+    protectedTitleStage: `${mediaHeader}${protectedRules.join("")}}`,
+    compressibleMobileAuthority: compressibleRules.length
+      ? `${mediaHeader}${compressibleRules.join("")}}`
+      : "",
+  };
 }
 
 function compactCoachCssPreservingAuthority(css, filename) {
   const { start, end, block } = extractCanonicalCoachMobileAuthority(css);
-  const { protectedTitleStage, compressibleLowerWorkspace } = splitCoachMobileAuthority(block);
-  const remainder = `${css.slice(0, start)}${compressibleLowerWorkspace}${css.slice(end)}`;
+  const { protectedTitleStage, compressibleMobileAuthority } = partitionCoachMobileAuthority(block);
+  const remainder = `${css.slice(0, start)}${compressibleMobileAuthority}${css.slice(end)}`;
 
   // The historical Coach bundle needs whole-bundle CSSO restructuring to stay
-  // inside the locked performance budget. Protect only the title-stage/hero
-  // authority from media merging; lower Coach Home workspace rules can be
-  // compacted with the rest of the bundle.
+  // inside the locked performance budget. Remove only the declarations whose
+  // responsive association CSSO has proven unsafe to merge, compact every
+  // remaining declaration normally, then append those source-derived
+  // declarations as the final <=700px Coach title-stage authority.
   const compactRemainder = compactProductionCss(
     restructureCss(remainder, `${filename}:without-coach-title-stage-authority`, { coach: true }),
     path.basename(filename),
