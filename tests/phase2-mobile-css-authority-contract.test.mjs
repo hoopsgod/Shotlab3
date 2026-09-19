@@ -86,7 +86,13 @@ test('Coach secondary filters keep scoped horizontal ownership with explicit wra
   );
   assert.match(
     geometryContract,
+    /export const INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST = \[\];/,
+    'Phase 1A must treat wrapped Players filters as non-scrolling and allow no product-level horizontal scroll owner',
+  );
+  assert.doesNotMatch(
+    geometryContract,
     /selector:\s*'\[data-testid="coach-players-filter-rail"\]\s*>\s*\[role="group"\]'/,
+    'Coach Players must not retain the retired horizontal-scroll exception',
   );
   assert.doesNotMatch(
     geometryContract,
