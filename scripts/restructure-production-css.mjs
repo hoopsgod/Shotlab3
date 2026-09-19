@@ -177,7 +177,9 @@ function compactCoachCssPreservingAuthority(css, filename) {
   );
   const compactAuthority = minify(protectedTitleStage, {
     filename: `${filename}:coach-title-stage-authority`,
-    restructure: false,
+    // This isolated block contains only the <=700px source authority, so CSSO
+    // can safely restructure within it without merging across breakpoints.
+    restructure: true,
     comments: false,
     forceMediaMerge: false,
   }).css;
@@ -201,6 +203,13 @@ async function finalizeProductionCss(files, mode) {
   for (const file of files) {
     const source = await readFile(file, "utf8");
     const relative = path.relative(DIST_DIR, file);
+    if (isProtectedFinalAuthority(file)) {
+      sourceBytes += Buffer.byteLength(source);
+      outputBytes += Buffer.byteLength(source);
+      protectedFiles += 1;
+      continue;
+    }
+
     const output = optimizeCss(source, relative);
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
@@ -232,6 +241,13 @@ async function main() {
   for (const file of files) {
     const source = await readFile(file, "utf8");
     const relative = path.relative(DIST_DIR, file);
+    if (isProtectedFinalAuthority(file)) {
+      sourceBytes += Buffer.byteLength(source);
+      outputBytes += Buffer.byteLength(source);
+      protectedFiles += 1;
+      continue;
+    }
+
     const output = isCoachWorkspace(file)
       ? compactCoachCssPreservingAuthority(source, relative)
       : restructureCss(source, relative);
