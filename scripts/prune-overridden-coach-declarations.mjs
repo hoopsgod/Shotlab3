@@ -12,6 +12,7 @@ const MISSION_CONTROL_SHELL_SCOPE = '.mcShellV3'
 const MISSION_CONTROL_CLASS = /^(?:mc[A-Z0-9_-]|mcShellV3$|missionControl$)/
 const MISSION_CONTROL_TOKEN = /\b(?:mc[A-Z][\w-]*|mcShellV3|missionControl)\b/g
 const MERGEABLE_CONTEXT_AT_RULE = /^@(media|supports|container)\b/i
+const SOURCE_OWNED_COACH_AUTHORITY = /(?:data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?|data-testid=(?:["'])?mission-control-team-header(?:["'])?)/
 
 function findMatchingBrace(source, openIndex) {
   let depth = 1
@@ -229,6 +230,7 @@ function collectRulesByContext(source, start, end, contexts, contextPath, option
         rules.push({
           selector: prelude,
           declarations,
+          sourceOwnedAuthority: SOURCE_OWNED_COACH_AUTHORITY.test(prelude),
           missionControl: options.allowMissionControlScope
             ? describeMissionControlSelector(prelude, options.exclusiveMissionControlClasses)
             : null,
@@ -262,12 +264,15 @@ function analyzeRules(rules, removals, stats) {
       const exactWins = declarationCanBeOverridden(declaration, exactLater)
       const laterWins = exactWins || Boolean(scopedLater)
 
-      if (laterWins) {
+      // CoachMissionControlTitleStage is the canonical source owner. Production
+      // pruning may remove genuinely dead/overridden Coach declarations, but it
+      // must never delete the compiled declarations that carry this authority.
+      if (laterWins && !rule.sourceOwnedAuthority) {
         removals.push({ start: declaration.start, end: declaration.end })
         stats.removedDeclarations += 1
         stats.rawBytesRemoved += declaration.end - declaration.start
         if (!exactWins && scopedLater) stats.scopedDeclarationsRemoved += 1
-      } else if (!exactLater || declaration.important) {
+      } else if (!exactLater || declaration.important || rule.sourceOwnedAuthority) {
         seen.set(declaration.property, declaration)
       }
 

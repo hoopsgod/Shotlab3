@@ -7,12 +7,11 @@ const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
-
+const POST_AUTH_FONTS_MODE = process.argv.includes("--post-auth-fonts");
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
   const html = await readFile(indexPath, "utf8");
   if (!html.includes("data-shotlab-authority-bundle")) return 0;
-
   const referenced = new Set(
     [...html.matchAll(/href=["'](?:\.\/|\/)?([^"'?]+\.css)(?:\?[^"']*)?["']/gi)]
       .map((match) => path.basename(match[1])),
@@ -21,7 +20,6 @@ async function removeBundledAuthorityDuplicates() {
   const staleAuthorities = rootEntries
     .filter((entry) => entry.isFile() && /^shotlab-.*\.css$/i.test(entry.name) && !referenced.has(entry.name))
     .map((entry) => entry.name);
-
   await Promise.all(staleAuthorities.map((name) => unlink(path.join(DIST_DIR, name))));
   return staleAuthorities.length;
 }
@@ -47,6 +45,10 @@ function compactProductionCss(css, filename) {
   }).code.toString("utf8");
 }
 
+function isCoachWorkspace(file) {
+  return COACH_WORKSPACE_ASSET.test(path.basename(file));
+}
+
 function restructureCss(css, filename, { coach = false } = {}) {
   return minify(css, {
     filename,
@@ -60,12 +62,11 @@ function isProtectedFinalAuthority(file) {
   return FINAL_MOBILE_AUTHORITY_ASSET.test(path.basename(file));
 }
 
-async function finalizeProductionCss(files) {
+async function finalizeProductionCss(files, mode) {
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
   let protectedFiles = 0;
-
   for (const file of files) {
     const source = await readFile(file, "utf8");
     const relative = path.relative(DIST_DIR, file);
@@ -75,11 +76,9 @@ async function finalizeProductionCss(files) {
       protectedFiles += 1;
       continue;
     }
-    const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
-    // Dedupe/font-token passes run after the first CSSO pass. Re-run the same
-    // standards-based restructure here so newly adjacent/equivalent rules can
-    // collapse before Lightning CSS performs the final syntax compaction.
-    const restructured = restructureCss(source, relative, { coach: isCoachWorkspace });
+
+    const coach = isCoachWorkspace(file);
+    const restructured = restructureCss(source, relative, { coach });
     const output = compactProductionCss(restructured, path.basename(file));
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
@@ -88,23 +87,19 @@ async function finalizeProductionCss(files) {
       changedFiles += 1;
     }
   }
-
-  console.log(`Final production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`);
+  console.log(
+    `${mode === "post-auth-fonts" ? "Post-font" : "Final"} production CSS restructure changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector/dedupe passes; protected ${protectedFiles} final mobile authority asset(s).`,
+  );
 }
 
 async function main() {
   await stat(DIST_DIR);
-
-  if (FINAL_COACH_MODE) {
+  if (FINAL_COACH_MODE || POST_AUTH_FONTS_MODE) {
     const files = await listCssFiles(DIST_DIR);
-    await finalizeProductionCss(files);
+    await finalizeProductionCss(files, POST_AUTH_FONTS_MODE ? "post-auth-fonts" : "final-coach");
     return;
   }
 
-  // Remove unreferenced authority copies before enumerating the files that will be
-  // restructured. A retired stylesheet can be present in dist after Vite copies
-  // public assets but intentionally absent from index.html; listing first leaves a
-  // stale pathname that is unlinked moments later and then crashes the optimizer.
   const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
   const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
@@ -120,8 +115,8 @@ async function main() {
       protectedFiles += 1;
       continue;
     }
-    const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
-    const output = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace });
+
+    const output = restructureCss(source, path.relative(DIST_DIR, file), { coach: isCoachWorkspace(file) });
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
@@ -131,7 +126,9 @@ async function main() {
   }
 
   console.log(`Removed ${removedAuthorityCopies} unreferenced visual-authority CSS copies.`);
-  console.log(`Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`);
+  console.log(
+    `Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw; protected ${protectedFiles} final mobile authority asset(s).`,
+  );
 }
 
 await main();

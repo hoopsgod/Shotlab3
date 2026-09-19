@@ -94,7 +94,32 @@ async function main() {
     const detail = violations.slice(0, 24).map((item) => `\n - ${item}`).join('')
     throw new Error(`Coach mobile identity authority verification failed: ${violatingRules} competing declaration set(s) remain across ${violatingFiles} production CSS asset(s). Fix the source authority instead of rewriting dist.${detail}`)
   }
-  console.log('Coach mobile identity authority verified: production CSS requires no post-build Coach rewrite.')
+
+  // CSSO may factor a declaration away from its original selector while
+  // preserving the same cascade. Source contracts own exact declaration
+  // placement; this production guard checks that canonical selectors and
+  // selectors survive optimization while the rule reconciler rejects competitors.
+  // CSSO is allowed to dedupe redundant literal values; computed-style E2E
+  // certifies the final selector/value association.
+  const cssSources = await Promise.all(
+    entries.filter((entry) => entry.isFile() && entry.name.endsWith('.css'))
+      .map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')),
+  )
+  const productionCss = cssSources.join('\n')
+  const requiredAuthority = [
+    ['Coach identity stage selector', /coach-mission-control/],
+    ['mobile utility header selector', /mission-control-team-header/],
+    ['Coach hero identity selector', /\.mcHeroIdentity/],
+    ['metric control selector', /\.mcRealityStrip button/],
+    ['metric value selector', /\.mcRealityStrip strong/],
+    ['primary CTA selector', /\.mcPrimary/],
+  ]
+  const missing = requiredAuthority.filter(([, pattern]) => !pattern.test(productionCss)).map(([label]) => label)
+  if (missing.length) {
+    throw new Error(`Coach mobile identity authority verification failed: optimized production CSS lost required Coach authority tokens (${missing.join(', ')}).`)
+  }
+
+  console.log('Coach mobile identity authority verified: production CSS needs no post-build Coach rewrite; computed-style certification owns optimized declaration association.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })

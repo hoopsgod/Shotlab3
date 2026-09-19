@@ -111,6 +111,7 @@ for (const viewport of VIEWPORTS) {
         primaryColor: primaryStyle?.color || '',
         primaryBorder: primaryStyle?.border || '',
         primaryHeight: primary?.getBoundingClientRect().height || 0,
+        headerDisplay: headerStyle?.display || '',
         headerBackground: headerStyle?.backgroundColor || '',
         headerBackgroundImage: headerStyle?.backgroundImage || '',
         headerColor: headerStyle?.color || '',
@@ -245,22 +246,12 @@ for (const viewport of VIEWPORTS) {
     expect(metrics.overflow).toBeLessThanOrEqual(1);
     expect(metrics.attention.top).toBeLessThan(metrics.dock.top);
 
-    // The compact mobile control bar intentionally keeps the team brand visible
-    // while the full team selector remains hidden; identity then expands in the hero.
-    expect(metrics.headerBrandDisplay).toBe('grid');
-    expect(metrics.teamSelectDisplay).toBe('none');
+    // Phase 6E removes the duplicate mobile utility header. The Hero is the one
+    // visible Coach Home identity stage, while the mounted header is zero-sized.
+    expect(metrics.headerDisplay).toBe('none');
+    expect(metrics.header.height).toBe(0);
     expect(metrics.heroBackgroundImage).not.toContain('titans-exact-logo');
-    expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.menu.bottom - 1);
-    expect(metrics.mark.top).toBeGreaterThanOrEqual(metrics.bell.bottom - 1);
     expect(metrics.mark.left).toBeGreaterThanOrEqual(metrics.team.right - 1);
-
-    expect(metrics.headerBackgroundImage).toContain('linear-gradient');
-    expect(luminance(parseRgb(metrics.headerBackground))).toBeLessThan(0.2);
-    expect(luminance(parseRgb(metrics.headerColor))).toBeGreaterThan(0.75);
-    expect(luminance(parseRgb(metrics.menuBackground))).toBeLessThan(0.2);
-    expect(luminance(parseRgb(metrics.menuColor))).toBeGreaterThan(0.75);
-    expect(luminance(parseRgb(metrics.bellBackground))).toBeLessThan(0.2);
-    expect(luminance(parseRgb(metrics.bellColor))).toBeGreaterThan(0.75);
 
     // Coach Home is one immersive dark hero. Identity is intentionally transparent
     // over that hero instead of becoming a separate nested material card.
