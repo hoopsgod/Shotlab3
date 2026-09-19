@@ -92,22 +92,34 @@ function extractCanonicalCoachMobileAuthority(css) {
   throw new Error("Canonical Coach <=700px authority block was not found before production CSS optimization.");
 }
 
+function splitCoachMobileAuthority(block) {
+  const open = block.indexOf("{");
+  const close = block.lastIndexOf("}");
+  const lowerSectionStart = block.indexOf(".mcShellV3 .mcFocusGrid", open + 1);
+  if (open < 0 || close < 0 || lowerSectionStart < 0) {
+    throw new Error("Canonical Coach mobile block could not be split at the lower-workspace boundary.");
+  }
+  const mediaHeader = block.slice(0, open + 1);
+  const protectedTitleStage = `${block.slice(0, lowerSectionStart)}}`;
+  const compressibleLowerWorkspace = `${mediaHeader}${block.slice(lowerSectionStart, close)}}`;
+  return { protectedTitleStage, compressibleLowerWorkspace };
+}
+
 function compactCoachCssPreservingAuthority(css, filename) {
   const { start, end, block } = extractCanonicalCoachMobileAuthority(css);
-  const remainder = `${css.slice(0, start)}${css.slice(end)}`;
+  const { protectedTitleStage, compressibleLowerWorkspace } = splitCoachMobileAuthority(block);
+  const remainder = `${css.slice(0, start)}${compressibleLowerWorkspace}${css.slice(end)}`;
 
   // The historical Coach bundle needs whole-bundle CSSO restructuring to stay
-  // inside the locked performance budget. Running that optimization over the
-  // canonical <=700px title-stage block can legally merge its media rules into
-  // other rules and change the rendered cascade. Remove only that one
-  // source-owned block, aggressively compact everything else, then append the
-  // same block as the final Coach mobile authority.
+  // inside the locked performance budget. Protect only the title-stage/hero
+  // authority from media merging; lower Coach Home workspace rules can be
+  // compacted with the rest of the bundle.
   const compactRemainder = compactProductionCss(
-    restructureCss(remainder, `${filename}:without-coach-mobile-authority`, { coach: true }),
+    restructureCss(remainder, `${filename}:without-coach-title-stage-authority`, { coach: true }),
     path.basename(filename),
   );
-  const compactAuthority = minify(block, {
-    filename: `${filename}:coach-mobile-authority`,
+  const compactAuthority = minify(protectedTitleStage, {
+    filename: `${filename}:coach-title-stage-authority`,
     restructure: false,
     comments: false,
     forceMediaMerge: false,
