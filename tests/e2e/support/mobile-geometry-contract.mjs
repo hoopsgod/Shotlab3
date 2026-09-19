@@ -9,10 +9,14 @@ export const MOBILE_GEOMETRY_WIDTHS = [
 
 export const MOBILE_GEOMETRY_TOLERANCE = 1;
 
-// Phase 1 mobile surfaces must not own horizontal scrolling. Coach Players
-// filters now wrap within the viewport, so the previous local-scroll exception
-// is intentionally retired rather than carried forward as technical debt.
-export const INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST = [];
+// The Coach Players filter-chip row is intentionally swipeable because its five
+// named filters do not fit at the supported mobile widths. It is the only
+// product surface authorized to own horizontal scrolling in Phase 1A.
+export const INTENTIONAL_HORIZONTAL_SCROLL_ALLOWLIST = [{
+  selector: '[data-testid="coach-players-filter-rail"] > [role="group"]',
+  component: "Coach Players dashboard filters",
+  rationale: "Keeps every named roster filter reachable without widening the page.",
+}];
 
 export async function collectMobileGeometry(page, contract) {
   return page.evaluate(async ({ contract, allowlist }) => {
