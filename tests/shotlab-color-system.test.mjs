@@ -59,6 +59,9 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
   assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(mobile, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
+  assert.match(mobile, /\.mcFocusGrid\{[^}]*margin:23px 0 0[^}]*padding:0 16px/);
+  assert.match(mobile, /\.mcSectionHead h2,\.mcShellV3\.is-mobile-shell \.mcPulseLead h2\{font:760 18px\/1 var\(--mc-native\)/);
+  assert.match(mobile, /\.mcAttention\{[^}]*margin-inline:-16px[^}]*padding-bottom:14px/);
   assert.match(coachShellCss, /@media\(max-width:700px\)[\s\S]*padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)!important/);
   assert.doesNotMatch(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:|\.mcProgramIdentity\{|\.mcHeroIdentity\{|\.mcHeroTeamMark\{/);
   assertDeclaration(image, "object-fit", "contain");
