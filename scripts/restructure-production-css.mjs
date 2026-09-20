@@ -204,9 +204,27 @@ async function finalizeProductionCss(files, mode) {
     const source = await readFile(file, "utf8");
     const relative = path.relative(DIST_DIR, file);
     if (isProtectedFinalAuthority(file)) {
+      if (mode !== "post-auth-fonts") {
+        sourceBytes += Buffer.byteLength(source);
+        outputBytes += Buffer.byteLength(source);
+        protectedFiles += 1;
+        continue;
+      }
+
+      // The final mobile-axis authority is isolated and loaded last. Give it
+      // one standards-based structural compaction only after every other CSS
+      // transform has finished; browser geometry/parity suites certify that
+      // the resulting cascade is unchanged.
+      const output = compactProductionCss(
+        restructureCss(source, `${relative}:final-mobile-axis`),
+        path.basename(file),
+      );
       sourceBytes += Buffer.byteLength(source);
-      outputBytes += Buffer.byteLength(source);
-      protectedFiles += 1;
+      outputBytes += Buffer.byteLength(output);
+      if (output !== source) {
+        await writeFile(file, output);
+        changedFiles += 1;
+      }
       continue;
     }
 
