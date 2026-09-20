@@ -77,9 +77,9 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(coachShellCss,/safe-area-inset-bottom/);
   assert.match(coachTitleCss,/Canonical Coach Home prototype-composition authority/);
   assert.match(coachTitleCss,/Phase 6E mobile Coach Home composition authority: one source-owned block/);
-  assert.match(coachTitleCss,/\.mcShellV3 \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
-  assert.match(coachTitleCss,/\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
-  assert.match(coachTitleCss,/\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
+  assert.match(coachTitleCss,/\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(coachTitleCss,/\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
+  assert.match(coachTitleCss,/\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
   assert.doesNotMatch(coachTitleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell/);
   assert.equal((playerCommandCenterSource.match(/data-testid="player-daily-command-center"/g)||[]).length,1);
 });
