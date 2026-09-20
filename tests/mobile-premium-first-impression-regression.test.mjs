@@ -127,21 +127,32 @@ test("Player Home remains immersive while Coach Home uses one verified brand-fir
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
 
   const tablet = mediaBlock(coachTitleCss, "(min-width:701px) and (max-width:980px)");
+  const mobile = mediaBlock(coachTitleCss, "(max-width:700px)");
   assert.match(tablet, /min-height:354px/);
   assert.match(tablet, /clamp\(36px,5\.5vw,49px\)\/\.88 "Barlow Condensed"/);
   assert.match(tablet, /clamp\(112px,17vw,142px\)/);
 
   assert.match(coachShellCss, /@media\(max-width:700px\)/);
-  assert.match(coachShellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
-  assert.match(coachShellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
-  assert.match(coachShellCss, /\.mcHeroIdentity\{grid-template-columns:minmax\(0,1fr\) 88px!important;gap:14px!important\}/);
-  assert.match(coachShellCss, /\.mcHeroTeamMark\{width:88px!important;height:88px!important/);
-  assert.match(coachShellCss, /\.mcProgramIdentity\{max-width:16ch!important;color:#f8f8f4!important;font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
-  assert.match(coachShellCss, /h1\{[^}]*font:760 24px\/1\.02 var\(--mc-native/);
-  assert.match(coachShellCss, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
-  assert.doesNotMatch(coachShellCss, /--coach-hero-crest:clamp\(80px,21vw,92px\)!important/);
+  assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*overflow-x:clip!important/);
+  assert.match(coachShellCss, /\.mcShellV3\.is-mobile-shell > \.mcRail\{display:none!important\}/);
+  assert.match(coachShellCss, /padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)!important/);
+  assert.doesNotMatch(coachShellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
+
+  assert.match(coachTitleCss, /Phase 6E mobile Coach Home composition authority/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
+  assert.match(mobile, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
+  assert.match(mobile, /\.mcHeroTeamMark\{[^}]*width:var\(--coach-hero-crest\);height:var\(--coach-hero-crest\)/);
+  assert.match(mobile, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
+  assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
+  assert.match(mobile, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
+  assert.match(mobile, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
+  assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
+  assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
+  assert.match(mobile, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
   assert.match(coachTitleCss, /object-fit:contain/);
-  assert.match(coachTitleCss, /\.mcHeroContent[\s\S]*width:100%/);
+  assert.match(mobile, /\.mcHeroContent[\s\S]*width:100%/);
   assert.doesNotMatch(playerHeader, /!important|data-mobile-chrome="native-identity"/);
 });
 

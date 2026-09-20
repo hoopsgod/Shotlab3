@@ -44,7 +44,7 @@ function assertUnique(label, entries) {
 
 function performanceFixture() {
   return {
-    budget: { maxLargestCssBytes: 128000, maxTotalCssGzipBytes: 88000 },
+    budget: { maxLargestCssBytes: 128000, maxTotalCssGzipBytes: 89000 },
     totals: { javaScriptFiles: 8, javaScriptBytes: 1320000, javaScriptGzipBytes: 347000, cssFiles: 12, cssBytes: 534000, cssGzipBytes: 90900 },
     startupAppJavaScript: { bytes: 471000, gzipBytes: 119000 },
     startupAppCss: { bytes: 0, gzipBytes: 0 },

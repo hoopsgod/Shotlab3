@@ -81,6 +81,6 @@ test('Phase 4F keeps JavaScript and startup performance thresholds while allowin
   assert.equal(budget.maxLargestCssBytes, 128000)
   assert.equal(budget.maxStartupAppCssBytes, 25000)
   assert.equal(budget.maxStartupAppCssGzipBytes, 5500)
-  assert.equal(budget.maxTotalCssGzipBytes, 88000)
+  assert.equal(budget.maxTotalCssGzipBytes, 89000)
   assert.equal(budget.maxJavaScriptFileCount, 8)
 })

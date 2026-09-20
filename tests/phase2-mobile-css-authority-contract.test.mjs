@@ -87,6 +87,7 @@ test('Coach secondary filters keep scoped horizontal ownership with explicit wra
   assert.match(
     geometryContract,
     /selector:\s*'\[data-testid="coach-players-filter-rail"\]\s*>\s*\[role="group"\]'/,
+    'Coach Players must retain its single documented local horizontal-scroll owner',
   );
   assert.doesNotMatch(
     geometryContract,

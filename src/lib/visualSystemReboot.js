@@ -148,8 +148,8 @@ body.mission-control-active .mcAssignmentAccountabilityBadge {
 body.mission-control-active .mcAssignmentAccountabilityEmpty,
 body.mission-control-active .mcAssignmentAccountabilityRow {
   border-color: var(--sl-line) !important;
-  background: #fafaf8 !important;
-  color: var(--sl-ink) !important;
+  background: #f5f4ef !important;
+  color: #111a21 !important;
 }
 
 @media (max-width: 760px) {

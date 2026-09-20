@@ -115,17 +115,19 @@ test("coach mobile home presents populated decision intelligence and a current S
   });
   expect(shellBox).not.toBeNull(); expect(objectiveBox).not.toBeNull(); expect(attentionBox).not.toBeNull();
   const shellLeftRail = shellBox.x, shellRightRail = viewportWidth - (shellBox.x + shellBox.width);
-  // Coach Home intentionally uses a full-bleed outer shell and objective; mcHeroContent owns the visual inset.
+  // Coach Home keeps the outer route shell full width while the canonical
+  // Phase 6E mobile title stage sits on the mission-control 12px page rail.
+  // The hero content then owns its stronger inner editorial inset.
   expect(Math.abs(shellLeftRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(shellRightRail)).toBeLessThanOrEqual(1);
   expect(Math.abs(shellLeftRail - shellRightRail)).toBeLessThanOrEqual(1);
   const stageLeftRail = objectiveBox.x, stageRightRail = viewportWidth - (objectiveBox.x + objectiveBox.width);
-  expect(Math.abs(stageLeftRail)).toBeLessThanOrEqual(1);
-  expect(Math.abs(stageRightRail)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageLeftRail - 12)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stageRightRail - 12)).toBeLessThanOrEqual(1);
   expect(Math.abs(stageLeftRail - stageRightRail)).toBeLessThanOrEqual(1);
-  // The approved Phase 4 hero composition uses a deliberate 16px inner rail.
-  expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(16);
-  expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(16);
+  // TitleStage.css owns an 18px hero-content inset at <=700px.
+  expect(objectiveContentPadding.left).toBeGreaterThanOrEqual(18);
+  expect(objectiveContentPadding.right).toBeGreaterThanOrEqual(18);
   expect(Math.abs(objectiveContentPadding.left - objectiveContentPadding.right)).toBeLessThanOrEqual(1);
   expect(objectiveBox.height).toBeLessThan(520);
   expect(attentionBox.y).toBeLessThan(844);

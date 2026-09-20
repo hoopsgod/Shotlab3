@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { mediaBlock } from "./helpers/css-contract.mjs";
 
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 const authenticatedAuthority = fs.readFileSync(new URL("../src/styles/AuthenticatedVisualAuthority2026.css", import.meta.url), "utf8");
@@ -40,7 +41,8 @@ test("Mission Control preserves the interaction contract while mobile may hide d
   assert.match(commandCenter, /is-mobile-shell/);
 });
 
-test("Coach Home base composition stays source-owned and the runtime shell bridge owns the verified Phase 6A mobile authority", () => {
+test("Coach Home base composition stays source-owned while the runtime shell bridge owns only mobile containment", () => {
+  const mobile = mediaBlock(titleCss, "(max-width:700px)");
   assert.match(commandCenter, /import "\.\/CoachMissionControlTitleStage\.css"/);
   assert.match(commandCenter, /import "\.\/CoachMissionControlShell\.css"/);
   assert.match(commandCenter, /data-team-identity-stage="coach-mission-control"/);
@@ -53,12 +55,23 @@ test("Coach Home base composition stays source-owned and the runtime shell bridg
   assert.match(titleCss, /\.mcPrimary\s*\{/);
 
   assert.match(shellCss, /\.mcShellV3\.is-mobile-shell > \.mcRail\{display:none!important\}/);
+  assert.match(shellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*overflow-x:clip!important/);
   assert.match(shellCss, /@media\(max-width:700px\)/);
-  assert.match(shellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
-  assert.match(shellCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{min-height:362px!important\}/);
-  assert.match(shellCss, /\.mcProgramIdentity\{[^}]*font:900 clamp\(38px,12vw,50px\)\/\.86 "Barlow Condensed"/);
-  assert.match(shellCss, /h1\{[^}]*max-width:16ch!important[^}]*font:760 24px\/1\.02 var\(--mc-native/);
-  assert.match(shellCss, /\.mcHeroContent>p\{[^}]*font:520 11px\/1\.45/);
+  assert.match(shellCss, /padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)!important/);
+  assert.doesNotMatch(shellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
+
+  assert.match(titleCss, /Phase 6E mobile Coach Home composition authority/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
+  assert.match(mobile, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
+  assert.match(mobile, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
+  assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
+  assert.match(mobile, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
+  assert.match(mobile, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
+  assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
+  assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
+  assert.match(mobile, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
 
   const supportCss = stripComments(css);
   assert.doesNotMatch(supportCss, /\.mcShellV3\b|\.missionControl\b|\.mcHero\b|\.mcSection\b/);
@@ -102,11 +115,13 @@ test("shared support tokens remain explicit light-surface values", () => {
 });
 
 test("mobile hierarchy has one visible introduction and retains safe viewport containment", () => {
+  const mobile = mediaBlock(titleCss, "(max-width:700px)");
   assert.match(titleCss, /@media\s*\(\s*max-width:\s*700px\s*\)/);
-  assert.match(titleCss, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,1fr\) var\(--coach-hero-crest\)/);
+  assert.match(mobile, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,1fr\) var\(--coach-hero-crest/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(shellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*overflow-x:clip!important/);
   assert.match(shellCss, /text-size-adjust:100%!important/);
-  assert.match(shellCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}/);
+  assert.doesNotMatch(shellCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader/);
   assert.doesNotMatch(stripComments(css), /\.mcHeader\b/);
 });
 

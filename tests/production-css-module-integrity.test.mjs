@@ -51,3 +51,14 @@ test("optimized production bundle preserves the runtime-owned Coach Home Program
   }
   assert.ok(runtimeOwners.length > 0, "Expected optimized JavaScript to retain the runtime Program Pulse material owner");
 });
+
+test("final production compaction preserves component-owned Coach mobile hero authority", async () => {
+  const assetsDir = path.join(root, "dist", "assets");
+  const names = await readdir(assetsDir);
+  const coachCss = names.find((name) => /^CoachWorkspaces-.*\.css$/.test(name));
+  assert.ok(coachCss, "Expected a CoachWorkspaces CSS asset in dist/assets");
+  const css = await readFile(path.join(assetsDir, coachCss), "utf8");
+  assert.match(css, /min-height:334px/);
+  assert.match(css, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
+  assert.match(css, /mission-control-team-header[^{}]*\{display:none\}/);
+});
