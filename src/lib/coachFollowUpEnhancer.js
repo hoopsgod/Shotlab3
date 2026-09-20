@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { loadCoachFollowUp, saveCoachFollowUp } from "./coachFollowUpService.js";
+import { loadCoachCoreLoopPlayer, saveCoachCoreLoopAction } from "./coachFollowUpService.js";
 import { loadPlayerAssignment, savePlayerAssignment } from "./playerAssignmentService.js";
 import {
   COACH_FOLLOW_UP_CONTEXT_KEY,
@@ -96,7 +96,7 @@ function CoachFollowUpPanel({ context }) {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      loadCoachFollowUp(context),
+      loadCoachCoreLoopPlayer(context),
       loadPlayerAssignment(context),
     ]).then(([result, deliveryResult]) => {
       if (cancelled) return;
@@ -146,7 +146,7 @@ function CoachFollowUpPanel({ context }) {
     setError(false);
     setStatus(requireAssignment ? "Saving private context and delivering assignment…" : "Saving…");
     try {
-      const followUpPromise = saveCoachFollowUp({
+      const followUpPromise = saveCoachCoreLoopAction({
         ...context,
         state: nextState,
         note: serializeCoachResponseNote({ assignment, privateNote: note }),

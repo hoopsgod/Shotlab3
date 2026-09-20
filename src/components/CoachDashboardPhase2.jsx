@@ -37,7 +37,7 @@ function MetricGrid({ items = [] }) {
   );
 }
 
-export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfile, onShowActivity }) {
+export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfile, onShowActivity, onReturnToHome }) {
   return (
     <DashboardDetailDrawer
       open={Boolean(model)}
@@ -58,6 +58,7 @@ export function CoachPlayerIntelligenceDrawer({ model, onClose, onOpenFullProfil
           <div className={styles.drawerActions}>
             <button type="button" className={styles.drawerAction} onClick={onOpenFullProfile}>Open Full Profile</button>
             <button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} onClick={onShowActivity}>Show Activity</button>
+            <button type="button" className={`${styles.drawerAction} ${styles.drawerActionSecondary}`} data-testid="coach-return-to-home" onClick={onReturnToHome}>Return to Coach Home</button>
           </div>
           <DashboardSection eyebrow="Current week" title="Development pulse" summary="A decision-ready summary of volume, attendance, and training compliance." compact>
             <DashboardProgress value={model.rsvpRate} max={100} label="Upcoming RSVP coverage" detail={`${model.rsvpResponded} of ${model.rsvpPossible}`} />

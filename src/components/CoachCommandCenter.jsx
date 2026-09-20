@@ -11,6 +11,7 @@ import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import { buildCoachInboxModel } from "../lib/coachInbox.js";
 import { getRemoteActiveNamesToday, loadCoachCrossDeviceActivity, mergeCoachActivityItems } from "../lib/coachCrossDeviceActivity.js";
 import { isDemoPersistenceSession } from "../lib/demoMode.js";
+import CoachCoreLoopPanel from "./CoachCoreLoopPanel.jsx";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
@@ -77,7 +78,7 @@ function LogoSetupPrompt({ teamName, className = "" }) {
 
 function AttentionRow({ item, onFallback, priority = 0 }) {
   const tone = item?.tone === "danger" ? "danger" : item?.tone === "success" ? "success" : "warning";
-  return <button type="button" className={`mcAttentionRow is-${tone} ${priority === 0 ? "is-priority" : ""}`} data-attention-priority={priority + 1} onClick={item?.onClick || onFallback}><span className={`mcStatusDot is-${tone}`} /><Avatar item={item} /><span className="mcAttentionCopy"><strong>{item?.name || item?.title || "Player follow-up"}</strong><small>{item?.detail || "Review player status"}</small>{item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}</span><span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span></button>;
+  return <button type="button" className={`mcAttentionRow is-${tone} ${priority === 0 ? "is-priority" : ""}`} data-attention-priority={priority + 1} aria-label={item?.ariaLabel} onClick={item?.onClick || onFallback}><span className={`mcStatusDot is-${tone}`} /><Avatar item={item} /><span className="mcAttentionCopy"><strong>{item?.name || item?.title || "Player follow-up"}</strong><small>{item?.detail || "Review player status"}</small>{item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}</span><span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span></button>;
 }
 
 function ProgramPulsePanel({ model }) {
@@ -106,7 +107,7 @@ function TodayPlan({ activation, onAction }) {
 }
 
 export default function CoachCommandCenter({
-  variant = "full", totalPlayers, activeTodayCount, nextEventDateFormatted, highlightPlayersAttention, onPlayersClick, onActiveTodayClick, onAnalyticsClick, onNextEventClick, onAddPlayer, onAddDrill, onScheduleEvent, onLogScore, joinCode, onCopyJoinCode, onRegenerateJoinCode, codeErr, attentionItems = [], activityItems = [], eventReadiness = null, onEventReadinessClick, programPulse = null,
+  variant = "full", totalPlayers, activeTodayCount, nextEventDateFormatted, highlightPlayersAttention, onPlayersClick, onActiveTodayClick, onAnalyticsClick, onNextEventClick, onAddPlayer, onAddDrill, onScheduleEvent, onLogScore, joinCode, onCopyJoinCode, onRegenerateJoinCode, codeErr, attentionItems = [], activityItems = [], eventReadiness = null, onEventReadinessClick, programPulse = null, coreLoop = null, onOpenCoreLoopPlayer, onCoreLoopRetry,
 }) {
   const { branding } = useTeamBranding();
   const isDemoSession = isDemoPersistenceSession();
@@ -179,8 +180,8 @@ export default function CoachCommandCenter({
   const unresolvedRsvps = Math.max(0, Number(eventReadiness?.missing) || 0);
   const hasScheduledSession = Boolean(nextEventDateFormatted && String(nextEventDateFormatted).trim() && !/^(none|—|not set)$/i.test(String(nextEventDateFormatted).trim()));
   const fallbackAttention = highlightPlayersAttention ? [{ name: "Roster activity gap", detail: rosterSize === 1 ? "No training activity has been logged this week." : "At least one player has no logged activity this week.", meta: "Review training status and account connection", tone: "danger", actionLabel: "Open", onClick: onPlayersClick }] : [];
-  const attentionSource = attentionItems.length ? attentionItems : fallbackAttention;
-  const resolvedAttention = attentionSource.filter((item) => !remoteActiveNames.has(normalizedName(item?.name || item?.title)));
+  const attentionSource = coreLoop?.attentionItems?.length ? coreLoop.attentionItems : attentionItems.length ? attentionItems : fallbackAttention;
+  const resolvedAttention = attentionSource.filter((item) => !remoteActiveNames.has(normalizedName(item?.name || item?.title))).map((item) => item?.onClick ? item : { ...item, actionLabel: "Open profile", onClick: () => onOpenCoreLoopPlayer?.(item) });
   const attentionCount = resolvedAttention.length;
   const resolvedActivity = mergedActivityItems.length ? mergedActivityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
   const hasLiveActivity = resolvedActivity.length > 0;
@@ -202,7 +203,7 @@ export default function CoachCommandCenter({
   const quickActions = useMemo(() => [{ label: "Add Player", icon: "users", onClick: onAddPlayer }, { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent }, { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor }, { label: "Build Mission", icon: "target", onClick: onAddDrill }, { label: "Record Result", icon: "score", onClick: onLogScore }, { label: "Review Players", icon: "message", onClick: onPlayersClick }, { label: "Team Code", icon: "settings", onClick: openTeamTools }], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
   const navigation = [{ label: "Mission Control", icon: "home", active: true }, { label: "Players", icon: "users", onClick: onPlayersClick }, { label: "Sessions", icon: "calendar", onClick: onNextEventClick }, { label: "Drills", icon: "target", onClick: onAddDrill }, { label: "Analytics", icon: "chart", onClick: onAnalyticsClick }, { label: "Coach Tools", icon: "plus", onClick: () => setActionsOpen(true) }];
 
-  const attentionPanel = <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading" data-testid="coach-athlete-attention"><div className="mcSectionHead"><span><small>Who needs you now</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>{attentionCount > 0 ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} priority={index} />)}</div> : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}<button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button></article>;
+  const attentionPanel = <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading" data-testid="coach-athlete-attention"><div className="mcSectionHead"><span><small>Who needs you now</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div><CoachCoreLoopPanel model={coreLoop} onOpenPlayer={onOpenCoreLoopPlayer || onPlayersClick} onOpenPlayers={onPlayersClick} onAddPlayer={onAddPlayer} onRetry={onCoreLoopRetry} renderItem={(item, onOpen, index) => <AttentionRow key={item.id} item={{ ...item, ariaLabel: `Open ${item.name} player context`, onClick: () => onOpen?.(item) }} onFallback={onPlayersClick} priority={index} />} /></article>;
   const pulsePanel = <ProgramPulsePanel model={programPulse} />;
   const livePanel = <LiveActivityPanel items={resolvedActivity} />;
   const sessionPanel = <NextSessionPanel date={hasScheduledSession ? nextEventDateFormatted : ""} onOpen={onNextEventClick} />;

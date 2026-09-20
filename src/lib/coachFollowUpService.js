@@ -51,7 +51,7 @@ function announceFollowUpChange(record) {
   try {
     if (typeof globalThis?.dispatchEvent !== "function" || typeof globalThis?.CustomEvent !== "function") return;
     globalThis.dispatchEvent(new CustomEvent(COACH_FOLLOW_UP_CHANGE_EVENT, {
-      detail: { teamId: record?.teamId || "", playerIdentity: record?.playerIdentity || "", state: record?.state || "" },
+      detail: { teamId: record?.teamId || "", playerIdentity: record?.playerIdentity || "", playerName: record?.playerName || "", state: record?.state || "" },
     }));
   } catch {}
 }
@@ -190,3 +190,30 @@ export async function saveCoachFollowUp({
     };
   }
 }
+
+// Phase 7A boundary: Coach Home consumes follow-up data through this service,
+// while the existing player-context controls continue to share the same path.
+export const COACH_CORE_LOOP_CHANGE_EVENT = COACH_FOLLOW_UP_CHANGE_EVENT;
+const coreLoopErrorText = (value) => clean(value?.message || value?.error || value);
+const coreLoopRecords = (value) => Array.isArray(value) ? value : [];
+
+export function classifyCoachCoreLoopError(error) {
+  const value = coreLoopErrorText(error).toLowerCase();
+  if (/(401|403|auth|permission|forbidden|unauthorized|not_authenticated|not authorized)/.test(value)) return "permission";
+  if (/(404|410|501|503|unavailable|not found|not_found|function)/.test(value)) return "unavailable";
+  return "error";
+}
+
+export async function loadCoachCoreLoop({ teamId = "", storage = globalThis?.localStorage, fetchImpl = globalThis?.fetch } = {}) {
+  const activeTeamId = clean(teamId);
+  if (!activeTeamId) return { ok: false, state: "permission", storageMode: "unavailable", records: [], error: "team_context_missing" };
+  try {
+    const result = await loadCoachFollowUps({ teamId: activeTeamId, storage, fetchImpl });
+    return result?.ok ? { ok: true, state: "success", storageMode: clean(result.storageMode) || "local_only", records: coreLoopRecords(result.records), error: "" } : { ok: false, state: classifyCoachCoreLoopError(result?.error), storageMode: clean(result?.storageMode) || "local_fallback", records: coreLoopRecords(result?.records), error: coreLoopErrorText(result?.error) || "follow_up_load_failed" };
+  } catch (error) {
+    return { ok: false, state: classifyCoachCoreLoopError(error), storageMode: "unavailable", records: [], error: coreLoopErrorText(error) || "follow_up_load_failed" };
+  }
+}
+
+export const loadCoachCoreLoopPlayer = loadCoachFollowUp;
+export const saveCoachCoreLoopAction = saveCoachFollowUp;
