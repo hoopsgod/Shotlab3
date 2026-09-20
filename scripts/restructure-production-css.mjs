@@ -162,28 +162,14 @@ function partitionCoachMobileAuthority(block) {
 }
 
 function compactCoachCssPreservingAuthority(css, filename) {
-  const { start, end, block } = extractCanonicalCoachMobileAuthority(css);
-  const { protectedTitleStage, compressibleMobileAuthority } = partitionCoachMobileAuthority(block);
-  const remainder = `${css.slice(0, start)}${compressibleMobileAuthority}${css.slice(end)}`;
-
-  // The historical Coach bundle needs whole-bundle CSSO restructuring to stay
-  // inside the locked performance budget. Remove only the declarations whose
-  // responsive association CSSO has proven unsafe to merge, compact every
-  // remaining declaration normally, then append those source-derived
-  // declarations as the final <=700px Coach title-stage authority.
-  const compactRemainder = compactProductionCss(
-    restructureCss(remainder, `${filename}:without-coach-title-stage-authority`, { coach: true }),
+  // Keep Coach breakpoints isolated. Normal CSSO restructuring still removes
+  // duplicate declarations inside each scope, but forceMediaMerge=false
+  // prevents equivalent selectors from being folded across desktop/tablet/mobile
+  // media boundaries and changing the canonical <=700px cascade.
+  return compactProductionCss(
+    restructureCss(css, filename, { coach: false }),
     path.basename(filename),
   );
-  const compactAuthority = minify(protectedTitleStage, {
-    filename: `${filename}:coach-title-stage-authority`,
-    // This isolated block contains only the <=700px source authority, so CSSO
-    // can safely restructure within it without merging across breakpoints.
-    restructure: true,
-    comments: false,
-    forceMediaMerge: false,
-  }).css;
-  return `${compactRemainder}${compactAuthority}`;
 }
 
 function isProtectedFinalAuthority(file) {
