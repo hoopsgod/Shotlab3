@@ -56,12 +56,12 @@ const crestImage = ruleBlock(coachTitleCss, '.mcHero[data-team-identity-stage="c
 // component-owned composition. Verify that single source block directly.
 for (const contract of [
   /Phase 6E mobile Coach Home composition authority: one source-owned block/,
-  /\.mcShellV3 \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/,
-  /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/,
+  /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/,
+  /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/,
+  /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/,
+  /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/,
+  /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/,
+  /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/,
 ]) {
   if (!contract.test(coachTitleCss)) {
     throw new Error(`Phase 5B could not verify canonical Phase 6E Coach mobile authority: ${contract}`)
