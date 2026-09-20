@@ -61,8 +61,8 @@ test("Coach Home base composition stays source-owned while the runtime shell bri
   assert.doesNotMatch(shellCss, /\.mcHeader\[data-testid="mission-control-team-header"\]\{display:none!important\}|\.mcHeroIdentity\{|\.mcHeroTeamMark\{|\.mcProgramIdentity\{/);
 
   assert.match(titleCss, /Phase 6E mobile Coach Home composition authority/);
-  assert.match(mobile, /\.mcShellV3 \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
-  assert.match(mobile, /\.mcShellV3 \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage="coach-mission-control"\]\{[^}]*min-height:334px[^}]*margin-inline:0/);
   assert.match(mobile, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
   assert.match(mobile, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
   assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
@@ -118,7 +118,7 @@ test("mobile hierarchy has one visible introduction and retains safe viewport co
   const mobile = mediaBlock(titleCss, "(max-width:700px)");
   assert.match(titleCss, /@media\s*\(\s*max-width:\s*700px\s*\)/);
   assert.match(mobile, /\.mcHeroIdentity[\s\S]*grid-template-columns:\s*minmax\(0,1fr\) var\(--coach-hero-crest/);
-  assert.match(mobile, /\.mcShellV3 \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
+  assert.match(mobile, /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid="mission-control-team-header"\]\{display:none\}/);
   assert.match(shellCss, /\.mcShellV3\.is-mobile-shell\{[^}]*overflow-x:clip!important/);
   assert.match(shellCss, /text-size-adjust:100%!important/);
   assert.doesNotMatch(shellCss, /body\.mission-control-active \.mcShellV3\.is-mobile-shell \.mcHeader/);
