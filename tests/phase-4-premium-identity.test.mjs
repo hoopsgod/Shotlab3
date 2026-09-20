@@ -14,7 +14,7 @@ test("Phase 4 preserves the Phase 3 surface and performance contracts", () => {
   assert.match(foundation, /--bg-0: #f3f1ea !important/);
   assert.match(foundation, /--surface-1: #ffffff !important/);
   assert.match(foundation, /--performance-surface: #0a2633/);
-  assert.equal(budget.maxTotalCssGzipBytes, 88000);
+  assert.equal(budget.maxTotalCssGzipBytes, 89000);
 });
 
 test("Phase 4 uses recognizable basketball geometry in performance moments", () => {

@@ -10,6 +10,16 @@ const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|va
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
+const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
+const COACH_MOBILE_MEDIA = /@media\s*\(\s*(?:max-width\s*:\s*700px|width\s*<=\s*700px)\s*\)\s*\{/g;
+const COACH_AUTHORITY_MARKERS = [
+  "coach-mission-control",
+  "mission-control-team-header",
+  "--coach-hero-crest:clamp(104px,29vw,120px)",
+  "min-height:334px",
+  "min-height:48px",
+  "min-height:50px",
+];
 
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -77,24 +87,145 @@ function armIsReachable(selector, corpus) {
   return classes.every((name) => classIsReachable(name, corpus));
 }
 
+function findOpeningBrace(css, start) {
+  let quote = "";
+  let comment = false;
+  for (let index = start; index < css.length; index += 1) {
+    const char = css[index];
+    const next = css[index + 1];
+    if (comment) {
+      if (char === "*" && next === "/") {
+        comment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (quote) {
+      if (char === "\\") index += 1;
+      else if (char === quote) quote = "";
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      comment = true;
+      index += 1;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === "{") return index;
+  }
+  return -1;
+}
+
+function findClosingBrace(css, openingBrace) {
+  let depth = 1;
+  let quote = "";
+  let comment = false;
+  for (let index = openingBrace + 1; index < css.length; index += 1) {
+    const char = css[index];
+    const next = css[index + 1];
+    if (comment) {
+      if (char === "*" && next === "/") {
+        comment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (quote) {
+      if (char === "\\") index += 1;
+      else if (char === quote) quote = "";
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      comment = true;
+      index += 1;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === "{") depth += 1;
+    else if (char === "}" && --depth === 0) return index;
+  }
+  return -1;
+}
+
+function extractCanonicalCoachMobileAuthority(css) {
+  COACH_MOBILE_MEDIA.lastIndex = 0;
+  for (const match of css.matchAll(COACH_MOBILE_MEDIA)) {
+    const openingBrace = findOpeningBrace(css, match.index);
+    const closingBrace = openingBrace >= 0 ? findClosingBrace(css, openingBrace) : -1;
+    if (closingBrace < 0) throw new Error("Unbalanced Coach mobile media block during global selector pruning.");
+    const block = css.slice(match.index, closingBrace + 1);
+    if (COACH_AUTHORITY_MARKERS.every((marker) => block.includes(marker))) {
+      return { start: match.index, end: closingBrace + 1, block };
+    }
+  }
+  throw new Error("Canonical Coach <=700px authority block was not found during global selector pruning.");
+}
+
 function pruneRules(css, corpus) {
   let removedArms = 0;
   let removedRules = 0;
-  const output = css.replace(/([^{}]+)\{([^{}]*)\}/g, (whole, selectorText, declarations) => {
-    const selector = selectorText.trim();
-    if (!selector || selector.startsWith("@")) return whole;
-    const arms = splitSelectorList(selector);
-    if (!arms.length) return whole;
-    const kept = arms.filter((arm) => armIsReachable(arm, corpus));
-    removedArms += arms.length - kept.length;
-    if (!kept.length) {
-      removedRules += 1;
-      return "";
+
+  // CSS contains nested at-rules such as @media and @supports. A flat
+  // /[^{}]+\{[^{}]*\}/ pass treats the outer at-rule as a selector and then
+  // consumes only its first child, which silently deletes responsive rules.
+  // Walk balanced blocks instead so selector reachability is applied inside
+  // nested at-rules without changing their cascade boundaries.
+  function walk(source) {
+    let output = "";
+    let cursor = 0;
+    let scan = 0;
+
+    while (scan < source.length) {
+      const openingBrace = findOpeningBrace(source, scan);
+      if (openingBrace < 0) {
+        output += source.slice(cursor);
+        break;
+      }
+
+      const closingBrace = findClosingBrace(source, openingBrace);
+      if (closingBrace < 0) {
+        output += source.slice(cursor);
+        break;
+      }
+
+      const prelude = source.slice(cursor, openingBrace);
+      const normalizedPrelude = prelude.replace(/\/\*[\s\S]*?\*\//g, "").trim();
+      const body = source.slice(openingBrace + 1, closingBrace);
+
+      if (!normalizedPrelude || normalizedPrelude.startsWith("@")) {
+        output += `${prelude}{${normalizedPrelude.startsWith("@") ? walk(body) : body}}`;
+      } else {
+        const arms = splitSelectorList(normalizedPrelude);
+        if (!arms.length) {
+          output += `${prelude}{${body}}`;
+        } else {
+          const kept = arms.filter((arm) => armIsReachable(arm, corpus));
+          removedArms += arms.length - kept.length;
+          if (!kept.length) {
+            removedRules += 1;
+          } else if (kept.length === arms.length) {
+            output += `${prelude}{${body}}`;
+          } else {
+            const leadingWhitespace = prelude.match(/^\s*/)?.[0] || "";
+            output += `${leadingWhitespace}${kept.join(",")}{${body}}`;
+          }
+        }
+      }
+
+      scan = closingBrace + 1;
+      cursor = scan;
     }
-    if (kept.length === arms.length) return whole;
-    return `${kept.join(",")}{${declarations}}`;
-  });
-  return { css: output, removedArms, removedRules };
+
+    return output;
+  }
+
+  return { css: walk(css), removedArms, removedRules };
 }
 
 async function main() {
@@ -118,7 +249,18 @@ async function main() {
     const source = await readFile(file, "utf8");
     const pruned = pruneRules(source, corpus);
     if (pruned.css === source) continue;
-    const output = minify(pruned.css, { restructure: true, comments: false, forceMediaMerge: false }).css;
+    let optimizationInput = pruned.css;
+    let canonicalAuthority = "";
+    if (COACH_WORKSPACE_ASSET.test(path.basename(file))) {
+      const authority = extractCanonicalCoachMobileAuthority(pruned.css);
+      optimizationInput = `${pruned.css.slice(0, authority.start)}${pruned.css.slice(authority.end)}`;
+      canonicalAuthority = authority.block;
+    }
+    const output = `${minify(optimizationInput, {
+      restructure: true,
+      comments: false,
+      forceMediaMerge: false,
+    }).css}${canonicalAuthority}`;
     await writeFile(file, output);
     removedArms += pruned.removedArms;
     removedRules += pruned.removedRules;

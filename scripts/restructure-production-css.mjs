@@ -8,7 +8,7 @@ const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 const FINAL_MOBILE_AUTHORITY_ASSET = /^MobileViewportAxisAuthority2026-.*\.css$/;
 const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 const POST_AUTH_FONTS_MODE = process.argv.includes("--post-auth-fonts");
-const COACH_MOBILE_MEDIA = /@media\s*\(\s*max-width\s*:\s*700px\s*\)\s*\{/g;
+const COACH_MOBILE_MEDIA = /@media\s*\(\s*(?:max-width\s*:\s*700px|width\s*<=\s*700px)\s*\)\s*\{/g;
 const COACH_AUTHORITY_MARKERS = [
   "coach-mission-control",
   "mission-control-team-header",
@@ -17,6 +17,16 @@ const COACH_AUTHORITY_MARKERS = [
   "min-height:48px",
   "min-height:50px",
 ];
+
+function normalizeMediaRangesForCsso(css) {
+  // Lightning CSS emits Media Queries Level 4 range syntax, while CSSO 5
+  // treats those at-rules as empty. Normalize only while CSSO is running;
+  // the subsequent Lightning CSS compaction restores standards-based ranges.
+  return css
+    .replace(/\(\s*width\s*>=\s*([^\)]+)\)\s+and\s+\(\s*width\s*<=\s*([^\)]+)\)/g, "(min-width:$1) and (max-width:$2)")
+    .replace(/\(\s*width\s*<=\s*([^\)]+)\)/g, "(max-width:$1)")
+    .replace(/\(\s*width\s*>=\s*([^\)]+)\)/g, "(min-width:$1)");
+}
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -59,8 +69,8 @@ function isCoachWorkspace(file) {
   return COACH_WORKSPACE_ASSET.test(path.basename(file));
 }
 
-function restructureCss(css, filename, { coach = false } = {}) {
-  return minify(css, {
+function restructureCss(css, filename, { coach = false, preserveMediaRanges = false } = {}) {
+  return minify(preserveMediaRanges ? normalizeMediaRangesForCsso(css) : css, {
     filename,
     restructure: true,
     comments: false,
@@ -162,14 +172,19 @@ function partitionCoachMobileAuthority(block) {
 }
 
 function compactCoachCssPreservingAuthority(css, filename) {
-  // Keep Coach breakpoints isolated. Normal CSSO restructuring still removes
-  // duplicate declarations inside each scope, but forceMediaMerge=false
-  // prevents equivalent selectors from being folded across desktop/tablet/mobile
-  // media boundaries and changing the canonical <=700px cascade.
-  return compactProductionCss(
-    restructureCss(css, filename, { coach: false }),
+  // CSSO 5 treats Lightning CSS's range-query syntax as an empty at-rule.
+  // Isolate the canonical Coach <=700px authority block while CSSO compacts
+  // the legacy remainder, then put the authority back as a final component-
+  // owned cascade layer. This keeps the production budget without allowing
+  // an optimizer compatibility gap to remove the mobile identity stage.
+  const authority = extractCanonicalCoachMobileAuthority(css);
+  const remainder = `${css.slice(0, authority.start)}${css.slice(authority.end)}`;
+  const compactedRemainder = compactProductionCss(
+    restructureCss(remainder, filename, { coach: false }),
     path.basename(filename),
   );
+  const compactedAuthority = compactProductionCss(authority.block, path.basename(filename));
+  return `${compactedRemainder}${compactedAuthority}`;
 }
 
 function isProtectedFinalAuthority(file) {
@@ -202,7 +217,7 @@ async function finalizeProductionCss(files, mode) {
       // transform has finished; browser geometry/parity suites certify that
       // the resulting cascade is unchanged.
       const output = compactProductionCss(
-        restructureCss(source, `${relative}:final-mobile-axis`),
+        restructureCss(source, `${relative}:final-mobile-axis`, { preserveMediaRanges: true }),
         path.basename(file),
       );
       sourceBytes += Buffer.byteLength(source);

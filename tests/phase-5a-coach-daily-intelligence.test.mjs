@@ -101,6 +101,6 @@ test("Phase 5A keeps JavaScript and startup budgets unchanged while correcting t
   assert.equal(budget.maxLargestCssBytes, 128000);
   assert.equal(budget.maxStartupAppCssBytes, 25000);
   assert.equal(budget.maxStartupAppCssGzipBytes, 5500);
-  assert.equal(budget.maxTotalCssGzipBytes, 88000);
+  assert.equal(budget.maxTotalCssGzipBytes, 89000);
   assert.equal(budget.maxJavaScriptFileCount, 8);
 });

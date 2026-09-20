@@ -97,29 +97,26 @@ async function main() {
 
   // CSSO may factor a declaration away from its original selector while
   // preserving the same cascade. Source contracts own exact declaration
-  // placement; this production guard checks that canonical selectors and
-  // selectors survive optimization while the rule reconciler rejects competitors.
-  // CSSO is allowed to dedupe redundant literal values; computed-style E2E
-  // certifies the final selector/value association.
-  const cssSources = await Promise.all(
-    entries.filter((entry) => entry.isFile() && entry.name.endsWith('.css'))
-      .map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')),
-  )
-  const productionCss = cssSources.join('\n')
+  // placement; this production guard checks the optimized Coach asset itself
+  // so another stylesheet cannot make a stripped title-stage bundle look
+  // superficially complete.
+  const coachEntry = entries.find((entry) => entry.isFile() && /^CoachWorkspaces-.*\.css$/.test(entry.name))
+  if (!coachEntry) throw new Error('Coach mobile identity authority verification failed: CoachWorkspaces production CSS asset is missing.')
+  const coachProductionCss = await readFile(path.join(DIST_ASSETS, coachEntry.name), 'utf8')
   const requiredAuthority = [
-    ['Coach identity stage selector', /coach-mission-control/],
-    ['mobile utility header selector', /mission-control-team-header/],
-    ['Coach hero identity selector', /\.mcHeroIdentity/],
-    ['metric control selector', /\.mcRealityStrip button/],
-    ['metric value selector', /\.mcRealityStrip strong/],
-    ['primary CTA selector', /\.mcPrimary/],
+    ['mobile utility header authority', /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid=mission-control-team-header\]\{display:none\}/],
+    ['mobile Coach hero geometry authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\]\{[^}]*min-height:334px[^}]*margin-inline:0/],
+    ['mobile Coach crest authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)/],
+    ['mobile metric control authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/],
+    ['mobile metric value authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcRealityStrip strong\{[^}]*font:800 20px\/.95 var\(--mc-native\)/],
+    ['mobile primary CTA authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/],
   ]
-  const missing = requiredAuthority.filter(([, pattern]) => !pattern.test(productionCss)).map(([label]) => label)
+  const missing = requiredAuthority.filter(([, pattern]) => !pattern.test(coachProductionCss)).map(([label]) => label)
   if (missing.length) {
-    throw new Error(`Coach mobile identity authority verification failed: optimized production CSS lost required Coach authority tokens (${missing.join(', ')}).`)
+    throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  console.log('Coach mobile identity authority verified: production CSS needs no post-build Coach rewrite; computed-style certification owns optimized declaration association.')
+  console.log('Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; computed-style certification owns final association.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })
