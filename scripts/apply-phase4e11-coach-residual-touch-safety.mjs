@@ -13,9 +13,9 @@ let index = readFileSync(indexPath, 'utf8');
 for (const required of [
   'testId="coach-player-invite-dashboard-section"',
   'testId="coach-page-dashboard-leaderboards"',
+  'key:"ranked",label:"Ranked Players"',
   'label:"Current Leader"',
   'label:"Archived Seasons"',
-  'label:"View"',
 ]) {
   if (!app.includes(required)) throw new Error(`Phase 4E.11 Coach source contract missing: ${required}`);
 }
