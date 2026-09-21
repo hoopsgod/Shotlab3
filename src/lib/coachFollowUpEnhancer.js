@@ -31,9 +31,9 @@ function mount(host,c){
     try{
       const [follow,deliveryResult]=await Promise.all([saveCoachCoreLoopAction({...c,state,note:serializeCoachResponseNote({assignment:assignment.value,privateNote:note.value})}),deliver?savePlayerAssignment({...c,assignmentText:assignment.value,resultDetail:response?.resultDetail||""}):null]);
       record=follow.record||record;
-      if(deliveryResult?.ok&&deliveryResult.assignment)setDelivery(deliveryResult.assignment);
+      if (deliveryResult?.ok && deliveryResult.assignment) setDelivery(deliveryResult.assignment);
       const parsed=parseCoachResponseNote(follow.record?.note||"");assignment.value=deliveryResult?.assignment?.assignmentText||parsed.assignment||assignment.value;note.value=parsed.privateNote||note.value;
-      draw(deliver?(deliveryResult?.ok?(deliveryResult.message||"Assignment delivered to the player."):"Player delivery could not be confirmed. Retry when connected."):(follow.message||(follow.ok?"Follow-up record saved.":"Follow-up could not be synced. Retry when connected.")));
+      draw(deliver?(deliveryResult?.ok?(deliveryResult.message||"Assignment delivered to the player."):(follow.ok?"Private follow-up saved. Player delivery could not be confirmed. Retry when connected.":"Saved locally, but team sync and player delivery could not be confirmed. Retry when connected.")):(follow.message||(follow.ok?"Follow-up record saved.":"Follow-up could not be synced. Retry when connected.")));
     }catch{draw(deliver?"Player delivery could not be confirmed. Retry when connected.":"Follow-up could not be saved. Try again.")}
     finally {saveInFlightRef.current = false;setSaving(false);draw()}
   };
