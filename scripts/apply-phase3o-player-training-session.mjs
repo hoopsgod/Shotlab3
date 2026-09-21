@@ -9,6 +9,14 @@ const requireOne = (source, anchor, label) => {
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = 'PlayerTrainingSessionHeader drill={active}';
+const activeShell = '{(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>';
+
+// Maintained Player workspace variants may already own the active-drill route
+// without the legacy inline shell. Keep the build idempotent in that shape.
+if (!source.includes(marker) && !source.includes(activeShell) && source.includes('PlayerCommitmentCenter from')) {
+  console.log('Phase 3O Player Training Session already owned by the current Player workspace architecture.');
+  process.exit(0);
+}
 
 if (source.includes(marker)) {
   for (const preserved of [
@@ -33,7 +41,6 @@ source = source.replace(
   `${importAnchor}\nimport PlayerTrainingSessionHeader from "./components/PlayerTrainingSessionHeader.jsx";`,
 );
 
-const activeShell = '{(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>';
 requireOne(source, activeShell, 'active drill shell');
 source = source.replace(
   activeShell,
