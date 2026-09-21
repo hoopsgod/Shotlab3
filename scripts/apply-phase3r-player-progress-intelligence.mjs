@@ -10,6 +10,11 @@ const path = "src/App.jsx";
 let source = readFileSync(path, "utf8");
 const marker = '<PlayerProgressStory userName={u.name}';
 
+if (!source.includes(marker) && !source.includes('data-testid="player-profile-readout"') && source.includes('PlayerCommitmentCenter from')) {
+  console.log("Phase 3R Player Progress Story already owned by the current Player workspace architecture.");
+  process.exit(0);
+}
+
 if (source.includes(marker)) {
   for (const preserved of [
     'data-testid="player-profile-workspace"',
