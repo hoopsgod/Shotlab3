@@ -65,9 +65,7 @@ async function minifyCandidate(source, { passes, quoteStyle, compress = {}, form
 
 async function recompress(file) {
   const source = await readFile(file, 'utf8')
-  const options = /^(?:AppDomainServices|CoachWorkspaces)-/.test(path.basename(file))
-    ? [...CANDIDATE_OPTIONS, ...APP_DOMAIN_OPTIONS]
-    : CANDIDATE_OPTIONS
+  const options = [...CANDIDATE_OPTIONS, ...APP_DOMAIN_OPTIONS]
   const candidates = await Promise.all(options.map((candidate) => minifyCandidate(source, candidate)))
   const output = candidates.reduce((best, candidate) => {
     const bestGzip = gzipBytes(best)
