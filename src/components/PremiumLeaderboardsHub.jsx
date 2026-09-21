@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import CompactLeaderboardPreviewCard from './CompactLeaderboardPreviewCard';
 import { ProgressiveDisclosure } from './VisualHierarchy.jsx';
 import { getAllProgramScoreRows } from '../lib/programDrillScoring.js';
-import { isShotLabDebugMode } from '../lib/releaseDiagnostics.js';
-import { getActiveTeamPlayerIdentity } from '../lib/playerDataManagement.js';
 import {
   LEADERBOARD_TIME_SCOPES,
   buildAllTimeEventParticipationLeaderboardRows,
@@ -124,8 +122,6 @@ export default function PremiumLeaderboardsHub({
       setActiveProgramDrillId(selectedProgramDrill.id);
     }
   }, [selectedProgramDrill, availableProgramDrills, activeProgramDrillId]);
-
-  const activeRosterIdentity = useMemo(() => getActiveTeamPlayerIdentity(players, teamId), [players, teamId]);
 
   // Current home-shot rankings are source-owned by the signed leaderboard
   // service. A missing or failed request must not be replaced with client-side
@@ -287,42 +283,6 @@ export default function PremiumLeaderboardsHub({
     includeArchivedPlayers: isAllTime,
   }), [remoteParticipationForTeam, participationScopeKey, allowLocalParticipation, isAllTime, localAllTimeStrengthRows, localCurrentStrengthRows, players, teamId]);
   const retryParticipationLeaderboards = () => setParticipationRefreshVersion((version) => version + 1);
-
-  useEffect(() => {
-    if (!isShotLabDebugMode()) return;
-    rawCurrentProgramRows.forEach((row) => {
-      const kept = currentProgramRows.some((allowed) => String(allowed?.email || allowed?.player_email || allowed?.playerId || allowed?.player_id || allowed?.id || '') === String(row?.email || row?.player_email || row?.playerId || row?.player_id || row?.id || ''));
-      if (!kept) console.warn('[leaderboard] filtered non-roster program row');
-    });
-  }, [rawCurrentProgramRows, currentProgramRows, activeRosterIdentity.players.length, teamId]);
-
-  useEffect(() => {
-    if (!isShotLabDebugMode() || activeLeaderboardCategory !== 'drill_shots') return;
-    if (normalizedProgramScores.length > 0 && selectedProgramDrill && programDrillLeaderboardRows.length === 0) {
-      console.warn('[program-scores] Program Drill leaderboard has no rows');
-    }
-  }, [activeLeaderboardCategory, normalizedProgramScores, selectedProgramDrill, programDrillLeaderboardRows, teamId, userEmail, activeTimeScope, players]);
-
-  const playerIdentityKeys = useMemo(
-    () => new Set([userEmail, currentUser?.email, currentUser?.playerId, currentUser?.player_id, currentUser?.userId, currentUser?.user_id, currentUser?.profileId, currentUser?.profile_id, currentUser?.id].map((value) => String(value || '').trim().toLowerCase()).filter(Boolean)),
-    [userEmail, currentUser],
-  );
-  const matchesCurrentPlayer = (row = {}) => [row?.email, row?.player_email, row?.playerId, row?.player_id, row?.userId, row?.user_id, row?.profileId, row?.profile_id, row?.id].map((value) => String(value || '').trim().toLowerCase()).some((key) => key && playerIdentityKeys.has(key));
-  const playerScopedHomeRows = useMemo(() => [...(Array.isArray(homeScores) ? homeScores : []), ...(Array.isArray(shotLogs) ? shotLogs : [])].filter(matchesCurrentPlayer), [homeScores, shotLogs, playerIdentityKeys]);
-  const playerScopedProgramRows = useMemo(() => normalizedProgramScores.filter(matchesCurrentPlayer), [normalizedProgramScores, playerIdentityKeys]);
-
-  useEffect(() => {
-    if (viewerRole !== 'player' || !isShotLabDebugMode()) return;
-    const activeRows = activeLeaderboardCategory === 'drill_shots' ? programDrillLeaderboardRows : atHomeLeaderboardRows;
-    const rawHomeScoreCount = (Array.isArray(homeScores) ? homeScores : []).length + (Array.isArray(shotLogs) ? shotLogs : []).length;
-    const rawProgramScoreCount = normalizedProgramScores.length;
-    const playerScopedHomeRowCount = playerScopedHomeRows.length;
-    const playerScopedProgramRowCount = playerScopedProgramRows.length;
-    const rawRelevantCount = activeLeaderboardCategory === 'drill_shots' ? rawProgramScoreCount : rawHomeScoreCount;
-    if (rawRelevantCount > 0 && activeRows.length === 0) {
-      console.warn('[player-leaderboard] Player leaderboard rows empty despite raw scores');
-    }
-  }, [viewerRole, activeLeaderboardCategory, activeTimeScope, atHomeLeaderboardRows, programDrillLeaderboardRows, homeScores, shotLogs, normalizedProgramScores, playerScopedHomeRows, playerScopedProgramRows, userEmail, currentUser]);
 
   const archiveCoverageLabel = hasFrozenHistory ? `${coverage.archiveCount} season${coverage.archiveCount === 1 ? '' : 's'}` : 'No archives';
   const activeCategoryLabel = CATEGORY_ITEMS.find((item) => item.key === activeLeaderboardCategory)?.label || 'At-Home Shots';
