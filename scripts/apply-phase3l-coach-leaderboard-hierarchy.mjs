@@ -126,8 +126,9 @@ const rawFollowUpSource = readFileSync(followUpPath, 'utf8');
 const followUpLineEnding = rawFollowUpSource.includes('\r\n') ? '\r\n' : '\n';
 let followUpSource = rawFollowUpSource.replace(/\r\n/g, '\n');
 const placementMarker = `const body = dialog.querySelector('[data-visual-role="dashboard-section"]')?.parentElement;`;
+const compactPlacementMarker = `body=dialog?.querySelector('[data-visual-role="dashboard-section"]')?.parentElement`;
 
-if (!followUpSource.includes(placementMarker)) {
+if (!followUpSource.includes(placementMarker) && !followUpSource.includes(compactPlacementMarker)) {
   const directPlacement = `    host = document.createElement("div");
     host.dataset.testid = HOST_TEST_ID;
     dialog.appendChild(host);`;
