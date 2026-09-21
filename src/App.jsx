@@ -2105,7 +2105,804 @@ return <div className={`app-shell performance-shell performance-shell--player ${
       const weeklyGoal=PLAYER_WEEKLY_SHOT_TARGET;
       const dailyPct=deriveCompletionRatio({todayMakes:todaysMakes,dailyGoal});
       const weeklyPct=deriveCompletionRatio({todayMakes:weeklyMakes,dailyGoal:weeklyGoal});
-      const seasonProgressPct=Mat…24351 tokens truncated…{onCompletionCue?.({title:"Event participation confirmed",detail:`You're in for ${event.title}`,momentum:"Attendance momentum building",next:"Show up and log post-session activity"});}};
+      const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
+      const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal,streak,weeklyPct});
+      const missionMomentumBadge=momentumLabel==="Building base volume"?"Building Base":momentumLabel;
+      const { trainingIdentity, commitmentLevel }=deriveTrainingIdentityLabels({eventsAttended,weeklyMakes,weeklyGoal,weeklyPct,streak});
+      const currentFocus=deriveNextFocusLabel({todaysMakes,dailyGoal});
+      const playerHasTeam=Boolean(u?.teamId);
+      const hasUpcomingEvents=upcomingEventsCount>0;
+      const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
+      const hasShotLogs=normalizedShotLogs.some(s=>Number(s.made)>0);
+      const firstWorkoutComplete=hasShotLogs||normalizedScLogs.length>0;
+      const firstEventInteraction=hasUpcomingEvents||rsvps.some(r=>normalizeEmail(r?.email||"")===normalizeEmail(u.email));
+      const playerChecklist=[
+        {label:"Join team",done:playerHasTeam},
+        {label:"View upcoming event",done:hasUpcomingEvents,onClick:()=>switchTab("program"),ariaLabel:"View upcoming events in Program"},
+        {label:"RSVP to an event",done:hasRsvped,onClick:()=>switchTab("program"),ariaLabel:"Go to Program events to RSVP"},
+        {label:"Log At Home Shots",done:hasShotLogs,onClick:()=>switchTab("log-drill"),ariaLabel:"Go to Log Drill to log At Home Shots"},
+        {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
+      ];
+      const firstWeekActivation=deriveFirstWeekActivationMilestones({hasRsvped,firstWorkoutComplete,firstEventInteraction}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
+      const recentPlayerActivity=deriveActivityFeedItems({view:"player",user:u,events,rsvps,shotLogs,players:playerLeaderboardPlayers,scores,today,activeTeamPlayerEmails:playerActiveTeamEmailSet,activeTeamPlayerKeys:playerActiveTeamKeySet});
+      const eventTypeTone=(type)=>{
+        const key=String(type||"event").toLowerCase();
+        if(key.includes("game"))return {label:"GAME",color:ORANGE,bg:"rgba(255,165,0,0.12)"};
+        if(key.includes("practice"))return {label:"PRACTICE",color:CYAN,bg:"rgba(94,208,255,0.14)"};
+        if(key.includes("workout")||key.includes("lift"))return {label:"WORKOUT",color:VOLT,bg:"rgba(200,255,0,0.16)"};
+        if(key.includes("meeting"))return {label:"MEETING",color:"#D2C6FF",bg:"rgba(210,198,255,0.16)"};
+        return {label:"EVENT",color:LIGHT,bg:"rgba(255,255,255,0.12)"};
+      };
+      const dayLabel=(dateValue)=>{
+        if(dateValue===today)return "TODAY";
+        const tmr=new Date(`${today}T00:00:00`);tmr.setDate(tmr.getDate()+1);
+        const tmrStr=`${tmr.getFullYear()}-${String(tmr.getMonth()+1).padStart(2,"0")}-${String(tmr.getDate()).padStart(2,"0")}`;
+        if(dateValue===tmrStr)return "TOMORROW";
+        const d=new Date(`${dateValue}T00:00:00`);
+        return Number.isNaN(d.getTime())?"UPCOMING":d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
+      };
+      const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
+      const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
+      const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
+      const upcomingScheduleItems=deriveUpcomingSchedule({events,rsvps,scSessions,scRsvps,userEmail:u?.email,today});
+      const coachName=players.find(p=>p.role==="coach"&&p.teamId===u?.teamId)?.name||"Your coach";
+      const emphasisLabel=String(coachPriorities?.focusEmphasis||"Volume").trim();
+      const coachTodayFocus=String(coachPriorities?.todayFocusText||"Daily shot volume + clean mechanics").trim();
+      const coachPriorityDrill=String(coachPriorities?.priorityDrillText||drills.find(d=>!todayS.some(s=>s.drillId===d.id))?.name||drills[0]?.name||"At-home drill block").trim();
+      const coachChallengeText=String(coachPriorities?.challengeText||"Build momentum: complete one drill and log shots today.").trim();
+      const coachWeeklyMakesTarget=Math.max(0,Number(coachPriorities?.weeklyMakesTarget)||weeklyGoal);
+      const coachWeeklyCheckinsTarget=Math.max(1,Number(coachPriorities?.weeklyCheckinsTarget)||Math.min(3,Math.max(1,upcomingWeekEvents.length||2)));
+      const weeklyGoalLabel=`${coachWeeklyMakesTarget} makes + ${coachWeeklyCheckinsTarget} team check-ins`;
+      const consistencyExpectation=weeklyPct>=80?"Consistency is on track — maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
+      const teamPlayers=players.filter((p)=>p.teamId===u?.teamId&&p.role!=="coach");
+      const completionsTodayCount=teamPlayers.filter((player)=>scores.some((score)=>normalizeEmail(score?.email||score?.playerId||"")===normalizeEmail(player?.email||"")&&score?.date===today)).length;
+      const sevenDayScores=scores.filter((score)=>score?.teamId===u?.teamId&&isWithinLastSevenDays(score?.date));
+      const activeTeamPlayersCount=new Set(sevenDayScores.map((score)=>normalizeEmail(score?.email||score?.playerId||"")).filter(Boolean)).size;
+      const recentTeamCompletions=scores
+        .filter((score)=>score?.teamId===u?.teamId)
+        .sort((a,b)=>new Date(`${b.date||"1970-01-01"}T00:00:00`).getTime()-new Date(`${a.date||"1970-01-01"}T00:00:00`).getTime())
+        .slice(0,3)
+        .map((score)=>`${score?.name||score?.playerId||"Team player"} completed ${score?.drillName||"a drill"} · ${score?.date===today?"Today":score?.date||"Recent"}`);
+      const teamMomentumLabel=activeTeamPlayersCount>=Math.max(2,Math.ceil(teamPlayers.length*0.5))?"Team streak building":"Momentum ramping";
+      const coachPresenceUpdates=[
+        `${coachName} updated priorities: ${coachTodayFocus}`,
+        `${coachName} emphasized: ${coachPriorityDrill}`,
+        `Challenge active: ${coachChallengeText}`,
+      ];
+      const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
+      const dailyCommandModel=derivePlayerDailyCommandCenter({today,userEmail:u?.email,teamId:u?.teamId,todayMakes:todaysMakes,weeklyMakes,dailyGoal,weeklyGoal:coachWeeklyMakesTarget,streak,leaderboardRank,drills,programDrills,todayHomeScores:todayS,todayProgramScores,events,rsvps,scSessions,scRsvps,shotLogs:normalizedShotLogs,scLogs:normalizedScLogs,coachPriorities});
+      return <div className="player-home-compact-dashboard" style={{marginBottom:24,display:"grid",gap:"var(--player-dashboard-gap, 14px)"}}>
+        <PlayerDailyCommandCenter model={dailyCommandModel} onAction={handleDailyCommandAction}/>
+        <ProgressiveDisclosure
+          title="Upcoming schedule"
+          summary={upcomingScheduleItems.length?`${upcomingScheduleItems.length} scheduled · ${unresolvedBadgeLabel}`:"No sessions scheduled"}
+          testId="player-upcoming-schedule"
+        >
+          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&amp;C session is scheduled yet.</div>:<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
+            {upcomingScheduleItems.map(item=><div key={item.kind} style={{borderTop:"1px solid var(--stroke-1)",padding:"11px 2px",minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.08em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10}}>{item.rsvpStatus}</span></div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,marginTop:6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
+              <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:5,lineHeight:1.45}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
+              <button data-player-home-schedule-action type="button" onClick={()=>switchTab(item.target)} style={{marginTop:8,minHeight:38,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>{item.cta} →</button>
+            </div>)}
+          </div>}
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Team standings" summary="Home-shot rankings and your position" testId="player-team-standings">
+          <CompactLeaderboardPreviewCard
+            title="Team Leaders"
+            areaTitle="Leaderboards"
+            categoryLabel="Home Shots"
+            mode="player"
+            userEmail={u?.email||""}
+            status={playerDashboardLeaderboardStatus}
+            error={playerLeaderboardState.error}
+            teamId={u?.teamId||""}
+            rows={playerDashboardLeaderboardRows}
+            emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
+            maxRows={3}
+            onViewAll={()=>switchTab("leaderboards")}
+            onRetry={refreshHomeShotsLeaderboard}
+          />
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure
+          title="Coach guidance"
+          summary={`${coachName} · ${coachPriorityDrill}`}
+          testId="player-coach-guidance"
+        >
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,lineHeight:1.5}}>Coach focus: {coachTodayFocus}</div>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
+            {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{borderTop:"1px solid var(--stroke-1)",padding:"9px 2px"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
+          </div>
+          <button data-player-home-coach-guidance-action type="button" onClick={()=>switchTab("duels")} style={{marginTop:9,minHeight:40,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>Open Program →</button>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure
+          title="More progress"
+          summary="Rank, attendance, season progress, and shortcuts"
+          testId="player-secondary-intelligence"
+        >
+          <MetricStrip items={[
+            {label:"Team Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"—",detail:"Home shots"},
+            {label:"Events",value:eventsAttended,detail:"Attended"},
+            {label:"Season",value:`${seasonProgressPct}%`,detail:trainingIdentity},
+          ]}/>
+          <QuietSection title="Next step" eyebrow="Recommended">
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,lineHeight:1.45}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
+          </QuietSection>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:8,marginTop:12}}>
+            {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:44,borderRadius:10,border:"1px solid var(--stroke-1)",background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
+          </div>
+        </ProgressiveDisclosure>
+        
+        
+      </div>
+    })()}
+
+  </div>}
+
+  {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
+  {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up player-training-workspace player-training-workspace--home" data-player-journey="at-home">
+    
+    <PlayerWorkspaceCommandBar model={atHomeWorkspaceModel} activeMetric={homeDrillFilter==="open"?"open":homeDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleAtHomeMetric} testId="player-at-home-workspace"/>
+    <PlayerWorkspaceFilterRail value={homeDrillFilter} onChange={setHomeDrillFilter} ariaLabel="At Home drill filters" testId="player-at-home-filter-rail" options={[{value:"all",label:"All drills",count:drills.length},{value:"open",label:"Open",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
+
+    {/* ── SHOT TRACKER ── */}
+    <div className="player-training-kicker">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      SHOT TRACKER
+    </div>
+    <div className="player-primary-logging-region" data-testid="player-shot-logging-region" data-layout-role="primary-decision">
+      <div className="player-logging-fields">
+        <div className="player-logging-field">
+          <label htmlFor="player-home-shots-made">SHOTS MADE</label>
+          <div className="player-logging-control">
+            <input id="player-home-shots-made" className="player-logging-input player-logging-input--score" type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0"/>
+          </div>
+        </div>
+        <div className="player-logging-field">
+          <label htmlFor="player-home-shot-date">DATE</label>
+          <div className="player-logging-control player-logging-control--date">
+            <input id="player-home-shot-date" className="player-logging-input" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)}/>
+          </div>
+        </div>
+      </div>
+
+    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice}/>
+    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
+      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){pushCompletionCue({title:"Shots logged",detail:`${validation.made} makes added to today’s total`,momentum:"Daily progress updated",next:"Return to the command center",nextAction:{target:"home"}});if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
+        {shotSaving?"SAVING…":shotSaved?"✓ SAVED":"LOG SHOTS"}
+      </button>
+      {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,textAlign:"center",marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
+      {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
+      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>SHOT STATS →</button>
+    </div>
+
+    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
+    <section className="player-training-plan" data-testid="player-at-home-drill-plan" data-layout-role="supporting-evidence">
+    <div className="player-training-plan__header"><div><span>Training plan</span><strong>Daily drills</strong></div><span>{todayS.length}/{drills.length} done</span></div>
+    <div className="player-training-progress" aria-hidden="true"><div style={{width:`${drills.length>0?Math.min(100,Math.round(todayS.length/drills.length*100)):0}%`}}/></div>
+    {visibleHomeDrills.length===0&&<PlayerWorkspaceEmptyState title={homeDrillFilter==="open"?"All assigned drills are complete":"No completed drills yet"} detail={homeDrillFilter==="open"?"Your daily drill block is finished. Add quality makes or review your stats.":"Complete a drill and it will appear here."} actionLabel={homeDrillFilter==="open"?"Review shot stats":"Show open drills"} onAction={()=>homeDrillFilter==="open"?setShowShotStats(true):setHomeDrillFilter("open")}/>}
+    {visibleHomeDrills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);
+      return <button key={d.id} className={`player-drill-row ${done?"is-complete":""}`} onClick={()=>!done&&setActive(d)} disabled={Boolean(done)} style={{"--drill-accent":VOLT}}>
+        <div className="player-drill-row__icon"><DrillIcon type={d.icon} size={22} color={done?VOLT+"99":VOLT}/></div>
+        <div className="player-drill-row__copy">
+          <div className="player-drill-row__title">{d.name}</div>
+          <div className="player-drill-row__detail">{d.desc}</div>
+        </div>
+        {done?<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+         :<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+      </button>})}
+    </section>
+  </div>}
+
+  {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
+    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace" showMetrics={false}/>
+    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} leaderboardError={homeShotsLeaderboard?.error||""} leaderboardMode={homeShotsLeaderboard?.mode||"unknown"} onRetryHomeShots={refreshHomeShotsLeaderboard} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} events={events} rsvps={rsvps} scSessions={scSessions} scLogs={scLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} showHeader={false}/>
+  </div>}
+
+  {tab==="in-season"&&!active&&<div className={slideClass} key="in-season" data-testid="player-in-season-workspace">
+    <InSeasonPerformanceHub role="player" user={u} team={team} programDrills={programDrills} programScores={teamProgramScores} players={playerLeaderboardPlayers} seasonArchives={seasonArchives} addScore={addScore} />
+  </div>}
+
+  {/* ═════ SHOT STATS sub-screen ═════ */}
+  {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
+    <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
+    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} retryHomeShotLog={retryHomeShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved} shotSaving={shotSaving} setShotSaving={setShotSaving} shotSaveNotice={shotSaveNotice} setShotSaveNotice={setShotSaveNotice}/>
+  </div>}
+
+
+  {/* ═════════════ ACTIVE DRILL INPUT ═════════════ */}
+  {(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter player-training-session" data-testid="player-training-session" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
+    {confetti&&<ConfettiBurst/>}
+    {saved&&shareData?<div className="fade-up player-training-completion-wrap" data-testid="player-training-completion-wrap" style={{padding:"16px 0"}}>
+      {!showChallForm?<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length} plannedTotal={shareData?.src==="program"?programDrills.length:drills.length} nextCommitment={events.filter(e=>e.date>=today).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")))[0]||null} currentStreak={streak} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)} onViewProgress={()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab("profile")}}/>
+      :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
+        <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}{shareData.max?`/${shareData.max}`:""} on {shareData.drill}</div>
+        {shareData?.src==="program"?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>Program scores save directly to the team program leaderboard.</div>:players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
+        :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
+          <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
+            <button key={p.email} onClick={()=>{setChallTarget(p.email);setChallengeSaveError("")}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
+              <Av n={p.name} sz={28} email={p.email}/><span style={{fontFamily:FB,color:challTarget===p.email?ORANGE:LIGHT,fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
+              {challTarget===p.email&&<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={ORANGE} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </button>)}
+          </div>
+          {challengeSaveError&&<div role="alert" style={{fontFamily:FB,color:DANGER,fontSize:11,lineHeight:1.45,marginBottom:10}}>{challengeSaveError}</div>}
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setShowChallForm(false);setChallTarget("");setChallengeSaveError("")}} disabled={challengeSending} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:challengeSending?"not-allowed":"pointer"}}>CANCEL</button>
+            <button className="btn-v cta-primary" onClick={sendChallenge} disabled={!challTarget||challengeSending} style={{width:"100%",opacity:challTarget&&!challengeSending?1:.5}}>{challengeSending?"SENDING...":"SEND IT"}</button>
+          </div>
+        </>}
+      </div>}
+
+    </div>
+    :<><PlayerTrainingSessionHeader drill={active} mode={activeMode} currentIndex={(activeMode==="program"?todayProgramScores:todayS).length+1} total={activeMode==="program"?programDrills.length:drills.length} score={input} onBack={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}}/>
+      {/* Personal Best + Average */}
+      {(()=>{const ds=activeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
+        return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
+          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${statAccent}33`,textAlign:"center"}}>
+            <div style={{fontFamily:FD,color:statAccent,fontSize:18}}>{pb}</div>
+            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
+          </div>
+          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+            <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:VOLT,fontSize:18}}>{avg}</div>
+            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>AVG</div>
+          </div>
+          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+            <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:LIGHT,fontSize:18}}>{ds.length}</div>
+            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>LOGGED</div>
+          </div>
+        </div>:null})()}
+      {active.instructions&&<div style={{margin:"12px auto 0",maxWidth:300,background:CARD_BG,borderRadius:12,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"left"}}>
+        <div style={{fontFamily:FD,color:CYAN,fontSize:10,letterSpacing:3,marginBottom:6,display:"flex",alignItems:"center",gap:6}}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          COACH NOTES
+        </div>
+        <p style={{fontFamily:FB,color:CYAN,fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap",textShadow:`0 0 18px ${CYAN}18`}}>{active.instructions}</p>
+      </div>}
+      {/* Motivational line */}
+      <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500,textShadow:activeMode==="program"?`0 0 16px ${CYAN}18`:"none"}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
+      {hasDrillMax(active)&&<div style={{fontFamily:FD,color:activeMode==="program"?CYAN:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>}
+      <div className="player-training-score-zone" data-testid="player-training-score-zone">
+      <div className="player-training-score-zone-label">LOG YOUR RESULT</div>
+      {/* Score input with reactive color */}
+      {(()=>{const v=Number(input)||0;const pct=hasDrillMax(active)&&active.max>0?v/active.max:0;const glowColor=hasDrillMax(active)?(pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT):VOLT;const borderColor=v>0?glowColor:VOLT;
+        return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
+        <input autoFocus type="number" inputMode="decimal" pattern="[0-9]*" min={active?.allowZeroScore===true||active?.minScore===0?"0":"1"} max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
+        {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
+      </div>})()}
+      {/* Score quality indicator */}
+      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?SUCCESS:pct>=75?SUCCESS:pct>=50?WARNING:DANGER;
+        return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
+      <button data-testid="player-training-log-score" className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{width:"100%",maxWidth:"none",margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>
+      </div>
+    </>}
+  </div>}
+
+  {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
+  {tab==="program"&&<div className={slideClass} key="program"><PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}
+
+
+
+  {/* ═════════════ PROGRAM LOG ═════════════ */}
+  {tab==="duels"&&!active&&<div className="fade-up player-training-workspace player-training-workspace--program" data-player-journey="program">
+    <PlayerWorkspaceCommandBar model={programWorkspaceModel} activeMetric={programDrillFilter==="open"?"open":programDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleProgramMetric} testId="player-program-workspace"/>
+    <PlayerWorkspaceFilterRail value={programDrillFilter} onChange={setProgramDrillFilter} ariaLabel="Program drill filters" testId="player-program-filter-rail" options={[{value:"all",label:"Full plan",count:programDrills.length},{value:"open",label:"Open",count:programWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:programWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
+
+    <DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/>
+    <CourtDivider color={CYAN} my={18}/>
+
+    <section className="player-training-plan player-training-plan--program" data-testid="player-program-drill-plan" data-layout-role="supporting-evidence">
+    <div className="player-training-plan__header"><div><span>Coach assigned</span><strong>Program drills</strong></div><span>{todayProgramScores.length}/{programDrills.length} done</span></div>
+    <div className="player-training-progress" aria-hidden="true"><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,"--progress-accent":CYAN}}/></div>
+    {visibleProgramSessionBlocks.length===0&&<PlayerWorkspaceEmptyState title={programDrillFilter==="open"?"Program plan complete":"No completed Program drills yet"} detail={programDrillFilter==="open"?"Every coach-assigned drill is complete for today.":"Complete a Program drill and it will appear here."} actionLabel={programDrillFilter==="open"?"Review rankings":"Show open drills"} onAction={()=>programDrillFilter==="open"?switchTab("leaderboards"):setProgramDrillFilter("open")}/>}
+    {visibleProgramSessionBlocks.map((block,blockIndex)=>{const isPrimarySession=block.drills.some((drill)=>programSessionBlocks.nextPriority===drill.id);return <div key={block.phase} className={`player-program-session ${isPrimarySession?"player-program-session--primary":""}`} data-layout-role={isPrimarySession?"primary-program-session":"quiet-secondary"}>
+      <div className="player-program-session__header">
+        <div>
+          <div className="player-program-session__title">{`SESSION ${blockIndex+1} · ${block.phase.toUpperCase()}`}</div>
+          <div className="player-program-session__detail">{block.emphasis}</div>
+        </div>
+        <div className="player-program-session__status" data-status={block.status}>{block.status==="completed"?"COMPLETED":block.status==="in-progress"?"IN PROGRESS":"UPCOMING"}</div>
+      </div>
+      {block.drills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);const isPriority=programSessionBlocks.nextPriority===d.id;
+        const leaderboardRows=getProgramLeaderboardRows(teamProgramScores,d,players,3);
+        return <button key={d.id} className={`player-drill-row player-drill-row--program ${done?"is-complete":""} ${isPriority&&!done?"is-priority":""}`} onClick={()=>setActive(d)} style={{"--drill-accent":CYAN}}>
+          <div className="player-drill-row__icon"><DrillIcon type={d.icon} size={20} color={done?CYAN+"99":CYAN}/></div>
+          <div className="player-drill-row__copy">
+            <div className="player-drill-row__title">{d.name}{isPriority&&!done&&<span className="player-drill-row__priority">PRIORITY</span>}</div>
+            <div className="player-drill-row__detail">{d.desc}</div>
+            <div className="player-drill-row__meta">Drill leaderboard: {leaderboardRows.length===0?"No scores yet":leaderboardRows.map(row=>`#${row.rank} ${row.name||row.email?.split("@")[0]} ${row.total}`).join(" · ")}</div>
+          </div>
+          {done?<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+          :<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+        </button>})}
+    </div>})}
+    </section>
+  </div>}
+
+  {/* ═════════════ CHALLENGES ═════════════ */}
+  {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
+
+  {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
+  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerCommitmentCenter mode="strength" model={strengthWorkspaceModel} items={scSessions} responses={scRsvps} logs={scLogs} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}
+
+  {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
+  {tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">
+  <PlayerProgressStory userName={u.name} userEmail={u.email} teamId={u.teamId} shotLogs={shotLogs} scores={scores} programScores={programScores} drills={drills} programDrills={programDrills} streak={streak} coachPriorities={coachPriorities} today={today} onStartTraining={()=>switchTab("log-drill")} onOpenFullProfile={()=>{const details=document.querySelector('[data-testid="player-progress-full-profile"]');if(details instanceof HTMLDetailsElement)details.open=true;window.setTimeout(()=>document.querySelector('[data-testid="player-profile-readout"]')?.scrollIntoView({behavior:"smooth",block:"start"}),0)}}/>
+  <ProgressiveDisclosure title="Full progress profile" summary="Report card, performance intelligence, drill development, history, and privacy" testId="player-progress-full-profile">
+    <ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/>
+  </ProgressiveDisclosure>
+</div>}
+</div>
+
+{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} onLogout={logout} ariaLabel="Player navigation"/>}
+
+  </div></div></main>
+{isDesktop&&<aside className="insights-panel"><OperationalInsightRail model={playerInsightRailModel} onAction={handlePlayerInsightAction} testId="player-operational-insight-rail"/></aside>}
+  </div>;
+}
+
+// ═══════════════════════════════════════
+// SHAREABLE WORKOUT CARD
+// ═══════════════════════════════════════
+function ShareCard({data}){
+const pct=data.pct||0;const pcol=pct>=80?SUCCESS:pct>=50?WARNING:DANGER;
+return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
+{/* Corner accents */}
+<div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
+<div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
+{/* Glow */}
+<div style={{position:"absolute",top:"-30%",left:"50%",width:200,height:200,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}0c,transparent)`,transform:"translateX(-50%)",pointerEvents:"none"}}/>
+{/* Brand */}
+<div style={{position:"relative",zIndex:1}}>
+<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:4}}>
+<SLLogo size={22}/>
+<span style={{fontFamily:FD,color:VOLT,fontSize:12,letterSpacing:4}}>SHOT LAB</span>
+</div>
+<div style={{fontFamily:FB,color:T.MUT,fontSize:9,letterSpacing:2,marginBottom:20}}>WORKOUT COMPLETE</div>
+{/* Player name */}
+<div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3,lineHeight:1}}>{data.name.toUpperCase()}</div>
+<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
+{/* Drill + Score */}
+<div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
+<DrillIcon type={data.icon} size={20}/>
+<span style={{fontFamily:FD,color:LIG…4351 tokens truncated…padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
+      <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:1,lineHeight:1}}>#{board.findIndex(b=>b.email===user.email)+1||"-"}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>YOUR RANK</div>
+    </div>
+  </div>
+</div>
+
+<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
+  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:10,marginBottom:10}}>
+    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:2}}>ATTENDANCE BY DATE ({currentYear})</div>
+    <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1}}>{myAttendanceByDate.reduce((a,d)=>a+d.count,0)}</div>
+  </div>
+  {myAttendanceByDate.length===0
+    ?<div style={{fontFamily:FB,color:MUTED,fontSize:12}}>No S&C sessions attended yet this year.</div>
+    :<div style={{display:"grid",gap:6}}>
+      {myAttendanceByDate.map(entry=><div key={entry.date} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}>
+        <span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700}}>{entry.date}</span>
+        <span style={{fontFamily:FD,color:SC_COLOR,fontSize:18,lineHeight:1}}>{entry.count}</span>
+      </div>)}
+    </div>}
+</div></div>
+
+<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.5,margin:"-2px 0 16px",padding:"10px 12px",borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.02)"}}>RSVP privacy is protected for players. You can see your own status; coaches can manage the full attendance list.</div>
+
+<SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SESSION LOG"/>
+<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"16px"}}>
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+    <FF l="DATE" v={newLog.date} set={v=>setNewLog({...newLog,date:v})} tp="date"/>
+    <FF l="TIME" v={newLog.time} set={v=>setNewLog({...newLog,time:v})} ph="e.g. 7:00 AM"/>
+    <div style={{gridColumn:"1 / -1"}}><FF l="PLACE" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} opts={["School","Private Trainer","Gym Membership","At Home"]}/></div>
+    <div style={{gridColumn:"1 / -1"}}><FF l="SPORT" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
+  </div>
+  {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
+  {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
+  <button className="btn-v cta-primary" onClick={handleAddScLog} style={{marginTop:10}}>ADD SESSION</button>
+</div></div>
+
+<div style={{marginBottom:16,background:"#141414",border:"1px solid #242424",borderRadius:16,minHeight:100,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"16px"}}>
+  <div style={{fontFamily:FD,color:"#C8FF00",fontSize:48,fontWeight:900,lineHeight:1}}>{myScLogs.length}</div>
+  <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,letterSpacing:"0.08em",fontWeight:700,marginTop:8,textTransform:"uppercase"}}>TOTAL S&C SESSIONS LOGGED</div>
+</div>
+
+{/* Upcoming sessions */}
+<SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
+{upcoming.length===0&&<Empty t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!" icon={<LiftIcon size={40} color="#555555"/>}/>}
+{upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
+  return <div key={s.id} style={{marginBottom:12}}>
+    <button onClick={()=>setExpanded(exp?null:s.id)} className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?SC_COLOR+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative",overflow:"hidden"}}>
+      {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:SC_COLOR,borderRadius:"4px 0 0 4px"}}/>}
+      <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
+        <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={24} color={going?SC_COLOR:MUTED}/></div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{s.sport||s.title}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:SC_COLOR,fontWeight:700}}>{s.date}</span> &#183; {s.time}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.location}</div>
+        </div>
+        <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:going?SC_COLOR:MUTED,fontSize:14}}>{going?"GOING":"OPEN"}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>YOUR RSVP</div></div>
+      </div>
+    </button>
+    {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
+      {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
+      <button className="btn-v cta-primary" onClick={()=>handleScRsvp(s.id)} style={{}}>
+        {going?<>✓ YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
+      </button>
+      {rsvpError&&<div role="alert" style={{fontFamily:FB,color:"#FF6969",fontSize:11,marginTop:10,fontWeight:700}}>{rsvpError}</div>}
+      <div style={{fontFamily:FB,color:going?SC_COLOR:MUTED,fontSize:11,marginTop:10,fontWeight:700}}>Your RSVP status: {going?"Going":"Not RSVP’d"}</div>
+    </div>}
+  </div>;
+})}
+
+{/* Past sessions */}
+{past.length>0&&<><CourtDivider color={SC_COLOR} my={12}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
+  {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
+    return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
+      <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
+      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
+      {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
+    </div>;
+  })}</>}
+
+  </div>;
+}
+
+
+function StatTile({value,label,color,style}){
+return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)",...style}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+}
+
+function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",infoLayout="equal",isActive,onClick,actionLabel="Open",titleColor=LIGHT,subtitleColor}){
+const a=MODE_CARD_ACCENTS[accent]||MODE_CARD_ACCENTS.home;
+const v=MODE_CARD_VARIANTS[variant]||MODE_CARD_VARIANTS.active;
+const infoLayoutConfig=MODE_CARD_INFO_LAYOUTS[infoLayout]||MODE_CARD_INFO_LAYOUTS.equal;
+const baseBorder=isActive?`1.5px solid ${a.glow}`:`1.5px solid ${MODE_CARD_TOKENS.BASE_BORDER}`;
+const baseShadow=isActive?`0 14px 32px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`:MODE_CARD_TOKENS.BASE_SHADOW;
+const chipBackground=v.chipBackground==="accent"?a.chipBackground:v.chipBackground;
+const chipBorder=v.chipBorder==="accent"?a.chipBorder:v.chipBorder;
+const chipColor=v.chipColor==="accent"?a.chipColor:v.chipColor;
+const ctaBackground=v.ctaBackground==="accent"?a.ctaBackground:v.ctaBackground;
+const ctaShadow=v.ctaShadow==="accent"?a.ctaShadow:v.ctaShadow;
+const themedIcon=isValidElement(icon)?cloneElement(icon,{stroke:a.iconStroke,color:a.iconStroke}):icon;
+return <button type="button" onClick={onClick} className="mode-card" style={{"--glow":a.glow,width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:24,padding:22,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.glow;e.currentTarget.style.boxShadow=`0 16px 34px rgba(0,0,0,.48), 0 0 0 1px ${a.glow} inset, 0 0 24px ${a.glow}`}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)";e.currentTarget.style.boxShadow=`0 0 0 2px ${a.glow}, 0 14px 28px rgba(0,0,0,.45)`}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`0 0 0 3px ${a.focusRing}, 0 14px 28px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
+  {v.showTopAccent&&<div aria-hidden="true" style={{position:"absolute",top:0,left:0,right:0,height:4,background:`linear-gradient(90deg, ${a.topAccentStart}, ${a.topAccentEnd})`,opacity:.9}}/>}
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
+      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`${v.iconBorderWidth} solid ${a.glow}`,boxShadow:v.iconGlow.replaceAll("var(--glow)",a.glow),display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{themedIcon}</div>
+      <div style={{minWidth:0}}>
+        <div style={{fontFamily:FD,color:titleColor,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
+        <div style={{fontFamily:FB,color:subtitleColor||chipColor,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
+      </div>
+    </div>
+    <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+      {actionLabel&&<div style={{fontFamily:FB,color:chipColor,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 10px",borderRadius:999,border:chipBorder,background:chipBackground,whiteSpace:"nowrap"}}>{actionLabel}</div>}
+      <div style={{width:38,height:38,borderRadius:10,background:ctaBackground,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:ctaShadow.replaceAll("var(--glow)",a.glow)}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
+    </div>
+  </div>
+  <div style={infoLayoutConfig.container}>{stats.map((s,index)=><StatTile key={s.label} value={s.value} label={s.label} color={s.color} style={infoLayoutConfig.getTileStyle(index,stats.length)}/>)}</div>
+</button>
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD LEADERBOARD — The hero section
+// ═══════════════════════════════════════
+function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs,players}){
+const[mode,setMode]=useState("home");
+const[sub,setSub]=useState("total");
+const medals=[VOLT,"#A0A0A0","#A0A0A0"];
+const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
+const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
+
+const leaderboardEligible=useMemo(()=>new Set(players.filter(p=>p.role!=="coach"&&isLeaderboardEligible(players,p.email)).map(p=>p.email)),[players]);
+const board=useMemo(()=>{
+if(mode==="home"){
+if(sub==="shots"){
+const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+}
+if(sub==="total"){
+// Combine drill scores + shot logs
+const m={};
+homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
+shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
+return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+}
+// Per-drill
+const did=parseInt(sub);const m={};
+homeScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
+return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+}
+// Program
+if(sub==="events"){
+const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+}
+if(sub==="sc"){
+const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+}
+if(sub.startsWith("prog-")){const did=sub.slice(5);const m={};progScores.filter(s=>String(s.drillId||s.drill_id)===String(did)).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);}
+const m={};progScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
+return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+},[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs,programDrills,leaderboardEligible]);
+
+const isHome=mode==="home";
+const accentColor=isHome?VOLT:CYAN;
+const unit=sub==="shots"?"makes":sub==="events"?"events":sub==="sc"?"sessions":"makes";
+const title=isHome?"AT HOME":"PROGRAM";
+const modeStyles={
+home:{accent:VOLT,bg:"rgba(200, 255, 0, 0.14)",glow:"0 0 18px rgba(200, 255, 0, 0.28)",label:"🏠"},
+prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 0.28)",label:"📅"}
+};
+
+// Swap sub when switching modes
+const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
+
+return <div>
+{/* Mode toggle */}
+<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
+{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
+const active=mode===m.k;
+const thisMode=modeStyles[m.k];
+return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
+})}
+</div>
+
+{/* Sub-tabs */}
+<div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,paddingLeft:16,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none"}}>
+  <div style={{display:"flex",gap:8,minWidth:"max-content"}}>
+    {isHome?
+      [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
+    :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?CYAN:"#1E1E1E",color:sub===t.k?"#041014":"#555555",transition:"all .2s",boxShadow:sub===t.k?"0 0 14px rgba(0, 229, 255, 0.35)":"none"}}>{t.l}</button>)}
+  </div>
+</div>
+
+{/* Title */}
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+  <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
+  <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
+</div>
+
+{/* Board */}
+<div key={mode+sub} className="slide-r">
+{board.length===0&&<Empty t={`No ${unit} logged yet`} action="Log a drill score to get on the board!" onTap={null}/>}
+
+{/* YOUR POSITION — sticky anchor */}
+{(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
+  if(myIdx<0)return null;
+  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
+    <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
+    <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:1}}>YOUR POSITION</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{myEntry.total} {unit}</div>
+    </div>
+    {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
+  </div>})()}
+
+{board.map((p,i)=>{
+  const isMe=p.email===user.email;
+  const isLeader=i===0&&board.length>1;
+  const isTop3=i<3;
+  const leaderTotal=board[0]?.total||1;
+  const pct=Math.round((p.total/leaderTotal)*100);
+  const rowBg=i%2===0?CARD_BG:T.SURFACE;
+  const rosterIdentity=p.email||p.playerId||p.id||p.name||i;
+
+  if(isLeader) return <div key={rosterIdentity} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+    <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
+    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>👑</div>
+    <div className="playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
+      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1</div>
+    </div>
+    <div style={{textAlign:"right",flexShrink:0}}>
+      <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
+    </div>
+  </div>;
+
+  return <div key={rosterIdentity} style={{display:"flex",alignItems:"center",gap:12,background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
+    {isTop3&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
+    {isMe&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
+    <RB r={i+1} m={medals}/>
+    <Av n={p.name} sz={32} email={p.email}/>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
+      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
+        <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
+      </div>
+    </div>
+
+    <DividerDot/>
+
+    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
+    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
+    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done&&hasDrillMax(d)?Math.round(done.score/d.max*100):0;
+      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
+        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+        </div>
+        {done?<div style={{textAlign:"right",flexShrink:0}}>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d.max}</span>}</div>
+          {hasDrillMax(d)&&<div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>}
+        </div>
+        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+      </button>})}
+    <div style={{textAlign:"right",flexShrink:0}}>
+      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
+    </div>
+  </div>;
+})}
+</div>
+
+  </div>;
+}
+
+
+function HomeShotSyncRetryPanel({syncIssueShots=[],retryHomeShotLog,setShotSaveNotice}){
+const[retryingShotId,setRetryingShotId]=useState("");
+const debugMode=typeof window!=="undefined"&&window.location.search.includes("homeShotDebug=1");
+const visibleSyncIssueShots=syncIssueShots;
+if(!visibleSyncIssueShots.length)return null;
+const diagnosticLines=(diag={})=>["status","error","stage","message","authorized_by","uuid_membership_query_result","email_membership_query_result","player_record_query_result","team_binding_repair_attempted","team_binding_repair_account_probe","team_binding_repair_players_result","team_binding_repair_memberships_result","team_binding_repair_result"].map(key=>diag?.[key]?`${key}: ${diag[key]}`:"").filter(Boolean);
+return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(255,181,71,0.07)",borderRadius:12,padding:"10px 12px",margin:"0 0 12px"}}>
+  <div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:800,letterSpacing:"0.08em",marginBottom:6}}>TEAM SYNC NEEDS ATTENTION</div>
+  {visibleSyncIssueShots.slice(0,3).map(log=>{const isRetrying=retryingShotId===log.id;const needsRepair=log.syncError==="missing_durable_team_binding"||log.syncError==="forbidden";const lines=debugMode?diagnosticLines(log.syncDiagnostic):[];return <div key={log.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"6px 0",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{needsRepair?"Your player account is not durably linked to this team yet. Ask your coach to review your team link.":log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally — sync pending"}</div>{debugMode&&lines.length>0&&<pre style={{whiteSpace:"pre-wrap",margin:"6px 0 0",color:MUTED,fontSize:9,lineHeight:1.35,fontFamily:"monospace"}}>{lines.join("\n")}</pre>}</div>
+    <button type="button" disabled={isRetrying} onClick={async()=>{if(isRetrying)return;setRetryingShotId(log.id);setShotSaveNotice(needsRepair?"Team link needs coach review — retrying sync…":"Retrying team sync…");try{const result=await retryHomeShotLog?.(log);setShotSaveNotice(result?.ok?"Team sync complete":needsRepair?"Team link still needs attention":"Could not sync yet — try again");setTimeout(()=>setShotSaveNotice(""),4200);}finally{setRetryingShotId("");}}} style={{border:`1px solid ${ORANGE}66`,background:ORANGE+"12",color:ORANGE,borderRadius:999,padding:"6px 10px",fontFamily:FB,fontSize:11,fontWeight:800,cursor:isRetrying?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:isRetrying?0.7:1}}>{isRetrying?"SYNCING…":"RETRY SYNC"}</button>
+  </div>})}
+</div>;
+}
+
+// ═══════════════════════════════════════
+// SHOT TRACKER — Log makes by date with running totals
+// ═══════════════════════════════════════
+function ShotTracker({u,shotLogs,addShotLog,retryHomeShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved,shotSaving,setShotSaving,shotSaveNotice,setShotSaveNotice}){
+const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
+const syncIssueShots=useMemo(()=>my.filter(s=>s.syncState==="failed_sync"),[my]);
+const today=todayStr();
+const[shotInputError,setShotInputError]=useState("");
+
+const handleLog=async()=>{
+if(shotSaving)return;
+const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}
+setShotInputError("");
+setShotSaveNotice("");
+setShotSaving(true);
+try{
+const result=await addShotLog(validation.made,shotDate);
+if(result?.ok){if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800);}
+}finally{
+setShotSaving(false);
+}
+};
+
+// Running totals
+const todayTotal=useMemo(()=>my.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0),[my,today]);
+const weekTotal=useMemo(()=>{
+const d=new Date();const day=d.getDay();const start=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);const startStr=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,"0")}-${String(start.getDate()).padStart(2,"0")}`;
+return my.filter(s=>s.date>=startStr&&s.date<=today).reduce((a,s)=>a+s.made,0);
+},[my,today]);
+const monthTotal=useMemo(()=>{const mo=today.slice(0,7);return my.filter(s=>s.date.startsWith(mo)).reduce((a,s)=>a+s.made,0)},[my,today]);
+const yearTotal=useMemo(()=>{const yr=today.slice(0,4);return my.filter(s=>s.date.startsWith(yr)).reduce((a,s)=>a+s.made,0)},[my,today]);
+const allTime=useMemo(()=>my.reduce((a,s)=>a+s.made,0),[my]);
+
+return <div className="fade-up">
+{/* Header */}
+{/* Shot Tracker banner — arc-inspired */}
+<div style={{background:`linear-gradient(180deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"18px 22px",marginBottom:16,border:`1px solid ${ORANGE}12`,position:"relative",overflow:"hidden"}}>
+<div style={{position:"absolute",top:-20,right:20,opacity:.06}}><svg width="80" height="80" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="3"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="2"/></svg></div>
+
+<div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
+<div style={{width:42,height:42,borderRadius:12,background:`${ORANGE}12`,border:`1px solid ${ORANGE}22`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+</div>
+<div>
+<div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>SHOT TRACKER</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Log makes · Running totals · Heat map</div>
+</div>
+</div>
+</div>
+
+{/* Running totals */}
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
+  <div className="grd-bdr" style={{gridColumn:"1/3"}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
+    <AnimNum v={allTime} c={VOLT} big/><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,marginTop:6,fontWeight:600}}>ALL-TIME MAKES</div>
+  </div></div>
+  {[{l:"TODAY",v:todayTotal,c:LIGHT},{l:"THIS WEEK",v:weekTotal,c:VOLT},{l:"THIS MONTH",v:monthTotal,c:CYAN},{l:"THIS YEAR",v:yearTotal,c:ORANGE}].map((s,i)=>
+    <div key={i} style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"14px 14px",border:`1px solid ${BORDER_CLR}`}}>
+      <AnimNum v={s.v} c={s.c}/>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
+    </div>
+  )}
+</div>
+
+{/* Input card */}
+<div style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:18,padding:"24px 22px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3,marginBottom:18}}>LOG MADE SHOTS</div>
+
+  {shotSaved?<div style={{textAlign:"center",padding:"24px 0"}}>
+    <div style={{width:60,height:60,borderRadius:"50%",background:VOLT+"15",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}><svg width="28" height="28" viewBox="0 0 40 40"><path d="M10 20l8 8 12-14" stroke={VOLT} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+    <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>SHOTS LOGGED</div>
+    {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
+  </div>
+  :<>
+    <div style={{display:"flex",gap:10,marginBottom:16}}>
+      <div style={{flex:1}}>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
+        <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
+      </div>
+      <div style={{flex:1}}>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
+        <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+      </div>
+    </div>
+    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice}/>
+    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
+    {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
+    <button className="btn-v cta-primary" disabled={shotSaving} onClick={handleLog} style={{opacity:shotSaving?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      {shotSaving?"SAVING…":"LOG SHOTS"}
+    </button>
+  </>}
+</div>
+
+{/* Heat Map Calendar */}
+{my.length>0||true?<>
+  <CourtDivider color={ORANGE} my={12}/>
+  <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SHOT HEAT MAP" s="LAST 12 WEEKS"/>
+  {(()=>{
+    const dayMap={};my.forEach(s=>{if(!dayMap[s.date])dayMap[s.date]=0;dayMap[s.date]+=s.made});
+    const weeks=[];const d=new Date();d.setDate(d.getDate()-d.getDay());// start of current week
+    for(let w=0;w<12;w++){const week=[];for(let day=0;day<7;day++){const dd=new Date(d);dd.setDate(dd.getDate()-(11-w)*7+day);const ds=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`;const count=dayMap[ds]||0;const isFuture=ds>today;week.push({date:ds,count,isFuture,isToday:ds===today})}weeks.push(week)}
+    const maxCount=Math.max(1,...Object.values(dayMap));
+    const getColor=(c)=>{if(c===0)return BORDER_CLR;const intensity=Math.min(c/Math.max(maxCount*.6,20),1);const r=parseInt(VOLT.slice(1,3),16);const g=parseInt(VOLT.slice(3,5),16);const b=parseInt(VOLT.slice(5,7),16);return `rgba(${r},${g},${b},${.15+intensity*.85})`};
+    return <div style={{overflowX:"auto",paddingBottom:8}}>
+      <div style={{display:"flex",gap:3,minWidth:"fit-content"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:3,paddingTop:2,marginRight:2}}>{["S","M","T","W","T","F","S"].map((d,i)=>i%2===1?<div key={i} style={{fontFamily:FB,fontSize:7,color:MUTED,height:12,lineHeight:"12px",textAlign:"right"}}>{d}</div>:<div key={i} style={{height:12}}/>)}</div>
+        {weeks.map((week,wi)=><div key={wi} style={{display:"flex",flexDirection:"column",gap:3}}>{week.map((day,di)=>
+          <div key={di} title={`${day.date}: ${day.count} makes`} style={{width:12,height:12,borderRadius:2,background:day.isFuture?"transparent":getColor(day.count),border:day.isToday?`1.5px solid ${ORANGE}`:day.isFuture?"none":`1px solid ${day.count?getColor(day.count):BORDER_CLR}44`,opacity:day.isFuture?.2:1,transition:"background .3s"}}/>
+        )}</div>)}
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
+        <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>Less</span>
+        {[0,.2,.4,.7,1].map((v,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:`rgba(200,255,0,${.1+v*.9})`,border:`1px solid ${VOLT}22`}}/>)}
+        <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>More</span>
+      </div>
+    </div>;
+  })()}
+</>:null}
+{my.length===0&&<Empty t="No shots logged yet" action="Track your makes from any session — gym, driveway, anywhere. Every shot counts!"/>}
+
+  </div>;
+}
+
+// ═══════════════════════════════════════
+// EVENTS PANEL (Player Program View)
+// ═══════════════════════════════════════
+function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){
+const[expanded,setExpanded]=useState(null),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
+const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
+const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
+const nextEvent=upcoming[0]||null;
+const eventTypeLabel=(type="event")=>{
+  const value=String(type||"event").toLowerCase();
+  if(["game","scrimmage"].includes(value))return "Game";
+  if(["practice","run","workout","clinic","shooting"].includes(value))return "Practice";
+  if(["recovery","training","lift"].includes(value))return "Training";
+  if(["meeting","film"].includes(value))return "Meeting";
+  return "Team Event";
+};
+const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
+
+const handleEventRsvp=(event)=>{const going=rsvps.some(r=>r.eventId===event.id&&r.email===user.email);toggleRsvp(event.id);if(!going){onCompletionCue?.({title:"Event participation confirmed",detail:`You're in for ${event.title}`,momentum:"Attendance momentum building",next:"Show up and log post-session activity"});}};
 
 return <div className="fade-up">
 <div className="accent-card" style={{borderRadius:18,padding:"16px 16px",marginBottom:12,background:"linear-gradient(145deg, rgba(119,215,255,.14), rgba(11,13,16,.94) 64%)",border:"1px solid color-mix(in srgb,var(--accent-events) 35%, var(--stroke-1))"}}>
