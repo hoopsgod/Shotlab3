@@ -61,6 +61,7 @@ export default function PremiumLeaderboardsHub({
   leaderboardError = '',
   leaderboardMode = 'unknown',
   onRetryHomeShots,
+  onOpenPlayer,
   userEmail = '',
   currentUser = {},
   programScores = [],
@@ -430,6 +431,7 @@ export default function PremiumLeaderboardsHub({
         rows={atHomeLeaderboardRows}
         emptyMessage={`No rankings yet. ${isAllTime ? allTimeEmptyMessage : 'Log shots to activate the Home Shots leaderboard.'}`}
         maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
         onRetry={onRetryHomeShots}
       />
     ) : activeLeaderboardCategory === 'drill_shots' ? (
@@ -455,6 +457,7 @@ export default function PremiumLeaderboardsHub({
           rows={programDrillLeaderboardRows}
           emptyMessage={isAllTime ? allTimeEmptyMessage : 'Program drill leaders will appear after players log coach-assigned drills.'}
           maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
         />
       </section>
     ) : activeLeaderboardCategory === 'event_participation' ? (
@@ -470,6 +473,7 @@ export default function PremiumLeaderboardsHub({
         rows={eventParticipationRows}
         emptyMessage={isAllTime ? allTimeEmptyMessage : 'Event rankings activate when players confirm attendance for team events.'}
         maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
         onRetry={retryParticipationLeaderboards}
       />
     ) : (
@@ -485,6 +489,7 @@ export default function PremiumLeaderboardsHub({
         rows={strengthParticipationRows}
         emptyMessage={isAllTime ? allTimeEmptyMessage : 'S&C rankings activate after players log completed strength work.'}
         maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
         onRetry={retryParticipationLeaderboards}
       />
     )}
