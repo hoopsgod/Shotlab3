@@ -2293,7 +2293,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   </div>}
 
   {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace" showMetrics={true}/>
+    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace" showMetrics={false}/>
     <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} leaderboardError={homeShotsLeaderboard?.error||""} leaderboardMode={homeShotsLeaderboard?.mode||"unknown"} onRetryHomeShots={refreshHomeShotsLeaderboard} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} events={events} rsvps={rsvps} scSessions={scSessions} scLogs={scLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} showHeader={false}/>
   </div>}
 
