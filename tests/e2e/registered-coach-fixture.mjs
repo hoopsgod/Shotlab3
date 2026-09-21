@@ -70,6 +70,7 @@ export async function enterSeededRegisteredCoach(page, {
   authUserId = DEFAULT_AUTH_USER_ID,
   path = '/',
   readyTestId = 'coach-command-center-full',
+  homeShotsLeaderboardRows = [],
 }) {
   if (!storage || !coachEmail || !teamId || !team) {
     throw new Error('enterSeededRegisteredCoach requires storage, coachEmail, teamId, and team');
@@ -105,7 +106,12 @@ export async function enterSeededRegisteredCoach(page, {
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({ leaderboard: [] }),
+    body: JSON.stringify({
+      ok: true,
+      team_id: teamId,
+      count: Array.isArray(homeShotsLeaderboardRows) ? homeShotsLeaderboardRows.length : 0,
+      leaderboard: Array.isArray(homeShotsLeaderboardRows) ? homeShotsLeaderboardRows : [],
+    }),
   }));
   await page.route(`${REGISTERED_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({
     status: 200,
