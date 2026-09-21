@@ -289,23 +289,14 @@ export default function PremiumLeaderboardsHub({
     if (!isShotLabDebugMode()) return;
     rawCurrentProgramRows.forEach((row) => {
       const kept = currentProgramRows.some((allowed) => String(allowed?.email || allowed?.player_email || allowed?.playerId || allowed?.player_id || allowed?.id || '') === String(row?.email || row?.player_email || row?.playerId || row?.player_id || row?.id || ''));
-      if (!kept) console.warn('[leaderboard] filtered non-roster program row', { normalizedRowEmail: String(row?.email || row?.player_email || '').trim().toLowerCase(), rowIdentity: { playerId: row?.playerId, player_id: row?.player_id, userId: row?.userId, user_id: row?.user_id, profileId: row?.profileId, profile_id: row?.profile_id, id: row?.id }, teamId, activeRosterCount: activeRosterIdentity.players.length, rosterMatchFound: false, reason: 'excluded_not_active_roster_member' });
+      if (!kept) console.warn('[leaderboard] filtered non-roster program row');
     });
   }, [rawCurrentProgramRows, currentProgramRows, activeRosterIdentity.players.length, teamId]);
 
   useEffect(() => {
     if (!isShotLabDebugMode() || activeLeaderboardCategory !== 'drill_shots') return;
     if (normalizedProgramScores.length > 0 && selectedProgramDrill && programDrillLeaderboardRows.length === 0) {
-      console.warn('[program-scores] Program Drill leaderboard has no rows', {
-        programScoresCount: normalizedProgramScores.length,
-        normalizedProgramDrillIds: normalizedProgramScores.map((score) => score.drillId).filter(Boolean),
-        selectedLeaderboardDrillId: selectedProgramDrill.id,
-        selectedLeaderboardDrillName: selectedProgramDrill.name,
-        teamId,
-        playerEmail: userEmail,
-        activeTimeScope,
-        availablePlayerIdentities: (Array.isArray(players) ? players : []).map((player) => ({ name: player?.name || '', email: player?.email || player?.player_email || '', playerId: player?.playerId || player?.player_id || player?.id || player?.userId || player?.user_id || '' })),
-      });
+      console.warn('[program-scores] Program Drill leaderboard has no rows');
     }
   }, [activeLeaderboardCategory, normalizedProgramScores, selectedProgramDrill, programDrillLeaderboardRows, teamId, userEmail, activeTimeScope, players]);
 
@@ -326,19 +317,7 @@ export default function PremiumLeaderboardsHub({
     const playerScopedProgramRowCount = playerScopedProgramRows.length;
     const rawRelevantCount = activeLeaderboardCategory === 'drill_shots' ? rawProgramScoreCount : rawHomeScoreCount;
     if (rawRelevantCount > 0 && activeRows.length === 0) {
-      console.warn('[player-leaderboard] Player leaderboard rows empty despite raw scores', {
-        currentUserEmail: userEmail || currentUser?.email || '',
-        normalizedCurrentUserEmail: String(userEmail || currentUser?.email || '').trim().toLowerCase(),
-        currentUserIdentity: { playerId: currentUser?.playerId || currentUser?.player_id || '', profileId: currentUser?.profileId || currentUser?.profile_id || '', userId: currentUser?.userId || currentUser?.user_id || '', id: currentUser?.id || '' },
-        rawHomeScoreCount,
-        rawProgramScoreCount,
-        playerScopedHomeRowCount,
-        playerScopedProgramRowCount,
-        generatedLeaderboardRowCount: activeRows.length,
-        activeLeaderboardCategory,
-        activeTimeScope,
-        filteredOutReason: activeLeaderboardCategory === 'drill_shots' ? 'No Program Drill leaderboard rows matched the selected drill/current player identities.' : 'No At Home leaderboard rows matched current player/team identities.',
-      });
+      console.warn('[player-leaderboard] Player leaderboard rows empty despite raw scores');
     }
   }, [viewerRole, activeLeaderboardCategory, activeTimeScope, atHomeLeaderboardRows, programDrillLeaderboardRows, homeScores, shotLogs, normalizedProgramScores, playerScopedHomeRows, playerScopedProgramRows, userEmail, currentUser]);
 
