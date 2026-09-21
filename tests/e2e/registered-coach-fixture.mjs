@@ -161,6 +161,7 @@ export async function enterSeededRegisteredPlayer(page, {
   authUserId = DEFAULT_PLAYER_AUTH_USER_ID,
   path = '/',
   readyTestId = 'mobile-navigation-dock',
+  homeShotsLeaderboardRows = [],
 }) {
   if (!storage || !playerEmail || !teamId || !team) {
     throw new Error('enterSeededRegisteredPlayer requires storage, playerEmail, teamId, and team');
@@ -199,8 +200,8 @@ export async function enterSeededRegisteredPlayer(page, {
     body: JSON.stringify({
       ok: true,
       team_id: teamId,
-      count: Array.isArray(homeShotsLeaderboard) ? homeShotsLeaderboard.length : 0,
-      leaderboard: Array.isArray(homeShotsLeaderboard) ? homeShotsLeaderboard : [],
+      count: Array.isArray(homeShotsLeaderboardRows) ? homeShotsLeaderboardRows.length : 0,
+      leaderboard: Array.isArray(homeShotsLeaderboardRows) ? homeShotsLeaderboardRows : [],
     }),
   }));
   await page.route(`${REGISTERED_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({
