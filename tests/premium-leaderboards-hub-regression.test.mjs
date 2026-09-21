@@ -11,6 +11,15 @@ test('player and coach dashboards both render the shared premium leaderboards hu
   assert.equal((appSource.match(/PremiumLeaderboardsHub viewerRole=/g) || []).length, 2);
 });
 
+test('player leaderboards use one authoritative decision-metric surface', () => {
+  assert.match(
+    appSource,
+    /testId="player-leaderboards-workspace" showMetrics=\{false\}/,
+    'the Player title stage must not reintroduce the legacy duplicate metrics strip',
+  );
+  assert.match(hubSource, /data-testid="leaderboard-metric-surface"/);
+});
+
 test('premium hub contains stable shell, categories, empty states, and safe defaults', () => {
   assert.match(hubSource, /data-testid=\{testId\}/);
   assert.match(hubSource, /COMPETITION HUB/);
