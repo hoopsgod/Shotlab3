@@ -72,7 +72,7 @@ export default defineConfig(async (environment) => {
           ...baseOutput,
           manualChunks(id, api) {
             const moduleId = normalizeModuleId(id)
-            if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
+            if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'CoachWorkspaces'
             if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
           },
