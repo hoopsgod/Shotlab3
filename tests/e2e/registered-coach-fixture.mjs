@@ -196,7 +196,12 @@ export async function enterSeededRegisteredPlayer(page, {
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({ leaderboard: [] }),
+    body: JSON.stringify({
+      ok: true,
+      team_id: teamId,
+      count: Array.isArray(homeShotsLeaderboard) ? homeShotsLeaderboard.length : 0,
+      leaderboard: Array.isArray(homeShotsLeaderboard) ? homeShotsLeaderboard : [],
+    }),
   }));
   await page.route(`${REGISTERED_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({
     status: 200,
