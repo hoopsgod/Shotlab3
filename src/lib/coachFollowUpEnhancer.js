@@ -86,7 +86,7 @@ function mount(host,ctx){
         ? deliveryOk
           ? (deliveryResult?.message||"Assignment delivered to the player.")
           : follow.ok
-            ? "Private follow-up saved, but player delivery could not be confirmed. Retry when connected."
+            ? "Private follow-up saved. Player delivery could not be confirmed. Retry when connected."
             : "Saved locally, but team sync and player delivery could not be confirmed. Retry when connected."
         : (follow.message||(follow.ok?"Follow-up record saved.":"Follow-up could not be synced. Retry when connected.")));
     }catch{paint(send?"The assignment could not be confirmed. Your edits are still on screen; retry when connected.":"The follow-up could not be saved. Your edits are still on screen; try again.")}
