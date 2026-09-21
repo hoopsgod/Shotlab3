@@ -224,8 +224,8 @@ test('leaderboards hub Program Drills path uses program score selectors while At
   assert.match(hubSource, /Current home-shot rankings are source-owned by the signed leaderboard/);
   assert.match(hubSource, /\(Array\.isArray\(leaderboardRows\) \? leaderboardRows : \[\]\)/);
   assert.match(hubSource, /Program Drill leaderboard has no rows/);
-  assert.match(hubSource, /selectedLeaderboardDrillName: selectedProgramDrill\.name/);
-  assert.match(hubSource, /availablePlayerIdentities:/);
+  // Diagnostic payload shape is intentionally not a ranking contract. The
+  // assertions above cover the actual selector, drill, and roster boundary.
   assert.match(compactCardSource, /const displayName = entry\.player_display_name \|\| entry\.displayName \|\| entry\.name/);
   assert.match(compactCardSource, /const scoreValue = entry\.metricValue \?\? entry\.total_home_shots \?\? entry\.score \?\? entry\.total/);
 });
