@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 124351)
-Total output lines: 4709
-
 // src/App.jsx
 
 import {
@@ -2466,7 +2463,239 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 {/* Drill + Score */}
 <div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
 <DrillIcon type={data.icon} size={20}/>
-<span style={{fontFamily:FD,color:LIG…4351 tokens truncated…padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
+<span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
+</div>
+{/* Big score */}
+<div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}{data.max?<span style={{color:MUTED,fontSize:32}}>/{data.max}</span>:null}</div>
+{/* Personal Best badge */}
+{data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:ORANGE+"15",borderRadius:10,padding:"6px 16px",border:`1px solid ${ORANGE}33`,marginTop:12}}>
+<span style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>★ NEW PERSONAL BEST</span>
+</div>}
+{/* Accuracy ring */}
+{typeof data.pct==="number"&&<div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
+<svg width="80" height="40" viewBox="0 0 80 40">
+<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#242424" strokeWidth="6" strokeLinecap="round"/>
+<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
+</svg>
+<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
+</div>}
+{/* Streak */}
+{data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:ORANGE+"12",borderRadius:8,padding:"4px 12px",border:`1px solid ${ORANGE}22`}}>
+<span style={{fontSize:14}}>🔥</span>
+<span style={{fontFamily:FD,color:ORANGE,fontSize:14,letterSpacing:2}}>{data.streak} DAY STREAK</span>
+</div>}
+{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
+</div>
+
+  </div>;
+}
+
+function DashboardReturnButton({onClick,label="Dashboard"}){
+  return <button className="shared-dashboard-back-action"
+    type="button"
+    onClick={onClick}
+    style={{
+      display:"inline-flex",
+      alignItems:"center",
+      gap:8,
+      border:"1px solid var(--team-brand-border, var(--stroke-1))",
+      background:"linear-gradient(135deg, color-mix(in srgb, var(--surface-1) 90%, transparent), color-mix(in srgb, var(--surface-2) 88%, transparent))",
+      color:"var(--text-2)",
+      minHeight:44,padding:"9px 14px",touchAction:"manipulation",
+      borderRadius:999,
+      fontFamily:FB,
+      fontSize:11,
+      letterSpacing:"0.07em",
+      fontWeight:700,
+      textTransform:"uppercase",
+      cursor:"pointer",
+      marginBottom:12
+    }}
+  >
+    <span aria-hidden="true">←</span>{label}
+  </button>;
+}
+
+// ═══════════════════════════════════════
+// HEAD-TO-HEAD DUELS
+// ═══════════════════════════════════════
+function DuelsPanel({u,challenges,drills,respondChallenge,players}){
+const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null),[respSaving,setRespSaving]=useState(false),[respError,setRespError]=useState("");
+const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
+const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
+const pending=incoming.filter(c=>c.status==="pending");
+const resolved=[...incoming.filter(c=>c.status!=="pending"),...outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
+
+const handleRespond=async(ch)=>{
+const v=parseInt(respInput);if(isNaN(v)||v<0||(hasDrillMax(ch)&&v>ch.max))return;
+if(respSaving)return;setRespSaving(true);setRespError("");const result=await respondChallenge(ch.id,v);setRespSaving(false);if(!result?.ok){setRespError(result?.error||"Response could not be saved. Please try again.");return}setRespSaved(ch.id);setRespId(null);setRespInput("");
+setTimeout(()=>setRespSaved(null),2000);
+};
+
+return <div className="fade-up">
+{/* Duels banner — aggressive, asymmetric */}
+<div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
+<div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+
+<div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
+<div style={{display:"flex",alignItems:"center",gap:14,position:"relative"}}>
+<div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(-6deg)"}}>
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+</div>
+<div>
+<div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div>
+</div>
+</div>
+</div>
+
+{/* Pending challenges */}
+{<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>{pending.length===0&&<div data-duel-empty-slot="true" style={{background:"rgba(255,255,255,0.66)",border:"1px solid var(--stroke-1)",borderRadius:14,padding:"12px 14px",marginBottom:10,minHeight:86,display:"grid",alignContent:"center",gap:4}}><div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800}}>No incoming duels</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,lineHeight:1.35}}>New teammate challenges will appear here.</div></div>}
+  {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
+    return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+        <Av n={ch.fromName} sz={38} email={ch.from}/>
+        <div style={{flex:1}}>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span>}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div>
+        </div>
+      </div>
+      {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
+      :isResp?<div className="fade-up">
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
+            <input autoFocus type="number" min="0" max={hasDrillMax(ch)?ch.max:undefined} value={respInput} onChange={e=>{setRespInput(e.target.value);setRespError("")}} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
+          </div>
+          {hasDrillMax(ch)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>}
+        </div>
+        {respError&&<div role="alert" style={{fontFamily:FB,color:DANGER,fontSize:11,lineHeight:1.45,marginBottom:10}}>{respError}</div>}
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={()=>{setRespId(null);setRespInput("");setRespError("")}} disabled={respSaving} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:respSaving?"not-allowed":"pointer"}}>CANCEL</button>
+          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} disabled={respSaving} style={{width:"100%",opacity:respSaving?0.65:1}}>{respSaving?"SAVING...":"SUBMIT"}</button>
+        </div>
+      </div>
+      :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE
+      </button>}
+    </div>;
+  })}</>}
+
+{/* Resolved / History */}
+{pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
+<SH t="COMPLETED" s={`${resolved.length} TOTAL`}/>
+{resolved.length===0&&<div data-duel-empty-slot="true" style={{background:"rgba(255,255,255,0.66)",border:"1px solid var(--stroke-1)",borderRadius:14,padding:"12px 14px",marginBottom:10,minHeight:86,display:"grid",alignContent:"center",gap:4}}><div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800}}>No completed duels yet</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,lineHeight:1.35}}>Completed teammate challenges will be collected here.</div></div>}
+{resolved.map(ch=>{
+  const isMine=ch.from===u.email;const dr=drills.find(d=>d.id===ch.drillId);
+  const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
+  const oppName=isMine?ch.toName:ch.fromName;
+  const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
+  const resultColor=isPending?WARNING:won?SUCCESS:tied?INFO:DANGER;
+  const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
+
+  return <div key={ch.id+"-"+ch.ts} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:6,border:`1px solid ${isPending?ORANGE+"22":BORDER_CLR}`}}>
+    <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+      {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
+      :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
+    </div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{isMine?"YOU":"YOU"} vs {oppName.toUpperCase()}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ch.drillName} &#183; {isPending?<span style={{color:ORANGE}}>Waiting for response</span>:<span style={{color:resultColor,fontWeight:700}}>{resultText}</span>}</div>
+    </div>
+    <div style={{textAlign:"right",flexShrink:0}}>
+      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span>}</div>
+      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore??"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore??"-"}</span></div>
+        {hasDrillMax(ch)&&<div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div>}</>}
+    </div>
+  </div>;
+})}
+
+  </div>;
+}
+
+// ═══════════════════════════════════════
+// STRENGTH & CONDITIONING PANEL
+// ═══════════════════════════════════════
+function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players,onCompletionCue}){
+const[expanded,setExpanded]=useState(null);
+const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false),[rsvpError,setRsvpError]=useState("");
+const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
+const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
+const myCount=scRsvps.filter(r=>r.email===user.email).length;
+const currentYear=String(new Date().getFullYear());
+const myAttendanceByDate=useMemo(()=>{
+  const dateCounts={};
+  const sessionsById={};
+  sessions.forEach(s=>{sessionsById[s.id]=s});
+  scRsvps.forEach(r=>{
+    if(r.email!==user.email)return;
+    const session=sessionsById[r.sessionId];
+    if(!session?.date||!session.date.startsWith(currentYear))return;
+    dateCounts[session.date]=(dateCounts[session.date]||0)+1;
+  });
+  return Object.entries(dateCounts)
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([date,count])=>({date,count}));
+},[sessions,scRsvps,user,currentYear]);
+const medals=[VOLT,"#A0A0A0","#A0A0A0"];
+
+const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!isLeaderboardEligible(players,r.email))return;if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps,players]);
+
+const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
+const SC_COLOR="#A0A0A0";
+const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
+const handleAddScLog=async()=>{
+  const date=newLog.date?.trim();
+  const time=newLog.time?.trim();
+  const place=newLog.place?.trim();
+  const sport=newLog.sport?.trim();
+  if(!date||!time||!place||!sport){setLogSaved(false);setLogErr("Please complete date, time, place, and sport.");return}
+  setLogErr("");
+  setLogSaved(false);
+  const result=await addScLog({date,time,place,sport,ts:Date.now()});
+  if(!result?.ok){setLogErr(result?.err||"Session could not be saved. Please try again.");return}
+  onCompletionCue?.({title:"S&C activity logged",detail:`${sport} · ${place} · ${time}`,momentum:"Consistency compounds",next:"RSVP to your next session"});
+  setNewLog({date:todayStr(),time:"",place:"School",sport:""});
+  setLogSaved(true);
+  setTimeout(()=>setLogSaved(false),1800);
+};
+const handleScRsvp=async(sessionId)=>{
+  setRsvpError("");
+  const result=await toggleScRsvp(sessionId);
+  if(!result?.ok)setRsvpError(result?.error||"RSVP could not be saved. Please try again.");
+};
+
+return <div className="fade-up">
+{/* S&C banner — heavy, grounded */}
+<div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
+<div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at top left, rgba(200, 255, 0, 0.06) 0%, transparent 70%)",pointerEvents:"none"}}/>
+<div style={{padding:"18px 22px",display:"flex",alignItems:"center",gap:12,position:"relative"}}>
+<div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={22} color={SC_COLOR}/></div>
+<div>
+<div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:3}}>STRENGTH & CONDITIONING</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Show up. Get stronger. Track sessions.</div>
+</div>
+</div>
+</div>
+
+{/* Personal stats */}
+<div style={{display:"flex",gap:8,marginBottom:16}}>
+  <div className="grd-bdr" style={{flex:1.5}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
+    <AnimNum v={myCount} c={SC_COLOR} big/>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:6,fontWeight:600}}>SESSIONS ATTENDED</div>
+  </div></div>
+  <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
+    <div style={{flex:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1,lineHeight:1}}>{upcoming.length}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>UPCOMING</div>
+    </div>
+    <div style={{flex:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
       <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:1,lineHeight:1}}>#{board.findIndex(b=>b.email===user.email)+1||"-"}</div>
       <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>YOUR RANK</div>
     </div>
