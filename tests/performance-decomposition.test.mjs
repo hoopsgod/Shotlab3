@@ -164,3 +164,24 @@ test('the performance verifier locks startup App assets and total request budget
   assert.equal(performanceBudget.maxTotalCssGzipBytes, 89000)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
+
+
+test('Phase 5B preserves shared domain ownership while keeping Coach response runtime role-local', () => {
+  assert.match(phase5bViteConfig, /const COACH_RESPONSE_SERVICE_FRAGMENTS = \[/)
+  for (const fragment of [
+    'coachResponseLoopEnhancer.js',
+    'coachFollowUpEnhancer.js',
+    'coachAssignmentOutcomeEnhancer.js',
+    'coachFollowUpService.js',
+    'coachPlayerResponseLoop.js',
+  ]) assert.match(phase5bViteConfig, new RegExp(fragment.replace('.', '\\.')))
+
+  assert.match(
+    phase5bViteConfig,
+    /COACH_RESPONSE_SERVICE_FRAGMENTS\.some\(\(fragment\) => moduleId\.includes\(fragment\)\)\) return 'CoachWorkspaces'/,
+  )
+  assert.match(
+    phase5bViteConfig,
+    /CORE_DOMAIN_SERVICE_FRAGMENTS\.some\(\(fragment\) => moduleId\.includes\(fragment\)\)\) return 'AppDomainServices'/,
+  )
+})

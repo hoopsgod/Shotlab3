@@ -22,17 +22,20 @@ const CORE_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/gameStatAnalytics.js',
   '/src/lib/gameStatPersistenceService.js',
   '/src/lib/playerDailyCommandCenter.js',
-  '/src/lib/coachResponseLoopEnhancer.js',
-  '/src/lib/coachFollowUpEnhancer.js',
-  '/src/lib/coachAssignmentOutcomeEnhancer.js',
-  '/src/lib/coachFollowUpService.js',
-  '/src/lib/coachPlayerResponseLoop.js',
   '/src/lib/coachAssignmentOutcomes.js',
   '/src/lib/supabase.js',
   '/src/lib/releaseAuthService.js',
   '/src/lib/runtimeReleaseReadiness.js',
   '/src/lib/backendHealth.js',
   '/src/lib/supabaseSchemaVerification.js',
+]
+
+const COACH_RESPONSE_SERVICE_FRAGMENTS = [
+  '/src/lib/coachResponseLoopEnhancer.js',
+  '/src/lib/coachFollowUpEnhancer.js',
+  '/src/lib/coachAssignmentOutcomeEnhancer.js',
+  '/src/lib/coachFollowUpService.js',
+  '/src/lib/coachPlayerResponseLoop.js',
 ]
 
 function normalizeModuleId(id = '') {
@@ -77,7 +80,8 @@ export default defineConfig(async (environment) => {
           ...baseOutput,
           manualChunks(id, api) {
             const moduleId = normalizeModuleId(id)
-            if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'CoachWorkspaces'
+            if (COACH_RESPONSE_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'CoachWorkspaces'
+            if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
             if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
           },
