@@ -361,7 +361,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 850,
     minify: 'terser',
     cssMinify: 'lightningcss',
-    terserOptions: { compress: { passes: 2, pure_funcs: ['console.log', 'console.debug', 'console.info'] }, format: { comments: false } },
+    terserOptions: {
+      module: true,
+      compress: { passes: 3, pure_funcs: ['console.log', 'console.debug', 'console.info'] },
+      mangle: { toplevel: true },
+      format: { comments: false },
+    },
     rollupOptions: {
       output: {
         manualChunks: stableVendorChunk,
