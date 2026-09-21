@@ -120,6 +120,49 @@ async function fulfillJson(route, body, status = 200) {
   await route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 }
 
+function buildSeededHomeShotsLeaderboard({ shotLogs = [], players = [], activeTeamId = "" } = {}) {
+  const clean = (value) => String(value ?? "").trim();
+  const lower = (value) => clean(value).toLowerCase();
+  const team = clean(activeTeamId);
+  const aliasesByPlayer = new Map();
+  const playerByAlias = new Map();
+
+  for (const player of Array.isArray(players) ? players : []) {
+    if (clean(player?.teamId || player?.team_id) !== team) continue;
+    if (lower(player?.role) === "coach" || player?.hideFromLeaderboards === true || player?.hide_from_leaderboards === true) continue;
+    const aliases = [player?.playerId, player?.player_id, player?.id, player?.userId, player?.user_id, player?.email, player?.player_email]
+      .map(lower)
+      .filter(Boolean);
+    if (!aliases.length) continue;
+    const canonical = aliases[0];
+    aliasesByPlayer.set(canonical, aliases);
+    aliases.forEach((alias) => playerByAlias.set(alias, { ...player, canonical }));
+  }
+
+  const totals = new Map();
+  for (const row of Array.isArray(shotLogs) ? shotLogs : []) {
+    if (clean(row?.teamId || row?.team_id) !== team) continue;
+    const aliases = [row?.playerId, row?.player_id, row?.id, row?.userId, row?.user_id, row?.email, row?.player_email].map(lower).filter(Boolean);
+    const roster = aliases.map((alias) => playerByAlias.get(alias)).find(Boolean);
+    if (!roster) continue;
+    const current = totals.get(roster.canonical) || {
+      player_id: clean(roster?.playerId || roster?.player_id || roster?.id || roster?.userId || roster?.user_id || roster?.email),
+      email: clean(roster?.email || roster?.player_email),
+      team_id: team,
+      player_display_name: clean(roster?.name || roster?.displayName || row?.name) || "Player",
+      total_home_shots: 0,
+      leaderboard_source: "remote",
+    };
+    current.total_home_shots += Math.max(0, Number(row?.made) || 0);
+    totals.set(roster.canonical, current);
+  }
+
+  return [...totals.values()]
+    .filter((row) => row.total_home_shots > 0)
+    .sort((left, right) => right.total_home_shots - left.total_home_shots || left.player_display_name.localeCompare(right.player_display_name))
+    .map((row, index) => ({ ...row, rank: index + 1 }));
+}
+
 async function installSeededPersistenceRoutes(page, storage, activeTeamId) {
   if (!storage) return;
 
@@ -160,6 +203,13 @@ async function installSeededPersistenceRoutes(page, storage, activeTeamId) {
   await page.route(/\/v1\/rsvps(?:\?.*)?$/, (route) => collectionRoute(route, "rsvps", rows.rsvps));
   await page.route(/\/v1\/scores(?:\?.*)?$/, (route) => collectionRoute(route, "scores", rows.scores));
   await page.route(/\/v1\/program-scores(?:\?.*)?$/, (route) => collectionRoute(route, "program_scores", rows.programScores));
+  const homeLeaderboardRows = buildSeededHomeShotsLeaderboard({ shotLogs: rows.shotLogs, players: rows.players, activeTeamId });
+  await page.route(/\/v1\/leaderboards\/home-shots(?:\?.*)?$/, (route) => fulfillJson(route, {
+    ok: true,
+    team_id: activeTeamId,
+    count: homeLeaderboardRows.length,
+    leaderboard: homeLeaderboardRows,
+  }));
   await page.route(/\/v1\/shot-logs(?:\?.*)?$/, (route) => collectionRoute(route, "shot_logs", rows.shotLogs));
   await page.route(/\/v1\/strength-conditioning(?:\?.*)?$/, async (route) => {
     const method = route.request().method().toUpperCase();
