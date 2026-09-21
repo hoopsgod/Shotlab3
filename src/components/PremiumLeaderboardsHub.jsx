@@ -50,6 +50,8 @@ const tabStyle = (active) => ({
   textTransform: 'uppercase',
   fontWeight: 800,
   cursor: 'pointer',
+  touchAction: 'manipulation',
+  boxSizing: 'border-box',
 });
 
 export default function PremiumLeaderboardsHub({
@@ -393,14 +395,14 @@ export default function PremiumLeaderboardsHub({
     <section aria-label="Leaderboard time scope" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', borderBottom: '1px solid var(--stroke-1)', marginBottom: 3 }}>
       {TIME_SCOPE_ITEMS.map((item) => {
         const active = activeTimeScope === item.key;
-        return <button data-testid={`leaderboard-time-scope-${item.key}`} type="button" aria-pressed={active} key={item.key} onClick={() => setActiveTimeScope(item.key)} style={tabStyle(active)}>{item.label}</button>;
+        return <button data-testid={`leaderboard-time-scope-${item.key}`} data-coach-filter-chip={viewerRole === "coach" ? "true" : undefined} type="button" aria-pressed={active} key={item.key} onClick={() => setActiveTimeScope(item.key)} style={tabStyle(active)}>{item.label}</button>;
       })}
     </section>
 
     <section aria-label="Primary leaderboard categories" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
       {PRIMARY_CATEGORY_ITEMS.map((item) => {
         const active = activeLeaderboardCategory === item.key;
-        return <button type="button" aria-selected={active} key={item.label} onClick={() => setActiveLeaderboardCategory(item.key)} style={tabStyle(active)}>{item.label}</button>;
+        return <button type="button" data-coach-filter-chip={viewerRole === "coach" ? "true" : undefined} aria-selected={active} aria-pressed={active} key={item.label} onClick={() => setActiveLeaderboardCategory(item.key)} style={tabStyle(active)}>{item.label}</button>;
       })}
     </section>
 
@@ -414,6 +416,7 @@ export default function PremiumLeaderboardsHub({
       </div>
     </ProgressiveDisclosure> : null}
 
+    <div data-testid={viewerRole === 'coach' ? 'coach-leaderboard-operational-results' : undefined}>
     {activeLeaderboardCategory === 'home_shots' ? (
       <CompactLeaderboardPreviewCard
         title={isAllTime ? 'All-Time At-Home Shots' : 'At-Home Shots'}
@@ -485,6 +488,7 @@ export default function PremiumLeaderboardsHub({
         onRetry={retryParticipationLeaderboards}
       />
     )}
+    </div>
 
     <ProgressiveDisclosure
       title="More rankings"
