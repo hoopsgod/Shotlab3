@@ -26,7 +26,7 @@ installCoachAssignmentActionPromptsEnhancer();
 installCoachAssignmentInterventionEnhancer();
 installCoachInterventionOutcomeEnhancer();
 installCoachHomeHierarchyEnhancer();
-// installCoachResponseLoopEnhancer() is consolidated into installCoachFollowUpEnhancer().
+// installCoachResponseLoopEnhancer(); consolidated into installCoachFollowUpEnhancer().
 installCoachFollowUpEnhancer();
 installVisualSystemReboot();
 installVisualSystemRebootReleaseFixes();
