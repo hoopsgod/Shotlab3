@@ -30,8 +30,8 @@ function retireNudges(){
    The player receives only the assignment text and result context. Private coach notes remain coach-only. */
 const markup=`<section data-testid="coach-follow-up-ledger" style="display:grid;gap:10px;margin-top:16px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px">
 <div style="display:flex;justify-content:space-between;gap:10px"><strong data-title>Follow-up record</strong><span data-state>Not recorded</span></div>
-<div data-testid="coach-result-response-context" hidden><small>Latest player result</small><strong></strong><time></time></div>
-<div data-testid="coach-player-assignment-status" hidden><small>Player delivery</small> <strong></strong></div>
+<div data-response hidden><small>Latest player result</small><strong></strong><time></time></div>
+<div data-delivery hidden><small>Player delivery</small> <strong></strong></div>
 <p style="margin:0">The player receives only the assignment text and result context. Private coach notes remain coach-only.</p>
 <label>Next assignment to deliver<textarea data-testid="coach-next-assignment-input" maxlength="2000" style="display:block;width:100%;min-height:84px;box-sizing:border-box"></textarea></label>
 <button type="button" data-deliver style="min-height:44px">Deliver next assignment</button>
@@ -42,17 +42,17 @@ const markup=`<section data-testid="coach-follow-up-ledger" style="display:grid;
 function mount(host,ctx){
   const response=getCoachResponseContext({playerIdentity:ctx.playerIdentity,playerName:ctx.playerName});
   host.innerHTML=markup;
-  const q=s=>host.querySelector(s),panel=q('[data-testid="coach-follow-up-ledger"]'),assignment=q('[data-testid="coach-next-assignment-input"]'),note=q("label:last-of-type textarea"),primary=q("[data-primary]"),clearButton=q("[data-clear]"),deliver=q("[data-deliver]"),status=q('[role="status"]'),evidence=q('[data-testid="coach-result-response-context"]'),deliveryEl=q('[data-testid="coach-player-assignment-status"]');
+  const q=s=>host.querySelector(s),panel=q('[data-testid="coach-follow-up-ledger"]'),assignment=q('[data-testid="coach-next-assignment-input"]'),note=q("label:last-of-type textarea"),primary=q("[data-primary]"),clearButton=q("[data-clear]"),deliver=q("[data-deliver]"),status=q('[role="status"]'),evidence=q("[data-response]"),deliveryEl=q("[data-delivery]");
   let record=null,delivery=null,busy=false;
   panel.setAttribute("aria-label",`Coach follow-up for ${ctx.playerName}`);
-  if(response){evidence.hidden=false;evidence.querySelector("strong").textContent=response.resultDetail||"Training result recorded";evidence.querySelector("time").textContent=response.resultMeta||"Recent"}
+  if(response){evidence.hidden=false;evidence.dataset.testid="coach-result-response-context";evidence.querySelector("strong").textContent=response.resultDetail||"Training result recorded";evidence.querySelector("time").textContent=response.resultMeta||"Recent"}
   const paint=(message="")=>{
     const state=record?.state==="dismissed"?"":record?.state||"";
     panel.dataset.followUpState=state||"none";q("[data-state]").textContent=state==="completed"?"Completed":state==="planned"?"Planned":"Not recorded";
     q("[data-title]").textContent=response?"Set the next action":"Follow-up record";
     primary.textContent=state==="planned"?"Mark follow-up complete":state==="completed"?"Reopen follow-up":"Mark for follow-up";
     primary.disabled=deliver.disabled=assignment.disabled=note.disabled=busy;clearButton.disabled=busy||!state;
-    deliveryEl.hidden=!delivery;if(delivery){deliveryEl.dataset.assignmentState=delivery.state||"";deliveryEl.querySelector("strong").textContent=deliveryLabel(delivery.state)}
+    deliveryEl.hidden=!delivery;if(delivery){deliveryEl.dataset.testid="coach-player-assignment-status";deliveryEl.dataset.assignmentState=delivery.state||"";deliveryEl.querySelector("strong").textContent=deliveryLabel(delivery.state)}else{delete deliveryEl.dataset.testid;delete deliveryEl.dataset.assignmentState}
     if(message)status.textContent=message;
   };
   const save=async(state,send=false)=>{
@@ -63,10 +63,10 @@ function mount(host,ctx){
         saveCoachCoreLoopAction({...ctx,state,note:serializeCoachResponseNote({assignment:assignment.value,privateNote:note.value})}),
         send?savePlayerAssignment({...ctx,assignmentText:assignment.value,resultDetail:response?.resultDetail||""}):Promise.resolve(null)
       ]);
-      record=follow.record||record;if(deliveryResult?.assignment)delivery=deliveryResult.assignment;
+      record=follow.record||record;if(deliveryResult?.ok&&deliveryResult.assignment)delivery=deliveryResult.assignment;
       const parsed=parseCoachResponseNote(follow.record?.note||"");if(deliveryResult?.assignment?.assignmentText||parsed.assignment)assignment.value=deliveryResult?.assignment?.assignmentText||parsed.assignment;note.value=parsed.privateNote||note.value;
       const ok=follow.ok&&(!send||deliveryResult?.ok);
-      paint(send?(deliveryResult?.message||(ok?"Assignment delivered to the player.":"Player delivery could not be confirmed. Retry when connected.")):(follow.message||(ok?"Follow-up record saved.":"Follow-up could not be synced. Retry when connected.")));
+      paint(send?(deliveryResult?.ok?(deliveryResult.message||"Assignment delivered to the player."):"Player delivery could not be confirmed. Retry when connected."):(follow.message||(ok?"Follow-up record saved.":"Follow-up could not be synced. Retry when connected.")));
     }catch{paint(send?"The assignment could not be confirmed. Retry when connected.":"The follow-up could not be saved. Try again.")}
     busy=false;paint();
   };
