@@ -3342,7 +3342,7 @@ useEffect(()=>{
     }
   });
 },[canonicalCoachHomeLeaderboardRows,coachRosterPlayers,u?.teamId]);
-const leaderboardPlayers=useMemo(()=>[...(Array.isArray(players)?players:[]),...(Array.isArray(playerProfiles)?playerProfiles:[])],[players,playerProfiles]);
+const leaderboardPlayers=useMemo(()=>coachRosterPlayers,[coachRosterPlayers]);
 const selectedSeasonArchive=useMemo(()=>seasonArchives.find(a=>String(a?.id||"")===String(selectedSeasonArchiveId||""))||null,[seasonArchives,selectedSeasonArchiveId]);
 useEffect(()=>{
   if(!isShotLabDebugMode())return;
