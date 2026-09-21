@@ -10,6 +10,12 @@ const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = '<PlayerTrainingCompletion data={shareData}';
 const legacyShareInstruction = '      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>';
+const savedShell = '{saved&&shareData?<div className="fade-up" style={{padding:"16px 0"}}>';
+
+if (!source.includes(marker) && !source.includes(savedShell) && source.includes('PlayerCommitmentCenter from')) {
+  console.log('Phase 3P Player Training Completion already owned by the current Player workspace architecture.');
+  process.exit(0);
+}
 
 if (source.includes(marker)) {
   for (const preserved of [
@@ -38,7 +44,6 @@ source = source.replace(
   `${importAnchor}\nimport PlayerTrainingCompletion from "./components/PlayerTrainingCompletion.jsx";`,
 );
 
-const savedShell = '{saved&&shareData?<div className="fade-up" style={{padding:"16px 0"}}>';
 requireOne(source, savedShell, 'saved completion shell');
 source = source.replace(
   savedShell,
