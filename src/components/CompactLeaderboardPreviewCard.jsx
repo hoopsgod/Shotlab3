@@ -24,6 +24,7 @@ export default function CompactLeaderboardPreviewCard({
   fullLeaderboardHref = "",
   onViewAll,
   onRetry,
+  onRowClick,
 }) {
   const safeRows = Array.isArray(rows) ? rows : [];
   const isCoachMode = mode === "coach";
@@ -100,7 +101,7 @@ export default function CompactLeaderboardPreviewCard({
               || (normalizedUser && String(entry?.email || "").trim().toLowerCase() === normalizedUser);
             const rank = Number(entry.rank) || index + 1;
             const premiumRank = rank <= 3;
-            return <div key={`${entry.rank}-${displayName}`} data-leaderboard-rank={rank} style={{ display: "grid", gridTemplateColumns: premiumRank ? "44px 1fr auto" : "34px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding: premiumRank ? "8px 2px" : "10px 2px", background:index===0?"linear-gradient(90deg, color-mix(in srgb,var(--accent) 7%, transparent), transparent)":"transparent" }}>
+            return <div key={`${entry.rank}-${displayName}`} className={isCoachMode && typeof onRowClick === "function" ? "coachLeaderboardRow" : undefined} role={isCoachMode && typeof onRowClick === "function" ? "button" : undefined} tabIndex={isCoachMode && typeof onRowClick === "function" ? 0 : undefined} aria-label={isCoachMode && typeof onRowClick === "function" ? `Open ${displayName}` : undefined} onClick={isCoachMode && typeof onRowClick === "function" ? () => onRowClick(entry) : undefined} onKeyDown={isCoachMode && typeof onRowClick === "function" ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onRowClick(entry); } } : undefined} data-leaderboard-rank={rank} style={{ display: "grid", gridTemplateColumns: premiumRank ? "44px 1fr auto" : "34px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding: premiumRank ? "8px 2px" : "10px 2px", background:index===0?"linear-gradient(90deg, color-mix(in srgb,var(--accent) 7%, transparent), transparent)":"transparent" }}>
               {premiumRank
                 ? <ShotLabPerformanceMark kind="rank" value={rank} compact testId={`leaderboard-rank-mark-${rank}`} />
                 : <div style={{ color: "var(--text-3)", fontSize: 12, fontWeight: 900 }}>#{rank}</div>}
