@@ -202,7 +202,7 @@ test('leaderboards hub Program Drills path uses program score selectors while At
   assert.match(appSource, /programScores=\{teamProgramScores\}/);
   assert.match(appSource, /programScores=\{safeProgramScores\}/);
   assert.match(appSource, /const safeProgramScores=useMemo\(\(\)=>filterActiveTeamPlayerRows\(getAllProgramScoreRows\(programScores\)\.filter\(score=>!u\?\.teamId\|\|score\.teamId===u\.teamId\),activeTeamPlayerEmailSet,activeTeamPlayerKeySet\)/);
-  assert.match(appSource, /const leaderboardPlayers=useMemo\(\(\)=>\[\.\.\.\(Array\.isArray\(players\)\?players:\[\]\),\.\.\.\(Array\.isArray\(playerProfiles\)\?playerProfiles:\[\]\)\]/);
+  assert.match(appSource, /const leaderboardPlayers=useMemo\(\(\)=>coachRosterPlayers,\[coachRosterPlayers\]\)/);
   assert.match(appSource, /viewerRole="coach"[\s\S]*players=\{leaderboardPlayers\}/);
   assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,teamId:u\?\.teamId\}\)/);
   assert.match(appSource, /<CoachRoster players=\{filteredCoachRosterPlayers\}[\s\S]*onSelectPlayer=\{openPlayerIntelligence\}/);
