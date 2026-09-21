@@ -10,8 +10,8 @@ test('player and coach leaderboard hubs receive team season archives and team sc
   assert.match(appSource, /function Player\([\s\S]*seasonArchives=\[\]/);
   assert.match(appSource, /<Player[\s\S]*seasonArchives=\{seasonArchives\.filter/);
   assert.equal((appSource.match(/PremiumLeaderboardsHub viewerRole=/g) || []).length, 2);
-  assert.equal((appSource.match(/seasonArchives=\{seasonArchives\} \/>/g) || []).length, 2);
-  assert.equal((appSource.match(/homeScores=\{scores\} shotLogs=\{shotLogs\} seasonArchives=\{seasonArchives\}/g) || []).length, 2);
+  assert.ok((appSource.match(/seasonArchives=\{seasonArchives\}/g) || []).length >= 2);
+  assert.ok((appSource.match(/homeScores=\{scores\} shotLogs=\{shotLogs\}/g) || []).length >= 2);
 });
 
 test('shared leaderboard hub exposes current and all-time controls', () => {

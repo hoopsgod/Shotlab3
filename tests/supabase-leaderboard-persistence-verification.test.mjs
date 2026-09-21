@@ -57,7 +57,7 @@ test('error handling test: supabase failures return safe fallback and non-techni
   const HomeShotsLeaderboardCard = loadHomeShotsLeaderboardCard()
   const supabaseClient = createMockSupabaseClient(); const shotService = createShotLogService({ supabaseClient }); const leaderboardService = createLeaderboardService({ supabaseClient })
   supabaseClient.__failInsert = true; const saveResult = await shotService.createShotLog({ shotLog: { made: 8 }, player: { id: 'player-a' }, team: { id: 'team-1' } }); assert.equal(saveResult.mode, 'demo'); assert.equal(saveResult.reason, 'backend_save_failed')
-  supabaseClient.__failSelect = true; const readResult = await leaderboardService.loadTeamLeaderboard({ teamId: 'team-1', fallbackShotLogs: [] }); assert.equal(readResult.mode, 'demo'); assert.equal(readResult.reason, 'backend_load_failed')
+  supabaseClient.__failSelect = true; const readResult = await leaderboardService.loadTeamLeaderboard({ teamId: 'team-1', fallbackShotLogs: [] }); assert.equal(readResult.mode, 'registered'); assert.equal(readResult.state, 'error'); assert.equal(readResult.ok, false)
   const html = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: 'error', error: 'Please try again.' }))
   assert.doesNotMatch(html, /Supabase|stack|SQL|technical/i)
 })

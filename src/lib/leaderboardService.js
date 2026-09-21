@@ -26,7 +26,8 @@ const toNum = (value) => {
 
 const safeArray = (value) => (Array.isArray(value) ? value : [])
 
-const toDemo = (data, reason, extra = {}) => ({ ok: true, data, mode: 'demo', reason, ...extra })
+const toDemo = (data, reason, extra = {}) => ({ ok: true, data, mode: 'demo', state: safeArray(data).length ? 'success' : 'empty', reason, ...extra })
+const toFailure = (reason, extra = {}) => ({ ok: false, data: [], mode: 'registered', state: 'error', reason, ...extra })
 
 const rowTeamId = (row = {}) => asText(row?.team_id || row?.teamId)
 const shotIdentity = (row = {}) => asText(row?.player_id || row?.playerId || row?.email)
@@ -162,7 +163,7 @@ export function createLeaderboardService({ supabaseClient } = {}) {
   const configured = Boolean(supabaseClient?.isConfigured)
 
   const loadTeamLogsSafe = async ({ teamId, fallbackShotLogs = [], fallbackPlayers = [], fallbackProfiles = [], scope = 'players' } = {}) => {
-    if (!asText(teamId)) return toDemo([], 'missing_team_context')
+    if (!asText(teamId)) return { ok: false, data: [], mode: 'none', state: 'missing_context', reason: 'missing_team_context' }
     const fallbackRows = () => calculateLeaderboardFromShotLogs({ shotLogs: fallbackShotLogs, teamId, playerContext: { players: fallbackPlayers, profiles: fallbackProfiles, scope } })
     if (!configured) return toDemo(fallbackRows(), 'missing_supabase_env')
     try {
@@ -171,17 +172,16 @@ export function createLeaderboardService({ supabaseClient } = {}) {
         selectAllSafe(supabaseClient, PLAYERS_TABLE).catch(() => ({ rows: [] })),
         selectAllSafe(supabaseClient, PROFILES_TABLE).catch(() => ({ rows: [] })),
       ])
-      if (shotLogsResponse?.error) return toDemo(fallbackRows(), 'backend_load_failed')
+      if (shotLogsResponse?.error) return toFailure('backend_load_failed')
       const shotRows = safeArray(shotLogsResponse?.data)
       const rows = calculateLeaderboardFromShotLogs({
         shotLogs: shotRows,
         teamId,
         playerContext: { players: playerRows.length ? playerRows : fallbackPlayers, profiles: profileRows.length ? profileRows : fallbackProfiles, scope },
       })
-      const localFallbackRows = rows.length ? [] : fallbackRows()
-      return { ok: true, data: rows.length ? rows : localFallbackRows, mode: 'supabase', rpcResultCount: rows.length, fallbackResultCount: localFallbackRows.length }
+      return { ok: true, data: rows, mode: 'supabase', state: rows.length ? 'success' : 'empty', rpcResultCount: rows.length, fallbackResultCount: 0 }
     } catch {
-      return toDemo(fallbackRows(), 'backend_unavailable')
+      return toFailure('backend_unavailable')
     }
   }
 

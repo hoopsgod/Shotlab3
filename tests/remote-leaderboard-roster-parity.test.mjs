@@ -19,17 +19,19 @@ function selfOnlyIdentity() {
   ], TEAM_ID);
 }
 
-test('authorized remote leaderboard summaries survive a self-scoped player roster', () => {
+test('authorized remote leaderboard summaries with stable identities survive a self-scoped player roster', () => {
   const identity = selfOnlyIdentity();
   const rows = filterActiveRosterLeaderboardRows([
     {
       rank: 1,
+      player_id: 'remote-ava',
       player_display_name: 'Ava Brooks',
       total_home_shots: 160,
       leaderboard_source: 'remote',
     },
     {
       rank: 2,
+      player_id: 'player-demo-primary',
       player_display_name: 'Demo Player',
       total_home_shots: 125,
       leaderboard_source: 'remote',
@@ -59,7 +61,7 @@ test('unmarked identity-less leaderboard rows remain rejected when local roster 
   assert.deepEqual(rows.map((row) => row.rank), [1]);
 });
 
-test('remote marker does not authorize malformed or inactive leaderboard rows', () => {
+test('remote marker does not authorize malformed, identity-less, or inactive leaderboard rows', () => {
   const identity = selfOnlyIdentity();
   const rows = filterActiveRosterLeaderboardRows([
     {
@@ -86,6 +88,7 @@ test('remote marker does not authorize malformed or inactive leaderboard rows', 
       player_display_name: 'Valid Remote Player',
       total_home_shots: 0,
       leaderboard_source: 'remote',
+      player_id: 'remote-valid',
     },
   ], identity.keySet, identity.emailSet, identity.nameSet);
 

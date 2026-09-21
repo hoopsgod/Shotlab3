@@ -53,6 +53,7 @@ const isAuthoritativeRemoteLeaderboardRow = (row = {}) => {
   const rawTotal = row?.total_home_shots ?? row?.total ?? row?.score;
   const numericTotal = Number(rawTotal);
   return normalizeRosterIdentityValue(row?.leaderboard_source) === REMOTE_LEADERBOARD_SOURCE
+    && getRosterIdentityKeys(row).length > 0
     && Boolean(displayName)
     && rawTotal !== null
     && rawTotal !== undefined

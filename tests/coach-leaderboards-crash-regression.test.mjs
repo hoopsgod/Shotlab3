@@ -4,6 +4,7 @@ import fs from 'node:fs';
 
 const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const hubSource = fs.readFileSync(new URL('../src/components/PremiumLeaderboardsHub.jsx', import.meta.url), 'utf8');
+const previewSource = fs.readFileSync(new URL('../src/components/CompactLeaderboardPreviewCard.jsx', import.meta.url), 'utf8');
 
 test('coach and player leaderboards use shared premium hub and avoid undefined legacy vars', () => {
   assert.match(appSource, /<PremiumLeaderboardsHub viewerRole="player"/);
@@ -20,7 +21,7 @@ test('leaderboards categories and content states are stable for coach and player
   assert.match(hubSource, /event_participation/);
   assert.match(hubSource, /strength_conditioning_participation/);
   assert.match(hubSource, /drill_shots/);
-  assert.match(hubSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
-  assert.match(hubSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
+  assert.match(previewSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
+  assert.match(previewSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
   assert.match(hubSource, /No rankings yet/);
 });

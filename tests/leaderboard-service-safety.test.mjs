@@ -18,7 +18,9 @@ test('missing Supabase env vars = demo/local safe', async () => {
 test('missing team context = no crash', async () => {
   const service = createLeaderboardService({ supabaseClient: makeClient(async () => ({ data: [] })) })
   const result = await service.loadTeamLeaderboard({})
-  assert.equal(result.ok, true)
+  assert.equal(result.ok, false)
+  assert.equal(result.state, 'missing_context')
+  assert.equal(result.mode, 'none')
   assert.equal(result.reason, 'missing_team_context')
   assert.deepEqual(result.data, [])
 })
@@ -51,16 +53,17 @@ test('missing player context = no crash', async () => {
   assert.deepEqual(result.data, [])
 })
 
-test('backend unavailable = safe fallback', async () => {
+test('backend unavailable remains an honest failure instead of a local success', async () => {
   const service = createLeaderboardService({ supabaseClient: makeClient(async () => { throw new Error('down') }) })
   const result = await service.loadTeamLeaderboard({
     teamId: 'team-1',
     fallbackShotLogs: [{ team_id: 'team-1', player_id: 'p1', made: 3 }],
   })
-  assert.equal(result.ok, true)
-  assert.equal(result.mode, 'demo')
+  assert.equal(result.ok, false)
+  assert.equal(result.mode, 'registered')
+  assert.equal(result.state, 'error')
   assert.equal(result.reason, 'backend_unavailable')
-  assert.equal(result.data[0].player_id, 'p1')
+  assert.deepEqual(result.data, [])
 })
 
 test('app startup does not depend on leaderboard data (safe defaults)', async () => {

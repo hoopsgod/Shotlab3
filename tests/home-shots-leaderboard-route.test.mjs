@@ -41,3 +41,18 @@ test("mapLeaderboardRow marks authorized aggregate rows as remote provenance", (
     leaderboard_source: "remote",
   });
 });
+
+test("mapLeaderboardRow includes the stable player identity when the signed RPC returns it", () => {
+  assert.deepEqual(mapLeaderboardRow({
+    rank: 1,
+    player_id: "player-ava",
+    player_display_name: "Ava Brooks",
+    total_home_shots: 160,
+  }), {
+    rank: 1,
+    player_id: "player-ava",
+    player_display_name: "Ava Brooks",
+    total_home_shots: 160,
+    leaderboard_source: "remote",
+  });
+});

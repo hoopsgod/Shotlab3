@@ -19,8 +19,9 @@ test('premium hub contains stable shell, categories, empty states, and safe defa
   assert.match(hubSource, /Strength & Conditioning/);
   assert.match(hubSource, /Program Drills/);
   assert.match(hubSource, /const \[activeLeaderboardCategory, setActiveLeaderboardCategory\] = useState\('home_shots'\);/);
-  assert.match(hubSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
-  assert.match(hubSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
+  assert.match(hubSource, /buildLeaderboardDecisionSurface/);
+  assert.match(hubSource, /buildLeaderboardWeeklyActivity/);
+  assert.match(hubSource, /showHeader = true/);
   assert.match(hubSource, /No rankings yet/);
   assert.doesNotMatch(hubSource, /leaderboardCategory/);
   assert.doesNotMatch(hubSource, /renderPremiumLeaderboardsHub/);
