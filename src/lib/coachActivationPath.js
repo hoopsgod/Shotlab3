@@ -27,7 +27,6 @@ installCoachAssignmentInterventionEnhancer();
 installCoachInterventionOutcomeEnhancer();
 installCoachHomeHierarchyEnhancer();
 installCoachResponseLoopEnhancer();
-if (typeof window !== "undefined") import("./coachFollowUpEnhancer.js").then(({ installCoachFollowUpEnhancer }) => installCoachFollowUpEnhancer());
 installVisualSystemReboot();
 installVisualSystemRebootReleaseFixes();
 
