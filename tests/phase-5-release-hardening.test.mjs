@@ -36,17 +36,17 @@ test("failed assignment sync stays explicitly unconfirmed", async () => {
 });
 
 test("coach follow-up presents only confirmed remote delivery as delivered", () => {
-  const source = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
+  const source = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
 
   assert.match(source, /const confirmedDelivery = deliveryResult\.ok \? deliveryResult\.assignment \|\| null : null/);
   assert.match(source, /if \(deliveryResult\?\.ok && deliveryResult\.assignment\) setDelivery\(deliveryResult\.assignment\)/);
   assert.match(source, /Player delivery could not be confirmed/);
-  assert.match(source, /team sync and player delivery could not be confirmed/);
+  assert.match(source, /private follow-up sync failed/);
   assert.doesNotMatch(source, /setDelivery\(deliveryResult\.assignment \|\| null\)/);
 });
 
 test("assignment mutations use synchronous single-flight guards", () => {
-  const coach = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
+  const coach = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
   const player = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
 
   assert.match(coach, /if \(saveInFlightRef\.current\) return/);
@@ -58,7 +58,7 @@ test("assignment mutations use synchronous single-flight guards", () => {
 });
 
 test("assignment mutation controls expose busy state and recover in finally", () => {
-  const coach = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
+  const coach = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
   const player = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
 
   assert.match(coach, /"aria-busy": saving/);
