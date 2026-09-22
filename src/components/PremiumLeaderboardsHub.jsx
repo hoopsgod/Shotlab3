@@ -338,19 +338,21 @@ export default function PremiumLeaderboardsHub({
     includeArchivedPlayers: isAllTime,
   }), [decisionRows, players, teamId, viewerRole, currentUser, userEmail, shotLogs, weeklyActivity, isAllTime]);
   const metricItems = decisionSurface.metrics;
+  const statusLine = <div data-testid="leaderboard-status-line" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 9, fontFamily: FALLBACK_FONT, color: SUB, fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
+    <span>{scopeLabel}</span><span aria-hidden="true">·</span><span>{activeCategoryLabel}</span><span aria-hidden="true">·</span><span>{activeRankedCount} ranked</span>{activeDataState.kind === 'refreshing' ? <><span aria-hidden="true">·</span><span>Refreshing</span></> : null}
+  </div>;
 
   return <div data-testid={testId} data-viewer-role={viewerRole} aria-label="Leaderboards">
     {showHeader ? <header style={{ padding: '4px 0 12px', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
       <div style={{ fontFamily: FALLBACK_FONT, color: VOLT, fontSize: 10, letterSpacing: '0.13em', fontWeight: 800, textTransform: 'uppercase' }}>COMPETITION HUB</div>
       <div style={{ fontFamily: FALLBACK_FONT, color: LIGHT, fontSize: 28, letterSpacing: '0.04em', marginTop: 3, lineHeight: 1, textTransform: 'uppercase', fontWeight: 800 }}>LEADERBOARDS</div>
       <div style={{ fontFamily: 'var(--font-body, Inter)', color: SUB, fontSize: 12, lineHeight: 1.45, marginTop: 5 }}>See the result that matters now and the next move to improve it.</div>
-      <div data-testid="leaderboard-status-line" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 9, fontFamily: FALLBACK_FONT, color: SUB, fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
-        <span>{scopeLabel}</span><span aria-hidden="true">·</span><span>{activeCategoryLabel}</span><span aria-hidden="true">·</span><span>{activeRankedCount} ranked</span>{activeDataState.kind === 'refreshing' ? <><span aria-hidden="true">·</span><span>Refreshing</span></> : null}
-      </div>
+      {statusLine}
     </header> : null}
+    {!showHeader ? statusLine : null}
 
-    <section aria-label="Leaderboard decision metrics" data-testid="leaderboard-metric-surface" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 1, margin: '10px 0 8px', overflow: 'hidden', border: '1px solid var(--stroke-1)', borderRadius: 12, background: 'linear-gradient(135deg,#121a20,#0b1014)' }}>
-      {metricItems.map((metric) => <div key={metric.label} data-metric={metric.label.toLowerCase().replaceAll(' ','-')} style={{ minWidth: 0, padding: '12px 9px' }}><div style={{ color: LIGHT, fontFamily: FALLBACK_FONT, fontSize: 24, fontWeight: 900, lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.value}</div><div style={{ color: VOLT, fontFamily: FALLBACK_FONT, fontSize: 10, fontWeight: 900, letterSpacing: '.07em', marginTop: 5, textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.label}</div><div style={{ color: SUB, fontSize: 10, lineHeight: 1.25, marginTop: 3, minHeight: 25 }}>{metric.detail}</div></div>)}
+    <section aria-label="Leaderboard decision metrics" data-testid="leaderboard-metric-surface" data-layout-role="supporting-evidence" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 1, margin: '10px 0 8px', overflow: 'hidden', border: '1px solid var(--stroke-1)', borderRadius: 12, background: 'linear-gradient(135deg,#121a20,#0b1014)' }}>
+      {metricItems.map((metric) => <div key={metric.label} data-metric={metric.label.toLowerCase().replaceAll(' ','-')} style={{ minWidth: 0, padding: '12px 9px' }}><div data-metric-role="value" style={{ color: LIGHT, fontFamily: FALLBACK_FONT, fontSize: 24, fontWeight: 900, lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.value}</div><div data-metric-role="label" style={{ color: VOLT, fontFamily: FALLBACK_FONT, fontSize: 11, fontWeight: 900, letterSpacing: '.06em', marginTop: 5, textTransform: 'uppercase', whiteSpace: 'normal', overflow: 'visible', textOverflow: 'clip' }}>{metric.label}</div><div data-metric-role="detail" style={{ color: SUB, fontSize: 12, lineHeight: 1.3, marginTop: 3, minHeight: 31 }}>{metric.detail}</div></div>)}
     </section>
 
     <section aria-label="Leaderboard time scope" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', borderBottom: '1px solid var(--stroke-1)', marginBottom: 3 }}>
