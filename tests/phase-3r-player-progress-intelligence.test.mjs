@@ -122,9 +122,9 @@ test("Progress Story presents a premium decision-first hierarchy with explicit d
   assert.match(component, /fake overall rating/);
   assert.match(css, /\.hero\s*\{[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.doesNotMatch(css, /linear-gradient\(150deg,\s*#0f1412/);
-  assert.match(css, /border-radius: 30px/);
+  assert.match(css, /border-radius: 22px/);
   assert.match(css, /\.signalGrid[\s\S]*repeat\(2,minmax\(0,1fr\)\)/);
-  assert.match(css, /\.nextFocus[\s\S]*background: #f7f8f4/);
+  assert.match(css, /\.nextFocus[\s\S]*border-left: 3px solid[\s\S]*background: linear-gradient/);
   assert.match(css, /\.nextFocus button[\s\S]*background: #c8ff1a/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
