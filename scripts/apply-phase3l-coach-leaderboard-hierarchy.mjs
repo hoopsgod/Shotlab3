@@ -127,8 +127,9 @@ const followUpLineEnding = rawFollowUpSource.includes('\r\n') ? '\r\n' : '\n';
 let followUpSource = rawFollowUpSource.replace(/\r\n/g, '\n');
 const placementMarker = `const body = dialog.querySelector('[data-visual-role="dashboard-section"]')?.parentElement;`;
 const compactPlacementMarker = `body=dialog?.querySelector('[data-visual-role="dashboard-section"]')?.parentElement`;
-const panelOwnsFollowUp = readFileSync(panelPath, 'utf8').includes('data-testid="coach-follow-up-ledger-host"')
-  && readFileSync(panelPath, 'utf8').includes('<CoachPlayerFollowUp model={model} />');
+const currentPanelSource = readFileSync(panelPath, 'utf8');
+const panelOwnsFollowUp = currentPanelSource.includes('data-testid="coach-follow-up-ledger-host"')
+  || currentPanelSource.includes('data-testid="coach-follow-up-ledger"');
 
 if (panelOwnsFollowUp) {
   console.log('Phase 3L Coach follow-up placement is React-owned by CoachDashboardPhase2.');
