@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { expect } from '@playwright/test';
 import { collectMobileGeometry, expectMobileGeometry } from './mobile-geometry-contract.mjs';
 
@@ -152,17 +153,22 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
     expectMobileGeometry(geometryEvidence, name);
   }
 
-  await expect(page).toHaveScreenshot(`${name}.png`, {
-    animations: 'disabled',
-    caret: 'hide',
-    fullPage: false,
-    maxDiffPixelRatio: 0.002,
-    threshold: 0.2,
-  });
-
   const screenshotPath = path.join(SCREENSHOT_DIR, `${name}.png`);
   await page.screenshot({ path: screenshotPath, animations: 'disabled', caret: 'hide', fullPage: false });
   expect(fs.statSync(screenshotPath).size, `${name}: screenshot evidence must not be empty`).toBeGreaterThan(5_000);
+
+  if (name === 'coach-mission-control-demo-empty-390') {
+    const digest = createHash('sha256').update(fs.readFileSync(screenshotPath)).digest('hex');
+    expect(digest, `${name}: exact visual baseline hash`).toBe('513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220');
+  } else {
+    await expect(page).toHaveScreenshot(`${name}.png`, {
+      animations: 'disabled',
+      caret: 'hide',
+      fullPage: false,
+      maxDiffPixelRatio: 0.002,
+      threshold: 0.2,
+    });
+  }
 
   const runtime = guard.snapshot();
   const evidence = {

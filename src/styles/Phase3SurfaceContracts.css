@@ -197,3 +197,17 @@
     line-height: .98;
   }
 }
+
+/* Unified Player leaderboard metrics intentionally remain a dark evidence strip at tablet widths. */
+.performance-shell--player [data-testid="leaderboard-metric-surface"][data-surface="dark"]{
+  background:linear-gradient(135deg,#121a20,#0b1014)!important;
+  background-color:#121a20!important;
+}
+.performance-shell--player [data-testid="leaderboard-metric-surface"] [data-metric-role="value"]{
+  color:#f8faf5!important;
+  -webkit-text-fill-color:#f8faf5!important;
+}
+.performance-shell--player [data-testid="leaderboard-metric-surface"] :is([data-metric-role="label"],[data-metric-role="detail"]){
+  color:#e8eee6!important;
+  -webkit-text-fill-color:#e8eee6!important;
+}
