@@ -120,7 +120,7 @@
  * the production restructure drops the module media rule. Reassert the source
  * mobile layout in the protected final authority. */
 @media (max-width: 620px) {
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] { border-radius: 26px !important; padding: 17px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] { border-radius: 18px !important; padding: 17px !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] { margin-bottom: 14px !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] { min-width: 0 !important; padding: 5px 0 3px !important; }
