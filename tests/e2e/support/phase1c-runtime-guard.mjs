@@ -9,6 +9,11 @@ const SCREENSHOT_DIR = path.join(OUTPUT_ROOT, 'screenshots');
 const RUNTIME_DIR = path.join(OUTPUT_ROOT, 'runtime');
 const EXACT_HEAD_PATH = path.join(OUTPUT_ROOT, 'exact-head-sha.txt');
 const FIXED_NOW = Date.parse('2026-09-01T12:00:00-04:00');
+const EXACT_VISUAL_BASELINE_HASHES = new Map([
+  // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
+  ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
+  ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
+]);
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 fs.mkdirSync(RUNTIME_DIR, { recursive: true });
@@ -157,9 +162,10 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
   await page.screenshot({ path: screenshotPath, animations: 'disabled', caret: 'hide', fullPage: false, scale: 'css' });
   expect(fs.statSync(screenshotPath).size, `${name}: screenshot evidence must not be empty`).toBeGreaterThan(5_000);
 
-  if (name === 'coach-mission-control-demo-empty-390') {
+  const exactVisualBaselineHash = EXACT_VISUAL_BASELINE_HASHES.get(name);
+  if (exactVisualBaselineHash) {
     const digest = createHash('sha256').update(fs.readFileSync(screenshotPath)).digest('hex');
-    expect(digest, `${name}: exact visual baseline hash`).toBe('513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220');
+    expect(digest, `${name}: exact visual baseline hash`).toBe(exactVisualBaselineHash);
   } else {
     await expect(page).toHaveScreenshot(`${name}.png`, {
       animations: 'disabled',
