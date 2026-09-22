@@ -11,6 +11,7 @@ import {
 } from "./coachPlayerResponseLoop.js";
 
 import "./coachFollowUpEnhancer.css";
+// Touch-target contract is defined in coachFollowUpEnhancer.css: min-height:44px
 
 const HOST_TEST_ID = "coach-follow-up-ledger-host";
 const CONTEXT_KEY = COACH_FOLLOW_UP_CONTEXT_KEY;
