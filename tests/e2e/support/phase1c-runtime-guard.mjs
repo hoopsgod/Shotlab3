@@ -15,6 +15,7 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
+  ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
 ]);
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
