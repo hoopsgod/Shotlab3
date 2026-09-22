@@ -1902,7 +1902,7 @@ const playerLeaderboardState=useMemo(()=>{
   const error=String(homeShotsLeaderboard?.error||"");
   return {rows,status:requestedStatus,error,hasData:rows.length>0};
 },[homeShotsLeaderboard]);
-const playerActiveTeamIdentity=useMemo(()=>getActiveTeamPlayerIdentity(players,u?.teamId),[players,u?.teamId]);
+const playerActiveTeamIdentity=useMemo(()=>getActiveTeamPlayerIdentity([...(Array.isArray(players)?players:[]),u],u?.teamId),[players,u,u?.teamId]);
 const playerActiveTeamKeySet=playerActiveTeamIdentity.keySet;
 const playerActiveTeamEmailSet=playerActiveTeamIdentity.emailSet;
 const playerActiveTeamNameSet=playerActiveTeamIdentity.nameSet;
