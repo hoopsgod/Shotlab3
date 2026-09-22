@@ -82,14 +82,14 @@ test("core-loop service classifies permission and unavailable failures honestly"
 
 test("Phase 7A wiring uses the service boundary and provides a truthful return path", () => {
   const app = fs.readFileSync("src/App.jsx", "utf8");
-  const enhancer = fs.readFileSync("src/lib/coachFollowUpEnhancer.js", "utf8");
+  const followUp = fs.readFileSync("src/components/CoachDashboardPhase2.jsx", "utf8");
   const commandCenter = fs.readFileSync("src/components/CoachCommandCenter.jsx", "utf8");
   const drawer = fs.readFileSync("src/components/CoachDashboardPhase2.jsx", "utf8");
   assert.match(app, /buildCoachCoreLoopModel/);
   assert.match(app, /COACH_CORE_LOOP_CHANGE_EVENT/);
   assert.match(app, /onReturnToHome/);
-  assert.match(enhancer, /saveCoachCoreLoopAction/);
-  assert.match(enhancer, /loadCoachCoreLoopPlayer/);
+  assert.match(followUp, /saveCoachCoreLoopAction/);
+  assert.match(followUp, /loadCoachCoreLoopPlayer/);
   assert.match(commandCenter, /CoachCoreLoopPanel/);
   assert.match(drawer, /data-testid="coach-return-to-home"/);
 });
