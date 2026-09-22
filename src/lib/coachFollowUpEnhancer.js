@@ -1,8 +1,8 @@
 import { loadCoachCoreLoopPlayer, saveCoachCoreLoopAction } from "./coachFollowUpService.js";
 import { loadPlayerAssignment, savePlayerAssignment } from "./playerAssignmentService.js";
 import { COACH_FOLLOW_UP_CONTEXT_KEY, buildNextAssignmentSuggestion, getCoachResponseContext, parseCoachResponseNote, serializeCoachResponseNote } from "./coachPlayerResponseLoop.js";
-// Follow-Up styles are injected only in browser runtime so Node contract tests can import this module.
-if (typeof document !== "undefined" && !document.querySelector('link[data-shotlab-follow-up-styles]')) { const link=document.createElement("link"); link.rel="stylesheet"; link.href="/assets/coachFollowUpEnhancer.css"; link.dataset.shotlabFollowUpStyles="true"; document.head?.appendChild(link); }
+// Follow-Up styles load only in browser runtime so Node contract tests can import this module.
+if (typeof document !== "undefined") import("./coachFollowUpEnhancer.css");
 
 // Source-contract markers retained for release guards:
 // if (saveInFlightRef.current) return; saveInFlightRef.current = true;
