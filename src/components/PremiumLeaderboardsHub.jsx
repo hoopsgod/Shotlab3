@@ -342,7 +342,7 @@ export default function PremiumLeaderboardsHub({
     <span>{scopeLabel}</span><span aria-hidden="true">·</span><span>{activeCategoryLabel}</span><span aria-hidden="true">·</span><span>{activeRankedCount} ranked</span>{activeDataState.kind === 'refreshing' ? <><span aria-hidden="true">·</span><span>Refreshing</span></> : null}
   </div>;
 
-  return <div data-testid={testId} data-viewer-role={viewerRole} aria-label="Leaderboards">
+  return <div data-testid={testId} data-viewer-role={viewerRole} data-team-workspace={viewerRole === 'player' ? 'leaderboards' : undefined} aria-label="Leaderboards">
     {showHeader ? <header style={{ padding: '4px 0 12px', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
       <div style={{ fontFamily: FALLBACK_FONT, color: VOLT, fontSize: 10, letterSpacing: '0.13em', fontWeight: 800, textTransform: 'uppercase' }}>COMPETITION HUB</div>
       <div style={{ fontFamily: FALLBACK_FONT, color: LIGHT, fontSize: 28, letterSpacing: '0.04em', marginTop: 3, lineHeight: 1, textTransform: 'uppercase', fontWeight: 800 }}>LEADERBOARDS</div>
