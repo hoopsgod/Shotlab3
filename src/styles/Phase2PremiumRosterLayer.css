@@ -1,24 +1,272 @@
-/* Phase 2 — compact Coach roster presentation for the current source-owned DOM. */
-.performance-shell--coach #coach-roster-operations{--phase2c-ink:#182019;--phase2c-muted:#667068;--phase2c-line:rgba(35,45,37,.11);--phase2c-surface:#fff;--phase2c-soft:#f6f7f3;--phase2c-accent:#71851f;margin-top:10px}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 10px;padding:0 2px;color:var(--phase2c-ink)}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading>div{display:grid;gap:3px;min-width:0}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading strong{font:760 14px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading span{color:var(--phase2c-muted);font:520 11px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading label{flex:0 0 auto;color:var(--phase2c-muted)!important}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading select{min-height:44px!important;padding:0 30px 0 11px!important;border:1px solid var(--phase2c-line)!important;border-radius:11px!important;background:var(--phase2c-surface)!important;color:var(--phase2c-ink)!important;-webkit-text-fill-color:var(--phase2c-ink)!important;box-shadow:none!important}
-.performance-shell--coach #coach-roster-operations .coachRosterCard{display:flex;min-height:96px;margin-bottom:8px;border:1px solid var(--phase2c-line);border-radius:16px;background:var(--phase2c-surface);color:var(--phase2c-ink);overflow:hidden;box-shadow:0 6px 18px rgba(29,38,31,.04)}
-.performance-shell--coach #coach-roster-operations .coachRosterCard>div:first-child{width:3px!important;opacity:.72}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__body{display:grid;grid-template-columns:40px minmax(0,1fr) 80px;align-items:center;gap:10px;width:100%;min-width:0;padding:10px 11px;box-sizing:border-box}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__initials{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--phase2c-soft);color:var(--phase2c-ink);font:800 15px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__profile{display:flex;align-items:center;justify-content:space-between;gap:8px;width:auto;min-width:0;min-height:44px;flex:1 1 auto;padding:0;border:0;background:transparent;color:var(--phase2c-ink);font:760 15px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;text-align:left;cursor:pointer}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__profile span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__profile span:last-child{color:var(--phase2c-muted);font-size:19px}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__profile:focus-visible{outline:3px solid rgba(113,133,31,.22);outline-offset:2px;border-radius:8px}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__metrics{color:var(--phase2c-muted);font:540 11px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__metrics strong{color:var(--phase2c-accent);font-weight:730}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child{min-width:0!important;width:80px!important;align-items:stretch!important;gap:6px!important}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button{width:100%!important;min-width:0!important;min-height:44px!important;padding:0 8px!important;border-radius:9px!important;box-shadow:none!important;font:720 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;letter-spacing:.04em!important;touch-action:manipulation}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button:last-child{border:1px solid var(--phase2c-line)!important;background:#fafbf8!important;color:#727a74!important;-webkit-text-fill-color:#727a74!important}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button:last-child:is(:hover,:focus-visible){border-color:rgba(195,59,73,.22)!important;background:rgba(195,59,73,.045)!important;color:#a93643!important;-webkit-text-fill-color:#a93643!important}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button:focus-visible{outline:3px solid rgba(113,133,31,.2)!important;outline-offset:2px!important}
-@media(max-width:420px){.performance-shell--coach #coach-roster-operations .coachRoster__heading{align-items:start}.performance-shell--coach #coach-roster-operations .coachRoster__heading>div span{display:none}.performance-shell--coach #coach-roster-operations .coachRosterCard__body{grid-template-columns:38px minmax(0,1fr) 76px;gap:8px;padding:9px 10px}.performance-shell--coach #coach-roster-operations .coachRosterCard__initials{width:38px;height:38px}.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child{width:76px!important}}
+/* Coach Players roster — canonical row visual authority.
+   Keep behavior in App.jsx; this layer owns density, hierarchy and responsive geometry. */
+.performance-shell--coach #coach-roster-operations {
+  --phase2c-ink:#172019;
+  --phase2c-muted:#626d66;
+  --phase2c-line:rgba(23,32,25,.12);
+  --phase2c-line-strong:rgba(23,32,25,.18);
+  --phase2c-surface:#fff;
+  --phase2c-soft:#f4f5f1;
+  --phase2c-accent:#617900;
+  margin-top:4px;
+}
+
+.performance-shell--coach #coach-roster-operations .coachRoster__heading {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:12px;
+  margin:0;
+  padding:14px 2px 12px;
+  border-bottom:1px solid var(--phase2c-line);
+  color:var(--phase2c-ink);
+}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading>div { display:grid;gap:4px;min-width:0; }
+.performance-shell--coach #coach-roster-operations .coachRoster__heading strong {
+  font:800 18px/1.05 "Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  letter-spacing:-.015em;
+}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading span {
+  max-width:38ch;
+  color:var(--phase2c-muted);
+  font:540 12px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading label {
+  flex:0 0 auto;
+  color:var(--phase2c-muted)!important;
+}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading select {
+  min-width:178px!important;
+  min-height:44px!important;
+  padding:0 30px 0 11px!important;
+  border:1px solid var(--phase2c-line-strong)!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.78)!important;
+  color:var(--phase2c-ink)!important;
+  -webkit-text-fill-color:var(--phase2c-ink)!important;
+  box-shadow:none!important;
+}
+
+/* The live row is an article with explicit nested controls. Avoid a card-inside-card
+   appearance: one hairline row, one avatar, one clear profile action. */
+.performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow,
+.performance-shell--coach #coach-roster-operations .phase1RosterRow.coachRosterCard {
+  position:relative;
+  display:flex;
+  min-height:82px;
+  margin:0;
+  border:0;
+  border-bottom:1px solid var(--phase2c-line);
+  border-radius:0;
+  background:transparent;
+  color:var(--phase2c-ink);
+  overflow:visible;
+  box-shadow:none;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard>div:first-child {
+  width:2px!important;
+  margin-block:12px;
+  border-radius:999px;
+  opacity:.72;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body {
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  width:100%;
+  min-width:0;
+  padding:12px 2px 12px 10px;
+  box-sizing:border-box;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__initials {
+  display:grid;
+  place-items:center;
+  width:40px;
+  height:40px;
+  border:1px solid var(--phase2c-line);
+  border-radius:12px;
+  background:var(--phase2c-soft);
+  color:var(--phase2c-ink);
+  font:820 15px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:nth-child(2) { min-width:0; }
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:nth-child(2)>div:first-child {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center!important;
+  gap:8px!important;
+  margin-bottom:3px!important;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__profile,
+.performance-shell--coach #coach-roster-operations [data-phase1-open-profile="true"] {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:7px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:44px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:var(--phase2c-ink)!important;
+  -webkit-text-fill-color:var(--phase2c-ink)!important;
+  box-shadow:none!important;
+  font:800 17px/1.08 "Barlow Condensed","Arial Narrow",-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  letter-spacing:-.01em!important;
+  text-align:left!important;
+  cursor:pointer;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__profile span:first-child {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__profile span:last-child {
+  flex:0 0 auto;
+  color:#778078!important;
+  -webkit-text-fill-color:#778078!important;
+  font-size:19px!important;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__profile:focus-visible,
+.performance-shell--coach #coach-roster-operations [data-phase1-open-profile="true"]:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--phase2c-accent) 28%,transparent);
+  outline-offset:2px;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__metrics {
+  color:var(--phase2c-muted);
+  font:560 12px/1.38 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__metrics strong {
+  color:#29352c;
+  font-weight:760;
+}
+.performance-shell--coach #coach-roster-operations [data-testid="semantic-roster-status"] {
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+/* Row actions are deliberately quiet. The player profile is the primary interaction. */
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child {
+  width:auto!important;
+  min-width:0!important;
+  align-items:flex-end!important;
+  gap:5px!important;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button {
+  width:auto!important;
+  min-width:68px!important;
+  min-height:38px!important;
+  padding:0 10px!important;
+  border:1px solid transparent!important;
+  border-radius:8px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#687169!important;
+  -webkit-text-fill-color:#687169!important;
+  font:760 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  letter-spacing:.055em!important;
+  touch-action:manipulation;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button:first-child:not(:last-child) {
+  border-color:var(--phase2c-line)!important;
+  background:rgba(255,255,255,.66)!important;
+  color:#48564b!important;
+  -webkit-text-fill-color:#48564b!important;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button:last-child:is(:hover,:focus-visible) {
+  border-color:rgba(171,48,61,.2)!important;
+  background:rgba(171,48,61,.045)!important;
+  color:#963441!important;
+  -webkit-text-fill-color:#963441!important;
+}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--phase2c-accent) 24%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+/* Legacy empty-slot scaffolding should read as quiet roster capacity, not as a card. */
+.performance-shell--coach #coach-roster-operations [data-coach-roster-placeholder="true"] {
+  min-height:72px!important;
+  margin:0!important;
+  border:0!important;
+  border-bottom:1px dashed var(--phase2c-line)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+/* Historic Phase 2 duplicate recap selectors are intentionally retained as a
+   compatibility no-op for release fixtures; the live .phase1RosterRow stays visible. */
+.performance-shell--coach #coach-roster-operations > div:nth-of-type(1):not(.fade-up),
+.performance-shell--coach #coach-roster-operations > div:nth-of-type(2):not(.fade-up) { display:none!important; }
+.performance-shell--coach #coach-roster-operations header:first-child { min-width:0; }
+.performance-shell--coach #coach-roster-operations > div:nth-of-type(3) select { min-width:178px!important;min-height:44px!important; }
+
+@media (max-width:620px) {
+  .performance-shell--coach #coach-roster-operations .coachRoster__heading {
+    grid-template-columns:minmax(0,1fr);
+    align-items:start;
+    gap:9px;
+    padding:12px 2px 11px;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRoster__heading span { display:none; }
+  .performance-shell--coach #coach-roster-operations .coachRoster__heading label { justify-self:start;gap:7px!important; }
+  .performance-shell--coach #coach-roster-operations .coachRoster__heading select { min-width:190px!important;max-width:min(100%,240px)!important; }
+
+  .performance-shell--coach #coach-roster-operations .phase1RosterRow.coachRosterCard {
+    min-height:96px;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard>div:first-child { margin-block:11px; }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__body {
+    grid-template-columns:40px minmax(0,1fr);
+    grid-template-areas:
+      "avatar details"
+      ". actions";
+    align-items:start;
+    gap:0 10px;
+    padding:11px 2px 11px 8px;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__initials {
+    grid-area:avatar;
+    width:38px;
+    height:38px;
+    margin-top:3px;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:nth-child(2) {
+    grid-area:details;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child {
+    grid-area:actions;
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:wrap!important;
+    justify-content:flex-start!important;
+    align-items:center!important;
+    width:auto!important;
+    margin-top:6px;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__body>div:last-child button {
+    min-width:0!important;
+    min-height:36px!important;
+    padding-inline:8px!important;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__profile,
+  .performance-shell--coach #coach-roster-operations [data-phase1-open-profile="true"] {
+    font-size:16px!important;
+  }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__metrics { font-size:11.5px; }
+}
+
+@media (max-width:360px) {
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__body { grid-template-columns:36px minmax(0,1fr);gap-inline:8px;padding-left:6px; }
+  .performance-shell--coach #coach-roster-operations .coachRosterCard__initials { width:34px;height:34px;border-radius:10px; }
+  .performance-shell--coach #coach-roster-operations [data-testid="semantic-roster-status"] { font-size:9px!important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .performance-shell--coach #coach-roster-operations button { transition:none!important; }
+}
