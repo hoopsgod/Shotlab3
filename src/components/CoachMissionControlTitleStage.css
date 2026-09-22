@@ -34,6 +34,5 @@
 @media(max-width:700px){
  .mcShellV3.is-mobile-shell .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{min-height:44px}
  .mcShellV3.is-mobile-shell .mcTeamHealth{padding:0}
- .mcShellV3.is-mobile-shell .mcHealthScore{font:820 28px/.9 var(--mc-native)}
 }
 @media(prefers-reduced-motion:reduce){.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button{transition:none}.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary{transition:none}.mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary:active{transform:none}}

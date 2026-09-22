@@ -134,7 +134,7 @@ test("assignment reads distinguish empty, degraded cached data, hard failure, an
 test("database, API, and UI contracts preserve role boundaries and acknowledgment evidence", () => {
   const migration = fs.readFileSync(new URL("../migrations/038_player_assignments.sql", import.meta.url), "utf8");
   const api = fs.readFileSync(new URL("../functions/v1/player-assignments/index.js", import.meta.url), "utf8");
-  const coach = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
+  const coach = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
   const player = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
   const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");
   const coachBootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");

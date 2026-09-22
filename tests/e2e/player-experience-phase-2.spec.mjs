@@ -172,8 +172,11 @@ test("Leaderboards and Progress retain the current operational hierarchy", async
   await enterSeededPlayer(page);
 
   await openMoreDestination(page, "leaderboards");
-  await expectWorkspaceTouchTargets(page, "player-leaderboards-workspace");
-  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-leaderboards-workspace")).toBeVisible({ timeout: 20_000 });
+  const leaderboardHub = page.getByTestId("premium-leaderboards-hub");
+  await expect(leaderboardHub).toBeVisible({ timeout: 20_000 });
+  await expect(leaderboardHub.getByTestId("leaderboard-metric-surface").locator('[data-metric-role="value"]')).toHaveCount(3);
+  await expectButtonTouchTargets(leaderboardHub, 4);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
   const profile = page.getByTestId("player-profile-workspace");

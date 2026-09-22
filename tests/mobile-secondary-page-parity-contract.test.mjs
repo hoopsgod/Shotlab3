@@ -18,12 +18,12 @@ test("player commitments keep a fixed mobile runway instead of removing the modu
   assert.doesNotMatch(commitmentSource, /state\.upcoming\.length\s*>\s*0\s*&&\s*\(\s*<div className=\{styles\.queue\}/);
 });
 
-test("player leaderboards keep ranking geometry when the registered account has fewer or zero rows", () => {
-  assert.match(leaderboardSource, /minimumRows = 3/);
-  assert.match(leaderboardSource, /data-reserved-rows=\{reservedRows\}/);
-  assert.match(leaderboardSource, /data-leaderboard-placeholder="true"/);
-  assert.match(leaderboardSource, /displayState === "empty"\s*\? reservedRows/);
-  assert.match(leaderboardSource, /keepsRankingFrame = displayState === "ready" \|\| displayState === "empty"/);
+test("player leaderboards preserve a truthful empty state instead of inventing open ranking slots", () => {
+  assert.match(leaderboardSource, /resolveLeaderboardDataState/);
+  assert.match(leaderboardSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
+  assert.match(leaderboardSource, /keepsRankingFrame = \["ready", "refreshing", "stale", "empty"\]\.includes\(displayState\)/);
+  assert.match(leaderboardSource, /Showing your last confirmed rankings/);
+  assert.doesNotMatch(leaderboardSource, /minimumRows|data-reserved-rows|data-leaderboard-placeholder|OpenRank/);
 });
 
 test("demo-only utilities cannot change visible Coach Settings geometry", () => {

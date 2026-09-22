@@ -11,6 +11,15 @@ test('player and coach dashboards both render the shared premium leaderboards hu
   assert.equal((appSource.match(/PremiumLeaderboardsHub viewerRole=/g) || []).length, 2);
 });
 
+test('player leaderboards use one authoritative decision-metric surface', () => {
+  assert.match(
+    appSource,
+    /testId="player-leaderboards-workspace" showMetrics=\{false\}/,
+    'the Player title stage must not reintroduce the legacy duplicate metrics strip',
+  );
+  assert.match(hubSource, /data-testid="leaderboard-metric-surface"/);
+});
+
 test('premium hub contains stable shell, categories, empty states, and safe defaults', () => {
   assert.match(hubSource, /data-testid=\{testId\}/);
   assert.match(hubSource, /COMPETITION HUB/);
@@ -19,8 +28,9 @@ test('premium hub contains stable shell, categories, empty states, and safe defa
   assert.match(hubSource, /Strength & Conditioning/);
   assert.match(hubSource, /Program Drills/);
   assert.match(hubSource, /const \[activeLeaderboardCategory, setActiveLeaderboardCategory\] = useState\('home_shots'\);/);
-  assert.match(hubSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
-  assert.match(hubSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
+  assert.match(hubSource, /buildLeaderboardDecisionSurface/);
+  assert.match(hubSource, /buildLeaderboardWeeklyActivity/);
+  assert.match(hubSource, /showHeader = true/);
   assert.match(hubSource, /No rankings yet/);
   assert.doesNotMatch(hubSource, /leaderboardCategory/);
   assert.doesNotMatch(hubSource, /renderPremiumLeaderboardsHub/);

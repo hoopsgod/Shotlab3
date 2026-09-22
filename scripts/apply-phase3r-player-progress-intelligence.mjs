@@ -9,6 +9,12 @@ const requireOne = (source, anchor, label) => {
 const path = "src/App.jsx";
 let source = readFileSync(path, "utf8");
 const marker = '<PlayerProgressStory userName={u.name}';
+const legacyReadoutAnchor = '>PLAYER READOUT</div>';
+
+if (!source.includes(marker) && !source.includes(legacyReadoutAnchor) && source.includes('PlayerCommitmentCenter from')) {
+  console.log("Phase 3R Player Progress Story already owned by the current Player workspace architecture.");
+  process.exit(0);
+}
 
 if (source.includes(marker)) {
   for (const preserved of [

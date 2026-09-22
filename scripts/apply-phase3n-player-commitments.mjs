@@ -9,6 +9,16 @@ const requireOne = (source, anchor, label) => {
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = 'PlayerCommitmentCenter mode="events"';
+const legacyEventsAnchor = `  {tab===\"program\"&&<div className={slideClass} key=\"program\"><PlayerWorkspaceCommandBar model={eventsWorkspaceModel}`;
+const legacyStrengthAnchor = `  {tab===\"sc\"&&<div className={slideClass} key=\"sc\"><PlayerWorkspaceCommandBar model={strengthWorkspaceModel}`;
+
+// Some maintained branches already own Events and Strength routes in a newer
+// Player workspace architecture. In that shape the legacy anchors are absent;
+// rerunning this source transformer must be a no-op rather than a build error.
+if (!source.includes(marker) && !source.includes(legacyEventsAnchor) && !source.includes(legacyStrengthAnchor) && source.includes('PlayerCommitmentCenter from')) {
+  console.log('Phase 3N Player Commitments hierarchy already owned by the current Player workspace architecture.');
+  process.exit(0);
+}
 
 if (source.includes(marker)) {
   for (const preserved of [

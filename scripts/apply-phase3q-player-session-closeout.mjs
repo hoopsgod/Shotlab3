@@ -9,6 +9,12 @@ const requireOne = (source, anchor, label) => {
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = 'completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length}';
+const phase3pMarker = '<PlayerTrainingCompletion data={shareData}';
+
+if (!source.includes(marker) && !source.includes(phase3pMarker) && source.includes('PlayerCommitmentCenter from')) {
+  console.log('Phase 3Q Player Session Closeout already owned by the current Player workspace architecture.');
+  process.exit(0);
+}
 
 if (source.includes(marker)) {
   for (const preserved of [
@@ -26,7 +32,6 @@ if (source.includes(marker)) {
   process.exit(0);
 }
 
-const phase3pMarker = '<PlayerTrainingCompletion data={shareData}';
 if (!source.includes(phase3pMarker)) fail('Phase 3P training completion must be applied before Phase 3Q.');
 
 const callAnchor = '<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)}/>';

@@ -40,11 +40,13 @@ function mapLeaderboardError(error) {
 }
 
 function mapLeaderboardRow(row = {}) {
+  const playerId = String(row?.player_id || row?.playerId || "").trim();
   return {
     rank: row.rank,
     player_display_name: row.player_display_name,
     total_home_shots: row.total_home_shots,
     leaderboard_source: "remote",
+    ...(playerId ? { player_id: playerId } : {}),
   };
 }
 

@@ -184,7 +184,10 @@ async function expectProgressStoryCommandSurface(page) {
 async function expectReadablePlayerMetrics(page, testId) {
   const workspace = page.getByTestId(testId);
   await expect(workspace).toBeVisible();
-  const contrastRatios = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
+  const evidenceRoot = testId === "player-leaderboards-workspace"
+    ? page.getByTestId("leaderboard-metric-surface")
+    : workspace.locator('[data-layout-role="supporting-evidence"]');
+  const contrastRatios = await evidenceRoot.evaluate((container) => {
     const metricNodes = [...container.querySelectorAll('[data-metric-role="value"], [data-metric-role="label"], [data-metric-role="detail"]')];
     const parse = (value) => {
       const numbers = (value.match(/\d+(?:\.\d+)?/g) || []).map(Number);

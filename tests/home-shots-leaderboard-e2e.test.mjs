@@ -61,6 +61,7 @@ function buildLeaderboardRows(shots) {
       rank: index + 1,
       player_display_name: entry.player_display_name,
       total_home_shots: entry.total_home_shots,
+      leaderboard_source: "remote",
     }));
 }
 
@@ -231,7 +232,7 @@ test("e2e regression: coach home-shots route + leaderboard card include same-tea
     assert.equal(rpcRequests[0].p_requester_user_id, "coach@test.example");
 
     const payload = await res.json();
-    assert.deepEqual(payload.leaderboard, [{ rank: 1, player_display_name: "Test Player", total_home_shots: 137 }]);
+    assert.deepEqual(payload.leaderboard, [{ rank: 1, player_display_name: "Test Player", total_home_shots: 137, leaderboard_source: "remote" }]);
 
     const HomeShotsLeaderboardCard = loadCardComponent();
     const coachHtml = renderToStaticMarkup(

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { expect } from '@playwright/test';
 import { collectMobileGeometry, expectMobileGeometry } from './mobile-geometry-contract.mjs';
 
@@ -8,6 +9,14 @@ const SCREENSHOT_DIR = path.join(OUTPUT_ROOT, 'screenshots');
 const RUNTIME_DIR = path.join(OUTPUT_ROOT, 'runtime');
 const EXACT_HEAD_PATH = path.join(OUTPUT_ROOT, 'exact-head-sha.txt');
 const FIXED_NOW = Date.parse('2026-09-01T12:00:00-04:00');
+const EXACT_VISUAL_BASELINE_HASHES = new Map([
+  // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
+  ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
+  ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
+  ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
+  ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
+  ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
+]);
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 fs.mkdirSync(RUNTIME_DIR, { recursive: true });
@@ -152,17 +161,23 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
     expectMobileGeometry(geometryEvidence, name);
   }
 
-  await expect(page).toHaveScreenshot(`${name}.png`, {
-    animations: 'disabled',
-    caret: 'hide',
-    fullPage: false,
-    maxDiffPixelRatio: 0.002,
-    threshold: 0.2,
-  });
-
   const screenshotPath = path.join(SCREENSHOT_DIR, `${name}.png`);
-  await page.screenshot({ path: screenshotPath, animations: 'disabled', caret: 'hide', fullPage: false });
+  await page.screenshot({ path: screenshotPath, animations: 'disabled', caret: 'hide', fullPage: false, scale: 'css' });
   expect(fs.statSync(screenshotPath).size, `${name}: screenshot evidence must not be empty`).toBeGreaterThan(5_000);
+
+  const exactVisualBaselineHash = EXACT_VISUAL_BASELINE_HASHES.get(name);
+  if (exactVisualBaselineHash) {
+    const digest = createHash('sha256').update(fs.readFileSync(screenshotPath)).digest('hex');
+    expect(digest, `${name}: exact visual baseline hash`).toBe(exactVisualBaselineHash);
+  } else {
+    await expect(page).toHaveScreenshot(`${name}.png`, {
+      animations: 'disabled',
+      caret: 'hide',
+      fullPage: false,
+      maxDiffPixelRatio: 0.002,
+      threshold: 0.2,
+    });
+  }
 
   const runtime = guard.snapshot();
   const evidence = {

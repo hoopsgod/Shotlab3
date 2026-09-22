@@ -36,7 +36,7 @@ import MobileNavigation from "./components/MobileNavigation.jsx";
 import SemanticStatus from "./components/SemanticStatus.jsx";
 import { DashboardSection } from "./components/CoachDashboardPrimitives.jsx";
 import { CoachEventsInteractiveDashboard, CoachPageDashboardHeader, CoachPlayersInteractiveDashboard } from "./components/CoachInteractiveDashboards.jsx";
-import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEventIntelligenceDrawer, CoachLeaderboardOperationalPanel, CoachPlayerIntelligenceDrawer, CoachSeasonComparisonPanel, CoachStrengthOperationalPanel } from "./components/CoachDashboardPhase2.jsx";
+import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEventIntelligenceDrawer, CoachPlayerIntelligenceDrawer, CoachSeasonComparisonPanel, CoachStrengthOperationalPanel } from "./components/CoachDashboardPhase2.jsx";
 import { SecondaryPageDecision, SecondaryPageIntro, SecondaryPageShell } from "./components/SecondaryPageSystem.jsx";
 import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";
 import ShotLabStatePanel from "./components/ShotLabStatePanel.jsx";
@@ -84,6 +84,7 @@ import {
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
 import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
+import { loadHomeShotsLeaderboard } from "./lib/homeShotsLeaderboardService.js";
 import { buildAtHomeLeaderboardRows, isHomeLeaderboardScoreRow } from "./lib/homeLeaderboardRows.js";
 import { buildProgramScoreRow, getAllProgramScoreRows, getProgramDrillBreakdownRows, getProgramLeaderboardRows, getProgramScoresForDrill, getProgramScoresForPlayer, validateProgramDrillScore } from "./lib/programDrillScoring.js";
 import { archivePlayerForTeam, deleteTeamLocalPlayerData, filterActiveTeamChallengeRows, filterActiveTeamLeaderboardRows, filterActiveTeamPlayerRows, getActiveTeamPlayerIdentity, getCoachRosterPlayers, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam, resolveMigratedRosterTeamId, resolvePlayerDisplayName, buildCoachPlayerDevelopmentProfile } from "./lib/playerDataManagement.js";
@@ -280,6 +281,16 @@ const PENDING_JOIN_CONTEXT_KEY = "sl:pending-join-context";
 const HOME_SHOTS_LEADERBOARD_LIMIT = 10;
 const INVITE_CONTEXT_STORAGE_KEY = "sl:invite-context";
 const SUPABASE_AUTH_ENABLED = String(import.meta.env.VITE_ENABLE_SUPABASE_AUTH || "").trim() === "true";
+
+/**
+ * Keeps data diagnostics available in development or explicitly enabled builds,
+ * while allowing normal production builds to remove their dormant UI and update
+ * paths from the shipped application chunk.
+ */
+const DATA_DEBUG_BUILD_ENABLED = import.meta.env.DEV
+  || import.meta.env.VITE_ENABLE_DATA_DEBUG === "1"
+  || import.meta.env.VITE_ENABLE_DATA_DEBUG === "true"
+  || import.meta.env.VITE_ENABLE_DATA_DEBUG === "yes";
 const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
   borderRadius: 999,
   padding: "7px 12px",
@@ -700,10 +711,10 @@ const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
 const accountCapabilities=useMemo(()=>buildAccountCapabilities(user),[user]);
 const[accountNotice,setAccountNotice]=useState("");
 const[startupError,setStartupError]=useState("");
-const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:""});
+const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:"",mode:"unknown",teamId:""});
 const [homeShotsLeaderboardScope,setHomeShotsLeaderboardScope]=useState("players");
 const [statSyncError,setStatSyncError]=useState("");
-const [dataDebug,setDataDebug]=useState({join:{enteredCode:"",normalizedCode:"",status:"idle",lookupSource:"none",lookupField:"none",lookupHashPrefix:"",lookupHashSource:"",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",consumeEndpoint:"/v1/team-memberships/confirm-context",consumeHttpStatus:null,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:"",consumeResolvedUserUuid:"",consumeAttemptStarted:"no",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeInFlightKey:"",consumeInFlightAgeMs:null,consumeGuardCleared:"no",consumeGuardClearReason:"",consumeTimeoutMs:15000,consumeFetchStarted:"no",consumeFetchFinished:"no",membershipInsertStatus:"idle",membershipInsertError:"",profileUpdateStatus:"idle",finalRouteDecision:"idle",update:"idle",error:""},auth:{mode:SUPABASE_AUTH_ENABLED?"supabase":"legacy",supabaseEnabled:SUPABASE_AUTH_ENABLED?"yes":"no",sessionPresent:"no",signupHttpStatus:null,signupCode:"",signupStage:"",signupMessage:"",loginHttpStatus:null,loginCode:"",loginMessage:"",providerHint:"",profileLoad:"idle",restoredRoleTeamId:"no",profilePersistStatus:"idle",profileRestoreStatus:"idle",legacyAuthRegisterStatus:"idle",legacyAuthLoginStatus:"idle",legacyAuthUpdateStatus:"idle",profileTeamId:"",registerEndpoint:"/v1/legacy-auth/register",registerParseMode:""},leaderboard:{endpoint:"",httpStatus:null,errorCode:"",resultCount:null,isEmpty:false},createTeam:{teamName:"",endpoint:"",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false,status:"idle"}});
+const [dataDebug,setDataDebug]=useState(DATA_DEBUG_BUILD_ENABLED ? {join:{enteredCode:"",normalizedCode:"",status:"idle",lookupSource:"none",lookupField:"none",lookupHashPrefix:"",lookupHashSource:"",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",consumeEndpoint:"/v1/team-memberships/confirm-context",consumeHttpStatus:null,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:"",consumeResolvedUserUuid:"",consumeAttemptStarted:"no",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeInFlightKey:"",consumeInFlightAgeMs:null,consumeGuardCleared:"no",consumeGuardClearReason:"",consumeTimeoutMs:15000,consumeFetchStarted:"no",consumeFetchFinished:"no",membershipInsertStatus:"idle",membershipInsertError:"",profileUpdateStatus:"idle",finalRouteDecision:"idle",update:"idle",error:""},auth:{mode:SUPABASE_AUTH_ENABLED?"supabase":"legacy",supabaseEnabled:SUPABASE_AUTH_ENABLED?"yes":"no",sessionPresent:"no",signupHttpStatus:null,signupCode:"",signupStage:"",signupMessage:"",loginHttpStatus:null,loginCode:"",loginMessage:"",providerHint:"",profileLoad:"idle",restoredRoleTeamId:"no",profilePersistStatus:"idle",profileRestoreStatus:"idle",legacyAuthRegisterStatus:"idle",legacyAuthLoginStatus:"idle",legacyAuthUpdateStatus:"idle",profileTeamId:"",registerEndpoint:"/v1/legacy-auth/register",registerParseMode:""},leaderboard:{endpoint:"",httpStatus:null,errorCode:"",resultCount:null,isEmpty:false},createTeam:{teamName:"",endpoint:"",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false,status:"idle"}} : {join:{},auth:{},leaderboard:{},createTeam:{}});
 const leaderboardRequestRef=useRef({teamId:null,requestId:0});
 const [isJoinConsumeActive,setIsJoinConsumeActive]=useState(false);
 const joinConsumeFlightRef=useRef({active:false,key:"",startedAt:0,lastClearedAt:0,lastClearedReason:"",promise:null,abortController:null});
@@ -711,12 +722,9 @@ const autoJoinAttemptRef=useRef("");
 const legacyAuthSecretRef=useRef({email:"",password:""});
 const bootMark=(stage,detail="")=>{try{window.__shotlabBootMark?.(stage,detail);}catch(error){}};
 const T=THEMES[theme];
-const dataDebugRequested=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
-const dataDebugEnvOverride=String(import.meta.env.VITE_ENABLE_DATA_DEBUG||"").trim().toLowerCase();
-const dataDebugEnvEnabled=dataDebugEnvOverride==="1"||dataDebugEnvOverride==="true"||dataDebugEnvOverride==="yes";
-const dataDebugLocalHost=typeof window!=="undefined"&&["localhost","127.0.0.1","::1"].includes(window.location.hostname);
-const dataDebugSafeMode=Boolean(import.meta.env.DEV||dataDebugLocalHost||(dataDebugEnvEnabled&&user?.role==="coach"));
-const dataDebugEnabled=dataDebugRequested&&dataDebugSafeMode;
+const dataDebugRequested=DATA_DEBUG_BUILD_ENABLED&&typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
+const dataDebugEnabled=dataDebugRequested&&(import.meta.env.DEV||user?.role==="coach");
+const updateDataDebug=DATA_DEBUG_BUILD_ENABLED?setDataDebug:undefined;
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const loadCoachPrioritiesForTeam = useCallback(async (teamId) => {
   if (!teamId) return;
@@ -782,62 +790,39 @@ meta,
 
 const homeShotDebugMode=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("homeShotDebug")==="1";
 const fetchHomeShotsLeaderboard=useCallback(async(teamId,scope=homeShotsLeaderboardScope)=>{
-if(!teamId||!user?.email)return;
+if(!teamId||!user?.email){
+setHomeShotsLeaderboard(prev=>({...prev,status:"missing_context",rows:[],error:"Choose a team before viewing rankings.",mode:"none",teamId:""}));
+return;
+}
 const requestId=Date.now();
 const debugMode=isShotLabDebugMode();
 const localLeaderboardRows=()=>calculateLeaderboardFromShotLogs({shotLogs,teamId,playerContext:{players,profiles:playerProfiles,scope}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
-const applyLeaderboardRows=(rows,{httpStatus=null,errorCode="",isEmpty=null}={})=>{
+const applyLeaderboardRows=(rows,{httpStatus=null,errorCode="",isEmpty=null,status="success",error="",mode="remote",preservePreviousRows=false}={})=>{
 if(leaderboardRequestRef.current.requestId!==requestId)return false;
-setHomeShotsLeaderboard({status:"success",rows,error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus,errorCode,resultCount:rows.length,isEmpty:isEmpty??rows.length===0}}));
+const safeRows=Array.isArray(rows)?rows:[];
+setHomeShotsLeaderboard(prev=>{const keepPrevious=preservePreviousRows&&String(prev?.teamId||"")===String(teamId);return{status,rows:keepPrevious?(Array.isArray(prev?.rows)?prev.rows:[]):safeRows,error,mode:keepPrevious?(prev?.mode||mode):mode,teamId};});
+updateDataDebug?.(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus,errorCode,resultCount:preservePreviousRows?null:safeRows.length,isEmpty:isEmpty??(!preservePreviousRows&&safeRows.length===0)}}));
 return true;
 };
 leaderboardRequestRef.current={teamId,requestId};
-setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
+setHomeShotsLeaderboard(prev=>{const sameTeam=String(prev?.teamId||"")===String(teamId);const previousRows=sameTeam&&Array.isArray(prev?.rows)?prev.rows:[];return{...prev,status:previousRows.length?"refreshing":"loading",rows:previousRows,error:"",teamId,mode:sameTeam?prev?.mode||"unknown":"unknown"};});
 if(accountCapabilities.isSandbox){
 const rows=localLeaderboardRows();
-applyLeaderboardRows(rows,{httpStatus:200,errorCode:"demo_local",isEmpty:rows.length===0});
+applyLeaderboardRows(rows,{httpStatus:200,errorCode:"demo_local",isEmpty:rows.length===0,mode:"demo_local"});
 return;
 }
-try{
-const url=`/v1/leaderboards/home-shots?team_id=${encodeURIComponent(teamId)}&limit=${HOME_SHOTS_LEADERBOARD_LIMIT}&scope=${encodeURIComponent(scope)}`;
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,endpoint:url,httpStatus:null,errorCode:"",resultCount:null,isEmpty:false}}));
-const res=await fetch(url,{headers:{"x-user-id":user.email}});
-const contentType=String(res.headers.get("content-type")||"").toLowerCase();
-let body={};
-let parseMode="json";
-if(contentType.includes("application/json")){
-body=await res.json().catch(()=>{parseMode="invalid_json";return{};});
-}else{
-parseMode="non_json";
-await res.text().catch(()=>"");
-}
-if(!res.ok){
-const msg=parseLeaderboardErrorMessage(body?.error,res.status,parseMode==="non_json"?"non_json":"json");
-const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"unknown");
-const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
-const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
-console.warn("[home-shots-leaderboard] refresh failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
-const fallbackRows=localLeaderboardRows();
-emitReleaseDiagnostic({event:"leaderboard_fetch_failed",leaderboardRpcResultCount:0,fallbackLeaderboardResultCount:fallbackRows.length,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown")}}, {debug:debugMode});
-if(applyLeaderboardRows(fallbackRows,{httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),isEmpty:fallbackRows.length===0}))return;
+const result=await loadHomeShotsLeaderboard({teamId,scope,userEmail:user.email,limit:HOME_SHOTS_LEADERBOARD_LIMIT});
+updateDataDebug?.(prev=>({...prev,leaderboard:{...prev.leaderboard,endpoint:result.url||prev.leaderboard.endpoint,httpStatus:result.httpStatus,errorCode:result.errorCode||"",resultCount:result.ok?result.rows.length:null,isEmpty:result.ok&&result.rows.length===0}}));
+if(!result.ok){
+const diagnostics=result.diagnostics||{};
+console.warn("[home-shots-leaderboard] refresh failed",{status:result.httpStatus,error:result.errorCode,scope,teamId,requesterIdentityPresent:diagnostics.requester_identity_present||"unknown",teamIdPresent:diagnostics.team_id_present||"unknown",rpcName:diagnostics.rpc_name_called||"",rpcSuccess:diagnostics.rpc_success||"unknown"});
+emitReleaseDiagnostic({event:"leaderboard_fetch_failed",leaderboardRpcResultCount:0,fallbackLeaderboardResultCount:0,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,httpStatus:result.httpStatus,errorCode:result.errorCode||"unknown",state:result.status}}, {debug:debugMode});
+applyLeaderboardRows(null,{httpStatus:result.httpStatus,errorCode:result.errorCode,status:result.status,error:result.message,preservePreviousRows:true,isEmpty:false});
 return;
 }
-const rows=Array.isArray(body?.leaderboard)?body.leaderboard:[];
-const rpcRows=rows;
-const fallbackRows=rpcRows.length?[]:localLeaderboardRows();
-// Legacy debug contract for empty RPC responses: isEmpty:rows.length===0
-const leaderboardRows=rpcRows.length?rpcRows:fallbackRows;
-emitReleaseDiagnostic({event:"leaderboard_fetch_completed",leaderboardRpcResultCount:rpcRows.length,fallbackLeaderboardResultCount:fallbackRows.length,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,httpStatus:res.status,usedFallback:rpcRows.length===0&&fallbackRows.length>0}}, {debug:debugMode});
-if(applyLeaderboardRows(leaderboardRows,{httpStatus:res.status,errorCode:rpcRows.length||!fallbackRows.length?"":"rpc_empty_local_fallback",isEmpty:leaderboardRows.length===0}))return;
-}catch(error){
-if(leaderboardRequestRef.current.requestId!==requestId)return;
-console.warn("[home-shots-leaderboard] refresh network failure",{scope,teamId,message:String(error?.message||"network_error")});
-const fallbackRows=localLeaderboardRows();
-emitReleaseDiagnostic({event:"leaderboard_fetch_network_failure",leaderboardRpcResultCount:0,fallbackLeaderboardResultCount:fallbackRows.length,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,errorCode:"network_error"}}, {debug:debugMode});
-applyLeaderboardRows(fallbackRows,{httpStatus:null,errorCode:"network_error",isEmpty:fallbackRows.length===0});
-}
-},[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles]);
+emitReleaseDiagnostic({event:"leaderboard_fetch_completed",leaderboardRpcResultCount:result.rows.length,fallbackLeaderboardResultCount:0,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,httpStatus:result.httpStatus,usedFallback:false}}, {debug:debugMode});
+applyLeaderboardRows(result.rows,{httpStatus:result.httpStatus,errorCode:"",isEmpty:result.rows.length===0,status:"success",mode:"remote"});
+},[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles,accountCapabilities.isSandbox]);
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,programScores:rawProgramScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -925,7 +910,7 @@ await DB.set("sl:sc-sessions",m.scSM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;
 const initialSupabaseSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabaseSessionRequest,new Promise(r=>setTimeout(()=>r(null),3e3))]):null;
-const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?initialSupabaseSession?.data?.session?.user?.email:sess?.email); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
+const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?initialSupabaseSession?.data?.session?.user?.email:sess?.email); updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
 if(SUPABASE_AUTH_ENABLED&&!authEmail&&supabaseSessionRequest){
 void supabaseSessionRequest.then(async(result)=>{
 const lateEmail=normalizeEmail(result?.data?.session?.user?.email);
@@ -936,7 +921,7 @@ if(currentEmail!==lateEmail)return;
 const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===lateEmail);
 if(!found)return;
 setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});
-setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:"yes",profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no",lateSessionRestore:"success"}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,sessionPresent:"yes",profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no",lateSessionRestore:"success"}}));
 if(found.role==="coach"&&!found.teamId)setView("create-team");
 else if(found.role==="player"&&!found.teamId)setView("join-team");
 else{if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player");}
@@ -996,7 +981,7 @@ if(!result.ok)return result;await P("sl:season-archives",result.seasonArchives,s
 const startJoinContext=useCallback(async(code,subjectKey)=>{
 const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
 const normalizedSubject=String(subjectKey||"").trim().toLowerCase();
-setDataDebug(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",update:"idle",error:""}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",update:"idle",error:""}}));
 if(!normalizedCode)return{ok:false,err:"Enter a valid team code."};
 if(!normalizedSubject)return{ok:false,err:"Enter a valid email."};
 try{
@@ -1011,17 +996,17 @@ const resolvedInviteState=String(body?.invite_state||"");
 const resolvedExpiresAt=body?.expires_at||body?.invite_expires_at||null;
 if(!res.ok){
 const safeError=String(body?.error||"lookup_failed");
-setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"failed",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:resolvedLookupCount,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,inviteContextSaved:"no",inviteContextTokenPresent:"no",inviteContextTeamId:resolvedMatchedTeamId,inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",error:safeError}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"failed",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:resolvedLookupCount,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,inviteContextSaved:"no",inviteContextTokenPresent:"no",inviteContextTeamId:resolvedMatchedTeamId,inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",error:safeError}}));
 if(safeError==="invalid_or_unavailable_code"||safeError==="invalid_code")return{ok:false,err:"Invalid team code."};
 return{ok:false,err:"Could not validate team code."};
 }
 const ctx={joinContextToken:body.join_context_token,token:body.join_context_token,expiresAt:body.expires_at,subject:normalizedSubject,subjectKey:normalizedSubject,inviteId:body.invite_id,teamId:resolvedMatchedTeamId,inviteCode:resolvedNormalizedCode,createdAt:Date.now()};
-setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"validated",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:Number.isFinite(resolvedLookupCount)&&resolvedLookupCount>0?resolvedLookupCount:1,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,error:""}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"validated",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:Number.isFinite(resolvedLookupCount)&&resolvedLookupCount>0?resolvedLookupCount:1,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,error:""}}));
 await savePendingJoinContext(ctx);
-setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:ctx.joinContextToken?"yes":"no",inviteContextTeamId:ctx.teamId||"",inviteContextSubject:ctx.subject||"",currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"yes"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:ctx.joinContextToken?"yes":"no",inviteContextTeamId:ctx.teamId||"",inviteContextSubject:ctx.subject||"",currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"yes"}}));
 return{ok:true,context:ctx};
 }catch(error){
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:"network_error"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:"network_error"}}));
 return{ok:false,err:"Could not validate team code."};
 }
 },[normalizeJoin,savePendingJoinContext]);
@@ -1031,19 +1016,19 @@ const consumeEndpoint="/v1/team-memberships/confirm-context";
 const resolvedContext=normalizeStoredInviteContext(contextOverride)||normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
 if(!currentUserEmail){
 const diagnostic=mapConsumeDiagnostic("consume_user_id_type_mismatch",400);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:"",consumeResolvedUserUuid:"",membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",error:diagnostic.code}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:"",consumeResolvedUserUuid:"",membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",error:diagnostic.code}}));
 return{ok:false,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
 }
 if(!resolvedContext?.joinContextToken){
 const diagnostic=mapConsumeDiagnostic("consume_context_token_missing",400);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:`${diagnostic.message} Checked ${INVITE_CONTEXT_STORAGE_KEY}.`,consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:currentUserEmail,consumeResolvedUserUuid:"",membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail,contextSubjectMatchesUser:"no",error:`missing_invite_context:${INVITE_CONTEXT_STORAGE_KEY}`}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:`${diagnostic.message} Checked ${INVITE_CONTEXT_STORAGE_KEY}.`,consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:currentUserEmail,consumeResolvedUserUuid:"",membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail,contextSubjectMatchesUser:"no",error:`missing_invite_context:${INVITE_CONTEXT_STORAGE_KEY}`}}));
 return{ok:false,err:`No validated invite context (checked ${INVITE_CONTEXT_STORAGE_KEY}).`,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
 }
 const subject=String(resolvedContext.subject||resolvedContext.subjectKey||"").trim().toLowerCase();
 const contextSubjectMatchesUser=subject===currentUserEmail?"yes":"no";
 if(contextSubjectMatchesUser!=="yes"){
 const diagnostic=mapConsumeDiagnostic("consume_subject_mismatch",400);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",error:diagnostic.code}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",error:diagnostic.code}}));
 return{ok:false,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
 }
 const consumeInFlightKey=buildConsumeInFlightKey({email:currentUserEmail,inviteCode:resolvedContext?.inviteCode||"",joinContextToken:resolvedContext?.joinContextToken||"",teamId:resolvedContext?.teamId||""});
@@ -1052,7 +1037,7 @@ const abortController=new AbortController();
 let timeoutId=null;
 const promise=(async()=>{
 setIsJoinConsumeActive(true);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeInFlightKey:consumeInFlightKey,consumeInFlightAgeMs:0,consumeTimeoutMs:15000,consumeHttpStatus:null,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeTokenPresent:resolvedContext.joinContextToken?"yes":"no",consumeTeamIdUsed:resolvedContext.teamId||"",consumeUserEmail:currentUserEmail,consumeResolvedUserUuid:"",consumeFetchStarted:"yes",consumeFetchFinished:"no",membershipInsertStatus:"pending",membershipInsertError:"",finalRouteDecision:"pending_consume",inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:resolvedContext.joinContextToken?"yes":"no",inviteContextTeamId:resolvedContext.teamId||"",inviteContextSubject:subject||"",currentUserEmail,contextSubjectMatchesUser,consumeGuardCleared:"no",consumeGuardClearReason:""}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeInFlightKey:consumeInFlightKey,consumeInFlightAgeMs:0,consumeTimeoutMs:15000,consumeHttpStatus:null,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeTokenPresent:resolvedContext.joinContextToken?"yes":"no",consumeTeamIdUsed:resolvedContext.teamId||"",consumeUserEmail:currentUserEmail,consumeResolvedUserUuid:"",consumeFetchStarted:"yes",consumeFetchFinished:"no",membershipInsertStatus:"pending",membershipInsertError:"",finalRouteDecision:"pending_consume",inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:resolvedContext.joinContextToken?"yes":"no",inviteContextTeamId:resolvedContext.teamId||"",inviteContextSubject:subject||"",currentUserEmail,contextSubjectMatchesUser,consumeGuardCleared:"no",consumeGuardClearReason:""}}));
 try{
 timeoutId=setTimeout(()=>abortController.abort("consume_fetch_timeout"),15_000);
 const res=await fetch(consumeEndpoint,{method:"POST",headers:{"Content-Type":"application/json","x-user-id":actor.email},signal:abortController.signal,body:JSON.stringify({join_context_token:resolvedContext.joinContextToken,subject_key:subject,client_request_id:clientRequestId||genId("join"),team_id_hint:resolvedContext.teamId||"",role_hint:"player"})});
@@ -1060,24 +1045,24 @@ const body=await res.json().catch(()=>({}));
 if(!res.ok){
 const diagnostic=mapConsumeDiagnostic(body?.diagnostic_code||body?.error,res.status);
 const diagnosticMessage=String(body?.diagnostic_message||body?.db_message||diagnostic.message||"");
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:res.status,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnosticMessage,consumeResolvedUserUuid:String(body?.resolved_uuid||prev.join.consumeResolvedUserUuid||""),membershipInsertStatus:res.status===429?"retryable":"failed",membershipInsertError:diagnostic.code,finalRouteDecision:res.status===429?"retry_join_team":"stay_join_team",error:res.status===429?"":diagnostic.code}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeHttpStatus:res.status,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnosticMessage,consumeResolvedUserUuid:String(body?.resolved_uuid||prev.join.consumeResolvedUserUuid||""),membershipInsertStatus:res.status===429?"retryable":"failed",membershipInsertError:diagnostic.code,finalRouteDecision:res.status===429?"retry_join_team":"stay_join_team",error:res.status===429?"":diagnostic.code}}));
 return{ok:false,retryable:res.status===429,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message,resolvedUserUuid:String(body?.resolved_uuid||"")};
 }
 await savePendingJoinContext(null);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:res.status,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeResolvedUserUuid:String(body?.resolved_user_uuid||prev.join.consumeResolvedUserUuid||""),membershipInsertStatus:"success",membershipInsertError:"",finalRouteDecision:"apply_profile_update"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeHttpStatus:res.status,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeResolvedUserUuid:String(body?.resolved_user_uuid||prev.join.consumeResolvedUserUuid||""),membershipInsertStatus:"success",membershipInsertError:"",finalRouteDecision:"apply_profile_update"}}));
 return{ok:true,teamId:body.team_id||resolvedContext.teamId,status:body.status||"joined",diagnosticCode:"",diagnosticMessage:"",resolvedUserUuid:String(body?.resolved_user_uuid||"")};
 }catch(error){
 if(error?.name==="AbortError"||String(error?.message||"").includes("consume_fetch_timeout")){
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:null,consumeDiagnosticCode:"consume_fetch_timeout",consumeDiagnosticMessage:"Join consume request timed out.",membershipInsertStatus:"failed",membershipInsertError:"consume_fetch_timeout",finalRouteDecision:"retry_join_team",error:"consume_fetch_timeout"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeHttpStatus:null,consumeDiagnosticCode:"consume_fetch_timeout",consumeDiagnosticMessage:"Join consume request timed out.",membershipInsertStatus:"failed",membershipInsertError:"consume_fetch_timeout",finalRouteDecision:"retry_join_team",error:"consume_fetch_timeout"}}));
 return{ok:false,retryable:true,err:"Join request timed out. Please retry.",diagnosticCode:"consume_fetch_timeout",diagnosticMessage:"Join consume request timed out."};
 }
 const diagnostic=mapConsumeDiagnostic("consume_membership_insert_failed",500);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:500,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",error:diagnostic.code}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeHttpStatus:500,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",error:diagnostic.code}}));
 return{ok:false,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
 }finally{
 if(timeoutId)clearTimeout(timeoutId);
 clearConsumeGuard(joinConsumeFlightRef.current,Date.now(),"consume_request_complete");
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeFetchFinished:"yes",consumeGuardCleared:"yes",consumeGuardClearReason:joinConsumeFlightRef.current.lastClearedReason||"consume_request_complete"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,consumeFetchFinished:"yes",consumeGuardCleared:"yes",consumeGuardClearReason:joinConsumeFlightRef.current.lastClearedReason||"consume_request_complete"}}));
 setIsJoinConsumeActive(false);
 }
 })();
@@ -1154,11 +1139,11 @@ if(SUPABASE_AUTH_ENABLED){
 const authRes=await supabase.auth.signUp({email:normalizedEmail,password});
 if(authRes.error){
 const safeMessage=getAuthErrorMessage(authRes.error);
-setDataDebug(prev=>({...prev,auth:{...prev.auth,signupHttpStatus:Number(authRes.error?.status||0)||null,signupCode:String(authRes.error.code||authRes.error.error||"signup_failed"),signupMessage:safeMessage,providerHint:mapSignupErrorMessage(authRes.error,false)}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,signupHttpStatus:Number(authRes.error?.status||0)||null,signupCode:String(authRes.error.code||authRes.error.error||"signup_failed"),signupMessage:safeMessage,providerHint:mapSignupErrorMessage(authRes.error,false)}}));
 console.error("[auth] signup failed",{status:authRes.error?.status??null,code:authRes.error?.code||authRes.error?.error||"signup_failed",message:safeMessage||"Signup failed"});
 return{ok:false,err:mapSignupErrorMessage(authRes.error,dataDebugRequested)};
 }
-setDataDebug(prev=>({...prev,auth:{...prev.auth,signupHttpStatus:200,signupCode:"success",signupMessage:"",providerHint:"",sessionPresent:authRes.data?.access_token?"yes":"no"}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,signupHttpStatus:200,signupCode:"success",signupMessage:"",providerHint:"",sessionPresent:authRes.data?.access_token?"yes":"no"}}));
 const hashed=hashPw(password);
 const np=upsertPlayerProfile(players,{email:normalizedEmail,name,password:hashed,role,teamId:null,hideFromLeaderboards:false});
 const seededDrills=mergeDefaultDrills(drills,DRILLS_INIT);
@@ -1179,11 +1164,11 @@ const registerEndpoint="/v1/legacy-auth/register";
 const reg=await legacyAuthFetch(registerEndpoint,{email:normalizedEmail,password,name,role});
 if(!reg.ok){
 const msg=reg.errorCode==="account_exists"?"Account already exists. Please sign in.":reg.errorCode==="invalid_request"?"Please enter a valid email, name, role, and an 8+ character password.":reg.errorCode==="rate_limited"?"Too many attempts. Wait and try again.":(reg.status===404||reg.parseMode!=="json")?"Registration service is not deployed yet.":reg.errorCode==="config_error"?"Registration service is not configured correctly.":reg.errorCode==="table_error"&&reg.errorStage==="select_existing_profile"?"Registration database lookup failed.":reg.errorCode==="table_error"&&reg.errorStage==="insert_legacy_profile"?"Registration database insert failed.":reg.errorCode==="internal_error"&&reg.errorStage==="hash_password"?"Registration password setup failed.":reg.errorCode==="internal_error"&&reg.errorStage==="insert_legacy_profile"?"Registration profile save failed.":"Registration service error. Please try again.";
-setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"failed",signupHttpStatus:reg.status,signupCode:String(reg.errorCode||"register_failed"),signupStage:String(reg.errorStage||""),signupMessage:reg.safeMessage||"",providerHint:"legacy_backend",profilePersistStatus:"failed",registerEndpoint,registerParseMode:reg.parseMode}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"failed",signupHttpStatus:reg.status,signupCode:String(reg.errorCode||"register_failed"),signupStage:String(reg.errorStage||""),signupMessage:reg.safeMessage||"",providerHint:"legacy_backend",profilePersistStatus:"failed",registerEndpoint,registerParseMode:reg.parseMode}}));
 console.error("[legacy-auth] register failed",{endpoint:registerEndpoint,status:reg.status,code:reg.errorCode||"register_failed",parseMode:reg.parseMode});
 return{ok:false,err:msg};}
 const profile=normalizeLegacyProfile(reg.body?.profile||{});
-setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"success",signupHttpStatus:reg.status||200,signupCode:"legacy_success",signupStage:"",signupMessage:"",providerHint:"legacy_backend",sessionPresent:"yes",profilePersistStatus:"success",profileTeamId:profile.teamId||"",registerEndpoint,registerParseMode:reg.parseMode}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"success",signupHttpStatus:reg.status||200,signupCode:"legacy_success",signupStage:"",signupMessage:"",providerHint:"legacy_backend",sessionPresent:"yes",profilePersistStatus:"success",profileTeamId:profile.teamId||"",registerEndpoint,registerParseMode:reg.parseMode}}));
 const np=upsertPlayerProfile(players,{email:profile.email,name:profile.name,password:"",role:profile.role,teamId:profile.teamId,hideFromLeaderboards:profile.hideFromLeaderboards});
 await P("sl:players",np,setPlayers);
 setUser(profile);legacyAuthSecretRef.current={email:profile.email,password};setView(profile.role==="coach"?"create-team":"join-team");DB.set("sl:session",{email:profile.email});trackEvent("auth_register",{targetRole:profile.role,userEmail:profile.email,userRole:profile.role},{email:profile.email,role:profile.role,teamId:profile.teamId||null});return{ok:true};
@@ -1196,22 +1181,22 @@ if(SUPABASE_AUTH_ENABLED){
 const authRes=await supabase.auth.signInWithPassword({email:normalizedEmail,password});
 if(authRes.error){
 const safeMessage=getAuthErrorMessage(authRes.error);
-setDataDebug(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:Number(authRes.error?.status||0)||null,loginCode:String(authRes.error.code||authRes.error.error||"login_failed"),loginMessage:safeMessage,providerHint:mapLoginErrorMessage(authRes.error,false)}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:Number(authRes.error?.status||0)||null,loginCode:String(authRes.error.code||authRes.error.error||"login_failed"),loginMessage:safeMessage,providerHint:mapLoginErrorMessage(authRes.error,false)}}));
 console.error("[auth] login failed",{status:authRes.error?.status??null,code:authRes.error?.code||authRes.error?.error||"login_failed",message:safeMessage||"Login failed"});
 return{ok:false,err:mapLoginErrorMessage(authRes.error,dataDebugRequested)};
 }
-setDataDebug(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:200,loginCode:"success",loginMessage:"",providerHint:"",sessionPresent:"yes"}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:200,loginCode:"success",loginMessage:"",providerHint:"",sessionPresent:"yes"}}));
 const activeSession=await supabase.auth.getSession();
 await bootstrapCoachProfile({supabaseClient:supabase,authUser:activeSession?.data?.session?.user,email:normalizedEmail});
 }else{
 const auth=await legacyAuthFetch("/v1/legacy-auth/login",{email:normalizedEmail,password});
-if(!auth.ok){setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"failed",loginHttpStatus:auth.status,loginCode:String(auth.body?.error||"invalid_credentials"),loginMessage:"Invalid email or password",providerHint:"legacy_backend"}}));return{ok:false,err:"Invalid email or password"};}
+if(!auth.ok){updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"failed",loginHttpStatus:auth.status,loginCode:String(auth.body?.error||"invalid_credentials"),loginMessage:"Invalid email or password",providerHint:"legacy_backend"}}));return{ok:false,err:"Invalid email or password"};}
 remoteProfile=normalizeLegacyProfile(auth.body?.profile||{});
-setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"success",loginHttpStatus:200,loginCode:"legacy_success",loginMessage:"",providerHint:"legacy_backend",sessionPresent:"yes",profileTeamId:remoteProfile.teamId||""}}));
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"success",loginHttpStatus:200,loginCode:"legacy_success",loginMessage:"",providerHint:"legacy_backend",sessionPresent:"yes",profileTeamId:remoteProfile.teamId||""}}));
 }
 const p=SUPABASE_AUTH_ENABLED?players.find(p=>normalizeEmail(p.email)===normalizedEmail):remoteProfile;
-if(!p){setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));return{ok:false,err:"Account not found. Please register again."};}
-setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success"}}));if(!SUPABASE_AUTH_ENABLED)legacyAuthSecretRef.current={email:normalizeEmail(p.email),password};
+if(!p){updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));return{ok:false,err:"Account not found. Please register again."};}
+updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,profileLoad:"success"}}));if(!SUPABASE_AUTH_ENABLED)legacyAuthSecretRef.current={email:normalizeEmail(p.email),password};
 if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);
 await DB.set("sl:session",{email:normalizeEmail(p.email),rp:normalizeEmail(p.email)+"\t"+(p.teamId||"")});
 const postAuthHydration=await hydrateAuthenticatedCollectionsToStorage({expectedIdentity:normalizeEmail(p.email)});
@@ -1325,7 +1310,7 @@ const createTeam=async(name,meta={})=>{
 if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
 if(teams.some(t=>t.ownerCoachId===user.email))return{ok:false,err:"Team already exists"};
 const endpoint="/v1/coach-signup/bootstrap";
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,teamName:String(name||""),endpoint,status:"request_start",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false}}));
+updateDataDebug?.(prev=>({...prev,createTeam:{...prev.createTeam,teamName:String(name||""),endpoint,status:"request_start",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false}}));
 let bootstrapBody={};
 let bootstrapStatus=0;
 try{
@@ -1340,24 +1325,24 @@ parseMode="non_json";
 await bootstrapRes.text().catch(()=>"");
 }
 const errorCode=String(bootstrapBody?.error||"");
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus,errorCode:errorCode||parseMode,responseSummary:bootstrapRes.ok?`invite:${Boolean(bootstrapBody?.invite_code)} team:${Boolean(bootstrapBody?.team_id)}`:`error:${errorCode||parseMode}`,status:bootstrapRes.ok?"response_ok":"response_error"}}));
+updateDataDebug?.(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus,errorCode:errorCode||parseMode,responseSummary:bootstrapRes.ok?`invite:${Boolean(bootstrapBody?.invite_code)} team:${Boolean(bootstrapBody?.team_id)}`:`error:${errorCode||parseMode}`,status:bootstrapRes.ok?"response_ok":"response_error"}}));
 if(!bootstrapRes.ok)return{ok:false,err:parseCreateTeamErrorMessage(bootstrapStatus,errorCode,parseMode)};
 }catch(error){
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus||null,errorCode:"network_error",responseSummary:"request_failed",status:"request_failed"}}));
+updateDataDebug?.(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus||null,errorCode:"network_error",responseSummary:"request_failed",status:"request_failed"}}));
 return{ok:false,err:"Network error while creating team."};
 }
 const code=normalizeJoin(bootstrapBody?.invite_code||"");
 const teamId=String(bootstrapBody?.team_id||"").trim();
 if(!code||!teamId){
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,errorCode:"invalid_response_shape",responseSummary:"missing team_id/invite_code",status:"response_invalid"}}));
+updateDataDebug?.(prev=>({...prev,createTeam:{...prev.createTeam,errorCode:"invalid_response_shape",responseSummary:"missing team_id/invite_code",status:"response_invalid"}}));
 return{ok:false,err:"Team setup response was incomplete."};
 }
 const nt={id:teamId,name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
 await P("sl:teams",[...teams,nt],setTeams);
 const np=players.map(p=>p.email===user.email?{...p,teamId:nt.id}:p);
 await P("sl:players",np,setPlayers);
-setUser({...user,teamId:nt.id});setView("coach");if(!SUPABASE_AUTH_ENABLED){await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",team_id:nt.id});setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthUpdateStatus:"success",profileTeamId:nt.id}}));}
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,teamId,joinCode:code,stateUpdated:true,remotePersisted:true,status:"success"}}));
+setUser({...user,teamId:nt.id});setView("coach");if(!SUPABASE_AUTH_ENABLED){await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",team_id:nt.id});updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,legacyAuthUpdateStatus:"success",profileTeamId:nt.id}}));}
+updateDataDebug?.(prev=>({...prev,createTeam:{...prev.createTeam,teamId,joinCode:code,stateUpdated:true,remotePersisted:true,status:"success"}}));
 return{ok:true,team:nt};
 };
 const persistJoinedPlayerRoster=async(resolvedTeamId)=>{
@@ -1374,7 +1359,7 @@ return{players:np,playerProfiles:nextProfiles};
 const joinTeam=async(code)=>{
 if(!user||user.role!=="player")return{ok:false,err:"Not authorized"};
 const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
-setDataDebug(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:String(user?.email||"").trim().toLowerCase(),contextSubjectMatchesUser:"no",update:"idle",error:""}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:String(user?.email||"").trim().toLowerCase(),contextSubjectMatchesUser:"no",update:"idle",error:""}}));
 let resolvedTeamId=null;
 const savedInviteContext=normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
 let activeContext=savedInviteContext;
@@ -1383,7 +1368,7 @@ const canUseSavedContext=Boolean(activeContext?.joinContextToken)&&String(active
 if(!canUseSavedContext){
 const ctx=await startJoinContext(normalizedCode,user.email);
 if(!ctx.ok){
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:ctx.err||"invalid_code"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:ctx.err||"invalid_code"}}));
 return{ok:false,err:ctx.err||"Invalid team code."};
 }
 activeContext=ctx.context||null;
@@ -1391,21 +1376,21 @@ activeContext=ctx.context||null;
 const joined=await consumeJoinContext(user,null,activeContext);
 if(!joined.ok){
 if(joined?.retryable)return{ok:false,retryable:true,err:joined.err||"Could not join team. Please retry."};
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,consumeDiagnosticCode:joined?.diagnosticCode||prev.join.consumeDiagnosticCode,consumeDiagnosticMessage:joined?.diagnosticMessage||joined.err||"",membershipInsertStatus:"failed",profileUpdateStatus:"idle",finalRouteDecision:"stay_join_team",error:joined?.diagnosticCode||joined.err||"join_failed"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,consumeDiagnosticCode:joined?.diagnosticCode||prev.join.consumeDiagnosticCode,consumeDiagnosticMessage:joined?.diagnosticMessage||joined.err||"",membershipInsertStatus:"failed",profileUpdateStatus:"idle",finalRouteDecision:"stay_join_team",error:joined?.diagnosticCode||joined.err||"join_failed"}}));
 return{ok:false,err:joined.err||"Could not join team."};
 }
 resolvedTeamId=joined.teamId;
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"backend_match",lookupCount:1,matchedTeamId:resolvedTeamId,consumeResolvedUserUuid:joined?.resolvedUserUuid||prev.join.consumeResolvedUserUuid}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,status:"backend_match",lookupCount:1,matchedTeamId:resolvedTeamId,consumeResolvedUserUuid:joined?.resolvedUserUuid||prev.join.consumeResolvedUserUuid}}));
 if(!resolvedTeamId)return{ok:false,err:"Could not resolve team."};
-if(user.teamId===resolvedTeamId){await persistJoinedPlayerRoster(resolvedTeamId);setDataDebug(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"roster_synced",finalRouteDecision:"route_player_dashboard"}}));navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
+if(user.teamId===resolvedTeamId){await persistJoinedPlayerRoster(resolvedTeamId);updateDataDebug?.(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"roster_synced",finalRouteDecision:"route_player_dashboard"}}));navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
 try{
 await persistJoinedPlayerRoster(resolvedTeamId);
-setDataDebug(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"roster_synced"}}));
-setUser({...user,teamId:resolvedTeamId});if(!SUPABASE_AUTH_ENABLED){await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",team_id:resolvedTeamId});setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthUpdateStatus:"success",profileTeamId:resolvedTeamId}}));}navigateToPlayerHome();setView("player");
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"joined",update:"success",profileUpdateStatus:prev.join.profileUpdateStatus==="idle"?"profile_unchanged":prev.join.profileUpdateStatus,finalRouteDecision:"route_player_dashboard",error:""}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"roster_synced"}}));
+setUser({...user,teamId:resolvedTeamId});if(!SUPABASE_AUTH_ENABLED){await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",team_id:resolvedTeamId});updateDataDebug?.(prev=>({...prev,auth:{...prev.auth,legacyAuthUpdateStatus:"success",profileTeamId:resolvedTeamId}}));}navigateToPlayerHome();setView("player");
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,status:"joined",update:"success",profileUpdateStatus:prev.join.profileUpdateStatus==="idle"?"profile_unchanged":prev.join.profileUpdateStatus,finalRouteDecision:"route_player_dashboard",error:""}}));
 return{ok:true};
 }catch(error){
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",consumeDiagnosticCode:"consume_profile_update_failed",consumeDiagnosticMessage:"Local profile/team persistence failed after membership confirmation.",profileUpdateStatus:"failed",finalRouteDecision:"stay_join_team",error:"consume_profile_update_failed"}}));
+updateDataDebug?.(prev=>({...prev,join:{...prev.join,status:"failed",consumeDiagnosticCode:"consume_profile_update_failed",consumeDiagnosticMessage:"Local profile/team persistence failed after membership confirmation.",profileUpdateStatus:"failed",finalRouteDecision:"stay_join_team",error:"consume_profile_update_failed"}}));
 return{ok:false,err:"Could not save player team profile locally.",diagnosticCode:"consume_profile_update_failed"};
 }
 };
@@ -1596,7 +1581,7 @@ replaceShotLog(localLog.id,demoSavedLog);
 setStatSyncError("");
 trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"demo_saved",syncState:"local_pending",demo:true});
 const demoLeaderboardRows=calculateLeaderboardFromShotLogs({shotLogs:[...shotLogs.filter(existing=>!isSameHomeShotEntry(existing,demoSavedLog)),demoSavedLog],teamId:user.teamId,playerContext:{players,profiles:playerProfiles,scope:view==="player"?"players":homeShotsLeaderboardScope}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
-setHomeShotsLeaderboard({status:"success",rows:demoLeaderboardRows,error:""});
+setHomeShotsLeaderboard({status:"success",rows:demoLeaderboardRows,error:"",mode:"demo_local",teamId:user.teamId});
 return{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true};
 }
 try{
@@ -1921,22 +1906,17 @@ const[showCoachGuidanceDetails,setShowCoachGuidanceDetails]=useState(false);
 const playerLeaderboardState=useMemo(()=>{
   const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
   const requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
-  const rawError=String(homeShotsLeaderboard?.error||"").toLowerCase();
-  const hasData=rows.length>0;
-  const emptyStateSafeError=requestedStatus==="error"&&(rawError.includes("not allowed for this team")||rawError.includes("team id is required")||rawError.includes("sign in required")||rawError.includes("invalid_scope")||rawError.includes("endpoint missing"));
-  const status=hasData?"success":emptyStateSafeError?"idle":requestedStatus;
-  const error=status==="error"?String(homeShotsLeaderboard?.error||""):"";
-  return {rows,status,error,hasData};
+  const error=String(homeShotsLeaderboard?.error||"");
+  return {rows,status:requestedStatus,error,hasData:rows.length>0};
 },[homeShotsLeaderboard]);
-const playerActiveTeamIdentity=useMemo(()=>getActiveTeamPlayerIdentity(players,u?.teamId),[players,u?.teamId]);
+const playerActiveTeamIdentity=useMemo(()=>getActiveTeamPlayerIdentity([...(Array.isArray(players)?players:[]),u],u?.teamId),[players,u,u?.teamId]);
 const playerActiveTeamKeySet=playerActiveTeamIdentity.keySet;
 const playerActiveTeamEmailSet=playerActiveTeamIdentity.emailSet;
 const playerActiveTeamNameSet=playerActiveTeamIdentity.nameSet;
 const playerLeaderboardPlayers=useMemo(()=>playerActiveTeamIdentity.players,[playerActiveTeamIdentity.players]);
-const playerDashboardHomeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(buildAtHomeLeaderboardRows({scores,shotLogs,programDrills,players:playerLeaderboardPlayers,limit:3}),playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet),[scores,shotLogs,programDrills,playerLeaderboardPlayers,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet]);
 const playerLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(playerLeaderboardState.rows,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet),[playerLeaderboardState.rows,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet]);
-const playerDashboardLeaderboardRows=playerLeaderboardRows.length?playerLeaderboardRows:playerDashboardHomeLeaderboardRows;
-const playerDashboardLeaderboardStatus=playerLeaderboardState.status==="success"||playerDashboardHomeLeaderboardRows.length>0?"success":playerLeaderboardState.status;
+const playerDashboardLeaderboardRows=playerLeaderboardRows;
+const playerDashboardLeaderboardStatus=playerLeaderboardState.status;
 const playerWeeklyMakes=useMemo(()=>{const cutoff=new Date(`${today}T00:00:00`);cutoff.setDate(cutoff.getDate()-6);const start=`${cutoff.getFullYear()}-${String(cutoff.getMonth()+1).padStart(2,"0")}-${String(cutoff.getDate()).padStart(2,"0")}`;return shotLogs.filter((row)=>rowMatchesPlayerIdentity(row)&&(!u?.teamId||!String(row?.teamId||row?.team_id||"")||String(row?.teamId||row?.team_id)===String(u.teamId))&&String(row?.date||"")>=start).reduce((sum,row)=>sum+Number(row?.made||0),0);},[shotLogs,rowMatchesPlayerIdentity,u?.teamId,today]);
 const atHomeWorkspaceModel=useMemo(()=>buildAtHomeWorkspaceModel({today,userEmail:u?.email,teamId:u?.teamId,drills,todayScores:todayS,shotLogs,streak,dailyGoal:PLAYER_DAILY_SHOT_TARGET}),[today,u?.email,u?.teamId,drills,todayS,shotLogs,streak]);
 const programWorkspaceModel=useMemo(()=>buildProgramWorkspaceModel({programDrills,todayScores:todayProgramScores,allScores:programScores,coachPriorities}),[programDrills,todayProgramScores,programScores,coachPriorities]);
@@ -2219,10 +2199,13 @@ return <div className={`app-shell performance-shell performance-shell--player ${
             mode="player"
             userEmail={u?.email||""}
             status={playerDashboardLeaderboardStatus}
+            error={playerLeaderboardState.error}
+            teamId={u?.teamId||""}
             rows={playerDashboardLeaderboardRows}
             emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
             maxRows={3}
             onViewAll={()=>switchTab("leaderboards")}
+            onRetry={refreshHomeShotsLeaderboard}
           />
         </ProgressiveDisclosure>
         <ProgressiveDisclosure
@@ -2317,8 +2300,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   </div>}
 
   {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace"/>
-    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} events={events} rsvps={rsvps} scSessions={scSessions} scLogs={scLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} />
+    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace" showMetrics={false}/>
+    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} leaderboardError={homeShotsLeaderboard?.error||""} leaderboardMode={homeShotsLeaderboard?.mode||"unknown"} onRetryHomeShots={refreshHomeShotsLeaderboard} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} events={events} rsvps={rsvps} scSessions={scSessions} scLogs={scLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} showHeader={false}/>
   </div>}
 
   {tab==="in-season"&&!active&&<div className={slideClass} key="in-season" data-testid="player-in-season-workspace">
@@ -3352,9 +3335,9 @@ const safeScRsvps=useMemo(()=>filterActiveTeamPlayerRows(scRsvps,activeTeamPlaye
 const safeScLogs=useMemo(()=>filterActiveTeamPlayerRows(scLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
 const safeShotLogs=useMemo(()=>filterActiveTeamPlayerRows(shotLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[shotLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
 const activeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(homeShotsLeaderboard?.rows||[],activeTeamPlayerKeySet,activeTeamPlayerEmailSet,activeTeamPlayerNameSet),[homeShotsLeaderboard?.rows,activeTeamPlayerKeySet,activeTeamPlayerEmailSet,activeTeamPlayerNameSet]);
-const canonicalCoachHomeLeaderboardRows=useMemo(()=>Array.isArray(coachHomeLeaderboardRows)?coachHomeLeaderboardRows:[],[coachHomeLeaderboardRows]);
+const canonicalCoachHomeLeaderboardRows=activeLeaderboardRows;
 const coachDashboardLeaderboardRows=canonicalCoachHomeLeaderboardRows.slice(0,5);
-const coachDashboardLeaderboardStatus=homeShotsLeaderboard?.status==="success"||coachDashboardLeaderboardRows.length>0?"success":homeShotsLeaderboard?.status||"idle";
+const coachDashboardLeaderboardStatus=homeShotsLeaderboard?.status||"idle";
 useEffect(()=>{
   if(!isShotLabDebugMode())return;
   const rosterKeys=new Set(coachRosterPlayers.flatMap(p=>[p?.email,p?.player_email,p?.playerId,p?.player_id,p?.userId,p?.user_id,p?.profileId,p?.profile_id,p?.id].map(normalizeEmail).filter(Boolean)));
@@ -3366,7 +3349,7 @@ useEffect(()=>{
     }
   });
 },[canonicalCoachHomeLeaderboardRows,coachRosterPlayers,u?.teamId]);
-const leaderboardPlayers=useMemo(()=>[...(Array.isArray(players)?players:[]),...(Array.isArray(playerProfiles)?playerProfiles:[])],[players,playerProfiles]);
+const leaderboardPlayers=useMemo(()=>coachRosterPlayers,[coachRosterPlayers]);
 const selectedSeasonArchive=useMemo(()=>seasonArchives.find(a=>String(a?.id||"")===String(selectedSeasonArchiveId||""))||null,[seasonArchives,selectedSeasonArchiveId]);
 useEffect(()=>{
   if(!isShotLabDebugMode())return;
@@ -3683,10 +3666,13 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
         categoryLabel="Home Shots"
         mode="coach"
         status={coachDashboardLeaderboardStatus}
+        error={homeShotsLeaderboard?.error||""}
+        teamId={u?.teamId||""}
         rows={coachDashboardLeaderboardRows}
         emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
         maxRows={5}
         onViewAll={openCoachLeaderboards}
+        onRetry={refreshHomeShotsLeaderboard}
       />
     </ProgressiveDisclosure>
     {(()=>{const coachChecklist=[
@@ -4196,7 +4182,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
 
   {tab==="activity"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Team intelligence" title="Activity" summary="Filter shooting, drill, S&C, and schedule signals into one decision-ready team stream." status={`${filteredCoachActivityIntelligenceRows.length} visible signals`} metrics={[{key:"all",label:"All Signals",value:coachActivityIntelligenceRows.length,detail:"Current operational stream"},{key:"shooting",label:"Shooting",value:coachActivityIntelligenceRows.filter(row=>row.type==="shooting").length,detail:"Home-shot activity",tone:"positive"},{key:"strength",label:"S&C",value:coachActivityIntelligenceRows.filter(row=>row.type==="strength").length,detail:"Completed strength work",tone:"info"},{key:"event",label:"Events",value:coachActivityIntelligenceRows.filter(row=>row.type==="event").length,detail:"Upcoming schedule signals"}]} activeMetric={activityIntelligenceScope} onMetricSelect={(key)=>setActivityIntelligenceScope(key)} testId="coach-page-dashboard-activity"/><CoachActivityIntelligencePanel rows={filteredCoachActivityIntelligenceRows} scope={activityIntelligenceScope} query={activityIntelligenceQuery} onScopeChange={setActivityIntelligenceScope} onQueryChange={setActivityIntelligenceQuery} onOpenItem={(item)=>{if(item.type==="event")setEventDrawerId(item.source?.id||"");else openPlayerIntelligence(item.source||{});}}/></div>}
 
-  {tab==="leaderboards"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Competitive intelligence" title="Leaderboards" summary="Track ranking movement, participation depth, and the players setting the current standard." status={coachPageDashboardSummary.leaderboards.leader?`Leader: ${coachPageDashboardSummary.leaderboards.leader.name||coachPageDashboardSummary.leaderboards.leader.email||"Player"}`:"No ranked players"} metrics={[{key:"ranked",label:"Ranked Players",value:coachPageDashboardSummary.leaderboards.ranked,detail:"Active roster entries"},{key:"leader",label:"Current Leader",value:coachPageDashboardSummary.leaderboards.leader?.total||coachPageDashboardSummary.leaderboards.leader?.makes||0,detail:coachPageDashboardSummary.leaderboards.leader?.name||"No leader yet",tone:"positive"},{key:"archives",label:"Archived Seasons",value:coachPageDashboardSummary.archives.total,detail:"Historical comparisons",tone:"info"},{key:"scope",label:"View",value:"LIVE",detail:"Current team scope"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>setCoachPageMetric(key)} testId="coach-page-dashboard-leaderboards"/><CoachLeaderboardOperationalPanel rows={filteredCoachLeaderboardIntelligenceRows} scope={leaderboardIntelligenceScope} query={leaderboardIntelligenceQuery} onScopeChange={setLeaderboardIntelligenceScope} onQueryChange={setLeaderboardIntelligenceQuery} onOpenPlayer={openPlayerIntelligence}/><PremiumLeaderboardsHub viewerRole="coach" leaderboardRows={canonicalCoachHomeLeaderboardRows} leaderboardStatus={coachDashboardLeaderboardStatus} programScores={safeProgramScores} programDrills={programDrills} players={leaderboardPlayers} teamId={u?.teamId||""} events={safeEvents} rsvps={safeRsvps} scSessions={scSessions} scLogs={safeScLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} />
+  {tab==="leaderboards"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Competitive intelligence" title="Leaderboards" summary="See the team standard, the next gap to close, and the category that needs attention." status={`${coachDashboardLeaderboardRows.length} current ranked`} metrics={[{key:"ranked",label:"Ranked Players",value:coachDashboardLeaderboardRows.length,detail:"Current verified rankings"},{key:"leader",label:"Current Leader",value:coachDashboardLeaderboardRows[0]?.total_home_shots||coachDashboardLeaderboardRows[0]?.total||0,detail:coachDashboardLeaderboardRows[0]?.player_display_name||"No leader yet"},{key:"archives",label:"Archived Seasons",value:seasonArchives.length,detail:"Historical record book"}]} activeMetric={coachPageMetric} onMetricSelect={setCoachPageMetric} testId="coach-page-dashboard-leaderboards"/><div data-testid="coach-leaderboard-operational-panel"><section className="coachLeaderboardPulse" data-testid="coach-leaderboard-pulse" aria-label="Leaderboard performance pulse" style={{boxSizing:"border-box",width:"min(100%, 330px)",maxWidth:"330px",marginInline:"auto"}}><div className="coachLeaderboardPulseCopy"><span>This week</span><strong>{coachDashboardLeaderboardRows.length?"Current verified standings":"The weekly race is open"}</strong><small>{coachDashboardLeaderboardRows.length?`${coachDashboardLeaderboardRows.length} players ranked in the current verified standings.`:"New verified activity will establish the weekly pace."}</small></div><div className="coachLeaderboardPulseMetrics"><div><span>Ranked</span><strong>{coachDashboardLeaderboardRows.length}</strong><small>current players</small></div><div><span>Archives</span><strong>{seasonArchives.length}</strong><small>completed seasons</small></div></div></section></div><PremiumLeaderboardsHub viewerRole="coach" leaderboardRows={canonicalCoachHomeLeaderboardRows} leaderboardStatus={coachDashboardLeaderboardStatus} leaderboardError={homeShotsLeaderboard?.error||""} leaderboardMode={homeShotsLeaderboard?.mode||"unknown"} onRetryHomeShots={refreshHomeShotsLeaderboard} programScores={safeProgramScores} programDrills={programDrills} players={leaderboardPlayers} teamId={u?.teamId||""} events={safeEvents} rsvps={safeRsvps} scSessions={scSessions} scLogs={safeScLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} onOpenPlayer={openPlayerIntelligence} showHeader={false}/>
   </div>}
 
   {tab==="in-season"&&<div className="page pageShell fade-up" data-accent="in-season" style={shellVars("in-season")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Season performance" title="In Season" summary="Manage in-season drill records, free throw standards, school leaderboards, and verified game-stat imports." status={`${customInSeasonDrillCount}/30 custom in-season drills`} metrics={[{key:"drills",label:"In Season Drills",value:programDrills.filter(d=>d?.isDefaultDemo||isInSeasonProgramDrill(d)).length,detail:"Team standards"},{key:"custom",label:"Custom Slots",value:`${customInSeasonDrillCount}/30`,detail:"Coach-created standards",tone:"info"},{key:"records",label:"Program Scores",value:safeProgramScores.length,detail:"Verified drill results",tone:"positive"},{key:"archives",label:"Archived Seasons",value:seasonArchives.length,detail:"Historical record books"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>setCoachPageMetric(key)} testId="coach-page-dashboard-in-season"/><InSeasonPerformanceHub role="coach" user={u} team={team} programDrills={programDrills} programScores={safeProgramScores} players={leaderboardPlayers} seasonArchives={seasonArchives} addProgramDrill={addInSeasonProgramDrill} updateProgramDrill={updateInSeasonProgramDrill} removeProgramDrill={removeProgramDrill} onOpenCoachScoreEntry={()=>setShowProgramScoreEntry(true)} />

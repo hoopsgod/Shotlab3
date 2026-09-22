@@ -11,7 +11,8 @@ const browserAligner = await readFile(new URL('../scripts/align-phase4f-browser-
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
 test('Phase 4F uses neutral runtime plus shared foundations and one workspace chunk per role', () => {
-  for (const chunk of ['RuntimeShared', 'AuthenticatedUi', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) assert.match(vite, new RegExp(`return '${chunk}'`))
+  for (const chunk of ['RuntimeShared', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) assert.match(vite, new RegExp(`return '${chunk}'`))
+  assert.doesNotMatch(vite, /return 'AuthenticatedUi'/)
   for (const retired of ['PlayerAnalyticsWorkspaces', 'PlayerInterfaceWorkspaces', 'CoachAdministrationWorkspaces', 'CoachOperationalWorkspaces', 'PlayerProfileWorkspaces']) assert.doesNotMatch(vite, new RegExp(`return '${retired}'`))
   assert.match(vite, /vite\/preload-helper/)
   assert.doesNotMatch(vite, /onlyExplicitManualChunks:\s*true/)
@@ -21,12 +22,13 @@ test('Phase 4F moves cross-role scoring and assignment services into AppDomainSe
   assert.match(vite, /APP_DOMAIN_SERVICE_FRAGMENTS/)
   for (const fragment of ['authFlow','appPersistenceService','homeShotLogging','playerDataManagement','seasonLeaderboardAnalytics','programDrillScoring','assignmentDeadline','playerAssignmentService','playerAssignmentHistoryService']) assert.match(vite, new RegExp(fragment))
   assert.match(vite, /return 'AppDomainServices'/)
+  assert.equal((vite.match(/useCleanTeamLogo\\.js/g) || []).length, 1)
 })
 
-test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in AuthenticatedUi', () => {
+test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in shared AppDomainServices', () => {
   assert.match(vite, /SHARED_AUTHENTICATED_UI_FRAGMENTS/)
-  for (const fragment of ['TeamBrandingContext','MobileNavigation','VisualHierarchy','ShotLabStatePanel','SemanticStatus','WorkspaceRecoveryBoundary','PlayerInterfaceFallback']) assert.match(vite, new RegExp(fragment))
-  assert.match(vite, /return 'AuthenticatedUi'/)
+  for (const fragment of ['TeamBrandingContext','MobileNavigation','VisualHierarchy','ShotLabStatePanel','SemanticStatus','WorkspaceRecoveryBoundary','PlayerInterfaceFallback','useCleanTeamLogo']) assert.match(vite, new RegExp(fragment))
+  assert.match(vite, /return 'AppDomainServices'/)
 })
 
 test('Phase 4F verifies current Coach routes and hydrated attendance events without mutating browser contracts', () => {

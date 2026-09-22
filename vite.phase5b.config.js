@@ -7,6 +7,14 @@ const APP_SUFFIX = '/src/App.jsx'
 const APP_COACH_STYLE_IMPORT = 'import "./styles/CoachInteractiveDashboard.css";'
 const SHARED_SECONDARY_PAGE_FRAGMENT = '/src/components/SecondaryPageSystem'
 const SHARED_PREMIUM_WORKSPACE_STYLE = '/src/styles/PremiumWorkspace.css'
+const COACH_RESPONSE_SERVICE_FRAGMENTS = [
+  '/src/lib/coachResponseLoopEnhancer.js',
+  '/src/lib/coachFollowUpEnhancer.js',
+  '/src/lib/coachAssignmentOutcomeEnhancer.js',
+  '/src/lib/coachFollowUpService.js',
+  '/src/lib/coachPlayerResponseLoop.js',
+]
+
 const CORE_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/schedulePersistenceService.js',
   '/src/lib/playerProfilePersistenceService.js',
@@ -72,8 +80,10 @@ export default defineConfig(async (environment) => {
           ...baseOutput,
           manualChunks(id, api) {
             const moduleId = normalizeModuleId(id)
+            if (COACH_RESPONSE_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'CoachWorkspaces'
             if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
-            if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
+            if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT)) return 'CoachWorkspaces'
+            if (moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AppDomainServices'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
           },
         },

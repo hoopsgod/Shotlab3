@@ -60,7 +60,7 @@ test("structured assignment notes preserve private coach notes and legacy notes"
 
 test("response-loop source contracts keep the workflow one-tap and honest", () => {
   const enhancer = fs.readFileSync(new URL("../src/lib/coachResponseLoopEnhancer.js", import.meta.url), "utf8");
-  const followUp = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
+  const followUp = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
   const activation = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 
   assert.match(enhancer, /coach-live-activity/);

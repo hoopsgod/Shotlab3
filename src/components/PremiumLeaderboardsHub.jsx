@@ -1,10 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import CompactLeaderboardPreviewCard from './CompactLeaderboardPreviewCard';
 import { ProgressiveDisclosure } from './VisualHierarchy.jsx';
-import { buildAtHomeLeaderboardRows } from '../lib/homeLeaderboardRows.js';
 import { getAllProgramScoreRows } from '../lib/programDrillScoring.js';
-import { isShotLabDebugMode } from '../lib/releaseDiagnostics.js';
-import { filterActiveTeamLeaderboardRows, getActiveTeamPlayerIdentity } from '../lib/playerDataManagement.js';
 import {
   LEADERBOARD_TIME_SCOPES,
   buildAllTimeEventParticipationLeaderboardRows,
@@ -12,13 +9,13 @@ import {
   buildAllTimeProgramLeaderboardRows,
   buildAllTimeStrengthParticipationLeaderboardRows,
   buildCurrentEventParticipationLeaderboardRows,
-  buildCurrentOffseasonHomeLeaderboardRows,
   buildCurrentOffseasonProgramLeaderboardRows,
   buildCurrentStrengthParticipationLeaderboardRows,
   getAllTimeProgramDrills,
   getSeasonLeaderboardCoverage,
 } from '../lib/seasonLeaderboardAnalytics.js';
 import { loadParticipationLeaderboards } from '../lib/participationLeaderboardService.js';
+import { buildLeaderboardDecisionSurface, buildLeaderboardWeeklyActivity, resolveLeaderboardDataState, selectLeaderboardRows } from '../lib/leaderboardSelectors.js';
 
 const PRIMARY_CATEGORY_ITEMS = [
   { key: 'home_shots', label: 'At-Home Shots' },
@@ -38,9 +35,6 @@ const TIME_SCOPE_ITEMS = [
 ];
 
 const FALLBACK_FONT = '"Barlow Condensed", "Bebas Neue", var(--font-body, Inter), sans-serif';
-const CURRENT_PLAYER_EMPTY = 'No leaderboard data yet. Log shots to enter the rankings.';
-const CURRENT_TEAM_EMPTY = 'No team leaderboard data yet. Players will appear here after they log shots.';
-
 const tabStyle = (active) => ({
   minHeight: 44,
   padding: '9px 12px',
@@ -54,12 +48,18 @@ const tabStyle = (active) => ({
   textTransform: 'uppercase',
   fontWeight: 800,
   cursor: 'pointer',
+  touchAction: 'manipulation',
+  boxSizing: 'border-box',
 });
 
 export default function PremiumLeaderboardsHub({
   viewerRole,
   leaderboardRows = [],
   leaderboardStatus = 'idle',
+  leaderboardError = '',
+  leaderboardMode = 'unknown',
+  onRetryHomeShots,
+  onOpenPlayer,
   userEmail = '',
   currentUser = {},
   programScores = [],
@@ -74,6 +74,7 @@ export default function PremiumLeaderboardsHub({
   scLogs = [],
   seasonArchives = [],
   testId = 'premium-leaderboards-hub',
+  showHeader = true,
 }) {
   const VOLT = '#C8FF00';
   const LIGHT = '#F5F7FA';
@@ -83,6 +84,10 @@ export default function PremiumLeaderboardsHub({
   const [activeProgramDrillId, setActiveProgramDrillId] = useState('');
   const [remoteParticipationLeaderboards, setRemoteParticipationLeaderboards] = useState(null);
   const [participationLoadMode, setParticipationLoadMode] = useState('loading');
+  const [participationStorageMode, setParticipationStorageMode] = useState('');
+  const [participationError, setParticipationError] = useState('');
+  const [participationRefreshVersion, setParticipationRefreshVersion] = useState(0);
+  const participationTeamRef = useRef('');
 
   const teamArchives = useMemo(
     () => (Array.isArray(seasonArchives) ? seasonArchives : []).filter((archive) => !teamId || String(archive?.teamId || archive?.team_id || '') === String(teamId)),
@@ -118,35 +123,16 @@ export default function PremiumLeaderboardsHub({
     }
   }, [selectedProgramDrill, availableProgramDrills, activeProgramDrillId]);
 
-  const activeRosterIdentity = useMemo(() => getActiveTeamPlayerIdentity(players, teamId), [players, teamId]);
-  const activeRosterKeySet = activeRosterIdentity.keySet;
-  const activeRosterEmailSet = activeRosterIdentity.emailSet;
-  const activeRosterNameSet = activeRosterIdentity.nameSet;
-
-  const currentDerivedHomeRows = useMemo(
-    () => buildCurrentOffseasonHomeLeaderboardRows({
-      seasonArchives: teamArchives,
-      teamId,
-      homeScores,
-      shotLogs,
-      programDrills,
-      players,
-      limit: 10,
-    }),
-    [teamArchives, teamId, homeScores, shotLogs, programDrills, players],
+  // Current home-shot rankings are source-owned by the signed leaderboard
+  // service. A missing or failed request must not be replaced with client-side
+  // score aggregation; All-Time has its own archive-aware selector below.
+  const currentHomeSourceRows = useMemo(
+    () => (Array.isArray(leaderboardRows) ? leaderboardRows : []),
+    [leaderboardRows],
   );
-  const rawFallbackHomeLeaderboardRows = useMemo(
-    () => buildAtHomeLeaderboardRows({ scores: homeScores, shotLogs, programDrills, players, limit: 10 }),
-    [homeScores, shotLogs, programDrills, players],
-  );
-  const currentHomeSourceRows = useMemo(() => {
-    if (hasFrozenHistory) return currentDerivedHomeRows;
-    if (Array.isArray(leaderboardRows) && leaderboardRows.length > 0) return leaderboardRows;
-    return currentDerivedHomeRows.length > 0 ? currentDerivedHomeRows : rawFallbackHomeLeaderboardRows;
-  }, [hasFrozenHistory, currentDerivedHomeRows, leaderboardRows, rawFallbackHomeLeaderboardRows]);
   const currentHomeLeaderboardRows = useMemo(
-    () => filterActiveTeamLeaderboardRows(currentHomeSourceRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet),
-    [currentHomeSourceRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet],
+    () => selectLeaderboardRows({ rows: currentHomeSourceRows, players, teamId }),
+    [currentHomeSourceRows, players, teamId],
   );
   const allTimeHomeLeaderboardRows = useMemo(
     () => buildAllTimeHomeLeaderboardRows({
@@ -160,11 +146,11 @@ export default function PremiumLeaderboardsHub({
     }),
     [teamArchives, teamId, homeScores, shotLogs, programDrills, players],
   );
-  const atHomeLeaderboardRows = isAllTime ? allTimeHomeLeaderboardRows : currentHomeLeaderboardRows;
-  const atHomeLeaderboardStatus = atHomeLeaderboardRows.length > 0
-    ? 'success'
-    : (!isAllTime && !hasFrozenHistory ? leaderboardStatus : 'idle');
-  const hasRows = atHomeLeaderboardRows.length > 0;
+  const atHomeLeaderboardRows = useMemo(
+    () => selectLeaderboardRows({ rows: isAllTime ? allTimeHomeLeaderboardRows : currentHomeLeaderboardRows, players, teamId, includeArchivedPlayers: isAllTime }),
+    [isAllTime, allTimeHomeLeaderboardRows, currentHomeLeaderboardRows, players, teamId],
+  );
+  const atHomeLeaderboardStatus = isAllTime ? 'success' : leaderboardStatus;
 
   const rawCurrentProgramRows = useMemo(
     () => selectedProgramDrill
@@ -180,8 +166,8 @@ export default function PremiumLeaderboardsHub({
     [selectedProgramDrill, teamArchives, teamId, normalizedProgramScores, players],
   );
   const currentProgramRows = useMemo(
-    () => filterActiveTeamLeaderboardRows(rawCurrentProgramRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet),
-    [rawCurrentProgramRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet],
+    () => selectLeaderboardRows({ rows: rawCurrentProgramRows, players, teamId }),
+    [rawCurrentProgramRows, players, teamId],
   );
   const allTimeProgramRows = useMemo(
     () => selectedProgramDrill
@@ -196,7 +182,10 @@ export default function PremiumLeaderboardsHub({
       : [],
     [selectedProgramDrill, teamArchives, teamId, normalizedProgramScores, players],
   );
-  const programDrillLeaderboardRows = isAllTime ? allTimeProgramRows : currentProgramRows;
+  const programDrillLeaderboardRows = useMemo(
+    () => selectLeaderboardRows({ rows: isAllTime ? allTimeProgramRows : currentProgramRows, players, teamId, includeArchivedPlayers: isAllTime }),
+    [isAllTime, allTimeProgramRows, currentProgramRows, players, teamId],
+  );
 
   const localCurrentEventRows = useMemo(
     () => buildCurrentEventParticipationLeaderboardRows({
@@ -245,90 +234,55 @@ export default function PremiumLeaderboardsHub({
 
   useEffect(() => {
     let cancelled = false;
-    setRemoteParticipationLeaderboards(null);
+    const teamChanged = participationTeamRef.current !== String(teamId || '');
+    participationTeamRef.current = String(teamId || '');
+    if (teamChanged) {
+      setRemoteParticipationLeaderboards(null);
+      setParticipationStorageMode('');
+    }
     if (!teamId) {
       setParticipationLoadMode('missing_context');
+      setParticipationStorageMode('');
+      setParticipationError('Choose a team before viewing participation rankings.');
       return () => { cancelled = true; };
     }
-    setParticipationLoadMode('loading');
+    setParticipationLoadMode((previous) => !teamChanged && ['success', 'error', 'permission', 'unavailable', 'demo_local'].includes(previous) ? 'refreshing' : 'loading');
+    setParticipationError('');
     void loadParticipationLeaderboards({ teamId, userEmail }).then((result) => {
       if (cancelled) return;
       if (!result.ok) {
-        setParticipationLoadMode('error');
+        setParticipationLoadMode(result.status || 'error');
+        setParticipationError(result.error || 'Participation rankings could not load. Try again.');
         return;
       }
-      setRemoteParticipationLeaderboards(result.leaderboards);
-      setParticipationLoadMode(result.mode || 'signed_api');
+      setRemoteParticipationLeaderboards({ teamId: String(teamId), leaderboards: result.leaderboards });
+      setParticipationStorageMode(result.mode || '');
+      setParticipationLoadMode(result.mode === 'demo_local' ? 'demo_local' : 'success');
+      setParticipationError('');
     });
     return () => { cancelled = true; };
-  }, [teamId, userEmail]);
+  }, [teamId, userEmail, participationRefreshVersion]);
 
-  const allowLocalParticipation = viewerRole === 'coach' || participationLoadMode === 'demo_local';
+  const allowLocalParticipation = leaderboardMode === 'demo_local' || participationStorageMode === 'demo_local';
   const participationScopeKey = isAllTime ? 'all_time' : 'current';
-  const eventParticipationRows = remoteParticipationLeaderboards?.event_participation?.[participationScopeKey]
-    ?? (allowLocalParticipation ? (isAllTime ? localAllTimeEventRows : localCurrentEventRows) : []);
-  const strengthParticipationRows = remoteParticipationLeaderboards?.strength_conditioning_participation?.[participationScopeKey]
-    ?? (allowLocalParticipation ? (isAllTime ? localAllTimeStrengthRows : localCurrentStrengthRows) : []);
-  const participationUnavailable = viewerRole === 'player'
-    && !remoteParticipationLeaderboards
-    && participationLoadMode !== 'demo_local';
-
-  useEffect(() => {
-    if (!isShotLabDebugMode()) return;
-    rawCurrentProgramRows.forEach((row) => {
-      const kept = currentProgramRows.some((allowed) => String(allowed?.email || allowed?.player_email || allowed?.playerId || allowed?.player_id || allowed?.id || '') === String(row?.email || row?.player_email || row?.playerId || row?.player_id || row?.id || ''));
-      if (!kept) console.warn('[leaderboard] filtered non-roster program row', { normalizedRowEmail: String(row?.email || row?.player_email || '').trim().toLowerCase(), rowIdentity: { playerId: row?.playerId, player_id: row?.player_id, userId: row?.userId, user_id: row?.user_id, profileId: row?.profileId, profile_id: row?.profile_id, id: row?.id }, teamId, activeRosterCount: activeRosterIdentity.players.length, rosterMatchFound: false, reason: 'excluded_not_active_roster_member' });
-    });
-  }, [rawCurrentProgramRows, currentProgramRows, activeRosterIdentity.players.length, teamId]);
-
-  useEffect(() => {
-    if (!isShotLabDebugMode() || activeLeaderboardCategory !== 'drill_shots') return;
-    if (normalizedProgramScores.length > 0 && selectedProgramDrill && programDrillLeaderboardRows.length === 0) {
-      console.warn('[program-scores] Program Drill leaderboard has no rows', {
-        programScoresCount: normalizedProgramScores.length,
-        normalizedProgramDrillIds: normalizedProgramScores.map((score) => score.drillId).filter(Boolean),
-        selectedLeaderboardDrillId: selectedProgramDrill.id,
-        selectedLeaderboardDrillName: selectedProgramDrill.name,
-        teamId,
-        playerEmail: userEmail,
-        activeTimeScope,
-        availablePlayerIdentities: (Array.isArray(players) ? players : []).map((player) => ({ name: player?.name || '', email: player?.email || player?.player_email || '', playerId: player?.playerId || player?.player_id || player?.id || player?.userId || player?.user_id || '' })),
-      });
-    }
-  }, [activeLeaderboardCategory, normalizedProgramScores, selectedProgramDrill, programDrillLeaderboardRows, teamId, userEmail, activeTimeScope, players]);
-
-  const playerIdentityKeys = useMemo(
-    () => new Set([userEmail, currentUser?.email, currentUser?.playerId, currentUser?.player_id, currentUser?.userId, currentUser?.user_id, currentUser?.profileId, currentUser?.profile_id, currentUser?.id].map((value) => String(value || '').trim().toLowerCase()).filter(Boolean)),
-    [userEmail, currentUser],
-  );
-  const matchesCurrentPlayer = (row = {}) => [row?.email, row?.player_email, row?.playerId, row?.player_id, row?.userId, row?.user_id, row?.profileId, row?.profile_id, row?.id].map((value) => String(value || '').trim().toLowerCase()).some((key) => key && playerIdentityKeys.has(key));
-  const playerScopedHomeRows = useMemo(() => [...(Array.isArray(homeScores) ? homeScores : []), ...(Array.isArray(shotLogs) ? shotLogs : [])].filter(matchesCurrentPlayer), [homeScores, shotLogs, playerIdentityKeys]);
-  const playerScopedProgramRows = useMemo(() => normalizedProgramScores.filter(matchesCurrentPlayer), [normalizedProgramScores, playerIdentityKeys]);
-
-  useEffect(() => {
-    if (viewerRole !== 'player' || !isShotLabDebugMode()) return;
-    const activeRows = activeLeaderboardCategory === 'drill_shots' ? programDrillLeaderboardRows : atHomeLeaderboardRows;
-    const rawHomeScoreCount = (Array.isArray(homeScores) ? homeScores : []).length + (Array.isArray(shotLogs) ? shotLogs : []).length;
-    const rawProgramScoreCount = normalizedProgramScores.length;
-    const playerScopedHomeRowCount = playerScopedHomeRows.length;
-    const playerScopedProgramRowCount = playerScopedProgramRows.length;
-    const rawRelevantCount = activeLeaderboardCategory === 'drill_shots' ? rawProgramScoreCount : rawHomeScoreCount;
-    if (rawRelevantCount > 0 && activeRows.length === 0) {
-      console.warn('[player-leaderboard] Player leaderboard rows empty despite raw scores', {
-        currentUserEmail: userEmail || currentUser?.email || '',
-        normalizedCurrentUserEmail: String(userEmail || currentUser?.email || '').trim().toLowerCase(),
-        currentUserIdentity: { playerId: currentUser?.playerId || currentUser?.player_id || '', profileId: currentUser?.profileId || currentUser?.profile_id || '', userId: currentUser?.userId || currentUser?.user_id || '', id: currentUser?.id || '' },
-        rawHomeScoreCount,
-        rawProgramScoreCount,
-        playerScopedHomeRowCount,
-        playerScopedProgramRowCount,
-        generatedLeaderboardRowCount: activeRows.length,
-        activeLeaderboardCategory,
-        activeTimeScope,
-        filteredOutReason: activeLeaderboardCategory === 'drill_shots' ? 'No Program Drill leaderboard rows matched the selected drill/current player identities.' : 'No At Home leaderboard rows matched current player/team identities.',
-      });
-    }
-  }, [viewerRole, activeLeaderboardCategory, activeTimeScope, atHomeLeaderboardRows, programDrillLeaderboardRows, homeScores, shotLogs, normalizedProgramScores, playerScopedHomeRows, playerScopedProgramRows, userEmail, currentUser]);
+  const remoteParticipationForTeam = remoteParticipationLeaderboards?.teamId === String(teamId)
+    ? remoteParticipationLeaderboards.leaderboards
+    : null;
+  const eventParticipationRows = useMemo(() => selectLeaderboardRows({
+    rows: remoteParticipationForTeam?.event_participation?.[participationScopeKey]
+      ?? (allowLocalParticipation ? (isAllTime ? localAllTimeEventRows : localCurrentEventRows) : []),
+    players,
+    teamId,
+    includeArchivedPlayers: isAllTime,
+  }), [remoteParticipationForTeam, participationScopeKey, allowLocalParticipation, isAllTime, localAllTimeEventRows, localCurrentEventRows, players, teamId]);
+  const strengthParticipationRows = useMemo(() => selectLeaderboardRows({
+    rows: remoteParticipationForTeam?.strength_conditioning_participation?.[participationScopeKey]
+      ?? (allowLocalParticipation ? (isAllTime ? localAllTimeStrengthRows : localCurrentStrengthRows) : []),
+    players,
+    teamId,
+    includeArchivedPlayers: isAllTime,
+  }), [remoteParticipationForTeam, participationScopeKey, allowLocalParticipation, isAllTime, localAllTimeStrengthRows, localCurrentStrengthRows, players, teamId]);
+  const retryParticipationLeaderboards = () => setParticipationRefreshVersion((version) => version + 1);
 
   const archiveCoverageLabel = hasFrozenHistory ? `${coverage.archiveCount} season${coverage.archiveCount === 1 ? '' : 's'}` : 'No archives';
   const activeCategoryLabel = CATEGORY_ITEMS.find((item) => item.key === activeLeaderboardCategory)?.label || 'At-Home Shots';
@@ -342,30 +296,76 @@ export default function PremiumLeaderboardsHub({
   const allTimeEmptyMessage = hasFrozenHistory
     ? 'No qualifying archived or current training results are available yet.'
     : 'Archive a completed season to begin building all-time rankings.';
-  const homeEmptyMessage = isAllTime ? allTimeEmptyMessage : (viewerRole === 'coach' ? CURRENT_TEAM_EMPTY : CURRENT_PLAYER_EMPTY);
-  const isCoachView = viewerRole === 'coach';
+  const decisionRows = activeLeaderboardCategory === 'home_shots'
+    ? atHomeLeaderboardRows
+    : activeLeaderboardCategory === 'drill_shots'
+      ? programDrillLeaderboardRows
+      : activeLeaderboardCategory === 'event_participation'
+      ? eventParticipationRows
+      : strengthParticipationRows;
+  const activeDataStatus = activeLeaderboardCategory === 'home_shots'
+    ? atHomeLeaderboardStatus
+    : activeLeaderboardCategory === 'drill_shots'
+      ? 'success'
+      : participationLoadMode;
+  const activeDataError = activeLeaderboardCategory === 'home_shots'
+    ? leaderboardError
+    : activeLeaderboardCategory === 'drill_shots'
+      ? ''
+      : participationError;
+  const activeDataState = resolveLeaderboardDataState({ status: activeDataStatus, rows: decisionRows, error: activeDataError, teamId });
+  const weeklyActivity = useMemo(() => buildLeaderboardWeeklyActivity({
+    category: activeLeaderboardCategory,
+    teamId,
+    viewerRole,
+    currentUser,
+    userEmail,
+    shotLogs,
+    programScores: normalizedProgramScores,
+    events,
+    rsvps,
+    scLogs,
+  }), [activeLeaderboardCategory, teamId, viewerRole, currentUser, userEmail, shotLogs, normalizedProgramScores, events, rsvps, scLogs]);
+  const decisionSurface = useMemo(() => buildLeaderboardDecisionSurface({
+    rows: decisionRows,
+    players,
+    teamId,
+    viewerRole,
+    currentUser,
+    userEmail,
+    shotLogs,
+    weeklyActivity,
+    includeArchivedPlayers: isAllTime,
+  }), [decisionRows, players, teamId, viewerRole, currentUser, userEmail, shotLogs, weeklyActivity, isAllTime]);
+  const metricItems = decisionSurface.metrics;
+  const statusLine = <div data-testid="leaderboard-status-line" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 9, fontFamily: FALLBACK_FONT, color: SUB, fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
+    <span>{scopeLabel}</span><span aria-hidden="true">·</span><span>{activeCategoryLabel}</span><span aria-hidden="true">·</span><span>{activeRankedCount} ranked</span>{activeDataState.kind === 'refreshing' ? <><span aria-hidden="true">·</span><span>Refreshing</span></> : null}
+  </div>;
 
-  return <div data-testid={testId} data-viewer-role={viewerRole}>
-    {!isCoachView ? <header style={{ padding: '4px 0 12px', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
+  return <div data-testid={testId} data-viewer-role={viewerRole} data-team-workspace={viewerRole === 'player' ? 'leaderboards' : undefined} aria-label="Leaderboards">
+    {showHeader ? <header style={{ padding: '4px 0 12px', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
       <div style={{ fontFamily: FALLBACK_FONT, color: VOLT, fontSize: 10, letterSpacing: '0.13em', fontWeight: 800, textTransform: 'uppercase' }}>COMPETITION HUB</div>
       <div style={{ fontFamily: FALLBACK_FONT, color: LIGHT, fontSize: 28, letterSpacing: '0.04em', marginTop: 3, lineHeight: 1, textTransform: 'uppercase', fontWeight: 800 }}>LEADERBOARDS</div>
-      <div style={{ fontFamily: 'var(--font-body, Inter)', color: SUB, fontSize: 12, lineHeight: 1.45, marginTop: 5 }}>Compare the team’s most important training results.</div>
-      <div data-testid="leaderboard-status-line" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 9, fontFamily: FALLBACK_FONT, color: SUB, fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
-        <span>{scopeLabel}</span><span aria-hidden="true">·</span><span>{activeCategoryLabel}</span><span aria-hidden="true">·</span><span>{activeRankedCount} ranked</span>
-      </div>
+      <div style={{ fontFamily: 'var(--font-body, Inter)', color: SUB, fontSize: 12, lineHeight: 1.45, marginTop: 5 }}>See the result that matters now and the next move to improve it.</div>
+      {statusLine}
     </header> : null}
+    {!showHeader ? statusLine : null}
+
+    <section aria-label="Leaderboard decision metrics" data-testid="leaderboard-metric-surface" data-layout-role="supporting-evidence" data-surface="dark" data-visual-role="supporting-evidence" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 1, margin: '10px 0 8px', overflow: 'hidden', border: '1px solid var(--stroke-1)', borderRadius: 12, background: 'rgb(7, 24, 32)' }}>
+      {metricItems.map((metric) => <div key={metric.label} data-metric={metric.label.toLowerCase().replaceAll(' ','-')} style={{ minWidth: 0, padding: '12px 9px', background: 'rgb(7, 24, 32)' }}><div data-metric-role="value" style={{ color: LIGHT, fontFamily: FALLBACK_FONT, fontSize: 24, fontWeight: 900, lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.value}</div><div data-metric-role="label" style={{ color: '#c8ff1a', fontFamily: FALLBACK_FONT, fontSize: 11, fontWeight: 900, letterSpacing: '.06em', marginTop: 5, textTransform: 'uppercase', whiteSpace: 'normal', overflow: 'visible', textOverflow: 'clip' }}>{metric.label}</div><div data-metric-role="detail" style={{ color: '#f8faf5', fontSize: 12, lineHeight: 1.3, marginTop: 3, minHeight: 31 }}>{metric.detail}</div></div>)}
+    </section>
 
     <section aria-label="Leaderboard time scope" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', borderBottom: '1px solid var(--stroke-1)', marginBottom: 3 }}>
       {TIME_SCOPE_ITEMS.map((item) => {
         const active = activeTimeScope === item.key;
-        return <button data-testid={`leaderboard-time-scope-${item.key}`} type="button" aria-pressed={active} key={item.key} onClick={() => setActiveTimeScope(item.key)} style={tabStyle(active)}>{item.label}</button>;
+        return <button data-testid={`leaderboard-time-scope-${item.key}`} data-coach-filter-chip={viewerRole === "coach" ? "true" : undefined} type="button" aria-pressed={active} key={item.key} onClick={() => setActiveTimeScope(item.key)} style={tabStyle(active)}>{item.label}</button>;
       })}
     </section>
 
     <section aria-label="Primary leaderboard categories" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', borderBottom: '1px solid var(--stroke-1)', marginBottom: 8 }}>
       {PRIMARY_CATEGORY_ITEMS.map((item) => {
         const active = activeLeaderboardCategory === item.key;
-        return <button type="button" aria-selected={active} key={item.label} onClick={() => setActiveLeaderboardCategory(item.key)} style={tabStyle(active)}>{item.label}</button>;
+        return <button type="button" data-coach-filter-chip={viewerRole === "coach" ? "true" : undefined} aria-selected={active} aria-pressed={active} key={item.label} onClick={() => setActiveLeaderboardCategory(item.key)} style={tabStyle(active)}>{item.label}</button>;
       })}
     </section>
 
@@ -379,6 +379,7 @@ export default function PremiumLeaderboardsHub({
       </div>
     </ProgressiveDisclosure> : null}
 
+    <div data-testid={viewerRole === 'coach' ? 'coach-leaderboard-operational-results' : undefined}>
     {activeLeaderboardCategory === 'home_shots' ? (
       <CompactLeaderboardPreviewCard
         title={isAllTime ? 'All-Time At-Home Shots' : 'At-Home Shots'}
@@ -387,9 +388,13 @@ export default function PremiumLeaderboardsHub({
         mode={viewerRole}
         userEmail={userEmail}
         status={atHomeLeaderboardStatus}
+        error={leaderboardError}
+        teamId={teamId}
         rows={atHomeLeaderboardRows}
         emptyMessage={`No rankings yet. ${isAllTime ? allTimeEmptyMessage : 'Log shots to activate the Home Shots leaderboard.'}`}
         maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
+        onRetry={onRetryHomeShots}
       />
     ) : activeLeaderboardCategory === 'drill_shots' ? (
       <section style={{ marginTop: 4 }}>
@@ -410,9 +415,11 @@ export default function PremiumLeaderboardsHub({
           mode={viewerRole}
           userEmail={userEmail}
           status="success"
+          teamId={teamId}
           rows={programDrillLeaderboardRows}
           emptyMessage={isAllTime ? allTimeEmptyMessage : 'Program drill leaders will appear after players log coach-assigned drills.'}
           maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
         />
       </section>
     ) : activeLeaderboardCategory === 'event_participation' ? (
@@ -422,10 +429,14 @@ export default function PremiumLeaderboardsHub({
         categoryLabel={scopeLabel}
         mode={viewerRole}
         userEmail={userEmail}
-        status={participationUnavailable ? 'error' : 'success'}
+        status={participationLoadMode}
+        error={participationError}
+        teamId={teamId}
         rows={eventParticipationRows}
-        emptyMessage={participationUnavailable ? 'Team participation rankings are temporarily unavailable. Your private RSVP records remain protected.' : (isAllTime ? allTimeEmptyMessage : 'Event rankings activate when players confirm attendance for team events.')}
+        emptyMessage={isAllTime ? allTimeEmptyMessage : 'Event rankings activate when players confirm attendance for team events.'}
         maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
+        onRetry={retryParticipationLeaderboards}
       />
     ) : (
       <CompactLeaderboardPreviewCard
@@ -434,15 +445,20 @@ export default function PremiumLeaderboardsHub({
         categoryLabel={scopeLabel}
         mode={viewerRole}
         userEmail={userEmail}
-        status={participationUnavailable ? 'error' : 'success'}
+        status={participationLoadMode}
+        error={participationError}
+        teamId={teamId}
         rows={strengthParticipationRows}
-        emptyMessage={participationUnavailable ? 'Team participation rankings are temporarily unavailable. Your private workout records remain protected.' : (isAllTime ? allTimeEmptyMessage : 'S&C rankings activate after players log completed strength work.')}
+        emptyMessage={isAllTime ? allTimeEmptyMessage : 'S&C rankings activate after players log completed strength work.'}
         maxRows={10}
+        onRowClick={viewerRole === 'coach' ? onOpenPlayer : undefined}
+        onRetry={retryParticipationLeaderboards}
       />
     )}
+    </div>
 
     <ProgressiveDisclosure
-      title="Participation categories"
+      title="More rankings"
       summary="Events attended and strength work"
       testId="leaderboard-participation-categories"
     >

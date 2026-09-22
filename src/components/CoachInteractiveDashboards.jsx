@@ -197,7 +197,7 @@ function buildOperationalPageModel({ title, summary, metrics = [], testId }) {
   };
 }
 
-export function CoachPageDashboardHeader({ eyebrow, title, summary, status, actions = [], metrics = [], activeMetric, onMetricSelect, testId }) {
+export function CoachPageDashboardHeader({ eyebrow, title, summary, status, actions = [], metrics = [], activeMetric, onMetricSelect, testId, presentation = "full" }) {
   const model = buildOperationalPageModel({ title, summary, metrics, testId });
   const decisionAction = model.primary?.key && onMetricSelect
     ? { label: model.isLeaderboardsPage ? "Review rankings" : `Review ${model.primary.label}`, onClick: () => onMetricSelect(model.primary.key) }
@@ -209,7 +209,7 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
   return (
     <SecondaryPageShell testId={testId} className="secondaryPageShell--embeddedHeader">
       <SecondaryPageIntro eyebrow={displayEyebrow} title={displayTitle} summary={displaySummary} status={status} actions={actions} compact={testId === "coach-page-dashboard-drills"} />
-      <CoachRoutePerformanceStage
+      {presentation === "full" ? <CoachRoutePerformanceStage
         kind={model.isLeaderboardsPage ? "leaderboards" : undefined}
         eyebrow={model.decisionEyebrow}
         title={model.decisionTitle}
@@ -220,7 +220,7 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
         activeMetric={activeMetric}
         onMetricSelect={onMetricSelect}
         testId={`${testId}-decision-brief`}
-      />
+      /> : null}
     </SecondaryPageShell>
   );
 }

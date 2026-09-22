@@ -22,7 +22,7 @@ function resolveWorkspaceIdentityLabel(model) {
   return labels[model?.id] || model?.eyebrow || "Player";
 }
 
-export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", backAction = null, titleSize = "auto", testId }) {
+export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", backAction = null, titleSize = "auto", testId, showMetrics = true }) {
   if (!model) return null;
   const runAction = (action) => { onAction?.(action); scheduleWorkspaceActionReveal(action); };
   const runMetric = (metric) => { onMetric?.(metric); if (metric?.action) scheduleWorkspaceActionReveal(metric.action); };
@@ -52,7 +52,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         ariaLabel={`${model.title} team identity and page title`}
       />
     </div>
-    <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
+    {showMetrics ? <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
       {metrics.map((metric, index) => {
         const interactive = Boolean(metric?.filter || metric?.action);
         const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
@@ -61,7 +61,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         if (!interactive) return <div key={metric.id} className={metricClassName} data-interactive="false" data-metric-priority={metricPriority}><MetricContent metric={metric} /></div>;
         return <button type="button" key={metric.id} className={metricClassName} data-interactive="true" data-metric-priority={metricPriority} onClick={() => runMetric(metric)} aria-pressed={activeMetric === metric.id}><MetricContent metric={metric} /></button>;
       })}
-    </div>
+    </div> : null}
   </section>;
 }
 

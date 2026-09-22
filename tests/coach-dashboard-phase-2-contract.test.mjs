@@ -11,9 +11,13 @@ test("phase two imports the reusable operational layer into the coach shell", ()
   assert.match(appSource, /CoachEventIntelligenceDrawer/);
   assert.match(appSource, /CoachDrillsOperationalPanel/);
   assert.match(appSource, /CoachStrengthOperationalPanel/);
-  assert.match(appSource, /CoachLeaderboardOperationalPanel/);
   assert.match(appSource, /CoachActivityIntelligencePanel/);
   assert.match(appSource, /CoachSeasonComparisonPanel/);
+});
+
+test('leaderboards route uses the shared competition surface instead of the legacy wrapper', () => {
+  assert.match(appSource, /<PremiumLeaderboardsHub viewerRole="coach"/);
+  assert.equal((appSource.match(/CoachLeaderboardOperationalPanel/g) || []).length, 0);
 });
 
 test("player and event drawers preserve full profile and attendance workflows", () => {

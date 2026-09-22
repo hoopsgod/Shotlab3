@@ -90,6 +90,15 @@ async function enterRegisteredRemovalCoach(page) {
     coachEmail: REGISTERED_COACH_EMAIL,
     coachName: "Acceptance Coach",
     teamId: TEAM_ID,
+    homeShotsLeaderboardRows: [{
+      rank: 1,
+      player_id: "player-acceptance",
+      email: PLAYER_EMAIL,
+      team_id: TEAM_ID,
+      player_display_name: "Acceptance Player",
+      total_home_shots: 87,
+      leaderboard_source: "remote",
+    }],
   });
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }

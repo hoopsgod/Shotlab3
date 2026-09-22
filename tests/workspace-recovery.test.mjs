@@ -76,11 +76,11 @@ test("all high-risk lazy workspaces use section-level recovery", () => {
 });
 
 test("leaderboard cards expose truthful data states", () => {
-  assert.match(leaderboardSource, /resolveDataDisplayState/);
+  assert.match(leaderboardSource, /resolveLeaderboardDataState/);
   assert.match(leaderboardSource, /data-data-state=\{displayState\}/);
   assert.match(leaderboardSource, /testId=\{`leaderboard-\$\{displayState\}-state`\}/);
   assert.match(leaderboardSource, /displayState === "loading"/);
-  assert.match(leaderboardSource, /displayState === "error"/);
+  assert.match(leaderboardSource, /\["error", "permission", "unavailable", "missing_context", "stale"\]/);
   assert.match(leaderboardSource, /displayState === "ready"/);
   assert.match(leaderboardSource, /Saved training results are still safe/);
   assert.match(leaderboardSource, /typeof onRetry === "function"/);

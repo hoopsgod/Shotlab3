@@ -66,7 +66,7 @@ test('release candidate: player shot logging persists remotely and updates playe
   assert.equal(coachBoard.data[0].player_id, 'roster-player-1')
 })
 
-test('release candidate: shot_logs rows never produce an empty leaderboard state, including RPC-empty local fallback', async () => {
+test('release candidate: a configured empty RPC stays an honest empty result', async () => {
   const shotLogs = [{ team_id: 'team-launch', player_id: 'player-a', email: 'player-a@shotlab.test', name: 'Player A', made: 27 }]
   const rows = calculateLeaderboardFromShotLogs({ shotLogs, teamId: 'team-launch' })
   assert.notEqual(rows.length, 0, 'shot_logs should aggregate into visible leaderboard rows')
@@ -74,10 +74,12 @@ test('release candidate: shot_logs rows never produce an empty leaderboard state
 
   const emptyRpcClient = createTableSupabaseClient({ shot_logs: [] })
   const service = createLeaderboardService({ supabaseClient: emptyRpcClient })
-  const fallback = await service.loadTeamLeaderboard({ teamId: 'team-launch', fallbackShotLogs: shotLogs })
-  assert.equal(fallback.mode, 'supabase')
-  assert.equal(fallback.data.length, 1)
-  assert.equal(fallback.data[0].total_home_shots, 27)
+  const empty = await service.loadTeamLeaderboard({ teamId: 'team-launch', fallbackShotLogs: shotLogs })
+  assert.equal(empty.ok, true)
+  assert.equal(empty.mode, 'supabase')
+  assert.equal(empty.state, 'empty')
+  assert.equal(empty.fallbackResultCount, 0)
+  assert.deepEqual(empty.data, [])
 })
 
 test('release candidate: legacy email and UUID shot rows aggregate under the roster player', () => {

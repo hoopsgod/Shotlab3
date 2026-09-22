@@ -1,5 +1,5 @@
 import React from "react";
-import { resolveDataDisplayState } from "../lib/workspaceRecovery.js";
+import { resolveLeaderboardDataState } from "../lib/leaderboardSelectors.js";
 import ShotLabIcon from "./ShotLabIcon.jsx";
 import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
@@ -7,31 +7,24 @@ import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 const DEFAULT_PLAYER_EMPTY = "No leaderboard data yet. Log shots to enter the rankings.";
 const DEFAULT_COACH_EMPTY = "No team leaderboard data yet. Players will appear here after they log shots.";
 const DEFAULT_ERROR = "Leaderboard data is temporarily unavailable. Saved training results are still safe.";
-
-function OpenRankRow({ index = 0 }) {
-  return <div key={`open-rank-${index}`} data-leaderboard-placeholder="true" style={{ display: "grid", gridTemplateColumns: "44px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding:"8px 2px", minHeight:52, opacity:.5 }}>
-    <div style={{ width:32, height:32, borderRadius:999, border:"1px dashed var(--stroke-2)", display:"grid", placeItems:"center", color:"var(--text-3)", fontSize:11, fontWeight:900 }}>—</div>
-    <div style={{ color:"var(--text-3)", fontSize:12, fontWeight:700 }}>Open rank</div>
-    <div style={{ color:"var(--text-3)", fontSize:11, fontWeight:800 }}>—</div>
-  </div>;
-}
-
 export default function CompactLeaderboardPreviewCard({
   title = "Team Leaders",
   rows = [],
   status = "idle",
+  error = "",
+  teamId = "",
   mode = "player",
   userEmail = "",
   emptyMessage,
   errorMessage,
   loadingMessage = "Loading leaderboard data…",
   maxRows,
-  minimumRows = 3,
   areaTitle = "Leaderboards",
   categoryLabel = "Home Shots",
   fullLeaderboardHref = "",
   onViewAll,
   onRetry,
+  onRowClick,
 }) {
   const safeRows = Array.isArray(rows) ? rows : [];
   const isCoachMode = mode === "coach";
@@ -42,30 +35,27 @@ export default function CompactLeaderboardPreviewCard({
     || (normalizedUser && String(row?.email || "").trim().toLowerCase() === normalizedUser))?.rank || null;
 
   const previewRows = safeRows.slice(0, Math.max(1, limit));
-  const displayState = resolveDataDisplayState({ status, rows: previewRows });
+  const dataState = resolveLeaderboardDataState({ status, rows: previewRows, error, teamId: teamId || "preview" });
+  const displayState = dataState.kind;
   const emptyCopy = emptyMessage || (isCoachMode ? DEFAULT_COACH_EMPTY : DEFAULT_PLAYER_EMPTY);
   const message = displayState === "loading"
     ? loadingMessage
-    : displayState === "error"
-      ? (errorMessage || emptyMessage || DEFAULT_ERROR)
+    : ["error", "permission", "unavailable", "missing_context", "stale"].includes(displayState)
+      ? (dataState.message || errorMessage || DEFAULT_ERROR)
       : emptyCopy;
-  const recoveryState = displayState === "loading" ? "loading" : displayState === "error" ? "error" : "empty";
+  const recoveryState = displayState === "loading" ? "loading" : ["error", "permission", "unavailable", "missing_context"].includes(displayState) ? "error" : "empty";
   const recoveryTitle = displayState === "loading"
     ? "Syncing team rankings"
-    : displayState === "error"
-      ? "Rankings need a retry"
+    : displayState === "permission"
+      ? "Rankings are protected"
+      : displayState === "unavailable"
+        ? "Rankings are unavailable"
+        : displayState === "missing_context"
+          ? "Choose a team first"
+          : displayState === "error"
+            ? "Rankings need a retry"
       : isCoachMode ? "Recognition starts with activity" : "Your ranking starts with a result";
-  const reservedRows = isCoachMode
-    ? previewRows.length
-    : Math.max(previewRows.length, Math.min(Math.max(1, minimumRows), Math.max(1, limit)));
-  const openRowCount = isCoachMode
-    ? 0
-    : displayState === "ready"
-      ? Math.max(0, reservedRows - previewRows.length)
-      : displayState === "empty"
-        ? reservedRows
-        : 0;
-  const keepsRankingFrame = displayState === "ready" || displayState === "empty";
+  const keepsRankingFrame = ["ready", "refreshing", "stale", "empty"].includes(displayState);
 
   return (
     <section
@@ -75,7 +65,6 @@ export default function CompactLeaderboardPreviewCard({
       data-testid="compact-leaderboard-preview"
       data-viewer-role={mode}
       data-data-state={displayState}
-      data-reserved-rows={reservedRows}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 10 }}>
         <div>
@@ -94,7 +83,13 @@ export default function CompactLeaderboardPreviewCard({
           data-testid={displayState === "ready" ? "leaderboard-ready-state" : "leaderboard-empty-state"}
           data-state={displayState}
         >
-          {displayState === "empty" ? <div style={{ minHeight:44, display:"grid", alignContent:"center", borderBottom:"1px solid var(--stroke-1)", padding:"4px 2px 8px" }}>
+          {displayState === "stale" ? <div role="status" style={{ minHeight:40, display:"grid", alignContent:"center", borderBottom:"1px solid var(--stroke-1)", padding:"4px 2px 8px" }}>
+            <div style={{ color:"var(--text-2)", fontSize:11, fontWeight:800 }}>Showing your last confirmed rankings</div>
+            <div style={{ color:"var(--text-3)", fontSize:10, lineHeight:1.35, marginTop:2 }}>{message}</div>
+            {typeof onRetry === "function" ? <button type="button" onClick={onRetry} style={{ justifySelf:"start", minHeight:36, marginTop:5, border:0, background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, padding:0, cursor:"pointer" }}>Retry leaderboard</button> : null}
+          </div> : null}
+          {displayState === "refreshing" ? <div role="status" style={{ minHeight:32, display:"flex", alignItems:"center", borderBottom:"1px solid var(--stroke-1)", padding:"4px 2px 8px", color:"var(--text-3)", fontSize:10, fontWeight:800 }}>Refreshing rankings…</div> : null}
+          {displayState === "empty" ? <div style={{ minHeight:84, display:"grid", alignContent:"center", borderBottom:"1px solid var(--stroke-1)", padding:"8px 2px" }}>
             <div style={{ color:"var(--text-2)", fontSize:11, fontWeight:800 }}>{recoveryTitle}</div>
             <div style={{ color:"var(--text-3)", fontSize:10, lineHeight:1.35, marginTop:2 }}>{message}</div>
           </div> : null}
@@ -106,7 +101,7 @@ export default function CompactLeaderboardPreviewCard({
               || (normalizedUser && String(entry?.email || "").trim().toLowerCase() === normalizedUser);
             const rank = Number(entry.rank) || index + 1;
             const premiumRank = rank <= 3;
-            return <div key={`${entry.rank}-${displayName}`} data-leaderboard-rank={rank} style={{ display: "grid", gridTemplateColumns: premiumRank ? "44px 1fr auto" : "34px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding: premiumRank ? "8px 2px" : "10px 2px", background:index===0?"linear-gradient(90deg, color-mix(in srgb,var(--accent) 7%, transparent), transparent)":"transparent" }}>
+            return <div key={`${entry.rank}-${displayName}`} className={isCoachMode && typeof onRowClick === "function" ? "coachLeaderboardRow" : undefined} role={isCoachMode && typeof onRowClick === "function" ? "button" : undefined} tabIndex={isCoachMode && typeof onRowClick === "function" ? 0 : undefined} aria-label={isCoachMode && typeof onRowClick === "function" ? `Open ${displayName}` : undefined} onClick={isCoachMode && typeof onRowClick === "function" ? () => onRowClick(entry) : undefined} onKeyDown={isCoachMode && typeof onRowClick === "function" ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onRowClick(entry); } } : undefined} data-leaderboard-rank={rank} style={{ display: "grid", gridTemplateColumns: premiumRank ? "44px 1fr auto" : "34px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding: premiumRank ? "8px 2px" : "10px 2px", background:index===0?"linear-gradient(90deg, color-mix(in srgb,var(--accent) 7%, transparent), transparent)":"transparent" }}>
               {premiumRank
                 ? <ShotLabPerformanceMark kind="rank" value={rank} compact testId={`leaderboard-rank-mark-${rank}`} />
                 : <div style={{ color: "var(--text-3)", fontSize: 12, fontWeight: 900 }}>#{rank}</div>}
@@ -114,7 +109,6 @@ export default function CompactLeaderboardPreviewCard({
               <div style={{ color: index===0?"var(--text-1)":"var(--text-2)", fontSize: 13, fontWeight: 800 }}>{scoreValue}</div>
             </div>;
           })}
-          {Array.from({ length: openRowCount }, (_, placeholderIndex) => <OpenRankRow key={`open-rank-${placeholderIndex}`} index={previewRows.length + placeholderIndex} />)}
         </div>
       ) : (
         <div style={{ marginTop: 10 }}>
@@ -123,8 +117,8 @@ export default function CompactLeaderboardPreviewCard({
             eyebrow={displayState === "loading" ? "Live team data" : "Data recovery"}
             title={recoveryTitle}
             detail={message}
-            actionLabel={displayState === "error" && typeof onRetry === "function" ? "Retry leaderboard" : undefined}
-            onAction={displayState === "error" ? onRetry : undefined}
+            actionLabel={["error", "permission", "unavailable"].includes(displayState) && typeof onRetry === "function" ? "Retry leaderboard" : undefined}
+            onAction={["error", "permission", "unavailable"].includes(displayState) ? onRetry : undefined}
             compact
             surface="light"
             testId={`leaderboard-${displayState}-state`}

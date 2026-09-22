@@ -188,12 +188,15 @@ test('coach team creation persists backend team_id and invite_code into shared t
 
 test('leaderboard fetch differentiates empty results, endpoint failures, and parse/network failures', async () => {
   const source = await appSource();
+  const service = await readFile(new URL('../src/lib/homeShotsLeaderboardService.js', import.meta.url), 'utf8');
 
-  assert.match(source, /if \(parseMode === "non_json"\) return "Leaderboard endpoint unavailable \(invalid response format\)\."/);
-  assert.match(source, /if \(status === 404\) return "Leaderboard endpoint missing\."/);
-  assert.match(source, /setHomeShotsLeaderboard\(\{status:"success",rows,error:""\}\);/);
-  assert.match(source, /isEmpty:rows\.length===0/);
-  assert.match(source, /errorCode:"network_error"/);
+  assert.match(source, /loadHomeShotsLeaderboard/);
+  assert.match(source, /homeShotsLeaderboard\.status/);
+  assert.match(service, /status: 'permission'/);
+  assert.match(service, /status: 'unavailable'/);
+  assert.match(service, /status: 'error'/);
+  assert.match(service, /status: 'success'/);
+  assert.match(service, /Array\.isArray\(body\?\.leaderboard\) \? body\.leaderboard : \[\]/);
 });
 
 test('coach and player dashboards both consume shared leaderboard state and fetch helper', async () => {

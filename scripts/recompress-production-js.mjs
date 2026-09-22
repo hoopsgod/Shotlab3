@@ -9,8 +9,12 @@ const CANDIDATE_OPTIONS = [
   { passes: 5, quoteStyle: 0 },
   { passes: 5, quoteStyle: 1 },
   { passes: 5, quoteStyle: 2 },
-  { passes: 3, quoteStyle: 0 },
   { passes: 8, quoteStyle: 0 },
+  { passes: 12, quoteStyle: 0 },
+  { passes: 20, quoteStyle: 0 },
+  { passes: 12, quoteStyle: 0, compress: { keep_fargs: false } },
+  { passes: 20, quoteStyle: 0, compress: { keep_fargs: false } },
+  { passes: 12, quoteStyle: 0, compress: { keep_fargs: false }, format: { semicolons: false } },
 ]
 const APP_DOMAIN_OPTIONS = [
   { passes: 10, quoteStyle: 0 },
@@ -50,7 +54,7 @@ async function minifyCandidate(source, { passes, quoteStyle, compress = {}, form
     compress: {
       passes,
       toplevel: true,
-      pure_funcs: ['console.log', 'console.debug', 'console.info'],
+      pure_funcs: ['console.log', 'console.debug', 'console.info', 'console.warn'],
       ...compress,
     },
     mangle: { toplevel: true },
@@ -61,9 +65,7 @@ async function minifyCandidate(source, { passes, quoteStyle, compress = {}, form
 
 async function recompress(file) {
   const source = await readFile(file, 'utf8')
-  const options = path.basename(file).startsWith('AppDomainServices-')
-    ? [...CANDIDATE_OPTIONS, ...APP_DOMAIN_OPTIONS]
-    : CANDIDATE_OPTIONS
+  const options = [...CANDIDATE_OPTIONS, ...APP_DOMAIN_OPTIONS]
   const candidates = await Promise.all(options.map((candidate) => minifyCandidate(source, candidate)))
   const output = candidates.reduce((best, candidate) => {
     const bestGzip = gzipBytes(best)

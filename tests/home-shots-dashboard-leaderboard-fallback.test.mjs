@@ -23,7 +23,21 @@ function loadCompactCardComponent() {
   }).code
   const module = { exports: {} }
   const runner = new Function('require', 'module', 'exports', transformed)
-  runner(require, module, module.exports)
+  runner((id) => {
+    if (id === 'react') return React
+    if (id.includes('leaderboardSelectors')) {
+      return {
+        resolveLeaderboardDataState: ({ status, rows = [] }) => {
+          const hasRows = Array.isArray(rows) && rows.length > 0
+          if (status === 'success') return { kind: hasRows ? 'ready' : 'empty' }
+          if (status === 'refreshing') return { kind: hasRows ? 'refreshing' : 'loading' }
+          return { kind: hasRows ? 'ready' : 'loading' }
+        },
+      }
+    }
+    if (id.includes('ShotLabIcon') || id.includes('ShotLabPerformanceMark') || id.includes('ShotLabStatePanel')) return () => null
+    return require(id)
+  }, module, module.exports)
   return module.exports.default || module.exports
 }
 
@@ -43,7 +57,7 @@ const shotLogs = [
   { id: 's-email', teamId: 'team-a', playerId: 'aahna@gmail.com', email: 'aahna@gmail.com', made: 480, syncState: 'remote_saved', syncSource: 'remote' },
 ]
 
-test('dashboard fallback aggregates the same saved shot logs that drive player totals', () => {
+test('demo-local projection aggregates the same saved shot logs that drive player totals', () => {
   const savedShotTotal = shotLogs.filter((row) => row.email === 'aahna@gmail.com' && row.teamId === 'team-a').reduce((sum, row) => sum + Number(row.made || 0), 0)
   assert.equal(savedShotTotal, 927)
 
@@ -55,7 +69,7 @@ test('dashboard fallback aggregates the same saved shot logs that drive player t
   assert.equal(rows[0].total_home_shots, 927)
 })
 
-test('player and coach compact home-shots cards show Aahna instead of empty after fallback rows exist', () => {
+test('player and coach compact home-shots cards show a confirmed local result without fabricated rows', () => {
   const CompactLeaderboardPreviewCard = loadCompactCardComponent()
   const rows = calculateLeaderboardFromShotLogs({ shotLogs, teamId: 'team-a', playerContext: { players } })
 
@@ -84,9 +98,12 @@ test('player and coach compact home-shots cards show Aahna instead of empty afte
   assert.doesNotMatch(coachHtml, /No team leaderboard data yet\. Players will appear here after they log shots\./)
 })
 
-test('App home-shots leaderboard fetch falls back to local shotLogs when RPC is empty or unavailable', () => {
+test('App home-shots leaderboard preserves honest registered empty and failure states', () => {
   assert.match(appSource, /calculateLeaderboardFromShotLogs\(\{shotLogs,teamId,playerContext:\{players,profiles:playerProfiles,scope\}\}\)\.slice\(0,HOME_SHOTS_LEADERBOARD_LIMIT\)/)
-  assert.match(appSource, /const fallbackRows=rpcRows\.length\?\[\]:localLeaderboardRows\(\);/)
-  assert.match(appSource, /const leaderboardRows=rpcRows\.length\?rpcRows:fallbackRows;/)
-  assert.match(appSource, /applyLeaderboardRows\(fallbackRows,\{httpStatus:null,errorCode:"network_error"/)
+  assert.match(appSource, /import \{ loadHomeShotsLeaderboard \} from "\.\/lib\/homeShotsLeaderboardService\.js"/)
+  assert.match(appSource, /const result=await loadHomeShotsLeaderboard\(\{teamId,scope,userEmail:user\.email,limit:HOME_SHOTS_LEADERBOARD_LIMIT\}\)/)
+  assert.match(appSource, /fallbackLeaderboardResultCount:0/)
+  assert.match(appSource, /preservePreviousRows:true/)
+  assert.match(appSource, /mode:"demo_local"/)
+  assert.doesNotMatch(appSource, /fetch\(`\/v1\/leaderboards\/home-shots/)
 })

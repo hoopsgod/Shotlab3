@@ -208,6 +208,32 @@ test("client accepts only explicit aggregate API payloads", async () => {
   assert.equal(valid.leaderboards.event_participation.current[0].metricValue, 3);
 });
 
+test("participation client preserves permission and unavailable failures instead of replacing them with local rows", async () => {
+  const forbidden = await loadParticipationLeaderboards({
+    teamId: TEAM_ID,
+    userEmail: "one@example.com",
+    fetchImpl: async () => Response.json({ error: "forbidden" }, { status: 403 }),
+  });
+  const unavailable = await loadParticipationLeaderboards({
+    teamId: TEAM_ID,
+    userEmail: "one@example.com",
+    fetchImpl: async () => Response.json({ error: "not_found" }, { status: 404 }),
+  });
+  const missingIdentity = await loadParticipationLeaderboards({ teamId: TEAM_ID });
+
+  assert.deepEqual(forbidden, {
+    ok: false,
+    leaderboards: null,
+    httpStatus: 403,
+    errorCode: "forbidden",
+    status: "permission",
+    error: "You do not have permission to view these participation rankings.",
+  });
+  assert.equal(unavailable.status, "unavailable");
+  assert.equal(unavailable.leaderboards, null);
+  assert.equal(missingIdentity.status, "permission");
+});
+
 test("Competition Hub replaces both participation placeholders with ranked cards and complete data wiring", () => {
   const hub = fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx", import.meta.url), "utf8");
   const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
@@ -215,6 +241,8 @@ test("Competition Hub replaces both participation placeholders with ranked cards
   assert.doesNotMatch(hub, /Strength leaders will appear after players complete assigned S&C work/);
   assert.match(hub, /rows=\{eventParticipationRows\}/);
   assert.match(hub, /rows=\{strengthParticipationRows\}/);
+  assert.match(hub, /const allowLocalParticipation = leaderboardMode === 'demo_local' \|\| participationStorageMode === 'demo_local';/);
+  assert.match(hub, /setRemoteParticipationLeaderboards\(\{ teamId: String\(teamId\), leaderboards: result\.leaderboards \}\)/);
   assert.match(app, /events=\{events\} rsvps=\{rsvps\} scSessions=\{scSessions\} scLogs=\{scLogs\}/);
   assert.match(app, /events=\{safeEvents\} rsvps=\{safeRsvps\} scSessions=\{scSessions\} scLogs=\{safeScLogs\}/);
 });

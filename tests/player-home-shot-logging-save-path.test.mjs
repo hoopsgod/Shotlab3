@@ -294,8 +294,9 @@ test('coach-facing home-shot leaderboard data is server-confirmed only', async (
   const source = await readFile(APP_PATH, 'utf8');
   assert.doesNotMatch(source, /upsertHomeShotsLeaderboardRow/);
   assert.doesNotMatch(source, /setHomeShotsLeaderboard\(prev=>\(\{\.\.\.prev,status:"success",error:"",rows:/);
-  assert.match(source, /const rows=Array\.isArray\(body\?\.leaderboard\)\?body\.leaderboard:\[\];/);
-  assert.match(source, /setHomeShotsLeaderboard\(\{status:"success",rows,error:""\}\)/);
+  assert.match(source, /const result=await loadHomeShotsLeaderboard\(\{teamId,scope,userEmail:user\.email,limit:HOME_SHOTS_LEADERBOARD_LIMIT\}\);/);
+  assert.match(source, /applyLeaderboardRows\(result\.rows,\{httpStatus:result\.httpStatus,errorCode:"",isEmpty:result\.rows\.length===0,status:"success",mode:"remote"\}\);/);
+  assert.doesNotMatch(source, /await fetch\(url/);
   assert.match(source, /const refreshHomeShotsLeaderboardAfterSave=async\(\{made,date,mode="remote_saved"\}=\{\}\)=>\{/);
   assert.match(source, /console\.warn\("home_shots_leaderboard_refresh_failed",\{mode,nonBlocking:true/);
   assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\);[\s\S]*void refreshHomeShotsLeaderboardAfterSave\(\{made:validation\.made,date:validation\.date,mode:"remote_saved"\}\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);

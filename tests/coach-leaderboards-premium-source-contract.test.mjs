@@ -10,15 +10,15 @@ const parityEnhancerSource = readFileSync(new URL("../scripts/apply-mobile-coach
 const hierarchyCss = readFileSync(new URL("../public/shotlab-phase3l-coach-leaderboard-hierarchy.css", import.meta.url), "utf8");
 
 test("coach leaderboard previews never fabricate open ranking slots", () => {
-  assert.match(previewSource, /const reservedRows = isCoachMode\s*\? previewRows\.length/);
-  assert.match(previewSource, /const openRowCount = isCoachMode\s*\? 0/);
+  assert.doesNotMatch(previewSource, /Open rank|open ranking|data-leaderboard-placeholder/);
+  assert.doesNotMatch(previewSource, /reservedRows|openRowCount/);
   assert.match(previewSource, /data-viewer-role=\{mode\}/);
 });
 
 test("coach leaderboards do not render a duplicate Competition Hub masthead", () => {
-  assert.match(hubSource, /const isCoachView = viewerRole === 'coach'/);
+  assert.match(hubSource, /showHeader = true/);
+  assert.match(hubSource, /showHeader \?/);
   assert.match(hubSource, /data-viewer-role=\{viewerRole\}/);
-  assert.match(hubSource, /\{!isCoachView \? <header/);
   assert.match(hubSource, />COMPETITION HUB<\/div>/);
 });
 
@@ -48,9 +48,10 @@ test("late Coach mobile parity preserves truthful natural-length Leaderboards", 
 });
 
 test("mobile Coach Leaderboards fits three signals in-view and flattens the lower pulse hierarchy", () => {
-  assert.match(hierarchyCss, /coach-page-dashboard-leaderboards-decision-brief[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)[^}]*overflow:\s*hidden/s);
-  assert.match(hierarchyCss, /coachLeaderboardPulse\s*\{[^}]*background:\s*transparent[^}]*border-top:[^}]*border-bottom:/s);
-  assert.match(hierarchyCss, /coachLeaderboardPulseMetrics\s*>\s*div\s*\{[^}]*background:\s*transparent/s);
-  assert.match(hierarchyCss, /coachLeaderboardRow\s*\{[^}]*border-radius:\s*0[^}]*background:\s*transparent[^}]*box-shadow:\s*none/s);
-  assert.match(hierarchyCss, /premium-leaderboards-hub[^}]*data-viewer-role="coach"/s);
+  assert.match(hubSource, /gridTemplateColumns: 'repeat\(3,minmax\(0,1fr\)\)'/);
+  assert.match(hubSource, /Your rank|Leader/);
+  assert.match(hubSource, /buildLeaderboardDecisionSurface/);
+  assert.match(hubSource, /weeklyActivity/);
+  assert.match(hubSource, /More rankings/);
+  assert.match(hubSource, /overflow: 'hidden'/);
 });

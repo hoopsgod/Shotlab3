@@ -138,10 +138,11 @@ test('Phase 1 keeps demo database writes local and demo leaderboards determinist
   const leaderboardEnd = appSource.indexOf('\n\nconst migrateData=', leaderboardStart)
   const leaderboardSource = appSource.slice(leaderboardStart, leaderboardEnd)
   const capabilityBoundary = leaderboardSource.indexOf('if(accountCapabilities.isSandbox)')
-  const remoteFetch = leaderboardSource.indexOf('await fetch(url')
+  const remoteFetch = leaderboardSource.indexOf('await loadHomeShotsLeaderboard(')
 
   assert.ok(leaderboardStart >= 0 && leaderboardEnd > leaderboardStart)
   assert.ok(capabilityBoundary >= 0 && capabilityBoundary < remoteFetch)
+  assert.doesNotMatch(leaderboardSource, /await fetch\(url/)
   assert.doesNotMatch(leaderboardSource, /isDemoMode\s*\(/)
   assert.match(leaderboardSource, /errorCode:"demo_local"/)
 })
