@@ -30,14 +30,6 @@ const CORE_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/supabaseSchemaVerification.js',
 ]
 
-const COACH_RESPONSE_SERVICE_FRAGMENTS = [
-  '/src/lib/coachResponseLoopEnhancer.js',
-  '/src/lib/coachFollowUpEnhancer.js',
-  '/src/lib/coachAssignmentOutcomeEnhancer.js',
-  '/src/lib/coachFollowUpService.js',
-  '/src/lib/coachPlayerResponseLoop.js',
-]
-
 function normalizeModuleId(id = '') {
   return String(id).replaceAll('\\', '/')
 }
@@ -80,7 +72,6 @@ export default defineConfig(async (environment) => {
           ...baseOutput,
           manualChunks(id, api) {
             const moduleId = normalizeModuleId(id)
-            if (COACH_RESPONSE_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'CoachWorkspaces'
             if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
             if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
