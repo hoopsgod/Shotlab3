@@ -71,7 +71,7 @@ test('Coach Home keeps one source-owned hero while runtime shell bridge owns onl
   assert.match(coachMobileAuthority, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(coachMobileAuthority, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
   assert.match(coachMobileAuthority, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
-  assert.match(coachMobileAuthority, /\.mcFocusGrid\{[^}]*margin:0/);
+  assert.match(coachMobileAuthority, /\.mcFocusGrid\{[^}]*margin:23px 0 0/);
   assert.match(coachMobileAuthority, /\.mcActivationChapter\{[^}]*margin:0/);
   assert.match(coachMobileAuthority, /\.mcLowerGrid\{[^}]*margin:0/);
   assert.doesNotMatch(coachMobileAuthority, /min-height:382px|clamp\(96px,26vw,108px\)/);
