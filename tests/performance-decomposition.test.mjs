@@ -184,4 +184,16 @@ test('Phase 5B preserves shared domain ownership while keeping Coach response ru
     phase5bViteConfig,
     /CORE_DOMAIN_SERVICE_FRAGMENTS\.some\(\(fragment\) => moduleId\.includes\(fragment\)\)\) return 'AppDomainServices'/,
   )
+  assert.match(
+    phase5bViteConfig,
+    /moduleId\.includes\(SHARED_SECONDARY_PAGE_FRAGMENT\)\) return 'CoachWorkspaces'/,
+  )
+  assert.match(
+    phase5bViteConfig,
+    /moduleId\.includes\(SHARED_PREMIUM_WORKSPACE_STYLE\)\) return 'AppDomainServices'/,
+  )
+  assert.doesNotMatch(
+    phase5bViteConfig,
+    /SHARED_SECONDARY_PAGE_FRAGMENT\).*SHARED_PREMIUM_WORKSPACE_STYLE\).*return 'AppDomainServices'/,
+  )
 })
