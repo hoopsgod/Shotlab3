@@ -10,6 +10,7 @@ import { installCoachAssignmentOutcomeEnhancer } from "./coachAssignmentOutcomeE
 import { installCoachHomeHierarchyEnhancer } from "./coachHomeHierarchyEnhancer.js";
 import { installCoachQuickAssignEnhancer } from "./coachQuickAssignEnhancer.js";
 import { installCoachResponseLoopEnhancer } from "./coachResponseLoopEnhancer.js";
+import { installCoachFollowUpEnhancer } from "./coachFollowUpEnhancer.js";
 import { installHomeExperienceHierarchy } from "./homeExperienceHierarchy.js";
 import { installVisualSystemReboot } from "./visualSystemReboot.js";
 import { installVisualSystemRebootReleaseFixes } from "./visualSystemRebootReleaseFixes.js";
@@ -27,6 +28,7 @@ installCoachAssignmentInterventionEnhancer();
 installCoachInterventionOutcomeEnhancer();
 installCoachHomeHierarchyEnhancer();
 installCoachResponseLoopEnhancer();
+installCoachFollowUpEnhancer();
 installVisualSystemReboot();
 installVisualSystemRebootReleaseFixes();
 
