@@ -33,11 +33,6 @@
 .performance-shell--coach #coach-roster-operations .coachRosterCard__actions button:focus-visible{outline:3px solid color-mix(in srgb,var(--phase2c-accent) 24%,transparent)!important;outline-offset:2px!important}
 .performance-shell--coach #coach-roster-operations [data-coach-roster-placeholder="true"]{min-height:68px!important;margin:0!important;border:0!important;border-bottom:1px dashed var(--phase2c-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 
-/* Compatibility: retire duplicate recap scaffolding only. */
-.performance-shell--coach #coach-roster-operations > div:nth-of-type(1):not(.fade-up),
-.performance-shell--coach #coach-roster-operations > div:nth-of-type(2):not(.fade-up){display:none!important}
-.performance-shell--coach #coach-roster-operations > div:nth-of-type(3) select{min-width:178px!important;min-height:44px!important}
-
 @media(max-width:620px){
 .performance-shell--coach #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr);align-items:start;gap:8px;padding:12px 2px 10px}
 .performance-shell--coach #coach-roster-operations .coachRoster__heading span{display:none}
