@@ -5,10 +5,13 @@ import { loadPlayerAssignment, savePlayerAssignment } from "./playerAssignmentSe
 import {
   COACH_FOLLOW_UP_CONTEXT_KEY,
   buildNextAssignmentSuggestion,
+  buildCoachResponseContext,
   getCoachResponseContext,
   parseCoachResponseNote,
   serializeCoachResponseNote,
+  setCoachResponseContext,
 } from "./coachPlayerResponseLoop.js";
+import { openExactPlayerFollowUp } from "./coachAssignmentOutcomeEnhancer.js";
 
 import "./coachFollowUpEnhancer.css";
 // Touch-target contract is defined in coachFollowUpEnhancer.css: min-height:44px
@@ -49,6 +52,47 @@ function inferContextFromDrawer(drawer) {
   const searchValue = clean(document.querySelector('[data-testid="coach-players-filter-rail"] input[type="search"]')?.value);
   const playerName = clean(drawer?.querySelector?.('[role="dialog"]')?.getAttribute?.("aria-label"));
   return resolveContext(searchValue, playerName);
+}
+
+const LIVE_ROW_SELECTOR = '[data-testid="coach-live-activity"] .mcTimeline > div';
+
+function liveResult(row) {
+  const playerName = clean(row?.querySelector?.("strong")?.textContent);
+  const detail = clean(row?.querySelector?.("small")?.textContent);
+  const meta = clean(row?.querySelector?.("time")?.textContent);
+  const actionable = Boolean(playerName && detail)
+    && !/^(team|athletes? active|player activity)$/i.test(playerName)
+    && /(home shots?|shooting|drill score|score|strength|s&c|makes?|logged|completed)/i.test(detail);
+  return { actionable, playerName, detail, meta };
+}
+
+function wireLiveRows() {
+  for (const row of document.querySelectorAll(LIVE_ROW_SELECTOR)) {
+    const result = liveResult(row);
+    if (!result.actionable) {
+      row.removeAttribute("data-shotlab-response-row");
+      row.removeAttribute("role");
+      row.removeAttribute("tabindex");
+      row.removeAttribute("aria-label");
+      continue;
+    }
+    row.dataset.shotlabResponseRow = "true";
+    row.setAttribute("role", "button");
+    row.setAttribute("tabindex", "0");
+    row.setAttribute("aria-label", `Review ${result.playerName} result and record next assignment`);
+  }
+}
+
+function openLiveRow(row) {
+  const result = liveResult(row);
+  if (!result.actionable) return false;
+  setCoachResponseContext(buildCoachResponseContext({
+    playerIdentity: result.playerName,
+    playerName: result.playerName,
+    detail: result.detail,
+    meta: result.meta,
+  }));
+  return openExactPlayerFollowUp({ searchIdentity: result.playerName, name: result.playerName });
 }
 
 function neutralizeLegacyNudges() {
@@ -230,12 +274,20 @@ export function installCoachFollowUpEnhancer() {
   if (window.__shotlabCoachFollowUpEnhancer) return true;
   window.__shotlabCoachFollowUpEnhancer = true;
   document.addEventListener("click", (event) => {
+    const liveRow = event.target?.closest?.(`${LIVE_ROW_SELECTOR}[data-shotlab-response-row="true"]`);
+    if (liveRow) { openLiveRow(liveRow); return; }
     const row = event.target?.closest?.(".mcAssignmentOutcomeRow[data-player-email]");
-    if (!row) return;
-    window[CONTEXT_KEY] = {
+    if (row) window[CONTEXT_KEY] = {
       playerIdentity: clean(row.getAttribute("data-player-email")),
       playerName: clean(row.querySelector("strong")?.textContent),
     };
+  }, true);
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const row = event.target?.closest?.(`${LIVE_ROW_SELECTOR}[data-shotlab-response-row="true"]`);
+    if (!row) return;
+    event.preventDefault();
+    openLiveRow(row);
   }, true);
 
   let host = null;
@@ -246,6 +298,7 @@ export function installCoachFollowUpEnhancer() {
 
   const reconcile = () => {
     frame = null;
+    wireLiveRows();
     neutralizeLegacyNudges();
     const nextDrawer = document.querySelector('[data-testid="coach-player-intelligence-drawer"]');
     if (!nextDrawer) {
@@ -282,8 +335,9 @@ export function installCoachFollowUpEnhancer() {
     frame = window.requestAnimationFrame(reconcile);
   };
   const observer = new MutationObserver(schedule);
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   window.addEventListener("storage", schedule);
+  window.addEventListener("focus", schedule);
   schedule();
   return true;
 }
