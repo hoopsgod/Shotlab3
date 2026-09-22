@@ -59,4 +59,3 @@
 .performance-shell--coach #coach-roster-operations .coachRosterCard__initials{width:32px!important;height:32px!important}
 .performance-shell--coach #coach-roster-operations [data-testid="semantic-roster-status"]{font-size:9px!important}
 }
-@media(prefers-reduced-motion:reduce){.performance-shell--coach #coach-roster-operations button{transition:none!important}}
