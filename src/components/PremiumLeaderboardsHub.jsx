@@ -351,7 +351,7 @@ export default function PremiumLeaderboardsHub({
     </header> : null}
     {!showHeader ? statusLine : null}
 
-    <section aria-label="Leaderboard decision metrics" data-testid="leaderboard-metric-surface" data-layout-role="supporting-evidence" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 1, margin: '10px 0 8px', overflow: 'hidden', border: '1px solid var(--stroke-1)', borderRadius: 12, background: 'linear-gradient(135deg,#121a20,#0b1014)' }}>
+    <section aria-label="Leaderboard decision metrics" data-testid="leaderboard-metric-surface" data-layout-role="supporting-evidence" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 1, margin: '10px 0 8px', overflow: 'hidden', border: '1px solid var(--stroke-1)', borderRadius: 12, backgroundColor: '#121a20', background: 'linear-gradient(135deg,#121a20,#0b1014)' }}>
       {metricItems.map((metric) => <div key={metric.label} data-metric={metric.label.toLowerCase().replaceAll(' ','-')} style={{ minWidth: 0, padding: '12px 9px' }}><div data-metric-role="value" style={{ color: LIGHT, fontFamily: FALLBACK_FONT, fontSize: 24, fontWeight: 900, lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.value}</div><div data-metric-role="label" style={{ color: VOLT, fontFamily: FALLBACK_FONT, fontSize: 11, fontWeight: 900, letterSpacing: '.06em', marginTop: 5, textTransform: 'uppercase', whiteSpace: 'normal', overflow: 'visible', textOverflow: 'clip' }}>{metric.label}</div><div data-metric-role="detail" style={{ color: SUB, fontSize: 12, lineHeight: 1.3, marginTop: 3, minHeight: 31 }}>{metric.detail}</div></div>)}
     </section>
 
