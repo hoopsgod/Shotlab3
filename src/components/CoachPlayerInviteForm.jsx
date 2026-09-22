@@ -91,7 +91,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     window.location.href = mailto;
   };
 
-  return <form id="coach-add-player-form" data-testid="coach-player-invite-form" aria-busy={busy || undefined} onSubmit={submit} style={styles.shell}>
+  return <form id="coach-player-invite-form" data-testid="coach-player-invite-form" aria-busy={busy || undefined} onSubmit={submit} style={styles.shell}>
     <div style={styles.title}>Add Player &amp; Send Login Invite</div>
     <p style={styles.copy}>Add the player to your roster and send a single-use account setup link. ShotLab never displays a permanent password.</p>
     <div style={styles.grid}>
