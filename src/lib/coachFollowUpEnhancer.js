@@ -3,6 +3,7 @@ import{createRoot}from"react-dom/client";
 import{loadCoachCoreLoopPlayer,saveCoachCoreLoopAction}from"./coachFollowUpService.js";
 import{loadPlayerAssignment,savePlayerAssignment}from"./playerAssignmentService.js";
 import{COACH_FOLLOW_UP_CONTEXT_KEY,buildNextAssignmentSuggestion,getCoachResponseContext,parseCoachResponseNote,serializeCoachResponseNote}from"./coachPlayerResponseLoop.js";
+if(typeof document!=="undefined")import("./coachFollowUpEnhancer.css");
 
 // Touch target authority lives in CoachActivationPath.css: min-height:44px
 const CONTEXT_KEY=COACH_FOLLOW_UP_CONTEXT_KEY,clean=v=>String(v??"").trim(),norm=v=>clean(v).toLowerCase();
@@ -22,6 +23,7 @@ function retireNudges(){
  document.querySelectorAll("#coach-roster-operations button").forEach(b=>{if(clean(b.textContent).replace(/^✓\s*/,"").toUpperCase()==="NUDGE"){b.hidden=true;b.disabled=true;b.dataset.shotlabLegacyNudgeRetired="true";b.setAttribute("aria-hidden","true")}});
 }
 const deliveryLabel=s=>s==="completed"?"Player completed":s==="started"?"Player started":s==="acknowledged"?"Player acknowledged":s==="assigned"?"Delivered":"Not delivered";
+const stateLabel=s=>s==="completed"?"Completed":s==="planned"?"Planned":"Not recorded";
 function CoachFollowUpPanel({context:c}){
  const responseContext=useMemo(()=>getCoachResponseContext({playerIdentity:c.playerIdentity,playerName:c.playerName}),[c.playerIdentity,c.playerName]);
  const[record,setRecord]=useState(null),[delivery,setDelivery]=useState(null),[assignment,setAssignment]=useState(""),[note,setNote]=useState(""),[status,setStatus]=useState("Loading follow-up record…"),[error,setError]=useState(false),[saving,setSaving]=useState(false);
@@ -46,7 +48,7 @@ function CoachFollowUpPanel({context:c}){
  };
  const state=record?.state==="dismissed"?"":record?.state||"",primary=state==="planned"?"completed":"planned";
  return React.createElement("section",{className:"coachFollowUpLedger","data-testid":"coach-follow-up-ledger","data-follow-up-state":state||"none","aria-label":`Coach follow-up for ${c.playerName}`},
-  React.createElement("div",{className:"coachFollowUpHead"},React.createElement("div",null,React.createElement("small",{className:"coachFollowUpEyebrow"},responseContext?"Live result response":"Coach workflow"),React.createElement("h2",{className:"coachFollowUpTitle"},responseContext?"Set the next action":"Follow-up record")),React.createElement("strong",{className:"coachFollowUpBadge"},state||"Not recorded")),
+  React.createElement("div",{className:"coachFollowUpHead"},React.createElement("div",null,React.createElement("small",{className:"coachFollowUpEyebrow"},responseContext?"Live result response":"Coach workflow"),React.createElement("h2",{className:"coachFollowUpTitle"},responseContext?"Set the next action":"Follow-up record")),React.createElement("strong",{className:"coachFollowUpBadge"},stateLabel(state))),
   responseContext&&React.createElement("div",{className:"coachResponseEvidence","data-testid":"coach-result-response-context"},React.createElement("small",null,"Latest player result"),React.createElement("strong",null,responseContext.resultDetail||"Training result recorded")),
   delivery&&React.createElement("div",{className:"coachDeliveryStatus","data-testid":"coach-player-assignment-status","data-assignment-state":delivery.state},React.createElement("span",null,"Player delivery"),React.createElement("strong",null,deliveryLabel(delivery.state))),
   React.createElement("p",{className:"coachFollowUpWarning"},"The player receives only the assignment text and result context. Private coach notes remain coach-only."),
