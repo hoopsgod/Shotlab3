@@ -7,9 +7,8 @@ import {
   DashboardSection,
 } from "./CoachDashboardPrimitives.jsx";
 import { useEffect, useRef, useState } from "react";
-import { loadCoachCoreLoopPlayer, saveCoachCoreLoopAction } from "../lib/coachFollowUpService.js";
-import { loadPlayerAssignment, savePlayerAssignment } from "../lib/playerAssignmentService.js";
 import { buildNextAssignmentSuggestion, getCoachResponseContext, parseCoachResponseNote, serializeCoachResponseNote } from "../lib/coachPlayerResponseLoop.js";
+const loadCoachFollowUpServices = () => Promise.all([import("../lib/coachFollowUpService.js"), import("../lib/playerAssignmentService.js")]);
 import styles from "./CoachDashboardPhase2.module.css";
 import "./Phase2PremiumEmptyStateLanguage.css";
 
@@ -61,7 +60,7 @@ function CoachPlayerFollowUp({ model }) {
 
   useEffect(() => {
     let live = true;
-    Promise.all([loadCoachCoreLoopPlayer(context), loadPlayerAssignment(context)]).then(([result, deliveryResult]) => {
+    loadCoachFollowUpServices().then(([followUpService, assignmentService]) => Promise.all([followUpService.loadCoachCoreLoopPlayer(context), assignmentService.loadPlayerAssignment(context)])).then(([result, deliveryResult]) => {
       if (!live) return;
       const parsed = parseCoachResponseNote(result.record?.note || "");
       const confirmedDelivery = deliveryResult.ok ? deliveryResult.assignment || null : null;
@@ -92,9 +91,10 @@ function CoachPlayerFollowUp({ model }) {
     setError(false);
     setStatus("Saving…");
     try {
+      const [followUpService, assignmentService] = await loadCoachFollowUpServices();
       const [result, deliveryResult] = await Promise.all([
-        saveCoachCoreLoopAction({ ...context, state: nextState, note: serializeCoachResponseNote({ assignment, privateNote: note }) }),
-        requireAssignment ? savePlayerAssignment({ ...context, assignmentText: assignment, resultDetail: response?.resultDetail || "" }) : Promise.resolve(null),
+        followUpService.saveCoachCoreLoopAction({ ...context, state: nextState, note: serializeCoachResponseNote({ assignment, privateNote: note }) }),
+        requireAssignment ? assignmentService.savePlayerAssignment({ ...context, assignmentText: assignment, resultDetail: response?.resultDetail || "" }) : Promise.resolve(null),
       ]);
       setRecord(result.record || record);
       if (deliveryResult?.ok && deliveryResult.assignment) setDelivery(deliveryResult.assignment);
