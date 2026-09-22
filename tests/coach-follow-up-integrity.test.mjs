@@ -167,6 +167,8 @@ test("database and API contracts keep follow-up notes behind the coach API", () 
   const migration = fs.readFileSync(new URL("../migrations/037_coach_follow_ups.sql", import.meta.url), "utf8");
   const api = fs.readFileSync(new URL("../functions/v1/coach-follow-ups/index.js", import.meta.url), "utf8");
   const enhancer = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
+  const followUp = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
+  const followUpCss = fs.readFileSync(new URL("../src/components/CoachActivationPath.css", import.meta.url), "utf8");
 
   assert.match(migration, /create table if not exists public\.coach_follow_ups/i);
   assert.match(migration, /enable row level security/i);
@@ -175,10 +177,10 @@ test("database and API contracts keep follow-up notes behind the coach API", () 
   assert.match(api, /writableTeamIds/);
   assert.match(api, /coach_follow_ups_post/);
   assert.match(api, /team_id,player_identity/);
-  assert.match(enhancer, /coach-follow-up-ledger/);
-  assert.match(enhancer, /player receives only the assignment text and result context/i);
-  assert.match(enhancer, /Private coach notes remain coach-only/i);
+  assert.match(followUp, /coach-follow-up-ledger/);
+  assert.match(followUp, /player receives only the assignment text and result context/i);
+  assert.match(followUp, /Private coach notes remain coach-only/i);
   assert.match(enhancer, /shotlabLegacyNudgeRetired/);
-  assert.match(enhancer, /min-height:44px/);
-  assert.doesNotMatch(enhancer, /message sent|notification delivered|player was notified/i);
+  assert.match(followUpCss, /min-height:44px/);
+  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);
 });
