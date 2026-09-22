@@ -22,11 +22,12 @@ test('Phase 4F moves cross-role scoring and assignment services into AppDomainSe
   assert.match(vite, /APP_DOMAIN_SERVICE_FRAGMENTS/)
   for (const fragment of ['authFlow','appPersistenceService','homeShotLogging','playerDataManagement','seasonLeaderboardAnalytics','programDrillScoring','assignmentDeadline','playerAssignmentService','playerAssignmentHistoryService']) assert.match(vite, new RegExp(fragment))
   assert.match(vite, /return 'AppDomainServices'/)
+  assert.equal((vite.match(/useCleanTeamLogo\\.js/g) || []).length, 1)
 })
 
 test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in shared AppDomainServices', () => {
   assert.match(vite, /SHARED_AUTHENTICATED_UI_FRAGMENTS/)
-  for (const fragment of ['TeamBrandingContext','MobileNavigation','VisualHierarchy','ShotLabStatePanel','SemanticStatus','WorkspaceRecoveryBoundary','PlayerInterfaceFallback']) assert.match(vite, new RegExp(fragment))
+  for (const fragment of ['TeamBrandingContext','MobileNavigation','VisualHierarchy','ShotLabStatePanel','SemanticStatus','WorkspaceRecoveryBoundary','PlayerInterfaceFallback','useCleanTeamLogo']) assert.match(vite, new RegExp(fragment))
   assert.match(vite, /return 'AppDomainServices'/)
 })
 
