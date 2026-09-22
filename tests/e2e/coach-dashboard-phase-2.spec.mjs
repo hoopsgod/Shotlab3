@@ -242,9 +242,14 @@ test("leaderboard, activity, and season comparison use the shared intelligence l
   await openMoreDestination(page, "leaderboards");
   const leaderboardPanel = page.getByTestId("coach-leaderboard-operational-panel");
   await expect(leaderboardPanel).toBeVisible({ timeout: 20_000 });
-  const leaderboardFilters = page.getByTestId("coach-leaderboard-operational-filters");
-  await leaderboardFilters.getByRole("button", { name: /^Most Improved/ }).click();
-  await expect(leaderboardFilters.getByRole("button", { name: /^Most Improved/ })).toHaveAttribute("aria-pressed", "true");
+  const leaderboardHub = page.getByTestId("premium-leaderboards-hub");
+  await expect(leaderboardHub).toBeVisible({ timeout: 20_000 });
+  const allTime = leaderboardHub.getByRole("button", { name: "All-Time", exact: true });
+  await allTime.click();
+  await expect(allTime).toHaveAttribute("aria-pressed", "true");
+  const programDrills = leaderboardHub.getByRole("button", { name: "Program Drills", exact: true });
+  await programDrills.click();
+  await expect(programDrills).toHaveAttribute("aria-pressed", "true");
   await expectNoHorizontalOverflow(page);
 
   await openMoreDestination(page, "activity");
