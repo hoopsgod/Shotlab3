@@ -82,7 +82,7 @@ export default defineConfig(async (environment) => {
             const moduleId = normalizeModuleId(id)
             if (COACH_RESPONSE_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'CoachWorkspaces'
             if (CORE_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
-            if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AuthenticatedUi'
+            if (moduleId.includes(SHARED_SECONDARY_PAGE_FRAGMENT) || moduleId.includes(SHARED_PREMIUM_WORKSPACE_STYLE)) return 'AppDomainServices'
             return typeof baseManualChunks === 'function' ? baseManualChunks(id, api) : undefined
           },
         },
