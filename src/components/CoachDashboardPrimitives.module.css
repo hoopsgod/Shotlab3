@@ -191,6 +191,16 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
+.filterRail[data-stacked="true"] {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
+.filterRail[data-stacked="true"] > .filterScroller {
+  width: 100%;
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+
 .searchField {
   display: flex;
   align-items: center;
