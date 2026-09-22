@@ -322,7 +322,7 @@ function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
   if (moduleId.includes('vite/preload-helper')) return 'RuntimeShared'
   if (moduleId.includes('/node_modules/react/') || moduleId.includes('/node_modules/react-dom/') || moduleId.includes('/node_modules/scheduler/')) return 'react-vendor'
-  if (matchesAny(moduleId, SHARED_AUTHENTICATED_UI_FRAGMENTS)) return 'AuthenticatedUi'
+  if (matchesAny(moduleId, SHARED_AUTHENTICATED_UI_FRAGMENTS)) return 'AppDomainServices'
   if (matchesAny(moduleId, APP_DOMAIN_SERVICE_FRAGMENTS)) return 'AppDomainServices'
   if (matchesAny(moduleId, PLAYER_WORKSPACE_FRAGMENTS)) return 'PlayerWorkspaces'
   if (matchesAny(moduleId, COACH_WORKSPACE_FRAGMENTS)) return 'CoachWorkspaces'
