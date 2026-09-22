@@ -123,13 +123,12 @@ test("roster controls do not fake latency and preserve 44px filter targets", asy
   assert.match(source, /aria-label="Search players"/);
 });
 
-test("Coach player follow-up stays inside the intelligence drawer scroll body", async () => {
-  const source = await read("src/lib/coachFollowUpEnhancer.js");
+test("Coach player follow-up stays React-owned inside the intelligence drawer", async () => {
+  const source = await read("src/components/CoachDashboardPhase2.jsx");
 
-  assert.match(source, /const body = dialog\.querySelector\('\[data-visual-role="dashboard-section"\]'\)\?\.parentElement/);
-  assert.match(source, /if \(!body \|\| body === dialog\) return/);
-  assert.match(source, /body\.appendChild\(host\)/);
-  assert.doesNotMatch(source, /dialog\.appendChild\(host\)/);
+  assert.match(source, /data-testid="coach-follow-up-ledger-host"/);
+  assert.match(source, /<CoachPlayerFollowUp model=\{model\} \/>/);
+  assert.doesNotMatch(source, /dialog\.appendChild|createRoot\(host\)/);
 });
 
 test("Phase 4 remains component-owned instead of introducing a new global visual authority", async () => {
