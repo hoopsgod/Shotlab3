@@ -3,7 +3,6 @@ import{createRoot}from"react-dom/client";
 import{loadCoachCoreLoopPlayer,saveCoachCoreLoopAction}from"./coachFollowUpService.js";
 import{loadPlayerAssignment,savePlayerAssignment}from"./playerAssignmentService.js";
 import{COACH_FOLLOW_UP_CONTEXT_KEY,buildNextAssignmentSuggestion,getCoachResponseContext,parseCoachResponseNote,serializeCoachResponseNote}from"./coachPlayerResponseLoop.js";
-if(typeof document!=="undefined")import("./coachFollowUpEnhancer.css");
 
 // Touch target authority lives in CoachActivationPath.css: min-height:44px
 const CONTEXT_KEY=COACH_FOLLOW_UP_CONTEXT_KEY,clean=v=>String(v??"").trim(),norm=v=>clean(v).toLowerCase();
