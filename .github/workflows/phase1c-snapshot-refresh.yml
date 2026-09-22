@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   refresh-one-baseline:
-    if: github.event.pull_request.number == 1569
+    if: github.event_name == 'push' || github.event.pull_request.number == 1569
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
