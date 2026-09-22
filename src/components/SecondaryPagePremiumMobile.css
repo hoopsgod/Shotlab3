@@ -102,6 +102,12 @@
   /* Coach Players owns a one-column composite rail on mobile: full-width search
      first, then a wrapping chip group. Keep shared flex/scroll authority off it. */
   [data-testid="coach-players-filter-rail"] {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     overflow-x: visible !important;
   }
 
@@ -116,6 +122,42 @@
     min-width: 0 !important;
     padding-inline: 0 !important;
     box-sizing: border-box !important;
+  }
+
+  .secondaryPageToolbar [data-testid="coach-players-filter-rail"] > div[role="group"] {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    overflow-x: visible !important;
+    padding: 0 !important;
+  }
+
+  .secondaryPageToolbar [data-testid="coach-players-filter-rail"] > div[role="group"] > button {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding-inline: 9px !important;
+    font-size: 11px !important;
+  }
+
+  .coachPlayersSecondary > summary {
+    display: grid;
+    gap: 3px;
+    min-height: 0;
+    padding: 10px 2px;
+  }
+
+  .coachPlayersSecondary > summary span:first-child {
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .coachPlayersSecondary > summary span + span {
+    font-size: 10px;
+    line-height: 1.3;
   }
 
   .secondaryPageToolbar [data-visual-role="filter-rail"]::-webkit-scrollbar {
