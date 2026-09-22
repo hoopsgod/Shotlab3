@@ -154,7 +154,7 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
   }
 
   const screenshotPath = path.join(SCREENSHOT_DIR, `${name}.png`);
-  await page.screenshot({ path: screenshotPath, animations: 'disabled', caret: 'hide', fullPage: false });
+  await page.screenshot({ path: screenshotPath, animations: 'disabled', caret: 'hide', fullPage: false, scale: 'css' });
   expect(fs.statSync(screenshotPath).size, `${name}: screenshot evidence must not be empty`).toBeGreaterThan(5_000);
 
   if (name === 'coach-mission-control-demo-empty-390') {
