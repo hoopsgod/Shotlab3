@@ -6,10 +6,6 @@ import {
   DashboardProgress,
   DashboardSection,
 } from "./CoachDashboardPrimitives.jsx";
-import { useEffect, useRef, useState } from "react";
-import { loadCoachCoreLoopPlayer, saveCoachCoreLoopAction } from "../lib/coachFollowUpService.js";
-import { loadPlayerAssignment, savePlayerAssignment } from "../lib/playerAssignmentService.js";
-import { buildNextAssignmentSuggestion, getCoachResponseContext, parseCoachResponseNote, serializeCoachResponseNote } from "../lib/coachPlayerResponseLoop.js";
 import styles from "./CoachDashboardPhase2.module.css";
 import "./Phase2PremiumEmptyStateLanguage.css";
 
@@ -38,86 +34,6 @@ function MetricGrid({ items = [] }) {
         </div>
       ))}
     </div>
-  );
-}
-
-const followUpDeliveryLabel = (state) => ({ completed: "Player completed", started: "Player started", acknowledged: "Player acknowledged", assigned: "Delivered" })[state] || "Not delivered";
-
-function CoachPlayerFollowUp({ model }) {
-  const player = model?.player || {};
-  const teamId = player.teamId || player.team_id || "";
-  const playerIdentity = model?.email || player.email || player.player_email || player.playerId || player.player_id || player.id || "";
-  const playerName = model?.name || player.name || player.displayName || playerIdentity || "Player";
-  const response = getCoachResponseContext({ playerIdentity, playerName });
-  const [record, setRecord] = useState(null);
-  const [delivery, setDelivery] = useState(null);
-  const [assignment, setAssignment] = useState("");
-  const [note, setNote] = useState("");
-  const [status, setStatus] = useState("Loading follow-up record…");
-  const [saving, setSaving] = useState(false);
-  const saveInFlightRef = useRef(false);
-  const context = { teamId, playerIdentity, playerName };
-
-  useEffect(() => {
-    let live = true;
-    Promise.all([loadCoachCoreLoopPlayer(context), loadPlayerAssignment(context)]).then(([followUp, assigned]) => {
-      if (!live) return;
-      const parsed = parseCoachResponseNote(followUp.record?.note || "");
-      const confirmedDelivery = assigned.ok ? assigned.assignment || null : null;
-      setRecord(followUp.record || null);
-      setDelivery(confirmedDelivery);
-      setAssignment(confirmedDelivery?.assignmentText || parsed.assignment || (response ? buildNextAssignmentSuggestion(response) : ""));
-      setNote(parsed.privateNote);
-      setStatus(!assigned.ok ? "Player delivery could not be confirmed. Retry when connected." : !followUp.ok ? "Follow-up could not be refreshed. Retry when connected." : "Follow-up ready.");
-    }).catch(() => { if (live) setStatus("Follow-up could not be loaded. Retry when connected."); });
-    return () => { live = false; };
-  }, [teamId, playerIdentity, response?.openedAt]);
-
-  const save = async (nextState, deliver = false) => {
-    if (deliver && !assignment.trim()) return setStatus("Add a next assignment before recording it.");
-    if (saveInFlightRef.current) return;
-    saveInFlightRef.current = true;
-    setSaving(true);
-    setStatus("Saving…");
-    try {
-      const [followUp, assigned] = await Promise.all([
-        saveCoachCoreLoopAction({ ...context, state: nextState, note: serializeCoachResponseNote({ assignment, privateNote: note }) }),
-        deliver ? savePlayerAssignment({ ...context, assignmentText: assignment, resultDetail: response?.resultDetail || "" }) : null,
-      ]);
-      if (followUp.record) setRecord(followUp.record);
-      if (assigned?.ok && assigned.assignment) setDelivery(assigned.assignment);
-      setStatus(deliver
-        ? assigned?.ok
-          ? followUp.ok ? (assigned.message || "Assignment delivered to the player.") : "Assignment delivered, but private follow-up sync failed."
-          : "Player delivery could not be confirmed. Retry when connected."
-        : (followUp.message || "Follow-up record saved."));
-    } catch {
-      setStatus("The follow-up could not be saved. Retry when connected.");
-    } finally {
-      saveInFlightRef.current = false;
-      setSaving(false);
-    }
-  };
-
-  const state = record?.state === "dismissed" ? "" : record?.state || "";
-  return (
-    <section className="coachFollowUpLedger" data-testid="coach-follow-up-ledger" data-follow-up-state={state || "none"} aria-label={`Coach follow-up for ${playerName}`}>
-      <div className="coachFollowUpHead">
-        <div><small className="coachFollowUpEyebrow">{response ? "Live result response" : "Coach workflow"}</small><h2 className="coachFollowUpTitle">{response ? "Set the next action" : "Follow-up record"}</h2></div>
-        <strong className="coachFollowUpBadge">{state === "completed" ? "Completed" : state === "planned" ? "Planned" : "Not recorded"}</strong>
-      </div>
-      {response ? <div className="coachResponseEvidence" data-testid="coach-result-response-context"><small>Latest player result</small><strong>{response.resultDetail || "Training result recorded"}</strong></div> : null}
-      {delivery ? <div className="coachDeliveryStatus" data-testid="coach-player-assignment-status" data-assignment-state={delivery.state}><span>Player delivery</span><strong>{followUpDeliveryLabel(delivery.state)}</strong></div> : null}
-      <p className="coachFollowUpWarning">The player receives only the assignment text and result context. Private coach notes remain coach-only.</p>
-      <label className="coachFollowUpField is-assignment"><span>Next assignment to deliver</span><textarea value={assignment} maxLength={2000} onChange={(event) => setAssignment(event.target.value)} disabled={saving} data-testid="coach-next-assignment-input" /></label>
-      <button type="button" className="coachAssignmentSave" onClick={() => save("planned", true)} disabled={saving} aria-busy={saving}>Deliver next assignment</button>
-      <label className="coachFollowUpField"><span>Private coach note</span><textarea value={note} maxLength={2000} onChange={(event) => setNote(event.target.value)} disabled={saving} /></label>
-      <div className="coachFollowUpActions">
-        <button type="button" onClick={() => save(state === "planned" ? "completed" : "planned")} disabled={saving} aria-busy={saving}>{state === "planned" ? "Mark follow-up complete" : state === "completed" ? "Reopen follow-up" : "Mark for follow-up"}</button>
-        <button type="button" onClick={() => save("dismissed")} disabled={saving || !state} aria-busy={saving}>Clear record</button>
-      </div>
-      <div className="coachFollowUpStatus" role="status">{status}</div>
-    </section>
   );
 }
 
