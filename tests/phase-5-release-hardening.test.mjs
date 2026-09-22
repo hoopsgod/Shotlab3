@@ -61,7 +61,7 @@ test("assignment mutation controls expose busy state and recover in finally", ()
   const coach = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
   const player = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
 
-  assert.match(coach, /"aria-busy": saving/);
+  assert.match(coach, /aria-busy=\{saving\}/);
   assert.match(coach, /finally \{[\s\S]*saveInFlightRef\.current = false;[\s\S]*setSaving\(false\)/);
   assert.match(player, /aria-busy=\{busy\}/);
   assert.match(player, /finally \{[\s\S]*actionInFlightRef\.current = false;[\s\S]*setBusy\(false\)/);
