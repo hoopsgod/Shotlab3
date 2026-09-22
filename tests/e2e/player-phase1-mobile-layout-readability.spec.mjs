@@ -128,7 +128,8 @@ async function assertPlayerRail(page) {
 async function assertWorkspaceReadability(page, viewport, expectedWorkspace) {
   const workspace = page.locator(`[data-team-workspace="${expectedWorkspace}"]`).first();
   await expect(workspace).toBeVisible({ timeout: 20_000 });
-  const metrics = await workspace.locator('[data-metric-role="label"], [data-metric-role="detail"]').evaluateAll((nodes) => nodes.map((node) => {
+  const metricRoot = expectedWorkspace === "leaderboards" ? page.getByTestId("leaderboard-metric-surface") : workspace;
+  const metrics = await metricRoot.locator('[data-metric-role="label"], [data-metric-role="detail"]').evaluateAll((nodes) => nodes.map((node) => {
     const style = getComputedStyle(node);
     const rect = node.getBoundingClientRect();
     const isTransparent = (value) => value === 'transparent' || /^rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0(?:\.0+)?\s*\)$/i.test(value);
