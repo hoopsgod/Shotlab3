@@ -11,7 +11,8 @@ const browserAligner = await readFile(new URL('../scripts/align-phase4f-browser-
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
 test('Phase 4F uses neutral runtime plus shared foundations and one workspace chunk per role', () => {
-  for (const chunk of ['RuntimeShared', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) assert.match(vite, new RegExp(`return '${chunk}'`))\n  assert.doesNotMatch(vite, /return 'AuthenticatedUi'/)
+  for (const chunk of ['RuntimeShared', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) assert.match(vite, new RegExp(`return '${chunk}'`))
+  assert.doesNotMatch(vite, /return 'AuthenticatedUi'/)
   for (const retired of ['PlayerAnalyticsWorkspaces', 'PlayerInterfaceWorkspaces', 'CoachAdministrationWorkspaces', 'CoachOperationalWorkspaces', 'PlayerProfileWorkspaces']) assert.doesNotMatch(vite, new RegExp(`return '${retired}'`))
   assert.match(vite, /vite\/preload-helper/)
   assert.doesNotMatch(vite, /onlyExplicitManualChunks:\s*true/)
