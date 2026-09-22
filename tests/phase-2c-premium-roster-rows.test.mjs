@@ -14,11 +14,11 @@ test('Phase 2C roster layer is loaded through the shared secondary-page bundle',
 test('Coach roster uses a flat editorial row instead of nested card chrome', () => {
   assert.match(rosterLayer, /\.phase1RosterRow\.coachRosterCard\s*\{[^}]*min-height:82px[^}]*border-radius:0[^}]*background:transparent[^}]*box-shadow:none/s);
   assert.match(rosterLayer, /\.coachRosterCard__profile,[\s\S]*\[data-phase1-open-profile="true"\][\s\S]*border:0!important;[\s\S]*background:transparent!important;/);
-  assert.match(rosterLayer, /Row actions are deliberately quiet/);
+  assert.match(rosterLayer, /One row, one surface/);
 });
 
 test('Coach roster mobile geometry gives player identity the width and moves utilities below', () => {
-  assert.match(rosterLayer, /@media \(max-width:620px\)/);
+  assert.match(rosterLayer, /@media\s*\(max-width:620px\)/);
   assert.match(rosterLayer, /grid-template-areas:\s*"avatar details"\s*"\. actions"/);
   assert.match(rosterLayer, /grid-area:details/);
   assert.match(rosterLayer, /grid-area:actions/);
@@ -42,7 +42,7 @@ test('Roster tools retain phone-safe controls and explicit focus treatment', () 
   assert.match(closure, /data-phase1-open-profile/);
   assert.match(rosterLayer, /:focus-visible/);
   assert.match(rosterLayer, /outline:3px solid/);
-  assert.match(rosterLayer, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(rosterLayer, /@media\s*\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(rosterLayer, /pointer-events:\s*none/);
 });
 
