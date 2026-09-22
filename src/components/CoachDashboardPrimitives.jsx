@@ -140,20 +140,9 @@ export function DashboardFilterRail({
   testId,
   surface = "dark",
   stacked = false,
-  wrapFilters = false,
 }) {
   return (
-    <div
-      className={styles.filterRail}
-      data-testid={testId}
-      data-surface={surface}
-      data-visual-role="filter-rail"
-      data-stacked={stacked || undefined}
-      style={{
-        ...(surface === "light" ? { "--dashboard-placeholder-color": "#59636a" } : {}),
-        ...(stacked ? { gridTemplateColumns: "minmax(0, 1fr)", width: "100%" } : {}),
-      }}
-    >
+    <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail" data-stacked={stacked || undefined} style={surface === "light" ? { "--dashboard-placeholder-color": "#59636a" } : undefined}>
       <label className={styles.searchField} style={surface === "light" ? { "--p3-dim": "#59636a" } : undefined}>
         <span className={styles.srOnly}>Search dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -167,12 +156,7 @@ export function DashboardFilterRail({
           placeholder={searchPlaceholder}
         />
       </label>
-      <div
-        className={styles.filterScroller}
-        role="group"
-        aria-label="Dashboard view filters"
-        style={(stacked || wrapFilters) ? { width: "100%", flexWrap: "wrap", overflowX: "visible" } : undefined}
-      >
+      <div className={styles.filterScroller} role="group" aria-label="Dashboard view filters">
         {filters.map((filter) => (
           <button
             key={filter.key}
