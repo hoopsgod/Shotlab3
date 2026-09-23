@@ -1,0 +1,57 @@
+name: Phase 7C Baseline Reconcile
+
+on:
+  push:
+    branches:
+      - agent/phase7c-player-roster-visual-convergence
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile-coach-players-baseline:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase7c-player-roster-visual-convergence
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner and Chromium
+        run: |
+          npm install --no-save @playwright/test@1.55.1
+          npx playwright install --with-deps chromium
+
+      - name: Build exact production assets
+        run: npm run build
+
+      - name: Regenerate Phase 1C evidence
+        run: npx playwright test --config=playwright.phase1c.config.mjs --update-snapshots || true
+
+      - name: Commit only the proven stale Coach Players baseline
+        run: |
+          TARGET='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-players-registered-populated-390-mobile-chromium-linux.png'
+          git add "$TARGET"
+          if git diff --cached --quiet; then
+            echo 'No target baseline change produced.'
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Reconcile Coach Players Phase 1C baseline'
+          git push origin HEAD:agent/phase7c-player-roster-visual-convergence
