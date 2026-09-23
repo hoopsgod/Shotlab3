@@ -1,0 +1,35 @@
+name: Phase 7D Safe Source Transform
+
+on:
+  push:
+    branches:
+      - agent/phase7d-coach-players-premium-roster
+
+permissions:
+  contents: write
+
+jobs:
+  transform:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/phase7d-coach-players-premium-roster
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply surgical roster transform
+        run: node scripts/phase7d-roster-transform.mjs
+      - name: Commit transformed source
+        run: |
+          if git diff --quiet; then
+            echo "No transform changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "feat(phase7d): move roster removal into contextual management"
+          git push origin HEAD:agent/phase7d-coach-players-premium-roster

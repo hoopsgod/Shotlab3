@@ -4552,6 +4552,7 @@ return <div className="fade-up">
 }
 function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePlayer,onSelectPlayer}){
   const [sortBy,setSortBy]=useState("status");
+  const [managePlayer,setManagePlayer]=useState(null);
   const now=Date.now();
   const dayMs=1000*60*60*24;
   const weekStartTs=now-(7*dayMs);
@@ -4648,7 +4649,12 @@ return <div className="fade-up coachRoster" data-testid="coach-roster-list">
         {p.statusMeta.pill==="INACTIVE"&&<button className="coachRosterCard__nudge" onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}}>
           {isNudged?"✓ NUDGED":"NUDGE"}
         </button>}
-        <button className="coachRosterCard__remove" type="button" onClick={()=>onRemovePlayer?.(rosterIdentity)}>REMOVE</button>
+        <div className="coachRosterCard__manage">
+          <button className="coachRosterCard__manageTrigger" type="button" aria-haspopup="menu" aria-expanded={managePlayer===rosterIdentity} aria-label={`Manage ${p.name||"player"}`} onClick={()=>setManagePlayer(current=>current===rosterIdentity?null:rosterIdentity)}>•••</button>
+          {managePlayer===rosterIdentity&&<div className="coachRosterCard__menu" role="menu" aria-label={`${p.name||"Player"} management`}>
+            <button role="menuitem" className="coachRosterCard__remove" type="button" onClick={()=>{setManagePlayer(null);if(window.confirm(`Remove ${p.name||"this player"} from the team roster? Their account and historical data will not be deleted.`))onRemovePlayer?.(rosterIdentity);}}>Remove from team</button>
+          </div>}
+        </div>
       </div>
     </div>
   </article>})}
