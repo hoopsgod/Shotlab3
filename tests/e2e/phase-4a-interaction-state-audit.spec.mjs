@@ -192,8 +192,12 @@ test("Phase 4A audits Coach interaction ergonomics and More-sheet behavior", asy
   await auditMoreSheet(page, "coach");
   expect(pageErrors).toEqual([]);
 
-  const scrollDependentLabels = audits.flatMap((audit) => audit.scrollDependent.map((target) => target.label));
-  expect(scrollDependentLabels.some((label) => /Top Engagement/.test(label)), "Coach Top Engagement must remain audit-visible through its horizontal scroller").toBe(true);
+  // The current leaderboard is intentionally viewport-contained; the former Top Engagement
+  // horizontal-scroller contract was superseded by the Phase 7 leaderboard presentation.
+  const leaderboardAudit = audits.find((audit) => audit.key === "leaderboards");
+  expect(leaderboardAudit, "Coach leaderboard must remain part of the audited mobile workflow").toBeTruthy();
+  expect(leaderboardAudit.documentWidth, "Coach leaderboard must not create horizontal page overflow").toBeLessThanOrEqual(leaderboardAudit.viewportWidth + 1);
+  expect(leaderboardAudit.clippedHorizontally, "Coach leaderboard controls must remain reachable without clipping").toEqual([]);
   // Events intentionally removes its type-filter rail in a true zero-event state; the global clipping gate still covers it whenever rendered.
 
   writeAndGateSummary("coach", audits);
