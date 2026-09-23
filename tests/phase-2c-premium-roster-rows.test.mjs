@@ -13,7 +13,7 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
 });
 
 test('Coach roster uses a flat editorial row instead of nested card chrome', () => {
-  assert.match(rosterLayer, /\.phase1RosterRow\.coachRosterCard\{[^}]*min-height:82px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:82px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
   for (const part of ['coachRosterCard__body','coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
     assert.match(rosterLayer, new RegExp(`\\.${part}\\{[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important`, 's'));
   }
@@ -22,9 +22,9 @@ test('Coach roster uses a flat editorial row instead of nested card chrome', () 
 
 test('Coach roster mobile geometry gives player identity the width and moves utilities below', () => {
   assert.match(rosterLayer, /@media\(max-width:620px\)/);
-  assert.match(rosterLayer, /\.phase1RosterRow\.coachRosterCard \.coachRosterCard__body\{grid-template-columns:36px minmax\(0,1fr\)!important;grid-template-areas:"avatar details" "\. actions"!important/);
-  assert.match(rosterLayer, /\.phase1RosterRow\.coachRosterCard \.coachRosterCard__details\{grid-area:details!important/);
-  assert.match(rosterLayer, /\.phase1RosterRow\.coachRosterCard \.coachRosterCard__actions\{grid-area:actions!important;flex-direction:row!important/);
+  assert.match(rosterLayer, /\.phase1RosterRow \.coachRosterCard__body\{grid-template-columns:36px minmax\(0,1fr\)!important;grid-template-areas:"avatar details" "\. actions"!important/);
+  assert.match(rosterLayer, /\.phase1RosterRow \.coachRosterCard__details\{grid-area:details!important/);
+  assert.match(rosterLayer, /\.phase1RosterRow \.coachRosterCard__actions\{grid-area:actions!important;flex-direction:row!important/);
   assert.match(rosterLayer, /font-size:16px!important/);
 });
 
