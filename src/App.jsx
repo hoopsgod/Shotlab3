@@ -4650,9 +4650,9 @@ return <div className="fade-up coachRoster" data-testid="coach-roster-list">
           {isNudged?"✓ NUDGED":"NUDGE"}
         </button>}
         <div className="coachRosterCard__manage">
-          <button className="coachRosterCard__manageTrigger" type="button" aria-haspopup="menu" aria-expanded={managePlayer===rosterIdentity} aria-label={`Manage 4{p.name||"player"}`} onClick={()=>setManagePlayer(current=>current===rosterIdentity?null:rosterIdentity)}>•••</button>
-          {managePlayer===rosterIdentity&&<div className="coachRosterCard__menu" role="menu" aria-label={`4{p.name||"Player"} management`}>
-            <button role="menuitem" className="coachRosterCard__remove" type="button" onClick={()=>{setManagePlayer(null);if(window.confirm(`Remove 4{p.name||"this player"} from the team roster? Their account and historical data will not be deleted.`))onRemovePlayer?.(rosterIdentity);}}>Remove from team</button>
+          <button className="coachRosterCard__manageTrigger" type="button" aria-haspopup="menu" aria-expanded={managePlayer===rosterIdentity} aria-label={`Manage ${p.name||"player"}`} onClick={()=>setManagePlayer(current=>current===rosterIdentity?null:rosterIdentity)}>•••</button>
+          {managePlayer===rosterIdentity&&<div className="coachRosterCard__menu" role="menu" aria-label={`${p.name||"Player"} management`}>
+            <button role="menuitem" className="coachRosterCard__remove" type="button" onClick={()=>{setManagePlayer(null);if(window.confirm(`Remove ${p.name||"this player"} from the team roster? Their account and historical data will not be deleted.`))onRemovePlayer?.(rosterIdentity);}}>Remove from team</button>
           </div>}
         </div>
       </div>
