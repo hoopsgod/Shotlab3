@@ -5,7 +5,15 @@ let source=fs.readFileSync(path,'utf8');
 const start=source.indexOf('function CoachRoster({');
 const end=source.indexOf('\n// Text sanitizer',start);
 if(start<0||end<0)throw new Error('CoachRoster boundary not found');
-const current=source.slice(start,end);
+let current=source.slice(start,end);
+const malformed='\x024{';
+if(current.includes(malformed)){
+  current=current.split(malformed).join('${');
+  source=source.slice(0,start)+current+source.slice(end);
+  fs.writeFileSync(path,source);
+  console.log('Repaired malformed Phase 7D interpolation');
+  process.exit(0);
+}
 if(current.includes('coachRosterCard__manage')){
   console.log('Phase 7D roster interaction already applied');
   process.exit(0);
