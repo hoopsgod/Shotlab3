@@ -1,4 +1,3 @@
-/* Coach Players roster — single presentation authority. */
 .performance-shell--coach #coach-roster-operations{--phase2c-ink:#172019;--phase2c-muted:#626d66;--phase2c-line:rgba(23,32,25,.12);--phase2c-line-strong:rgba(23,32,25,.18);--phase2c-soft:#f2f4ef;--phase2c-accent:#617900;margin-top:4px}
 .performance-shell--coach #coach-roster-operations .coachRoster__heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px;margin:0;padding:14px 2px 12px;border-bottom:1px solid var(--phase2c-line);color:var(--phase2c-ink)}
 .performance-shell--coach #coach-roster-operations .coachRoster__heading>div{display:grid;gap:4px;min-width:0}
@@ -7,7 +6,7 @@
 .performance-shell--coach #coach-roster-operations .coachRoster__heading label{color:var(--phase2c-muted)!important}
 .performance-shell--coach #coach-roster-operations .coachRoster__heading select{min-width:178px!important;min-height:44px!important;padding:0 30px 0 11px!important;border:1px solid var(--phase2c-line-strong)!important;border-radius:9px!important;background:#fff!important;color:var(--phase2c-ink)!important;box-shadow:none!important}
 
-/* One row, one surface. Explicit resets remove historical nested-card chrome. */
+/* One row, one surface */
 .performance-shell--coach #coach-roster-operations > .fade-up > .phase1RosterRow,
 .performance-shell--coach #coach-roster-operations .phase1RosterRow.coachRosterCard{position:relative;display:flex;min-height:82px;margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid var(--phase2c-line)!important;border-radius:0!important;background:transparent!important;color:var(--phase2c-ink)!important;box-shadow:none!important}
 .performance-shell--coach #coach-roster-operations .coachRosterCard__accent{flex:0 0 2px!important;width:2px!important;align-self:stretch;margin-block:11px;border-radius:999px;opacity:.76}
