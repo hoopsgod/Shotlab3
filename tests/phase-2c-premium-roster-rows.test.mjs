@@ -9,7 +9,7 @@ const closure = readFileSync('src/lib/phase1EvidenceClosure.js', 'utf8');
 test('Phase 2C roster layer is retained as one dedicated production authority', () => {
   assert.match(system, /import "\.\.\/styles\/Phase2PremiumRosterLayer\.css\?roster-authority"/);
   assert.equal((system.match(/Phase2PremiumRosterLayer\.css/g) || []).length, 1);
-  assert.match(rosterLayer, /#coach-roster-operations > \.fade-up > \.phase1RosterRow/);
+  assert.match(rosterLayer, /#coach-roster-operations \.phase1RosterRow/);
 });
 
 test('Coach roster uses a flat editorial row instead of nested card chrome', () => {
