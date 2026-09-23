@@ -1,0 +1,42 @@
+name: Phase 7C Baseline Reconcile
+
+on:
+  push:
+    branches:
+      - agent/phase7c-player-roster-visual-convergence
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  reconcile-player-progress-baseline:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase7c-player-roster-visual-convergence
+
+      - name: Download exact-head Phase 1C evidence
+        run: gh run download 35806756984 -n phase1c-focused-mobile-visual-runtime-b46516d0c936eaa5a72f9f34ca3ce7fcc0f0ffe0 -D /tmp/phase1c
+
+      - name: Reconcile only the proven stale Player Progress baseline
+        run: |
+          TARGET='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/player-progress-registered-populated-390-mobile-chromium-linux.png'
+          ACTUAL=$(find /tmp/phase1c -type f -name 'player-progress-registered-populated-390-actual.png' -print -quit)
+          test -n "$ACTUAL"
+          cp "$ACTUAL" "$TARGET"
+          git add "$TARGET"
+          if git diff --cached --quiet; then
+            echo 'No target baseline change produced.'
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Reconcile Player Progress Phase 1C baseline'
+          git push origin HEAD:agent/phase7c-player-roster-visual-convergence
