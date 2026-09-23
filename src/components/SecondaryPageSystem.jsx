@@ -5,8 +5,11 @@ import "./SecondaryPageSystem.css";
 import "./SecondaryPagePremiumMobile.css";
 import "./Phase2PremiumActionLayer.css";
 import "./Phase3CoachLeaderboardHierarchy.css";
-import "../styles/Phase2PremiumRosterLayer.css";
 import "./CoachSecondaryExperience.css";
+// Keep the Coach Players presentation as one dedicated production authority.
+// The query prevents optimized CSS restructuring from folding this route-owned
+// layer into an earlier shared chunk where late authenticated styles can erase it.
+import "../styles/Phase2PremiumRosterLayer.css?roster-authority";
 
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/strength|lifting|conditioning/,"strength"],[/activity|signal|feed/,"activity"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/program|brand|identity/,"program"],[/account|setting/,"settings"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";

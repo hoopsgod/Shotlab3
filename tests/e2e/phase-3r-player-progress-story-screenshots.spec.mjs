@@ -68,7 +68,7 @@ test("player progress opens with ShotLab Target Court before deep analytics", as
   expect(heroStyle.backgroundColor).toBe(heroStyle.brandSurfaceDeep);
   expect(heroStyle.backgroundColor).not.toBe("rgb(15, 20, 18)");
   expect(heroStyle.backgroundImage).toContain("gradient");
-  expect(parseFloat(heroStyle.radius)).toBeGreaterThanOrEqual(24);
+  expect(parseFloat(heroStyle.radius)).toBe(18);
   expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
 
   const transparentHeroSeams = [

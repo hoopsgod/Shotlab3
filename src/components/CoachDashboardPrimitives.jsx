@@ -139,9 +139,10 @@ export function DashboardFilterRail({
   trailing,
   testId,
   surface = "dark",
+  stacked = false,
 }) {
   return (
-    <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail" style={surface === "light" ? { "--dashboard-placeholder-color": "#59636a" } : undefined}>
+    <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail" data-stacked={stacked || undefined} style={surface === "light" ? { "--dashboard-placeholder-color": "#59636a" } : undefined}>
       <label className={styles.searchField} style={surface === "light" ? { "--p3-dim": "#59636a" } : undefined}>
         <span className={styles.srOnly}>Search dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

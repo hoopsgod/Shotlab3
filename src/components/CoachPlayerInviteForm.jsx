@@ -3,12 +3,12 @@ import { buildCoachPlayerInviteEmailLink, loadCoachPlayerInvitations, provisionC
 import { DSButton, DSInput } from "./ui/designSystem.jsx";
 
 const styles = {
-  shell: { background: "var(--surface-1, #151515)", border: "1px solid var(--stroke-1, #333)", borderRadius: 14, padding: 14, marginBottom: 12 },
-  title: { color: "var(--text-1, #fff)", fontSize: 16, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase" },
-  copy: { color: "var(--text-3, #aaa)", fontSize: 11, lineHeight: 1.5, margin: "6px 0 12px" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8 },
-  input: { width: "100%", minHeight: 44, borderRadius: 9, border: "1px solid var(--stroke-1, #333)", background: "var(--surface-0, #0b0b0b)", color: "var(--text-1, #fff)", padding: "0 11px", fontSize: 15 },
-  button: { width: "100%", minHeight: 44, marginTop: 10, borderRadius: 9, fontWeight: 900, letterSpacing: ".05em" },
+  shell: { background: "transparent", border: 0, borderTop: "1px solid var(--stroke-1, rgba(17,26,33,.12))", borderRadius: 0, padding: "16px 0 0", marginBottom: 0 },
+  title: { color: "var(--text-1, #172019)", fontSize: 15, fontWeight: 800, letterSpacing: "-.015em", textTransform: "none" },
+  copy: { maxWidth: 520, color: "var(--text-3, #626d66)", fontSize: 12, lineHeight: 1.45, margin: "5px 0 12px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(135px,1fr))", gap: 9 },
+  input: { width: "100%", minHeight: 46, borderRadius: 9, border: "1px solid var(--stroke-1, rgba(17,26,33,.15))", background: "var(--surface-0, #fff)", color: "var(--text-1, #172019)", padding: "0 12px", fontSize: 15, boxShadow: "none" },
+  button: { width: "100%", minHeight: 46, marginTop: 11, borderRadius: 9, fontWeight: 820, letterSpacing: ".015em", boxShadow: "none" },
 };
 
 const statusLabel = (status) => ({ sent: "Invite Sent", pending: "Invite Pending", claimed: "Account Active", expired: "Invite Expired", revoked: "Invite Revoked" }[status] || "Invite Pending");
@@ -91,7 +91,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     window.location.href = mailto;
   };
 
-  return <form id="coach-add-player-form" data-testid="coach-player-invite-form" aria-busy={busy || undefined} onSubmit={submit} style={styles.shell}>
+  return <form id="coach-player-invite-form" data-testid="coach-player-invite-form" aria-busy={busy || undefined} onSubmit={submit} style={styles.shell}>
     <div style={styles.title}>Add Player &amp; Send Login Invite</div>
     <p style={styles.copy}>Add the player to your roster and send a single-use account setup link. ShotLab never displays a permanent password.</p>
     <div style={styles.grid}>
@@ -103,7 +103,7 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     <DSButton type="submit" variant="primary" loading={busy} loadingLabel="Sending invite" style={styles.button}>ADD PLAYER & SEND INVITE</DSButton>
     {message && <div role="status" aria-live="polite" style={{ color: "var(--accent, #c8ff00)", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{message}</div>}
     {error && <div role="alert" aria-live="assertive" style={{ color: "#ff8f8f", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{error}</div>}
-    {setupUrl && <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8 }}>
+    {setupUrl && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 8 }}>
       <DSButton type="button" variant="secondary" onClick={copySetupLink} style={{ ...styles.button, background: "transparent", color: "var(--text-1, #fff)", border: "1px solid var(--stroke-1, #333)" }}>COPY SECURE LINK</DSButton>
       <DSButton type="button" variant="secondary" onClick={openEmailApp} style={{ ...styles.button, background: "transparent", color: "var(--accent, #c8ff00)", border: "1px solid rgba(200,255,0,.45)" }}>OPEN EMAIL APP</DSButton>
     </div>}

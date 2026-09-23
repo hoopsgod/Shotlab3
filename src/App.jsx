@@ -4190,7 +4190,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
 
   {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPlayersInteractiveDashboard metrics={coachPlayerDashboardMetrics} rows={coachPlayerDashboardRows} filter={playerDashboardFilter} query={playerDashboardQuery} onFilterChange={setPlayerDashboardFilter} onQueryChange={setPlayerDashboardQuery} onAddPlayer={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth",block:"start"})} onOpenArchives={()=>setTab("settings")}/>
     <div id="coach-roster-operations" className="coachDashboardOperationalContent">{filteredCoachPlayerDashboardRows.length===0&&<div className="coachDashboardNoResults">No players match the current dashboard filters.</div>}<CoachRoster players={filteredCoachRosterPlayers} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged} onRemovePlayer={removeRosterPlayer} onSelectPlayer={openPlayerIntelligence}/></div>
-    <DashboardSection eyebrow="Account activation" title="Add a player" summary="Create the roster relationship and send a secure account setup invitation." action={{label:"Back to roster",onClick:()=>document.getElementById("coach-roster-operations")?.scrollIntoView({behavior:"smooth",block:"start"})}} testId="coach-player-invite-dashboard-section"><div id="coach-add-player-form"><CoachPlayerInviteForm coach={u} teamId={u?.teamId||""} onProvisioned={()=>{void hydratePersistedData();}}/></div></DashboardSection>
+    <DashboardSection eyebrow="Account activation" title="Add a player" summary="Create the roster relationship and send a secure account setup invitation." action={{label:"Back to roster",onClick:()=>document.getElementById("coach-roster-operations")?.scrollIntoView({behavior:"smooth",block:"start"})}} testId="coach-player-invite-dashboard-section"><div id="coach-add-player-form" className="coachPlayerInviteMount"><CoachPlayerInviteForm coach={u} teamId={u?.teamId||""} onProvisioned={()=>{void hydratePersistedData();}}/></div></DashboardSection>
   </div>}
 
   {tab==="settings"&&<SecondaryPageShell className="coachAdministrationWorkspace" testId="coach-administration-workspace">
@@ -4630,24 +4630,25 @@ return <div className="fade-up coachRoster" data-testid="coach-roster-list">
 
 {roster.map(p=>{const rosterIdentity=p.email||p.profileId||p.playerId||p.id;const c=p.statusMeta.color;const isNudged=nudged.includes(rosterIdentity);
   return <article key={rosterIdentity} className="phase1RosterRow coachRosterCard" data-status={p.statusMeta.tone}>
-    <div style={{width:5,background:c,flexShrink:0}}/>
+    <div className="coachRosterCard__accent" style={{background:c}} aria-hidden="true"/>
     <div className="coachRosterCard__body">
       <div className="coachRosterCard__initials" aria-hidden="true">{(p.name||"?").trim().slice(0,1).toUpperCase()}</div>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginBottom:4}}>
+      <div className="coachRosterCard__details">
+        <div className="coachRosterCard__identity">
           <button type="button" className="coachRosterCard__profile" onClick={()=>onSelectPlayer?.(p)} aria-label={`Open ${p.name || "player"} profile`}><span>{p.name}</span><span aria-hidden="true">›</span></button>
           <SemanticStatus tone={p.statusMeta.tone} compact testId="semantic-roster-status">{p.statusMeta.pill}</SemanticStatus>
         </div>
         <div className="coachRosterCard__metrics">
-          <div>Last active <strong>{formatLastActive(p.daysAgo)}</strong> · {p.weeklyActivityCount} log{p.weeklyActivityCount===1?"":"s"} this week</div>
-          {p.weeklyCompletionPct!==null&&<div>Training completion <strong>{p.weeklyCompletionPct}%</strong></div>}
+          <span>Last active <strong>{formatLastActive(p.daysAgo)}</strong></span>
+          <span>{p.weeklyActivityCount} log{p.weeklyActivityCount===1?"":"s"} this week</span>
+          {p.weeklyCompletionPct!==null&&<span>Training <strong>{p.weeklyCompletionPct}%</strong></span>}
         </div>
       </div>
-      <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end",gap:8,minWidth:94}}>
-    {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?INFO+"55":DANGER+"55"}`,background:isNudged?"var(--semantic-info-surface)":"var(--semantic-danger-surface)",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?INFO:DANGER,whiteSpace:"nowrap",width:"100%"}}>
-      {isNudged?"✓ NUDGED":"NUDGE"}
-    </button>}
-    <button type="button" onClick={()=>onRemovePlayer?.(rosterIdentity)}>REMOVE</button>
+      <div className="coachRosterCard__actions">
+        {p.statusMeta.pill==="INACTIVE"&&<button className="coachRosterCard__nudge" onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}}>
+          {isNudged?"✓ NUDGED":"NUDGE"}
+        </button>}
+        <button className="coachRosterCard__remove" type="button" onClick={()=>onRemovePlayer?.(rosterIdentity)}>REMOVE</button>
       </div>
     </div>
   </article>})}

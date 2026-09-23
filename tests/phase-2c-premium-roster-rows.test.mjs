@@ -6,43 +6,42 @@ const system = readFileSync('src/components/SecondaryPageSystem.jsx', 'utf8');
 const rosterLayer = readFileSync('src/styles/Phase2PremiumRosterLayer.css', 'utf8');
 const closure = readFileSync('src/lib/phase1EvidenceClosure.js', 'utf8');
 
-test('Phase 2C premium roster layer is loaded through the shared secondary-page bundle', () => {
-  assert.match(system, /import "\.\.\/styles\/Phase2PremiumRosterLayer\.css"/);
-  assert.match(rosterLayer, /#coach-roster-operations > \.fade-up > \.phase1RosterRow/);
+test('Phase 2C roster layer is retained as one dedicated production authority', () => {
+  assert.match(system, /import "\.\.\/styles\/Phase2PremiumRosterLayer\.css\?roster-authority"/);
+  assert.equal((system.match(/Phase2PremiumRosterLayer\.css/g) || []).length, 1);
+  assert.match(rosterLayer, /#coach-roster-operations \.phase1RosterRow/);
 });
 
-test('Phase 2C roster rows use a deliberate mobile information hierarchy', () => {
-  assert.match(rosterLayer, /min-height: 104px !important/);
-  assert.match(rosterLayer, /grid-template-areas:/);
-  assert.match(rosterLayer, /"avatar details"/);
-  assert.match(rosterLayer, /"\. actions"/);
-  assert.match(rosterLayer, /font-size: 15px !important/);
+test('Coach roster uses a flat editorial row instead of nested card chrome', () => {
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:82px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
+  for (const part of ['coachRosterCard__body','coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
+    assert.match(rosterLayer, new RegExp(`\\.${part}\\{[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important`, 's'));
+  }
+  assert.match(rosterLayer, /One row, one surface/);
 });
 
-test('Phase 2C removes only the duplicate legacy roster recap and keeps the working list visible', () => {
-  assert.match(rosterLayer, /div:nth-of-type\(1\),/);
-  assert.match(rosterLayer, /div:nth-of-type\(2\) \{/);
-  assert.match(rosterLayer, /display: none !important/);
-  assert.match(rosterLayer, /header:first-child/);
-  assert.doesNotMatch(rosterLayer, /\.phase1RosterRow[^{]*\{[^}]*display:\s*none/s);
-  assert.doesNotMatch(rosterLayer, /visibility:\s*hidden/);
+test('Coach roster mobile geometry gives player identity the width and moves utilities below', () => {
+  assert.match(rosterLayer, /@media\(max-width:620px\)/);
+  assert.match(rosterLayer, /\.phase1RosterRow \.coachRosterCard__body\{grid-template-columns:36px minmax\(0,1fr\)!important;grid-template-areas:"avatar details" "\. actions"!important/);
+  assert.match(rosterLayer, /\.phase1RosterRow \.coachRosterCard__details\{grid-area:details!important/);
+  assert.match(rosterLayer, /\.phase1RosterRow \.coachRosterCard__actions\{grid-area:actions!important;flex-direction:row!important/);
+  assert.match(rosterLayer, /font-size:16px!important/);
 });
 
-test('Phase 2C gives the remaining roster tool a phone-safe control', () => {
-  assert.match(rosterLayer, /div:nth-of-type\(3\) select/);
-  assert.match(rosterLayer, /min-height: 44px !important/);
-  assert.match(rosterLayer, /min-width: 178px !important/);
+test('Roster utilities are visually secondary but remain touch and keyboard usable', () => {
+  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-height:36px!important[^}]*background:transparent!important/s);
+  assert.match(rosterLayer, /\.coachRosterCard__remove:is\(:hover,:focus-visible\)/);
+  assert.match(rosterLayer, /:focus-visible/);
+  assert.match(rosterLayer, /outline:3px solid/);
+  assert.match(rosterLayer, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.doesNotMatch(rosterLayer, /pointer-events:\s*none/);
 });
 
-test('Phase 2C keeps visual row authority while explicit nested controls own interaction', () => {
+test('Phase 1 closure preserves semantics without injecting roster presentation CSS', () => {
   assert.match(closure, /classList\.add\("phase1RosterRow"\)/);
   assert.match(closure, /removeAttribute\("role"\)/);
   assert.match(closure, /data-phase1-open-profile/);
-  assert.match(rosterLayer, /button \{/);
-  assert.match(rosterLayer, /:focus-visible/);
-  assert.match(rosterLayer, /outline: 3px solid/);
-  assert.match(rosterLayer, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.doesNotMatch(rosterLayer, /pointer-events:\s*none/);
+  assert.doesNotMatch(closure, /coachRosterCard__body/);
 });
 
 test('Phase 2C stays scoped to coach roster presentation', () => {
