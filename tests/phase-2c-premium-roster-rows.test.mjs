@@ -13,10 +13,9 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
 });
 
 test('Coach roster uses one flat editorial player surface', () => {
-  assert.match(rosterLayer, /:is\(\.phase1RosterRow,\.coachRosterCard__body,\.coachRosterCard__details,\.coachRosterCard__identity,\.coachRosterCard__metrics,\.coachRosterCard__actions\)\{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important\}/);
-  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px!important[^}]*border-bottom:1px solid var\(--phase2c-line\)!important/s);
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
   for (const part of ['coachRosterCard__body','coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
-    assert.match(rosterLayer, new RegExp(`\\.${part}\\{`));
+    assert.match(rosterLayer, new RegExp(`\\.${part}\\{[^}]*border[^;]*0!important[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important`, 's'));
   }
   assert.match(rosterLayer, /One row, one surface/);
 });
@@ -45,7 +44,7 @@ test('Roster utilities stay subordinate and accessible', () => {
 
 test('Mobile geometry preserves density and long-name width', () => {
   assert.match(rosterLayer, /@media\(max-width:620px\)/);
-  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px!important/s);
+  assert.match(rosterLayer, /\.phase1RosterRow\{min-height:92px!important\}/);
   assert.match(rosterLayer, /grid-template-columns:38px minmax\(0,1fr\) 44px!important/);
   assert.match(rosterLayer, /text-overflow:ellipsis;white-space:nowrap/);
   assert.match(rosterLayer, /@media\(max-width:360px\)/);
