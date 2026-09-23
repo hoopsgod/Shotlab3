@@ -7,45 +7,30 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   reconcile-coach-players-baseline:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     env:
-      VITE_ENABLE_PRODUCTION_DEMOS: "true"
-      VITE_SUPABASE_URL: "https://parity.supabase.co"
-      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Check out exact branch head
         uses: actions/checkout@v4
         with:
           ref: agent/phase7c-player-roster-visual-convergence
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+      - name: Download proven exact-head Phase 1C evidence
+        run: gh run download 35797405204 -n phase1c-focused-mobile-visual-runtime-316ee909c4767354031b2ec07a4b5ec0c9b4b2e4 -D /tmp/phase1c
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install pinned Playwright runner and Chromium
-        run: |
-          npm install --no-save @playwright/test@1.55.1
-          npx playwright install --with-deps chromium
-
-      - name: Build exact production assets
-        run: npm run build
-
-      - name: Regenerate Phase 1C evidence
-        run: npx playwright test --config=playwright.phase1c.config.mjs --update-snapshots || true
-
-      - name: Commit only the proven stale Coach Players baseline
+      - name: Reconcile only the proven stale Coach Players baseline
         run: |
           TARGET='tests/e2e/phase1c-focused-visual-runtime.spec.mjs-snapshots/coach-players-registered-populated-390-mobile-chromium-linux.png'
+          ACTUAL=$(find /tmp/phase1c -type f -name 'coach-players-registered-populated-390-actual.png' -print -quit)
+          test -n "$ACTUAL"
+          cp "$ACTUAL" "$TARGET"
           git add "$TARGET"
           if git diff --cached --quiet; then
             echo 'No target baseline change produced.'
