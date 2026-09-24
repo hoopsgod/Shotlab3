@@ -12,7 +12,7 @@ if (!source.includes(photoImport)) {
 }
 
 const profileAnchor = 'data-testid="player-profile-workspace">\n  <PlayerProgressStory';
-const photoSurface = '<PlayerProfilePhotoCard player={u}/>';
+const photoSurface = '<PlayerProfilePhotoCard player={players.find(rowMatchesPlayerIdentity)||u}/>';
 if (!source.includes(photoSurface)) {
   if (!source.includes(profileAnchor)) throw new Error("Phase 7E player profile anchor missing");
   source = source.replace(profileAnchor, `data-testid="player-profile-workspace">\n  ${photoSurface}\n  <PlayerProgressStory`);
