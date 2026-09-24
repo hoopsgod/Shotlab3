@@ -17,6 +17,8 @@ on:
 
 permissions:
   contents: read
+  issues: read
+  checks: read
 
 env:
   VITE_ENABLE_PRODUCTION_DEMOS: "true"
@@ -28,7 +30,7 @@ concurrency:
 jobs:
   premium-roster-slice:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - name: Check out exact PR head
         uses: actions/checkout@v4
@@ -64,7 +66,49 @@ jobs:
       - name: Verify unchanged performance budget
         run: npm run verify:performance-budget
 
-      - name: Run Coach premium roster browser and computed-style contracts
+      - name: Run local Coach roster browser and computed-style contracts
+        run: >-
+          npx playwright test
+          tests/e2e/phase-2c-premium-roster-rows.spec.mjs
+          tests/e2e/semantic-color-system.spec.mjs
+          --config=playwright.acceptance.config.mjs
+          --reporter=line
+
+      - name: Resolve exact-head Cloudflare preview
+        if: github.event_name == 'pull_request'
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          short_sha="${CANDIDATE_SHA:0:7}"
+          for attempt in $(seq 1 36); do
+            comments="$(gh api -H "Accept: application/vnd.github+json" "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
+            body="$(jq -r --arg sha "$short_sha" '[.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($sha))] | last | .body // empty' <<< "$comments")"
+            preview_url="$(grep -oE 'https://[0-9a-f]+\.shotlab3\.pages\.dev' <<< "$body" | head -n 1 || true)"
+            deployment_id="$(grep -oE 'shotlab3/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' <<< "$body" | head -n 1 | cut -d/ -f2 || true)"
+            if [ -n "$preview_url" ] && [ -n "$deployment_id" ] && curl --fail --silent --show-error --location "$preview_url" >/dev/null; then
+              echo "url=${preview_url}" >> "$GITHUB_OUTPUT"
+              echo "deployment_id=${deployment_id}" >> "$GITHUB_OUTPUT"
+              {
+                echo "candidate_sha=${CANDIDATE_SHA}"
+                echo "deployment_id=${deployment_id}"
+                echo "preview_url=${preview_url}"
+              } | tee artifacts/phase-2c-premium-roster/cloudflare-exact-head.txt
+              exit 0
+            fi
+            echo "Waiting for exact-head Cloudflare preview ${short_sha} (${attempt}/36)..."
+            sleep 10
+          done
+          echo "No exact-head Cloudflare preview/deployment ID resolved for ${CANDIDATE_SHA}." >&2
+          exit 1
+
+      - name: Run exact-head deployed roster browser certification
+        if: github.event_name == 'pull_request'
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.preview.outputs.url }}
         run: >-
           npx playwright test
           tests/e2e/phase-2c-premium-roster-rows.spec.mjs
