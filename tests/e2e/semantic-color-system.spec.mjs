@@ -67,9 +67,11 @@ test("coach roster statuses and Schedule metadata render with semantic roles", a
   await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
 
   const status = page.getByTestId("semantic-roster-status").first();
-  await expect(status).toBeVisible({ timeout: 20_000 });
+  await expect(status).toBeAttached({ timeout: 20_000 });
   const tone = await status.getAttribute("data-tone");
   expect(["success", "warning", "danger"]).toContain(tone);
+  if (tone === "success") await expect(status).toBeHidden();
+  else await expect(status).toBeVisible();
   const expectedStatusColor = await computedColorForVariable(page, `--semantic-${tone}`);
   const actualStatusColor = await status.evaluate((node) => getComputedStyle(node).color);
   expect(actualStatusColor).toBe(expectedStatusColor);
