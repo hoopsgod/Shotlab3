@@ -15,18 +15,19 @@ const migration = read("migrations/057_player_profile_photos.sql");
 test("player profile exposes one shared, constrained photo picker", () => {
   assert.match(component, /data-testid="player-profile-photo-card"/);
   assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
-  assert.match(component, /5 \* 1024 \* 1024/);
-  assert.match(component, /player\?\.photoUrl \|\| player\?\.photo_url/);
+  assert.match(component, /5242880/);
+  assert.match(component, /player\.photoUrl \|\| player\.photo_url/);
   assert.match(component, /savePlayerProfilePhoto/);
   assert.doesNotMatch(component, /loadPlayerProfilePhoto|demoMode|isDemoAccount|isDemoMode/);
 });
 
-test("persistence service contains demo safety without creating alternate product UI", () => {
+test("persistence service keeps demo uploads local and registered writes authenticated", () => {
   assert.match(service, /isDemoAccount/);
   assert.match(service, /fetch\("\/v1\/player-photo"/);
   assert.match(service, /buildApiIdentityHeaders/);
   assert.match(service, /new FormData\(\)/);
   assert.match(service, /URL\.createObjectURL/);
+  assert.match(service, /throw Error/);
   assert.doesNotMatch(service, /loadPlayerProfilePhoto/);
 });
 
@@ -48,21 +49,22 @@ test("players API carries one canonical photo URL without erasing it during unre
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl/);
 });
 
-test("route enhancer places the player photo on profile and coach roster", () => {
+test("route enhancer places one player photo surface and one coach roster image path", () => {
   assert.match(enhancer, /PlayerProfilePhotoCard/);
-  assert.match(enhancer, /data-phase7e-player-photo/);
+  assert.match(enhancer, /photoSurface/);
   assert.match(enhancer, /coachRosterCard__photo/);
   assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
-  assert.match(enhancer, /data-player-roster-identity/);
+  assert.match(enhancer, /source\.split\(photoSurface\)\.length !== 2/);
   const phaseIndex = runner.indexOf("scripts/apply-phase7e-player-profile-photo.mjs");
   const minifyIndex = runner.indexOf("scripts/minify-visual-authority-css.mjs");
   assert.ok(phaseIndex > 0 && minifyIndex > phaseIndex, "Phase 7E must run after reconciliation and before final CSS minification");
 });
 
-test("coach roster uses photos plus restrained team color", () => {
-  assert.match(rosterCss, /\.coachRosterCard__photo\{/);
-  assert.match(rosterCss, /object-fit:cover!important/);
+test("coach roster uses photos plus alternating restrained team color", () => {
+  assert.match(enhancer, /style=\{\{objectFit:"cover"\}\}/);
   assert.match(rosterCss, /team-brand-primary/);
+  assert.match(rosterCss, /team-brand-secondary/);
+  assert.match(rosterCss, /\.phase1RosterRow:nth-of-type\(even\)/);
   assert.match(rosterCss, /\.phase1RosterRow\{[^}]*background:color-mix\(in srgb/);
 });
 
