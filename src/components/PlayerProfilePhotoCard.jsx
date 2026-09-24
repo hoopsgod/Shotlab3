@@ -1,36 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildApiIdentityHeaders, normalizeIdentity } from "../lib/apiIdentityHeaders.js";
-import { isDemoAccount } from "../lib/demoMode.js";
+import { normalizeIdentity } from "../lib/apiIdentityHeaders.js";
+import { loadPlayerProfilePhoto, savePlayerProfilePhoto } from "../lib/playerProfilePhotoService.js";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-const readPlayers = () => {
-  try {
-    const rows = JSON.parse(window.localStorage?.getItem("sl:players") || "[]");
-    return Array.isArray(rows) ? rows : [];
-  } catch {
-    return [];
-  }
-};
-
-const persistPhotoLocally = (email, photoUrl) => {
-  const identity = normalizeIdentity(email);
-  if (!identity) return;
-  const rows = readPlayers();
-  const next = rows.map((row) => normalizeIdentity(row?.email) === identity
-    ? { ...row, photo_url: photoUrl || null, photoUrl: photoUrl || null }
-    : row);
-  try { window.localStorage?.setItem("sl:players", JSON.stringify(next)); } catch {}
-  window.dispatchEvent(new CustomEvent("shotlab:player-photo-updated", { detail: { email: identity, photoUrl: photoUrl || "" } }));
-};
-
-const fileToDataUrl = (file) => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(String(reader.result || ""));
-  reader.onerror = () => reject(new Error("preview_failed"));
-  reader.readAsDataURL(file);
-});
 
 export default function PlayerProfilePhotoCard({ player = {} }) {
   const inputRef = useRef(null);
@@ -40,27 +13,17 @@ export default function PlayerProfilePhotoCard({ player = {} }) {
   const [photoUrl, setPhotoUrl] = useState(initialUrl);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
-  const demo = isDemoAccount(requester);
 
   useEffect(() => {
     let active = true;
-    if (!requester || demo) return () => { active = false; };
-    (async () => {
-      try {
-        const response = await fetch("/v1/player-photo", {
-          headers: buildApiIdentityHeaders({ requester }),
-        });
-        const body = await response.json().catch(() => ({}));
-        if (!active || !response.ok || !body?.ok) return;
-        const nextUrl = String(body?.photo_url || "").trim();
-        if (nextUrl) {
-          setPhotoUrl(nextUrl);
-          persistPhotoLocally(requester, nextUrl);
-        }
-      } catch {}
-    })();
+    if (!requester) return () => { active = false; };
+    loadPlayerProfilePhoto({ requester, fallbackUrl: initialUrl }).then((result) => {
+      if (!active || !result?.ok) return;
+      const nextUrl = String(result?.photoUrl || "").trim();
+      if (nextUrl) setPhotoUrl(nextUrl);
+    });
     return () => { active = false; };
-  }, [requester, demo]);
+  }, [requester, initialUrl]);
 
   const chooseFile = () => inputRef.current?.click();
 
@@ -80,30 +43,13 @@ export default function PlayerProfilePhotoCard({ player = {} }) {
     setBusy(true);
     setStatus("");
     try {
-      if (demo) {
-        const localPreview = await fileToDataUrl(file);
-        setPhotoUrl(localPreview);
-        setStatus("Demo preview updated. Registered players can save the photo to their profile.");
+      const result = await savePlayerProfilePhoto({ requester, file });
+      if (!result?.ok || !result?.photoUrl) {
+        setStatus(String(result?.message || "Could not save the photo. Check your connection and try again."));
         return;
       }
-
-      const form = new FormData();
-      form.append("file", file, file.name || "profile-photo");
-      const response = await fetch("/v1/player-photo", {
-        method: "POST",
-        headers: buildApiIdentityHeaders({ requester }),
-        body: form,
-      });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok || !body?.ok || !body?.photo_url) {
-        throw new Error(String(body?.message || body?.error || "photo_upload_failed"));
-      }
-      const nextUrl = String(body.photo_url);
-      setPhotoUrl(nextUrl);
-      persistPhotoLocally(requester, nextUrl);
-      setStatus("Profile photo saved. Coaches will see it on the roster.");
-    } catch {
-      setStatus("Could not save the photo. Check your connection and try again.");
+      setPhotoUrl(String(result.photoUrl));
+      setStatus(String(result?.message || "Profile photo saved."));
     } finally {
       setBusy(false);
     }
