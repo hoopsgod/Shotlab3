@@ -7,7 +7,7 @@
 :scope #coach-roster-operations .coachRoster__heading label{color:var(--phase2c-muted)!important;font-size:10px!important}
 :scope #coach-roster-operations .coachRoster__heading select{min-width:142px!important;min-height:42px!important;padding:0 28px 0 10px!important;border:1px solid var(--phase2c-line-strong)!important;border-radius:9px!important;background:#fff!important;color:var(--phase2c-ink)!important;font-size:11px!important}
 /* One row, one surface. */
-:scope #coach-roster-operations .phase1RosterRow{display:flex;min-height:92px;margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid var(--phase2c-line)!important;border-radius:0!important;background:transparent!important;color:var(--phase2c-ink)!important;box-shadow:none!important}
+:scope #coach-roster-operations .phase1RosterRow{display:flex;min-height:92px!important;margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid var(--phase2c-line)!important;border-radius:0!important;background:transparent!important;color:var(--phase2c-ink)!important;box-shadow:none!important}
 :scope #coach-roster-operations .coachRosterCard__accent{flex:0 0 3px!important;align-self:stretch;margin-block:14px;border-radius:999px;opacity:.76}
 :scope #coach-roster-operations .phase1RosterRow[data-status="success"] .coachRosterCard__accent{visibility:hidden}
 :scope #coach-roster-operations .coachRosterCard__body{display:grid!important;grid-template-columns:42px minmax(0,1fr) 44px!important;align-items:center!important;gap:10px!important;width:100%!important;min-width:0!important;padding:9px 1px 9px 8px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
@@ -39,8 +39,7 @@
 .performance-shell--coach #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 128px;gap:9px;padding:8px 1px 9px;align-items:center}
 .performance-shell--coach #coach-roster-operations .coachRoster__heading span{display:none}
 .performance-shell--coach #coach-roster-operations .coachRoster__heading label{font-size:0!important}
-.performance-shell--coach #coach-roster-operations .coachRoster__heading select{min-width:128px!important;max-width:128px!important;min-height:42px!important;font-size:11px!important}
-.performance-shell--coach #coach-roster-operations .phase1RosterRow{min-height:92px!important}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading select{min-width:128px!important;max-width:128px!important}
 .performance-shell--coach #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:38px minmax(0,1fr) 44px!important;gap:8px!important;padding:8px 0 8px 5px!important}
 .performance-shell--coach #coach-roster-operations .phase1RosterRow .coachRosterCard__initials{width:36px!important;height:36px!important}
 .performance-shell--coach #coach-roster-operations [data-phase1-open-profile="true"]{font-size:18px!important}
