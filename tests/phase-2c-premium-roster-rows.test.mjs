@@ -25,16 +25,16 @@ test('Coach roster uses one flat editorial player surface', () => {
 });
 
 test('Player identity is dominant and the row body behaves as the profile action', () => {
-  assert.match(rosterLayer, /\[data-phase1-open-profile="true"\]\{[^}]*font:840 19px\/1\.04/s);
-  assert.match(rosterLayer, /\[data-phase1-open-profile="true"\]::after\{content:"";position:absolute;z-index:1;inset:/);
+  assert.match(rosterLayer, /\[data-phase1-open-profile\]\{[^}]*font:840 19px\/1\.04/s);
+  assert.match(rosterLayer, /\[data-phase1-open-profile\]::after\{content:"";position:absolute;z-index:1;inset:/);
   assert.match(rosterLayer, /span:last-child\{display:none\}/);
   assert.match(rosterLayer, /:focus-visible/);
 });
 
 test('Healthy status is quiet while exception status remains available', () => {
-  assert.match(rosterLayer, /\.phase1RosterRow\[data-status="success"\] \[data-testid="semantic-roster-status"\]\{display:none!important\}/);
-  assert.doesNotMatch(rosterLayer, /\.phase1RosterRow\[data-status="warning"\] \[data-testid="semantic-roster-status"\]\{display:none/);
-  assert.doesNotMatch(rosterLayer, /\.phase1RosterRow\[data-status="danger"\] \[data-testid="semantic-roster-status"\]\{display:none/);
+  assert.match(rosterLayer, /\.phase1RosterRow\[data-status=success\] \[data-testid=semantic-roster-status\]\{display:none!important\}/);
+  assert.doesNotMatch(rosterLayer, /\.phase1RosterRow\[data-status=warning\] \[data-testid=semantic-roster-status\]\{display:none/);
+  assert.doesNotMatch(rosterLayer, /\.phase1RosterRow\[data-status=danger\] \[data-testid=semantic-roster-status\]\{display:none/);
 });
 
 test('Roster utilities stay subordinate and accessible', () => {
