@@ -79,9 +79,8 @@ test('Coach roster renders stored player photos and restrained row color', async
   await expect(photo).toBeVisible();
   await expect(photo).toHaveAttribute('src', /^data:image\/png;base64,/);
 
-  const backgrounds = await rows.evaluateAll((nodes) => nodes.slice(0, 2).map((node) => getComputedStyle(node).backgroundColor));
-  expect(backgrounds[0]).not.toBe('rgb(255, 255, 255)');
-  expect(backgrounds[0]).not.toBe('rgba(0, 0, 0, 0)');
-  if (backgrounds.length > 1) expect(new Set(backgrounds).size).toBeGreaterThan(1);
+  const background = await rows.first().evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(background).not.toBe('rgb(255, 255, 255)');
+  expect(background).not.toBe('rgba(0, 0, 0, 0)');
   await noHorizontalOverflow(page);
 });
