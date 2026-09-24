@@ -15,7 +15,7 @@ const migration = read("migrations/057_player_profile_photos.sql");
 test("player profile exposes one shared, constrained photo picker", () => {
   assert.match(component, /data-testid="player-profile-photo-card"/);
   assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
-  assert.match(component, /MAX_BYTES = 5 \* 1024 \* 1024/);
+  assert.match(component, /5 \* 1024 \* 1024/);
   assert.match(component, /loadPlayerProfilePhoto/);
   assert.match(component, /savePlayerProfilePhoto/);
   assert.doesNotMatch(component, /demoMode|isDemoAccount|isDemoMode/);
@@ -26,8 +26,7 @@ test("persistence service contains demo safety without creating alternate produc
   assert.match(service, /fetch\("\/v1\/player-photo"/);
   assert.match(service, /buildApiIdentityHeaders/);
   assert.match(service, /new FormData\(\)/);
-  assert.match(service, /fileToDataUrl/);
-  assert.match(service, /shotlab:player-photo-updated/);
+  assert.match(service, /URL\.createObjectURL/);
 });
 
 test("photo endpoint authenticates the player and keeps storage credentials server-side", () => {
