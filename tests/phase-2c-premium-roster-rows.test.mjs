@@ -43,12 +43,18 @@ test('Roster utilities stay subordinate and accessible', () => {
   assert.doesNotMatch(rosterLayer, /pointer-events:\s*none/);
 });
 
-test('Mobile geometry preserves density, touch target, and long-name width', () => {
-  assert.match(rosterLayer, /@media\(max-width:620px\)/);
+test('Responsive geometry is intrinsic and survives production optimization without duplicate viewport blocks', () => {
+  const metrics = ruleBody('\\.coachRosterCard__metrics');
+  const menu = ruleBody('\\.coachRosterCard__menu');
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px/);
-  assert.match(rosterLayer, /grid-template-columns:38px minmax\(0,1fr\) 44px!important/);
+  assert.match(rosterLayer, /grid-template-columns:40px minmax\(0,1fr\) 44px!important/);
   assert.match(rosterLayer, /text-overflow:ellipsis;white-space:nowrap/);
-  assert.match(rosterLayer, /@media\(max-width:360px\)/);
+  assert.match(metrics, /flex-wrap:nowrap!important/);
+  assert.match(metrics, /overflow:hidden!important/);
+  assert.match(metrics, /font:570 10\.5px\/1\.3/);
+  assert.match(menu, /right:24px/);
+  assert.match(menu, /max-width:calc\(100vw - 24px\)/);
+  assert.doesNotMatch(rosterLayer, /@media\(max-width:(?:620|360)px\)/);
 });
 
 test('Phase 1 closure preserves semantics without injecting roster presentation CSS', () => {
