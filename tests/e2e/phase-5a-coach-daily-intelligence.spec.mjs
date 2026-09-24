@@ -29,17 +29,26 @@ async function removeInactiveDemoPlayerThroughUi(page) {
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Players", exact: true }).click();
 
-  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Micah Santos", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 
-  const micahRow = page
-    .locator("#coach-roster-operations .phase1RosterRow")
+  const micahRow = roster
+    .locator(".phase1RosterRow")
     .filter({ hasText: "Micah Santos" })
-    .filter({ has: page.getByRole("button", { name: "REMOVE", exact: true }) })
     .first();
+  await expect(micahRow).toBeVisible();
   await expect(micahRow).not.toHaveAttribute("role", "button");
+
+  const removeAction = micahRow.getByRole("button", { name: "Remove from team", exact: true });
+  await expect(removeAction).toHaveCount(0);
+  const manageTrigger = micahRow.locator(".coachRosterCard__manageTrigger");
+  await expect(manageTrigger).toBeVisible();
+  await manageTrigger.click();
+  await expect(removeAction).toBeVisible();
+
   page.once("dialog", async (dialog) => dialog.accept());
-  await micahRow.getByRole("button", { name: "REMOVE", exact: true }).click();
+  await removeAction.click();
   await expect(page.getByText("Micah Santos", { exact: true })).toHaveCount(0);
 
   await dock.getByRole("button", { name: "Home", exact: true }).click();
