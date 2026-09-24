@@ -28,7 +28,9 @@
 :scope #coach-roster-operations .coachRosterCard__menu .coachRosterCard__remove:is(:hover,:focus-visible){background:#ab303d0f!important;color:#842b37!important}
 :scope #coach-roster-operations .coachRosterCard__actions button:focus{outline:3px solid #6179003d!important;outline-offset:2px!important}
 :scope #coach-roster-operations [data-coach-roster-placeholder="true"]{min-height:68px!important;border-bottom:1px dashed var(--l)!important}
+}
 @media(max-width:620px){
+@scope (.performance-shell--coach){
 :scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 126px;gap:8px;padding:7px 1px 8px;align-items:center}
 :scope #coach-roster-operations .coachRoster__heading span{display:none}
 :scope #coach-roster-operations .coachRoster__heading label{font-size:0!important}
@@ -39,10 +41,14 @@
 :scope #coach-roster-operations .coachRosterCard__metrics{font-size:10.5px!important;gap:1px 6px!important}
 :scope #coach-roster-operations .coachRosterCard__menu{right:12px}
 }
+}
 @media(max-width:360px){
+@scope (.performance-shell--coach){
 :scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 108px;padding-inline:0}
 :scope #coach-roster-operations .coachRoster__heading select{min-width:108px!important;width:108px!important;padding-left:6px!important}
 :scope #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:36px minmax(0,1fr) 44px!important;gap:6px!important;padding-left:2px!important}
 }
-@media(prefers-reduced-motion:reduce){:scope #coach-roster-operations *{transition:none!important;animation:none!important}}
+}
+@media(prefers-reduced-motion:reduce){
+@scope (.performance-shell--coach){:scope #coach-roster-operations *{transition:none!important;animation:none!important}}
 }
