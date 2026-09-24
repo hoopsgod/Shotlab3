@@ -7,6 +7,6 @@ export async function savePlayerProfilePhoto(id, file) {
   body.append("file", file);
   const response = await fetch("/v1/player-photo", { method: "POST", headers: buildApiIdentityHeaders({ requester: id }), body });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.photo_url) throw Error(data.message || "Could not save photo.");
+  if (!response.ok || !data.photo_url) throw Error(data.message || "Upload failed.");
   return data.photo_url;
 }
