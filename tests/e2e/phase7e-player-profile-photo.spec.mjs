@@ -48,7 +48,7 @@ test('Player can add a profile photo through the shared profile surface', async 
 
   const image = card.locator('img');
   await expect(image).toBeVisible();
-  await expect(image).toHaveAttribute('src', /^data:image\/png;base64,/);
+  await expect(image).toHaveAttribute('src', /^blob:/);
   await expect(action).toHaveText('Change photo');
   await noHorizontalOverflow(page);
 });
