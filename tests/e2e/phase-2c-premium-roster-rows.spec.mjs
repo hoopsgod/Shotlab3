@@ -108,6 +108,15 @@ async function verifyRosterGeometry(page, width) {
   await expect(profile).toBeVisible();
   const profileBox = await profile.boundingBox();
   expect(profileBox?.width || 0).toBeGreaterThan(80);
+  expect(profileBox?.height || 0).toBeGreaterThanOrEqual(44);
+  expect((profileBox?.x || 0) + (profileBox?.width || 0)).toBeLessThanOrEqual((manageBox?.x || width) + 1);
+
+  const pseudoGeometry = await profile.evaluate((node) => ({
+    beforeContent: getComputedStyle(node, '::before').content,
+    afterContent: getComputedStyle(node, '::after').content,
+  }));
+  expect(['none', 'normal']).toContain(pseudoGeometry.beforeContent);
+  expect(['none', 'normal']).toContain(pseudoGeometry.afterContent);
 
   const metrics = row.locator('.coachRosterCard__metrics');
   await expect(metrics).toBeVisible();
@@ -152,6 +161,18 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
 
   const profileButton = firstRow.locator('[data-phase1-open-profile="true"]');
   const manageTrigger = firstRow.locator('.coachRosterCard__manageTrigger');
+  const profileBox = await profileButton.boundingBox();
+  const manageBox = await manageTrigger.boundingBox();
+  expect(profileBox?.height || 0).toBeGreaterThanOrEqual(44);
+  expect(manageBox?.height || 0).toBeGreaterThanOrEqual(44);
+  expect((profileBox?.x || 0) + (profileBox?.width || 0)).toBeLessThanOrEqual((manageBox?.x || 390) + 1);
+  const profilePseudoGeometry = await profileButton.evaluate((node) => ({
+    beforeContent: getComputedStyle(node, '::before').content,
+    afterContent: getComputedStyle(node, '::after').content,
+  }));
+  expect(['none', 'normal']).toContain(profilePseudoGeometry.beforeContent);
+  expect(['none', 'normal']).toContain(profilePseudoGeometry.afterContent);
+
   const removeButton = firstRow.getByRole('button', { name: 'REMOVE', exact: true });
   await expect(removeButton).toBeHidden();
 
