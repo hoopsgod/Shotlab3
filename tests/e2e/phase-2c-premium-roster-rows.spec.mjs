@@ -173,10 +173,12 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
   expect(['none', 'normal']).toContain(profilePseudoGeometry.beforeContent);
   expect(['none', 'normal']).toContain(profilePseudoGeometry.afterContent);
 
-  const removeButton = firstRow.getByRole('button', { name: 'REMOVE', exact: true });
+  const removeButton = firstRow.getByRole('button', { name: 'Remove from team', exact: true });
   await expect(removeButton).toBeHidden();
 
   await manageTrigger.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
   await expect(manageTrigger).toBeFocused();
   const manageFocus = await manageTrigger.evaluate((node) => {
     const style = getComputedStyle(node);
@@ -236,6 +238,8 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
 
   await profileButton.scrollIntoViewIfNeeded();
   await profileButton.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
   await expect(profileButton).toBeFocused();
   const profileFocus = await profileButton.evaluate((node) => {
     const style = getComputedStyle(node);
