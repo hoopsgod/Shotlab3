@@ -15,7 +15,7 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
 });
 
 test('Coach roster explicitly neutralizes every inner legacy surface in one authority rule', () => {
-  assert.match(rosterLayer, /:is\(\.phase1RosterRow,\.coachRosterCard__body,\.coachRosterCard__details,\.coachRosterCard__identity,\.coachRosterCard__metrics,\.coachRosterCard__actions,\[data-phase1-open-profile="true"\]\)\{[^}]*margin:0!important[^}]*padding:0!important[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
+  assert.match(rosterLayer, /:is\(\.phase1RosterRow,\.coachRosterCard__body,\.coachRosterCard__details,\.coachRosterCard__identity,\.coachRosterCard__metrics,\.coachRosterCard__actions,\.coachRosterCard__manage,\[data-phase1-open-profile="true"\]\)\{[^}]*margin:0!important[^}]*padding:0!important[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px[^}]*border-bottom:1px solid var\(--l\)!important/s);
 });
 
