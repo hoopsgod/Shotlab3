@@ -181,7 +181,7 @@ async function replaceDemoCollections(page, fixture) {
   }, { storage: fixture.storage });
 }
 
-async function createSession(browser, { role, scenario, mode, width }) {
+async function createSession(browser, { role, scenario, mode, width, route }) {
   const context = await browser.newContext({
     viewport: { width, height: HEIGHT },
     screen: { width, height: HEIGHT },
@@ -192,13 +192,20 @@ async function createSession(browser, { role, scenario, mode, width }) {
   const page = await context.newPage();
   await installPhase1CFixedTime(page);
   const fixture = buildPhase1BFixture({ role, scenario, mode });
+  // Coach Home visual snapshots exercise geometry/branding, not shot-log ownership.
+  // Keep them independent of trusted basketball activity, which has dedicated persistence/parity coverage.
+  if (role === 'coach' && route === 'home') fixture.storage['sl:shotlogs'] = [];
   await installPhase1CRoutes(page, fixture);
 
   if (mode === 'demo') {
     await page.goto('/?demo=1');
     const demoButton = page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true });
     await expect(demoButton).toBeVisible({ timeout: 20_000 });
+    const assignmentHistorySettled = role === 'coach'
+      ? page.waitForResponse((response) => response.request().method() === 'GET' && new URL(response.url()).pathname === '/v1/player-assignment-history')
+      : null;
     await demoButton.click();
+    if (assignmentHistorySettled) await assignmentHistorySettled;
     await expect(page.getByTestId(role === 'coach' ? 'coach-command-center-full' : 'player-daily-command-center')).toBeVisible({ timeout: 20_000 });
     await replaceDemoCollections(page, fixture);
     await page.reload();
