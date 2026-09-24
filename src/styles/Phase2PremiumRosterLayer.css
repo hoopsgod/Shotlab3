@@ -22,7 +22,6 @@
 :scope #coach-roster-operations [data-testid="semantic-roster-status"]{flex:0 0 auto;padding:2px 5px!important;font-size:9px!important}
 :scope #coach-roster-operations .phase1RosterRow[data-status="success"] [data-testid="semantic-roster-status"]{display:none!important}
 :scope #coach-roster-operations .coachRosterCard__metrics{display:flex!important;flex-wrap:wrap!important;gap:1px 7px!important;min-width:0!important;color:var(--m)!important;font:570 11px/1.3 system-ui,sans-serif!important}
-:scope #coach-roster-operations .coachRosterCard__metrics>span{white-space:nowrap}
 :scope #coach-roster-operations .coachRosterCard__metrics strong{font-weight:780!important}
 :scope #coach-roster-operations .coachRosterCard__actions{position:relative;z-index:3}
 :scope #coach-roster-operations .coachRosterCard__actions button{min-width:44px!important;min-height:44px!important;padding:0 7px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;box-shadow:none!important;color:#687169!important}
@@ -45,11 +44,8 @@
 }
 @media(max-width:360px){
 :scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 116px}
-:scope #coach-roster-operations .coachRoster__heading select{width:116px!important;font-size:10px!important}
+:scope #coach-roster-operations .coachRoster__heading select{width:116px!important}
 :scope #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:36px minmax(0,1fr) 44px!important;gap:6px!important;padding-left:2px!important}
-:scope #coach-roster-operations .coachRosterCard__initials{width:34px!important;height:34px!important;font-size:12px!important}
-:scope #coach-roster-operations [data-phase1-open-profile="true"]{font-size:17px!important}
-:scope #coach-roster-operations .coachRosterCard__metrics{font-size:10px!important;gap:1px 5px!important}
 }
 @media(prefers-reduced-motion:reduce){:scope #coach-roster-operations *{transition:none!important;animation:none!important}}
 }
