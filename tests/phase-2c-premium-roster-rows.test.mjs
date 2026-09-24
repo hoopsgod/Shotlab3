@@ -19,10 +19,11 @@ test('Coach roster explicitly neutralizes every inner legacy surface in one auth
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px[^}]*border-bottom:1px solid var\(--l\)!important/s);
 });
 
-test('Player identity is dominant, flat, and remains the profile action', () => {
+test('Player identity is dominant, flat, and remains the real profile touch target', () => {
   const body = ruleBody('\\[data-phase1-open-profile="true"\\]');
+  assert.match(body, /min-height:44px!important/);
   assert.match(body, /font:840 19px\/1\.04/);
-  assert.match(rosterLayer, /\[data-phase1-open-profile="true"\]::after\{content:"";position:absolute;z-index:1;inset:/);
+  assert.doesNotMatch(rosterLayer, /\[data-phase1-open-profile="true"\]::(?:before|after)/);
   assert.match(rosterLayer, /span:last-child\{display:none\}/);
   assert.match(rosterLayer, /:focus-visible/);
 });
