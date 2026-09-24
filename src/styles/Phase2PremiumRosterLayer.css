@@ -38,7 +38,7 @@
 .performance-shell--coach #coach-roster-operations .phase1RosterRow .coachRosterCard__initials{width:36px!important;height:36px!important}
 .performance-shell--coach #coach-roster-operations [data-phase1-open-profile="true"]{font-size:18px!important}
 .performance-shell--coach #coach-roster-operations .coachRosterCard__metrics{font-size:10.5px!important;gap:1px 6px!important}
-.performance-shell--coach #coach-roster-operations .coachRosterCard__menu{right:12px}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__menu{right:24px!important;box-sizing:border-box;max-width:calc(100vw - 24px)}
 }
 @media(max-width:360px){
 .performance-shell--coach #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 108px;padding-inline:0}
