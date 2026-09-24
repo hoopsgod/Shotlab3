@@ -16,7 +16,7 @@ test("player profile exposes one shared, constrained photo picker", () => {
   assert.match(component, /data-testid="player-profile-photo-card"/);
   assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
   assert.match(component, /5242880/);
-  assert.match(component, /player\.photoUrl \|\| player\.photo_url/);
+  assert.match(component, /saved \|\| player\.photoUrl \|\| player\.photo_url/);
   assert.match(component, /savePlayerProfilePhoto/);
   assert.doesNotMatch(component, /loadPlayerProfilePhoto|demoMode|isDemoAccount|isDemoMode/);
 });
@@ -49,9 +49,9 @@ test("players API carries one canonical photo URL without erasing it during unre
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl/);
 });
 
-test("route enhancer places one player photo surface and one coach roster image path", () => {
+test("route enhancer binds the profile photo to hydrated player identity and coach roster", () => {
   assert.match(enhancer, /PlayerProfilePhotoCard/);
-  assert.match(enhancer, /photoSurface/);
+  assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
   assert.match(enhancer, /coachRosterCard__photo/);
   assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
   assert.match(enhancer, /source\.split\(photoSurface\)\.length !== 2/);
