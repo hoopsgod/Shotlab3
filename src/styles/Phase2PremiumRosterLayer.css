@@ -23,7 +23,7 @@
 :scope #coach-roster-operations .coachRosterCard__actions button{min-width:44px!important;min-height:44px!important;padding:0 7px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;box-shadow:none!important;color:#687169!important}
 :scope #coach-roster-operations .coachRosterCard__nudge{position:absolute;right:44px;bottom:-14px;min-height:30px!important;padding-inline:8px!important;font-size:8px!important}
 :scope #coach-roster-operations .coachRosterCard__manageTrigger{font-size:17px!important;color:#69726b!important;transform:rotate(90deg)}
-:scope #coach-roster-operations .coachRosterCard__menu{position:absolute;z-index:20;top:calc(100% + 4px);right:24px;min-width:184px;max-width:calc(100vw - 24px);padding:6px;border:1px solid var(--s);border-radius:11px;background:#fff}
+:scope #coach-roster-operations .coachRosterCard__menu{position:absolute;z-index:20;top:calc(100% + 4px);right:24px;max-width:calc(100vw - 24px);padding:6px;border:1px solid var(--s);border-radius:11px;background:#fff}
 :scope #coach-roster-operations .coachRosterCard__menu .coachRosterCard__remove{width:100%!important;justify-content:flex-start!important;padding-inline:10px!important;color:#963441!important}
 :scope #coach-roster-operations .coachRosterCard__menu .coachRosterCard__remove:is(:hover,:focus-visible){background:#ab303d0f!important}
 :scope #coach-roster-operations .coachRosterCard__actions button:focus{outline:3px solid #6179003d!important;outline-offset:2px!important}
