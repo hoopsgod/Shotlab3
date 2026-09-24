@@ -10,7 +10,17 @@ async function installSignedPlayersRoute(page, storage) {
     if (route.request().method().toUpperCase() === 'POST') {
       try {
         const body = route.request().postDataJSON();
-        players = Array.isArray(body?.players) ? body.players : players;
+        if (Array.isArray(body?.players)) {
+          players = body.players.map((player) => {
+            const identity = String(player?.email || player?.id || '').toLowerCase();
+            const existing = players.find((candidate) => String(candidate?.email || candidate?.id || '').toLowerCase() === identity);
+            const photoUrl = player?.photoUrl || player?.photo_url || existing?.photoUrl || existing?.photo_url || null;
+            return {
+              ...player,
+              ...(photoUrl ? { photoUrl, photo_url: photoUrl } : {}),
+            };
+          });
+        }
       } catch {}
     }
     await route.fulfill({
