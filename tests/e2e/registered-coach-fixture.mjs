@@ -4,6 +4,32 @@ const REGISTERED_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const DEFAULT_AUTH_USER_ID = '99999999-9999-4999-8999-999999999999';
 const DEFAULT_PLAYER_AUTH_USER_ID = '88888888-8888-4888-8888-888888888888';
 
+async function installSignedPlayersRoute(page, storage) {
+  let players = Array.isArray(storage?.['sl:players']) ? storage['sl:players'] : [];
+  await page.route('**/v1/players**', async (route) => {
+    if (route.request().method().toUpperCase() === 'POST') {
+      try {
+        const body = route.request().postDataJSON();
+        players = Array.isArray(body?.players) ? body.players : players;
+      } catch {}
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        storage_mode: 'signed_api',
+        players: players.map((player) => ({
+          ...player,
+          team_id: player?.team_id || player?.teamId || '',
+          photo_url: player?.photo_url || player?.photoUrl || null,
+          photoUrl: player?.photoUrl || player?.photo_url || null,
+        })),
+      }),
+    });
+  });
+}
+
 async function installSignedEventsRoute(page, storage) {
   let events = Array.isArray(storage?.['sl:events']) ? storage['sl:events'] : [];
   await page.route('**/v1/events**', async (route) => {
@@ -101,6 +127,7 @@ export async function enterSeededRegisteredCoach(page, {
     }
   }, { seededStorage: signedStorage });
 
+  await installSignedPlayersRoute(page, storage);
   await installSignedEventsRoute(page, storage);
   await installSignedStrengthConditioningRoute(page, storage, teamId);
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
@@ -192,6 +219,7 @@ export async function enterSeededRegisteredPlayer(page, {
     }
   }, { seededStorage: signedStorage });
 
+  await installSignedPlayersRoute(page, storage);
   await installSignedEventsRoute(page, storage);
   await installSignedStrengthConditioningRoute(page, storage, teamId);
   await page.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
