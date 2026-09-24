@@ -160,7 +160,7 @@ test("coach roster computed cascade stays flat and semantic at 390px", async ({ 
 
   const pathBeforeManage = new URL(page.url()).pathname;
   await manage.click();
-  await expect(row.getByRole("button", { name: "Remove from team", exact: true })).toBeVisible();
+  await expect(row.getByRole("menuitem", { name: "Remove from team", exact: true })).toBeVisible();
   expect(new URL(page.url()).pathname).toBe(pathBeforeManage);
   await page.screenshot({ path: testInfo.outputPath("coach-roster-menu-390.png"), fullPage: true });
   await manage.click();
