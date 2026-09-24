@@ -15,8 +15,8 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
 });
 
 test('Coach roster uses one flat editorial player surface', () => {
-  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
-  assert.match(rosterLayer, /\.coachRosterCard__body\{[^}]*border:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px[^}]*border-radius:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
+  assert.match(rosterLayer, /\.coachRosterCard__body\{[^}]*border:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
   for (const part of ['coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
     const body = ruleBody(`\\.${part}`);
     assert.ok(body, `${part} rule remains present`);
@@ -38,7 +38,7 @@ test('Healthy status is quiet while exception status remains available', () => {
 });
 
 test('Roster utilities stay subordinate and accessible', () => {
-  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-width:44px!important[^}]*min-height:44px!important[^}]*background:transparent!important/s);
+  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-width:44px!important[^}]*min-height:44px!important[^}]*background:#0000!important/s);
   assert.match(rosterLayer, /\.coachRosterCard__manageTrigger\{[^}]*transform:rotate\(90deg\)/s);
   assert.match(rosterLayer, /\.coachRosterCard__remove:is\(:hover,:focus-visible\)/);
   assert.match(rosterLayer, /outline:3px solid/);
