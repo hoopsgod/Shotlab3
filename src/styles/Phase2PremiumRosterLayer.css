@@ -37,6 +37,7 @@
 :scope #coach-roster-operations .phase1RosterRow .coachRosterCard__initials{width:36px!important;height:36px!important}
 :scope #coach-roster-operations [data-phase1-open-profile="true"]{font-size:18px!important}
 :scope #coach-roster-operations .coachRosterCard__metrics{font-size:10.5px!important;gap:1px 6px!important}
+:scope #coach-roster-operations .coachRosterCard__menu{right:12px}
 }
 @media(max-width:360px){
 :scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 108px;padding-inline:0}
