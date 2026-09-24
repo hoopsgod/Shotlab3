@@ -132,6 +132,9 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
   const firstRow = await firstHealthyOrNormalRow(roster);
   await expect(firstRow).not.toHaveAttribute('role', 'button');
 
+  const nestedInteractives = roster.locator('button button, button a[href], a[href] button, [role="button"] button, [role="button"] a[href]');
+  expect(await nestedInteractives.count()).toBe(0);
+
   for (const selector of [
     '.coachRosterCard__details',
     '.coachRosterCard__identity',
@@ -152,8 +155,17 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
   const removeButton = firstRow.getByRole('button', { name: 'REMOVE', exact: true });
   await expect(removeButton).toBeHidden();
 
+  await manageTrigger.focus();
+  await expect(manageTrigger).toBeFocused();
+  const manageFocus = await manageTrigger.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return { outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) };
+  });
+  expect(manageFocus.outlineStyle).not.toBe('none');
+  expect(manageFocus.outlineWidth).toBeGreaterThanOrEqual(2);
+
   const pathBeforeManage = new URL(page.url()).pathname;
-  await manageTrigger.click();
+  await page.keyboard.press('Space');
   await expect(removeButton).toBeVisible();
   expect(new URL(page.url()).pathname).toBe(pathBeforeManage);
   const menu = firstRow.locator('.coachRosterCard__menu');
@@ -161,7 +173,17 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
   expect(menuBox?.x || 0).toBeGreaterThanOrEqual(0);
   expect((menuBox?.x || 0) + (menuBox?.width || 0)).toBeLessThanOrEqual(391);
   await capture(page, '02-coach-players-context-menu-390', null);
-  await manageTrigger.click();
+
+  const rowCountBeforeCancel = await rows.count();
+  let removalDismissed = false;
+  page.once('dialog', async (dialog) => {
+    removalDismissed = true;
+    await dialog.dismiss();
+  });
+  await removeButton.click();
+  expect(removalDismissed).toBe(true);
+  expect(await rows.count()).toBe(rowCountBeforeCancel);
+  await expect(firstRow).toBeVisible();
   await expect(removeButton).toBeHidden();
 
   const status = firstRow.getByTestId('semantic-roster-status');
@@ -179,10 +201,11 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
   await capture(page, '03-coach-players-long-name-390', firstRow);
   await firstNameSpan.evaluate((node, value) => { node.textContent = value; }, originalName || 'Player');
 
-  const options = await roster.getByRole('combobox', { name: 'Sort' }).locator('option').evaluateAll((nodes) => nodes.map((node) => node.value));
+  const sort = roster.getByRole('combobox', { name: 'Sort' });
+  const options = await sort.locator('option').evaluateAll((nodes) => nodes.map((node) => node.value));
   if (options.length > 1) {
-    await roster.getByRole('combobox', { name: 'Sort' }).selectOption(options[1]);
-    await expect(roster.getByRole('combobox', { name: 'Sort' })).toHaveValue(options[1]);
+    await sort.selectOption(options[1]);
+    await expect(sort).toHaveValue(options[1]);
   }
 
   const lastRow = rows.last();
@@ -191,10 +214,23 @@ test('Coach Players roster is one flat editorial surface and preserves contextua
   await capture(page, '04-coach-players-bottom-roster-390', null);
 
   await profileButton.scrollIntoViewIfNeeded();
-  await profileButton.click();
+  await profileButton.focus();
+  await expect(profileButton).toBeFocused();
+  const profileFocus = await profileButton.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return { outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) };
+  });
+  expect(profileFocus.outlineStyle).not.toBe('none');
+  expect(profileFocus.outlineWidth).toBeGreaterThanOrEqual(2);
+  await page.keyboard.press('Enter');
   const drawer = page.getByTestId('coach-player-intelligence-drawer');
   await expect(drawer).toBeVisible({ timeout: 10_000 });
   await expectNoHorizontalOverflow(page);
+  await drawer.getByRole('button', { name: 'Close details', exact: true }).last().click();
+  await expect(drawer).toHaveCount(0);
+
+  await profileButton.click();
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
   await drawer.getByRole('button', { name: 'Open Full Profile', exact: true }).click();
   await expect(page.getByTestId('coach-player-detail-workspace')).toBeVisible({ timeout: 10_000 });
   await expectNoHorizontalOverflow(page);
