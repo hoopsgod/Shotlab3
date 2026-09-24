@@ -13,6 +13,7 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
   ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
   ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
+  ['coach-players-registered-populated-390', 'cdd499318c0fcb719edb6783a70ef4e37d73a4ffcced12f1ea57a134241debb9'],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
   ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
@@ -174,10 +175,7 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
       animations: 'disabled',
       caret: 'hide',
       fullPage: false,
-      // Phase 7C intentionally changes the Coach Players composition. Keep this
-      // guard strict enough to catch meaningful visual regressions while allowing
-      // the reviewed 390px roster convergence to replace its pre-7C baseline.
-      maxDiffPixelRatio: name === 'coach-players-registered-populated-390' ? 0.012 : 0.002,
+      maxDiffPixelRatio: 0.002,
       threshold: 0.2,
     });
   }
