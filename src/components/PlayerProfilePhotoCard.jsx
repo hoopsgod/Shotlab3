@@ -4,8 +4,9 @@ import { savePlayerProfilePhoto } from "../lib/playerProfilePhotoService.js";
 export default function PlayerProfilePhotoCard({ player = {} }) {
   const id = player.email || player.userEmail || player.playerId || "";
   const name = player.name || String(id).split("@")[0] || "Player";
-  const [photo, setPhoto] = useState(player.photoUrl || player.photo_url);
+  const [saved, setSaved] = useState("");
   const [error, setError] = useState("");
+  const photo = saved || player.photoUrl || player.photo_url;
 
   async function upload({ target }) {
     const file = target.files?.[0];
@@ -13,7 +14,7 @@ export default function PlayerProfilePhotoCard({ player = {} }) {
     if (!file) return;
     if (file.size > 5242880) return setError("Choose an image smaller than 5 MB.");
     try {
-      setPhoto(await savePlayerProfilePhoto(id, file));
+      setSaved(await savePlayerProfilePhoto(id, file));
       setError("");
     } catch (cause) {
       setError(cause?.message || "Could not save photo.");
