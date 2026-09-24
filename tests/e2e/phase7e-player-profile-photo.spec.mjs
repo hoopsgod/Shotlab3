@@ -8,7 +8,7 @@ async function installSafeRoutes(page) {
 }
 
 async function enterDemo(page, role) {
-  await page.goto('/');
+  await page.goto('/?demo=1');
   const button = page.getByRole('button', { name: role === 'coach' ? 'Coach demo' : 'Player demo', exact: true });
   await expect(button).toBeVisible({ timeout: 20_000 });
   await button.click();
