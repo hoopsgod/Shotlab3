@@ -30,25 +30,19 @@
 :scope #coach-roster-operations [data-coach-roster-placeholder="true"]{min-height:68px!important;border-bottom:1px dashed var(--l)!important}
 }
 @media(max-width:620px){
-@scope (.performance-shell--coach){
-:scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 126px;gap:8px;padding:7px 1px 8px;align-items:center}
-:scope #coach-roster-operations .coachRoster__heading span{display:none}
-:scope #coach-roster-operations .coachRoster__heading label{font-size:0!important}
-:scope #coach-roster-operations .coachRoster__heading select{width:126px!important}
-:scope #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:38px minmax(0,1fr) 44px!important;gap:8px!important;padding:3px 0 3px 5px!important}
-:scope #coach-roster-operations .phase1RosterRow .coachRosterCard__initials{width:36px!important;height:36px!important}
-:scope #coach-roster-operations [data-phase1-open-profile="true"]{font-size:18px!important}
-:scope #coach-roster-operations .coachRosterCard__metrics{font-size:10.5px!important;gap:1px 6px!important}
-:scope #coach-roster-operations .coachRosterCard__menu{right:12px}
-}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 126px;gap:8px;padding:7px 1px 8px;align-items:center}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading span{display:none}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading label{font-size:0!important}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading select{width:126px!important}
+.performance-shell--coach #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:38px minmax(0,1fr) 44px!important;gap:8px!important;padding:3px 0 3px 5px!important}
+.performance-shell--coach #coach-roster-operations .phase1RosterRow .coachRosterCard__initials{width:36px!important;height:36px!important}
+.performance-shell--coach #coach-roster-operations [data-phase1-open-profile="true"]{font-size:18px!important}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__metrics{font-size:10.5px!important;gap:1px 6px!important}
+.performance-shell--coach #coach-roster-operations .coachRosterCard__menu{right:12px}
 }
 @media(max-width:360px){
-@scope (.performance-shell--coach){
-:scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 108px;padding-inline:0}
-:scope #coach-roster-operations .coachRoster__heading select{min-width:108px!important;width:108px!important;padding-left:6px!important}
-:scope #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:36px minmax(0,1fr) 44px!important;gap:6px!important;padding-left:2px!important}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 108px;padding-inline:0}
+.performance-shell--coach #coach-roster-operations .coachRoster__heading select{min-width:108px!important;width:108px!important;padding-left:6px!important}
+.performance-shell--coach #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:36px minmax(0,1fr) 44px!important;gap:6px!important;padding-left:2px!important}
 }
-}
-@media(prefers-reduced-motion:reduce){
-@scope (.performance-shell--coach){:scope #coach-roster-operations *{transition:none!important;animation:none!important}}
-}
+@media(prefers-reduced-motion:reduce){.performance-shell--coach #coach-roster-operations *{transition:none!important;animation:none!important}}
