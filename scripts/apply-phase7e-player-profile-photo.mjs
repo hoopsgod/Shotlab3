@@ -32,4 +32,25 @@ if (source.split(photoSurface).length !== 2) throw new Error("Phase 7E player ph
 if ((source.match(/className="coachRosterCard__photo"/g) || []).length !== 1) throw new Error("Phase 7E roster photo rendering duplicated");
 
 if (source !== before) writeFileSync(appPath, source);
-console.log("Phase 7E player profile photo and roster image wiring verified.");
+
+const remotePath = "src/lib/remotePersistence.js";
+let remoteSource = readFileSync(remotePath, "utf8");
+const remoteBefore = remoteSource;
+const appNormalizerAnchor = `    name: cleanText(row.name),\n    role: cleanText(row.role),\n    createdAt: toFiniteNumber(row.createdAt ?? row.created_at),`;
+const appNormalizerReplacement = `    name: cleanText(row.name),\n    role: cleanText(row.role),\n    photoUrl: cleanText(row.photoUrl ?? row.photo_url) || null,\n    createdAt: toFiniteNumber(row.createdAt ?? row.created_at),`;
+if (!remoteSource.includes('photoUrl: cleanText(row.photoUrl ?? row.photo_url) || null')) {
+  if (!remoteSource.includes(appNormalizerAnchor)) throw new Error("Phase 7E player app-normalizer anchor missing");
+  remoteSource = remoteSource.replace(appNormalizerAnchor, appNormalizerReplacement);
+}
+const dbNormalizerAnchor = `    name: app.name,\n    role: app.role,\n    created_at: app.createdAt,`;
+const dbNormalizerReplacement = `    name: app.name,\n    role: app.role,\n    photo_url: app.photoUrl || null,\n    created_at: app.createdAt,`;
+if (!remoteSource.includes('photo_url: app.photoUrl || null')) {
+  if (!remoteSource.includes(dbNormalizerAnchor)) throw new Error("Phase 7E player DB-normalizer anchor missing");
+  remoteSource = remoteSource.replace(dbNormalizerAnchor, dbNormalizerReplacement);
+}
+for (const marker of ['photoUrl: cleanText(row.photoUrl ?? row.photo_url) || null', 'photo_url: app.photoUrl || null']) {
+  if (!remoteSource.includes(marker)) throw new Error(`Phase 7E player normalization marker missing: ${marker}`);
+}
+if (remoteSource !== remoteBefore) writeFileSync(remotePath, remoteSource);
+
+console.log("Phase 7E player profile photo, roster image wiring, and player photo normalization verified.");
