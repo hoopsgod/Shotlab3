@@ -8,7 +8,7 @@
 :scope #coach-roster-operations .phase1RosterRow{display:flex;min-height:80px;border-bottom:1px solid var(--l)!important;color:var(--i)!important}
 :scope #coach-roster-operations .coachRosterCard__accent{flex:0 0 2px!important;margin-block:13px;border-radius:999px;opacity:.64}
 :scope #coach-roster-operations .phase1RosterRow[data-status="success"] .coachRosterCard__accent{visibility:hidden}
-:scope #coach-roster-operations .coachRosterCard__body{display:grid!important;grid-template-columns:40px minmax(0,1fr) 44px!important;align-items:center!important;gap:10px!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;padding:8px 1px 8px 7px!important}
+:scope #coach-roster-operations .coachRosterCard__body{display:grid!important;grid-template-columns:40px minmax(0,1fr) 44px!important;align-items:center!important;gap:10px!important;box-sizing:border-box!important;flex:1 1 0!important;width:auto!important;min-width:0!important;padding:8px 1px 8px 7px!important}
 :scope #coach-roster-operations .coachRosterCard__initials{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;border:1px solid var(--l)!important;border-radius:50%!important;background:#f2f4ef!important;color:var(--i)!important;box-shadow:none!important;font:820 13px/1 system-ui,sans-serif!important}
 :scope #coach-roster-operations .coachRosterCard__details{display:grid!important;gap:3px!important;min-width:0!important}
 :scope #coach-roster-operations .coachRosterCard__identity{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important}
