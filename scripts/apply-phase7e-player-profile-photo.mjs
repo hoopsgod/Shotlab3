@@ -28,7 +28,7 @@ if (!source.includes('className="coachRosterCard__photo"')) {
 for (const marker of [photoImport, photoSurface, 'className="coachRosterCard__photo"', 'p.photoUrl||p.photo_url']) {
   if (!source.includes(marker)) throw new Error(`Phase 7E marker missing after transform: ${marker}`);
 }
-if ((source.match(/<PlayerProfilePhotoCard player=\{u\}\/ >/g) || []).length > 1) throw new Error("Phase 7E player photo surface duplicated");
+if (source.split(photoSurface).length !== 2) throw new Error("Phase 7E player photo surface duplicated");
 if ((source.match(/className="coachRosterCard__photo"/g) || []).length !== 1) throw new Error("Phase 7E roster photo rendering duplicated");
 
 if (source !== before) writeFileSync(appPath, source);
