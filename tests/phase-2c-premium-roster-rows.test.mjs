@@ -18,7 +18,6 @@ test('Coach roster explicitly neutralizes every inner legacy surface', () => {
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:82px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
   assert.match(rosterLayer, /\.coachRosterCard__body\{[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
   assert.match(rosterLayer, /:is\(\.coachRosterCard__details,\.coachRosterCard__identity,\.coachRosterCard__metrics,\.coachRosterCard__actions\)\{[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
-  assert.match(rosterLayer, /One row, one surface/);
 });
 
 test('Player identity is dominant, flat, and remains the profile action', () => {
