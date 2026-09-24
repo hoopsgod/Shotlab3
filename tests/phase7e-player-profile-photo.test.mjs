@@ -58,13 +58,11 @@ test("route enhancer places the player photo on profile and coach roster", () =>
   assert.ok(phaseIndex > 0 && minifyIndex > phaseIndex, "Phase 7E must run after reconciliation and before final CSS minification");
 });
 
-test("coach roster uses photos plus restrained alternating team color", () => {
+test("coach roster uses photos plus restrained team color", () => {
   assert.match(rosterCss, /\.coachRosterCard__photo\{/);
   assert.match(rosterCss, /object-fit:cover!important/);
   assert.match(rosterCss, /team-brand-primary/);
-  assert.match(rosterCss, /team-brand-secondary/);
-  assert.match(rosterCss, /\.phase1RosterRow:nth-of-type\(even\)/);
-  assert.match(rosterCss, /color-mix\(in srgb/);
+  assert.match(rosterCss, /\.phase1RosterRow\{[^}]*background:color-mix\(in srgb/);
 });
 
 test("migration records the canonical photo column and restricted avatar bucket", () => {
