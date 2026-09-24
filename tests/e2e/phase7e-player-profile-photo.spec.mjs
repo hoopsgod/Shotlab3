@@ -59,7 +59,7 @@ test('Coach roster renders stored player photos and restrained row color', async
   const { context, page } = await enterPhase1BSession(browser, {
     role: 'coach',
     scenario: 'populated',
-    mode: 'demo',
+    mode: 'registered',
     playerPhotoUrl: ONE_PIXEL_DATA_URL,
   });
   try {
