@@ -12,8 +12,7 @@
 :scope #coach-roster-operations .coachRosterCard__initials{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;border:1px solid var(--l)!important;border-radius:50%!important;background:#f2f4ef!important;color:var(--i)!important;box-shadow:none!important;font:820 13px/1 system-ui,sans-serif!important}
 :scope #coach-roster-operations .coachRosterCard__details{display:grid!important;gap:3px!important;min-width:0!important}
 :scope #coach-roster-operations .coachRosterCard__identity{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important}
-:scope #coach-roster-operations [data-phase1-open-profile="true"]{position:relative;display:flex!important;align-items:center!important;flex:1 1 auto!important;min-width:0!important;min-height:36px!important;color:var(--i)!important;font:840 19px/1.04 "Barlow Condensed","Arial Narrow",sans-serif!important;text-align:left!important}
-:scope #coach-roster-operations [data-phase1-open-profile="true"]::after{content:"";position:absolute;z-index:1;inset:-22px -86px -22px -54px}
+:scope #coach-roster-operations [data-phase1-open-profile="true"]{display:flex!important;align-items:center!important;flex:1 1 auto!important;min-width:0!important;min-height:44px!important;color:var(--i)!important;font:840 19px/1.04 "Barlow Condensed","Arial Narrow",sans-serif!important;text-align:left!important}
 :scope #coach-roster-operations [data-phase1-open-profile="true"] span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 :scope #coach-roster-operations [data-phase1-open-profile="true"] span:last-child{display:none}
 :scope #coach-roster-operations [data-phase1-open-profile="true"]:focus-visible{outline:3px solid #61790047!important;outline-offset:3px!important}
