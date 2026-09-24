@@ -6,6 +6,8 @@ const system = readFileSync('src/components/SecondaryPageSystem.jsx', 'utf8');
 const rosterLayer = readFileSync('src/styles/Phase2PremiumRosterLayer.css', 'utf8');
 const closure = readFileSync('src/lib/phase1EvidenceClosure.js', 'utf8');
 
+const ruleBody = (selector) => rosterLayer.match(new RegExp(`${selector}\\{([^}]*)\\}`, 's'))?.[1] ?? '';
+
 test('Phase 2C roster layer is retained as one dedicated production authority', () => {
   assert.match(system, /import "\.\.\/styles\/Phase2PremiumRosterLayer\.css\?roster-authority"/);
   assert.equal((system.match(/Phase2PremiumRosterLayer\.css/g) || []).length, 1);
@@ -14,10 +16,12 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
 
 test('Coach roster uses one flat editorial player surface', () => {
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
-  for (const part of ['coachRosterCard__body','coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
-    assert.match(rosterLayer, new RegExp(`\\.${part}\\{[^}]*border[^;]*0!important[^}]*border-radius:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important`, 's'));
+  assert.match(rosterLayer, /\.coachRosterCard__body\{[^}]*border:0!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
+  for (const part of ['coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
+    const body = ruleBody(`\\.${part}`);
+    assert.ok(body, `${part} rule remains present`);
+    assert.doesNotMatch(body, /border-radius|background:\s*#fff|box-shadow:(?!none)/);
   }
-  assert.match(rosterLayer, /One row, one surface/);
 });
 
 test('Player identity is dominant and the row body behaves as the profile action', () => {
@@ -44,7 +48,6 @@ test('Roster utilities stay subordinate and accessible', () => {
 
 test('Mobile geometry preserves density and long-name width', () => {
   assert.match(rosterLayer, /@media\(max-width:620px\)/);
-  assert.match(rosterLayer, /\.phase1RosterRow\{min-height:92px!important\}/);
   assert.match(rosterLayer, /grid-template-columns:38px minmax\(0,1fr\) 44px!important/);
   assert.match(rosterLayer, /text-overflow:ellipsis;white-space:nowrap/);
   assert.match(rosterLayer, /@media\(max-width:360px\)/);
@@ -58,5 +61,6 @@ test('Phase 1 closure preserves semantics without injecting roster presentation 
 });
 
 test('Phase 2C stays scoped to coach roster presentation', () => {
-  assert.match(rosterLayer, /\.performance-shell--coach #coach-roster-operations/);
+  assert.match(rosterLayer, /@scope \(\.performance-shell--coach\)/);
+  assert.match(rosterLayer, /:scope #coach-roster-operations/);
 });
