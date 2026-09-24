@@ -56,21 +56,13 @@ test('Player can add a profile photo through the shared profile surface', async 
 });
 
 test('Coach roster renders stored player photos and restrained row color', async ({ browser }) => {
-  const { context, page } = await enterPhase1BSession(browser, { role: 'coach', scenario: 'populated', mode: 'demo' });
+  const { context, page } = await enterPhase1BSession(browser, {
+    role: 'coach',
+    scenario: 'populated',
+    mode: 'demo',
+    playerPhotoUrl: ONE_PIXEL_DATA_URL,
+  });
   try {
-    const seeded = await page.evaluate((photoUrl) => {
-      const rows = JSON.parse(localStorage.getItem('sl:players') || '[]');
-      const player = rows.find((row) => String(row?.role || '').toLowerCase() === 'player') || rows.find((row) => !String(row?.email || '').includes('coach'));
-      if (!player) return null;
-      player.photoUrl = photoUrl;
-      player.photo_url = photoUrl;
-      localStorage.setItem('sl:players', JSON.stringify(rows));
-      return String(player.email || player.id || '');
-    }, ONE_PIXEL_DATA_URL);
-    expect(seeded).toBeTruthy();
-
-    await page.reload();
-    await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 });
     await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click();
     await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
 
