@@ -23,10 +23,9 @@
 :scope #coach-roster-operations .coachRosterCard__metrics{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:2px 8px!important;min-width:0!important;color:var(--m)!important;font:570 11px/1.34 system-ui,sans-serif!important}
 :scope #coach-roster-operations .coachRosterCard__metrics>span{white-space:nowrap}
 :scope #coach-roster-operations .coachRosterCard__metrics strong{color:#29352c!important;font-weight:780!important}
-:scope #coach-roster-operations .coachRosterCard__actions{position:relative;z-index:3;display:flex!important;align-items:center!important}
+:scope #coach-roster-operations .coachRosterCard__actions{position:relative;z-index:3}
 :scope #coach-roster-operations .coachRosterCard__actions button{min-width:44px!important;min-height:44px!important;padding:0 7px!important;border:1px solid #0000!important;border-radius:10px!important;background:#0000!important;color:#687169!important;touch-action:manipulation}
 :scope #coach-roster-operations .coachRosterCard__nudge{position:absolute;right:44px;bottom:-18px;min-height:30px!important;padding-inline:8px!important;font-size:8px!important}
-:scope #coach-roster-operations .coachRosterCard__manage{position:relative}
 :scope #coach-roster-operations .coachRosterCard__manageTrigger{font-size:18px!important;color:#69726b!important;transform:rotate(90deg)}
 :scope #coach-roster-operations .coachRosterCard__menu{position:absolute;z-index:20;top:calc(100% + 4px);right:0;min-width:184px;padding:6px;border:1px solid var(--s);border-radius:11px;background:#fff;box-shadow:0 12px 28px #17201929}
 :scope #coach-roster-operations .coachRosterCard__menu .coachRosterCard__remove{width:100%!important;justify-content:flex-start!important;padding-inline:10px!important;color:#963441!important;text-align:left!important;font-size:11px!important}
