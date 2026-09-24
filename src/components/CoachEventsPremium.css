@@ -54,7 +54,6 @@
 .coach-events-mobile-surface {
   min-width: 0;
   max-width: 100%;
-  --semantic-info: var(--accent, #c8ff1a);
 }
 
 [data-testid="coach-events-mobile-page"] {
