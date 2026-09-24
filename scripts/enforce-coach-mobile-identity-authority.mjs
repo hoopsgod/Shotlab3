@@ -1,9 +1,7 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-const ROOT_DIR = process.cwd()
-const DIST_ASSETS = path.resolve(ROOT_DIR, 'dist', 'assets')
-const ROSTER_SOURCE = path.resolve(ROOT_DIR, 'src', 'styles', 'Phase2PremiumRosterLayer.css')
+const DIST_ASSETS = path.resolve(process.cwd(), 'dist', 'assets')
 const AUTHORITATIVE_STAGE = /\[data-team-identity-stage=(?:["'])?coach-mission-control(?:["'])?\]/
 const AUTHORITATIVE_HEADER = /\[data-testid=(?:["'])?mission-control-team-header(?:["'])?\]/
 const COMPONENT_HEADER_AUTHORITY = /^\.mcShellV3\s+(?:\.mcHeader(?:\s|[.:])|\.mcBrandLockup(?:\s|[.:]|$)|\.mcBrandCopy(?:\s|[.:]|$)|\.mcHeaderActions(?:\s|[.:]|$)|\.mcTeamSelect(?:[.:]|$)|\.mcBell(?:[.:]|$)|\.mcMobileMenu(?:[.:]|$))/
@@ -76,41 +74,6 @@ export function enforceCoachMobileIdentityAuthority(css) {
   return { css: output, changed, selectors }
 }
 
-function balancedBlock(source, marker) {
-  const start = source.indexOf(marker)
-  if (start < 0) throw new Error(`Coach mobile authority verification failed: source block ${marker} is missing.`)
-  const open = source.indexOf('{', start)
-  if (open < 0) throw new Error(`Coach mobile authority verification failed: source block ${marker} has no opening brace.`)
-  let depth = 0
-  for (let index = open; index < source.length; index += 1) {
-    if (source[index] === '{') depth += 1
-    else if (source[index] === '}' && --depth === 0) return source.slice(start, index + 1)
-  }
-  throw new Error(`Coach mobile authority verification failed: source block ${marker} is unbalanced.`)
-}
-
-function hasRosterResponsiveAuthority(css) {
-  return css.includes('padding:3px 0 3px 5px!important')
-    && css.includes('.coachRosterCard__metrics span:nth-child(n+3){display:none}')
-    && css.includes('.coachRosterCard__menu{right:24px!important')
-}
-
-async function preserveRosterResponsiveAuthority(coachPath, coachCss) {
-  if (hasRosterResponsiveAuthority(coachCss)) return { css: coachCss, restored: false }
-
-  // Phase2PremiumRosterLayer.css remains the single source of truth. The
-  // production optimizer has historically discarded its nested responsive
-  // media rules even while preserving the base roster layer. Reattach the
-  // exact source-owned media blocks after all CSS restructuring passes rather
-  // than duplicating their declarations in this build guard.
-  const rosterSource = await readFile(ROSTER_SOURCE, 'utf8')
-  const mobile = balancedBlock(rosterSource, '@media(max-width:620px)')
-  const narrow = balancedBlock(rosterSource, '@media(max-width:360px)')
-  const repaired = `${coachCss}${mobile}${narrow}`
-  await writeFile(coachPath, repaired)
-  return { css: repaired, restored: true }
-}
-
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
   let violatingFiles = 0
@@ -139,8 +102,7 @@ async function main() {
   // superficially complete.
   const coachEntry = entries.find((entry) => entry.isFile() && /^CoachWorkspaces-.*\.css$/.test(entry.name))
   if (!coachEntry) throw new Error('Coach mobile identity authority verification failed: CoachWorkspaces production CSS asset is missing.')
-  const coachPath = path.join(DIST_ASSETS, coachEntry.name)
-  let coachProductionCss = await readFile(coachPath, 'utf8')
+  const coachProductionCss = await readFile(path.join(DIST_ASSETS, coachEntry.name), 'utf8')
   const requiredAuthority = [
     ['mobile utility header authority', /\.mcShellV3\.is-mobile-shell \.mcHeader\[data-testid=mission-control-team-header\]\{display:none\}/],
     ['mobile Coach hero geometry authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\]\{[^}]*min-height:334px[^}]*margin-inline:0/],
@@ -154,13 +116,7 @@ async function main() {
     throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  const rosterResult = await preserveRosterResponsiveAuthority(coachPath, coachProductionCss)
-  coachProductionCss = rosterResult.css
-  if (!hasRosterResponsiveAuthority(coachProductionCss)) {
-    throw new Error('Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost source-owned roster responsive authority.')
-  }
-
-  console.log(`Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; roster responsive authority ${rosterResult.restored ? 'restored from its source stylesheet' : 'already retained'}; computed-style certification owns final association.`)
+  console.log('Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; roster geometry is source-owned and media-independent; computed-style certification owns final association.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })
