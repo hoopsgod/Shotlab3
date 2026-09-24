@@ -19,7 +19,7 @@ if (!source.includes(photoSurface)) {
 }
 
 const avatarAnchor = '<div className="coachRosterCard__initials" aria-hidden="true">{(p.name||"?").trim().slice(0,1).toUpperCase()}</div>';
-const avatarReplacement = '<div className="coachRosterCard__initials" aria-hidden="true">{p.photoUrl||p.photo_url?<img className="coachRosterCard__photo" src={p.photoUrl||p.photo_url} alt="" width="38" height="38" style={{objectFit:"cover"}}/>:(p.name||"?").trim()[0]?.toUpperCase()}</div>';
+const avatarReplacement = '<div className="coachRosterCard__initials" aria-hidden="true">{p.photoUrl||p.photo_url?<img className="coachRosterCard__photo" src={p.photoUrl||p.photo_url} width="38" height="38" style={{objectFit:"cover"}}/>:(p.name||"?")[0].toUpperCase()}</div>';
 if (!source.includes('className="coachRosterCard__photo"')) {
   if (!source.includes(avatarAnchor)) throw new Error("Phase 7E roster avatar anchor missing");
   source = source.replace(avatarAnchor, avatarReplacement);
