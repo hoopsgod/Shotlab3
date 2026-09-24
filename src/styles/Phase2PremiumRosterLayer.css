@@ -39,8 +39,8 @@
 :scope #coach-roster-operations .coachRosterCard__metrics{font-size:10.5px!important;gap:1px 6px!important}
 }
 @media(max-width:360px){
-:scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 116px}
-:scope #coach-roster-operations .coachRoster__heading select{width:116px!important}
+:scope #coach-roster-operations .coachRoster__heading{grid-template-columns:minmax(0,1fr) 112px}
+:scope #coach-roster-operations .coachRoster__heading select{min-width:112px!important;width:112px!important}
 :scope #coach-roster-operations .phase1RosterRow .coachRosterCard__body{grid-template-columns:36px minmax(0,1fr) 44px!important;gap:6px!important;padding-left:2px!important}
 }
 @media(prefers-reduced-motion:reduce){:scope #coach-roster-operations *{transition:none!important;animation:none!important}}
