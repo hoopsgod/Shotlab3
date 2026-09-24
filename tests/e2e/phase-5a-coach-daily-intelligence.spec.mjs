@@ -40,7 +40,7 @@ async function removeInactiveDemoPlayerThroughUi(page) {
   await expect(micahRow).toBeVisible();
   await expect(micahRow).not.toHaveAttribute("role", "button");
 
-  const removeAction = micahRow.getByRole("button", { name: "Remove from team", exact: true });
+  const removeAction = micahRow.getByRole("menuitem", { name: "Remove from team", exact: true });
   await expect(removeAction).toHaveCount(0);
   const manageTrigger = micahRow.locator(".coachRosterCard__manageTrigger");
   await expect(manageTrigger).toBeVisible();
