@@ -60,6 +60,14 @@ test("route enhancer binds the profile photo to hydrated player identity and coa
   assert.ok(phaseIndex > 0 && minifyIndex > phaseIndex, "Phase 7E must run after reconciliation and before final CSS minification");
 });
 
+test("route enhancer preserves the canonical photo field through player app and DB normalization", () => {
+  assert.match(enhancer, /remotePersistence\.js/);
+  assert.match(enhancer, /photoUrl: cleanText\(row\.photoUrl \?\? row\.photo_url\) \|\| null/);
+  assert.match(enhancer, /photo_url: app\.photoUrl \|\| null/);
+  assert.match(enhancer, /player app-normalizer anchor missing/);
+  assert.match(enhancer, /player DB-normalizer anchor missing/);
+});
+
 test("coach roster uses photos plus alternating restrained team color", () => {
   assert.match(enhancer, /style=\{\{objectFit:"cover"\}\}/);
   assert.match(rosterCss, /team-brand-primary/);
