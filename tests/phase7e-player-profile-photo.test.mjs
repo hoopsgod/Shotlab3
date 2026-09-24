@@ -16,9 +16,9 @@ test("player profile exposes one shared, constrained photo picker", () => {
   assert.match(component, /data-testid="player-profile-photo-card"/);
   assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
   assert.match(component, /5 \* 1024 \* 1024/);
-  assert.match(component, /loadPlayerProfilePhoto/);
+  assert.match(component, /player\?\.photoUrl \|\| player\?\.photo_url/);
   assert.match(component, /savePlayerProfilePhoto/);
-  assert.doesNotMatch(component, /demoMode|isDemoAccount|isDemoMode/);
+  assert.doesNotMatch(component, /loadPlayerProfilePhoto|demoMode|isDemoAccount|isDemoMode/);
 });
 
 test("persistence service contains demo safety without creating alternate product UI", () => {
@@ -27,6 +27,7 @@ test("persistence service contains demo safety without creating alternate produc
   assert.match(service, /buildApiIdentityHeaders/);
   assert.match(service, /new FormData\(\)/);
   assert.match(service, /URL\.createObjectURL/);
+  assert.doesNotMatch(service, /loadPlayerProfilePhoto/);
 });
 
 test("photo endpoint authenticates the player and keeps storage credentials server-side", () => {
