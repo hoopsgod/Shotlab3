@@ -55,7 +55,7 @@ test('Player can add a profile photo through the shared profile surface', async 
   await noHorizontalOverflow(page);
 });
 
-test('Coach roster renders stored player photos and restrained row color', async ({ browser }) => {
+test('Coach roster and full player profile render the same stored player photo', async ({ browser }) => {
   const { context, page } = await enterPhase1BSession(browser, {
     role: 'coach',
     scenario: 'populated',
@@ -76,6 +76,20 @@ test('Coach roster renders stored player photos and restrained row color', async
     const background = await rows.first().evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(background).not.toBe('rgb(255, 255, 255)');
     expect(background).not.toBe('rgba(0, 0, 0, 0)');
+
+    const profileAction = rows.first().locator('[data-phase1-open-profile="true"]');
+    await expect(profileAction).toBeVisible();
+    await profileAction.click();
+
+    const drawer = page.getByTestId('coach-player-intelligence-drawer');
+    await expect(drawer).toBeVisible({ timeout: 20_000 });
+    await drawer.getByRole('button', { name: 'Open Full Profile', exact: true }).click();
+
+    const profile = page.getByTestId('coach-player-development-profile');
+    await expect(profile).toBeVisible({ timeout: 20_000 });
+    const profilePhoto = profile.getByTestId('coach-player-profile-photo');
+    await expect(profilePhoto).toBeVisible();
+    await expect(profilePhoto).toHaveAttribute('src', /^data:image\/png;base64,/);
     await noHorizontalOverflow(page);
   } finally {
     await context.close();
