@@ -25,11 +25,19 @@ if (!source.includes('className="coachRosterCard__photo"')) {
   source = source.replace(avatarAnchor, avatarReplacement);
 }
 
-for (const marker of [photoImport, photoSurface, 'className="coachRosterCard__photo"', 'p.photoUrl||p.photo_url']) {
+const coachProfileAvatarAnchor = '<Av n={profile.identity.name} sz={64} email={profile.identity.email}/>';
+const coachProfilePhoto = '{player?.photoUrl||player?.photo_url?<img data-testid="coach-player-profile-photo" src={player.photoUrl||player.photo_url} alt={`${profile.identity.name} profile`} width="64" height="64" style={{width:64,height:64,borderRadius:"50%",objectFit:"cover",flexShrink:0}}/>:<Av n={profile.identity.name} sz={64} email={profile.identity.email}/>}';
+if (!source.includes('data-testid="coach-player-profile-photo"')) {
+  if (!source.includes(coachProfileAvatarAnchor)) throw new Error("Phase 7E coach player profile avatar anchor missing");
+  source = source.replace(coachProfileAvatarAnchor, coachProfilePhoto);
+}
+
+for (const marker of [photoImport, photoSurface, 'className="coachRosterCard__photo"', 'p.photoUrl||p.photo_url', 'data-testid="coach-player-profile-photo"', 'player?.photoUrl||player?.photo_url']) {
   if (!source.includes(marker)) throw new Error(`Phase 7E marker missing after transform: ${marker}`);
 }
 if (source.split(photoSurface).length !== 2) throw new Error("Phase 7E player photo surface duplicated");
 if ((source.match(/className="coachRosterCard__photo"/g) || []).length !== 1) throw new Error("Phase 7E roster photo rendering duplicated");
+if ((source.match(/data-testid="coach-player-profile-photo"/g) || []).length !== 1) throw new Error("Phase 7E coach player profile photo rendering duplicated");
 
 if (source !== before) writeFileSync(appPath, source);
 
@@ -50,4 +58,4 @@ if (!remoteSource.includes('photoUrl: cleanText(row.photoUrl || row.photo_url) |
 if (!remoteSource.includes('const payload = error?.remoteRows && typeof error.remoteRows === "object"')) throw new Error("Phase 7E remote debug compaction marker missing");
 if (remoteSource !== remoteBefore) writeFileSync(remotePath, remoteSource);
 
-console.log("Phase 7E player profile photo, roster image wiring, and player photo normalization verified.");
+console.log("Phase 7E player profile photo, coach profile photo, roster image wiring, and player photo normalization verified.");
