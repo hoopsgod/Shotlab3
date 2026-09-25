@@ -116,7 +116,7 @@ async function main() {
     throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  console.log('Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; computed-style certification owns final association.')
+  console.log('Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; roster geometry is source-owned and media-independent; computed-style certification owns final association.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })

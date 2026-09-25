@@ -41,6 +41,68 @@ async function computedColorForVariable(page, variableName) {
   }, variableName);
 }
 
+async function readFlatSurfaceStyle(locator) {
+  return locator.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      boxShadow: style.boxShadow,
+      borderTopWidth: style.borderTopWidth,
+      borderRightWidth: style.borderRightWidth,
+      borderBottomWidth: style.borderBottomWidth,
+      borderLeftWidth: style.borderLeftWidth,
+      borderRadius: style.borderRadius,
+    };
+  });
+}
+
+const expectFlatSurface = (style) => {
+  expect(["rgba(0, 0, 0, 0)", "transparent"]).toContain(style.backgroundColor);
+  expect(style.backgroundImage).toBe("none");
+  expect(style.boxShadow).toBe("none");
+  expect(style.borderTopWidth).toBe("0px");
+  expect(style.borderRightWidth).toBe("0px");
+  expect(style.borderBottomWidth).toBe("0px");
+  expect(style.borderLeftWidth).toBe("0px");
+  expect(style.borderRadius).toBe("0px");
+};
+
+async function readRosterCascadeAudit(page, row) {
+  return row.evaluate((root) => {
+    const selectors = [
+      ".coachRosterCard__details",
+      ".coachRosterCard__identity",
+      "[data-phase1-open-profile=\"true\"]",
+      ".coachRosterCard__metrics",
+      ".coachRosterCard__actions",
+    ];
+    const targets = selectors.map((selector) => [selector, root.querySelector(selector)]).filter(([, node]) => node);
+    const found = [];
+    const visit = (rules, owner) => {
+      for (const rule of Array.from(rules || [])) {
+        if (rule.cssRules) visit(rule.cssRules, owner);
+        if (!rule.selectorText || !rule.style) continue;
+        for (const [target, node] of targets) {
+          let matches = false;
+          try { matches = node.matches(rule.selectorText); } catch {}
+          if (!matches) continue;
+          const properties = {};
+          for (const name of ["background", "background-color", "box-shadow", "border", "border-radius", "padding", "margin"]) {
+            const value = rule.style.getPropertyValue(name);
+            if (value) properties[name] = { value, priority: rule.style.getPropertyPriority(name) };
+          }
+          if (Object.keys(properties).length) found.push({ target, owner, selector: rule.selectorText, properties });
+        }
+      }
+    };
+    for (const sheet of Array.from(document.styleSheets)) {
+      try { visit(sheet.cssRules, sheet.href || sheet.ownerNode?.id || sheet.ownerNode?.getAttribute?.("data-vite-dev-id") || "inline"); } catch {}
+    }
+    return found;
+  });
+}
+
 test("semantic state variables remain fixed and distinct from team branding", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
@@ -56,7 +118,7 @@ test("semantic state variables remain fixed and distinct from team branding", as
   expect(variables.danger).not.toBe(variables.brand);
 });
 
-test("coach roster statuses and Schedule metadata render with semantic roles", async ({ page }) => {
+test("coach roster computed cascade stays flat and semantic at 390px", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
   await enterDemo(page, "coach");
@@ -64,7 +126,47 @@ test("coach roster statuses and Schedule metadata render with semantic roles", a
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Players", exact: true }).click();
 
-  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
+  const roster = page.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const row = roster.locator(".phase1RosterRow").first();
+  await expect(row).toBeVisible({ timeout: 20_000 });
+
+  for (const selector of [
+    ".coachRosterCard__details",
+    ".coachRosterCard__identity",
+    "[data-phase1-open-profile=\"true\"]",
+    ".coachRosterCard__metrics",
+  ]) {
+    const target = row.locator(selector);
+    await expect(target).toBeAttached();
+    expectFlatSurface(await readFlatSurfaceStyle(target));
+  }
+
+  const rowBox = await row.boundingBox();
+  expect(rowBox?.height || 0).toBeGreaterThanOrEqual(76);
+  expect(rowBox?.height || 999).toBeLessThanOrEqual(84);
+
+  const manage = row.locator(".coachRosterCard__manageTrigger");
+  const manageBox = await manage.boundingBox();
+  expect(manageBox?.width || 0).toBeGreaterThanOrEqual(44);
+  expect(manageBox?.height || 0).toBeGreaterThanOrEqual(44);
+  const profile = row.locator('[data-phase1-open-profile="true"]');
+  await expect(profile).toBeVisible();
+
+  const audit = await readRosterCascadeAudit(page, row);
+  console.log(`ROSTER_CASCADE_AUDIT=${JSON.stringify(audit)}`);
+  await testInfo.attach("roster-cascade-audit.json", { body: JSON.stringify(audit, null, 2), contentType: "application/json" });
+  await page.screenshot({ path: testInfo.outputPath("coach-roster-390.png"), fullPage: true });
+
+  const pathBeforeManage = new URL(page.url()).pathname;
+  await manage.click();
+  await expect(row.getByRole("menuitem", { name: "Remove from team", exact: true })).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe(pathBeforeManage);
+  await page.screenshot({ path: testInfo.outputPath("coach-roster-menu-390.png"), fullPage: true });
+  await manage.click();
+
+  await profile.click();
+  await expect(page.getByTestId("coach-player-intelligence-drawer")).toBeVisible({ timeout: 20_000 });
 
   const status = page.getByTestId("semantic-roster-status").first();
   await expect(status).toBeAttached({ timeout: 20_000 });
@@ -75,7 +177,14 @@ test("coach roster statuses and Schedule metadata render with semantic roles", a
   const expectedStatusColor = await computedColorForVariable(page, `--semantic-${tone}`);
   const actualStatusColor = await status.evaluate((node) => getComputedStyle(node).color);
   expect(actualStatusColor).toBe(expectedStatusColor);
+});
 
+test("Schedule metadata renders with the semantic info role", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installRoutes(page);
+  await enterDemo(page, "coach");
+
+  const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.locator('.pageShell[data-accent="events"]').first();
   await expect(eventsPage).toBeVisible({ timeout: 20_000 });

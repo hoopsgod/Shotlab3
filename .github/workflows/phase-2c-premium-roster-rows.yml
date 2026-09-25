@@ -3,12 +3,13 @@ name: Phase 2C Premium Roster Rows
 on:
   pull_request:
     branches:
-      - agent/phase-2b-premium-action-language
+      - march-3-reset-85393dd
     paths:
       - "src/components/SecondaryPageSystem.jsx"
       - "src/styles/Phase2PremiumRosterLayer.css"
       - "tests/phase-2c-premium-roster-rows.test.mjs"
       - "tests/e2e/phase-2c-premium-roster-rows.spec.mjs"
+      - "tests/e2e/semantic-color-system.spec.mjs"
       - ".github/workflows/phase-2c-premium-roster-rows.yml"
       - "package.json"
       - "playwright.acceptance.config.mjs"
@@ -16,6 +17,8 @@ on:
 
 permissions:
   contents: read
+  issues: read
+  checks: read
 
 env:
   VITE_ENABLE_PRODUCTION_DEMOS: "true"
@@ -27,12 +30,17 @@ concurrency:
 jobs:
   premium-roster-slice:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - name: Check out exact PR head
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Record exact candidate SHA
+        run: |
+          mkdir -p artifacts/phase-2c-premium-roster
+          git rev-parse HEAD | tee artifacts/phase-2c-premium-roster/exact-head-sha.txt
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -55,16 +63,74 @@ jobs:
       - name: Verify production build
         run: npm run build
 
-      - name: Run Coach premium roster browser flow
-        run: npx playwright test tests/e2e/phase-2c-premium-roster-rows.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+      - name: Verify unchanged performance budget
+        run: npm run verify:performance-budget
 
-      - name: Upload Phase 2C roster screenshots
+      - name: Run local Coach roster browser and computed-style contracts
+        run: >-
+          npx playwright test
+          tests/e2e/phase-2c-premium-roster-rows.spec.mjs
+          tests/e2e/semantic-color-system.spec.mjs
+          --config=playwright.acceptance.config.mjs
+          --reporter=line
+
+      - name: Resolve exact-head Cloudflare preview
+        if: github.event_name == 'pull_request'
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          short_sha="${CANDIDATE_SHA:0:7}"
+          for attempt in $(seq 1 36); do
+            comments="$(gh api -H "Accept: application/vnd.github+json" "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
+            body="$(jq -r --arg sha "$short_sha" '[.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($sha))] | last | .body // empty' <<< "$comments")"
+            preview_url="$(grep -oE 'https://[0-9a-f]+\.shotlab3\.pages\.dev' <<< "$body" | head -n 1 || true)"
+            deployment_id="$(grep -oE 'shotlab3/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' <<< "$body" | head -n 1 | cut -d/ -f2 || true)"
+            if [ -n "$preview_url" ] && [ -n "$deployment_id" ] && curl --fail --silent --show-error --location "$preview_url" >/dev/null; then
+              echo "url=${preview_url}" >> "$GITHUB_OUTPUT"
+              echo "deployment_id=${deployment_id}" >> "$GITHUB_OUTPUT"
+              {
+                echo "candidate_sha=${CANDIDATE_SHA}"
+                echo "deployment_id=${deployment_id}"
+                echo "preview_url=${preview_url}"
+              } | tee artifacts/phase-2c-premium-roster/cloudflare-exact-head.txt
+              exit 0
+            fi
+            echo "Waiting for exact-head Cloudflare preview ${short_sha} (${attempt}/36)..."
+            sleep 10
+          done
+          echo "No exact-head Cloudflare preview/deployment ID resolved for ${CANDIDATE_SHA}." >&2
+          exit 1
+
+      - name: Run exact-head deployed roster browser certification
+        if: github.event_name == 'pull_request'
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.preview.outputs.url }}
+        run: >-
+          npx playwright test
+          tests/e2e/phase-2c-premium-roster-rows.spec.mjs
+          tests/e2e/semantic-color-system.spec.mjs
+          --config=playwright.acceptance.config.mjs
+          --reporter=line
+
+      - name: Collect exact-head roster evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/phase-2c-premium-roster
+          git rev-parse HEAD > artifacts/phase-2c-premium-roster/exact-head-sha.txt
+          cp artifacts/performance/build-metrics.json artifacts/phase-2c-premium-roster/build-metrics.json 2>/dev/null || true
+          cp -R test-results artifacts/phase-2c-premium-roster/test-results 2>/dev/null || true
+
+      - name: Upload Phase 2C roster evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: phase-2c-premium-roster-evidence
           path: artifacts/phase-2c-premium-roster/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
 
       - name: Upload Phase 2C failure diagnostics

@@ -14,19 +14,16 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
   assert.match(rosterLayer, /#coach-roster-operations \.phase1RosterRow/);
 });
 
-test('Coach roster uses one flat editorial player surface', () => {
-  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:92px[^}]*border-radius:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
-  assert.match(rosterLayer, /\.coachRosterCard__body\{[^}]*border:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
-  for (const part of ['coachRosterCard__details','coachRosterCard__identity','coachRosterCard__metrics','coachRosterCard__actions']) {
-    const body = ruleBody(`\\.${part}`);
-    assert.ok(body, `${part} rule remains present`);
-    assert.doesNotMatch(body, /border-radius|background:\s*#fff|box-shadow:(?!none)/);
-  }
+test('Coach roster explicitly neutralizes every inner legacy surface in one authority rule', () => {
+  assert.match(rosterLayer, /:is\(\.phase1RosterRow,\.coachRosterCard__body,\.coachRosterCard__details,\.coachRosterCard__identity,\.coachRosterCard__metrics,\.coachRosterCard__actions,\.coachRosterCard__manage,\[data-phase1-open-profile="true"\]\)\{[^}]*margin:0!important[^}]*padding:0!important[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px[^}]*border-bottom:1px solid var\(--l\)!important/s);
 });
 
-test('Player identity is dominant and the row body behaves as the profile action', () => {
-  assert.match(rosterLayer, /\[data-phase1-open-profile="true"\]\{[^}]*font:840 19px\/1\.04/s);
-  assert.match(rosterLayer, /\[data-phase1-open-profile="true"\]::after\{content:"";position:absolute;z-index:1;inset:/);
+test('Player identity is dominant, flat, and remains the real profile touch target', () => {
+  const body = ruleBody('\\[data-phase1-open-profile="true"\\]');
+  assert.match(body, /min-height:44px!important/);
+  assert.match(body, /font:840 19px\/1\.04/);
+  assert.doesNotMatch(rosterLayer, /\[data-phase1-open-profile="true"\]::(?:before|after)/);
   assert.match(rosterLayer, /span:last-child\{display:none\}/);
   assert.match(rosterLayer, /:focus-visible/);
 });
@@ -38,7 +35,7 @@ test('Healthy status is quiet while exception status remains available', () => {
 });
 
 test('Roster utilities stay subordinate and accessible', () => {
-  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-width:44px!important[^}]*min-height:44px!important[^}]*background:#0000!important/s);
+  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-width:44px!important[^}]*min-height:44px!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
   assert.match(rosterLayer, /\.coachRosterCard__manageTrigger\{[^}]*transform:rotate\(90deg\)/s);
   assert.match(rosterLayer, /\.coachRosterCard__remove:is\(:hover,:focus-visible\)/);
   assert.match(rosterLayer, /outline:3px solid/);
@@ -46,11 +43,18 @@ test('Roster utilities stay subordinate and accessible', () => {
   assert.doesNotMatch(rosterLayer, /pointer-events:\s*none/);
 });
 
-test('Mobile geometry preserves density and long-name width', () => {
-  assert.match(rosterLayer, /@media\(max-width:620px\)/);
-  assert.match(rosterLayer, /grid-template-columns:38px minmax\(0,1fr\) 44px!important/);
+test('Responsive geometry is intrinsic and survives production optimization without duplicate viewport blocks', () => {
+  const metrics = ruleBody('\\.coachRosterCard__metrics');
+  const menu = ruleBody('\\.coachRosterCard__menu');
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px/);
+  assert.match(rosterLayer, /grid-template-columns:40px minmax\(0,1fr\) 44px!important/);
   assert.match(rosterLayer, /text-overflow:ellipsis;white-space:nowrap/);
-  assert.match(rosterLayer, /@media\(max-width:360px\)/);
+  assert.match(metrics, /flex-wrap:nowrap!important/);
+  assert.match(metrics, /overflow:hidden!important/);
+  assert.match(metrics, /font:570 10\.5px\/1\.3/);
+  assert.match(menu, /right:24px/);
+  assert.match(menu, /max-width:calc\(100vw - 24px\)/);
+  assert.doesNotMatch(rosterLayer, /@media\(max-width:(?:620|360)px\)/);
 });
 
 test('Phase 1 closure preserves semantics without injecting roster presentation CSS', () => {
