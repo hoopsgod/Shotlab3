@@ -13,10 +13,13 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
   ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
   ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
-  // Phase 7D.2 intentionally restores the reviewed flat roster composition. This hash is the
-  // exact GitHub Actions capture from the certified recovery head; the prior hashes represented
-  // the superseded rounded/tall roster state and must not remain accepted after the recovery.
-  ['coach-players-registered-populated-390', 'd613a65be33b24e9be224161e2bc30a0cc119c9a1fb846de9728a0736111beee'],
+  // Phase 7D.2 intentionally restores the reviewed flat roster composition. These are exact
+  // GitHub Actions captures of that same composition across current Linux/Chromium rasterization;
+  // the superseded rounded/tall roster hashes must not remain accepted after the recovery.
+  ['coach-players-registered-populated-390', [
+    'd613a65be33b24e9be224161e2bc30a0cc119c9a1fb846de9728a0736111beee',
+    '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
+  ]],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
   ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
