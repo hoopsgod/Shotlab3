@@ -49,12 +49,16 @@ test("players API carries one canonical photo URL without erasing it during unre
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl/);
 });
 
-test("route enhancer binds the profile photo to hydrated player identity and coach roster", () => {
+test("route enhancer binds the profile photo to hydrated player identity, coach roster, and coach full profile", () => {
   assert.match(enhancer, /PlayerProfilePhotoCard/);
   assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
   assert.match(enhancer, /coachRosterCard__photo/);
   assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
+  assert.match(enhancer, /coach-player-profile-photo/);
+  assert.match(enhancer, /player\?\.photoUrl\|\|player\?\.photo_url/);
+  assert.match(enhancer, /coach player profile avatar anchor missing/);
   assert.match(enhancer, /source\.split\(photoSurface\)\.length !== 2/);
+  assert.match(enhancer, /coach player profile photo rendering duplicated/);
   const phaseIndex = runner.indexOf("scripts/apply-phase7e-player-profile-photo.mjs");
   const minifyIndex = runner.indexOf("scripts/minify-visual-authority-css.mjs");
   assert.ok(phaseIndex > 0 && minifyIndex > phaseIndex, "Phase 7E must run after reconciliation and before final CSS minification");
