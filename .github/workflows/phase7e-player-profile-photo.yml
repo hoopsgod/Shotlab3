@@ -1,0 +1,99 @@
+name: Phase 7E Player Profile Photo
+
+on:
+  pull_request:
+    paths:
+      - "src/components/PlayerProfilePhotoCard.jsx"
+      - "src/lib/playerProfilePhotoService.js"
+      - "src/styles/Phase2PremiumRosterLayer.css"
+      - "src/App.jsx"
+      - "functions/v1/player-photo/**"
+      - "functions/v1/players/index.js"
+      - "migrations/057_player_profile_photos.sql"
+      - "scripts/apply-phase7e-player-profile-photo.mjs"
+      - "scripts/run-route-enhancers.mjs"
+      - "tests/phase7e-player-profile-photo.test.mjs"
+      - "tests/e2e/phase7e-player-profile-photo.spec.mjs"
+      - ".github/workflows/phase7e-player-profile-photo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase7e-player-profile-photo-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate
+        shell: bash
+        run: |
+          actual="$(git rev-parse HEAD)"
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          printf 'Expected head: %s\nActual head:   %s\n' "$expected" "$actual"
+          test "$actual" = "$expected"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 7E source contracts and Demo registered UI parity
+        run: node --test tests/phase7e-player-profile-photo.test.mjs tests/demo-visual-parity-contract.test.mjs
+
+      - name: Build production candidate
+        run: npm run build
+
+      - name: Verify unchanged production performance budget
+        run: npm run verify:performance-budget
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start built production preview
+        shell: bash
+        run: |
+          npm run preview:agent > /tmp/phase7e-preview.log 2>&1 &
+          echo $! > /tmp/phase7e-preview.pid
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/phase7e-preview.log
+          exit 1
+
+      - name: Certify player photo and coach roster behavior
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase7e-player-profile-photo.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase7e-player-profile-photo-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/phase7e-preview.log
+          if-no-files-found: ignore
+          retention-days: 7

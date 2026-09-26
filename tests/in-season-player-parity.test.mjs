@@ -18,6 +18,14 @@ test("player In Season parity transform is deterministic and idempotent", () => 
   assert.match(routeEnhancers, /apply-in-season-player-parity\.mjs/);
 });
 
+test("player In Season parity stays idempotent after Personalization expands the path maps", () => {
+  const withPersonalization = transformedApp
+    .replace('profile:"/profile",players:"/players"', 'profile:"/profile",personalization:"/personalization",players:"/players"')
+    .replace('"/profile":"profile","/players":"players"', '"/profile":"profile","/personalization":"personalization","/players":"players"');
+  assert.match(withPersonalization, /personalization:"\/personalization"/);
+  assert.equal(applyInSeasonPlayerParity(withPersonalization), withPersonalization);
+});
+
 test("player navigation exposes an addressable In Season destination", () => {
   assert.match(transformedApp, /"in-season":"\/in-season"/);
   assert.match(transformedApp, /"\/in-season":"in-season"/);
