@@ -7,15 +7,15 @@ const importLine='import PlayerCareerHistory from "./components/PlayerCareerHist
 if(!source.includes(photoImport)){if(!source.includes(importLine))throw Error("Phase 7E import anchor missing");source=source.replace(importLine,`${importLine}\n${photoImport}`)}
 const photoSurface='<PlayerProfilePhotoCard player={players.find(rowMatchesPlayerIdentity)||u}/>',profileRoute='{tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">';
 if(!source.includes(photoSurface)){if(!source.includes(profileRoute))throw Error("Phase 7E profile route anchor missing");source=source.replace(profileRoute,profileRoute+photoSurface)}
-const avatarAnchor='<div className="coachRosterCard__initials" aria-hidden="true">{(p.name||"?").trim().slice(0,1).toUpperCase()}</div>',avatarReplacement='<div className="coachRosterCard__initials" aria-hidden="true">{p.photoUrl||p.photo_url?<img className="coachRosterCard__photo" src={p.photoUrl||p.photo_url}/>:(p.name||"?")[0].toUpperCase()}</div>';
-if(!source.includes('className="coachRosterCard__photo"')){if(!source.includes(avatarAnchor))throw Error("Phase 7E roster avatar anchor missing");source=source.replace(avatarAnchor,avatarReplacement)}
-const coachAnchor='<Av n={profile.identity.name} sz={64} email={profile.identity.email}/>',coachPhoto='{player?.photoUrl||player?.photo_url?<img data-testid="coach-player-profile-photo" className="coachPlayerProfileHero__photo" src={player.photoUrl||player.photo_url} alt={profile.identity.name}/>:<Av n={profile.identity.name} sz={64} email={profile.identity.email}/>}';
+const avatarAnchor='<div className="coachRosterCard__initials" aria-hidden="true">{(p.name||"?").trim().slice(0,1).toUpperCase()}</div>',avatarReplacement='<div className="coachRosterCard__initials" aria-hidden="true">{p.photoUrl||p.photo_url?<img className="coachRosterCard__photo playerPhoto" src={p.photoUrl||p.photo_url} width="38" height="38"/>:(p.name||"?")[0].toUpperCase()}</div>';
+if(!source.includes('coachRosterCard__photo')){if(!source.includes(avatarAnchor))throw Error("Phase 7E roster avatar anchor missing");source=source.replace(avatarAnchor,avatarReplacement)}
+const coachAnchor='<Av n={profile.identity.name} sz={64} email={profile.identity.email}/>',coachPhoto='{player?.photoUrl||player?.photo_url?<img data-testid="coach-player-profile-photo" className="playerPhoto" src={player.photoUrl||player.photo_url} alt={profile.identity.name} width="64" height="64"/>:<Av n={profile.identity.name} sz={64} email={profile.identity.email}/>}';
 if(!source.includes('data-testid="coach-player-profile-photo"')){if(!source.includes(coachAnchor))throw Error("Phase 7E coach player profile avatar anchor missing");source=source.replace(coachAnchor,coachPhoto)}
-for(const marker of[photoImport,'data-testid="player-profile-workspace"',photoSurface,'className="coachRosterCard__photo"','data-testid="coach-player-profile-photo"'])if(!source.includes(marker))throw Error(`Phase 7E marker missing after transform: ${marker}`);
+for(const marker of[photoImport,'data-testid="player-profile-workspace"',photoSurface,'coachRosterCard__photo','data-testid="coach-player-profile-photo"'])if(!source.includes(marker))throw Error(`Phase 7E marker missing after transform: ${marker}`);
 const pi=source.indexOf(profileRoute),fi=source.indexOf(photoSurface);
 if(!(pi>=0&&fi>pi))throw Error("Phase 7E photo must live in Player Profile");
 if(source.split(photoSurface).length!==2)throw Error("Phase 7E player photo surface duplicated");
-if((source.match(/className="coachRosterCard__photo"/g)||[]).length!==1)throw Error("Phase 7E roster photo rendering duplicated");
+if((source.match(/coachRosterCard__photo/g)||[]).length!==1)throw Error("Phase 7E roster photo rendering duplicated");
 if((source.match(/data-testid="coach-player-profile-photo"/g)||[]).length!==1)throw Error("Phase 7E coach player profile photo rendering duplicated");
 if(source!==before)writeFileSync(appPath,source);
 

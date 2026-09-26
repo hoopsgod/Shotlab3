@@ -75,8 +75,9 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
 test("player Profile accepts iPhone photo sources and exposes actionable state", () => {
   assert.match(component, /premiumSummaryPanel/);
   assert.match(component, /btn-v cta-primary/);
-  assert.match(component, /playerProfilePhotoCard__image/);
-  assert.match(rosterCss, /\.playerProfilePhotoCard__image\{[^}]*width:80px[^}]*height:80px[^}]*border-radius:50%[^}]*object-fit:cover/);
+  assert.match(component, /className="playerPhoto"/);
+  assert.match(component, /width="80" height="80"/);
+  assert.match(rosterCss, /\.playerPhoto\{[^}]*border-radius:50%[^}]*object-fit:cover[^}]*flex-shrink:0/);
   assert.match(component, /accept="image\/\*"/);
   assert.match(component, /Preparing photo/);
   assert.match(component, /role="alert"/);
@@ -158,8 +159,10 @@ test("route enhancer keeps player photo inside Profile and preserves coach ident
   assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
   assert.doesNotMatch(enhancer, /personalization:\"\/personalization\"|player-personalization-workspace/);
   assert.match(enhancer, /coachRosterCard__photo/);
+  assert.match(enhancer, /width=\"38\" height=\"38\"/);
   assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
   assert.match(enhancer, /coach-player-profile-photo/);
+  assert.match(enhancer, /width=\"64\" height=\"64\"/);
   assert.match(enhancer, /player\?\.photoUrl\|\|player\?\.photo_url/);
   const phaseIndex = runner.indexOf("scripts/apply-phase7e-player-profile-photo.mjs");
   const minifyIndex = runner.indexOf("scripts/minify-visual-authority-css.mjs");
@@ -176,9 +179,8 @@ test("route enhancer preserves canonical photo hydration within the unchanged JS
 });
 
 test("coach roster uses photos plus alternating restrained team color", () => {
-  assert.match(enhancer, /className=\"coachRosterCard__photo\"/);
-  assert.match(rosterCss, /\.coachRosterCard__photo\{[^}]*object-fit:cover/);
-  assert.match(rosterCss, /\.coachPlayerProfileHero__photo\{[^}]*object-fit:cover/);
+  assert.match(enhancer, /coachRosterCard__photo playerPhoto/);
+  assert.match(rosterCss, /\.playerPhoto\{[^}]*object-fit:cover/);
   assert.match(rosterCss, /team-brand-primary/);
   assert.match(rosterCss, /team-brand-secondary/);
   assert.match(rosterCss, /\.phase1RosterRow:nth-of-type\(even\)/);
