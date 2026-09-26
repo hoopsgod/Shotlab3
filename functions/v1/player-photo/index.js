@@ -4,8 +4,9 @@ import { readAuthenticatedIdentity } from "../../_utils/legacySession.js";
 import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 
 const BUCKET = "player-avatars";
-const MAX_BYTES = 5 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_BYTES = 15 * 1024 * 1024;
+const MAX_FALLBACK_DATA_URL_CHARS = 2_000_000;
+const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value, max = 500) => String(value ?? "").trim().slice(0, max);
@@ -16,6 +17,13 @@ function storageConfig(env) {
   if (!baseUrl) throw new Error("SUPABASE_URL_MISSING");
   if (!serviceRoleKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY_MISSING");
   return { baseUrl, serviceRoleKey };
+}
+
+function validFallbackDataUrl(value) {
+  const dataUrl = String(value || "").trim();
+  if (!dataUrl || dataUrl.length > MAX_FALLBACK_DATA_URL_CHARS) return "";
+  if (!/^data:image\/(?:jpeg|png|webp|heic|heif);base64,/i.test(dataUrl)) return "";
+  return dataUrl;
 }
 
 async function profileForIdentity(env, identity) {
@@ -71,7 +79,7 @@ export async function onRequestGet({ request, env }) {
       windowMs: 60_000,
     });
     if (!rate.allowed) return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
-    return Response.json({ ok: true, storage_mode: "signed_api", photo_url: cleanText(auth.target?.photo_url, 2000) || null });
+    return Response.json({ ok: true, storage_mode: "signed_api", photo_url: cleanText(auth.target?.photo_url, 2_000_000) || null });
   } catch (error) {
     console.error("player_photo_get_failed", { message: cleanText(error?.message, 180) });
     return Response.json({ error: "player_photo_load_failed" }, { status: 500 });
@@ -82,6 +90,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const form = await request.formData().catch(() => null);
     const file = form?.get?.("file");
+    const fallbackDataUrl = validFallbackDataUrl(form?.get?.("fallback_data_url"));
     const auth = await authorizePhotoTarget(request, env, form?.get?.("player_email") || "");
     if (auth.response) return auth.response;
     const rate = enforceRateLimit({
@@ -92,40 +101,62 @@ export async function onRequestPost({ request, env }) {
     if (!rate.allowed) return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
 
     if (!file || typeof file.arrayBuffer !== "function") {
-      return Response.json({ error: "profile_photo_required" }, { status: 400 });
+      return Response.json({ error: "profile_photo_required", message: "Choose a photo and try again." }, { status: 400 });
     }
     const contentType = cleanText(file.type, 100).toLowerCase();
     if (!ALLOWED_TYPES.has(contentType)) {
-      return Response.json({ error: "profile_photo_type_invalid", message: "Use a JPG, PNG, or WebP image." }, { status: 415 });
+      return Response.json({ error: "profile_photo_type_invalid", message: "Choose an image from Photos or Files." }, { status: 415 });
     }
     const size = Number(file.size || 0);
     if (!Number.isFinite(size) || size <= 0 || size > MAX_BYTES) {
-      return Response.json({ error: "profile_photo_size_invalid", message: "Profile photos must be 5 MB or smaller." }, { status: 413 });
+      return Response.json({ error: "profile_photo_size_invalid", message: "Choose a photo smaller than 15 MB." }, { status: 413 });
     }
 
-    const { baseUrl, serviceRoleKey } = storageConfig(env);
-    const playerKey = await opaquePlayerKey(auth.targetEmail);
-    const objectPath = `${playerKey}/avatar`;
-    const objectUrl = `${baseUrl}/storage/v1/object/${BUCKET}/${objectPath}`;
-    const bytes = await file.arrayBuffer();
-    const upload = await fetch(objectUrl, {
-      method: "POST",
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        "Content-Type": contentType,
-        "cache-control": "3600",
-        "x-upsert": "true",
-      },
-      body: bytes,
-    });
-    if (!upload.ok) {
-      const detail = await upload.text().catch(() => "");
-      console.error("player_photo_storage_failed", { status: upload.status, detail: cleanText(detail, 240) });
-      return Response.json({ error: "profile_photo_storage_failed" }, { status: 502 });
+    let photoUrl = "";
+    let storageMode = "signed_api";
+    let storageFailure = "";
+
+    try {
+      const { baseUrl, serviceRoleKey } = storageConfig(env);
+      const playerKey = await opaquePlayerKey(auth.targetEmail);
+      const objectPath = `${playerKey}/avatar`;
+      const objectUrl = `${baseUrl}/storage/v1/object/${BUCKET}/${objectPath}`;
+      const bytes = await file.arrayBuffer();
+      const upload = await fetch(objectUrl, {
+        method: "POST",
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          "Content-Type": contentType,
+          "cache-control": "3600",
+          "x-upsert": "true",
+        },
+        body: bytes,
+      });
+      if (upload.ok) {
+        photoUrl = `${baseUrl}/storage/v1/object/public/${BUCKET}/${objectPath}?v=${Date.now()}`;
+      } else {
+        const detail = await upload.text().catch(() => "");
+        storageFailure = `${upload.status}:${cleanText(detail, 180)}`;
+        console.error("player_photo_storage_failed", { status: upload.status, detail: cleanText(detail, 240) });
+      }
+    } catch (error) {
+      storageFailure = cleanText(error?.message, 180);
+      console.error("player_photo_storage_unavailable", { message: storageFailure });
     }
 
-    const photoUrl = `${baseUrl}/storage/v1/object/public/${BUCKET}/${objectPath}?v=${Date.now()}`;
+    if (!photoUrl && fallbackDataUrl) {
+      photoUrl = fallbackDataUrl;
+      storageMode = "database_fallback";
+    }
+    if (!photoUrl) {
+      return Response.json({
+        error: "profile_photo_storage_failed",
+        message: "Photo storage is unavailable. Try another photo or try again in a moment.",
+        diagnostic: cleanText(storageFailure, 120),
+      }, { status: 502 });
+    }
+
     const updated = await updateRows(
       env,
       "players",
@@ -133,12 +164,12 @@ export async function onRequestPost({ request, env }) {
       { photo_url: photoUrl },
     );
     if (!Array.isArray(updated) || updated.length !== 1) {
-      return Response.json({ error: "profile_photo_identity_update_failed" }, { status: 409 });
+      return Response.json({ error: "profile_photo_identity_update_failed", message: "The photo was prepared but could not be attached to this player." }, { status: 409 });
     }
 
-    return Response.json({ ok: true, storage_mode: "signed_api", photo_url: photoUrl });
+    return Response.json({ ok: true, storage_mode: storageMode, photo_url: photoUrl });
   } catch (error) {
     console.error("player_photo_post_failed", { message: cleanText(error?.message, 180) });
-    return Response.json({ error: "profile_photo_save_failed" }, { status: 500 });
+    return Response.json({ error: "profile_photo_save_failed", message: "Upload failed. Try another photo." }, { status: 500 });
   }
 }
