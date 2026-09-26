@@ -23,7 +23,7 @@ async function noHorizontalOverflow(page) {
 }
 
 const ONE_PIXEL_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
-const ONE_PIXEL_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+const ONE_PIXEL_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
@@ -69,15 +69,17 @@ test('Coach roster and full player profile render the same stored player photo',
     const roster = page.locator('#coach-roster-operations');
     const rows = roster.locator('.phase1RosterRow');
     expect(await rows.count()).toBeGreaterThanOrEqual(1);
-    const photo = roster.locator('.coachRosterCard__photo').first();
+    const photoRow = roster.locator('.phase1RosterRow:has(.coachRosterCard__photo)').first();
+    const photo = photoRow.locator('.coachRosterCard__photo');
+    await expect(photoRow).toBeVisible();
     await expect(photo).toBeVisible();
     await expect(photo).toHaveAttribute('src', /^data:image\/png;base64,/);
 
-    const background = await rows.first().evaluate((node) => getComputedStyle(node).backgroundColor);
+    const background = await photoRow.evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(background).not.toBe('rgb(255, 255, 255)');
     expect(background).not.toBe('rgba(0, 0, 0, 0)');
 
-    const profileAction = rows.first().locator('[data-phase1-open-profile="true"]');
+    const profileAction = photoRow.locator('[data-phase1-open-profile="true"]');
     await expect(profileAction).toBeVisible();
     await profileAction.click();
 
