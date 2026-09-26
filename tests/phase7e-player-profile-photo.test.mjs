@@ -153,10 +153,10 @@ test("coach cannot upload a profile photo for a player on a team they cannot wri
   assert.equal(result.writes.length, 0);
 });
 
-test("players API carries one canonical photo URL without erasing it during unrelated sync", () => {
-  assert.match(playersApi, /photo_url/);
-  assert.match(playersApi, /photoUrl: String\(value\?\.photo_url \?\? value\?\.photoUrl \?\? ""\)\.trim\(\)/);
-  assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl/);
+test("players API carries one canonical bounded photo value without erasing it during unrelated sync", () => {
+  assert.match(playersApi, /MAX_PHOTO_URL_CHARS = 2_000_000/);
+  assert.match(playersApi, /photoUrl: cleanText\(value\?\.photo_url \?\? value\?\.photoUrl, MAX_PHOTO_URL_CHARS\)/);
+  assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl = cleanText\(prior\.photo_url, MAX_PHOTO_URL_CHARS\)/);
 });
 
 test("route enhancer moves player photo out of Progress into Personalization and preserves coach identity surfaces", () => {
