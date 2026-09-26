@@ -54,8 +54,8 @@ test('Coach roster and full player profile render the same stored player photo',
     await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
     const roster = page.locator('#coach-roster-operations');
     expect(await roster.locator('.phase1RosterRow').count()).toBeGreaterThanOrEqual(1);
-    const photoRow = roster.locator('.phase1RosterRow:has(.coachRosterCard__photo)').first();
-    const photo = photoRow.locator('.coachRosterCard__photo');
+    const photoRow = roster.locator('.phase1RosterRow:has(.coachRosterCard__initials img.slp)').first();
+    const photo = photoRow.locator('.coachRosterCard__initials img.slp');
     await expect(photoRow).toBeVisible();
     await expect(photo).toHaveAttribute('src', /^data:image\/png;base64,/);
     const background = await photoRow.evaluate((node) => getComputedStyle(node).backgroundColor);

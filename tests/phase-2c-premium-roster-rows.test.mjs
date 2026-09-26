@@ -49,7 +49,7 @@ test('Responsive geometry is intrinsic and survives production optimization with
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px/);
   assert.match(rosterLayer, /grid-template-columns:40px minmax\(0,1fr\) 44px!important/);
   assert.match(rosterLayer, /text-overflow:ellipsis;white-space:nowrap/);
-  assert.match(metrics, /flex-wrap:nowrap!important/);
+  assert.doesNotMatch(metrics, /flex-wrap:/);
   assert.match(metrics, /overflow:hidden!important/);
   assert.match(metrics, /font:570 10\.5px\/1\.3/);
   assert.match(menu, /right:24px/);
