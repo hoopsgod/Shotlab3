@@ -33,23 +33,25 @@ test.beforeEach(async ({ page }) => {
 test('Player photo control lives in More > Personalization, not Progress', async ({ page }) => {
   await enterDemo(page, 'player');
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click();
-  await expect(page.getByTestId('player-profile-workspace')).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId('player-profile-photo-card')).toHaveCount(0);
+  const progress = page.getByTestId('player-profile-workspace');
+  await expect(progress).toBeVisible({ timeout: 20_000 });
+  await expect(progress.locator('input[type="file"][accept="image/jpeg,image/png,image/webp"]')).toHaveCount(0);
 
   await page.getByTestId('mobile-navigation-more').click();
   const sheet = page.getByTestId('mobile-navigation-sheet');
   await expect(sheet).toBeVisible();
   await sheet.locator('[data-nav-key="personalization"]').click();
-  await expect(page.getByTestId('player-personalization-workspace')).toBeVisible({ timeout: 20_000 });
+  const workspace = page.getByTestId('player-personalization-workspace');
+  await expect(workspace).toBeVisible({ timeout: 20_000 });
 
-  const card = page.getByTestId('player-profile-photo-card');
+  const card = workspace.locator('section.premiumSummaryPanel:has(input[type="file"])');
   await expect(card).toBeVisible();
   const cardBox = await card.boundingBox();
   expect(cardBox?.height || 0).toBeGreaterThanOrEqual(44);
-  const action = card.locator('strong');
+  const action = card.locator('label.cta-primary');
   await expect(action).toHaveText('Add photo');
   await card.locator('input[type="file"]').setInputFiles({ name: 'profile.png', mimeType: 'image/png', buffer: ONE_PIXEL_PNG });
-  await expect(card.locator('img')).toHaveAttribute('src', /^blob:/);
+  await expect(card.locator('img.coachRosterCard__photo')).toHaveAttribute('src', /^blob:/);
   await expect(action).toHaveText('Change photo');
   await noHorizontalOverflow(page);
 });
