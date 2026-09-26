@@ -10,8 +10,8 @@ values (
   'player-avatars',
   'player-avatars',
   true,
-  5242880,
-  array['image/jpeg','image/png','image/webp']::text[]
+  15728640,
+  array['image/jpeg','image/png','image/webp','image/heic','image/heif']::text[]
 )
 on conflict (id) do update
 set public = excluded.public,
