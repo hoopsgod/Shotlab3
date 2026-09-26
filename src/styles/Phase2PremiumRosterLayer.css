@@ -11,6 +11,7 @@
 :scope #coach-roster-operations .phase1RosterRow[data-status="success"] .coachRosterCard__accent{visibility:hidden}
 :scope #coach-roster-operations .coachRosterCard__body{display:grid!important;grid-template-columns:40px minmax(0,1fr) 44px!important;align-items:center!important;gap:10px!important;flex:1 1 0!important;min-width:0!important;padding:8px 1px 8px 7px!important}
 :scope #coach-roster-operations .coachRosterCard__initials{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;overflow:hidden!important;border:1px solid var(--l)!important;border-radius:50%!important;background:#f2f4ef!important;color:var(--i)!important;box-shadow:none!important;font:820 13px/1 system-ui,sans-serif!important}
+:scope #coach-roster-operations .coachRosterCard__photo{width:100%;height:100%;object-fit:cover}
 :scope #coach-roster-operations .coachRosterCard__details{display:grid!important;gap:3px!important;min-width:0!important}
 :scope #coach-roster-operations .coachRosterCard__identity{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important}
 :scope #coach-roster-operations [data-phase1-open-profile="true"]{display:flex!important;align-items:center!important;flex:1 1 auto!important;min-width:0!important;min-height:44px!important;color:var(--i)!important;font:840 19px/1.04 "Barlow Condensed","Arial Narrow",sans-serif!important;text-align:left!important}
@@ -30,4 +31,6 @@
 :scope #coach-roster-operations .coachRosterCard__actions button:focus{outline:3px solid #6179003d!important;outline-offset:2px!important}
 :scope #coach-roster-operations [data-coach-roster-placeholder="true"]{min-height:68px!important;border-bottom:1px dashed var(--l)!important}
 }
+.coachPlayerProfileHero__photo{width:64px;height:64px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.playerProfilePhotoCard__image{width:80px;height:80px;border-radius:50%;object-fit:cover}
 @media(prefers-reduced-motion:reduce){.performance-shell--coach #coach-roster-operations *{transition:none!important;animation:none!important}}
