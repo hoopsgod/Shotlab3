@@ -40,11 +40,8 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
       }]);
     }
     if (url.includes("/rest/v1/rpc/resolve_app_user_uuid")) return json("coach-uuid");
-    if (url.includes("/rest/v1/legacy_auth_profiles?")) {
-      return json(coachTeams.map((team_id) => ({ team_id, role: "coach" })));
-    }
-    if (url.includes("/rest/v1/team_memberships?")) return json([]);
-    if (url.includes("/rest/v1/teams?")) return json([]);
+    if (url.includes("/rest/v1/legacy_auth_profiles?")) return json(coachTeams.map((team_id) => ({ team_id, role: "coach" })));
+    if (url.includes("/rest/v1/team_memberships?") || url.includes("/rest/v1/teams?")) return json([]);
     if (url.includes("/rest/v1/players?")) {
       const parsed = new URL(url);
       const email = String(parsed.searchParams.get("email") || "").replace(/^eq\./, "");
@@ -67,11 +64,7 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
     form.append("player_email", "player@example.com");
     form.append("file", new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), "avatar.png");
     if (fallbackDataUrl) form.append("fallback_data_url", fallbackDataUrl);
-    const request = new Request("https://shotlab.test/v1/player-photo", {
-      method: "POST",
-      headers: { Cookie: "sl_legacy_session=coach-session-token" },
-      body: form,
-    });
+    const request = new Request("https://shotlab.test/v1/player-photo", { method: "POST", headers: { Cookie: "sl_legacy_session=coach-session-token" }, body: form });
     const response = await onRequestPost({ request, env: ENV });
     return { response, body: await response.json(), writes };
   } finally {
@@ -83,8 +76,8 @@ test("player personalization accepts iPhone photo sources and exposes actionable
   assert.match(component, /premiumSummaryPanel/);
   assert.match(component, /btn-v cta-primary/);
   assert.match(component, /width="80" height="80"/);
-  assert.match(component, /borderRadius: "50%"/);
-  assert.match(component, /objectFit: "cover"/);
+  assert.match(component, /borderRadius:"50%"/);
+  assert.match(component, /objectFit:"cover"/);
   assert.match(component, /accept="image\/\*"/);
   assert.match(component, /Preparing photo/);
   assert.match(component, /role="alert"/);
@@ -92,13 +85,14 @@ test("player personalization accepts iPhone photo sources and exposes actionable
 });
 
 test("persistence service creates a compact JPEG fallback without duplicating the upload payload", () => {
+  assert.match(service, /createImageBitmap/);
   assert.match(service, /c\.width=c\.height=512/);
-  assert.match(service, /g\.drawImage/);
+  assert.match(service, /getContext\("2d"\)\.drawImage/);
   assert.match(service, /toDataURL\("image\/jpeg",\.82\)/);
   assert.match(service, /fallback_data_url/);
   assert.match(service, /buildApiIdentityHeaders\(\)/);
   assert.match(service, /fetch\("\/v1\/player-photo"/);
-  assert.match(service, /MAX=15\*1024\*1024/);
+  assert.match(service, /f\.size>15728640/);
   assert.doesNotMatch(service, /canvasToBlob|new File\(\[blob\]/);
 });
 
