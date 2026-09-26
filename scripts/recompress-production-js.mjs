@@ -14,8 +14,6 @@ const CANDIDATE_OPTIONS = [
   { passes: 20, quoteStyle: 0 },
   { passes: 12, quoteStyle: 0, compress: { keep_fargs: false } },
   { passes: 20, quoteStyle: 0, compress: { keep_fargs: false } },
-  { passes: 20, quoteStyle: 0, compress: { keep_fargs: false, booleans_as_integers: true } },
-  { passes: 20, quoteStyle: 0, compress: { keep_fargs: false, booleans_as_integers: true }, format: { semicolons: false } },
   { passes: 12, quoteStyle: 0, compress: { keep_fargs: false }, format: { semicolons: false } },
 ]
 const APP_DOMAIN_OPTIONS = [
