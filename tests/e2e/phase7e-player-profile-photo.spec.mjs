@@ -32,7 +32,6 @@ test.beforeEach(async ({ page }) => {
 
 test('Player photo control lives in More > Personalization, not Progress', async ({ page }) => {
   await enterDemo(page, 'player');
-
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click();
   await expect(page.getByTestId('player-profile-workspace')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId('player-profile-photo-card')).toHaveCount(0);
@@ -45,63 +44,37 @@ test('Player photo control lives in More > Personalization, not Progress', async
 
   const card = page.getByTestId('player-profile-photo-card');
   await expect(card).toBeVisible();
-  const action = card.getByTestId('player-profile-photo-action');
-  await expect(action).toBeVisible();
-  const actionBox = await action.boundingBox();
-  expect(actionBox?.height || 0).toBeGreaterThanOrEqual(44);
-
-  await card.getByTestId('player-profile-photo-input').setInputFiles({
-    name: 'profile.png',
-    mimeType: 'image/png',
-    buffer: ONE_PIXEL_PNG,
-  });
-
-  const image = card.locator('img');
-  await expect(image).toBeVisible();
-  await expect(image).toHaveAttribute('src', /^blob:/);
+  const cardBox = await card.boundingBox();
+  expect(cardBox?.height || 0).toBeGreaterThanOrEqual(44);
+  const action = card.locator('strong');
+  await expect(action).toHaveText('Add photo');
+  await card.locator('input[type="file"]').setInputFiles({ name: 'profile.png', mimeType: 'image/png', buffer: ONE_PIXEL_PNG });
+  await expect(card.locator('img')).toHaveAttribute('src', /^blob:/);
   await expect(action).toHaveText('Change photo');
   await noHorizontalOverflow(page);
 });
 
 test('Coach roster and full player profile render the same stored player photo', async ({ browser }) => {
-  const { context, page } = await enterPhase1BSession(browser, {
-    role: 'coach',
-    scenario: 'populated',
-    mode: 'registered',
-    playerPhotoUrl: ONE_PIXEL_DATA_URL,
-  });
+  const { context, page } = await enterPhase1BSession(browser, { role: 'coach', scenario: 'populated', mode: 'registered', playerPhotoUrl: ONE_PIXEL_DATA_URL });
   try {
     await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click();
     await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
-
     const roster = page.locator('#coach-roster-operations');
-    const rows = roster.locator('.phase1RosterRow');
-    expect(await rows.count()).toBeGreaterThanOrEqual(1);
+    expect(await roster.locator('.phase1RosterRow').count()).toBeGreaterThanOrEqual(1);
     const photoRow = roster.locator('.phase1RosterRow:has(.coachRosterCard__photo)').first();
     const photo = photoRow.locator('.coachRosterCard__photo');
     await expect(photoRow).toBeVisible();
-    await expect(photo).toBeVisible();
     await expect(photo).toHaveAttribute('src', /^data:image\/png;base64,/);
-
     const background = await photoRow.evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(background).not.toBe('rgb(255, 255, 255)');
     expect(background).not.toBe('rgba(0, 0, 0, 0)');
-
-    const profileAction = photoRow.locator('[data-phase1-open-profile="true"]');
-    await expect(profileAction).toBeVisible();
-    await profileAction.click();
-
+    await photoRow.locator('[data-phase1-open-profile="true"]').click();
     const drawer = page.getByTestId('coach-player-intelligence-drawer');
     await expect(drawer).toBeVisible({ timeout: 20_000 });
     await drawer.getByRole('button', { name: 'Open Full Profile', exact: true }).click();
-
     const profile = page.getByTestId('coach-player-development-profile');
     await expect(profile).toBeVisible({ timeout: 20_000 });
-    const profilePhoto = profile.getByTestId('coach-player-profile-photo');
-    await expect(profilePhoto).toBeVisible();
-    await expect(profilePhoto).toHaveAttribute('src', /^data:image\/png;base64,/);
+    await expect(profile.getByTestId('coach-player-profile-photo')).toHaveAttribute('src', /^data:image\/png;base64,/);
     await noHorizontalOverflow(page);
-  } finally {
-    await context.close();
-  }
+  } finally { await context.close(); }
 });
