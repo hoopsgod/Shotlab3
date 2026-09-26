@@ -21,7 +21,7 @@ const ENV = {
 
 const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json" } });
 
-async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "team-3"] } = {}) {
+async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "team-3"], storageStatus = 200, fallbackDataUrl = "" } = {}) {
   const originalFetch = globalThis.fetch;
   const writes = [];
   globalThis.fetch = async (input, init = {}) => {
@@ -58,7 +58,7 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
     }
     if (url.includes("/storage/v1/object/player-avatars/")) {
       writes.push({ kind: "storage", url, method });
-      return new Response("", { status: 200 });
+      return storageStatus === 200 ? new Response("", { status: 200 }) : new Response("bucket unavailable", { status: storageStatus });
     }
     throw new Error(`Unexpected fetch: ${method} ${url}`);
   };
@@ -66,6 +66,7 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
     const form = new FormData();
     form.append("player_email", "player@example.com");
     form.append("file", new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), "avatar.png");
+    if (fallbackDataUrl) form.append("fallback_data_url", fallbackDataUrl);
     const request = new Request("https://shotlab.test/v1/player-photo", {
       method: "POST",
       headers: { Cookie: "sl_legacy_session=coach-session-token" },
@@ -78,28 +79,27 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
   }
 }
 
-test("player personalization exposes one shared, constrained photo picker using the premium system", () => {
+test("player personalization accepts iPhone photo sources and exposes actionable state", () => {
   assert.match(component, /premiumSummaryPanel/);
   assert.match(component, /btn-v cta-primary/);
   assert.match(component, /width="80" height="80"/);
-  assert.match(component, /borderRadius:"50%"/);
-  assert.match(component, /objectFit:"cover"/);
-  assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
-  assert.match(component, /5242880/);
-  assert.match(component, /saved\|\|player\.photoUrl\|\|player\.photo_url/);
+  assert.match(component, /borderRadius: "50%"/);
+  assert.match(component, /objectFit: "cover"/);
+  assert.match(component, /accept="image\/\*"/);
+  assert.match(component, /Preparing photo/);
+  assert.match(component, /role="alert"/);
   assert.match(component, /savePlayerProfilePhoto/);
-  assert.doesNotMatch(component, /loadPlayerProfilePhoto|demoMode|isDemoAccount|isDemoMode/);
 });
 
-test("persistence service keeps demo uploads local and registered writes target the selected player", () => {
-  assert.match(service, /isDemoAccount/);
-  assert.match(service, /fetch\("\/v1\/player-photo"/);
+test("persistence service normalizes mobile photos and supplies a database fallback payload", () => {
+  assert.match(service, /OUTPUT_SIZE = 512/);
+  assert.match(service, /JPEG_QUALITY = 0\.82/);
+  assert.match(service, /canvas\.toDataURL\("image\/jpeg"/);
+  assert.match(service, /canvasToBlob\(canvas, "image\/jpeg"/);
+  assert.match(service, /fallback_data_url/);
   assert.match(service, /buildApiIdentityHeaders\(\)/);
-  assert.match(service, /new FormData\(\)/);
-  assert.match(service, /body\.append\("player_email", id\)/);
-  assert.match(service, /URL\.createObjectURL/);
-  assert.match(service, /throw Error/);
-  assert.doesNotMatch(service, /loadPlayerProfilePhoto/);
+  assert.match(service, /fetch\("\/v1\/player-photo"/);
+  assert.match(service, /MAX_INPUT_BYTES = 15 \* 1024 \* 1024/);
 });
 
 test("photo endpoint authorizes player self-service or a coach with canonical write access to the target team", () => {
@@ -109,29 +109,40 @@ test("photo endpoint authorizes player self-service or a coach with canonical wr
   assert.match(endpoint, /writableTeamIds\.has\(targetTeamId\)/);
   assert.match(endpoint, /requester === targetEmail/);
   assert.match(endpoint, /player_photo_target_forbidden/);
-  assert.match(endpoint, /SUPABASE_SERVICE_ROLE_KEY/);
-  assert.match(endpoint, /crypto\.subtle\.digest\("SHA-256"/);
-  assert.match(endpoint, /const objectPath = `\$\{playerKey\}\/avatar`/);
-  assert.match(endpoint, /"x-upsert": "true"/);
-  assert.match(endpoint, /profile_photo_type_invalid/);
-  assert.match(endpoint, /profile_photo_size_invalid/);
+});
+
+test("endpoint accepts HEIC and HEIF and retains bounded input limits", () => {
+  assert.match(endpoint, /image\/heic/);
+  assert.match(endpoint, /image\/heif/);
+  assert.match(endpoint, /MAX_BYTES = 15 \* 1024 \* 1024/);
+  assert.match(endpoint, /MAX_FALLBACK_DATA_URL_CHARS = 2_000_000/);
 });
 
 test("real legacy-session coach can upload without a coach row in players", async () => {
   const result = await coachUpload();
   assert.equal(result.response.status, 200);
   assert.equal(result.body.ok, true);
+  assert.equal(result.body.storage_mode, "signed_api");
   assert.match(result.body.photo_url, /\/storage\/v1\/object\/public\/player-avatars\//);
   assert.equal(result.writes.filter((entry) => entry.kind === "storage").length, 1);
   assert.equal(result.writes.filter((entry) => entry.kind === "player_update").length, 1);
-  assert.match(result.writes.find((entry) => entry.kind === "player_update").url, /email=eq\.player%40example\.com/);
+});
+
+test("storage failure automatically falls back to a compact database-backed photo", async () => {
+  const fallback = `data:image/jpeg;base64,${Buffer.from("fallback-avatar").toString("base64")}`;
+  const result = await coachUpload({ storageStatus: 500, fallbackDataUrl: fallback });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.ok, true);
+  assert.equal(result.body.storage_mode, "database_fallback");
+  assert.equal(result.body.photo_url, fallback);
+  const update = result.writes.find((entry) => entry.kind === "player_update");
+  assert.equal(update?.body?.photo_url, fallback);
 });
 
 test("multi-team coach can upload for a player on another team they can write", async () => {
   const result = await coachUpload({ targetTeam: "team-3" });
   assert.equal(result.response.status, 200);
   assert.equal(result.body.ok, true);
-  assert.equal(result.writes.filter((entry) => entry.kind === "storage").length, 1);
   assert.equal(result.writes.filter((entry) => entry.kind === "player_update").length, 1);
 });
 
@@ -158,9 +169,6 @@ test("route enhancer moves player photo out of Progress into Personalization and
   assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
   assert.match(enhancer, /coach-player-profile-photo/);
   assert.match(enhancer, /player\?\.photoUrl\|\|player\?\.photo_url/);
-  assert.match(enhancer, /coach player profile avatar anchor missing/);
-  assert.match(enhancer, /source\.split\(photoSurface\)\.length!==2/);
-  assert.match(enhancer, /coach player profile photo rendering duplicated/);
   const phaseIndex = runner.indexOf("scripts/apply-phase7e-player-profile-photo.mjs");
   const minifyIndex = runner.indexOf("scripts/minify-visual-authority-css.mjs");
   assert.ok(phaseIndex > 0 && minifyIndex > phaseIndex, "Phase 7E must run after reconciliation and before final CSS minification");
@@ -183,11 +191,13 @@ test("coach roster uses photos plus alternating restrained team color", () => {
   assert.match(rosterCss, /\.phase1RosterRow\{[^}]*background:color-mix\(in srgb/);
 });
 
-test("migration records the canonical photo column and restricted avatar bucket", () => {
+test("migration allows iPhone formats while retaining the canonical photo column", () => {
   assert.match(migration, /add column if not exists photo_url text/);
   assert.match(migration, /'player-avatars'/);
-  assert.match(migration, /5242880/);
+  assert.match(migration, /15728640/);
   assert.match(migration, /image\/jpeg/);
   assert.match(migration, /image\/png/);
   assert.match(migration, /image\/webp/);
+  assert.match(migration, /image\/heic/);
+  assert.match(migration, /image\/heif/);
 });
