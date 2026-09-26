@@ -91,15 +91,15 @@ test("player personalization accepts iPhone photo sources and exposes actionable
   assert.match(component, /savePlayerProfilePhoto/);
 });
 
-test("persistence service normalizes mobile photos and supplies a database fallback payload", () => {
-  assert.match(service, /OUTPUT_SIZE = 512/);
-  assert.match(service, /JPEG_QUALITY = 0\.82/);
-  assert.match(service, /canvas\.toDataURL\("image\/jpeg"/);
-  assert.match(service, /canvasToBlob\(canvas, "image\/jpeg"/);
+test("persistence service creates a compact JPEG fallback without duplicating the upload payload", () => {
+  assert.match(service, /c\.width=c\.height=512/);
+  assert.match(service, /g\.drawImage/);
+  assert.match(service, /toDataURL\("image\/jpeg",\.82\)/);
   assert.match(service, /fallback_data_url/);
   assert.match(service, /buildApiIdentityHeaders\(\)/);
   assert.match(service, /fetch\("\/v1\/player-photo"/);
-  assert.match(service, /MAX_INPUT_BYTES = 15 \* 1024 \* 1024/);
+  assert.match(service, /MAX=15\*1024\*1024/);
+  assert.doesNotMatch(service, /canvasToBlob|new File\(\[blob\]/);
 });
 
 test("photo endpoint authorizes player self-service or a coach with canonical write access to the target team", () => {
@@ -155,7 +155,7 @@ test("coach cannot upload a profile photo for a player on a team they cannot wri
 
 test("players API carries one canonical photo URL without erasing it during unrelated sync", () => {
   assert.match(playersApi, /photo_url/);
-  assert.match(playersApi, /photoUrl: cleanText\(value\?\.photo_url \?\? value\?\.photoUrl/);
+  assert.match(playersApi, /photoUrl: String\(value\?\.photo_url \?\? value\?\.photoUrl \?\? ""\)\.trim\(\)/);
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl/);
 });
 
