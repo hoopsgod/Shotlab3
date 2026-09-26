@@ -7,6 +7,7 @@ const DEMO_IDENTITIES = new Set(["coach.demo@shotlab.app", "demo@shotlab.app"]);
 const COACH_ROLES = new Set(["coach", "assistant_coach"]);
 const ALLOWED_ROLES = new Set(["player", "coach", "assistant_coach"]);
 const MAX_PLAYERS_PER_REQUEST = 1000;
+const MAX_PHOTO_URL_CHARS = 2_000_000;
 const PLAYER_SELECT = "id,email,name,role,team_id,hide_from_leaderboards,photo_url,created_at";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
@@ -25,7 +26,7 @@ export function sanitizePlayerRow(value = {}) {
     role: ALLOWED_ROLES.has(role) ? role : "player",
     teamId: cleanText(value?.team_id ?? value?.teamId, 180),
     hideFromLeaderboards: value?.hide_from_leaderboards === true || value?.hideFromLeaderboards === true,
-    photoUrl: cleanText(value?.photo_url ?? value?.photoUrl, 2000),
+    photoUrl: cleanText(value?.photo_url ?? value?.photoUrl, MAX_PHOTO_URL_CHARS),
     createdAt: finiteNumber(value?.created_at ?? value?.createdAt),
   };
 }
@@ -156,7 +157,7 @@ export async function onRequestPost({ request, env }) {
         if (row.teamId && !readableTeamIds.has(row.teamId)) return Response.json({ error: "team_assignment_forbidden" }, { status: 403 });
         const sessionRole = normalizeIdentity(auth?.session?.role);
         if (!priorRole && ["player", "coach", "assistant_coach"].includes(sessionRole)) row.role = sessionRole;
-        if (!row.photoUrl && prior?.photo_url) row.photoUrl = cleanText(prior.photo_url, 2000);
+        if (!row.photoUrl && prior?.photo_url) row.photoUrl = cleanText(prior.photo_url, MAX_PHOTO_URL_CHARS);
         if (row.createdAt == null) row.createdAt = finiteNumber(prior?.created_at) || Date.now();
         authorized.push(toDatabase(row));
         continue;
@@ -167,7 +168,7 @@ export async function onRequestPost({ request, env }) {
       if (!priorTeamId || !writableTeamIds.has(priorTeamId)) continue;
       if (row.role !== "player") return Response.json({ error: "player_role_conflict" }, { status: 409 });
       if (row.teamId && row.teamId !== priorTeamId) return Response.json({ error: "team_move_forbidden" }, { status: 403 });
-      if (!row.photoUrl && prior?.photo_url) row.photoUrl = cleanText(prior.photo_url, 2000);
+      if (!row.photoUrl && prior?.photo_url) row.photoUrl = cleanText(prior.photo_url, MAX_PHOTO_URL_CHARS);
       row.createdAt = finiteNumber(prior.created_at) || row.createdAt || Date.now();
       authorized.push(toDatabase(row));
     }
