@@ -29,13 +29,37 @@ async function profileForIdentity(env, identity) {
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
+async function legacyProfileForIdentity(env, identity, teamId = "") {
+  const email = normalizeIdentity(identity);
+  if (!email) return null;
+  const teamFilter = cleanText(teamId, 180);
+  const query = [
+    "select=email,role,team_id",
+    `email=eq.${encodeURIComponent(email)}`,
+    teamFilter ? `team_id=eq.${encodeURIComponent(teamFilter)}` : "",
+    "limit=1",
+  ].filter(Boolean).join("&");
+  const rows = await selectRows(env, "legacy_auth_profiles", query).catch(() => []);
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+async function actorContextForTarget(env, auth, requester, targetTeamId) {
+  const sessionRole = normalizeIdentity(auth?.session?.role);
+  const sessionTeamId = cleanText(auth?.session?.teamId ?? auth?.session?.team_id, 180);
+  if (sessionRole === "player" || COACH_ROLES.has(sessionRole)) {
+    return { email: requester, role: sessionRole, team_id: sessionTeamId || null, source: auth?.source || "session" };
+  }
+
+  const legacyProfile = await legacyProfileForIdentity(env, requester, targetTeamId);
+  if (legacyProfile) return legacyProfile;
+
+  return profileForIdentity(env, requester);
+}
+
 async function authorizePhotoTarget(request, env, requestedTarget = "") {
   const auth = await readAuthenticatedIdentity({ env, request, allowDemo: false });
   const requester = normalizeIdentity(auth?.identity);
   if (!requester) return { response: Response.json({ error: "unauthorized" }, { status: 401 }) };
-
-  const actor = await profileForIdentity(env, requester);
-  if (!actor) return { response: Response.json({ error: "profile_required" }, { status: 403 }) };
 
   const targetEmail = normalizeIdentity(requestedTarget || requester);
   const target = await profileForIdentity(env, targetEmail);
@@ -43,9 +67,12 @@ async function authorizePhotoTarget(request, env, requestedTarget = "") {
     return { response: Response.json({ error: "player_profile_required" }, { status: 404 }) };
   }
 
+  const targetTeamId = cleanText(target?.team_id, 180);
+  const actor = await actorContextForTarget(env, auth, requester, targetTeamId);
+  if (!actor) return { response: Response.json({ error: "profile_required" }, { status: 403 }) };
+
   const actorRole = normalizeIdentity(actor?.role);
   const actorTeamId = cleanText(actor?.team_id, 180);
-  const targetTeamId = cleanText(target?.team_id, 180);
   const playerOwnsTarget = actorRole === "player" && requester === targetEmail;
   const coachOwnsTarget = COACH_ROLES.has(actorRole) && actorTeamId && actorTeamId === targetTeamId;
   if (!playerOwnsTarget && !coachOwnsTarget) {
