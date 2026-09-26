@@ -38,7 +38,7 @@ const legacyProfilePhoto = `  ${photoSurface}\n`;
 if (source.includes(legacyProfilePhoto)) source = source.replace(legacyProfilePhoto, "");
 const profileComment = '  {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}';
 const personalizationRoute = `{tab==="personalization"&&<SecondaryPageShell testId="player-personalization-workspace"><SecondaryPageIntro eyebrow="Player identity" title="Personalization" summary="Manage how you appear across ShotLab." testId="player-personalization-header" icon="profile"/><SecondaryPageDecision eyebrow="Profile" title="Profile photo" detail="Shown on your player profile and in your coach's roster." testId="player-personalization-photo" icon="profile">${photoSurface}</SecondaryPageDecision></SecondaryPageShell>}\n\n`;
-if (!source.includes('data-testid="player-personalization-workspace"')) {
+if (!source.includes('testId="player-personalization-workspace"')) {
   if (!source.includes(profileComment)) throw new Error("Phase 7E personalization route anchor missing");
   source = source.replace(profileComment, personalizationRoute + profileComment);
 }
@@ -57,7 +57,7 @@ if (!source.includes('data-testid="coach-player-profile-photo"')) {
   source = source.replace(coachProfileAvatarAnchor, coachProfilePhoto);
 }
 
-for (const marker of [photoImport, 'personalization:"/personalization"', personalizationNav, 'getPlayerNavItem("personalization"', 'data-testid="player-personalization-workspace"', photoSurface, 'className="coachRosterCard__photo"', 'p.photoUrl||p.photo_url', 'data-testid="coach-player-profile-photo"', 'player?.photoUrl||player?.photo_url']) {
+for (const marker of [photoImport, 'personalization:"/personalization"', personalizationNav, 'getPlayerNavItem("personalization"', 'testId="player-personalization-workspace"', photoSurface, 'className="coachRosterCard__photo"', 'p.photoUrl||p.photo_url', 'data-testid="coach-player-profile-photo"', 'player?.photoUrl||player?.photo_url']) {
   if (!source.includes(marker)) throw new Error(`Phase 7E marker missing after transform: ${marker}`);
 }
 const personalizationIndex = source.indexOf('tab==="personalization"');
