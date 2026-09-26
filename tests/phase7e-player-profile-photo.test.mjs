@@ -27,11 +27,22 @@ async function coachUpload({ targetTeam = "team-1" } = {}) {
   globalThis.fetch = async (input, init = {}) => {
     const url = String(input);
     const method = String(init?.method || "GET").toUpperCase();
-    if (url.endsWith("/auth/v1/user")) return json({ id: "coach-auth", email: "coach@example.com" });
+    if (url.includes("/rest/v1/legacy_auth_sessions?")) {
+      return json([{
+        token_hash: "session-hash",
+        user_email: "coach@example.com",
+        user_role: "coach",
+        team_id: "team-1",
+        created_at: "2026-01-01T00:00:00.000Z",
+        last_seen_at: "2026-01-01T00:00:00.000Z",
+        expires_at: "2099-01-01T00:00:00.000Z",
+        revoked_at: null,
+      }]);
+    }
     if (url.includes("/rest/v1/players?")) {
       const parsed = new URL(url);
       const email = String(parsed.searchParams.get("email") || "").replace(/^eq\./, "");
-      if (method === "GET" && email === "coach@example.com") return json([{ id: "coach-1", email, role: "coach", team_id: "team-1", photo_url: null }]);
+      if (method === "GET" && email === "coach@example.com") return json([]);
       if (method === "GET" && email === "player@example.com") return json([{ id: "player-1", email, role: "player", team_id: targetTeam, photo_url: null }]);
       if (method === "PATCH" && email === "player@example.com") {
         writes.push({ kind: "player_update", url, body: JSON.parse(String(init.body || "{}")) });
@@ -51,7 +62,7 @@ async function coachUpload({ targetTeam = "team-1" } = {}) {
     form.append("file", new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), "avatar.png");
     const request = new Request("https://shotlab.test/v1/player-photo", {
       method: "POST",
-      headers: { Authorization: "Bearer player-photo-test-token" },
+      headers: { Cookie: "sl_legacy_session=coach-session-token" },
       body: form,
     });
     const response = await onRequestPost({ request, env: ENV });
@@ -89,6 +100,8 @@ test("photo endpoint authorizes player self-service or a coach for the same team
   assert.match(endpoint, /readAuthenticatedIdentity/);
   assert.match(endpoint, /allowDemo: false/);
   assert.match(endpoint, /COACH_ROLES/);
+  assert.match(endpoint, /auth\?\.session\?\.role/);
+  assert.match(endpoint, /auth\?\.session\?\.teamId/);
   assert.match(endpoint, /actorTeamId === targetTeamId/);
   assert.match(endpoint, /requester === targetEmail/);
   assert.match(endpoint, /player_photo_target_forbidden/);
@@ -100,7 +113,7 @@ test("photo endpoint authorizes player self-service or a coach for the same team
   assert.match(endpoint, /profile_photo_size_invalid/);
 });
 
-test("same-team coach can upload a photo that persists on the target player row", async () => {
+test("real legacy-session coach can upload without a coach row in players", async () => {
   const result = await coachUpload();
   assert.equal(result.response.status, 200);
   assert.equal(result.body.ok, true);
