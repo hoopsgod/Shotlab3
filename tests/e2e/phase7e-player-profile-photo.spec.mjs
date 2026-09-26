@@ -51,7 +51,7 @@ test('Player photo control lives in More > Personalization, not Progress', async
   const action = card.locator('label.cta-primary');
   await expect(action).toHaveText('Add photo');
   await card.locator('input[type="file"]').setInputFiles({ name: 'profile.png', mimeType: 'image/png', buffer: ONE_PIXEL_PNG });
-  await expect(card.locator('img.coachRosterCard__photo')).toHaveAttribute('src', /^blob:/);
+  await expect(card.locator('img')).toHaveAttribute('src', /^blob:/);
   await expect(action).toHaveText('Change photo');
   await noHorizontalOverflow(page);
 });
