@@ -14,9 +14,10 @@ const migration = read("migrations/057_player_profile_photos.sql");
 
 test("player personalization exposes one shared, constrained photo picker using the premium system", () => {
   assert.match(component, /premiumSummaryPanel/);
-  assert.match(component, /coachRosterCard__initials/);
-  assert.match(component, /coachRosterCard__photo/);
   assert.match(component, /btn-v cta-primary/);
+  assert.match(component, /width="80" height="80"/);
+  assert.match(component, /borderRadius:"50%"/);
+  assert.match(component, /objectFit:"cover"/);
   assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
   assert.match(component, /5242880/);
   assert.match(component, /saved\|\|player\.photoUrl\|\|player\.photo_url/);
