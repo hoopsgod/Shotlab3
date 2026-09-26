@@ -12,13 +12,13 @@ const runner = read("scripts/run-route-enhancers.mjs");
 const rosterCss = read("src/styles/Phase2PremiumRosterLayer.css");
 const migration = read("migrations/057_player_profile_photos.sql");
 
-test("player profile exposes one shared, constrained photo picker", () => {
+test("player personalization exposes one shared, constrained photo picker", () => {
   assert.match(component, /data-testid="player-profile-photo-card"/);
   assert.match(component, /accept="image\/jpeg,image\/png,image\/webp"/);
   assert.match(component, /5242880/);
   assert.match(component, /saved \|\| player\.photoUrl \|\| player\.photo_url/);
   assert.match(component, /savePlayerProfilePhoto/);
-  assert.doesNotMatch(component, /loadPlayerProfilePhoto|demoMode|isDemoAccount|isDemoMode/);
+  assert.doesNotMatch(component, /cta-primary|loadPlayerProfilePhoto|demoMode|isDemoAccount|isDemoMode/);
 });
 
 test("persistence service keeps demo uploads local and registered writes authenticated", () => {
@@ -49,8 +49,11 @@ test("players API carries one canonical photo URL without erasing it during unre
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl/);
 });
 
-test("route enhancer binds the profile photo to hydrated player identity, coach roster, and coach full profile", () => {
-  assert.match(enhancer, /PlayerProfilePhotoCard/);
+test("route enhancer moves player photo out of Progress into Personalization and preserves coach identity surfaces", () => {
+  assert.match(enhancer, /personalization:"\/personalization"/);
+  assert.match(enhancer, /getPlayerNavItem\("personalization"/);
+  assert.match(enhancer, /player-personalization-workspace/);
+  assert.match(enhancer, /photo must live in Personalization before Progress/);
   assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
   assert.match(enhancer, /coachRosterCard__photo/);
   assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
