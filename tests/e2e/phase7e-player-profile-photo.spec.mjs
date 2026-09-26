@@ -30,10 +30,18 @@ test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 });
 
-test('Player can add a profile photo through the shared profile surface', async ({ page }) => {
+test('Player photo control lives in More > Personalization, not Progress', async ({ page }) => {
   await enterDemo(page, 'player');
+
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click();
   await expect(page.getByTestId('player-profile-workspace')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId('player-profile-photo-card')).toHaveCount(0);
+
+  await page.getByTestId('mobile-navigation-more').click();
+  const sheet = page.getByTestId('mobile-navigation-sheet');
+  await expect(sheet).toBeVisible();
+  await sheet.locator('[data-nav-key="personalization"]').click();
+  await expect(page.getByTestId('player-personalization-workspace')).toBeVisible({ timeout: 20_000 });
 
   const card = page.getByTestId('player-profile-photo-card');
   await expect(card).toBeVisible();
