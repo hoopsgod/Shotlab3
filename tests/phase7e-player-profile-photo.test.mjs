@@ -21,7 +21,7 @@ const ENV = {
 
 const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json" } });
 
-async function coachUpload({ targetTeam = "team-1" } = {}) {
+async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "team-3"] } = {}) {
   const originalFetch = globalThis.fetch;
   const writes = [];
   globalThis.fetch = async (input, init = {}) => {
@@ -32,13 +32,19 @@ async function coachUpload({ targetTeam = "team-1" } = {}) {
         token_hash: "session-hash",
         user_email: "coach@example.com",
         user_role: "coach",
-        team_id: "team-1",
+        team_id: coachTeams[0] || null,
         created_at: "2026-01-01T00:00:00.000Z",
         last_seen_at: "2026-01-01T00:00:00.000Z",
         expires_at: "2099-01-01T00:00:00.000Z",
         revoked_at: null,
       }]);
     }
+    if (url.includes("/rest/v1/rpc/resolve_app_user_uuid")) return json("coach-uuid");
+    if (url.includes("/rest/v1/legacy_auth_profiles?")) {
+      return json(coachTeams.map((team_id) => ({ team_id, role: "coach" })));
+    }
+    if (url.includes("/rest/v1/team_memberships?")) return json([]);
+    if (url.includes("/rest/v1/teams?")) return json([]);
     if (url.includes("/rest/v1/players?")) {
       const parsed = new URL(url);
       const email = String(parsed.searchParams.get("email") || "").replace(/^eq\./, "");
@@ -96,13 +102,11 @@ test("persistence service keeps demo uploads local and registered writes target 
   assert.doesNotMatch(service, /loadPlayerProfilePhoto/);
 });
 
-test("photo endpoint authorizes player self-service or a coach for the same team", () => {
+test("photo endpoint authorizes player self-service or a coach with canonical write access to the target team", () => {
   assert.match(endpoint, /readAuthenticatedIdentity/);
   assert.match(endpoint, /allowDemo: false/);
-  assert.match(endpoint, /COACH_ROLES/);
-  assert.match(endpoint, /auth\?\.session\?\.role/);
-  assert.match(endpoint, /auth\?\.session\?\.teamId/);
-  assert.match(endpoint, /actorTeamId === targetTeamId/);
+  assert.match(endpoint, /collectTeamPriorityAccess/);
+  assert.match(endpoint, /writableTeamIds\.has\(targetTeamId\)/);
   assert.match(endpoint, /requester === targetEmail/);
   assert.match(endpoint, /player_photo_target_forbidden/);
   assert.match(endpoint, /SUPABASE_SERVICE_ROLE_KEY/);
@@ -123,7 +127,15 @@ test("real legacy-session coach can upload without a coach row in players", asyn
   assert.match(result.writes.find((entry) => entry.kind === "player_update").url, /email=eq\.player%40example\.com/);
 });
 
-test("coach cannot upload a profile photo for a player on another team", async () => {
+test("multi-team coach can upload for a player on another team they can write", async () => {
+  const result = await coachUpload({ targetTeam: "team-3" });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.body.ok, true);
+  assert.equal(result.writes.filter((entry) => entry.kind === "storage").length, 1);
+  assert.equal(result.writes.filter((entry) => entry.kind === "player_update").length, 1);
+});
+
+test("coach cannot upload a profile photo for a player on a team they cannot write", async () => {
   const result = await coachUpload({ targetTeam: "team-2" });
   assert.equal(result.response.status, 403);
   assert.equal(result.body.error, "player_photo_target_forbidden");
