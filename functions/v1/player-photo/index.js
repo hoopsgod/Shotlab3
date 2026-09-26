@@ -26,6 +26,15 @@ function validFallbackDataUrl(value) {
   return dataUrl;
 }
 
+async function fallbackFromFile(file, contentType) {
+  const prefix = `data:${contentType};base64,`;
+  if (prefix.length + 4 * Math.ceil(Number(file.size || 0) / 3) > MAX_FALLBACK_DATA_URL_CHARS) return "";
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 32768) binary += String.fromCharCode(...bytes.subarray(i, i + 32768));
+  return prefix + btoa(binary);
+}
+
 async function profileForIdentity(env, identity) {
   const email = normalizeIdentity(identity);
   if (!email) return null;
@@ -145,9 +154,12 @@ export async function onRequestPost({ request, env }) {
       console.error("player_photo_storage_unavailable", { message: storageFailure });
     }
 
-    if (!photoUrl && fallbackDataUrl) {
-      photoUrl = fallbackDataUrl;
-      storageMode = "database_fallback";
+    if (!photoUrl) {
+      const databaseFallback = fallbackDataUrl || await fallbackFromFile(file, contentType).catch(() => "");
+      if (databaseFallback) {
+        photoUrl = databaseFallback;
+        storageMode = "database_fallback";
+      }
     }
     if (!photoUrl) {
       return Response.json({
