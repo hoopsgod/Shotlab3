@@ -7,6 +7,6 @@ export async function savePlayerProfilePhoto(id,f){
  if(isDemoAccount(id))return URL.createObjectURL(f);
  const x=await small(f).catch(()=>""),b=new FormData;b.append("file",f);b.append("player_email",id);if(x)b.append("fallback_data_url",x);
  const d=await (await fetch("/v1/player-photo",{method:"POST",headers:buildApiIdentityHeaders(),body:b})).json();
- if(!d.photo_url)throw Error(d.message);
+ if(!d.photo_url)throw Error();
  return d.photo_url
 }

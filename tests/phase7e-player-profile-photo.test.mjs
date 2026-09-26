@@ -75,9 +75,9 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
 test("player Profile accepts iPhone photo sources and exposes actionable state", () => {
   assert.match(component, /premiumSummaryPanel/);
   assert.match(component, /btn-v cta-primary/);
-  assert.match(component, /className="playerPhoto"/);
+  assert.match(component, /className="slp"/);
   assert.match(component, /width="80" height="80"/);
-  assert.match(rosterCss, /\.playerPhoto\{[^}]*border-radius:50%[^}]*object-fit:cover[^}]*flex-shrink:0/);
+  assert.match(rosterCss, /\.slp\{[^}]*border-radius:50%[^}]*object-fit:cover[^}]*flex:none/);
   assert.match(component, /accept="image\/\*"/);
   assert.match(component, /Preparing photo/);
   assert.match(component, /role="alert"/);
@@ -158,12 +158,16 @@ test("route enhancer keeps player photo inside Profile and preserves coach ident
   assert.match(enhancer, /photo must live in Player Profile/);
   assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
   assert.doesNotMatch(enhancer, /personalization:\"\/personalization\"|player-personalization-workspace/);
-  assert.match(enhancer, /coachRosterCard__photo/);
+  assert.match(enhancer, /coachRosterCard__photo slp/);
   assert.match(enhancer, /width=\"38\" height=\"38\"/);
-  assert.match(enhancer, /p\.photoUrl\|\|p\.photo_url/);
+  assert.match(enhancer, /p\.photoUrl\?/);
+  assert.match(enhancer, /src=\{p\.photoUrl\}/);
+  assert.doesNotMatch(enhancer, /p\.photo_url/);
   assert.match(enhancer, /coach-player-profile-photo/);
   assert.match(enhancer, /width=\"64\" height=\"64\"/);
-  assert.match(enhancer, /player\?\.photoUrl\|\|player\?\.photo_url/);
+  assert.match(enhancer, /player\?\.photoUrl\?/);
+  assert.match(enhancer, /src=\{player\.photoUrl\}/);
+  assert.doesNotMatch(enhancer, /player\?\.photo_url/);
   const phaseIndex = runner.indexOf("scripts/apply-phase7e-player-profile-photo.mjs");
   const minifyIndex = runner.indexOf("scripts/minify-visual-authority-css.mjs");
   assert.ok(phaseIndex > 0 && minifyIndex > phaseIndex, "Phase 7E must run after reconciliation and before final CSS minification");
@@ -171,7 +175,7 @@ test("route enhancer keeps player photo inside Profile and preserves coach ident
 
 test("route enhancer preserves canonical photo hydration within the unchanged JS budget", () => {
   assert.match(enhancer, /remotePersistence\.js/);
-  assert.match(enhancer, /photoUrl: cleanText\(row\.photoUrl \|\| row\.photo_url\) \|\| null/);
+  assert.match(enhancer, /photoUrl: cleanText\(row\.photoUrl \|\| row\.photo_url\),/);
   assert.match(enhancer, /player app-normalizer anchor missing/);
   assert.match(enhancer, /remoteRows === "object"/);
   assert.match(enhancer, /remote debug compaction marker missing/);
@@ -179,8 +183,8 @@ test("route enhancer preserves canonical photo hydration within the unchanged JS
 });
 
 test("coach roster uses photos plus alternating restrained team color", () => {
-  assert.match(enhancer, /coachRosterCard__photo playerPhoto/);
-  assert.match(rosterCss, /\.playerPhoto\{[^}]*object-fit:cover/);
+  assert.match(enhancer, /coachRosterCard__photo slp/);
+  assert.match(rosterCss, /\.slp\{[^}]*object-fit:cover/);
   assert.match(rosterCss, /team-brand-primary/);
   assert.match(rosterCss, /team-brand-secondary/);
   assert.match(rosterCss, /\.phase1RosterRow:nth-of-type\(even\)/);

@@ -21,9 +21,9 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
     'a3407c36f7b76bbb2b98b664acd89f759a4eaabfae27326576465fff851945a2',
   ]],
-  // Phase 7E moves the player-owned photo control into Personalization, restoring Progress to
-  // its reviewed pre-photo composition. Accept only the exact Actions capture of that state.
-  ['player-progress-registered-populated-390', 'ab2357b3e1393fb78d270b8eb840ff8dfec0627ae65576d7cd3be8faee4059d7'],
+  // Phase 7E intentionally adds the player-owned photo control to Progress/Profile. The reviewed
+  // Actions capture below contains that bounded panel and no unrelated title, navigation, or spacing drift.
+  ['player-progress-registered-populated-390', 'a0965e8d62ca41fda34788f716908c5fb4ad347d4b348c923d45410978d2a775'],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
   ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
