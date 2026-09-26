@@ -11,11 +11,12 @@ if (!source.includes(photoImport)) {
   source = source.replace(importLine, `${importLine}\n${photoImport}`);
 }
 
-const pathsBefore = 'const PLAYER_TAB_PATHS={home:"/",duels:"/program-log",log-drill:"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards","in-season":"/in-season",profile:"/profile",players:"/players"};\nconst PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/in-season":"in-season","/profile":"profile","/players":"players"};';
-const pathsAfter = 'const PLAYER_TAB_PATHS={home:"/",duels:"/program-log",log-drill:"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards","in-season":"/in-season",profile:"/profile",personalization:"/personalization",players:"/players"};\nconst PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/in-season":"in-season","/profile":"profile","/personalization":"personalization","/players":"players"};';
 if (!source.includes('personalization:"/personalization"')) {
-  if (!source.includes(pathsBefore)) throw new Error("Phase 7E personalization path anchor missing");
-  source = source.replace(pathsBefore, pathsAfter);
+  const pathAnchor = 'profile:"/profile",players:"/players"';
+  const reverseAnchor = '"/profile":"profile","/players":"players"';
+  if (!source.includes(pathAnchor) || !source.includes(reverseAnchor)) throw new Error("Phase 7E personalization path anchor missing");
+  source = source.replace(pathAnchor, 'profile:"/profile",personalization:"/personalization",players:"/players"');
+  source = source.replace(reverseAnchor, '"/profile":"profile","/personalization":"personalization","/players":"players"');
 }
 
 const navAnchor = 'const getPlayerNavItem=(key,overrides={})=>{const item=playerNavItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};';
@@ -25,11 +26,11 @@ if (!source.includes(personalizationNav)) {
   source = source.replace(navAnchor, `${personalizationNav}\n${navAnchor}`);
 }
 
-const mobileAnchor = '  getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"}),\n  getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),';
-const mobileReplacement = '  getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"}),\n  getPlayerNavItem("personalization",{description:"Profile photo and player identity",group:"team"}),\n  getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),';
+const mobileAnchor = '  getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"}),';
+const mobileItem = '  getPlayerNavItem("personalization",{description:"Profile photo and player identity",group:"team"}),';
 if (!source.includes('getPlayerNavItem("personalization"')) {
   if (!source.includes(mobileAnchor)) throw new Error("Phase 7E personalization mobile anchor missing");
-  source = source.replace(mobileAnchor, mobileReplacement);
+  source = source.replace(mobileAnchor, `${mobileAnchor}\n${mobileItem}`);
 }
 
 const photoSurface = '<PlayerProfilePhotoCard player={players.find(rowMatchesPlayerIdentity)||u}/>';
