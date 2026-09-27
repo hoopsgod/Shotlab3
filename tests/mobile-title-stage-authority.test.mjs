@@ -110,8 +110,10 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
   assert.match(geometry, /env\(safe-area-inset-bottom,\s*0px\)/);
 });
 
-test('page title remains a real level-one heading with discoverable identity metadata', () => {
-  assert.match(stage, /<h1 className="teamIdentityTitleStage__title" data-identity-role="page-title">/);
+test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
+  assert.match(stage, /headingLevel = 1/);
+  assert.match(stage, /const TitleHeading = headingLevel === 2 \? "h2" : "h1"/);
+  assert.match(stage, /<TitleHeading className="teamIdentityTitleStage__title" data-identity-role="page-title">/);
   assert.match(stage, /data-title-word-count=\{titleWords\.length\}/);
   assert.match(stage, /data-title-size=\{titleSize\}/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);
