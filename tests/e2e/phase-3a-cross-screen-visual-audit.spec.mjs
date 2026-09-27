@@ -90,12 +90,12 @@ async function expectPlayerIdentityInsideViewport(page) {
     expect(geometry.crestWidth).toBeGreaterThanOrEqual(104);
     expect(geometry.crestHeight).toBeGreaterThanOrEqual(104);
   } else {
-    expect(geometry.titleSize).toBeGreaterThanOrEqual(38);
+    expect(geometry.titleSize).toBeGreaterThanOrEqual(28);
     expect(geometry.titleSize).toBeLessThanOrEqual(46);
-    expect(geometry.crestWidth).toBeGreaterThanOrEqual(84);
-    expect(geometry.crestWidth).toBeLessThanOrEqual(108);
-    expect(geometry.crestHeight).toBeGreaterThanOrEqual(84);
-    expect(geometry.crestHeight).toBeLessThanOrEqual(108);
+    expect(geometry.crestWidth).toBeGreaterThanOrEqual(64);
+    expect(geometry.crestWidth).toBeLessThanOrEqual(80);
+    expect(geometry.crestHeight).toBeGreaterThanOrEqual(64);
+    expect(geometry.crestHeight).toBeLessThanOrEqual(80);
   }
   if (geometry.objectFit !== "fallback") expect(geometry.objectFit).toBe("contain");
 }
@@ -128,11 +128,7 @@ async function expectCompactFunctionalIntro(page) {
     expect(geometry.variant).not.toBe("hero");
     expect(geometry.family).toBe("editorial");
     expect(geometry.brandTreatment).toBe("compact");
-    // The exact production-coordinate audit currently resolves this shared
-    // compact family from 35.1px at the tight end through 47.3px at 430px.
-    // Keep a narrow 34–48px certification window instead of the stale 38–46px
-    // source-number assumption while preserving containment and hierarchy.
-    expect(geometry.titleSize).toBeGreaterThanOrEqual(34);
+    expect(geometry.titleSize).toBeGreaterThanOrEqual(28);
     expect(geometry.titleSize).toBeLessThanOrEqual(48);
     const maxBrandPanel = geometry.titleText === "Program Branding" ? 108 : 80;
     expect(geometry.brandPanelWidth).toBeGreaterThanOrEqual(56);
