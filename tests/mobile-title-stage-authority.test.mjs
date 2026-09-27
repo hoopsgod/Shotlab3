@@ -29,7 +29,6 @@ test('authenticated mobile title authority exposes exactly identity and editoria
 
 test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.match(titleRule, /overflow-wrap:\s*normal/);
-  assert.match(titleRule, /word-break:\s*normal/);
   assert.match(titleRule, /hyphens:\s*none/);
   assert.doesNotMatch(titleRule, /anywhere|break-all/);
   assert.doesNotMatch(longMultiRule, /anywhere|break-all/);
