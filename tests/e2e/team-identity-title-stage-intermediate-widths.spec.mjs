@@ -49,7 +49,7 @@ async function measureSharedStage(page, variant) {
   await expect(stage).toBeVisible();
   return stage.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const title = element.querySelector(".mcHeroTitle");
+    const title = element.querySelector("h1");
     const crest = element.querySelector('[data-identity-role="brand-mark"]');
     const fallback = element.querySelector('[data-identity-role="brand-fallback"]');
     const crestRect = (crest || fallback)?.getBoundingClientRect();

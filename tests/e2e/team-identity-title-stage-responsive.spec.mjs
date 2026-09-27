@@ -216,7 +216,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   await expect(stage).toBeVisible();
   const result = await stage.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const title = element.querySelector(".mcHeroTitle");
+    const title = element.querySelector("h1");
     const team = element.querySelector('[data-identity-role="team-name"]');
     const brandPanel = element.querySelector('[data-identity-role="brand-panel"]');
     const brandPanelRect = brandPanel?.getBoundingClientRect();
