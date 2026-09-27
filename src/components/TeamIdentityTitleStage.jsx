@@ -70,6 +70,7 @@ export default function TeamIdentityTitleStage({
   role = "Team",
   eyebrow = "",
   title,
+  headingLevel = 1,
   personName = "",
   summary = "",
   status = null,
@@ -91,6 +92,7 @@ export default function TeamIdentityTitleStage({
   const cleanedLogo = useCleanTeamLogo(rawLogo);
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
+  const TitleHeading = headingLevel === 2 ? "h2" : "h1";
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
   const titleWords = displayTitle.split(/\s+/).filter(Boolean);
@@ -219,7 +221,7 @@ export default function TeamIdentityTitleStage({
             <span className="teamIdentityTitleStage__team" data-identity-role="team-name">{teamName}</span>
             <span className="teamIdentityTitleStage__descriptor" data-identity-role="role">{descriptor}</span>
           </div>
-          <h1 className="teamIdentityTitleStage__title" data-identity-role="page-title">{displayTitle}</h1>
+          <TitleHeading className="teamIdentityTitleStage__title" data-identity-role="page-title">{displayTitle}</TitleHeading>
           {displayPerson && displayPerson !== displayTitle ? <div className="teamIdentityTitleStage__person" data-identity-role="person-name">{displayPerson}</div> : null}
           {summary ? <p className="teamIdentityTitleStage__summary">{summary}</p> : null}
           <TeamIdentitySupportRail status={status} actions={actions} />

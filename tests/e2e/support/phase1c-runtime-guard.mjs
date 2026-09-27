@@ -32,6 +32,7 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   ['player-progress-registered-populated-390', [
     'ab2357b3e1393fb78d270b8eb840ff8dfec0627ae65576d7cd3be8faee4059d7',
     '33201cf2a3bb26b98774eccf2edde46e53963a59d574aa9a29b27696a61008a5',
+    '8f7916dd1cf2877d3c2d62c551742364edd0521aa5ca68532409602b6a94852d',
   ]],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],

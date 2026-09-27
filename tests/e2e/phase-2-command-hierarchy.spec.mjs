@@ -103,7 +103,7 @@ test("Player home preserves the command hierarchy beneath the Dashboard Showstop
   const pageTitle = page.getByTestId("player-dashboard-identity-header").getByRole("heading", { level: 1 });
   await expect(pageTitle).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  const commandHeading = root.getByRole("heading", { level: 2 });
+  const commandHeading = root.locator('[data-command-role="primary"]').getByRole("heading", { level: 2 });
   await expect(commandHeading).toBeVisible();
   await expect(commandHeading).not.toHaveText("");
   await expect(evidence).toBeVisible();
