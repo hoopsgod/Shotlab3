@@ -81,7 +81,7 @@ test("Coach Leaderboards uses the accepted shared title and dark decision hierar
   const title = shell.locator('[data-identity-role="page-title"]');
   const summary = shell.locator(".teamIdentityTitleStage__summary");
   await expect(title).toHaveText("Leaderboards");
-  await expect(summary).toContainText("Recognize the standard");
+  await expect(summary).toHaveText(/^\d+ current ranked$/);
 
   const decision = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
   await expect(decision).toHaveAttribute("data-surface", "dark");
