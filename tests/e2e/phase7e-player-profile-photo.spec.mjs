@@ -30,11 +30,20 @@ test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 });
 
-test('Player photo control lives in Profile and works in demo parity', async ({ page }) => {
+test('Player photo control lives in More > Personalization, not Progress', async ({ page }) => {
   await enterDemo(page, 'player');
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click();
-  const workspace = page.getByTestId('player-profile-workspace');
+  const progress = page.getByTestId('player-profile-workspace');
+  await expect(progress).toBeVisible({ timeout: 20_000 });
+  await expect(progress.locator('input[type="file"]')).toHaveCount(0);
+
+  await page.getByTestId('mobile-navigation-more').click();
+  const sheet = page.getByTestId('mobile-navigation-sheet');
+  await expect(sheet).toBeVisible();
+  await sheet.locator('[data-nav-key="personalization"]').click();
+  const workspace = page.getByTestId('player-personalization-workspace');
   await expect(workspace).toBeVisible({ timeout: 20_000 });
+
   const card = workspace.locator('section.premiumSummaryPanel:has(input[type="file"])');
   await expect(card).toBeVisible();
   const cardBox = await card.boundingBox();
