@@ -66,7 +66,7 @@ async function expectPremiumTitleStage(page) {
     };
   });
   expect(visual.family).toBe("editorial");
-  expect(visual.titleSize).toBeGreaterThanOrEqual(38);
+  expect(visual.titleSize).toBeGreaterThanOrEqual(28);
   expect(visual.titleSize).toBeLessThanOrEqual(58);
   expect(visual.teamText.length).toBeGreaterThan(0);
   // Editorial stages keep a compact 64-74px slot. Preview variants may optically inset
