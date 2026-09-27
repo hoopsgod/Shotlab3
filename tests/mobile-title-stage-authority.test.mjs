@@ -113,7 +113,7 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
 });
 
 test('In Season hero follows role-specific page heading semantics', () => {
-  assert.match(inSeasonHub, /const H = isCoach \? "h2" : "h1";/);
+  assert.match(inSeasonHub, /const H = "h" \+ \(isCoach \? 2 : 1\);/);
   assert.match(inSeasonHub, /<H className="t">In Season<\/H>/);
   assert.equal((inSeasonStyles.match(/\.inSeasonHero \.t/g) || []).length, 2);
 });
