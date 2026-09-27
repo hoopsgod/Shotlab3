@@ -419,7 +419,7 @@
   [data-visual-role="player-team-workspace-title"]::before{inset-block-end:9px}
   [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__inner){grid-template-columns:minmax(0,1fr) var(--identity-crest);gap:11px;padding:6px 0 15px}
   [data-visual-role="player-team-workspace-title"] [data-identity-role="brand-panel"]{width:var(--identity-crest);height:var(--identity-crest);min-width:var(--identity-crest);margin-top:12px}
-  [data-visual-role="player-team-workspace-title"] [data-identity-role="page-title"]{max-width:13ch;font-size:var(--identity-title);line-height:1;letter-spacing:-.03em;overflow-wrap:anywhere}
+  [data-visual-role="player-team-workspace-title"] [data-identity-role="page-title"]{max-width:13ch;font-size:var(--identity-title);line-height:1;letter-spacing:-.03em;overflow-wrap:normal}
   [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__summary){display:block;max-width:34ch;margin-top:8px;overflow:visible;font-size:14px;line-height:1.4;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;-webkit-line-clamp:unset}
   [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__support){align-items:center;margin-top:11px;padding-top:9px}
   [data-visual-role="player-team-workspace-title"] :global(.teamIdentityTitleStage__action){min-height:44px;padding-inline:12px}

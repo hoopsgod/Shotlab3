@@ -36,6 +36,8 @@ test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.match(stageCss, /teamIdentityTitleStage--singleWord[\s\S]*white-space:\s*nowrap/);
   assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(38px,\s*9\.6vw,\s*40px\)/);
   assert.match(longMultiRule, /clamp\(40px,\s*9\.8vw,\s*44px\)/);
+  assert.match(stage, /const longToken = longestWordLength > 16/);
+  assert.match(stageCss, /teamIdentityTitleStage--longToken[\s\S]*overflow-wrap:\s*anywhere/);
 });
 
 test('secondary destinations converge on one editorial treatment with a compact full custom crest', () => {
@@ -80,7 +82,7 @@ test('secondary mobile stages preserve one compact shared geometry without domin
   assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*64px/);
   assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*10px[\s\S]*padding:\s*10px 2px 12px/);
   assert.doesNotMatch(brandCss, /data-brand-treatment="signature"|data-brand-treatment="none"|signatureRule|watermarkBrand|microBrand/);
-  assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
+  assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(30px,\s*8vw,\s*36px\)/);
 });
 
 test('Back is a first-class title-stage affordance with accessible semantics and touch target', () => {
@@ -94,7 +96,8 @@ test('Back is a first-class title-stage affordance with accessible semantics and
 
 test('page-level status and actions are integrated into the editorial title composition', () => {
   assert.doesNotMatch(secondary, /TeamIdentitySupportRail/);
-  assert.match(secondary, /status=\{status\}/);
+  assert.match(secondary, /summary=\{status \|\| summary\}/);
+  assert.doesNotMatch(secondary, /status=\{status\}/);
   assert.match(secondary, /actions=\{actions\}/);
   assert.doesNotMatch(playerWorkspace, /TeamIdentitySupportRail/);
   assert.match(playerWorkspace, /status=\{model\.status\}/);

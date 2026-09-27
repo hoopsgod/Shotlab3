@@ -14,7 +14,8 @@ test("Coach Events places a real month calendar before the next-event decision s
   assert.ok(decisionIndex > calendarIndex);
   assert.match(dashboard, /rows=\{rows\}/);
   assert.match(dashboard, /onOpenEvent=\{onOpenEvent\}/);
-  assert.match(dashboard, /summary="Plan practices, games and team moments\."/);
+  assert.match(dashboard, /summary=\{briefing\.missing \?[\s\S]*RSVP response/);
+  assert.match(dashboard, /No upcoming team events scheduled/);
   assert.match(integrationCss, /coach-events-interactive-dashboard[^}]*> \.coachEventsCalendar\s*\{\s*order:\s*2\s*!important/s);
 });
 

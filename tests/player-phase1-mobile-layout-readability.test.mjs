@@ -32,7 +32,7 @@ test('Player workspace metrics use readable floors and wrap meaningful copy', ()
 test('mobile Player filter rails and title support reflow inside the viewport', () => {
   assert.match(workspace, /@media\(max-width:760px\)[\s\S]*filterRail\[data-player-workspace-filter-rail="true"\]\{[^}]*flex-wrap:wrap[^}]*overflow-x:visible[^}]*scroll-snap-type:none/);
   assert.match(workspace, /filterRail\[data-player-workspace-filter-rail="true"\]\s*>\s*\.filterButton\{[^}]*white-space:normal/);
-  assert.match(workspace, /teamIdentityTitleStage__identityLine\)\{margin-bottom:6px;font-size:10px\}/);
+  assert.match(workspace, /teamIdentityTitleStage__identityLine\)\{margin-bottom:6px;font-size:11px\}/);
   assert.match(workspace, /teamIdentityTitleStage__summary\)\{[^}]*display:block[^}]*overflow:visible[^}]*-webkit-line-clamp:unset/);
 });
 

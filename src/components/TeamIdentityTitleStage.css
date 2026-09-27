@@ -80,7 +80,7 @@
 .teamIdentityTitleStage__team {
   max-width: 30ch;
   color: #5e7413;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 .teamIdentityTitleStage__descriptor { color: #6b746e; }
 .teamIdentityTitleStage__descriptor::before { content: "·"; margin-right: 8px; color: #9aa29d; }
@@ -91,7 +91,7 @@
   font: 820 var(--identity-title)/.92 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.062em;
   text-wrap: balance;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
 }
@@ -111,9 +111,13 @@
   max-width: 16ch;
   font-size: clamp(40px, 9.8vw, 44px);
   line-height: .94;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
+}
+.teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .teamIdentityTitleStage--title-long .teamIdentityTitleStage__title {
   font-size: clamp(36px, 9.5vw, 42px);

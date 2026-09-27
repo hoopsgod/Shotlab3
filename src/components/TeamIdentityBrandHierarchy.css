@@ -24,9 +24,13 @@
    safety rules may protect arbitrary headings, but they must not introduce
    emergency breaks inside authenticated page-title words. */
 .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__title {
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
+}
+.teamIdentityTitleStage[data-title-stage-family="editorial"].teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 /* Missing artwork remains a brand state, not setup scaffolding. Coach stages

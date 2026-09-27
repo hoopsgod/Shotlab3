@@ -96,6 +96,7 @@ export default function TeamIdentityTitleStage({
   const titleWords = displayTitle.split(/\s+/).filter(Boolean);
   const singleWordTitle = titleWords.length === 1;
   const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
+  const longToken = longestWordLength > 16;
   const longSingleWord = singleWordTitle && longestWordLength >= 11;
   const longTitle = displayTitle.length > 22 || longestWordLength > 12;
   const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
@@ -178,6 +179,7 @@ export default function TeamIdentityTitleStage({
         heroClass,
         surfaceClass,
         longTitle ? "teamIdentityTitleStage--longTitle" : "",
+        longToken ? "teamIdentityTitleStage--longToken" : "",
         singleWordTitle ? "teamIdentityTitleStage--singleWord" : "teamIdentityTitleStage--multiWord",
         longSingleWord ? "teamIdentityTitleStage--longSingleWord" : "",
         titleSize !== "auto" ? `teamIdentityTitleStage--title-${titleSize}` : "",
