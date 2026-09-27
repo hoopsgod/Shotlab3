@@ -22,6 +22,10 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     'a3407c36f7b76bbb2b98b664acd89f759a4eaabfae27326576465fff851945a2',
     '37b37fb495cfca1747ae79810b6103964971fa4bf2e222cc6c601133dead9b2c',
   ]],
+  // The app-wide heading pass intentionally replaces the generic Events intro copy with the
+  // reviewed live RSVP status. Lock that exact CI-rendered state by digest so Phase 1C does not
+  // depend on a repository PNG binary for this intentionally changed surface.
+  ['coach-events-registered-populated-390', '03e08a265baa8384f207499e9a830191afbbc8110caf64cfe8b238cb2ea591fe'],
   // Phase 7E now keeps photo ownership in More > Personalize, so Progress returns to the
   // previously reviewed compact state with no photo panel or unrelated visual drift.
   ['player-progress-registered-populated-390', 'ab2357b3e1393fb78d270b8eb840ff8dfec0627ae65576d7cd3be8faee4059d7'],
