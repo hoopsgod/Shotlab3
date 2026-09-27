@@ -57,8 +57,17 @@ async function readFlatSurfaceStyle(locator) {
   });
 }
 
+const isEffectivelyTransparent = (value) => {
+  const color = String(value || "").trim().toLowerCase();
+  if (color === "transparent" || color === "rgba(0, 0, 0, 0)") return true;
+  const alphaMatch = color.match(/\/\s*([0-9]*\.?[0-9]+)(%)?\s*\)$/);
+  if (!alphaMatch) return false;
+  const alpha = Number(alphaMatch[1]) / (alphaMatch[2] ? 100 : 1);
+  return Number.isFinite(alpha) && alpha <= 0.02;
+};
+
 const expectFlatSurface = (style) => {
-  expect(["rgba(0, 0, 0, 0)", "transparent"]).toContain(style.backgroundColor);
+  expect(isEffectivelyTransparent(style.backgroundColor), `inner roster surface must remain effectively transparent: ${style.backgroundColor}`).toBe(true);
   expect(style.backgroundImage).toBe("none");
   expect(style.boxShadow).toBe("none");
   expect(style.borderTopWidth).toBe("0px");

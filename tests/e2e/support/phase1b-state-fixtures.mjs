@@ -205,7 +205,7 @@ async function settle(page) {
   });
 }
 
-export async function enterPhase1BSession(browser, { role, scenario, mode }) {
+export async function enterPhase1BSession(browser, { role, scenario, mode, playerPhotoUrl = '' }) {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     screen: { width: 390, height: 844 },
@@ -215,6 +215,12 @@ export async function enterPhase1BSession(browser, { role, scenario, mode }) {
   });
   const page = await context.newPage();
   const fixture = buildPhase1BFixture({ role, scenario, mode });
+  if (playerPhotoUrl) {
+    const playerEmail = PHASE1B_IDENTITIES[mode].player.email;
+    fixture.storage['sl:players'] = fixture.storage['sl:players'].map((row) => String(row?.email || '').toLowerCase() === playerEmail.toLowerCase()
+      ? { ...row, photoUrl: playerPhotoUrl, photo_url: playerPhotoUrl }
+      : row);
+  }
   await installSafeRoutes(page, fixture);
 
   if (mode === 'demo') {

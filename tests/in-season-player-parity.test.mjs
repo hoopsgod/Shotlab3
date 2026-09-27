@@ -18,6 +18,23 @@ test("player In Season parity transform is deterministic and idempotent", () => 
   assert.match(routeEnhancers, /apply-in-season-player-parity\.mjs/);
 });
 
+test("player In Season parity stays idempotent after Personalization expands the path maps", () => {
+  const withPersonalization = transformedApp
+    .replace('profile:"/profile",players:"/players"', 'profile:"/profile",personalization:"/personalization",players:"/players"')
+    .replace('"/profile":"profile","/players":"players"', '"/profile":"profile","/personalization":"personalization","/players":"players"');
+  assert.match(withPersonalization, /personalization:"\/personalization"/);
+  assert.equal(applyInSeasonPlayerParity(withPersonalization), withPersonalization);
+});
+
+test("player In Season parity stays idempotent after later mobile metadata compaction", () => {
+  const compacted = transformedApp
+    .replace('getPlayerNavItem("in-season",{mobileLabel:"In Season",mobileIcon:"chart",group:"performance",description:', 'getPlayerNavItem("in-season",{mobileIcon:"chart",group:"performance",description:')
+    .replace('getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:', 'getPlayerNavItem("team-store",{description:')
+    .replace('mobileLabel:"Rankings",description:"Current and all-time team rankings",', '');
+  assert.match(compacted, /getPlayerNavItem\("in-season",\{mobileIcon:"chart",group:"performance"/);
+  assert.equal(applyInSeasonPlayerParity(compacted), compacted);
+});
+
 test("player navigation exposes an addressable In Season destination", () => {
   assert.match(transformedApp, /"in-season":"\/in-season"/);
   assert.match(transformedApp, /"\/in-season":"in-season"/);

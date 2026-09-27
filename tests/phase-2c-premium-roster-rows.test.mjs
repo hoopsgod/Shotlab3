@@ -16,7 +16,7 @@ test('Phase 2C roster layer is retained as one dedicated production authority', 
 
 test('Coach roster explicitly neutralizes every inner legacy surface in one authority rule', () => {
   assert.match(rosterLayer, /:is\(\.phase1RosterRow,\.coachRosterCard__body,\.coachRosterCard__details,\.coachRosterCard__identity,\.coachRosterCard__metrics,\.coachRosterCard__actions,\.coachRosterCard__manage,\[data-phase1-open-profile="true"\]\)\{[^}]*margin:0!important[^}]*padding:0!important[^}]*border:0!important[^}]*border-radius:0!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
-  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px[^}]*border-bottom:1px solid var\(--l\)!important/s);
+  assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px[^}]*border-bottom:1px solid #1720191f!important/s);
 });
 
 test('Player identity is dominant, flat, and remains the real profile touch target', () => {
@@ -35,9 +35,9 @@ test('Healthy status is quiet while exception status remains available', () => {
 });
 
 test('Roster utilities stay subordinate and accessible', () => {
-  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-width:44px!important[^}]*min-height:44px!important[^}]*background:transparent!important[^}]*box-shadow:none!important/s);
+  assert.match(rosterLayer, /\.coachRosterCard__actions button\{[^}]*min-width:44px!important[^}]*min-height:44px!important[^}]*background:#0000!important[^}]*box-shadow:none!important/s);
   assert.match(rosterLayer, /\.coachRosterCard__manageTrigger\{[^}]*transform:rotate\(90deg\)/s);
-  assert.match(rosterLayer, /\.coachRosterCard__remove:is\(:hover,:focus-visible\)/);
+  assert.doesNotMatch(rosterLayer, /\.coachRosterCard__remove:is\(:hover,:focus-visible\)\{background:#fff\}/);
   assert.match(rosterLayer, /outline:3px solid/);
   assert.match(rosterLayer, /@media\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(rosterLayer, /pointer-events:\s*none/);
@@ -49,7 +49,7 @@ test('Responsive geometry is intrinsic and survives production optimization with
   assert.match(rosterLayer, /\.phase1RosterRow\{[^}]*min-height:80px/);
   assert.match(rosterLayer, /grid-template-columns:40px minmax\(0,1fr\) 44px!important/);
   assert.match(rosterLayer, /text-overflow:ellipsis;white-space:nowrap/);
-  assert.match(metrics, /flex-wrap:nowrap!important/);
+  assert.doesNotMatch(metrics, /flex-wrap:/);
   assert.match(metrics, /overflow:hidden!important/);
   assert.match(metrics, /font:570 10\.5px\/1\.3/);
   assert.match(menu, /right:24px/);

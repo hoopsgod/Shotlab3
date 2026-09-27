@@ -59,6 +59,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-mobile-player-composition-reconciliation.mjs',
   'scripts/apply-mobile-auth-signature-stage.mjs',
   'scripts/apply-in-season-player-parity.mjs',
+  'scripts/apply-phase7e-player-profile-photo.mjs',
   'scripts/minify-visual-authority-css.mjs',
 ])
 
