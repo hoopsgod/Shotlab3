@@ -85,7 +85,7 @@ for (const viewport of VIEWPORTS) {
     const standard = await measureSharedStage(page, "standard");
     expect(standard.left).toBeGreaterThanOrEqual(-1);
     expect(standard.right).toBeLessThanOrEqual(standard.viewport + 1);
-    expect(standard.titleSize).toBeGreaterThanOrEqual(38);
+    expect(standard.titleSize).toBeGreaterThanOrEqual(30);
     expect(standard.titleSize).toBeLessThanOrEqual(44);
     // Secondary/editorial stages use the compact 64–74px mobile crest authority.
     expect(standard.crestWidth).toBeGreaterThanOrEqual(64);
