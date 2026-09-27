@@ -50,10 +50,6 @@
   .secondaryPageTitleStage.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
     max-width: 11ch;
     font-size: clamp(28px, 7.6vw, 34px) !important;
-    white-space: normal;
-  }
-  .secondaryPageTitleStage.teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
-    overflow-wrap: anywhere !important;
   }
 
   .secondaryPageTitleStage .teamIdentityTitleStage__identityLine {
@@ -275,13 +271,5 @@
 
   .secondaryPageTitleStage.teamIdentityTitleStage--standard {
     --identity-crest: 58px;
-  }
-
-  .secondaryPageTitleStage .teamIdentityTitleStage__title {
-    font-size: clamp(30px, 8vw, 36px) !important;
-  }
-
-  .secondaryPageTitleStage.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
-    font-size: clamp(28px, 7.6vw, 34px) !important;
   }
 }
