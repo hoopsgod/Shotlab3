@@ -10,6 +10,7 @@ const secondary = read('src/components/SecondaryPageSystem.jsx');
 const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
 const playerHome = read('src/components/PlayerDashboardHeader.jsx');
 const inSeasonHub = read('src/components/InSeasonPerformanceHub.jsx');
+const inSeasonStyles = read('src/components/InSeasonPerformanceHubLegacy.css');
 const coachHome = read('src/components/CoachCommandCenter.jsx');
 const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const geometry = read('src/styles/AuthenticatedVisualAuthority2026.css');
@@ -114,6 +115,7 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
 test('In Season hero remains subordinate to the shared page title', () => {
   assert.match(inSeasonHub, /<h2>In Season<\/h2>/);
   assert.doesNotMatch(inSeasonHub, /<h1>In Season<\/h1>/);
+  assert.equal((inSeasonStyles.match(/\\.inSeasonHero h2/g) || []).length, 2);
 });
 
 test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
