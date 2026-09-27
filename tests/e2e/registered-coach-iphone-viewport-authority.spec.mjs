@@ -164,7 +164,7 @@ async function expectVisibleTitlesBelowVisualViewportTop(page, label) {
       '[data-identity-role="page-title"]',
       '[data-team-identity-stage="coach-mission-control"] h1',
       '[data-team-identity-stage="coach-mission-control"] h2',
-      '[data-testid="coach-primary-objective"] h1',
+      '[data-testid="coach-primary-objective"] .mcHeroTitle',
       '[data-testid="coach-primary-objective"] h2',
     ].join(',')));
     const titles = candidates.map((node) => {
