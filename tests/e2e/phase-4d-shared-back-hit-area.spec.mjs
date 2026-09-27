@@ -178,19 +178,12 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-test("Player mobile secondary routes retain the existing shared return control", async ({ page }) => {
+test("Player top-level mobile destinations use the dock instead of a duplicate Dashboard return row", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "player");
   await navigate(page, "log-drill");
-  const back = page.locator("button.shared-dashboard-back-action");
-  await expect(back).toHaveCount(1);
-  await expect(back).toBeVisible();
-  const box = await back.boundingBox();
-  expect(box?.width || 0).toBeGreaterThanOrEqual(44);
-  expect(box?.height || 0).toBeGreaterThanOrEqual(44);
-  const state = await back.evaluate((node) => ({ touchAction: getComputedStyle(node).touchAction, text: String(node.textContent || "").replace(/\s+/g, " ").trim() }));
-  expect(state.touchAction).toBe("manipulation");
-  expect(state.text).toMatch(/dashboard/i);
-  await back.focus();
-  await expect(back).toBeFocused();
+  await expect(page.locator("button.shared-dashboard-back-action")).toHaveCount(0);
+  const home = page.getByTestId("mobile-navigation-dock").locator('[data-nav-key="home"]');
+  await expect(home).toHaveCount(1);
+  await expect(home).toBeVisible();
 });

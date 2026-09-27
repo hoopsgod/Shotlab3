@@ -1,14 +1,15 @@
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 
-export default function PlayerDashboardHeader({ userName, subtitle, mission }) {
+export default function PlayerDashboardHeader({ userName, subtitle, mission, headingLevel = false }) {
   const displayName = String(userName || "Player").trim();
   return (
     <TeamIdentityTitleStage
       variant="hero"
+      headingLevel={headingLevel}
       surface="dark"
       role="Player Mode"
       title={displayName}
-      summary={subtitle || "Train. Track. Improve."}
+      summary={subtitle}
       status={mission || null}
       testId="player-dashboard-identity-header"
       className="playerDashboardIdentityStage"

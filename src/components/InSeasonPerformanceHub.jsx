@@ -313,9 +313,10 @@ export default function InSeasonPerformanceHub({
     catch { setDrillMessage("The drill could not be removed."); }
   };
 
+  const H = "h" + (isCoach ? 2 : 1);
   return <section className="inSeasonHub" data-testid="in-season-performance-hub" data-role={role}>
     <header className="inSeasonHero">
-      <div className="inSeasonHeroCopy"><span className="inSeasonEyebrow">Season performance</span><h1>In Season</h1><p>{isCoach ? "Run repeatable team standards, capture verified results, and turn game data into a living program record." : "Compete against today’s team standards and the best marks your program has produced."}</p></div>
+      <div className="inSeasonHeroCopy"><span className="inSeasonEyebrow">Season performance</span><H className="t">In Season</H><p>{isCoach ? "Set standards, log verified results, and build the season record." : "Track your results against team standards and season bests."}</p></div>
       <div className="inSeasonHeroPulse"><span>Program standard</span><strong>{visibleDrills.length}</strong><small>active drills</small></div>
     </header>
 

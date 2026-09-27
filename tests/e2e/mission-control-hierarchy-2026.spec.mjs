@@ -65,7 +65,7 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const heroContent = document.querySelector(".mcHeroContent");
     const identity = hero?.querySelector(".mcHeroIdentity");
     const programIdentity = hero?.querySelector(".mcProgramIdentity");
-    const title = hero?.querySelector("h1");
+    const title = hero?.querySelector(".mcHeroTitle");
     const heroMark = document.querySelector(".mcHeroTeamMark");
     const heroLogo = heroMark?.querySelector("img");
     const heroFallback = heroMark?.querySelector(".mcTeamFallback");

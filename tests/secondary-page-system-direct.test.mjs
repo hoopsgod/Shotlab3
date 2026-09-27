@@ -32,7 +32,8 @@ test("secondary destinations converge on one supporting team-identity treatment 
 
 test("secondary page title actions expose stable accessibility and disabled states through the shared primitive", () => {
   assert.match(component, /actions=\{actions\}/);
-  assert.match(component, /status=\{status\}/);
+  assert.match(component, /summary=\{status \|\| summary\}/);
+  assert.doesNotMatch(component, /status=\{status\}/);
   assert.match(titleStage, /aria-label=\{action\.ariaLabel \|\| action\.label\}/);
   assert.match(titleStage, /disabled=\{action\.disabled\}/);
   assert.match(titleStage, /aria-live="polite"/);

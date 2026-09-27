@@ -9,6 +9,8 @@ const brandCss = read('src/components/TeamIdentityBrandHierarchy.css');
 const secondary = read('src/components/SecondaryPageSystem.jsx');
 const playerWorkspace = read('src/components/PlayerOperationalWorkspace.jsx');
 const playerHome = read('src/components/PlayerDashboardHeader.jsx');
+const inSeasonHub = read('src/components/InSeasonPerformanceHub.jsx');
+const inSeasonStyles = read('src/components/InSeasonPerformanceHubLegacy.css');
 const coachHome = read('src/components/CoachCommandCenter.jsx');
 const brandingPreview = read('src/components/team/TeamBrandingPreview.jsx');
 const geometry = read('src/styles/AuthenticatedVisualAuthority2026.css');
@@ -29,13 +31,14 @@ test('authenticated mobile title authority exposes exactly identity and editoria
 
 test('editorial page titles cannot opt into partial-word wrapping', () => {
   assert.match(titleRule, /overflow-wrap:\s*normal/);
-  assert.match(titleRule, /word-break:\s*normal/);
   assert.match(titleRule, /hyphens:\s*none/);
   assert.doesNotMatch(titleRule, /anywhere|break-all/);
   assert.doesNotMatch(longMultiRule, /anywhere|break-all/);
   assert.match(stageCss, /teamIdentityTitleStage--singleWord[\s\S]*white-space:\s*nowrap/);
   assert.match(stageCss, /teamIdentityTitleStage--longSingleWord[\s\S]*clamp\(38px,\s*9\.6vw,\s*40px\)/);
   assert.match(longMultiRule, /clamp\(40px,\s*9\.8vw,\s*44px\)/);
+  assert.match(stage, /const longToken = longestWordLength > 16/);
+  assert.match(stageCss, /teamIdentityTitleStage--longToken[\s\S]*overflow-wrap:\s*anywhere/);
 });
 
 test('secondary destinations converge on one editorial treatment with a compact full custom crest', () => {
@@ -80,7 +83,7 @@ test('secondary mobile stages preserve one compact shared geometry without domin
   assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*64px/);
   assert.match(brandCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*10px[\s\S]*padding:\s*10px 2px 12px/);
   assert.doesNotMatch(brandCss, /data-brand-treatment="signature"|data-brand-treatment="none"|signatureRule|watermarkBrand|microBrand/);
-  assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(39px,\s*10\.35vw,\s*44px\)/);
+  assert.match(stageCss, /teamIdentityTitleStage--standard[\s\S]*--identity-title:\s*clamp\(30px,\s*8vw,\s*36px\)/);
 });
 
 test('Back is a first-class title-stage affordance with accessible semantics and touch target', () => {
@@ -94,7 +97,8 @@ test('Back is a first-class title-stage affordance with accessible semantics and
 
 test('page-level status and actions are integrated into the editorial title composition', () => {
   assert.doesNotMatch(secondary, /TeamIdentitySupportRail/);
-  assert.match(secondary, /status=\{status\}/);
+  assert.match(secondary, /summary=\{status \|\| summary\}/);
+  assert.doesNotMatch(secondary, /status=\{status\}/);
   assert.match(secondary, /actions=\{actions\}/);
   assert.doesNotMatch(playerWorkspace, /TeamIdentitySupportRail/);
   assert.match(playerWorkspace, /status=\{model\.status\}/);
@@ -108,8 +112,16 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
   assert.match(geometry, /env\(safe-area-inset-bottom,\s*0px\)/);
 });
 
-test('page title remains a real level-one heading with discoverable identity metadata', () => {
-  assert.match(stage, /<h1 className="teamIdentityTitleStage__title" data-identity-role="page-title">/);
+test('In Season hero follows role-specific page heading semantics', () => {
+  assert.match(inSeasonHub, /const H = "h" \+ \(isCoach \? 2 : 1\);/);
+  assert.match(inSeasonHub, /<H className="t">In Season<\/H>/);
+  assert.equal((inSeasonStyles.match(/\.inSeasonHero \.t/g) || []).length, 2);
+});
+
+test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
+  assert.match(stage, /headingLevel = false/);
+    assert.match(stage, /const TitleHeading = headingLevel/);
+  assert.match(stage, /<TitleHeading className="teamIdentityTitleStage__title" data-identity-role="page-title">/);
   assert.match(stage, /data-title-word-count=\{titleWords\.length\}/);
   assert.match(stage, /data-title-size=\{titleSize\}/);
   assert.match(stage, /data-brand-treatment=\{resolvedBrandTreatment\}/);

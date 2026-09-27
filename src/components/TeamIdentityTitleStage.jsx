@@ -70,6 +70,7 @@ export default function TeamIdentityTitleStage({
   role = "Team",
   eyebrow = "",
   title,
+  headingLevel = false,
   personName = "",
   summary = "",
   status = null,
@@ -91,11 +92,13 @@ export default function TeamIdentityTitleStage({
   const cleanedLogo = useCleanTeamLogo(rawLogo);
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
+  const TitleHeading = headingLevel ? "h2" : "h1";
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
   const titleWords = displayTitle.split(/\s+/).filter(Boolean);
   const singleWordTitle = titleWords.length === 1;
   const longestWordLength = titleWords.reduce((max, word) => Math.max(max, word.length), 0);
+  const longToken = longestWordLength > 16;
   const longSingleWord = singleWordTitle && longestWordLength >= 11;
   const longTitle = displayTitle.length > 22 || longestWordLength > 12;
   const heroClass = variant === "hero" || variant === "identity" ? "teamIdentityTitleStage--hero" : "teamIdentityTitleStage--standard";
@@ -178,6 +181,7 @@ export default function TeamIdentityTitleStage({
         heroClass,
         surfaceClass,
         longTitle ? "teamIdentityTitleStage--longTitle" : "",
+        longToken ? "teamIdentityTitleStage--longToken" : "",
         singleWordTitle ? "teamIdentityTitleStage--singleWord" : "teamIdentityTitleStage--multiWord",
         longSingleWord ? "teamIdentityTitleStage--longSingleWord" : "",
         titleSize !== "auto" ? `teamIdentityTitleStage--title-${titleSize}` : "",
@@ -217,7 +221,7 @@ export default function TeamIdentityTitleStage({
             <span className="teamIdentityTitleStage__team" data-identity-role="team-name">{teamName}</span>
             <span className="teamIdentityTitleStage__descriptor" data-identity-role="role">{descriptor}</span>
           </div>
-          <h1 className="teamIdentityTitleStage__title" data-identity-role="page-title">{displayTitle}</h1>
+          <TitleHeading className="teamIdentityTitleStage__title" data-identity-role="page-title">{displayTitle}</TitleHeading>
           {displayPerson && displayPerson !== displayTitle ? <div className="teamIdentityTitleStage__person" data-identity-role="person-name">{displayPerson}</div> : null}
           {summary ? <p className="teamIdentityTitleStage__summary">{summary}</p> : null}
           <TeamIdentitySupportRail status={status} actions={actions} />

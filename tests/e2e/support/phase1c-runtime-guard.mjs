@@ -14,16 +14,29 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
   ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
   // Phase 7D.2 restores the reviewed flat roster composition. Phase 7E keeps that composition
-  // and adds the reviewed restrained team-brand row tint. Only exact Actions captures of these
-  // intentional recovered states are accepted; superseded rounded/tall roster hashes stay rejected.
+  // and adds the reviewed restrained team-brand row tint. The app-wide heading pass adds the
+  // reviewed compact editorial title treatment while preserving the roster composition below it.
   ['coach-players-registered-populated-390', [
     'd613a65be33b24e9be224161e2bc30a0cc119c9a1fb846de9728a0736111beee',
     '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
     'a3407c36f7b76bbb2b98b664acd89f759a4eaabfae27326576465fff851945a2',
+    '37b37fb495cfca1747ae79810b6103964971fa4bf2e222cc6c601133dead9b2c',
+    '549a327449c8a375e7dd45f738a62b651263fa83bb859732c40f0476153dc07f',
+  ]],
+  // The app-wide heading pass intentionally replaces the generic Events intro copy with the
+  // reviewed live RSVP status. Lock that exact CI-rendered state by digest so Phase 1C does not
+  // depend on a repository PNG binary for this intentionally changed surface.
+  ['coach-events-registered-populated-390', [
+    '03e08a265baa8384f207499e9a830191afbbc8110caf64cfe8b238cb2ea591fe',
+    'b1f9bf67a81a471ac9f7f74ba03f8b7f2a67e45951c168377713e2bbbe0bf211',
   ]],
   // Phase 7E now keeps photo ownership in More > Personalize, so Progress returns to the
   // previously reviewed compact state with no photo panel or unrelated visual drift.
-  ['player-progress-registered-populated-390', 'ab2357b3e1393fb78d270b8eb840ff8dfec0627ae65576d7cd3be8faee4059d7'],
+  ['player-progress-registered-populated-390', [
+    'ab2357b3e1393fb78d270b8eb840ff8dfec0627ae65576d7cd3be8faee4059d7',
+    '33201cf2a3bb26b98774eccf2edde46e53963a59d574aa9a29b27696a61008a5',
+    '8f7916dd1cf2877d3c2d62c551742364edd0521aa5ca68532409602b6a94852d',
+  ]],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
   ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],

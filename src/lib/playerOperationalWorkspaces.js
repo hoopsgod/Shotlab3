@@ -76,8 +76,8 @@ export const buildAtHomeWorkspaceModel = ({
     id: "at-home",
     eyebrow: "Player workspace",
     title: "At Home Training",
-    subtitle: openDrills.length ? `${openDrills.length} drill${openDrills.length === 1 ? "" : "s"} still open today.` : "Daily drill block complete. Protect the standard with quality makes.",
-    status: openDrills.length ? "Training active" : "Block complete",
+    subtitle: openDrills.length ? `${openDrills.length} drill${openDrills.length === 1 ? "" : "s"} open today` : "All assigned drills completed today",
+    status: null,
     primaryAction,
     metrics: [
       { id: "today", label: "Today", value: todayMakes, detail: `${pct(todayMakes, dailyGoal)}% of make goal`, action: shotTrackerAction },
@@ -111,8 +111,8 @@ export const buildProgramWorkspaceModel = ({
     id: "program",
     eyebrow: "Coach-directed work",
     title: "Program Training",
-    subtitle: priorityDrill ? `Next priority: ${clean(priorityDrill?.name || priorityDrill?.drillName)}` : "All coach-assigned work is complete for today.",
-    status: openDrills.length ? "Coach plan active" : "Program complete",
+    subtitle: priorityDrill ? `Next priority: ${clean(priorityDrill?.name || priorityDrill?.drillName)}` : "All coach-assigned drills completed today",
+    status: null,
     primaryAction: priorityDrill ? { label: "Start coach priority", target: "duels", drillId: rowDrillId(priorityDrill) } : { label: "Review rankings", ...rankingsAction },
     metrics: [
       { id: "progress", label: "Today", value: `${completed.size}/${safeArray(programDrills).length}`, detail: `${pct(completed.size, safeArray(programDrills).length)}% complete` },

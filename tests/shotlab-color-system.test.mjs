@@ -53,7 +53,7 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
   assert.match(mobile, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
   assert.match(mobile, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
   assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
-  assert.match(mobile, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)/);
+  assert.match(mobile, /\.mcHeroTitle\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)/);
   assert.match(mobile, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
   assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
   assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);

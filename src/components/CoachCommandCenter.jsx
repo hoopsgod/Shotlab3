@@ -232,7 +232,7 @@ export default function CoachCommandCenter({
               <div className="mcHeroIdentityCopy"><span className="mcProgramIdentity">{teamName}</span><span className="mcEyebrow">Coach Mode · {primaryCommand.eyebrow}</span></div>
               <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcHeroLogoSetup" />}</button>
             </div>
-            <h1>{primaryCommand.title}</h1><p>{primaryCommand.detail}</p>
+            <h2 className="mcHeroTitle">{primaryCommand.title}</h2><p>{primaryCommand.detail}</p>
             <div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button><button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button></div>
             <button type="button" className="mcPrimary" onClick={primaryCommand.onClick}>{primaryCommand.label}<Icon name="arrow" /></button>
           </div>

@@ -60,7 +60,7 @@ for (const viewport of VIEWPORTS) {
       const eyebrow = hero?.querySelector('.mcEyebrow');
       const mark = hero?.querySelector('.mcHeroTeamMark');
       const image = mark?.querySelector('img');
-      const title = hero?.querySelector('h1');
+      const title = hero?.querySelector('.mcHeroTitle');
       const detail = hero?.querySelector('.mcHeroContent > p');
       const reality = document.querySelector('.mcRealityStrip');
       const realityButtons = [...(reality?.querySelectorAll(':scope > button') || [])];

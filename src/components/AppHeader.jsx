@@ -57,8 +57,10 @@ export default function AppHeader({
   leading,
   brandLockup,
   action,
+  headingLevel = false,
 }) {
   const stylePreset = VARIANT_STYLES[variant] || VARIANT_STYLES.standard;
+  const TitleHeading = headingLevel ? "h2" : "h1";
   const isIconOnlyAction = Boolean(action && !action.label);
   const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
     ? {
@@ -102,9 +104,9 @@ export default function AppHeader({
                 {eyebrow}
               </div>
             ) : null}
-            <h1 className="appHeaderTitle" style={{ fontFamily: "var(--font-display)", fontSize: variant === "utility" ? 24 : 38, fontWeight: 780, lineHeight: 1.02, margin: 0, color: "var(--text-1)", letterSpacing: "-.038em", maxWidth: "100%", overflowWrap: "break-word" }}>
+            {title ? <TitleHeading className="appHeaderTitle" style={{ fontFamily: "var(--font-display)", fontSize: variant === "utility" ? 24 : 38, fontWeight: 780, lineHeight: 1.02, margin: 0, color: "var(--text-1)", letterSpacing: "-.038em", maxWidth: "100%", overflowWrap: "break-word" }}>
               {title}
-            </h1>
+            </TitleHeading> : null}
             {subtitle ? (
               <p className="appHeaderSubtitle" style={{ marginTop: 8, marginBottom: 0, color: "var(--text-2)", fontFamily: "var(--font-body)", fontSize: "var(--type-secondary, 14px)", letterSpacing: "-.008em", lineHeight: 1.5, overflowWrap: "anywhere", maxWidth: 680 }}>
                 {subtitle}

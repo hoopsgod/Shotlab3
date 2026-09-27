@@ -80,9 +80,9 @@ async function expectEditorialTitle(page, { minCrestWidth = 64 } = {}) {
   // contains the artwork inside the source-owned crest token.
   expect(metrics.crestWidth).toBeGreaterThanOrEqual(minCrestWidth);
   expect(metrics.crestWidth).toBeLessThanOrEqual(80);
-  // Exact Phase 3A evidence certifies route titles such as Events at 35.1px;
-  // retain a readable 34px floor rather than restoring the stale 38px minimum.
-  expect(metrics.titleSize).toBeGreaterThanOrEqual(34);
+  // The shared compact editorial system intentionally spans 28–36px on mobile;
+  // certify that source contract instead of reintroducing an oversized floor.
+  expect(metrics.titleSize).toBeGreaterThanOrEqual(28);
   expect(metrics.titleSize).toBeLessThanOrEqual(46);
 }
 
@@ -133,7 +133,7 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   await expect(page.getByTestId("coach-primary-objective")).toBeVisible({ timeout: 20_000 });
   const home = await page.getByTestId("coach-primary-objective").evaluate((element) => {
     const identity = element.querySelector('.mcHeroIdentity');
-    const title = element.querySelector('h1');
+    const title = element.querySelector('.mcHeroTitle');
     const crest = element.querySelector('.mcHeroTeamMark');
     const computed = getComputedStyle(element);
     return {

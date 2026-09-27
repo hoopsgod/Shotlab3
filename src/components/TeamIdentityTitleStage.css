@@ -80,7 +80,7 @@
 .teamIdentityTitleStage__team {
   max-width: 30ch;
   color: #5e7413;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 .teamIdentityTitleStage__descriptor { color: #6b746e; }
 .teamIdentityTitleStage__descriptor::before { content: "·"; margin-right: 8px; color: #9aa29d; }
@@ -92,28 +92,26 @@
   letter-spacing: -.062em;
   text-wrap: balance;
   overflow-wrap: normal;
-  word-break: normal;
   hyphens: none;
 }
 .teamIdentityTitleStage--singleWord .teamIdentityTitleStage__title {
   max-width: none;
   white-space: nowrap;
-  text-wrap: nowrap;
 }
 .teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
   font-size: clamp(38px, 9.6vw, 40px);
   letter-spacing: -.068em;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .teamIdentityTitleStage--longTitle.teamIdentityTitleStage--multiWord .teamIdentityTitleStage__title {
   max-width: 16ch;
   font-size: clamp(40px, 9.8vw, 44px);
   line-height: .94;
-  overflow-wrap: normal;
-  word-break: normal;
-  hyphens: none;
 }
-.teamIdentityTitleStage--title-long .teamIdentityTitleStage__title {
-  font-size: clamp(36px, 9.5vw, 42px);
+.teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .teamIdentityTitleStage__person {
   margin-top: 8px;
@@ -291,9 +289,9 @@
   --identity-tonal: clamp(205px, 61vw, 250px);
 }
 .teamIdentityTitleStage--hero .teamIdentityTitleStage__inner {
-  min-height: 188px;
+  min-height: 160px;
   align-items: end;
-  padding-block-end: 24px;
+  padding-block-end: 16px;
 }
 .teamIdentityTitleStage--hero .teamIdentityTitleStage__title { max-width: 11ch; white-space: normal; text-wrap: balance; }
 .teamIdentityTitleStage--hero.teamIdentityTitleStage--longTitle .teamIdentityTitleStage__title { font-size: clamp(44px, 11vw, 52px); }
@@ -307,7 +305,7 @@
   /* Compact Editorial Stage: keep the team mark present but subordinate to page identity. */
   .teamIdentityTitleStage--standard {
     --identity-crest: clamp(60px, 16vw, 68px);
-    --identity-title: clamp(39px, 10.35vw, 44px);
+    --identity-title: clamp(30px, 8vw, 36px);
   }
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner {
     align-items: start;
@@ -376,7 +374,7 @@
 }
 
 @media (max-width: 390px) {
-  .teamIdentityTitleStage--standard { --identity-crest: 60px; --identity-title: 39px; }
+  .teamIdentityTitleStage--standard { --identity-crest: 60px; --identity-title: clamp(28px, 8vw, 34px); }
   .teamIdentityTitleStage--hero { --identity-crest: 104px; --identity-title: 46px; }
   .teamIdentityTitleStage--standard .teamIdentityTitleStage__inner { gap: 10px; padding: 8px 2px 10px; }
   .teamIdentityTitleStage__identityLine { margin-bottom: 6px; font-size: 11px; }

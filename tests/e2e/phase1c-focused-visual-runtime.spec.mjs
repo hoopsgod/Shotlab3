@@ -7,8 +7,6 @@ import {
   installPhase1CFixedTime,
 } from './support/phase1c-runtime-guard.mjs';
 
-test.describe.configure({ mode: 'serial' });
-
 const HEIGHT = 844;
 
 const GEOMETRY = {

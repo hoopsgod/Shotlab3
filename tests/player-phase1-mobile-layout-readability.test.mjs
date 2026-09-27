@@ -20,7 +20,7 @@ test('Player Phase 1 uses existing Player authorities without a global overflow 
 });
 
 test('Player workspace metrics use readable floors and wrap meaningful copy', () => {
-  assert.match(workspace, /\.metricLabel,\.metricDetail\{[\s\S]*overflow:visible[\s\S]*text-overflow:clip[\s\S]*white-space:normal[\s\S]*overflow-wrap:anywhere/);
+  assert.match(workspace, /\.metricLabel,\.metricDetail\{[\s\S]*overflow:visible[\s\S]*white-space:normal[\s\S]*overflow-wrap:anywhere/);
   assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricLabel\s*\{[\s\S]*color:#5f6962[\s\S]*font-size:11px/);
   assert.match(workspace, /data-page-hierarchy="editorial"[\s\S]*\.metricDetail\s*\{[\s\S]*color:#59635d[\s\S]*font-size:12px/);
   assert.match(hierarchy, /@media\(max-width:700px\)[\s\S]*\.metricSupporting>span:last-child\{[^}]*font-size:12px!important/);
@@ -32,7 +32,7 @@ test('Player workspace metrics use readable floors and wrap meaningful copy', ()
 test('mobile Player filter rails and title support reflow inside the viewport', () => {
   assert.match(workspace, /@media\(max-width:760px\)[\s\S]*filterRail\[data-player-workspace-filter-rail="true"\]\{[^}]*flex-wrap:wrap[^}]*overflow-x:visible[^}]*scroll-snap-type:none/);
   assert.match(workspace, /filterRail\[data-player-workspace-filter-rail="true"\]\s*>\s*\.filterButton\{[^}]*white-space:normal/);
-  assert.match(workspace, /teamIdentityTitleStage__identityLine\)\{margin-bottom:6px;font-size:10px\}/);
+  assert.match(workspace, /teamIdentityTitleStage__identityLine\)\{margin-bottom:6px;font-size:11px\}/);
   assert.match(workspace, /teamIdentityTitleStage__summary\)\{[^}]*display:block[^}]*overflow:visible[^}]*-webkit-line-clamp:unset/);
 });
 

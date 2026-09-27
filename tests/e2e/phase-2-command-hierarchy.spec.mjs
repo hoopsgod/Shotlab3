@@ -100,7 +100,10 @@ test("Player home preserves the command hierarchy beneath the Dashboard Showstop
   await expect(root).toBeVisible({ timeout: 20_000 });
   await expect(root).toHaveAttribute("data-phase", "dashboard-showstopper-phase-2");
   await expect(primary).toBeVisible();
-  const commandHeading = root.getByRole("heading", { level: 1 });
+  const pageTitle = page.getByTestId("player-dashboard-identity-header").getByRole("heading", { level: 1 });
+  await expect(pageTitle).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  const commandHeading = root.locator('[data-command-role="primary"]').getByRole("heading", { level: 2 });
   await expect(commandHeading).toBeVisible();
   await expect(commandHeading).not.toHaveText("");
   await expect(evidence).toBeVisible();
@@ -115,7 +118,7 @@ test("Player home preserves the command hierarchy beneath the Dashboard Showstop
     const top = (selector) => document.querySelector(selector)?.getBoundingClientRect().top ?? -1;
     const rootStyle = style('[data-testid="player-daily-command-center"]');
     const heroStyle = style('[data-command-role="primary"]');
-    const titleStyle = style('[data-command-role="primary"] h1');
+    const titleStyle = style('[data-command-role="primary"] h2');
     const primaryButtonStyle = style('[data-testid="player-daily-primary-action"]');
     const primaryButtonLabel = document.querySelector('[data-testid="player-daily-primary-action"] span');
     const primaryButtonLabelStyle = primaryButtonLabel ? getComputedStyle(primaryButtonLabel) : null;

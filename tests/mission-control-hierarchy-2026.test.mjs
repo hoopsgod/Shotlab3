@@ -66,7 +66,7 @@ test("Coach Home base composition stays source-owned while the runtime shell bri
   assert.match(mobile, /\.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
   assert.match(mobile, /\.mcProgramIdentity\{[^}]*max-width:16ch[^}]*font:780 11px\/1\.2 -apple-system/);
   assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
-  assert.match(mobile, /h1\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
+  assert.match(mobile, /\.mcHeroTitle\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
   assert.match(mobile, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
   assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
@@ -83,7 +83,7 @@ test("late global hierarchy layers cannot redesign Coach Home identity or decisi
   for (const lateAuthority of [stripComments(css), cascadeLock, criticalCss]) {
     assert.doesNotMatch(lateAuthority, /\.mcHeroTeamMark\s*\{[^}]*display:\s*none/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroTeamMark\s*\{[^}]*width\s*:/s);
-    assert.doesNotMatch(lateAuthority, /\.mcHero\s+h1\s*\{[^}]*font-size\s*:/s);
+    assert.doesNotMatch(lateAuthority, /\.mcHero\s+\.mcHeroTitle\s*\{[^}]*font-size\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeroContent\s*\{[^}]*grid-template-columns\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcHeader\s*\{[^}]*grid-template-columns\s*:/s);
     assert.doesNotMatch(lateAuthority, /\.mcRealityStrip\b|\.mcPrimary\b/);

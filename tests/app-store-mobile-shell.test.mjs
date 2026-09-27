@@ -73,7 +73,7 @@ test("mobile shell preserves current touch targets, safe areas, contrast, reduce
   // it in the generic foundation would restore duplicate global layout authority.
   assert.match(navigationCss, /env\(safe-area-inset-bottom/);
   assert.match(foundationCss, /prefers-reduced-motion:\s*reduce/);
-  assert.match(correctionsCss, /Title and team-identity composition are intentionally excluded/);
+  // The contract is behavioral/source-authority based: corrections must not own title composition.
   assert.doesNotMatch(correctionsCss, /teamIdentityTitleStage|mcHeroTeamMark/);
   assert.doesNotMatch(correctionsCss, /\.mcHero\s*\{/);
 });

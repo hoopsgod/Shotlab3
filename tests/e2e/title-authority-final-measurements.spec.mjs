@@ -130,7 +130,7 @@ test("records exact current difficult-branding Coach Mission Control geometry", 
     const rect = element.getBoundingClientRect();
     const identity = element.querySelector(".mcHeroIdentity");
     const identityRect = identity?.getBoundingClientRect();
-    const title = element.querySelector("h1");
+    const title = element.querySelector(".mcHeroTitle");
     const titleRect = title?.getBoundingClientRect();
     const team = element.querySelector(".mcProgramIdentity");
     const teamStyle = team ? getComputedStyle(team) : null;
@@ -208,7 +208,7 @@ test("captures the exact default Coach Demo winning cascade before repair", asyn
     const parentRect = parent?.getBoundingClientRect();
     const hero = element.closest('[data-testid="coach-primary-objective"]');
     const heroRect = hero?.getBoundingClientRect();
-    const title = hero?.querySelector("h1");
+    const title = hero?.querySelector(".mcHeroTitle");
     const titleRect = title?.getBoundingClientRect();
     const computed = getComputedStyle(element);
     const parentComputed = parent ? getComputedStyle(parent) : null;
@@ -232,7 +232,7 @@ test("captures the exact default Coach Demo winning cascade before repair", asyn
     mark: '[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark',
     image: '[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark img',
     hero: '[data-team-identity-stage="coach-mission-control"]',
-    title: '[data-team-identity-stage="coach-mission-control"] h1',
+    title: '[data-team-identity-stage="coach-mission-control"] .mcHeroTitle',
   };
   const cascade = {};
   for (const [key, selector] of Object.entries(selectors)) {

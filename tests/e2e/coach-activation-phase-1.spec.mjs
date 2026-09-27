@@ -59,7 +59,7 @@ test("fresh Coach Demo preserves its confirmed team identity and keeps branding 
   await expect(page.getByTestId("coach-onboarding-state")).toHaveCount(0);
   const objective = page.getByTestId("coach-primary-objective");
   await expect(objective.getByText("Demo Titans", { exact: true })).toBeVisible();
-  await expect(objective.getByRole("heading", { level: 1 })).toHaveText(/\S+/);
+  await expect(objective.locator(".mcHeroTitle")).toHaveText(/\S+/);
   await expect(objective.locator(".mcPrimary")).toBeVisible();
   await expect(objective.getByTestId("coach-primary-metrics").getByRole("button")).toHaveCount(3);
 

@@ -35,6 +35,20 @@ test('Phase 7 owns return-control geometry while Phase 3C keeps only route-densi
   assert.match(backEnhancer, /touchAction:"manipulation"/);
 });
 
+test('mobile heading cleanup preserves established desktop return navigation', () => {
+  assert.match(backEnhancer, /isDesktop&&tab!=="home"&&!active/);
+  assert.match(backEnhancer, /!isDesktop&&tab==="log-drill"&&showShotStats/);
+  assert.match(backEnhancer, /tab==="drills"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /tab==="events"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /tab==="activity"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /tab==="leaderboards"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /tab==="in-season"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /tab==="players"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /tab==="sc"[\s\S]*isDesktop&&<DashboardReturnButton/);
+  assert.match(backEnhancer, /isDesktop\?\[\{key:"home",label:"Back to Home"/);
+  assert.match(phase7Chrome, /performance-shell--coach\.is-mobile \.shared-dashboard-back-action\{display:none!important\}/);
+});
+
 test('Leaderboard destination removes duplicated inner title rows while keeping context content', () => {
   assert.match(css, /premium-leaderboards-hub"\]>header>div:nth-child\(1\)/);
   assert.match(css, /premium-leaderboards-hub"\]>header>div:nth-child\(2\)/);
