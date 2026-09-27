@@ -38,7 +38,6 @@
 
   .secondaryPageTitleStage .teamIdentityTitleStage__title {
     max-width: 10.5ch;
-    margin: 0;
     font-size: clamp(30px, 8vw, 36px) !important;
     line-height: .94 !important;
     letter-spacing: -.045em !important;
@@ -72,9 +71,7 @@
   }
 
   .secondaryPageTitleStage .teamIdentityTitleStage__actions {
-    display: flex;
     flex-wrap: wrap;
-    gap: 8px !important;
     width: 100%;
   }
 
