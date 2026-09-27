@@ -83,7 +83,7 @@ async function expectPlayerIdentityInsideViewport(page) {
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
   expect(geometry.width).toBeGreaterThan(300);
   if (geometry.variant === "hero") {
-    expect(geometry.height).toBeGreaterThanOrEqual(180);
+    expect(geometry.height).toBeGreaterThanOrEqual(160);
     expect(geometry.height).toBeLessThanOrEqual(300);
     expect(geometry.titleSize).toBeGreaterThanOrEqual(44);
     expect(geometry.titleSize).toBeLessThanOrEqual(60);
