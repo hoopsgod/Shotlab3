@@ -112,10 +112,10 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
   assert.match(geometry, /env\(safe-area-inset-bottom,\s*0px\)/);
 });
 
-test('In Season hero remains subordinate to the shared page title', () => {
-  assert.match(inSeasonHub, /<h2>In Season<\/h2>/);
-  assert.doesNotMatch(inSeasonHub, /<h1>In Season<\/h1>/);
-  assert.equal((inSeasonStyles.match(/\.inSeasonHero h2/g) || []).length, 2);
+test('In Season hero follows role-specific page heading semantics', () => {
+  assert.match(inSeasonHub, /const SeasonTitle = isCoach \? "h2" : "h1";/);
+  assert.match(inSeasonHub, /<SeasonTitle className="inSeasonHeroTitle">In Season<\/SeasonTitle>/);
+  assert.equal((inSeasonStyles.match(/\.inSeasonHeroTitle/g) || []).length, 2);
 });
 
 test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
