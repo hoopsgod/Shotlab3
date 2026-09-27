@@ -315,7 +315,7 @@ export default function InSeasonPerformanceHub({
 
   return <section className="inSeasonHub" data-testid="in-season-performance-hub" data-role={role}>
     <header className="inSeasonHero">
-      <div className="inSeasonHeroCopy"><span className="inSeasonEyebrow">Season performance</span><h1>In Season</h1><p>{isCoach ? "Run repeatable team standards, capture verified results, and turn game data into a living program record." : "Compete against today’s team standards and the best marks your program has produced."}</p></div>
+      <div className="inSeasonHeroCopy"><span className="inSeasonEyebrow">Season performance</span><h2>In Season</h2><p>{isCoach ? "Run repeatable team standards, capture verified results, and turn game data into a living program record." : "Compete against today’s team standards and the best marks your program has produced."}</p></div>
       <div className="inSeasonHeroPulse"><span>Program standard</span><strong>{visibleDrills.length}</strong><small>active drills</small></div>
     </header>
 
