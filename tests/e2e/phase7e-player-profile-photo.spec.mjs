@@ -61,13 +61,15 @@ test('Coach roster and full player profile render the same stored player photo',
     const background = await photoRow.evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(background).not.toBe('rgb(255, 255, 255)');
     expect(background).not.toBe('rgba(0, 0, 0, 0)');
-    await photoRow.locator('[data-phase1-open-profile="true"]').click();
+    const openProfile = photoRow.locator('[data-phase1-open-profile="true"]');
+    const playerName = (await openProfile.locator('span').first().innerText()).trim();
+    await openProfile.click();
     const drawer = page.getByTestId('coach-player-intelligence-drawer');
     await expect(drawer).toBeVisible({ timeout: 20_000 });
     await drawer.getByRole('button', { name: 'Open Full Profile', exact: true }).click();
     const profile = page.getByTestId('coach-player-development-profile');
     await expect(profile).toBeVisible({ timeout: 20_000 });
-    await expect(profile.getByTestId('coach-player-profile-photo')).toHaveAttribute('src', /^data:image\/png;base64,/);
+    await expect(profile.getByRole('img', { name: playerName, exact: true })).toHaveAttribute('src', /^data:image\/png;base64,/);
     await noHorizontalOverflow(page);
   } finally { await context.close(); }
 });
