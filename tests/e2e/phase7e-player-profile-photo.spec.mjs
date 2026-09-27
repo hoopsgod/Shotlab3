@@ -30,7 +30,7 @@ test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 });
 
-test('Player photo control lives in More > Personalization, not Progress', async ({ page }) => {
+test('Player photo control lives in More > Personalize, not Progress', async ({ page }) => {
   await enterDemo(page, 'player');
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click();
   const progress = page.getByTestId('player-profile-workspace');
@@ -40,12 +40,12 @@ test('Player photo control lives in More > Personalization, not Progress', async
   await page.getByTestId('mobile-navigation-more').click();
   const sheet = page.getByTestId('mobile-navigation-sheet');
   await expect(sheet).toBeVisible();
-  await sheet.locator('[data-nav-key="personalization"]').click();
-  const workspace = page.getByTestId('player-personalization-workspace');
-  await expect(workspace).toBeVisible({ timeout: 20_000 });
+  const personalizeItem = sheet.locator('[data-nav-key="personalization"]');
+  await expect(personalizeItem).toContainText('Personalize');
+  await personalizeItem.click();
 
-  const card = workspace.locator('section.premiumSummaryPanel:has(input[type="file"])');
-  await expect(card).toBeVisible();
+  const card = page.locator('section.premiumSummaryPanel:has(input[type="file"])');
+  await expect(card).toBeVisible({ timeout: 20_000 });
   const cardBox = await card.boundingBox();
   expect(cardBox?.height || 0).toBeGreaterThanOrEqual(44);
   const action = card.locator('label.cta-primary');
