@@ -24,7 +24,7 @@
    safety rules may protect arbitrary headings, but they must not introduce
    emergency breaks inside authenticated page-title words. */
 .teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__title {
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
   word-break: normal;
   hyphens: none;
 }

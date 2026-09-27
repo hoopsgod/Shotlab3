@@ -90,7 +90,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
 
         <div className={styles.statusBlock}>
-          <h1 className={styles.title}>{narrative.headline}</h1>
+          <h2 className={styles.title}>{narrative.headline}</h2>
           <p className={styles.description}>{narrative.description}</p>
         </div>
 

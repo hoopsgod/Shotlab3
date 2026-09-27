@@ -8,7 +8,7 @@ export default function PlayerDashboardHeader({ userName, subtitle, mission }) {
       surface="dark"
       role="Player Mode"
       title={displayName}
-      summary={subtitle || "Train. Track. Improve."}
+      summary={subtitle}
       status={mission || null}
       testId="player-dashboard-identity-header"
       className="playerDashboardIdentityStage"
