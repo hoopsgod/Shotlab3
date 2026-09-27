@@ -27,7 +27,7 @@ test('mobile secondary route mastheads resolve through the shared source-owned t
   assert.match(stageCss, /\.teamIdentityTitleStage--standard \{ --identity-crest: 60px; --identity-title: clamp\(28px, 8vw, 34px\); \}/)
   assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*--identity-crest:\s*64px/)
   assert.match(brandHierarchyCss, /@media \(max-width: 390px\)[\s\S]*gap:\s*10px[\s\S]*padding:\s*10px 2px 12px/)
-  assert.match(stageCss, /\.teamIdentityTitleStage__title[\s\S]*overflow-wrap:\s*normal[\s\S]*word-break:\s*normal/)
+  assert.match(stageCss, /\.teamIdentityTitleStage__title[\s\S]*overflow-wrap:\s*normal[\s\S]*hyphens:\s*none/)
 })
 
 test('shared title stage owns responsive geometry without build-time source transforms', () => {
