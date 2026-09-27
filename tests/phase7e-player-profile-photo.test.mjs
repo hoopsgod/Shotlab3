@@ -153,10 +153,11 @@ test("players API carries one canonical bounded photo value without erasing it d
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl = cleanText\(prior\.photo_url, MAX_PHOTO_URL_CHARS\)/);
 });
 
-test("route enhancer moves player photo out of Progress into Personalization and preserves coach identity surfaces", () => {
+test("route enhancer moves player photo out of Progress into Personalize and preserves coach identity surfaces", () => {
   assert.match(enhancer, /personalization:\"\/personalization\"/);
   assert.match(enhancer, /k:\"personalization\"/);
-  assert.match(enhancer, /player-personalization-workspace/);
+  assert.match(enhancer, /l:\"Personalize\"/);
+  assert.match(enhancer, /title=\"Personalize\"/);
   assert.match(enhancer, /photo must live in Personalization before Progress/);
   assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
   assert.match(enhancer, /coachRosterCard__photo slp/);
