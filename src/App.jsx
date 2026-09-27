@@ -2039,7 +2039,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 
 {/* Header — Premium dashboard heading */}
 <PlayerDashboardHeader
-  headingLevel={tab !== "home"}
+  headingLevel={tab !== "home" && !showShotStats}
   userName={u.name}
   subtitle=""
   mission={(()=>{
@@ -3042,7 +3042,7 @@ return <div className="fade-up">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
 </div>
 <div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>SHOT TRACKER</div>
+<h2 style={{margin:0,fontFamily:FD,color:ORANGE,fontSize:16,fontWeight:400,letterSpacing:3}}>SHOT TRACKER</h2>
 <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Log makes · Running totals · Heat map</div>
 </div>
 </div>
