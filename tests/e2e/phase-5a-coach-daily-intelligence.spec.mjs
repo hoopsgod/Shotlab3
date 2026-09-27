@@ -66,7 +66,7 @@ test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding de
   const metrics = page.getByTestId("coach-primary-metrics");
   await expect(hero).toBeVisible({ timeout: 20_000 });
   await expect(hero.getByText("Demo Titans", { exact: true })).toBeVisible();
-  await expect(hero.getByRole("heading", { level: 1 })).toHaveText(/\S+/);
+  await expect(hero.locator(".mcHeroTitle")).toHaveText(/\S+/);
   await expect(hero.locator(".mcPrimary")).toBeVisible();
   await expect(metrics).toContainText("Active");
   await expect(metrics).toContainText("Follow-up");
@@ -106,7 +106,7 @@ test("Phase 5A keeps the post-roster-change Coach decision path truthful and act
 
   const hero = page.getByTestId("coach-primary-objective");
   await expect(hero).toBeVisible();
-  await expect(hero.getByRole("heading", { level: 1 })).toHaveText(/\S+/);
+  await expect(hero.locator(".mcHeroTitle")).toHaveText(/\S+/);
   const primaryAction = hero.locator(".mcPrimary");
   await expect(primaryAction).toBeVisible();
   expect((await primaryAction.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
