@@ -12,7 +12,8 @@
 /* Secondary pages must never add a tile, plate, or shadow box behind uploaded
    artwork. Any transparency belongs to the image itself and is cleaned by the
    shared team-logo pipeline. */
-.teamIdentityTitleStage[data-title-stage-family="editorial"] :is(.teamIdentityTitleStage__crestSlot, .teamIdentityTitleStage__crest) {
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crestSlot,
+.teamIdentityTitleStage[data-title-stage-family="editorial"] .teamIdentityTitleStage__crest {
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -55,7 +56,6 @@
 }
 
 .teamIdentityTitleStage__fallbackActionMark {
-  color: inherit;
   font: 900 28px/.9 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   letter-spacing: -.06em;
 }
