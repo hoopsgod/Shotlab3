@@ -114,8 +114,8 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
 
 test('In Season hero follows role-specific page heading semantics', () => {
   assert.match(inSeasonHub, /const H = isCoach \? "h2" : "h1";/);
-  assert.match(inSeasonHub, /<H className="title">In Season<\/H>/);
-  assert.equal((inSeasonStyles.match(/\.inSeasonHero \.title/g) || []).length, 2);
+  assert.match(inSeasonHub, /<H className="t">In Season<\/H>/);
+  assert.equal((inSeasonStyles.match(/\.inSeasonHero \.t/g) || []).length, 2);
 });
 
 test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
