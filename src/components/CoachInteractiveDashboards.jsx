@@ -91,7 +91,7 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
       <SecondaryPageIntro
         eyebrow="SCHEDULE"
         title="Events"
-        summary="Plan practices, games and team moments."
+        summary={briefing.missing ? `${briefing.missing} RSVP response${briefing.missing === 1 ? "" : "s"} needed` : next ? `Next: ${next.title || "Team event"} · ${formatCoachScheduleDate(next.date)}` : "No upcoming team events scheduled"}
         actions={[{ key: "create", label: "+ Create Event", onClick: onCreateEvent }]}
         testId="coach-events-command-bar"
         compact
