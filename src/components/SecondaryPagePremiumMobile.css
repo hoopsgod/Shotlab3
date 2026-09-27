@@ -43,7 +43,6 @@
     line-height: .94 !important;
     letter-spacing: -.045em !important;
     overflow-wrap: normal !important;
-    word-break: normal !important;
     text-wrap: balance;
   }
 
@@ -213,7 +212,6 @@
     line-height: 1.02 !important;
     letter-spacing: -.04em !important;
     overflow-wrap: normal !important;
-    word-break: normal !important;
     text-wrap: balance;
   }
 
