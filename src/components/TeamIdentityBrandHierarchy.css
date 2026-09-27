@@ -30,7 +30,6 @@
 }
 .teamIdentityTitleStage[data-title-stage-family="editorial"].teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
   overflow-wrap: anywhere;
-  white-space: normal;
 }
 
 /* Missing artwork remains a brand state, not setup scaffolding. Coach stages

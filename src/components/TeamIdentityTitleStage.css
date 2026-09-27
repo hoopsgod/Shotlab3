@@ -92,35 +92,26 @@
   letter-spacing: -.062em;
   text-wrap: balance;
   overflow-wrap: normal;
-  word-break: normal;
   hyphens: none;
 }
 .teamIdentityTitleStage--singleWord .teamIdentityTitleStage__title {
   max-width: none;
   white-space: nowrap;
-  text-wrap: nowrap;
 }
 .teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
   font-size: clamp(38px, 9.6vw, 40px);
   letter-spacing: -.068em;
   white-space: normal;
-  text-wrap: wrap;
   overflow-wrap: anywhere;
 }
 .teamIdentityTitleStage--longTitle.teamIdentityTitleStage--multiWord .teamIdentityTitleStage__title {
   max-width: 16ch;
   font-size: clamp(40px, 9.8vw, 44px);
   line-height: .94;
-  overflow-wrap: normal;
-  word-break: normal;
-  hyphens: none;
 }
 .teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
   white-space: normal;
   overflow-wrap: anywhere;
-}
-.teamIdentityTitleStage--title-long .teamIdentityTitleStage__title {
-  font-size: clamp(36px, 9.5vw, 42px);
 }
 .teamIdentityTitleStage__person {
   margin-top: 8px;

@@ -54,7 +54,6 @@
   }
   .secondaryPageTitleStage.teamIdentityTitleStage--longToken .teamIdentityTitleStage__title {
     overflow-wrap: anywhere !important;
-    white-space: normal;
   }
 
   .secondaryPageTitleStage .teamIdentityTitleStage__identityLine {
