@@ -5,6 +5,6 @@ async function small(f){const i=await createImageBitmap(f),s=Math.min(i.width,i.
 export async function savePlayerProfilePhoto(id,f){
  if(f.size>15728640)throw Error();
  if(isDemoAccount(id))return URL.createObjectURL(f);
- const b=new FormData;b.append("file",f);b.append("player_email",id);try{b.append("fallback_data_url",await small(f))}catch{}
+ const b=new FormData;b.append("file",f);try{b.append("fallback_data_url",await small(f))}catch{}
  return (await (await fetch("/v1/player-photo",{method:"POST",headers:buildApiIdentityHeaders(),body:b})).json()).photo_url||Promise.reject()
 }
