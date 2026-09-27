@@ -49,9 +49,8 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
         <SecondaryPageIntro
           eyebrow="Program identity"
           title="Program Branding"
-          summary={`${teamName} should feel unmistakably yours across coach, player, training, event, leaderboard, and storefront experiences.`}
-          status="Coach + Player"
-          actions={[{ key: "back", label: "Back to Coach", onClick: onBack }]}
+          summary={`${teamName} identity appears across Coach and Player workspaces.`}
+          backAction={{ label: "Coach", ariaLabel: "Back to Coach", onClick: onBack }}
           testId="coach-branding-header"
           icon="settings"
         />

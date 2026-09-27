@@ -103,12 +103,15 @@
 .teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
   font-size: clamp(38px, 9.6vw, 40px);
   letter-spacing: -.068em;
+  white-space: normal;
+  text-wrap: wrap;
+  overflow-wrap: anywhere;
 }
 .teamIdentityTitleStage--longTitle.teamIdentityTitleStage--multiWord .teamIdentityTitleStage__title {
   max-width: 16ch;
   font-size: clamp(40px, 9.8vw, 44px);
   line-height: .94;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
   word-break: normal;
   hyphens: none;
 }
