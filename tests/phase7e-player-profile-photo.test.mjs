@@ -72,7 +72,7 @@ async function coachUpload({ targetTeam = "team-1", coachTeams = ["team-1", "tea
   }
 }
 
-test("player Profile accepts iPhone photo sources and exposes actionable state", () => {
+test("player personalization accepts iPhone photo sources and exposes actionable state", () => {
   assert.match(component, /premiumSummaryPanel/);
   assert.match(component, /btn-v cta-primary/);
   assert.match(component, /className="slp"/);
@@ -153,11 +153,12 @@ test("players API carries one canonical bounded photo value without erasing it d
   assert.match(playersApi, /if \(!row\.photoUrl && prior\?\.photo_url\) row\.photoUrl = cleanText\(prior\.photo_url, MAX_PHOTO_URL_CHARS\)/);
 });
 
-test("route enhancer keeps player photo inside Profile and preserves coach identity surfaces", () => {
-  assert.match(enhancer, /data-testid=\"player-profile-workspace\"/);
-  assert.match(enhancer, /photo must live in Player Profile/);
+test("route enhancer moves player photo out of Progress into Personalization and preserves coach identity surfaces", () => {
+  assert.match(enhancer, /personalization:\"\/personalization\"/);
+  assert.match(enhancer, /k:\"personalization\"/);
+  assert.match(enhancer, /player-personalization-workspace/);
+  assert.match(enhancer, /photo must live in Personalization before Progress/);
   assert.match(enhancer, /players\.find\(rowMatchesPlayerIdentity\)\|\|u/);
-  assert.doesNotMatch(enhancer, /personalization:\"\/personalization\"|player-personalization-workspace/);
   assert.match(enhancer, /coachRosterCard__photo slp/);
   assert.match(enhancer, /width=\"38\" height=\"38\"/);
   assert.match(enhancer, /p\.photoUrl\?/);
