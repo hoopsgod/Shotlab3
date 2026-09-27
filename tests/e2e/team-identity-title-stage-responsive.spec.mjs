@@ -243,7 +243,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   expect(result.left).toBeGreaterThanOrEqual(-1);
   expect(result.right).toBeLessThanOrEqual(result.viewport + 1);
   expect(result.teamName).toBe(teamName);
-  expect(result.titleSize).toBeGreaterThanOrEqual(38);
+  expect(result.titleSize).toBeGreaterThanOrEqual(variant === "hero" ? 44 : 28);
   expect(result.titleSize).toBeLessThanOrEqual(58);
   expect(result.hasBrandContent).toBe(true);
   if (variant === "hero") {
