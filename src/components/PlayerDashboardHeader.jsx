@@ -1,6 +1,6 @@
 import TeamIdentityTitleStage from "./TeamIdentityTitleStage.jsx";
 
-export default function PlayerDashboardHeader({ userName, subtitle, mission, headingLevel = 1 }) {
+export default function PlayerDashboardHeader({ userName, subtitle, mission, headingLevel = false }) {
   const displayName = String(userName || "Player").trim();
   return (
     <TeamIdentityTitleStage

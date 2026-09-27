@@ -57,10 +57,10 @@ export default function AppHeader({
   leading,
   brandLockup,
   action,
-  headingLevel = 1,
+  headingLevel = false,
 }) {
   const stylePreset = VARIANT_STYLES[variant] || VARIANT_STYLES.standard;
-  const TitleHeading = headingLevel === 2 ? "h2" : "h1";
+  const TitleHeading = headingLevel ? "h2" : "h1";
   const isIconOnlyAction = Boolean(action && !action.label);
   const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
     ? {

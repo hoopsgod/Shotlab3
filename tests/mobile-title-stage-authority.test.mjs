@@ -111,8 +111,8 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
 });
 
 test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
-  assert.match(stage, /headingLevel = 1/);
-  assert.match(stage, /const TitleHeading = headingLevel === 2 \? "h2" : "h1"/);
+  assert.match(stage, /headingLevel = false/);
+  assert.match(stage, /const TitleHeading = headingLevel \\? "h2" : "h1"/);
   assert.match(stage, /<TitleHeading className="teamIdentityTitleStage__title" data-identity-role="page-title">/);
   assert.match(stage, /data-title-word-count=\{titleWords\.length\}/);
   assert.match(stage, /data-title-size=\{titleSize\}/);

@@ -70,7 +70,7 @@ export default function TeamIdentityTitleStage({
   role = "Team",
   eyebrow = "",
   title,
-  headingLevel = 1,
+  headingLevel = false,
   personName = "",
   summary = "",
   status = null,
@@ -92,7 +92,7 @@ export default function TeamIdentityTitleStage({
   const cleanedLogo = useCleanTeamLogo(rawLogo);
   const [logoFailed, setLogoFailed] = useState(false);
   const displayTitle = tidy(title, personName || "ShotLab");
-  const TitleHeading = headingLevel === 2 ? "h2" : "h1";
+  const TitleHeading = headingLevel ? "h2" : "h1";
   const displayPerson = tidy(personName);
   const descriptor = tidy(eyebrow || role, "Team");
   const titleWords = displayTitle.split(/\s+/).filter(Boolean);
