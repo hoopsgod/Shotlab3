@@ -9,11 +9,11 @@ if(!source.includes('personalization:"/personalization"')){const a='profile:"/pr
 const mobileAnchor='  getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"}),',mobileItem='  getPlayerNavItem("profile",{k:"personalization",l:"Personalize",group:"team"}),';
 if(!source.includes('k:"personalization"')){if(!source.includes(mobileAnchor))throw Error("Phase 7E personalization mobile anchor missing");source=source.replace(mobileAnchor,`${mobileAnchor}\n${mobileItem}`)}
 source=source.replace('getPlayerNavItem("home",{mobileLabel:"Home"})','getPlayerNavItem("home")');
-source=source.replace('getPlayerNavItem("program",{mobileLabel:"Events",description:"Team schedule and RSVPs"})','getPlayerNavItem("program",{description:"Team schedule and RSVPs"})');
-source=source.replace('getPlayerNavItem("sc",{mobileLabel:"Lifting",description:"Strength and conditioning"})','getPlayerNavItem("sc",{description:"Strength and conditioning"})');
+source=source.replace('getPlayerNavItem("program",{mobileLabel:"Events",description:"Team schedule and RSVPs"})','getPlayerNavItem("program")');
+source=source.replace('getPlayerNavItem("sc",{mobileLabel:"Lifting",description:"Strength and conditioning"})','getPlayerNavItem("sc")');
 source=source.replace('getPlayerNavItem("in-season",{mobileLabel:"In Season",mobileIcon:"chart",group:"performance",description:','getPlayerNavItem("in-season",{mobileIcon:"chart",group:"performance",description:');
-source=source.replace('getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"})','getPlayerNavItem("team-store",{description:"Official team apparel and fan gear"})');
-source=source.replace('getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"})','getPlayerNavItem("profile",{description:"Progress, settings, and account"})');
+source=source.replace('getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"})','getPlayerNavItem("team-store")');
+source=source.replace('getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"})','getPlayerNavItem("profile")');
 source=source.replace('mobileLabel:"Rankings",description:"Current and all-time team rankings",','');
 const photoSurface='<PlayerProfilePhotoCard player={players.find(rowMatchesPlayerIdentity)||u}/>',profileRoute='{tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">';
 if(source.includes(profileRoute+photoSurface))source=source.replace(profileRoute+photoSurface,profileRoute);
