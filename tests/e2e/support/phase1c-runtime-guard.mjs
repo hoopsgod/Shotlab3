@@ -21,6 +21,7 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
     'a3407c36f7b76bbb2b98b664acd89f759a4eaabfae27326576465fff851945a2',
     '37b37fb495cfca1747ae79810b6103964971fa4bf2e222cc6c601133dead9b2c',
+    '549a327449c8a375e7dd45f738a62b651263fa83bb859732c40f0476153dc07f',
   ]],
   // The app-wide heading pass intentionally replaces the generic Events intro copy with the
   // reviewed live RSVP status. Lock that exact CI-rendered state by digest so Phase 1C does not
