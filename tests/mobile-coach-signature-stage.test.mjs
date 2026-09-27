@@ -48,7 +48,7 @@ test('Coach prototype hierarchy is brand-aware, decision-first and intentionally
   assert.match(desktop, /min-height:330px/);
   assert.match(desktop, /\.mcProgramIdentity\{[^}]*font:760 12px\/1\.2 var\(--mc-native\)/);
   assert.doesNotMatch(desktop, /\.mcProgramIdentity\{[^}]*font:[^}]*Barlow Condensed/);
-  assert.match(desktop, / h1\{[^}]*font:800 clamp\(36px,3\.4vw,48px\)\/\.92 "Barlow Condensed"/);
+  assert.match(desktop, / \.mcHeroTitle\{[^}]*font:800 clamp\(36px,3\.4vw,48px\)\/\.92 "Barlow Condensed"/);
   assert.match(desktop, /clamp\(128px,12vw,168px\)/);
 
   assert.match(tablet, /min-height:354px/);
@@ -59,7 +59,7 @@ test('Coach prototype hierarchy is brand-aware, decision-first and intentionally
   assert.match(mobile, /min-height:334px/);
   assert.match(mobile, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
   assert.match(mobile, /font:780 11px\/1\.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif/);
-  assert.match(mobile, /h1\{[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)[^}]*font-weight:800[^}]*line-height:\.94/);
+  assert.match(mobile, /\.mcHeroTitle\{[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)[^}]*font-weight:800[^}]*line-height:\.94/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(mobile, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
   assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);

@@ -106,7 +106,7 @@ test("desktop Coach Home follows the prototype command-stage anatomy",()=>{
   assert.match(titleCss,/\.mcRailBrand::before\{content:"SHOTLAB"/);
   assert.match(desktopTitle,/\.mcProgramIdentity\{[^}]*font:760 12px\/1\.2 var\(--mc-native\)/);
   assert.doesNotMatch(desktopTitle,/\.mcProgramIdentity\{[^}]*font:[^}]*Barlow Condensed/);
-  assert.match(desktopTitle,/ h1\{[^}]*font:800 clamp\(36px,3\.4vw,48px\)\/\.92 "Barlow Condensed"/);
+  assert.match(desktopTitle,/ \.mcHeroTitle\{[^}]*font:800 clamp\(36px,3\.4vw,48px\)\/\.92 "Barlow Condensed"/);
 });
 
 test("mobile Coach Home remains brand-first, Pulse-first and touch-safe",()=>{
