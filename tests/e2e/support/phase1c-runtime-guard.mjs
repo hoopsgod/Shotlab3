@@ -14,12 +14,13 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
   ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
   // Phase 7D.2 restores the reviewed flat roster composition. Phase 7E keeps that composition
-  // and adds the reviewed restrained team-brand row tint. Only exact Actions captures of these
-  // intentional recovered states are accepted; superseded rounded/tall roster hashes stay rejected.
+  // and adds the reviewed restrained team-brand row tint. The app-wide heading pass adds the
+  // reviewed compact editorial title treatment while preserving the roster composition below it.
   ['coach-players-registered-populated-390', [
     'd613a65be33b24e9be224161e2bc30a0cc119c9a1fb846de9728a0736111beee',
     '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
     'a3407c36f7b76bbb2b98b664acd89f759a4eaabfae27326576465fff851945a2',
+    '37b37fb495cfca1747ae79810b6103964971fa4bf2e222cc6c601133dead9b2c',
   ]],
   // Phase 7E now keeps photo ownership in More > Personalize, so Progress returns to the
   // previously reviewed compact state with no photo panel or unrelated visual drift.
