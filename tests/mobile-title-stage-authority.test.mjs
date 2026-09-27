@@ -115,7 +115,7 @@ test('existing 20px meaningful-content rail and bottom safe-area landing remain 
 test('In Season hero remains subordinate to the shared page title', () => {
   assert.match(inSeasonHub, /<h2>In Season<\/h2>/);
   assert.doesNotMatch(inSeasonHub, /<h1>In Season<\/h1>/);
-  assert.equal((inSeasonStyles.match(/\\.inSeasonHero h2/g) || []).length, 2);
+  assert.equal((inSeasonStyles.match(/\.inSeasonHero h2/g) || []).length, 2);
 });
 
 test('shared page title supports explicit level-one and subordinate level-two heading semantics', () => {
