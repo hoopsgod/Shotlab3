@@ -197,7 +197,9 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
     await applyDemoPerformanceState(page, { makes: state.makes });
     await expect(page.getByTestId("player-today-performance")).toContainText(String(state.makes));
     await expect(page.getByTestId("player-target-interpretation")).toHaveText(state.interpretation);
-    await expect(page.getByTestId("player-daily-command-center").getByRole("heading", { level: 1 })).toHaveText(state.heading);
+    await expect(page.getByTestId("player-dashboard-identity-header").getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await expect(page.getByTestId("player-daily-command-center").getByRole("heading", { level: 2 })).toHaveText(state.heading);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
     await capture(page, state.name);
   }
