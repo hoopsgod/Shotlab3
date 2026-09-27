@@ -133,7 +133,7 @@ test("every Coach mobile destination uses the converged branded-dark/cream produ
   await expect(page.getByTestId("coach-primary-objective")).toBeVisible({ timeout: 20_000 });
   const home = await page.getByTestId("coach-primary-objective").evaluate((element) => {
     const identity = element.querySelector('.mcHeroIdentity');
-    const title = element.querySelector('h1');
+    const title = element.querySelector('.mcHeroTitle');
     const crest = element.querySelector('.mcHeroTeamMark');
     const computed = getComputedStyle(element);
     return {

@@ -160,7 +160,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
       const rect = element.getBoundingClientRect();
       const identity = element.querySelector(".mcHeroIdentity");
       const identityRect = identity?.getBoundingClientRect();
-      const decisionTitle = element.querySelector("h1");
+      const decisionTitle = element.querySelector(".mcHeroTitle");
       const decisionRect = decisionTitle?.getBoundingClientRect();
       const reality = element.querySelector(".mcRealityStrip");
       const realityRect = reality?.getBoundingClientRect();
@@ -216,7 +216,7 @@ async function expectTitleStageGeometry(page, { variant = "standard", teamName }
   await expect(stage).toBeVisible();
   const result = await stage.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const title = element.querySelector("h1");
+    const title = element.querySelector(".mcHeroTitle");
     const team = element.querySelector('[data-identity-role="team-name"]');
     const brandPanel = element.querySelector('[data-identity-role="brand-panel"]');
     const brandPanelRect = brandPanel?.getBoundingClientRect();
