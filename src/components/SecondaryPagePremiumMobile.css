@@ -42,7 +42,6 @@
     line-height: .94 !important;
     letter-spacing: -.045em !important;
     overflow-wrap: normal !important;
-    text-wrap: balance;
   }
 
   .secondaryPageTitleStage.teamIdentityTitleStage--longSingleWord .teamIdentityTitleStage__title {
@@ -68,11 +67,6 @@
 
   .secondaryPageTitleStage .teamIdentityTitleStage__support {
     margin-top: 11px !important;
-  }
-
-  .secondaryPageTitleStage .teamIdentityTitleStage__actions {
-    flex-wrap: wrap;
-    width: 100%;
   }
 
   .secondaryPageTitleStage .teamIdentityTitleStage__action {
