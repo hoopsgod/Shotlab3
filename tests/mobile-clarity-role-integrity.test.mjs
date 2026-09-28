@@ -20,6 +20,7 @@ test("Player Program coach-priority CTA is an intentional player training action
 
 test("Player Home names the existing rolling seven-day calculation explicitly", async () => {
   const app = await read("src/App.jsx");
+  const commandCenter = await read("src/components/PlayerDailyCommandCenter.jsx");
   const narrative = derivePlayerPerformanceNarrative({
     daily: { makes: 40, goal: 100, pct: 40 },
     weekly: { makes: 240, goal: 500, pct: 48 },
@@ -31,15 +32,16 @@ test("Player Home names the existing rolling seven-day calculation explicitly", 
   assert.match(app, /cutoff\.setDate\(cutoff\.getDate\(\)-6\)/);
   assert.equal(narrative.weeklyText, "240 / 500");
   assert.equal(narrative.weeklyLabel, "Last 7 days");
+  assert.match(commandCenter, /last 7 days/i);
+  assert.doesNotMatch(commandCenter, /Today and this week|makes this week|makes logged this week/);
 });
 
 test("Progress owns a two-plus-one mobile metric layout instead of three squeezed columns", async () => {
   const css = await read("src/components/PlayerProgressStory.module.css");
-  const mobile = css.match(/@media \(max-width: 620px\) \{([\s\S]*?)\n\}/)?.[1] || "";
 
-  assert.match(mobile, /\.metricStrip\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
-  assert.match(mobile, /\.metricStrip > div:nth-child\(3\)\s*\{[\s\S]*grid-column:\s*1 \/ -1/);
-  assert.match(mobile, /\.metricStrip > div:nth-child\(3\)[\s\S]*border-top:\s*1px solid/);
+  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip > div:nth-child\(3\)\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
+  assert.match(css, /\.metricStrip > div:nth-child\(3\)\s*\{[\s\S]*?border-left:\s*0;[\s\S]*?border-top:\s*1px solid/);
 });
 
 test("existing mobile dock authority reserves content landing and safe-area space", async () => {
