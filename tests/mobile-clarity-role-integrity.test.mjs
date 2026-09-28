@@ -37,11 +37,11 @@ test("Player Home names the existing rolling seven-day calculation explicitly", 
 });
 
 test("Progress owns a two-plus-one mobile metric layout instead of three squeezed columns", async () => {
-  const css = await read("src/styles/MobileViewportAxisAuthority2026.css");
+  const css = await read("public/shotlab-phase4b-performance-marks.css");
   const moduleCss = await read("src/components/PlayerProgressStory.module.css");
 
-  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\[data-testid="player-progress-metrics"\]\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, 1fr\)/);
-  assert.match(css, /\[data-testid="player-progress-metrics"\] > div:nth-child\(3\)\s*\{[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?border-left:\s*0 !important;[\s\S]*?border-top:\s*1px solid/);
+  assert.match(css, /@media\(max-width:620px\)[\s\S]*?\[data-testid="player-progress-metrics"\]\[data-testid\]\{[\s\S]*?grid-template-columns:repeat\(2,1fr\)!important/);
+  assert.match(css, /\[data-testid="player-progress-metrics"\]>div:nth-child\(3\)\{[\s\S]*?grid-column:1\/-1!important;[\s\S]*?border-left:0!important;[\s\S]*?border-top:1px solid/);
   assert.doesNotMatch(moduleCss, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip\s*\{[^}]*grid-template-columns/);
 });
 
