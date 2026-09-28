@@ -47,10 +47,10 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   const momentumTitle = dailyComplete ? "Daily target complete" : dailyRemaining > 0 ? `${dailyRemaining} makes from today’s target` : "Your next action is ready";
   const momentumDetail = dailyComplete
     ? weeklyComplete
-      ? "Today and this week are complete. Review progress or protect the streak with optional work."
+      ? "Today and the last 7 days are complete. Review progress or protect the streak with optional work."
       : weeklyGoal > 0
-        ? `${model.weekly.makes} of ${weeklyGoal} makes this week. Choose the next action that best builds on today’s work.`
-        : `${model.weekly?.makes || 0} makes logged this week. No weekly target is set, so choose the next action that best builds on today’s work.`
+        ? `${model.weekly.makes} of ${weeklyGoal} makes in the last 7 days. Choose the next action that best builds on today’s work.`
+        : `${model.weekly?.makes || 0} makes logged in the last 7 days. No seven-day target is set, so choose the next action that best builds on today’s work.`
     : `${narrative.streakText} · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
   const progressShouldOpen = dailyComplete || primary.urgency === "urgent";
 
