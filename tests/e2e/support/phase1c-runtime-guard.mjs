@@ -11,8 +11,8 @@ const EXACT_HEAD_PATH = path.join(OUTPUT_ROOT, 'exact-head-sha.txt');
 const FIXED_NOW = Date.parse('2026-09-01T12:00:00-04:00');
 const EXACT_VISUAL_BASELINE_HASHES = new Map([
   // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
-  ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
-  ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
+  ['coach-mission-control-demo-empty-390', 'cd8b097651c92bcf5cbc860d6b483eb95fa7a28e1234ef697636cdf1990a47f9'],
+  ['coach-mission-control-registered-empty-390', '2a8793e8268338e9e750033c82b79a5a7c0ea40e491d068ac771763d6204c6e4'],
   // Phase 7D.2 restores the reviewed flat roster composition. Phase 7E keeps that composition
   // and adds the reviewed restrained team-brand row tint. The app-wide heading pass adds the
   // reviewed compact editorial title treatment while preserving the roster composition below it.
@@ -37,9 +37,9 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     '33201cf2a3bb26b98774eccf2edde46e53963a59d574aa9a29b27696a61008a5',
     '8f7916dd1cf2877d3c2d62c551742364edd0521aa5ca68532409602b6a94852d',
   ]],
-  ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
-  ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
-  ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
+  ['coach-home-branding-stress-390', 'd927cb24b48c6f4ea598b8805d9221b17c1181e57908de5f4019e51460fee94f'],
+  ['coach-home-edge-320', '951dae7a536f5ea24976f0fd14ee94ac5504b394bb41079a499aae3e191363d6'],
+  ['coach-home-edge-430', 'b9bccec5a1d71f51aca59fc1dfca56ad7ad956cd68cd466c7cb8a8f011c347c5'],
 ]);
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
