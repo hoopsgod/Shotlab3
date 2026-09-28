@@ -40,5 +40,21 @@ if (!source.includes(marker)) {
   source = source.replace(needle, replacement)
 }
 
+const shotLogMigrationNeedle = 'const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:"local"})).filter(Boolean);'
+const shotLogMigrationReplacement = 'const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:(l?.syncSource==="remote"||l?.sync_source==="remote")?"remote":"local"})).filter(Boolean);'
+
+if (!source.includes(shotLogMigrationReplacement)) {
+  if (!source.includes(shotLogMigrationNeedle)) throw new Error('Could not find shot-log migration provenance boundary in src/App.jsx.')
+  source = source.replace(shotLogMigrationNeedle, shotLogMigrationReplacement)
+}
+
+const coachShotVisibilityNeedle = 'const coachVisibleShotLogs=scopedShotLogs.filter(l=>l.syncState==="remote_saved"&&l.syncSource==="remote");'
+const coachShotVisibilityReplacement = 'const coachVisibleShotLogs=accountCapabilities.isSandbox?scopedShotLogs:scopedShotLogs.filter(l=>l.syncState==="remote_saved"&&l.syncSource==="remote");'
+
+if (!source.includes(coachShotVisibilityReplacement)) {
+  if (!source.includes(coachShotVisibilityNeedle)) throw new Error('Could not find Coach shot-log trust boundary in src/App.jsx.')
+  source = source.replace(coachShotVisibilityNeedle, coachShotVisibilityReplacement)
+}
+
 fs.writeFileSync(appPath, source.replace(/\n/g, lineEnding))
-console.log('Applied legacy signed collection reads to registered persistence hydration.')
+console.log('Applied legacy signed collection reads, preserved remote shot-log provenance, and kept sandbox Coach sample activity visible without relaxing registered trust.')

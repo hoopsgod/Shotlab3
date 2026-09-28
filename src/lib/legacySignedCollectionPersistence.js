@@ -60,7 +60,7 @@ export async function hydrateAuthenticatedCollectionsToStorage({fetchImpl=global
   return{ok:!failures.length,hydrated:[...new Set(hydrated)],pending,failures:[...new Set(failures)],identity:session.identity,identityHydrated};
 }
 
-function configFor(table){if(table==="player_profiles")return["/v1/player-profiles","profiles"];if(/^sc_(sessions|rsvps|logs)$/.test(table))return[SC_PATH,table.slice(3)];return/^(teams|players|events|rsvps)$/.test(table)?[`/v1/${table}`,table]:null}
+function configFor(table){if(table==="player_profiles")return["/v1/player-profiles","profiles"];if(table==="shot_logs")return["/v1/shot-logs","shot_logs"];if(/^sc_(sessions|rsvps|logs)$/.test(table))return[SC_PATH,table.slice(3)];return/^(teams|players|events|rsvps)$/.test(table)?[`/v1/${table}`,table]:null}
 
 export async function requestLegacySignedCollection({table,method="GET",fetchImpl=globalThis?.fetch,storage=globalThis?.localStorage,supabaseAuthEnabled=false}={}){
   const config=configFor(table);if(!config||method!=="GET")return null;
