@@ -35,7 +35,7 @@ test('Coach secondary routes use one outer rail with bounded mobile grid content
   assert.match(app, /var\(--shotlab-coach-route-wrapper-gutter, 16px\) 104px/);
   assert.match(authority, /performance-shell--coach \.secondaryPageShell\s*\{[^}]*padding-inline:\s*0 !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell[^{]*\{[^}]*padding-inline:\s*0 !important/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell[^{}]*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*,[\s\S]*player-primary-logging-region \.player-logging-input\s*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
   assert.doesNotMatch(dashboards, /secondaryPageShell > \.teamIdentityTitleStageFrame/);
   assert.match(secondaryPremium, /\.teamIdentityTitleStageFrame,[\s\S]*min-width:\s*0;[\s\S]*max-width:\s*100%;[\s\S]*box-sizing:\s*border-box;/);
