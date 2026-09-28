@@ -222,22 +222,6 @@
     border-left: 0;
     border-top: 1px solid rgba(255,255,255,.1);
   }
-  .metricStrip {
-    margin-top: 10px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0;
-  }
-  .metricStrip > div {
-    padding: 5px 9px;
-  }
-  .metricStrip > div + div {
-    border-left: 1px solid rgba(255,255,255,.1);
-  }
-  .metricStrip > div:nth-child(3) {
-    grid-column: 1 / -1;
-    border-left: 0;
-    border-top: 1px solid rgba(255,255,255,.1);
-  }
   .metricStrip [data-performance-kind] {
     width: 100%;
   }
@@ -259,7 +243,6 @@
 @media (max-width: 390px) {
   .heroTopline { margin-bottom: 11px; }
   .heroCopy h2 { font-size: 37px; }
-  .metricStrip > div { padding: 5px 9px; }
   .metricStrip strong { font-size: 20px; }
   .targetPanelCopy strong { font-size: 30px; }
 }

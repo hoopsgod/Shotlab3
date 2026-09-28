@@ -249,6 +249,9 @@ async function runSurface(browser, surface) {
     const geometry = surface.route === 'home'
       ? (surface.role === 'coach' ? GEOMETRY.coachHome : GEOMETRY.playerHome)
       : route.geometry;
+    if (surface.name === 'player-progress-registered-populated-390') {
+      await expect(session.page.getByTestId('player-progress-team-title')).toContainText('Phase 1B Parity Team');
+    }
     await capturePhase1CSnapshot(session.page, session.guard, surface.name, { geometry });
   } finally {
     await session.context.close();

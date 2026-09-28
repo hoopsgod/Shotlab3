@@ -37,11 +37,12 @@ test("Player Home names the existing rolling seven-day calculation explicitly", 
 });
 
 test("Progress owns a two-plus-one mobile metric layout instead of three squeezed columns", async () => {
-  const css = await read("src/components/PlayerProgressStory.module.css");
+  const css = await read("src/styles/MobileViewportAxisAuthority2026.css");
+  const moduleCss = await read("src/components/PlayerProgressStory.module.css");
 
-  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
-  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip > div:nth-child\(3\)\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
-  assert.match(css, /\.metricStrip > div:nth-child\(3\)\s*\{[\s\S]*?border-left:\s*0;[\s\S]*?border-top:\s*1px solid/);
+  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\[data-testid="player-progress-metrics"\]\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, 1fr\)/);
+  assert.match(css, /\[data-testid="player-progress-metrics"\] > div:nth-child\(3\)\s*\{[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?border-left:\s*0 !important;[\s\S]*?border-top:\s*1px solid/);
+  assert.doesNotMatch(moduleCss, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip\s*\{[^}]*grid-template-columns/);
 });
 
 test("existing mobile dock authority reserves content landing and safe-area space", async () => {

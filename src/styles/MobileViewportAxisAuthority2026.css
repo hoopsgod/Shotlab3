@@ -132,10 +132,18 @@
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] {
     grid-template-columns: repeat(2, 1fr);
     margin-top: 10px !important;
+    gap: 0 !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] > div {
+    padding: 5px 9px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] > div + div {
+    border-left: 1px solid rgba(255,255,255,.1) !important;
   }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] > div:nth-child(3) {
-    grid-column: 1 / -1;
-    border-left: 0;
+    grid-column: 1 / -1 !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.1) !important;
   }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-visual"] { width: 60px; height: 60px; }
 }
