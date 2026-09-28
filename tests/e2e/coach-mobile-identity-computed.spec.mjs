@@ -148,8 +148,10 @@ for (const viewport of VIEWPORTS) {
     const pulseMetrics = await page.evaluate(() => {
       const score = document.querySelector('.mcHealthScore');
       const lead = score?.closest('.mcPulseLead');
+      const card = score?.closest('[data-testid="coach-program-pulse"]');
       const heading = lead?.querySelector('h2');
-      if (!score || !lead || !heading) return null;
+      if (!score || !lead || !card || !heading) return null;
+      const cardStyle = getComputedStyle(card);
       const original = score.textContent;
       const samples = [];
       for (const value of ['0%', '50%', '100%']) {
@@ -176,10 +178,17 @@ for (const viewport of VIEWPORTS) {
       score.textContent = original;
       return {
         samples,
+        cardPadding: {
+          top: Number.parseFloat(cardStyle.paddingTop),
+          right: Number.parseFloat(cardStyle.paddingRight),
+          bottom: Number.parseFloat(cardStyle.paddingBottom),
+          left: Number.parseFloat(cardStyle.paddingLeft),
+        },
         overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
       };
     });
     expect(pulseMetrics).not.toBeNull();
+    expect(pulseMetrics.cardPadding).toEqual({ top: 21, right: 16, bottom: 23, left: 16 });
     for (const sample of pulseMetrics.samples) {
       expect(sample.fontSize).toBeGreaterThanOrEqual(36);
       expect(sample.fontSize).toBeLessThanOrEqual(44);
