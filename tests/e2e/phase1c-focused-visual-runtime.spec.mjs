@@ -249,6 +249,16 @@ async function runSurface(browser, surface) {
     const geometry = surface.route === 'home'
       ? (surface.role === 'coach' ? GEOMETRY.coachHome : GEOMETRY.playerHome)
       : route.geometry;
+    if (surface.name === 'player-progress-registered-populated-390') {
+      await expect(session.page.getByTestId('player-progress-team-title')).toContainText('Phase 1B Parity Team');
+    }
+    if (surface.role === 'coach' && surface.route === 'home') {
+      const caption = session.page.getByTestId('coach-program-pulse').locator('.mcPulseCaption small');
+      const color = await caption.evaluate((node) => getComputedStyle(node).color);
+      const channels = color.match(/[\d.]+/g)?.slice(0, 3).map(Number) || [];
+      expect(channels, 'Pulse caption must stay legible on its dark card').toHaveLength(3);
+      expect(Math.min(...channels), 'Pulse caption must use light text').toBeGreaterThan(150);
+    }
     await capturePhase1CSnapshot(session.page, session.guard, surface.name, { geometry });
   } finally {
     await session.context.close();

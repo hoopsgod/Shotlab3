@@ -61,7 +61,7 @@ export const derivePlayerPerformanceNarrative = ({ daily = {}, weekly = {}, stre
     description,
     contextLabel,
     weeklyText: weeklyGoal > 0 ? `${weeklyMakes} / ${weeklyGoal}` : `${weeklyMakes}`,
-    weeklyLabel: weeklyGoal > 0 ? "This week" : "This week · no target",
+    weeklyLabel: weeklyGoal > 0 ? "Last 7 days" : "Last 7 days · no target",
     streakText: run > 0 ? `${run} day${run === 1 ? "" : "s"} run` : "No active run",
   };
 };

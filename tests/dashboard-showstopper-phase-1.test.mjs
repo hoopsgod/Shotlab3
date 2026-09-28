@@ -16,6 +16,7 @@ test("performance narrative interprets zero, partial, near-complete, complete, a
   const zero = narrative(0);
   assert.equal(zero.interpretation, "100 TO TARGET");
   assert.equal(zero.headline, "Today starts here.");
+  assert.equal(zero.weeklyLabel, "Last 7 days");
 
   const early = narrative(25);
   assert.equal(early.interpretation, "75 TO TARGET");
@@ -42,7 +43,7 @@ test("performance narrative handles no streak, missing weekly target, and coach-
   });
   assert.equal(result.streakText, "No active run");
   assert.equal(result.weeklyText, "125");
-  assert.equal(result.weeklyLabel, "This week · no target");
+  assert.equal(result.weeklyLabel, "Last 7 days · no target");
   assert.equal(result.contextLabel, "Coach plan");
 });
 

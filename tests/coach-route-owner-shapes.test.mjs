@@ -27,7 +27,7 @@ test('secondary Coach title stages stay on the source rail while final authority
   assert.doesNotMatch(dashboards, /width:\s*calc\(100% \+/);
   assert.doesNotMatch(dashboards, /margin-inline:\s*calc\(/);
   assert.doesNotMatch(finalAxis, /secondaryPageShell > \.teamIdentityTitleStageFrame,/);
-  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) !important/);
+  assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell[^{}]*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) !important/);
   assert.match(finalAxis, /performance-shell--coach\.is-mobile \.secondaryPageShell > \*,[\s\S]*\{[^}]*box-sizing:\s*border-box !important;[^}]*min-width:\s*0 !important;[^}]*max-width:\s*100% !important/);
   assert.doesNotMatch(finalAxis, /calc\(100% - \(var\(--shotlab-mobile-content-rail/);
 });
