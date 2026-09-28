@@ -6,6 +6,7 @@ on:
     branches:
       - march-3-reset-85393dd
     paths:
+      - src/components/PlayerDailyCommandCenter.jsx
       - src/components/PlayerProgressStory.module.css
       - src/lib/playerPerformanceNarrative.js
       - tests/dashboard-showstopper-phase-1.test.mjs
@@ -16,6 +17,9 @@ on:
 
 permissions:
   contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
 
 concurrency:
   group: mobile-clarity-role-integrity-${{ github.event.pull_request.number || github.ref }}
