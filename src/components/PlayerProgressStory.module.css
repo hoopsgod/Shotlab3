@@ -20,9 +20,7 @@
 
 .heroTopline,
 .heroGrid,
-.metricStrip,
 .readoutHeader,
-.signalGrid,
 .detailRow {
   display: flex;
 }
@@ -112,18 +110,8 @@
   grid-template-columns: repeat(3, minmax(0,1fr));
   gap: 8px;
 }
-.metricStrip > div {
-  min-width: 0;
-  padding: 12px 13px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
 .metricStrip > div + div { border-left: 1px solid rgba(255,255,255,.1); }
-.metricStrip span { display: block; color: #b8c4c8; }
-.metricStrip strong { display: block; margin-top: 5px; color: #f8faf5; font-size: 22px; line-height: 1; letter-spacing: -.025em; }
-.metricStrip small { margin-left: 2px; color: #b8c4c8; font-size: 11px; }
+.metricStrip strong { margin-top: 5px; color: #f8faf5; font-size: 22px; line-height: 1; letter-spacing: -.025em; }
 .metricStrip [data-performance-kind] span,
 .metricStrip [data-performance-kind] small { font-size: 11px !important; }
 
@@ -221,9 +209,6 @@
     padding: 8px 0 0;
     border-left: 0;
     border-top: 1px solid rgba(255,255,255,.1);
-  }
-  .metricStrip [data-performance-kind] {
-    width: 100%;
   }
   .targetPanel [data-testid="player-progress-target-visual"] {
     width: 60px;
