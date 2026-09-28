@@ -98,7 +98,7 @@ body.mission-control-active [data-testid="coach-assignment-accountability"] h2 {
 }
 
 body.mission-control-active .mcSection p,
-body.mission-control-active .mcSection small,
+body.mission-control-active .mcSection:not(.mcTeamHealth) small,
 body.mission-control-active [data-testid="coach-assignment-accountability"] small,
 body.mission-control-active [data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityMeta,
 body.mission-control-active [data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityStatus {
