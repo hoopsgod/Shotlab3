@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 const workspace = await readFile(new URL('../src/components/PlayerOperationalWorkspace.module.css', import.meta.url), 'utf8');
 const hierarchy = await readFile(new URL('../src/components/PlayerMetricHierarchy.module.css', import.meta.url), 'utf8');
 const progress = await readFile(new URL('../src/components/PlayerProgressStory.module.css', import.meta.url), 'utf8');
+const marks = await readFile(new URL('../public/shotlab-phase4b-performance-marks.css', import.meta.url), 'utf8');
 const home = await readFile(new URL('../src/styles/CommandHierarchy2026.css', import.meta.url), 'utf8');
 const component = await readFile(new URL('../src/components/PlayerOperationalWorkspace.jsx', import.meta.url), 'utf8');
 
@@ -39,8 +40,8 @@ test('mobile Player filter rails and title support reflow inside the viewport', 
 test('Player Progress dark-surface labels are readable and AA-safe', () => {
   assert.match(progress, /heroTopline\s*>\s*span:first-child\s*\{\s*color:\s*#b8c4c8/);
   assert.match(progress, /targetPanelCopy\s*>\s*span\s*\{[^}]*#b8c4c8/);
-  assert.match(progress, /metricStrip span\s*\{[^}]*#b8c4c8/);
-  assert.match(progress, /metricStrip small\s*\{[^}]*#b8c4c8[^}]*font-size:\s*11px/);
+  assert.match(marks, /\[data-testid="player-progress-metrics"\] \[data-performance-kind\] span\{[^}]*color:#f7faf5!important/);
+  assert.match(marks, /\[data-testid="player-progress-metrics"\] \[data-performance-kind\] small\{[^}]*color:#b8c4c8!important;[^}]*font-size:11px!important/);
   for (const background of ['#071820','#0b2633','#203945']) assert.ok(contrast(hex('#b8c4c8'),hex(background))>=4.5);
 });
 
