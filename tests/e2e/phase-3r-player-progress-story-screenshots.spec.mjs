@@ -22,7 +22,7 @@ async function noOverflow(page) {
 }
 
 async function openPlayerProgress(page) {
-  await page.goto("/");
+  await page.goto("http://127.0.0.1:4173/");
   await page.getByRole("button", { name: /Player demo/i }).click();
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible({ timeout: 20_000 });
