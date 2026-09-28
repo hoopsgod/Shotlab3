@@ -4,11 +4,13 @@ import path from "node:path";
 
 const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/phase-3a-cross-screen-visual-audit");
 const MOBILE_VIEWPORTS = [
+  { width: 320, height: 812 },
+  { width: 360, height: 812 },
   { width: 375, height: 812 },
   { width: 390, height: 844 },
-  { width: 393, height: 852 },
   { width: 402, height: 874 },
   { width: 430, height: 932 },
+  { width: 468, height: 932 },
 ];
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -81,7 +83,7 @@ async function expectPlayerIdentityInsideViewport(page) {
   });
   expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
-  expect(geometry.width).toBeGreaterThan(300);
+  expect(geometry.width).toBeGreaterThanOrEqual(geometry.viewportWidth - 40);
   if (geometry.variant === "hero") {
     expect(geometry.height).toBeGreaterThanOrEqual(160);
     expect(geometry.height).toBeLessThanOrEqual(300);
@@ -124,7 +126,7 @@ async function expectCompactFunctionalIntro(page) {
     });
     expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
     expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 0.5);
-    expect(geometry.width).toBeGreaterThan(300);
+    expect(geometry.width).toBeGreaterThanOrEqual(geometry.viewportWidth - 40);
     expect(geometry.variant).not.toBe("hero");
     expect(geometry.family).toBe("editorial");
     expect(geometry.brandTreatment).toBe("compact");
@@ -168,12 +170,42 @@ async function expectProgressStoryCommandSurface(page) {
       titleSize: title ? Number.parseFloat(getComputedStyle(title).fontSize) : 0,
       right: rect.right,
       viewportWidth: window.innerWidth,
+      sections: Object.fromEntries([
+        ["topline", "player-progress-story-topline"],
+        ["heroGrid", "player-progress-story-hero-grid"],
+        ["copy", "player-progress-story-copy"],
+        ["target", "player-progress-target-court"],
+        ["metrics", "player-progress-metrics"],
+      ].map(([name, id]) => {
+        const section = element.querySelector(`[data-testid="${id}"]`);
+        return [name, section?.getBoundingClientRect().height || 0];
+      })),
     };
   });
   expect(geometry.height).toBeLessThanOrEqual(390);
   expect(geometry.titleSize).toBeLessThanOrEqual(42);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
   await expect(page.getByTestId("player-progress-metrics")).toBeVisible();
+  const metricsGeometry = await page.getByTestId("player-progress-metrics").evaluate((strip) => {
+    const cells = [...strip.children].map((cell) => {
+      const rect = cell.getBoundingClientRect();
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    });
+    const labels = [...strip.querySelectorAll("[data-performance-kind] span")].map((label) => {
+      const rect = label.getBoundingClientRect();
+      return { text: label.textContent.trim(), height: rect.height, lineHeight: Number.parseFloat(getComputedStyle(label).lineHeight) || Number.parseFloat(getComputedStyle(label).fontSize) * 1.2 };
+    });
+    return { cells, labels };
+  });
+  expect(metricsGeometry.cells).toHaveLength(3);
+  expect(metricsGeometry.cells[0].y).toBeCloseTo(metricsGeometry.cells[1].y, 0);
+  expect(metricsGeometry.cells[2].y).toBeGreaterThan(metricsGeometry.cells[1].y);
+  expect(Math.abs(metricsGeometry.cells[2].x - metricsGeometry.cells[0].x)).toBeLessThanOrEqual(1);
+  for (const label of metricsGeometry.labels) {
+    expect(label.text).not.toBe("");
+    expect(label.height).toBeLessThanOrEqual(label.lineHeight * 2.15);
+  }
+  console.log("PLAYER_PROGRESS_GEOMETRY", JSON.stringify({ width: geometry.viewportWidth, height: geometry.height, sections: geometry.sections, metricCells: metricsGeometry.cells }));
   await expect(page.getByText("What the work says now", { exact: true })).toBeVisible();
 }
 
@@ -403,7 +435,8 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
   expect(pageErrors).toEqual([]);
 });
 
-test("Phase 3A validates first-impression geometry at 375, 390, 393, 402, and 430px", async ({ page }) => {
+test("Phase 3A validates first-impression geometry at every required mobile width", async ({ page }) => {
+  test.setTimeout(90_000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await installSafeRoutes(page);
@@ -436,6 +469,26 @@ test("Phase 3A validates first-impression geometry at 375, 390, 393, 402, and 43
     if (viewport.width === 375 || viewport.width === 430) {
       await page.screenshot({ path: path.join(OUTPUT_DIR, `responsive-player-rankings-${viewport.width}.png`), animations: "disabled" });
     }
+    await navigateByKey(page, "profile");
+    await stabilize(page);
+    await expectProgressStoryCommandSurface(page);
+    await expectNoHorizontalOverflow(page);
+    if (viewport.width === 320 || viewport.width === 390 || viewport.width === 430) {
+      await page.screenshot({ path: path.join(OUTPUT_DIR, `responsive-player-progress-${viewport.width}.png`), animations: "disabled" });
+    }
+    await page.evaluate(() => {
+      const scroller = document.querySelector(".player-scroll-container");
+      if (scroller) scroller.scrollTop = scroller.scrollHeight;
+      window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: "auto" });
+    });
+    await page.waitForTimeout(80);
+    const landing = await page.evaluate(() => {
+      const action = document.querySelector('[data-testid="player-progress-open-profile"]')?.getBoundingClientRect();
+      const dock = document.querySelector('[data-testid="mobile-navigation-dock"]')?.getBoundingClientRect();
+      return action && dock ? { actionBottom: action.bottom, dockTop: dock.top } : null;
+    });
+    expect(landing, `${viewport.width}px should expose the final Progress action and dock`).not.toBeNull();
+    expect(landing.actionBottom, `${viewport.width}px final Progress action must clear the fixed dock`).toBeLessThanOrEqual(landing.dockTop - 4);
   }
 
   expect(pageErrors).toEqual([]);

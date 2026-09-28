@@ -120,16 +120,26 @@
  * the production restructure drops the module media rule. Reassert the source
  * mobile layout in the protected final authority. */
 @media (max-width: 620px) {
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] { border-radius: 18px !important; padding: 17px !important; }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] { margin-bottom: 14px !important; }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero"] { border-radius: 18px !important; padding: 13px 17px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-topline"] { margin-bottom: 11px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-hero-grid"] { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] { min-width: 0 !important; padding: 5px 0 3px !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] h2 { font-size: min(42px, 11vw) !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-story-copy"] p { display: none !important; }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-court"] {
-    width: 100% !important; min-width: 0 !important; flex: none !important; padding: 10px 0 0 !important; border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.1) !important;
+    width: 100% !important; min-width: 0 !important; flex: none !important; padding: 8px 0 0 !important; border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.1) !important;
   }
-  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] { margin-top: 14px !important; }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 10px !important;
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] > div:nth-child(3) {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-visual"] { width: 60px; height: 60px; }
 }
 
 @media (min-width: 391px) and (max-width: 767px) {

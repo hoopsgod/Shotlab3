@@ -212,23 +212,23 @@
 
 @media (max-width: 620px) {
   .root { gap: 14px; }
-  .hero { border-radius: 18px; padding: 17px; }
-  .heroGrid { display: grid; gap: 10px; }
+  .hero { border-radius: 18px; padding: 13px 17px; }
+  .heroGrid { display: grid; gap: 8px; }
   .heroCopy h2 { font-size: clamp(34px, 11vw, 46px); }
   .heroCopy p { display: none; }
   .targetPanel {
     min-width: 0;
-    padding: 10px 0 0;
+    padding: 8px 0 0;
     border-left: 0;
     border-top: 1px solid rgba(255,255,255,.1);
   }
   .metricStrip {
-    margin-top: 14px;
+    margin-top: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0;
   }
   .metricStrip > div {
-    padding: 12px 10px;
+    padding: 5px 9px;
   }
   .metricStrip > div + div {
     border-left: 1px solid rgba(255,255,255,.1);
@@ -240,6 +240,10 @@
   }
   .metricStrip [data-performance-kind] {
     width: 100%;
+  }
+  .targetPanel [data-testid="player-progress-target-visual"] {
+    width: 60px;
+    height: 60px;
   }
   .readoutHeader { display: grid; gap: 7px; }
   .readoutHeader > p { max-width: none; text-align: left; }
@@ -253,9 +257,9 @@
 }
 
 @media (max-width: 390px) {
-  .heroTopline { margin-bottom: 14px; }
+  .heroTopline { margin-bottom: 11px; }
   .heroCopy h2 { font-size: 37px; }
-  .metricStrip > div { padding: 11px 9px; }
+  .metricStrip > div { padding: 5px 9px; }
   .metricStrip strong { font-size: 20px; }
   .targetPanelCopy strong { font-size: 30px; }
 }
