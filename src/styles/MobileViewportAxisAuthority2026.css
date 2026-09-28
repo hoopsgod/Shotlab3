@@ -130,14 +130,12 @@
     width: 100% !important; min-width: 0 !important; flex: none !important; padding: 8px 0 0 !important; border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.1) !important;
   }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0;
+    grid-template-columns: repeat(2, 1fr);
     margin-top: 10px !important;
   }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-metrics"] > div:nth-child(3) {
     grid-column: 1 / -1;
     border-left: 0;
-    border-top: 1px solid rgba(255,255,255,.1);
   }
   html body #root .performance-shell--player.is-mobile [data-testid="player-progress-target-visual"] { width: 60px; height: 60px; }
 }
