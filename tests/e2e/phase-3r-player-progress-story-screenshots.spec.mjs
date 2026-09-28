@@ -134,7 +134,7 @@ test("player progress metrics remain readable and clear of the mobile dock acros
     });
     const page = await context.newPage();
     await installRoutes(page);
-    const { dock, story } = await openPlayerProgress(page);
+    const { story } = await openPlayerProgress(page);
     const metrics = story.getByTestId("player-progress-metrics");
     await expect(metrics).toBeVisible();
 
@@ -173,8 +173,11 @@ test("player progress metrics remain readable and clear of the mobile dock acros
     }
     expect(geometry.scrollWidth - geometry.viewport, `${width}px should not horizontally overflow`).toBeLessThanOrEqual(1);
 
-    const finalAction = story.getByTestId("player-progress-open-profile");
-    await finalAction.scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      const scroller = document.querySelector(".player-scroll-container");
+      if (scroller) scroller.scrollTop = scroller.scrollHeight;
+      window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: "auto" });
+    });
     await page.waitForTimeout(80);
     const landing = await page.evaluate(() => {
       const action = document.querySelector('[data-testid="player-progress-open-profile"]')?.getBoundingClientRect();
