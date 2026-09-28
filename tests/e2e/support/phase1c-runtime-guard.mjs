@@ -37,6 +37,8 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     '33201cf2a3bb26b98774eccf2edde46e53963a59d574aa9a29b27696a61008a5',
     '8f7916dd1cf2877d3c2d62c551742364edd0521aa5ca68532409602b6a94852d',
     'd59bed99f378ec8016325aabc12a0f862ce2a4e74c9ed19a91e25ed9a0aabc6f',
+    // Reviewed exact-head 390x844 capture: seven-day label and two-plus-one metric grid.
+    '65534a94bcbb9640b7d489892b82f8980d61ce90b880d6326c02165d4553e97a',
   ]],
   ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
   ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
