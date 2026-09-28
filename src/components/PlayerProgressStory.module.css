@@ -212,7 +212,7 @@
   }
   .targetPanel [data-testid="player-progress-target-visual"] {
     width: 60px;
-    height: 60px;
+    min-width: 60px;
   }
   .readoutHeader { display: grid; gap: 7px; }
   .readoutHeader > p { max-width: none; text-align: left; }

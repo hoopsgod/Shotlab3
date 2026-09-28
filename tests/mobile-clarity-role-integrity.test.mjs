@@ -42,6 +42,8 @@ test("Progress owns a two-plus-one mobile metric layout instead of three squeeze
 
   assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\[data-testid="player-progress-metrics"\]\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, 1fr\)/);
   assert.match(css, /\[data-testid="player-progress-metrics"\] > div:nth-child\(3\)\s*\{[\s\S]*?grid-column:\s*1 \/ -1 !important;[\s\S]*?border-left:\s*0 !important;[\s\S]*?border-top:\s*1px solid/);
+  assert.match(css, /\[data-testid="player-progress-target-visual"\]\s*\{\s*width:\s*60px;\s*min-width:\s*60px;/);
+  assert.match(moduleCss, /\[data-testid="player-progress-target-visual"\]\s*\{\s*width:\s*60px;\s*min-width:\s*60px;/);
   assert.doesNotMatch(moduleCss, /@media \(max-width: 620px\)[\s\S]*?\.metricStrip\s*\{[^}]*grid-template-columns/);
 });
 
