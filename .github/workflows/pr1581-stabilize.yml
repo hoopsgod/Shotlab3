@@ -6,6 +6,7 @@ on:
       - agent/desktop-single-page-workspace-shell
     paths:
       - .github/workflows/pr1581-stabilize.yml
+      - scripts/patch-pr1581-stabilization.cjs
   workflow_dispatch:
 
 permissions:
