@@ -5,12 +5,12 @@ import { gzipSync } from 'node:zlib'
 const distDir = path.resolve('dist')
 const assetsDir = path.join(distDir, 'assets')
 
-// Rebased after the accepted mobile surface-coherence baseline increased the
-// authenticated authority payload. Keep a deliberate reserve above that known
-// production state rather than allowing this gate to remain permanently red.
-// Exact baseline observed on 2026-08-25: largest=127,527 bytes, total gzip=87,997 bytes.
-const MAX_LARGEST_CSS_BYTES = 130_000
-const MAX_TOTAL_CSS_GZIP_BYTES = 90_000
+// Rebased after the desktop workspace CSS recovery preserved media rules that
+// the production optimizer had silently discarded. Keep the reserve aligned
+// with the explicit production CSS budget while retaining a measured margin.
+// Exact candidate observed on 2026-09-29: largest=136,415 bytes, total gzip=91,554 bytes.
+const MAX_LARGEST_CSS_BYTES = 138_000
+const MAX_TOTAL_CSS_GZIP_BYTES = 93_000
 
 function collectCssFiles(directory) {
   const files = []
