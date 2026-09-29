@@ -21,6 +21,14 @@ const COACH_AUTHORITY_MARKERS = [
   "min-height:50px",
 ];
 
+function normalizeMediaRangesForCsso(css) {
+  // Lightning CSS emits range syntax that CSSO 5 silently discards.
+  return css
+    .replace(/\(\s*width\s*>=\s*([^\)]+)\)\s+and\s+\(\s*width\s*<=\s*([^\)]+)\)/g, "(min-width:$1) and (max-width:$2)")
+    .replace(/\(\s*width\s*<=\s*([^\)]+)\)/g, "(max-width:$1)")
+    .replace(/\(\s*width\s*>=\s*([^\)]+)\)/g, "(min-width:$1)");
+}
+
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
@@ -256,7 +264,7 @@ async function main() {
       optimizationInput = `${pruned.css.slice(0, authority.start)}${pruned.css.slice(authority.end)}`;
       canonicalAuthority = authority.block;
     }
-    const output = `${minify(optimizationInput, {
+    const output = `${minify(normalizeMediaRangesForCsso(optimizationInput), {
       restructure: true,
       comments: false,
       forceMediaMerge: false,
