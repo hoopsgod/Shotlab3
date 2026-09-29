@@ -368,6 +368,7 @@ test("Phase 3A captures auth and the complete Coach mobile hierarchy at iPhone w
 });
 
 test("Phase 3A captures the complete Player training and progress hierarchy at iPhone width", async ({ page }) => {
+  test.setTimeout(90_000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 

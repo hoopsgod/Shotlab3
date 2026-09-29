@@ -116,7 +116,7 @@ const routeChunkLoaded = (page, moduleNames, excludedNames = []) => page.evaluat
 
 const playerInterfaceLoaded = (page) => routeChunkLoaded(
   page,
-  ['PlayerInterfaceWorkspaces', 'PlayerDashboardHeader', 'PlayerDailyCommandCenter', 'PlayerDailyPrimitives', 'PlayerOperationalWorkspace'],
+  ['PlayerWorkspaces', 'PlayerInterfaceWorkspaces', 'PlayerDashboardHeader', 'PlayerDailyCommandCenter', 'PlayerDailyPrimitives', 'PlayerOperationalWorkspace'],
   ['DeferredPlayerDashboardHeader', 'DeferredPlayerDailyCommandCenter', 'DeferredPlayerOperationalWorkspace', 'PlayerInterfaceFallback'],
 )
 
