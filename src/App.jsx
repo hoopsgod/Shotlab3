@@ -49,6 +49,7 @@ import PlayerTrainingSessionHeader from "./components/PlayerTrainingSessionHeade
 import PlayerTrainingCompletion from "./components/PlayerTrainingCompletion.jsx";
 import OperationalInsightRail from "./components/OperationalInsightRail.jsx";
 import "./styles/PremiumWorkspace.css";
+import "./styles/DesktopHudlWorkspace2026.css";
 import "./styles/CoachInteractiveDashboard.css";
 
 import { TeamBrandingProvider } from "./context/TeamBrandingContext";
