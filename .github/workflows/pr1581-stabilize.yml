@@ -1,0 +1,39 @@
+name: PR 1581 Stabilization Patch
+
+on:
+  push:
+    branches:
+      - agent/desktop-single-page-workspace-shell
+    paths:
+      - .github/workflows/pr1581-stabilize.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stabilize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/desktop-single-page-workspace-shell
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node scripts/patch-pr1581-stabilization.cjs
+      - run: npm ci
+      - run: node --test tests/desktop-single-page-workspace-shell.test.mjs
+      - run: npm run build:performance
+      - run: git diff --check
+      - name: Commit stabilized implementation
+        run: |
+          rm scripts/patch-pr1581-stabilization.cjs .github/workflows/pr1581-stabilize.yml
+          git config user.name "shotlab-release-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: stabilize desktop workspace routing"
+          git push origin HEAD:agent/desktop-single-page-workspace-shell
