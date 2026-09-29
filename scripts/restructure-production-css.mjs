@@ -19,13 +19,10 @@ const COACH_AUTHORITY_MARKERS = [
 ];
 
 function normalizeMediaRangesForCsso(css) {
-  // Lightning CSS emits Media Queries Level 4 range syntax, while CSSO 5
-  // treats those at-rules as empty. Normalize only while CSSO is running;
-  // the subsequent Lightning CSS compaction restores standards-based ranges.
-  return css
-    .replace(/\(\s*width\s*>=\s*([^\)]+)\)\s+and\s+\(\s*width\s*<=\s*([^\)]+)\)/g, "(min-width:$1) and (max-width:$2)")
-    .replace(/\(\s*width\s*<=\s*([^\)]+)\)/g, "(max-width:$1)")
-    .replace(/\(\s*width\s*>=\s*([^\)]+)\)/g, "(min-width:$1)");
+  // Keep the desktop workspace breakpoints through CSSO 5 without changing
+  // the existing mobile cascade or its certified visual baselines.
+  return css.replace(/\(\s*width\s*>=\s*(\d+(?:\.\d+)?)px\s*\)/g,
+    (query, width) => Number(width) >= 981 ? `(min-width:${width}px)` : query);
 }
 
 async function removeBundledAuthorityDuplicates() {
