@@ -206,8 +206,8 @@ test('Profile workspaces load together only after the player opens Profile', asy
   await expect(page.getByTestId('player-career-history')).toBeAttached({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
   await expect(page.getByTestId('player-career-history-loading')).toHaveCount(0)
-  await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
-  // Production chunk compaction no longer preserves source module names in resource URLs.
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(false)
+  // Home panels unmount on Profile; the mounted profile boundaries verify this route.
   // The mounted profile boundaries and cleared loading fallbacks are the stable lazy-load contract.
   await expect(page.getByTestId('progress-charts-workspace')).toBeAttached()
   await expect(page.getByTestId('player-career-history')).toBeAttached()
@@ -233,8 +233,8 @@ test('leaderboard analytics load only after the player opens Leaderboards', asyn
   await expect(workspace).toBeVisible({ timeout: 20_000 })
   await expect(workspace.getByTestId('premium-leaderboards-hub')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('leaderboards-loading')).toHaveCount(0)
-  await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
-  // The rendered deferred workspace is the durable proof that the implementation loaded;
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(false)
+  // Home panels unmount on Rankings; the deferred workspace verifies this route.
   // optimized chunk filenames are intentionally free to change with bundling strategy.
   await expect(workspace.getByTestId('premium-leaderboards-hub')).toBeVisible()
   await expect.poll(() => playerProfileLoaded(page)).toBe(false)
