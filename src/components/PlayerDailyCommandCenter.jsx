@@ -159,6 +159,10 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       </section>
 
+      <button type="button" className={styles.coachSignalAction} onClick={() => runAction(primary)}>
+        {coachSignal.stale ? "Continue today's training" : "Train toward this focus"}<ShotLabIcon name="arrow" size={16} />
+      </button>
+
       {queue.length > 0 && <div className={styles.section} data-command-role="next-actions" data-layout-role="quiet-secondary">
         <div className={styles.sectionHeading} data-visual-role="next-actions-heading"><div><div className={styles.sectionLabel} data-visual-role="next-actions-eyebrow">After this</div><div className={styles.sectionTitle} data-visual-role="next-actions-title">Your next moves</div></div><div className={styles.meta} data-visual-role="next-actions-meta">{queue.length} queued</div></div>
         <div className={styles.tasks} data-testid="player-daily-task-queue">
@@ -173,7 +177,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       </div>}
 
-      <details className="playerProgressDisclosure" data-testid="player-progress-disclosure" data-command-role="progress-details" data-layout-role="quiet-secondary" open={progressShouldOpen || undefined}>
+      <details className="playerProgressDisclosure" data-testid="player-progress-disclosure" data-command-role="progress-details" data-layout-role="quiet-secondary" open={progressShouldOpen || (typeof window !== "undefined" && window.matchMedia("(min-width:981px)").matches) || undefined}>
         <summary><span><small>Progress snapshot</small><strong>{narrative.makes} made today · {narrative.weeklyText} {narrative.weeklyLabel.toLowerCase()}</strong></span><span>View details</span></summary>
         <div className="playerProgressDisclosureBody">
           <div className={styles.momentumSignal}>

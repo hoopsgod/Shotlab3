@@ -29,3 +29,26 @@
   .mcShellV3.is-desktop-shell .mcSectionHead h2,.mcShellV3.is-desktop-shell .mcPulseLead h2 { font-size:20px; }
   .mcShellV3.is-desktop-shell .mcTeamHealth .mcPulseLead small,.mcShellV3.is-desktop-shell .mcTeamHealth .mcPulseCaption small { color:#c3ced2 !important; opacity:1 !important; }
 }
+
+/* Desktop decision brief; mobile is owned by the existing authority. */
+@media (min-width:981px) {
+#root .missionControl{grid-template-rows:auto auto auto auto;gap:12px;padding:0 clamp(18px,3vw,40px);align-content:start}
+#root .mcHeader[data-testid="mission-control-team-header"]{margin-inline:calc(-1 * clamp(18px,3vw,40px))}
+#root .mcHero{grid-column:1/9;grid-row:2;min-height:255px;border-radius:12px}
+#root .mcHero .mcHeroContent{min-height:255px;padding:18px 23px}
+#root .mcHero .mcHeroIdentity{grid-template-columns:minmax(0,1fr) 62px;gap:8px}
+.mcShellV3.is-desktop-shell .mcHero .mcHeroTeamMark{width:62px;height:62px}
+#root .mcHero .mcHeroTitle{margin-top:5px;max-width:28ch;font-size:clamp(29px,2.6vw,38px);line-height:1}
+#root .mcNextSession{grid-column:9/-1;grid-row:2;min-height:255px}
+#root .mcAttention{grid-column:1/9;grid-row:3;min-height:190px}
+#root .mcTeamHealth{grid-column:9/-1;grid-row:3;min-height:190px}
+#root .mcActivity{grid-column:9/-1;grid-row:4;min-height:200px}
+#root .mcAssignmentAccountabilityHost{grid-column:1/9;grid-row:4}
+#root .mcNextSession,#root .mcAttention,#root .mcActivity{padding:19px;border:1px solid #d8dedc;border-radius:12px;background:#fff}
+#root .mcTeamHealth{padding:19px;border-radius:12px}
+#root .mcAssignmentAccountability{padding:18px;border:1px solid #d8dedc;border-radius:12px;background:#fff}
+#root .mcActivationChapter{grid-column:1/9;grid-row:5}
+#root .missionControl:has(.mcActivationChapter) .mcAttention{grid-row:3}
+#root .missionControl:has(.mcActivationChapter) .mcNextSession{grid-row:2}
+#root .missionControl:has(.mcActivationChapter) .mcActivity{grid-row:4}
+}
