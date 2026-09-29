@@ -14,6 +14,14 @@ async function enterCoachDemo(page) {
   await expect(home).toBeVisible({ timeout: 20_000 });
 }
 
+async function enterPlayerDemo(page) {
+  const home = page.getByTestId("player-daily-command-center");
+  const demo = page.getByRole("button", { name: "Player demo", exact: true });
+  await expect.poll(async () => (await home.isVisible().catch(() => false)) || (await demo.isVisible().catch(() => false)), { timeout: 20_000 }).toBe(true);
+  if (await demo.isVisible().catch(() => false)) await demo.click();
+  await expect(home).toBeVisible({ timeout: 20_000 });
+}
+
 async function openFirstPlayerDrawer(page) {
   const roster = page.locator("#coach-roster-operations");
   await expect(roster).toBeVisible({ timeout: 20_000 });
@@ -32,12 +40,24 @@ async function clickDesktopNav(page, name) {
   await sidebar.getByRole("button", { name, exact: true }).click();
 }
 
+async function clickPlayerNav(page, name) {
+  const button = page.getByRole("button", { name, exact: true }).first();
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
+}
+
+async function expectNoHorizontalPagePan(page) {
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+}
+
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
   await page.setViewportSize({ width: 1280, height: 900 });
 });
 
 test("desktop Coach workspace owns marked player history and restores valid routes", async ({ page }) => {
+  const pageErrors=[];
+  page.on("pageerror", error => pageErrors.push(error.message));
   await page.goto("/");
   await enterCoachDemo(page);
   expect(new URL(page.url()).pathname).toBe("/");
@@ -98,6 +118,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await expect(direct.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => new URL(direct.url()).pathname).toBe("/");
   await direct.close();
+  expect(pageErrors).toEqual([]);
 });
 
 test("mobile Coach navigation remains authoritative and does not write desktop routes", async ({ page }) => {
@@ -111,4 +132,59 @@ test("mobile Coach navigation remains authoritative and does not write desktop r
   await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
   expect(new URL(page.url()).pathname).toBe("/");
   expect(await page.evaluate(() => window.history.length)).toBe(historyLength);
+  await expectNoHorizontalPagePan(page);
 });
+
+test("desktop Player workspace preserves route, refresh, back, forward, and same-route history", async ({ page }) => {
+  const pageErrors=[];
+  page.on("pageerror", error => pageErrors.push(error.message));
+  await page.goto("/");
+  await enterPlayerDemo(page);
+  expect(new URL(page.url()).pathname).toBe("/");
+
+  await clickPlayerNav(page, "AT Home Log");
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
+  const sameRouteLength=await page.evaluate(() => history.length);
+  await clickPlayerNav(page, "AT Home Log");
+  expect(await page.evaluate(() => history.length)).toBe(sameRouteLength);
+
+  await clickPlayerNav(page, "Events");
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
+  await page.goBack();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
+  await page.goBack();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/");
+  await page.goForward();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
+  await page.goForward();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
+
+  await page.reload();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
+  await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+  expect(pageErrors).toEqual([]);
+});
+
+test("mobile Player primary navigation remains usable without horizontal pan", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await enterPlayerDemo(page);
+  const dock=page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toBeVisible();
+  await dock.getByRole("button", { name: "At Home", exact: true }).click();
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
+  await expectNoHorizontalPagePan(page);
+});
+
+for (const width of [320,375,390,430,768,1024,1280,1440]) {
+  for (const role of ["Coach","Player"]) {
+    test(`${role} ${width}px workspace has no horizontal page pan`, async ({ page }) => {
+      await page.setViewportSize({ width, height: width>=768?900:844 });
+      await page.goto("/");
+      if(role==="Coach") await enterCoachDemo(page); else await enterPlayerDemo(page);
+      await expectNoHorizontalPagePan(page);
+      if(width<1024) await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+      if(width>=1024) await expect(page.getByTestId("mobile-navigation-dock")).toHaveCount(0);
+    });
+  }
+}
