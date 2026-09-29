@@ -22,11 +22,10 @@ const COACH_AUTHORITY_MARKERS = [
 ];
 
 function normalizeMediaRangesForCsso(css) {
-  // Lightning CSS emits range syntax that CSSO 5 silently discards.
-  return css
-    .replace(/\(\s*width\s*>=\s*([^\)]+)\)\s+and\s+\(\s*width\s*<=\s*([^\)]+)\)/g, "(min-width:$1) and (max-width:$2)")
-    .replace(/\(\s*width\s*<=\s*([^\)]+)\)/g, "(max-width:$1)")
-    .replace(/\(\s*width\s*>=\s*([^\)]+)\)/g, "(min-width:$1)");
+  // CSSO 5 drops range queries. Preserve the desktop workspace rules while
+  // leaving the current mobile cascade and its certified baselines intact.
+  return css.replace(/\(\s*width\s*>=\s*(\d+(?:\.\d+)?)px\s*\)/g,
+    (query, width) => Number(width) >= 981 ? `(min-width:${width}px)` : query);
 }
 
 async function listFiles(directory, predicate) {
