@@ -1,0 +1,18 @@
+/* Shared desktop workspace layer. Mobile remains governed by the mobile
+   viewport authority and bottom navigation styles. */
+@media (min-width:981px) {
+  .performance-shell.is-desktop { --desktop-canvas:#f5f3ee; --desktop-ink:#14232b; display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; background:var(--desktop-canvas); }
+  .performance-shell.is-desktop > .sidebar-nav { position:sticky; top:0; z-index:8; height:100dvh; box-sizing:border-box; padding:20px 14px 16px !important; border:0 !important; border-right:1px solid rgba(255,255,255,.08) !important; border-radius:0 !important; background:#09212c !important; box-shadow:none !important; }
+  .performance-shell.is-desktop > .sidebar-nav .nav-title { min-height:56px; margin:0 12px 24px !important; padding:0 0 16px; display:flex; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,.11); color:#f2f6f7 !important; font-size:14px !important; letter-spacing:.02em !important; }
+  .performance-shell.is-desktop > .sidebar-nav .nav-title::before { content:"SHOTLAB"; position:absolute; top:22px; color:#c8ff1a; font:800 18px/1 "Barlow Condensed","Arial Narrow",sans-serif; letter-spacing:-.02em; transform:translateY(-22px); }
+  .performance-shell.is-desktop > .sidebar-nav .nav-item { min-height:48px !important; margin:4px 8px !important; border-radius:10px !important; color:#9db0b8 !important; }
+  .performance-shell.is-desktop > .sidebar-nav .nav-item:hover,.performance-shell.is-desktop > .sidebar-nav .nav-item:focus-visible { color:#f5f8f8 !important; background:rgba(255,255,255,.06) !important; transform:none; }
+  .performance-shell.is-desktop > .sidebar-nav .nav-item.is-active { color:#f7fbfb !important; background:linear-gradient(90deg,rgba(200,255,26,.16),rgba(200,255,26,.04)) !important; box-shadow:inset 3px 0 #c8ff1a; }
+  .performance-shell.is-desktop > .sidebar-nav .nav-item.is-active::before { display:none; }
+  .performance-shell.is-desktop > .shell-main { min-width:0; background:var(--desktop-canvas); }
+  .performance-shell.is-desktop > .shell-main > .content-wrap { max-width:none; padding:0 !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
+  .performance-shell.is-desktop .performance-workspace { min-height:100dvh; background:var(--desktop-canvas) !important; color:var(--desktop-ink); }
+  .performance-shell.is-desktop .player-scroll-container { max-width:1320px !important; padding:30px clamp(30px,5vw,76px) 56px !important; }
+  .performance-shell.is-desktop .player-quick-actions { max-width:1320px; margin-inline:auto; padding-inline:clamp(30px,5vw,76px) !important; }
+  .performance-shell.is-desktop .playerDashboardIdentityStage { border-radius:0; box-shadow:none; }
+}
