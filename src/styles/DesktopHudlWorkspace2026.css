@@ -15,4 +15,9 @@
   .performance-shell.is-desktop .player-scroll-container { max-width:1320px !important; padding:30px clamp(30px,5vw,76px) 56px !important; }
   .performance-shell.is-desktop .player-quick-actions { max-width:1320px; margin-inline:auto; padding-inline:clamp(30px,5vw,76px) !important; }
   .performance-shell.is-desktop .playerDashboardIdentityStage { border-radius:0; box-shadow:none; }
+  .performance-shell--player.is-desktop > .insights-panel { grid-column:2; min-width:0; }
+}
+@media (min-width:1280px) {
+  .performance-shell--player.is-desktop { grid-template-columns:248px minmax(0,1fr) minmax(240px,280px); }
+  .performance-shell--player.is-desktop > .insights-panel { grid-column:3; grid-row:1; position:sticky; top:0; align-self:start; max-height:100dvh; overflow-y:auto; }
 }
