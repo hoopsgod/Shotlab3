@@ -12,10 +12,15 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: pr1581-stabilize
+  cancel-in-progress: true
+
 jobs:
   stabilize:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,12 +30,22 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: node scripts/patch-pr1581-stabilization.cjs
       - run: npm ci
-      - run: node --test tests/desktop-single-page-workspace-shell.test.mjs
-      - run: npm run build:performance
-      - run: git diff --check
-      - name: Commit stabilized implementation
+      - name: Apply stabilization patch
+        run: node scripts/patch-pr1581-stabilization.cjs
+      - name: Run focused source regressions
+        run: node --test tests/desktop-single-page-workspace-shell.test.mjs tests/mobile-coach-navigation.test.mjs tests/desktop-hudl-workspace-2026.test.mjs
+      - name: Verify fixed production performance budget
+        run: npm run build:performance
+      - name: Install Chromium for focused browser certification
+        run: npx playwright install --with-deps chromium
+      - name: Verify desktop workspace history and mobile route isolation
+        run: npx playwright test tests/e2e/desktop-workspace-routing.spec.mjs
+      - name: Restore Season Archive E2E
+        run: npm run test:e2e:season-archive
+      - name: Ensure patch is clean
+        run: git diff --check
+      - name: Commit tested stabilization
         run: |
           rm scripts/patch-pr1581-stabilization.cjs .github/workflows/pr1581-stabilize.yml
           git config user.name "shotlab-release-bot"
