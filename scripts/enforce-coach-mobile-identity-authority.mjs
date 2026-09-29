@@ -118,7 +118,16 @@ async function main() {
     throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  console.log('Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; roster geometry is source-owned and media-independent; computed-style certification owns final association.')
+  const desktopGrid = /\.mcShellV3\.is-desktop-shell\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/
+  if (!desktopGrid.test(coachProductionCss)) {
+    throw new Error('Production CSS lost the desktop Coach workspace grid during optimization.')
+  }
+  const appCss = (await Promise.all(entries.filter((entry) => entry.isFile() && /^App-.*\.css$/.test(entry.name)).map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')))).join('\n')
+  if (!/\.performance-shell\.is-desktop\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/.test(appCss)) {
+    throw new Error('Production CSS lost the desktop Player workspace grid during optimization.')
+  }
+
+  console.log('Coach mobile identity and desktop workspace grids verified in optimized production CSS.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })
