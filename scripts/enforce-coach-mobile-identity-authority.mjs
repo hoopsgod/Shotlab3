@@ -7,6 +7,7 @@ const AUTHORITATIVE_HEADER = /\[data-testid=(?:["'])?mission-control-team-header
 const COMPONENT_HEADER_AUTHORITY = /^\.mcShellV3\s+(?:\.mcHeader(?:\s|[.:])|\.mcBrandLockup(?:\s|[.:]|$)|\.mcBrandCopy(?:\s|[.:]|$)|\.mcHeaderActions(?:\s|[.:]|$)|\.mcTeamSelect(?:[.:]|$)|\.mcBell(?:[.:]|$)|\.mcMobileMenu(?:[.:]|$))/
 const COMPONENT_FALLBACK_AUTHORITY = /^\.mcShellV3\s+\.mc(?:Hero|Header)TeamMark\s+\.mcTeamFallback\b/
 const COMPONENT_RAIL_BRAND_AUTHORITY = /^\.mcShellV3\s+\.mcRailBrand(?:\s|[.:]|$)/
+const DESKTOP_ONLY_AUTHORITY = /^\.mcShellV3\.is-desktop-shell(?:\s|[.:>]|$)/
 
 const GEOMETRY = new Set([
   'width','height','min-width','min-height','max-width','max-height',
@@ -36,7 +37,8 @@ function everyArmIsCurrentComponentAuthority(selector) {
     || AUTHORITATIVE_HEADER.test(arm)
     || COMPONENT_HEADER_AUTHORITY.test(arm)
     || COMPONENT_FALLBACK_AUTHORITY.test(arm)
-    || COMPONENT_RAIL_BRAND_AUTHORITY.test(arm),
+    || COMPONENT_RAIL_BRAND_AUTHORITY.test(arm)
+    || DESKTOP_ONLY_AUTHORITY.test(arm),
   )
 }
 
