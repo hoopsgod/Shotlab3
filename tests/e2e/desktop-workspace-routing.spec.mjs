@@ -104,12 +104,11 @@ test("mobile Coach navigation remains authoritative and does not write desktop r
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await enterCoachDemo(page);
+  const historyLength = await page.evaluate(() => window.history.length);
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible();
   await dock.getByRole("button", { name: "Players", exact: true }).click();
   await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
   expect(new URL(page.url()).pathname).toBe("/");
-  await page.goBack().catch(() => null);
-  await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible();
-  expect(new URL(page.url()).pathname).toBe("/");
+  expect(await page.evaluate(() => window.history.length)).toBe(historyLength);
 });
