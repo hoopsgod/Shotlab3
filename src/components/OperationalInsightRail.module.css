@@ -118,7 +118,7 @@
 }
 
 .primaryCard h3 { color: #f6f8f9; font-size: 15px; letter-spacing: -.01em; }
-.primaryCard p { color: #bdc9cf; }
+.primaryCard p { color: #d4e0e3 !important; opacity: 1 !important; font-size: 13px; }
 
 .card button {
   align-items: center;
