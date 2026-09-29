@@ -70,6 +70,8 @@ replace(
     ['{k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null}', '{k:"program",l:"Events",accentVar:"--accent-events",icon:"calendar",mobileIcon:"calendar",dot:unrsvpEvents>0?VOLT:null}', 'player events icon'],
     ['{k:"team-store",l:"Team Store",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v9h12v-9"/><path d="M9 19v-5h6v5"/><path d="M4 10c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2"/></svg>}', '{k:"team-store",l:"Team Store",accentVar:"--accent",icon:"store",mobileIcon:"store"}', 'player store icon'],
     ['{k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>}', '{k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",icon:"chart",mobileIcon:"chart"}', 'player leaderboard icon'],
+    ['{k:"in-season",l:"In Season",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-3 3 2 5-7"/><path d="M15 7h4v4"/></svg>}', '{k:"in-season",l:"In Season",accentVar:"--accent-events",icon:"momentum",mobileIcon:"momentum"}', 'player in-season icon'],
+    ['{k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}', '{k:"profile",l:"Profile",accentVar:"--accent-players",icon:"profile",mobileIcon:"profile"}', 'player profile icon'],
   ];
   for(const [from,to,label] of swaps){if(!app.includes(from))throw new Error(`missing ${label}`);app=app.replace(from,to);}
   const direct='<ShotLabIcon name={item.icon} size={22}/><span>{item.l}</span>';
@@ -77,6 +79,16 @@ replace(
   const shared='{item.svg||<ShotLabIcon name={item.icon} size={22}/>}<span>{item.l}</span>';
   app=app.split(direct).join(shared).split(legacy).join(shared);
   fs.writeFileSync("src/App.jsx",app);
+}
+
+{
+  const path="scripts/apply-in-season-player-parity.mjs";
+  let source=fs.readFileSync(path,"utf8");
+  const from='  source = replaceOnce(source, navBefore, navAfter, "player In Season navigation item");';
+  const to='  if (!source.includes(\'{k:"in-season",l:"In Season"\')) source = replaceOnce(source, navBefore, navAfter, "player In Season navigation item");';
+  if(!source.includes(from))throw new Error("missing in-season nav enhancer guard");
+  source=source.replace(from,to);
+  fs.writeFileSync(path,source);
 }
 
 console.log("PR 1581 focus/performance refinement applied");
