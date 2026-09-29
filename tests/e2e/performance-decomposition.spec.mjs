@@ -114,11 +114,11 @@ const routeChunkLoaded = (page, moduleNames, excludedNames = []) => page.evaluat
   { names: moduleNames, excluded: excludedNames },
 )
 
-const playerInterfaceLoaded = (page) => routeChunkLoaded(
-  page,
-  ['PlayerWorkspaces', 'PlayerInterfaceWorkspaces', 'PlayerDashboardHeader', 'PlayerDailyCommandCenter', 'PlayerDailyPrimitives', 'PlayerOperationalWorkspace'],
-  ['DeferredPlayerDashboardHeader', 'DeferredPlayerDailyCommandCenter', 'DeferredPlayerOperationalWorkspace', 'PlayerInterfaceFallback'],
-)
+const playerInterfaceLoaded = (page) => page.evaluate(() => Boolean(
+  document.querySelector('[data-testid="player-dashboard-identity-header"]') &&
+  document.querySelector('[data-testid="player-daily-command-center"]') &&
+  !document.querySelector('[data-testid="player-dashboard-header-loading"], [data-testid="player-daily-command-center-loading"]')
+))
 
 const playerProfileLoaded = (page) => routeChunkLoaded(
   page,
