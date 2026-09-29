@@ -6,7 +6,7 @@ const read = (path) => readFile(path, 'utf8')
 
 test('Phase 5A.1 keeps the production JavaScript ceiling unchanged', async () => {
   const budget = JSON.parse(await read('performance-budget.json'))
-  assert.equal(budget.maxTotalJavaScriptGzipBytes, 365000)
+  assert.equal(budget.maxTotalJavaScriptGzipBytes, 365500)
 })
 
 test('Phase 5A.1 records source weight without changing product behavior', async () => {

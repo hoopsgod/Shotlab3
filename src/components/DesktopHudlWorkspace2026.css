@@ -27,4 +27,5 @@
   .mcShellV3.is-desktop-shell .missionControl > .mcHero { min-height:360px; }
   .mcShellV3.is-desktop-shell .missionControl > .mcLowerGrid { padding-bottom:36px; }
   .mcShellV3.is-desktop-shell .mcSectionHead h2,.mcShellV3.is-desktop-shell .mcPulseLead h2 { font-size:20px; }
+  .mcShellV3.is-desktop-shell .mcTeamHealth .mcPulseLead small,.mcShellV3.is-desktop-shell .mcTeamHealth .mcPulseCaption small { color:#c3ced2 !important; opacity:1 !important; }
 }
