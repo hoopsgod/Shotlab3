@@ -2147,9 +2147,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
         const d=new Date(`${dateValue}T00:00:00`);
         return Number.isNaN(d.getTime())?"UPCOMING":d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
       };
-      const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
-      const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
-      const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
+      const upcomingEventRsvpGaps=Number(eventsWorkspaceModel.metrics.find(metric=>metric.id==="missing")?.value)||0;
+      const unresolvedBadgeLabel=upcomingEventRsvpGaps>0?`${upcomingEventRsvpGaps} upcoming event RSVP${upcomingEventRsvpGaps===1?"":"s"} need response`:"Upcoming event RSVPs current";
       const upcomingScheduleItems=deriveUpcomingSchedule({events,rsvps,scSessions,scRsvps,userEmail:u?.email,today});
       const coachName=players.find(p=>p.role==="coach"&&p.teamId===u?.teamId)?.name||"Your coach";
       const emphasisLabel=String(coachPriorities?.focusEmphasis||"Volume").trim();

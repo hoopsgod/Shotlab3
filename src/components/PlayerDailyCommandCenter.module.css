@@ -229,7 +229,7 @@
   .primaryButton,.taskButton,.activationButton { transition:none; }
 }
 
-.coachSignalAction { display:inline-flex; align-items:center; justify-content:space-between; gap:10px; min-height:42px; margin-top:2px; padding:0 14px; border:1px solid #ccd6d2; border-radius:10px; background:#fff; color:#20342f; font:750 13px/1.2 var(--font-body,system-ui,sans-serif); cursor:pointer; }
+.coachSignalAction { display:none; align-items:center; justify-content:space-between; gap:10px; min-height:42px; margin-top:2px; padding:0 14px; border:1px solid #ccd6d2; border-radius:10px; background:#fff; color:#20342f; font:750 13px/1.2 var(--font-body,system-ui,sans-serif); cursor:pointer; }
 .coachSignalAction:hover,.coachSignalAction:focus-visible { border-color:#799786; background:#f3f9f1; }
 .coachSignalAction:focus-visible { outline:3px solid #9ebd7d; outline-offset:2px; }
 @media (min-width:981px) {
@@ -241,7 +241,7 @@
   .coachSignal { grid-column:2; grid-row:1; margin:0 !important; padding:20px !important; border:1px solid #d6ded7; border-radius:15px; background:#fff; }
   .coachSignalTitle { color:#142b25; }
   .coachSignalValue { font-size:14px !important; line-height:1.45 !important; }
-  .coachSignalAction { grid-column:2; grid-row:2; width:100%; margin:0; }
+  .coachSignalAction { display:inline-flex; grid-column:2; grid-row:2; width:100%; margin:0; }
   .root > :global(.playerProgressDisclosure) { grid-column:1/-1; grid-row:3; margin:0; border:1px solid #d8ded8; border-radius:14px; background:#fff; }
   .root > :global(.playerProgressDisclosure) summary { padding:15px 20px; }
   .section,.activation,.momentumSignal { grid-column:1/-1; margin-top:0; }
