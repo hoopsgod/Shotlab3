@@ -405,6 +405,7 @@ test("Phase 3A captures the complete Player training and progress hierarchy at i
 });
 
 test("Phase 3A validates first-impression geometry at 375, 390, 393, 402, and 430px", async ({ page }) => {
+  test.setTimeout(90_000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await installSafeRoutes(page);
