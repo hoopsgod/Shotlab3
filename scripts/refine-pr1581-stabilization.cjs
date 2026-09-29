@@ -59,4 +59,17 @@ replace(
   "drawer focus and scroll assertion",
 );
 
+{
+  let app=fs.readFileSync("src/App.jsx","utf8");
+  const start=app.indexOf('const playerNavItems=[');
+  const end=app.indexOf('];\nconst getPlayerNavItem',start)+2;
+  if(start<0||end<2)throw new Error('missing player nav items');
+  const compact='const playerNavItems=[["home","Home","home"],[u.isCoach?"players":"duels",u.isCoach?"Players":"Program Log",u.isCoach?"team":"program"],["log-drill","AT Home Log","target"],["sc","Lifting","strength",soonSC>0?VOLT:null],["program","Events","calendar",unrsvpEvents>0?VOLT:null],["team-store","Team Store","store"],["in-season","In Season","momentum"],["profile","Profile","profile"]].map(([k,l,icon,dot])=>({k,l,icon,mobileIcon:icon,dot}));';
+  app=app.slice(0,start)+compact+app.slice(end);
+  const desktopIcon='{item.svg}<span>{item.l}</span>';
+  if(!app.includes(desktopIcon))throw new Error('missing player desktop icon render');
+  app=app.replace(desktopIcon,'<ShotLabIcon name={item.icon} size={22}/><span>{item.l}</span>');
+  fs.writeFileSync("src/App.jsx",app);
+}
+
 console.log("PR 1581 focus/performance refinement applied");
