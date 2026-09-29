@@ -69,7 +69,7 @@ function isCoachWorkspace(file) {
   return COACH_WORKSPACE_ASSET.test(path.basename(file));
 }
 
-function restructureCss(css, filename, { coach = false, preserveMediaRanges = false } = {}) {
+function restructureCss(css, filename, { coach = false, preserveMediaRanges = true } = {}) {
   return minify(preserveMediaRanges ? normalizeMediaRangesForCsso(css) : css, {
     filename,
     restructure: true,
