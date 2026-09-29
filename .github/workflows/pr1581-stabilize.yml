@@ -7,6 +7,8 @@ on:
     paths:
       - .github/workflows/pr1581-stabilize.yml
       - scripts/patch-pr1581-stabilization.cjs
+      - scripts/refine-pr1581-stabilization.cjs
+      - tests/e2e/desktop-workspace-routing.spec.mjs
   workflow_dispatch:
 
 permissions:
@@ -32,11 +34,26 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Apply stabilization patch
-        run: node scripts/patch-pr1581-stabilization.cjs
+        run: |
+          node scripts/patch-pr1581-stabilization.cjs
+          node scripts/refine-pr1581-stabilization.cjs
       - name: Run focused source regressions
         run: node --test tests/desktop-single-page-workspace-shell.test.mjs tests/mobile-coach-navigation.test.mjs tests/desktop-hudl-workspace-2026.test.mjs
       - name: Verify fixed production performance budget
         run: npm run build:performance
+      - name: Require measurable JavaScript headroom
+        run: |
+          node --input-type=module - <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const metrics=JSON.parse(await readFile('artifacts/performance/build-metrics.json','utf8'));
+          const used=metrics.totals.javaScriptGzipBytes;
+          const limit=metrics.budget.maxTotalJavaScriptGzipBytes;
+          const headroom=limit-used;
+          console.log(`JS_GZIP_BYTES=${used}`);
+          console.log(`JS_GZIP_BUDGET=${limit}`);
+          console.log(`JS_GZIP_HEADROOM=${headroom}`);
+          if(headroom<1024) throw new Error(`JavaScript gzip headroom ${headroom} B is below required 1024 B stabilization margin.`);
+          NODE
       - name: Install pinned Playwright test runner
         run: npm install --no-save --package-lock=false @playwright/test@1.55.1
       - name: Install Chromium for focused browser certification
@@ -56,6 +73,7 @@ jobs:
           path: |
             routing-playwright.log
             test-results
+            artifacts/performance/build-metrics.json
           if-no-files-found: ignore
       - name: Enforce focused browser gate
         if: steps.routing.outcome != 'success'
@@ -66,7 +84,7 @@ jobs:
         run: git diff --check
       - name: Commit tested stabilization
         run: |
-          rm scripts/patch-pr1581-stabilization.cjs .github/workflows/pr1581-stabilize.yml
+          rm scripts/patch-pr1581-stabilization.cjs scripts/refine-pr1581-stabilization.cjs .github/workflows/pr1581-stabilize.yml
           git config user.name "shotlab-release-bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
