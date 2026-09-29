@@ -3284,11 +3284,11 @@ function SeasonArchiveDetail({ archive, onBack }){
 
 const COACH_ROUTE_TABS = new Set(["feed","drills","events","sc","players","activity","leaderboards","in-season","settings","branding","sc"]);
 function readCoachRoute(path = "/") {
-  const normalized = path.replace(/\\/+$/, "") || "/";
+  const normalized = path.replace(/\/+$/, "") || "/";
   if (normalized === "/" || normalized === "/coach") return { tab: "feed", playerKey: "" };
   const legacyTab = normalized.startsWith("/") ? normalized.slice(1) : "";
   if (COACH_ROUTE_TABS.has(legacyTab)) return { tab: legacyTab, playerKey: "" };
-  const match = normalized.match(/^\\/coach\\/([^/]+)(?:\\/(.+))?$/);
+  const match = normalized.match(/^\/coach\/([^/]+)(?:\/(.+))?$/);
   if (!match || !COACH_ROUTE_TABS.has(match[1])) return { tab: "feed", playerKey: "" };
   return { tab: match[1], playerKey: match[1] === "players" ? decodeURIComponent(match[2] || "") : "" };
 }
