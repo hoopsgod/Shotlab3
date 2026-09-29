@@ -3282,8 +3282,23 @@ function SeasonArchiveDetail({ archive, onBack }){
   return <article className="seasonArchiveDetail" data-testid="season-archive-detail"><button type="button" aria-label="Back to archived seasons list" onClick={onBack}>Back to archived seasons</button><header><span>Archived season</span><h3>{detail.seasonName}</h3><p>Created {archiveDate} · Archived by {detail.archivedBy}{detail.seasonRange?` · ${detail.seasonRange}`:""}</p></header><div className="seasonArchiveStats">{detail.summaryStats.map(stat=><ArchiveDetailStat key={stat.label} label={stat.label} value={stat.value}/>)}</div><div className="seasonArchiveSections">{detail.sections.map(section=><section key={section.title} data-testid={section.title==="PLAYER SEASON SUMMARIES"?"season-archive-player-summaries":undefined}><h4>{section.title}</h4>{section.rows.length===0?<p>{section.empty}</p>:<div>{section.rows.map((row,index)=><p key={`${section.title}-${index}`}>{row}</p>)}</div>}</section>)}</div></article>;
 }
 
+const COACH_ROUTE_TABS = new Set(["feed","drills","events","sc","players","activity","leaderboards","in-season","settings","branding","sc"]);
+function readCoachRoute(path = "/") {
+  const normalized = path.replace(/\\/+$/, "") || "/";
+  if (normalized === "/" || normalized === "/coach") return { tab: "feed", playerKey: "" };
+  const match = normalized.match(/^\\/coach\\/([^/]+)(?:\\/(.+))?$/);
+  if (!match || !COACH_ROUTE_TABS.has(match[1])) return { tab: "feed", playerKey: "" };
+  return { tab: match[1], playerKey: match[1] === "players" ? decodeURIComponent(match[2] || "") : "" };
+}
+function buildCoachRoute(tab = "feed", playerKey = "") {
+  if (tab === "feed" && !playerKey) return "/";
+  const base = tab === "feed" ? "/coach" : `/coach/${tab}`;
+  return playerKey ? `${base}/${encodeURIComponent(playerKey)}` : base;
+}
+
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,archiveSeason,seasonArchives=[],playerProfiles,drills,programDrills,scores,programScores=[],players,addCoachProgramScore,updateDrill,addDrill,removeDrill,addProgramDrill,updateProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachHomeLeaderboardRows=[],coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",accountCapabilities, demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
+const initialCoachRoute=readCoachRoute(typeof window!=="undefined"?window.location.pathname:"/");
+const[tab,setTab]=useState(initialCoachRoute.tab),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState(""),[playerDashboardFilter,setPlayerDashboardFilter]=useState("all"),[playerDashboardQuery,setPlayerDashboardQuery]=useState(""),[eventDashboardStatus,setEventDashboardStatus]=useState("upcoming"),[eventDashboardQuery,setEventDashboardQuery]=useState(""),[coachPageMetric,setCoachPageMetric]=useState("active");
 const[playerDrawerKey,setPlayerDrawerKey]=useState(""),[eventDrawerId,setEventDrawerId]=useState(""),[drillIntelligenceScope,setDrillIntelligenceScope]=useState("all"),[drillIntelligenceQuery,setDrillIntelligenceQuery]=useState(""),[strengthIntelligenceScope,setStrengthIntelligenceScope]=useState("all"),[strengthIntelligenceQuery,setStrengthIntelligenceQuery]=useState(""),[leaderboardIntelligenceScope,setLeaderboardIntelligenceScope]=useState("all"),[leaderboardIntelligenceQuery,setLeaderboardIntelligenceQuery]=useState(""),[activityIntelligenceScope,setActivityIntelligenceScope]=useState("all"),[activityIntelligenceQuery,setActivityIntelligenceQuery]=useState("");
@@ -3473,12 +3488,12 @@ const filteredCoachLeaderboardIntelligenceRows=useMemo(()=>filterLeaderboardInte
 const coachActivityIntelligenceRows=useMemo(()=>buildActivityIntelligenceRows({scores:safeScores,shotLogs:safeShotLogs,scLogs:safeScLogs,events:safeEvents,today}),[safeScores,safeShotLogs,safeScLogs,safeEvents,today]);
 const filteredCoachActivityIntelligenceRows=useMemo(()=>filterActivityIntelligenceRows(coachActivityIntelligenceRows,{scope:activityIntelligenceScope,query:activityIntelligenceQuery}),[coachActivityIntelligenceRows,activityIntelligenceScope,activityIntelligenceQuery]);
 const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:[...safeScores,...safeProgramScores],currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);
-const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));setPlayerDrawerKey(row?.key||candidates[0]||"");},[coachPlayerDashboardRows]);
+const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));const key=row?.key||candidates[0]||"";if(!key)return;setTab("players");setPlayerDrawerKey(key);const nextPath=buildCoachRoute("players",key);if(window.location.pathname!==nextPath)window.history.pushState({shotlabWorkspace:"coach-player",playerKey:key},"",nextPath);},[coachPlayerDashboardRows]);
 const coachCoreLoopModel=useMemo(()=>buildCoachCoreLoopModel({playerRows:coachPlayerDashboardRows,records:coachCoreLoopData.records,requestState:coachCoreLoopData.requestState,error:coachCoreLoopData.error,storageMode:coachCoreLoopData.storageMode,feedback:coachCoreLoopFeedback}),[coachCoreLoopData,coachCoreLoopFeedback,coachPlayerDashboardRows]);
-const openCoachCoreLoopPlayer=useCallback((item={})=>{setPlayerDashboardFilter("attention");openPlayerIntelligence(item.player||item);setTab("players");},[openPlayerIntelligence]);
+const openCoachCoreLoopPlayer=useCallback((item={})=>{setPlayerDashboardFilter("attention");openPlayerIntelligence(item.player||item);},[openPlayerIntelligence]);
 const coachCommandActivityItems=useMemo(()=>coachActivityIntelligenceRows.slice(0,5).map(row=>({name:row.player||row.title,detail:row.type==="event"?`${row.title} · ${row.detail}`:`${row.type} · ${row.detail}`,meta:row.date})),[coachActivityIntelligenceRows]);
-const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
-const openEventCreateFlow=useCallback(()=>{setEventSaveError("");setTab("events");setSelP(null);setExpEv(null);setShowAddSC(false);setShowAdd(true);setTimeout(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth",block:"start"}),120);},[]);
+const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setPlayerDrawerKey("");setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
+const openEventCreateFlow=useCallback(()=>{setEventSaveError("");setTab("events");setPlayerDrawerKey("");setSelP(null);setExpEv(null);setShowAddSC(false);setShowAdd(true);setTimeout(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth",block:"start"}),120);},[]);
 const handleLogScoreAction=()=>{
   setShowProgramScoreEntry(true);
 };
@@ -3522,7 +3537,9 @@ const handleNavChange=(k)=>{
     openTeamBranding();
     return;
   }
-  setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
+  const nextPath=buildCoachRoute(k);
+  if(window.location.pathname!==nextPath)window.history.pushState({shotlabWorkspace:"coach",tab:k},"",nextPath);
+  setTab(k);setPlayerDrawerKey("");setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
 };
 const coachInsightRailModel=useMemo(()=>buildCoachOperationalInsightRail({activeTab:tab,rosterCount:totalPlayers,activeTodayCount,activeThisWeekCount:activeThisWeek.size,inactivePlayersCount,eventMetrics:coachEventDashboardMetrics,strengthRows:coachStrengthIntelligenceRows,pageSummary:coachPageDashboardSummary}),[tab,totalPlayers,activeTodayCount,activeThisWeek,inactivePlayersCount,coachEventDashboardMetrics,coachStrengthIntelligenceRows,coachPageDashboardSummary]);
 const handleCoachInsightAction=(action={})=>{
@@ -3558,6 +3575,15 @@ useEffect(()=>{
   window.addEventListener("resize",onResize);
   return()=>window.removeEventListener("resize",onResize);
 },[]);
+useEffect(()=>{
+  const onPopState=()=>{const next=readCoachRoute(window.location.pathname);setTab(next.tab);setPlayerDrawerKey(next.playerKey);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false);};
+  window.addEventListener("popstate",onPopState);
+  return()=>window.removeEventListener("popstate",onPopState);
+},[]);
+useEffect(()=>{
+  const desired=buildCoachRoute(tab,tab==="players"?playerDrawerKey:"");
+  if(window.location.pathname!==desired)window.history.replaceState({shotlabWorkspace:"coach",tab,playerKey:playerDrawerKey||""},"",desired);
+},[tab,playerDrawerKey]);
 
 useEffect(()=>{
   const heroNode=heroRef.current;
@@ -4285,7 +4311,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
 </div>
 
 <CoachProgramScoreDrawer open={showProgramScoreEntry} players={coachRosterPlayers} drills={programDrills} onClose={()=>setShowProgramScoreEntry(false)} onSubmit={addCoachProgramScore}/>
-<CoachPlayerIntelligenceDrawer model={selectedPlayerIntelligence} onClose={()=>setPlayerDrawerKey("")} onOpenFullProfile={()=>{if(selectedPlayerDashboardRow?.player){setSelP(selectedPlayerDashboardRow.player);setPlayerDrawerKey("");}}} onShowActivity={()=>{setActivityIntelligenceQuery(selectedPlayerIntelligence?.name||selectedPlayerIntelligence?.email||"");setActivityIntelligenceScope("all");setTab("activity");setPlayerDrawerKey("");}} onReturnToHome={()=>{setPlayerDrawerKey("");setSelP(null);setPlayerDashboardFilter("all");setPlayerDashboardQuery("");setTab("feed");}}/><CoachEventIntelligenceDrawer model={selectedEventIntelligence} onClose={()=>setEventDrawerId("")} onManageAttendance={()=>{if(selectedEventIntelligence?.id){setExpEv(selectedEventIntelligence.id);setTab("events");setEventDrawerId("");}}} onOpenSchedule={()=>{setTab("events");setEventDrawerId("");}}/>{!isDesktop&&<MobileNavigation primaryItems={coachMobilePrimaryItems} secondaryItems={coachMobileSecondaryItems} activeKey={tab} onChange={handleNavChange} ariaLabel="Coach navigation"/>}
+<CoachPlayerIntelligenceDrawer model={selectedPlayerIntelligence} onClose={()=>{if(window.location.pathname.includes("/coach/players/"))window.history.back();else setPlayerDrawerKey("");}} onOpenFullProfile={()=>{if(selectedPlayerDashboardRow?.player){setSelP(selectedPlayerDashboardRow.player);setPlayerDrawerKey("");}}} onShowActivity={()=>{setActivityIntelligenceQuery(selectedPlayerIntelligence?.name||selectedPlayerIntelligence?.email||"");setActivityIntelligenceScope("all");setTab("activity");setPlayerDrawerKey("");}} onReturnToHome={()=>{setPlayerDrawerKey("");setSelP(null);setPlayerDashboardFilter("all");setPlayerDashboardQuery("");setTab("feed");}}/><CoachEventIntelligenceDrawer model={selectedEventIntelligence} onClose={()=>setEventDrawerId("")} onManageAttendance={()=>{if(selectedEventIntelligence?.id){setExpEv(selectedEventIntelligence.id);setTab("events");setEventDrawerId("");}}} onOpenSchedule={()=>{setTab("events");setEventDrawerId("");}}/>{!isDesktop&&<MobileNavigation primaryItems={coachMobilePrimaryItems} secondaryItems={coachMobileSecondaryItems} activeKey={tab} onChange={handleNavChange} ariaLabel="Coach navigation"/>}
 
   </div></div></main>
 {isDesktop&&<aside className="insights-panel"><OperationalInsightRail model={coachInsightRailModel} onAction={handleCoachInsightAction} testId="coach-operational-insight-rail"/></aside>}
