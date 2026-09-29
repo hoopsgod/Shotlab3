@@ -3,6 +3,7 @@ import "./CoachMissionControlInteractions.css";
 import "./CoachMissionControlShell.css";
 import "./CoachMissionControlFinal.css";
 import "./CoachMissionControlTitleStage.css";
+import "./DesktopHudlWorkspace2026.css";
 import "./CoachActivationPath.css";
 import "./CoachTeamMonogramFallback.css";
 import "./CoachPriorityOverlay.css";
@@ -213,7 +214,7 @@ export default function CoachCommandCenter({
   return <>
     <div className={`mcShell mcShellV3 ${desktopRailEnabled ? "is-desktop-shell" : "is-mobile-shell"} ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" data-visual-system="phase-4-premium" data-desktop-rail={desktopRailEnabled ? "visible" : "removed"} style={{ "--mc": accent, "--mc-secondary": secondary }}>
       {desktopRailEnabled ? <aside className="mcRail" aria-label="Coach navigation">
-        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</button>
+        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><span className="mcRailBrandMark">{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</span><span className="mcRailBrandCopy"><small>TEAM WORKSPACE</small><strong>{teamName}</strong></span></button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside> : null}
