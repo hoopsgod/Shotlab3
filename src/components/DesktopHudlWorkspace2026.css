@@ -1,0 +1,30 @@
+/* Desktop workspace authority: a team-first coaching workbench. Mobile
+   composition remains owned by the established Phase 1/6 rules. */
+@media (min-width: 981px) {
+  .mcShellV3.is-desktop-shell { --hudl-ink:#14232b; --hudl-canvas:#f5f3ee; display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; background:var(--hudl-canvas); color:var(--hudl-ink); }
+  .mcShellV3.is-desktop-shell > .mcRail { position:sticky; top:0; height:100dvh; box-sizing:border-box; padding:20px 14px 16px; background:#09212c; border-right:1px solid rgba(255,255,255,.08); }
+  .mcShellV3.is-desktop-shell .mcRailBrand { min-height:76px; padding:0 12px; display:grid; grid-template-columns:42px minmax(0,1fr); gap:11px; place-items:center stretch; border:0; border-bottom:1px solid rgba(255,255,255,.11); text-align:left; }
+  .mcShellV3.is-desktop-shell .mcRailBrand::before,.mcShellV3.is-desktop-shell .mcRailBrand::after { display:none; }
+  .mcShellV3.is-desktop-shell .mcRailBrandMark { width:42px; height:42px; display:grid; place-items:center; overflow:hidden; border-radius:12px; background:#07151d; border:1px solid rgba(200,255,26,.28); }
+  .mcShellV3.is-desktop-shell .mcRailLogo,.mcShellV3.is-desktop-shell .mcRailLogoSetup { display:grid; width:34px; height:34px; object-fit:contain; }
+  .mcShellV3.is-desktop-shell .mcRailBrandCopy { min-width:0; }
+  .mcShellV3.is-desktop-shell .mcRailBrandCopy small,.mcShellV3.is-desktop-shell .mcRailBrandCopy strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mcShellV3.is-desktop-shell .mcRailBrandCopy small { color:#8ba0a8; font:700 9px/1.1 var(--mc-native); letter-spacing:.12em; }
+  .mcShellV3.is-desktop-shell .mcRailBrandCopy strong { margin-top:5px; color:#f2f6f7; font:760 14px/1 var(--mc-native); }
+  .mcShellV3.is-desktop-shell .mcRail nav { gap:4px; margin-top:24px; }
+  .mcShellV3.is-desktop-shell .mcRail nav button { min-height:48px; padding:0 14px; border-radius:10px; color:#9db0b8; font-size:12px; }
+  .mcShellV3.is-desktop-shell .mcRail nav button:hover,.mcShellV3.is-desktop-shell .mcRail nav button:focus-visible { color:#f5f8f8; background:rgba(255,255,255,.06); transform:none; }
+  .mcShellV3.is-desktop-shell .mcRail nav button.is-active { color:#f7fbfb; background:linear-gradient(90deg,rgba(200,255,26,.16),rgba(200,255,26,.04)); box-shadow:inset 3px 0 var(--mc,#c8ff1a); }
+  .mcShellV3.is-desktop-shell .mcRail nav button.is-active::before { display:none; }
+  .mcShellV3.is-desktop-shell .mcCoachIdentity { margin:auto 4px 0; padding:16px 0 2px; border-top:1px solid rgba(255,255,255,.11); }
+  .mcShellV3.is-desktop-shell > .missionControl { min-width:0; background:var(--hudl-canvas); }
+  .mcShellV3.is-desktop-shell .mcHeader[data-testid="mission-control-team-header"] { position:sticky; top:0; z-index:10; min-height:72px; padding-inline:clamp(28px,4vw,64px); background:rgba(251,250,247,.92); border-bottom:1px solid rgba(20,35,43,.10); backdrop-filter:blur(18px); }
+  .mcShellV3.is-desktop-shell .mcBrandCopy small { color:#728087; }
+  .mcShellV3.is-desktop-shell .mcBrandCopy strong { color:var(--hudl-ink); font-size:15px; }
+  .mcShellV3.is-desktop-shell .mcTeamSelect { min-height:40px; border-radius:10px; background:#fff; }
+  .mcShellV3.is-desktop-shell .mcBell { border-radius:10px; box-shadow:0 5px 16px rgba(20,35,43,.08); }
+  .mcShellV3.is-desktop-shell .missionControl > .mcHero,.mcShellV3.is-desktop-shell .missionControl > .mcFocusGrid,.mcShellV3.is-desktop-shell .missionControl > .mcLowerGrid,.mcShellV3.is-desktop-shell .missionControl > .mcActivationChapter,.mcShellV3.is-desktop-shell .missionControl > .mcTools { width:min(1440px,100%); margin-inline:auto; }
+  .mcShellV3.is-desktop-shell .missionControl > .mcHero { min-height:360px; }
+  .mcShellV3.is-desktop-shell .missionControl > .mcLowerGrid { padding-bottom:36px; }
+  .mcShellV3.is-desktop-shell .mcSectionHead h2,.mcShellV3.is-desktop-shell .mcPulseLead h2 { font-size:20px; }
+}
