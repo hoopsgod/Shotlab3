@@ -15,8 +15,9 @@ edit(
   "explicit demo-only refresh restore",
 );
 edit("src/App.jsx",/window\.history\.pushState\(\{slp:1\},"",nextPath\)/g,'window.history.pushState({slp:1},"",nextPath+(isDemoAccount(u)?"?demo=1":""))',"coach player demo route marker");
-edit("src/App.jsx",/window\.history\.pushState\(\{\s*shotlabWorkspace:"coach",\s*tab:k\s*\},"",nextPath\)/g,'window.history.pushState({shotlabWorkspace:"coach",tab:k},"",nextPath+(isDemoAccount(u)?"?demo=1":""))',"coach navigation demo route marker");
-edit("src/App.jsx",/window\.history\.replaceState\(\{\s*shotlabWorkspace:"coach",\s*tab,\s*playerKey:playerDrawerKey\|\|""\s*\},"",desired\)/g,'window.history.replaceState({shotlabWorkspace:"coach",tab,playerKey:playerDrawerKey||""},"",desired+(isDemoAccount(u)?"?demo=1":""))',"coach canonical demo route marker");
+edit("src/App.jsx",/window\.history\.pushState\(null,"",nextPath\)/g,'window.history.pushState(null,"",nextPath+(isDemoAccount(u)?"?demo=1":""))',"coach navigation demo route marker");
+edit("src/App.jsx",/history\.replaceState\(null,"",desired\)/g,'history.replaceState(null,"",desired+(isDemoAccount(u)?"?demo=1":""))',"coach canonical demo route marker");
+edit("src/App.jsx",/history\.replaceState\(null,"","\/coach\/players"\)/g,'history.replaceState(null,"","/coach/players"+(isDemoAccount(u)?"?demo=1":""))',"coach direct drawer close demo marker");
 edit("src/App.jsx",/window\.history\.pushState\(\{\},"",nextPath\)/g,'window.history.pushState({},"",nextPath+(isDemoAccount(u)?"?demo=1":""))',"player navigation demo route marker");
 
 edit(
