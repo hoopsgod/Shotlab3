@@ -1,5 +1,5 @@
 name: PR 1581 Stabilization Patch
-# closure retrigger
+# closure retrigger normalized
 
 on:
   push:
