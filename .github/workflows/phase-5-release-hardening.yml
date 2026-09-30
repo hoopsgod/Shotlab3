@@ -168,7 +168,7 @@ jobs:
           short="${EXPECTED_SHA:0:7}"
           for attempt in {1..90}; do
             comments="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
-            body="$(printf '%s' "$comments" | jq -r --arg marker "<code>${short}</code>" '.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($marker)) | .body' | tail -n 1)"
+            body="$(printf '%s' "$comments" | jq -r --arg marker "<code>${short}</code>" '.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($marker)) | .body')"
             preview_url="$(printf '%s\n' "$body" | grep -Eo 'https://[0-9a-f]{8}\.shotlab3\.pages\.dev' | head -n 1 || true)"
             deployment_id="$(printf '%s\n' "$body" | grep -Eo '/shotlab3/[0-9a-f-]{36}' | head -n 1 | sed 's#.*/##' || true)"
             if [[ -n "$preview_url" ]] && curl --fail --silent --show-error "$preview_url/" > /dev/null; then
