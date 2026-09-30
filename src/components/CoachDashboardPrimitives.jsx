@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./CoachDashboardPrimitives.module.css";
@@ -9,23 +8,23 @@ const cx = (...values) => values.filter(Boolean).join(" ");
 const metricIconName = (item = {}) => {
   if (item.icon) return item.icon;
   const value = `${item.key || ""} ${item.label || ""}`.toLowerCase();
-  if (value.includes("roster") || value.includes("player")) return "team";
-  if (value.includes("active") || value.includes("completed")) return "check";
-  if (value.includes("attention") || value.includes("missing") || value.includes("awaiting")) return "alert";
-  if (value.includes("response") || value.includes("rate")) return "chart";
-  if (value.includes("upcoming") || value.includes("event")) return "calendar";
-  if (value.includes("make") || value.includes("shot")) return "target";
+  if (/roster|player/.test(value)) return "team";
+  if (/active|completed/.test(value)) return "check";
+  if (/attention|missing|awaiting/.test(value)) return "alert";
+  if (/response|rate/.test(value)) return "chart";
+  if (/upcoming|event/.test(value)) return "calendar";
+  if (/make|shot/.test(value)) return "target";
   return "momentum";
 };
 
 const metricEvidencePoints = (values = []) => {
-  const numeric = values.map((value) => Number(value)).filter(Number.isFinite).slice(0, 10);
+  const numeric = values.map(Number).filter(Number.isFinite).slice(0, 10);
   if (numeric.length < 2) return null;
   const min = Math.min(...numeric);
   const max = Math.max(...numeric);
   const flat = max === min;
   return numeric.map((value, index) => {
-    const x = numeric.length === 1 ? 50 : (index / (numeric.length - 1)) * 100;
+    const x = (index / (numeric.length - 1)) * 100;
     const y = flat ? 14 : 24 - ((value - min) / (max - min)) * 18;
     return `${x.toFixed(2)},${y.toFixed(2)}`;
   }).join(" ");
@@ -242,38 +241,18 @@ export function DashboardProgress({ value = 0, max = 100, label, detail }) {
 }
 
 export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, children, testId }) {
-  const closeButtonRef = useRef(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    closeButtonRef.current?.focus();
-    const handleKeyDown = (event) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      onCloseRef.current?.();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      if (previous?.isConnected) previous.focus();
-    };
-  }, [open]);
-
   if (!open) return null;
   const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
       <button type="button" className={styles.drawerBackdrop} aria-label="Close details" onClick={onClose} />
-      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer">
+      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer" onFocus={e=>{e.currentTarget._returnFocus||=e.relatedTarget}} onKeyDown={e=>{if(e.key==="Escape"){e.preventDefault();onClose?.();e.currentTarget._returnFocus?.focus?.()}}}>
         <div className={styles.drawerHeader}>
           <div>
             {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
             <h2>{title}</h2>
             {meta ? <p>{meta}</p> : null}
           </div>
-          <button ref={closeButtonRef} type="button" className={styles.drawerClose} data-action-role="tertiary" aria-label="Close details" onClick={onClose}>×</button>
+          <button autoFocus type="button" className={styles.drawerClose} data-action-role="tertiary" aria-label="Close details" onClick={onClose}>×</button>
         </div>
         <div className={styles.drawerBody}>{children}</div>
       </aside>
