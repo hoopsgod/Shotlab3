@@ -71,6 +71,7 @@ jobs:
 
       - name: Verify unchanged production performance budget
         id: performance_budget
+        continue-on-error: true
         run: npm run verify:performance-budget
 
       - name: Start built production preview
@@ -89,6 +90,7 @@ jobs:
 
       - name: Certify desktop workspace SPA routing, history, and responsive geometry
         id: desktop_workspace_local
+        continue-on-error: true
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/desktop-workspace-routing.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --retries=0
@@ -260,6 +262,7 @@ jobs:
           name: phase-5-release-hardening-evidence
           path: |
             artifacts/phase-5-release-hardening/
+            artifacts/performance/
             artifacts/phase-5-mobile-precision-evidence/
             artifacts/phase-4-product-reset-interaction/
             artifacts/phase-3a-cross-screen-visual-audit/
@@ -269,12 +272,31 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: Enforce exact-head release blockers
+        if: always()
+        shell: bash
+        env:
+          PERFORMANCE_BUDGET_RESULT: ${{ steps.performance_budget.outcome }}
+          LOCAL_WORKSPACE_RESULT: ${{ steps.desktop_workspace_local.outcome }}
+        run: |
+          failed=0
+          if [[ "$PERFORMANCE_BUDGET_RESULT" != "success" ]]; then
+            echo "Performance budget did not pass: $PERFORMANCE_BUDGET_RESULT" >&2
+            failed=1
+          fi
+          if [[ "$LOCAL_WORKSPACE_RESULT" != "success" ]]; then
+            echo "Local desktop workspace certification did not pass: $LOCAL_WORKSPACE_RESULT" >&2
+            failed=1
+          fi
+          exit "$failed"
+
       - name: Upload failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: phase-5-release-hardening-failure
           path: |
+            artifacts/performance/
             playwright-report/
             test-results/
             /tmp/phase-5-preview.log
