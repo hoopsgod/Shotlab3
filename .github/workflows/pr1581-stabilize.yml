@@ -7,6 +7,7 @@ on:
       - agent/desktop-single-page-workspace-shell
     paths:
       - .github/workflows/pr1581-stabilize.yml
+      - scripts/normalize-pr1581-closure.cjs
       - scripts/patch-pr1581-stabilization.cjs
       - scripts/refine-pr1581-stabilization.cjs
       - scripts/finalize-pr1581-deeplink.cjs
@@ -37,6 +38,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Normalize closure patch for current icon-dedupe head
+        run: node scripts/normalize-pr1581-closure.cjs
       - name: Apply stabilization patch
         run: |
           node scripts/patch-pr1581-stabilization.cjs
@@ -91,7 +94,7 @@ jobs:
         id: final
         shell: bash
         run: |
-          rm scripts/patch-pr1581-stabilization.cjs scripts/refine-pr1581-stabilization.cjs scripts/finalize-pr1581-deeplink.cjs .github/workflows/pr1581-stabilize.yml
+          rm scripts/normalize-pr1581-closure.cjs scripts/patch-pr1581-stabilization.cjs scripts/refine-pr1581-stabilization.cjs scripts/finalize-pr1581-deeplink.cjs .github/workflows/pr1581-stabilize.yml
           git config user.name "shotlab-release-bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
