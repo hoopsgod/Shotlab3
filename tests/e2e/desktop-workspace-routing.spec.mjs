@@ -24,6 +24,15 @@ async function enterPlayerDemo(page) {
   await expect(home).toBeVisible({ timeout: 20_000 });
 }
 
+async function reloadExplicitDemoRoute(page) {
+  await page.evaluate(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("demo", "1");
+    window.history.replaceState(window.history.state, "", url);
+  });
+  await page.reload();
+}
+
 async function openFirstPlayerDrawer(page) {
   const roster = page.locator("#coach-roster-operations");
   await expect(roster).toBeVisible({ timeout: 20_000 });
@@ -131,11 +140,11 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await expect(page.getByTestId("coach-events-interactive-dashboard")).toBeVisible();
   expect(await documentNavigationCount(page)).toBe(initialDocumentNavigations);
 
-  await page.reload();
+  await reloadExplicitDemoRoute(page);
   await expect(page.getByTestId("coach-events-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
   expect(new URL(page.url()).pathname).toBe("/coach/events");
 
-  await page.goto("/coach/settings");
+  await page.goto("/coach/settings?demo=1");
   await expect(page.getByTestId("coach-season-archive")).toBeVisible({ timeout: 20_000 });
   await page.reload();
   await expect(page.getByTestId("coach-season-archive")).toBeVisible({ timeout: 20_000 });
@@ -144,7 +153,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   const direct = await page.context().newPage();
   await installSafeRoutes(direct);
   await direct.setViewportSize({ width: 1280, height: 900 });
-  await direct.goto(playerPath);
+  await direct.goto(`${playerPath}?demo=1`);
   const directDrawer = direct.getByTestId("coach-player-intelligence-drawer");
   await expect(directDrawer).toBeVisible({ timeout: 20_000 });
   expect(await direct.evaluate(() => window.history.state?.slp || null)).not.toBe(1);
@@ -152,7 +161,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await expect(directDrawer).toHaveCount(0);
   expect(new URL(direct.url()).pathname).toBe("/coach/players");
 
-  await direct.goto("/coach/not-a-real-route");
+  await direct.goto("/coach/not-a-real-route?demo=1");
   await expect(direct.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => new URL(direct.url()).pathname).toBe("/");
   await direct.close();
@@ -199,14 +208,14 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
   await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
   expect(await documentNavigationCount(page)).toBe(initialDocumentNavigations);
 
-  await page.reload();
+  await reloadExplicitDemoRoute(page);
   await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
   await expect(page.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
 
   const direct = await page.context().newPage();
   await installSafeRoutes(direct);
   await direct.setViewportSize({ width: 1280, height: 900 });
-  await direct.goto("/events");
+  await direct.goto("/events?demo=1");
   await expect(direct.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
   expect(new URL(direct.url()).pathname).toBe("/events");
   await direct.reload();
