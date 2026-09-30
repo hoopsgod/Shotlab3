@@ -5,9 +5,9 @@ import "./Phase2PremiumMetricLayer.css";
 
 const cx = (...values) => values.filter(Boolean).join(" ");
 
-const metricIconName = (item = {}) => {
+const metricIconName = item => {
   if (item.icon) return item.icon;
-  const value = `${item.key || ""} ${item.label || ""}`.toLowerCase();
+  const value = `${item.key} ${item.label}`.toLowerCase();
   if (/roster|player/.test(value)) return "team";
   if (/active|completed/.test(value)) return "check";
   if (/attention|missing|awaiting/.test(value)) return "alert";
@@ -19,15 +19,11 @@ const metricIconName = (item = {}) => {
 
 const metricEvidencePoints = (values = []) => {
   const numeric = values.map(Number).filter(Number.isFinite).slice(0, 10);
-  if (numeric.length < 2) return null;
+  if (numeric.length < 2) return;
   const min = Math.min(...numeric);
-  const max = Math.max(...numeric);
-  const flat = max === min;
-  return numeric.map((value, index) => {
-    const x = (index / (numeric.length - 1)) * 100;
-    const y = flat ? 14 : 24 - ((value - min) / (max - min)) * 18;
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
-  }).join(" ");
+  const range = Math.max(...numeric) - min;
+  const last = numeric.length - 1;
+  return numeric.map((value, index) => `${((index / last) * 100).toFixed(2)},${(range ? 24 - ((value - min) / range) * 18 : 14).toFixed(2)}`).join(" ");
 };
 
 function PremiumMetricEvidence({ values, label }) {
@@ -245,7 +241,7 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
   const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
       <button type="button" className={styles.drawerBackdrop} aria-label="Close details" onClick={onClose} />
-      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer" onFocus={e=>{e.currentTarget._returnFocus||=e.relatedTarget}} onKeyDown={e=>{if(e.key==="Escape"){e.preventDefault();onClose?.();e.currentTarget._returnFocus?.focus?.()}}}>
+      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer" onFocus={e=>{e.currentTarget._f??=e.relatedTarget}} onKeyDown={e=>e.key==="Escape"&&(e.preventDefault(),onClose(),e.currentTarget._f?.focus())}>
         <div className={styles.drawerHeader}>
           <div>
             {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
@@ -258,7 +254,5 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
       </aside>
     </div>
   );
-  return typeof document !== "undefined" && document.body
-    ? createPortal(drawer, document.body)
-    : drawer;
+  return createPortal(drawer, document.body);
 }
