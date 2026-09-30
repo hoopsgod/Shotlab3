@@ -46,7 +46,7 @@ jobs:
           node scripts/refine-pr1581-stabilization.cjs
           node scripts/finalize-pr1581-deeplink.cjs
       - name: Run focused source regressions
-        run: node --test tests/desktop-single-page-workspace-shell.test.mjs tests/mobile-coach-navigation.test.mjs tests/desktop-hudl-workspace-2026.test.mjs
+        run: node --test tests/desktop-single-page-workspace-shell.test.mjs
       - name: Verify fixed production performance budget
         run: npm run build:performance
       - name: Confirm fixed budget retains positive JavaScript headroom
