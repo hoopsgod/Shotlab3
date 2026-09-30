@@ -1,7 +1,7 @@
 /* Desktop workspace authority: a team-first coaching workbench. Mobile
    composition remains owned by the established Phase 1/6 rules. */
 @media (min-width: 981px) {
-  .mcShellV3.is-desktop-shell { --hudl-ink:#14232b; --hudl-canvas:#f5f3ee; display:grid; grid-template-columns:248px minmax(0,1fr); width:100%; max-width:100%; min-width:0; min-height:100dvh; box-sizing:border-box; background:var(--hudl-canvas); color:var(--hudl-ink); }
+  .mcShellV3.is-desktop-shell { --hudl-ink:#14232b; --hudl-canvas:#f5f3ee; display:grid; grid-template-columns:248px minmax(0,1fr); min-width:0; min-height:100dvh; background:var(--hudl-canvas); color:var(--hudl-ink); }
   .mcShellV3.is-desktop-shell > .mcRail { position:sticky; top:0; height:100dvh; box-sizing:border-box; padding:20px 14px 16px; background:#09212c; border-right:1px solid rgba(255,255,255,.08); }
   .mcShellV3.is-desktop-shell .mcRailBrand { min-height:76px; padding:0 12px; display:grid; grid-template-columns:42px minmax(0,1fr); gap:11px; place-items:center stretch; border:0; border-bottom:1px solid rgba(255,255,255,.11); text-align:left; }
   .mcShellV3.is-desktop-shell .mcRailBrand::before,.mcShellV3.is-desktop-shell .mcRailBrand::after { display:none; }
@@ -17,8 +17,8 @@
   .mcShellV3.is-desktop-shell .mcRail nav button.is-active { color:#f7fbfb; background:linear-gradient(90deg,rgba(200,255,26,.16),rgba(200,255,26,.04)); box-shadow:inset 3px 0 var(--mc,#c8ff1a); }
   .mcShellV3.is-desktop-shell .mcRail nav button.is-active::before { display:none; }
   .mcShellV3.is-desktop-shell .mcCoachIdentity { margin:auto 4px 0; padding:16px 0 2px; border-top:1px solid rgba(255,255,255,.11); }
-  .mcShellV3.is-desktop-shell > .missionControl { width:100%; max-width:100%; min-width:0; box-sizing:border-box; background:var(--hudl-canvas); }
-  .mcShellV3.is-desktop-shell .missionControl > * { min-width:0; max-width:100%; box-sizing:border-box; }
+  .mcShellV3.is-desktop-shell > .missionControl { min-width:0; background:var(--hudl-canvas); }
+  .mcShellV3.is-desktop-shell .missionControl > * { min-width:0; max-width:100%; }
   .mcShellV3.is-desktop-shell .mcHeader[data-testid="mission-control-team-header"] { position:sticky; top:0; z-index:10; min-height:72px; padding-inline:clamp(28px,4vw,64px); background:rgba(251,250,247,.92); border-bottom:1px solid rgba(20,35,43,.10); backdrop-filter:blur(18px); }
   .mcShellV3.is-desktop-shell .mcBrandCopy small { color:#728087; }
   .mcShellV3.is-desktop-shell .mcBrandCopy strong { color:var(--hudl-ink); font-size:15px; }
@@ -33,8 +33,8 @@
 
 /* Desktop decision brief; mobile is owned by the existing authority. */
 @media (min-width:981px) {
-#root .missionControl{grid-template-rows:auto auto auto auto;gap:12px;padding:0 clamp(18px,3vw,40px);align-content:start;box-sizing:border-box;max-width:100%}
-#root .mcHeader[data-testid="mission-control-team-header"]{margin-inline:0;width:100%;max-width:100%;box-sizing:border-box}
+#root .missionControl{grid-template-rows:auto auto auto auto;gap:12px;padding:0 clamp(18px,3vw,40px);align-content:start;max-width:100%}
+#root .mcHeader[data-testid="mission-control-team-header"]{margin-inline:0;width:100%}
 #root .mcHero{grid-column:1/9;grid-row:2;min-height:255px;border-radius:12px}
 #root .mcHero .mcHeroContent{min-height:255px;padding:18px 23px}
 #root .mcHero .mcHeroIdentity{grid-template-columns:minmax(0,1fr) 62px;gap:8px}
