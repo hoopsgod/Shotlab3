@@ -82,6 +82,10 @@ async function expectNoHorizontalPagePan(page) {
   expect(geometry.documentWidth).toBeLessThanOrEqual(geometry.viewportWidth + 1);
 }
 
+async function documentNavigationCount(page) {
+  return page.evaluate(() => performance.getEntriesByType("navigation").length);
+}
+
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -93,6 +97,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await page.goto("/");
   await enterCoachDemo(page);
   expect(new URL(page.url()).pathname).toBe("/");
+  const initialDocumentNavigations = await documentNavigationCount(page);
 
   await clickDesktopNav(page, "Players");
   await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible();
@@ -124,6 +129,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   expect(new URL(page.url()).pathname).toBe("/coach/players");
   await page.goForward();
   await expect(page.getByTestId("coach-events-interactive-dashboard")).toBeVisible();
+  expect(await documentNavigationCount(page)).toBe(initialDocumentNavigations);
 
   await page.reload();
   await expect(page.getByTestId("coach-events-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
@@ -173,6 +179,7 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
   await page.goto("/");
   await enterPlayerDemo(page);
   expect(new URL(page.url()).pathname).toBe("/");
+  const initialDocumentNavigations = await documentNavigationCount(page);
 
   await clickPlayerNav(page, "AT Home Log");
   await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
@@ -190,10 +197,22 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
   await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
   await page.goForward();
   await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
+  expect(await documentNavigationCount(page)).toBe(initialDocumentNavigations);
 
   await page.reload();
   await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
-  await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
+
+  const direct = await page.context().newPage();
+  await installSafeRoutes(direct);
+  await direct.setViewportSize({ width: 1280, height: 900 });
+  await direct.goto("/events");
+  await expect(direct.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
+  expect(new URL(direct.url()).pathname).toBe("/events");
+  await direct.reload();
+  await expect(direct.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
+  expect(new URL(direct.url()).pathname).toBe("/events");
+  await direct.close();
   expect(pageErrors).toEqual([]);
 });
 
@@ -203,7 +222,7 @@ test("mobile Player primary navigation remains usable without horizontal pan", a
   await enterPlayerDemo(page);
   const dock=page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible();
-  await dock.getByRole("button", { name: "At Home", exact: true }).click();
+  await dock.getByRole("button", { name: "Train", exact: true }).click();
   await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
   await expectNoHorizontalPagePan(page);
 });
