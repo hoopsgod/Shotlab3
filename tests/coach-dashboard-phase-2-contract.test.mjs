@@ -61,7 +61,7 @@ test("Player and Coach drill filters remain isolated in their own function scope
 });
 
 test("activity intelligence is a reachable coach workspace", () => {
-  assert.match(appSource, /k:"activity",l:"Activity"/);
+  assert.match(appSource, /(?:k:"activity",l:"Activity"|\["activity","Activity","activity"\])/);
   assert.match(appSource, /testId="coach-page-dashboard-activity"/);
   assert.match(appSource, /tab==="activity"/);
   assert.match(appSource, /setTab\("activity"\)/);
