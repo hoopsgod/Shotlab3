@@ -48,7 +48,4 @@
 #root .mcTeamHealth{padding:19px;border-radius:12px}
 #root .mcAssignmentAccountability{padding:18px;border:1px solid #d8dedc;border-radius:12px;background:#fff}
 #root .mcActivationChapter{grid-column:1/9;grid-row:5}
-#root .missionControl:has(.mcActivationChapter) .mcAttention{grid-row:3}
-#root .missionControl:has(.mcActivationChapter) .mcNextSession{grid-row:2}
-#root .missionControl:has(.mcActivationChapter) .mcActivity{grid-row:4}
 }
