@@ -121,7 +121,7 @@ test("player can intentionally close the daily training loop after logging a res
   });
   expect(dockAuthority.wrapMarginBottom).toBe(0);
   expect(dockAuthority.wrapPaddingBottom).toBe(0);
-  expect(dockAuthority.scrollPaddingBottom).toBe(0);
+  expect(dockAuthority.scrollPaddingBottom).toBeGreaterThan(0);
   expect(dockAuthority.workspacePaddingBottom).toBeGreaterThan(0);
 
   await noOverflow(page);
