@@ -6,8 +6,7 @@ on:
 
 permissions:
   contents: read
-  issues: read
-  pull-requests: read
+  checks: read
 
 env:
   VITE_ENABLE_PRODUCTION_DEMOS: true
@@ -162,25 +161,53 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          short="${EXPECTED_SHA:0:7}"
           for attempt in {1..90}; do
-            comments="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
-            body="$(printf '%s' "$comments" | jq -r --arg marker "<code>${short}</code>" '.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($marker)) | .body')"
-            preview_url="$(printf '%s\n' "$body" | grep -Eo 'https://[0-9a-f]{8}\.shotlab3\.pages\.dev' | head -n 1 || true)"
-            deployment_id="$(printf '%s\n' "$body" | grep -Eo '/shotlab3/[0-9a-f-]{36}' | head -n 1 | sed 's#.*/##' || true)"
-            if [[ -n "$preview_url" ]] && curl --fail --silent --show-error "$preview_url/" > /dev/null; then
-              printf 'Cloudflare exact-head proof: sha=%s preview=%s deployment_id=%s\n' "$EXPECTED_SHA" "$preview_url" "$deployment_id"
+            checks="$(gh api -H 'Accept: application/vnd.github+json' "repos/${GITHUB_REPOSITORY}/commits/${EXPECTED_SHA}/check-runs?per_page=100")"
+            check="$(printf '%s' "$checks" | jq -c --arg sha "$EXPECTED_SHA" '
+              [.check_runs[]
+                | select(.name == "Cloudflare Pages")
+                | select(.head_sha == $sha)
+                | select(.app.slug == "cloudflare-workers-and-pages")]
+              | sort_by(.started_at)
+              | last // empty')"
+            if [[ -z "$check" ]]; then
+              sleep 10
+              continue
+            fi
+
+            status="$(printf '%s' "$check" | jq -r '.status // empty')"
+            conclusion="$(printf '%s' "$check" | jq -r '.conclusion // empty')"
+            deployment_id="$(printf '%s' "$check" | jq -r '.external_id // empty')"
+            details_url="$(printf '%s' "$check" | jq -r '.details_url // empty')"
+            completed_at="$(printf '%s' "$check" | jq -r '.completed_at // empty')"
+            summary="$(printf '%s' "$check" | jq -r '.output.summary // empty')"
+            preview_url="$(printf '%s\n' "$summary" | grep -Eo 'https://[0-9a-f]{8}\.shotlab3\.pages\.dev' | head -n 1 || true)"
+
+            if [[ "$status" == "completed" && "$conclusion" == "success" ]]; then
+              if [[ -z "$deployment_id" || -z "$preview_url" ]]; then
+                echo "Cloudflare exact-head check succeeded but did not expose immutable deployment identity and preview URL for $EXPECTED_SHA." >&2
+                printf '%s\n' "$check" >&2
+                exit 1
+              fi
+              curl --fail --silent --show-error "$preview_url/" > /dev/null
+              printf 'Cloudflare exact-head proof: sha=%s preview=%s deployment_id=%s completed_at=%s\n' "$EXPECTED_SHA" "$preview_url" "$deployment_id" "$completed_at"
               echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
               echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
-              echo "source_short_sha=$short" >> "$GITHUB_OUTPUT"
+              echo "source_sha=$EXPECTED_SHA" >> "$GITHUB_OUTPUT"
+              echo "completed_at=$completed_at" >> "$GITHUB_OUTPUT"
+              echo "details_url=$details_url" >> "$GITHUB_OUTPUT"
               exit 0
+            fi
+
+            if [[ "$status" == "completed" && "$conclusion" != "success" ]]; then
+              echo "Cloudflare Pages completed unsuccessfully for exact head $EXPECTED_SHA: conclusion=$conclusion deployment_id=$deployment_id" >&2
+              exit 1
             fi
             sleep 10
           done
-          echo "No successful Cloudflare Pages preview was published for exact head $EXPECTED_SHA." >&2
+          echo "No successful Cloudflare Pages check run completed for exact head $EXPECTED_SHA." >&2
           exit 1
 
       - name: Certify exact deployed Cloudflare build in Chromium
@@ -196,7 +223,9 @@ jobs:
         env:
           CLOUDFLARE_PREVIEW_URL: ${{ steps.cloudflare.outputs.preview_url }}
           CLOUDFLARE_DEPLOYMENT_ID: ${{ steps.cloudflare.outputs.deployment_id }}
-          CLOUDFLARE_SOURCE_SHORT_SHA: ${{ steps.cloudflare.outputs.source_short_sha }}
+          CLOUDFLARE_SOURCE_SHA: ${{ steps.cloudflare.outputs.source_sha }}
+          CLOUDFLARE_COMPLETED_AT: ${{ steps.cloudflare.outputs.completed_at }}
+          CLOUDFLARE_DETAILS_URL: ${{ steps.cloudflare.outputs.details_url }}
           PERFORMANCE_BUDGET_RESULT: ${{ steps.performance_budget.outcome }}
           LOCAL_WORKSPACE_RESULT: ${{ steps.desktop_workspace_local.outcome }}
           DEPLOYED_WORKSPACE_RESULT: ${{ steps.desktop_workspace_deployed.outcome }}
@@ -217,8 +246,11 @@ jobs:
             --arg performance_budget "$PERFORMANCE_BUDGET_RESULT" \
             --arg cloudflare_preview_url "$CLOUDFLARE_PREVIEW_URL" \
             --arg cloudflare_deployment_id "$CLOUDFLARE_DEPLOYMENT_ID" \
-            --arg cloudflare_source_short_sha "$CLOUDFLARE_SOURCE_SHORT_SHA" \
-            '{candidate_sha:$candidate_sha,production_build_sha:$production_build_sha,browser:$browser,roles:$roles,viewports:$viewports,routes:$routes,local_playwright:$local_playwright,deployed_playwright:$deployed_playwright,performance_budget:$performance_budget,cloudflare_preview_url:$cloudflare_preview_url,cloudflare_deployment_id:$cloudflare_deployment_id,cloudflare_source_short_sha:$cloudflare_source_short_sha}' \
+            --arg cloudflare_source_sha "$CLOUDFLARE_SOURCE_SHA" \
+            --arg cloudflare_status "success" \
+            --arg cloudflare_completed_at "$CLOUDFLARE_COMPLETED_AT" \
+            --arg cloudflare_details_url "$CLOUDFLARE_DETAILS_URL" \
+            '{candidate_sha:$candidate_sha,production_build_sha:$production_build_sha,browser:$browser,roles:$roles,viewports:$viewports,routes:$routes,local_playwright:$local_playwright,deployed_playwright:$deployed_playwright,performance_budget:$performance_budget,cloudflare_preview_url:$cloudflare_preview_url,cloudflare_deployment_id:$cloudflare_deployment_id,cloudflare_source_sha:$cloudflare_source_sha,cloudflare_status:$cloudflare_status,cloudflare_completed_at:$cloudflare_completed_at,cloudflare_details_url:$cloudflare_details_url}' \
             > artifacts/phase-5-release-hardening/release-certification.json
 
       - name: Upload exact-head Phase 5 visual and certification evidence
