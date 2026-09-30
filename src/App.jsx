@@ -3300,7 +3300,9 @@ function buildCoachRoute(tab = "feed", playerKey = "") {
 }
 
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,archiveSeason,seasonArchives=[],playerProfiles,drills,programDrills,scores,programScores=[],players,addCoachProgramScore,updateDrill,addDrill,removeDrill,addProgramDrill,updateProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachHomeLeaderboardRows=[],coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",accountCapabilities, demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
-const initialCoachRoute=readCoachRoute(typeof window!=="undefined"?window.location.pathname:"/");
+const desktopCoachRoute=typeof window!=="undefined"&&window.innerWidth>=1024;
+const[isDesktop,setIsDesktop]=useState(desktopCoachRoute);
+const initialCoachRoute=readCoachRoute(desktopCoachRoute?window.location.pathname:"/");
 const[tab,setTab]=useState(initialCoachRoute.tab),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState(""),[playerDashboardFilter,setPlayerDashboardFilter]=useState("all"),[playerDashboardQuery,setPlayerDashboardQuery]=useState(""),[eventDashboardStatus,setEventDashboardStatus]=useState("upcoming"),[eventDashboardQuery,setEventDashboardQuery]=useState(""),[coachPageMetric,setCoachPageMetric]=useState("active");
@@ -3491,7 +3493,7 @@ const filteredCoachLeaderboardIntelligenceRows=useMemo(()=>filterLeaderboardInte
 const coachActivityIntelligenceRows=useMemo(()=>buildActivityIntelligenceRows({scores:safeScores,shotLogs:safeShotLogs,scLogs:safeScLogs,events:safeEvents,today}),[safeScores,safeShotLogs,safeScLogs,safeEvents,today]);
 const filteredCoachActivityIntelligenceRows=useMemo(()=>filterActivityIntelligenceRows(coachActivityIntelligenceRows,{scope:activityIntelligenceScope,query:activityIntelligenceQuery}),[coachActivityIntelligenceRows,activityIntelligenceScope,activityIntelligenceQuery]);
 const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:[...safeScores,...safeProgramScores],currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);
-const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));const key=row?.key||candidates[0]||"";if(!key)return;setTab("players");setPlayerDrawerKey(key);const nextPath=buildCoachRoute("players",key);if(window.location.pathname!==nextPath)window.history.pushState({shotlabWorkspace:"coach-player",playerKey:key},"",nextPath);},[coachPlayerDashboardRows]);
+const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));const key=row?.key||candidates[0]||"";if(!key)return;setTab("players");setPlayerDrawerKey(key);const nextPath=buildCoachRoute("players",key);if(isDesktop&&window.location.pathname!==nextPath)window.history.pushState({slp:1},"",nextPath);},[coachPlayerDashboardRows,isDesktop]);
 const coachCoreLoopModel=useMemo(()=>buildCoachCoreLoopModel({playerRows:coachPlayerDashboardRows,records:coachCoreLoopData.records,requestState:coachCoreLoopData.requestState,error:coachCoreLoopData.error,storageMode:coachCoreLoopData.storageMode,feedback:coachCoreLoopFeedback}),[coachCoreLoopData,coachCoreLoopFeedback,coachPlayerDashboardRows]);
 const openCoachCoreLoopPlayer=useCallback((item={})=>{setPlayerDashboardFilter("attention");openPlayerIntelligence(item.player||item);},[openPlayerIntelligence]);
 const coachCommandActivityItems=useMemo(()=>coachActivityIntelligenceRows.slice(0,5).map(row=>({name:row.player||row.title,detail:row.type==="event"?`${row.title} · ${row.detail}`:`${row.type} · ${row.detail}`,meta:row.date})),[coachActivityIntelligenceRows]);
@@ -3529,7 +3531,7 @@ const handleNavChange=(k)=>{
     return;
   }
   const nextPath=buildCoachRoute(k);
-  if(window.location.pathname!==nextPath)window.history.pushState({shotlabWorkspace:"coach",tab:k},"",nextPath);
+  if(isDesktop&&window.location.pathname!==nextPath)window.history.pushState(null,"",nextPath);
   setTab(k);setPlayerDrawerKey("");setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
 };
 const coachInsightRailModel=useMemo(()=>buildCoachOperationalInsightRail({activeTab:tab,rosterCount:totalPlayers,activeTodayCount,activeThisWeekCount:activeThisWeek.size,inactivePlayersCount,eventMetrics:coachEventDashboardMetrics,strengthRows:coachStrengthIntelligenceRows,pageSummary:coachPageDashboardSummary}),[tab,totalPlayers,activeTodayCount,activeThisWeek,inactivePlayersCount,coachEventDashboardMetrics,coachStrengthIntelligenceRows,coachPageDashboardSummary]);
@@ -3548,7 +3550,7 @@ const handleCoachInsightAction=(action={})=>{
   handleNavChange(target);
 };
 const openCoachLeaderboards=()=>handleNavChange("leaderboards");
-const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
+
 const [showMiniHeader,setShowMiniHeader]=useState(false);
 const heroRef=useRef(null);
 const coachScrollRef=useRef(null);
@@ -3566,15 +3568,8 @@ useEffect(()=>{
   window.addEventListener("resize",onResize);
   return()=>window.removeEventListener("resize",onResize);
 },[]);
-useEffect(()=>{
-  const onPopState=()=>{const next=readCoachRoute(window.location.pathname);setTab(next.tab);setPlayerDrawerKey(next.playerKey);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false);};
-  window.addEventListener("popstate",onPopState);
-  return()=>window.removeEventListener("popstate",onPopState);
-},[]);
-useEffect(()=>{
-  const desired=buildCoachRoute(tab,tab==="players"?playerDrawerKey:"");
-  if(window.location.pathname!==desired)window.history.replaceState({shotlabWorkspace:"coach",tab,playerKey:playerDrawerKey||""},"",desired);
-},[tab,playerDrawerKey]);
+useEffect(()=>{if(!isDesktop)return;const onPopState=()=>{const next=readCoachRoute(window.location.pathname);setTab(next.tab);setPlayerDrawerKey(next.playerKey);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};addEventListener("popstate",onPopState);return()=>removeEventListener("popstate",onPopState)},[isDesktop]);
+useEffect(()=>{if(!isDesktop)return;const desired=buildCoachRoute(tab,tab==="players"?playerDrawerKey:"");if(location.pathname!==desired)history.replaceState(null,"",desired)},[isDesktop,tab,playerDrawerKey]);
 
 useEffect(()=>{
   const heroNode=heroRef.current;
