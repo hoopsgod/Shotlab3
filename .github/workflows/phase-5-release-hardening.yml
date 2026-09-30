@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: read
+  issues: read
+  pull-requests: read
 
 env:
   VITE_ENABLE_PRODUCTION_DEMOS: true
@@ -69,6 +71,7 @@ jobs:
         run: npm run build
 
       - name: Verify unchanged production performance budget
+        id: performance_budget
         run: npm run verify:performance-budget
 
       - name: Start built production preview
@@ -86,9 +89,10 @@ jobs:
           exit 1
 
       - name: Certify desktop workspace SPA routing, history, and responsive geometry
+        id: desktop_workspace_local
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
-        run: npx playwright test tests/e2e/desktop-workspace-routing.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+        run: npx playwright test tests/e2e/desktop-workspace-routing.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --retries=0
 
       - name: Certify Phase 5 trust, retry, duplicate-submit, and touch regressions
         env:
@@ -151,13 +155,71 @@ jobs:
           tests/e2e/phase-3-team-store-portal-certification.spec.mjs
           --config=playwright.acceptance.config.mjs --reporter=line
 
-      - name: Record exact Phase 5 candidate SHA
+      - name: Resolve exact-head Cloudflare Pages deployment
+        id: cloudflare
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          short="${EXPECTED_SHA:0:7}"
+          for attempt in {1..90}; do
+            comments="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
+            body="$(printf '%s' "$comments" | jq -r --arg marker "<code>${short}</code>" '.[] | select(.user.login == "cloudflare-workers-and-pages[bot]") | select(.body | contains($marker)) | .body' | tail -n 1)"
+            preview_url="$(printf '%s\n' "$body" | grep -Eo 'https://[0-9a-f]{8}\.shotlab3\.pages\.dev' | head -n 1 || true)"
+            deployment_id="$(printf '%s\n' "$body" | grep -Eo '/shotlab3/[0-9a-f-]{36}' | head -n 1 | sed 's#.*/##' || true)"
+            if [[ -n "$preview_url" ]] && curl --fail --silent --show-error "$preview_url/" > /dev/null; then
+              printf 'Cloudflare exact-head proof: sha=%s preview=%s deployment_id=%s\n' "$EXPECTED_SHA" "$preview_url" "$deployment_id"
+              echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
+              echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+              echo "source_short_sha=$short" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "No successful Cloudflare Pages preview was published for exact head $EXPECTED_SHA." >&2
+          exit 1
+
+      - name: Certify exact deployed Cloudflare build in Chromium
+        id: desktop_workspace_deployed
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.cloudflare.outputs.preview_url }}
+        run: npx playwright test tests/e2e/desktop-workspace-routing.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --retries=0
+
+      - name: Record exact Phase 5 candidate SHA and release provenance
         if: always()
         shell: bash
+        env:
+          CLOUDFLARE_PREVIEW_URL: ${{ steps.cloudflare.outputs.preview_url }}
+          CLOUDFLARE_DEPLOYMENT_ID: ${{ steps.cloudflare.outputs.deployment_id }}
+          CLOUDFLARE_SOURCE_SHORT_SHA: ${{ steps.cloudflare.outputs.source_short_sha }}
+          PERFORMANCE_BUDGET_RESULT: ${{ steps.performance_budget.outcome }}
+          LOCAL_WORKSPACE_RESULT: ${{ steps.desktop_workspace_local.outcome }}
+          DEPLOYED_WORKSPACE_RESULT: ${{ steps.desktop_workspace_deployed.outcome }}
         run: |
           mkdir -p artifacts/phase-5-release-hardening
-          git rev-parse HEAD > artifacts/phase-5-release-hardening/exact-head-sha.txt
+          candidate="$(git rev-parse HEAD)"
+          printf '%s\n' "$candidate" > artifacts/phase-5-release-hardening/exact-head-sha.txt
           printf '%s\n' "$PHASE5_BASELINE_SHA" > artifacts/phase-5-release-hardening/baseline-sha.txt
+          jq -n \
+            --arg candidate_sha "$candidate" \
+            --arg production_build_sha "$candidate" \
+            --arg browser "Chromium" \
+            --arg roles "Coach,Player" \
+            --arg viewports "320,375,390,430,768,1024,1280,1440" \
+            --arg routes "Coach Home,Players,Player context,Events,Settings/Season Archive; Player Home,Train/Quick Menu,Events; Back,Forward,direct deep-link,refresh" \
+            --arg local_playwright "$LOCAL_WORKSPACE_RESULT" \
+            --arg deployed_playwright "$DEPLOYED_WORKSPACE_RESULT" \
+            --arg performance_budget "$PERFORMANCE_BUDGET_RESULT" \
+            --arg cloudflare_preview_url "$CLOUDFLARE_PREVIEW_URL" \
+            --arg cloudflare_deployment_id "$CLOUDFLARE_DEPLOYMENT_ID" \
+            --arg cloudflare_source_short_sha "$CLOUDFLARE_SOURCE_SHORT_SHA" \
+            '{candidate_sha:$candidate_sha,production_build_sha:$production_build_sha,browser:$browser,roles:$roles,viewports:$viewports,routes:$routes,local_playwright:$local_playwright,deployed_playwright:$deployed_playwright,performance_budget:$performance_budget,cloudflare_preview_url:$cloudflare_preview_url,cloudflare_deployment_id:$cloudflare_deployment_id,cloudflare_source_short_sha:$cloudflare_source_short_sha}' \
+            > artifacts/phase-5-release-hardening/release-certification.json
 
       - name: Upload exact-head Phase 5 visual and certification evidence
         if: always()
