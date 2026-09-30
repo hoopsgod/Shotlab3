@@ -21,6 +21,13 @@ replace(
 );
 
 replace(
+  "src/App.jsx",
+  'const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?initialSupabaseSession?.data?.session?.user?.email:sess?.email);',
+  'const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||isDemoAccount(sess?.email))?sess?.email:""));',
+  "sandbox demo refresh identity restore",
+);
+
+replace(
   "src/components/CoachDashboardPrimitives.jsx",
   '  const previousFocus=useRef(null);\n  useEffect(()=>{if(!open)return;previousFocus.current=document.activeElement;const root=document.getElementById("root");if(root)root.inert=true;return()=>{if(root)root.inert=false;previousFocus.current?.focus?.({preventScroll:true})}},[open]);',
   '  const previousFocus=useRef(null),closeRef=useRef(null);\n  useEffect(()=>{if(!open)return;previousFocus.current=document.activeElement;const root=document.getElementById("root");if(root)root.inert=true;closeRef.current?.focus({preventScroll:true});return()=>{if(root)root.inert=false;requestAnimationFrame(()=>previousFocus.current?.focus?.({preventScroll:true}))}},[open]);',
@@ -39,6 +46,7 @@ replace(
   'assert.match(source, /pushState\\(\\{slp:1\\}/);\n  assert.match(source, /history\\.state\\?\\.slp===1/);',
   "source marker assertions",
 );
+fs.appendFileSync("tests/desktop-single-page-workspace-shell.test.mjs", '\n\ntest("sandbox demo identity can restore a deep route without overriding a real Supabase session", () => {\n  assert.match(source, /const supabaseEmail=normalizeEmail\\(initialSupabaseSession\\?\\.data\\?\\.session\\?\\.user\\?\\.email\\)/);\n  assert.match(source, /supabaseEmail\\|\\|\\(\\(!SUPABASE_AUTH_ENABLED\\|\\|isDemoAccount\\(sess\\?\\.email\\)\\)\\?sess\\?\\.email:""\\)/);\n});\n');
 
 replace(
   "tests/e2e/desktop-workspace-routing.spec.mjs",
@@ -57,6 +65,12 @@ replace(
   '  await page.keyboard.press("Escape");\n  await expect(drawer).toHaveCount(0);\n  expect(new URL(page.url()).pathname).toBe("/coach/players");\n  await expect(profile).toBeFocused();',
   '  const originScrollY=await page.evaluate(()=>scrollY);\n  await page.keyboard.press("Escape");\n  await expect(drawer).toHaveCount(0);\n  expect(new URL(page.url()).pathname).toBe("/coach/players");\n  await expect(profile).toBeFocused();\n  await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(originScrollY);',
   "drawer focus and scroll assertion",
+);
+replace(
+  "tests/e2e/desktop-workspace-routing.spec.mjs",
+  'await dock.getByRole("button", { name: "At Home", exact: true }).click();',
+  'await dock.getByRole("button", { name: "Train", exact: true }).click();',
+  "player mobile train label",
 );
 
 {
