@@ -1,6 +1,24 @@
 import { test, expect } from "@playwright/test";
 
 async function installSafeRoutes(page) {
+  await page.route("**/v1/legacy-auth/restore", (route) => {
+    const request = route.request();
+    const body = request.postDataJSON?.() || {};
+    const email = String(body.email || request.headers()["x-user-id"] || "").trim().toLowerCase();
+    const coach = email === "coach.demo@shotlab.app";
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        profile: {
+          email: coach ? "coach.demo@shotlab.app" : "demo@shotlab.app",
+          name: coach ? "Demo Coach" : "Demo Player",
+          role: coach ? "coach" : "player",
+        },
+      }),
+    });
+  });
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
