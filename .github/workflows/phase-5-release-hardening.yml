@@ -85,6 +85,11 @@ jobs:
           cat /tmp/phase-5-preview.log
           exit 1
 
+      - name: Certify desktop workspace SPA routing, history, and responsive geometry
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/desktop-workspace-routing.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
       - name: Certify Phase 5 trust, retry, duplicate-submit, and touch regressions
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
