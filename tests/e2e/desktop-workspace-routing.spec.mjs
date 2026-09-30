@@ -8,10 +8,12 @@ async function installSafeRoutes(page) {
 
 async function enterCoachDemo(page) {
   const home = page.getByTestId("coach-command-center-full");
+  const sidebar = page.getByRole("complementary", { name: "Coach navigation" });
   const demo = page.getByRole("button", { name: "Coach demo", exact: true });
-  await expect.poll(async () => (await home.isVisible().catch(() => false)) || (await demo.isVisible().catch(() => false)), { timeout: 20_000 }).toBe(true);
+  const coachReady = async () => (await home.isVisible().catch(() => false)) || (await sidebar.isVisible().catch(() => false));
+  await expect.poll(async () => (await coachReady()) || (await demo.isVisible().catch(() => false)), { timeout: 20_000 }).toBe(true);
   if (await demo.isVisible().catch(() => false)) await demo.click();
-  await expect(home).toBeVisible({ timeout: 20_000 });
+  await expect.poll(coachReady, { timeout: 20_000 }).toBe(true);
 }
 
 async function enterPlayerDemo(page) {
@@ -69,7 +71,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   const { profile, drawer } = await openFirstPlayerDrawer(page);
   const playerPath = new URL(page.url()).pathname;
   expect(playerPath).toMatch(/^\/coach\/players\/.+/);
-  expect(await page.evaluate(() => window.history.state?.shotlabWorkspace)).toBe("coach-player");
+  expect(await page.evaluate(() => window.history.state?.slp)).toBe(1);
   await expect(drawer.getByRole("button", { name: "Close details", exact: true }).last()).toBeFocused();
 
   await page.keyboard.press("Escape");
@@ -109,13 +111,13 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await direct.goto(playerPath);
   const directDrawer = direct.getByTestId("coach-player-intelligence-drawer");
   await expect(directDrawer).toBeVisible({ timeout: 20_000 });
-  expect(await direct.evaluate(() => window.history.state?.shotlabWorkspace || null)).not.toBe("coach-player");
+  expect(await direct.evaluate(() => window.history.state?.slp || null)).not.toBe(1);
   await directDrawer.getByRole("button", { name: "Close details", exact: true }).last().click();
   await expect(directDrawer).toHaveCount(0);
   expect(new URL(direct.url()).pathname).toBe("/coach/players");
 
   await direct.goto("/coach/not-a-real-route");
-  await expect(direct.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
+  await expect(direct.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => new URL(direct.url()).pathname).toBe("/");
   await direct.close();
   expect(pageErrors).toEqual([]);
