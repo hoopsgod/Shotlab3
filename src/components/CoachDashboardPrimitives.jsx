@@ -248,9 +248,9 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
   onCloseRef.current = onClose;
 
   useEffect(() => {
-    if (!open || typeof document === "undefined") return undefined;
+    if (!open) return undefined;
     restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const focusFrame = requestAnimationFrame(() => closeButtonRef.current?.focus());
+    closeButtonRef.current?.focus();
     const handleKeyDown = (event) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
@@ -258,10 +258,9 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", handleKeyDown);
       const previous = restoreFocusRef.current;
-      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+      if (previous?.isConnected) previous.focus();
       restoreFocusRef.current = null;
     };
   }, [open]);
