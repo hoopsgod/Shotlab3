@@ -865,8 +865,7 @@ return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM
 
 const navigateToPlayerHome=useCallback(()=>{
 if(typeof window==="undefined")return;
-const homePath=PLAYER_TAB_PATHS.home||"/";
-if(window.location.pathname!==homePath)window.history.replaceState({},"",homePath);
+if(!PLAYER_PATH_TABS[window.location.pathname])window.history.replaceState({},"","/");
 },[]);
 
 const normalizeStoredInviteContext=useCallback((ctx)=>{
