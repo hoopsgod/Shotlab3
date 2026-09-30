@@ -6,6 +6,55 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
+async function installDemoRestoreRoutes(page, role, existingFixture = null) {
+  const fixture = existingFixture || await page.evaluate((requestedRole) => {
+    const read = (key, fallback) => {
+      try {
+        const raw = window.localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+    const email = requestedRole === "coach" ? "coach.demo@shotlab.app" : "demo@shotlab.app";
+    const players = read("sl:players", []);
+    const teams = read("sl:teams", []);
+    const session = read("sl:session", {});
+    const person = (Array.isArray(players) ? players : []).find((candidate) => String(candidate?.email || candidate?.id || "").trim().toLowerCase() === email) || {};
+    const teamId = person.teamId || person.team_id || session?.teamId || session?.team_id || (Array.isArray(teams) ? teams[0]?.id : null) || null;
+    const team = (Array.isArray(teams) ? teams : []).find((candidate) => candidate?.id === teamId) || (Array.isArray(teams) ? teams[0] : null) || (teamId ? { id: teamId, name: "Demo Team" } : null);
+    return {
+      profile: {
+        email,
+        name: person.name || (requestedRole === "coach" ? "Demo Coach" : "Demo Player"),
+        role: requestedRole,
+        team_id: teamId,
+        hide_from_leaderboards: requestedRole === "coach",
+      },
+      team,
+    };
+  }, role);
+
+  if (!fixture?.profile?.team_id || !fixture?.team?.id) {
+    throw new Error(`Unable to capture ${role} demo team context for route restoration`);
+  }
+
+  await page.route("**/v1/legacy-auth/restore", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      profile: fixture.profile,
+      session: { authenticated: true, expires_at: Math.floor(Date.now() / 1000) + 3600 },
+    }),
+  }));
+  await page.route("**/v1/teams/restore-context", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, team: fixture.team }),
+  }));
+  return fixture;
+}
+
 async function enterCoachDemo(page) {
   const home = page.getByTestId("coach-command-center-full");
   const sidebar = page.getByRole("complementary", { name: "Coach navigation" });
@@ -14,6 +63,7 @@ async function enterCoachDemo(page) {
   await expect.poll(async () => (await coachReady()) || (await demo.isVisible().catch(() => false)), { timeout: 20_000 }).toBe(true);
   if (await demo.isVisible().catch(() => false)) await demo.click();
   await expect.poll(coachReady, { timeout: 20_000 }).toBe(true);
+  return installDemoRestoreRoutes(page, "coach");
 }
 
 async function enterPlayerDemo(page) {
@@ -22,6 +72,7 @@ async function enterPlayerDemo(page) {
   await expect.poll(async () => (await home.isVisible().catch(() => false)) || (await demo.isVisible().catch(() => false)), { timeout: 20_000 }).toBe(true);
   if (await demo.isVisible().catch(() => false)) await demo.click();
   await expect(home).toBeVisible({ timeout: 20_000 });
+  return installDemoRestoreRoutes(page, "player");
 }
 
 async function reloadExplicitDemoRoute(page) {
@@ -104,7 +155,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   const pageErrors=[];
   page.on("pageerror", error => pageErrors.push(error.message));
   await page.goto("/");
-  await enterCoachDemo(page);
+  const demoRestoreFixture = await enterCoachDemo(page);
   expect(new URL(page.url()).pathname).toBe("/");
   const initialDocumentNavigations = await documentNavigationCount(page);
 
@@ -152,6 +203,7 @@ test("desktop Coach workspace owns marked player history and restores valid rout
 
   const direct = await page.context().newPage();
   await installSafeRoutes(direct);
+  await installDemoRestoreRoutes(direct, "coach", demoRestoreFixture);
   await direct.setViewportSize({ width: 1280, height: 900 });
   await direct.goto(`${playerPath}?demo=1`);
   const directDrawer = direct.getByTestId("coach-player-intelligence-drawer");
@@ -186,7 +238,7 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
   const pageErrors=[];
   page.on("pageerror", error => pageErrors.push(error.message));
   await page.goto("/");
-  await enterPlayerDemo(page);
+  const demoRestoreFixture = await enterPlayerDemo(page);
   expect(new URL(page.url()).pathname).toBe("/");
   const initialDocumentNavigations = await documentNavigationCount(page);
 
@@ -214,6 +266,7 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
 
   const direct = await page.context().newPage();
   await installSafeRoutes(direct);
+  await installDemoRestoreRoutes(direct, "player", demoRestoreFixture);
   await direct.setViewportSize({ width: 1280, height: 900 });
   await direct.goto("/events?demo=1");
   await expect(direct.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
