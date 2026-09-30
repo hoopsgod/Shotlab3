@@ -11,8 +11,10 @@ const EXACT_HEAD_PATH = path.join(OUTPUT_ROOT, 'exact-head-sha.txt');
 const FIXED_NOW = Date.parse('2026-09-01T12:00:00-04:00');
 const EXACT_VISUAL_BASELINE_HASHES = new Map([
   // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
-  ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
-  ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
+  // The inherited CI-debt stabilization intentionally compacts the Coach Home title stage while
+  // preserving branding, CTA visibility, mobile-dock clearance, and horizontal containment.
+  ['coach-mission-control-demo-empty-390', '5ae119686ecef63a6de0d9cd1518a4e6a9f7b28d69860a738c69a724d8310f34'],
+  ['coach-mission-control-registered-empty-390', 'a03078f21b4b3e5b889c6f4f976eade65c021315716d8c4063cfbf651ab762ed'],
   // Phase 7D.2 restores the reviewed flat roster composition. Phase 7E keeps that composition
   // and adds the reviewed restrained team-brand row tint. The app-wide heading pass adds the
   // reviewed compact editorial title treatment while preserving the roster composition below it.
@@ -37,9 +39,11 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     '33201cf2a3bb26b98774eccf2edde46e53963a59d574aa9a29b27696a61008a5',
     '8f7916dd1cf2877d3c2d62c551742364edd0521aa5ca68532409602b6a94852d',
   ]],
-  ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
-  ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
-  ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
+  // These edge/stress captures are the same reviewed compact Coach Home composition at widths
+  // that exercise long team identity and the minimum/maximum Phase 1C mobile geometry bounds.
+  ['coach-home-branding-stress-390', 'e0b049843519fc7b4b54053fc1e7b6453d92a794f359d0db34d92ada4cfdc482'],
+  ['coach-home-edge-320', '0bb8db1efe60f61aca78ffaa1be94ada300de5610b855961aeec19e7140fa775'],
+  ['coach-home-edge-430', '50c882de67dbd200167f9f11e01c000eba9f1283ffd898e2e399bae9f1dc0dc1'],
 ]);
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
