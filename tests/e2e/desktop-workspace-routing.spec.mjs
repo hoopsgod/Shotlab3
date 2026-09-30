@@ -49,7 +49,37 @@ async function clickPlayerNav(page, name) {
 }
 
 async function expectNoHorizontalPagePan(page) {
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  const geometry = await page.evaluate(() => {
+    const viewportWidth = window.innerWidth;
+    const documentWidth = document.documentElement.scrollWidth;
+    const offenders = Array.from(document.querySelectorAll("body *"))
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        return {
+          tag: element.tagName.toLowerCase(),
+          id: element.id || "",
+          className: typeof element.className === "string" ? element.className : "",
+          testId: element.getAttribute("data-testid") || "",
+          left: Math.round(rect.left * 10) / 10,
+          right: Math.round(rect.right * 10) / 10,
+          width: Math.round(rect.width * 10) / 10,
+          clientWidth: element.clientWidth,
+          scrollWidth: element.scrollWidth,
+          position: style.position,
+          overflowX: style.overflowX,
+        };
+      })
+      .filter((entry) => entry.width > 0 && (entry.right > viewportWidth + 1 || entry.left < -1 || entry.scrollWidth > entry.clientWidth + 1))
+      .sort((a, b) => Math.max(b.right - viewportWidth, b.scrollWidth - b.clientWidth) - Math.max(a.right - viewportWidth, a.scrollWidth - a.clientWidth))
+      .slice(0, 30);
+    return { viewportWidth, documentWidth, offenders };
+  });
+
+  if (geometry.documentWidth > geometry.viewportWidth + 1) {
+    console.log(`[horizontal-overflow] ${JSON.stringify(geometry)}`);
+  }
+  expect(geometry.documentWidth).toBeLessThanOrEqual(geometry.viewportWidth + 1);
 }
 
 test.beforeEach(async ({ page }) => {
