@@ -66,6 +66,7 @@ export default defineConfig(async (environment) => {
 
   return {
     ...resolvedBase,
+    base: '/',
     plugins: [
       createLegacyRuntimeCssExtractionPlugin(),
       ownCoachInteractiveStylesInWorkspace(),
