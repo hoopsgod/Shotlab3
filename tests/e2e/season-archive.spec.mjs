@@ -142,11 +142,12 @@ async function firstVisiblePlayersButton(page) {
 async function enterCoachDemo(page) {
   const demoCoachButton = page.getByRole("button", { name: "Coach demo", exact: true });
   const commandCenter = page.getByTestId("coach-command-center-full");
+  const desktopNavigation = page.getByRole("complementary", { name: "Coach navigation" });
+  const coachReady = async () => (await commandCenter.isVisible().catch(() => false)) || (await desktopNavigation.isVisible().catch(() => false));
 
   await expect.poll(async () => {
     const demoReady = await demoCoachButton.isVisible().catch(() => false);
-    const coachReady = await commandCenter.isVisible().catch(() => false);
-    return demoReady || coachReady;
+    return demoReady || (await coachReady());
   }, { timeout: 20_000 }).toBe(true);
 
   if (await demoCoachButton.isVisible().catch(() => false)) {
@@ -154,7 +155,7 @@ async function enterCoachDemo(page) {
     await demoCoachButton.click();
   }
 
-  await expect(commandCenter).toBeVisible({ timeout: 20_000 });
+  await expect.poll(coachReady, { timeout: 20_000 }).toBe(true);
   await expect(page.getByTestId("coach-command-center-loading")).toHaveCount(0);
   return firstVisiblePlayersButton(page);
 }
@@ -162,12 +163,19 @@ async function enterCoachDemo(page) {
 async function openSeasonArchivePanel(page) {
   const panel = page.getByTestId("coach-season-archive");
   if (!(await panel.isVisible().catch(() => false))) {
-    const secondary = page.getByTestId("coach-players-secondary-intelligence");
-    await expect(secondary).toBeVisible({ timeout: 15_000 });
-    if (!(await secondary.getAttribute("open"))) await secondary.locator("summary").click();
-    const teamAccountButton = secondary.getByRole("button", { name: "Team & Account", exact: true });
-    await expect(teamAccountButton).toBeVisible({ timeout: 15_000 });
-    await teamAccountButton.click();
+    const desktopNavigation = page.getByRole("complementary", { name: "Coach navigation" });
+    if (await desktopNavigation.isVisible().catch(() => false)) {
+      const teamAccountButton = desktopNavigation.getByRole("button", { name: "Team & Account", exact: true });
+      await expect(teamAccountButton).toBeVisible({ timeout: 15_000 });
+      await teamAccountButton.click();
+    } else {
+      const secondary = page.getByTestId("coach-players-secondary-intelligence");
+      await expect(secondary).toBeVisible({ timeout: 15_000 });
+      if (!(await secondary.getAttribute("open"))) await secondary.locator("summary").click();
+      const teamAccountButton = secondary.getByRole("button", { name: "Team & Account", exact: true });
+      await expect(teamAccountButton).toBeVisible({ timeout: 15_000 });
+      await teamAccountButton.click();
+    }
   }
   await expect(panel).toBeVisible({ timeout: 15_000 });
   return panel;
