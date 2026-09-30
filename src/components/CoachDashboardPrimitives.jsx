@@ -243,13 +243,12 @@ export function DashboardProgress({ value = 0, max = 100, label, detail }) {
 
 export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, children, testId }) {
   const closeButtonRef = useRef(null);
-  const restoreFocusRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return undefined;
-    restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeButtonRef.current?.focus();
     const handleKeyDown = (event) => {
       if (event.key !== "Escape") return;
@@ -259,9 +258,7 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      const previous = restoreFocusRef.current;
       if (previous?.isConnected) previous.focus();
-      restoreFocusRef.current = null;
     };
   }, [open]);
 
