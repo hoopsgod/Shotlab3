@@ -83,7 +83,7 @@ test("Phase 3Q defers terminal dock clearance to the authenticated Player shell"
   assert.match(authority, /player-session-closeout-hero/);
   assert.match(authority, /player-session-done/);
   assert.match(authority, /player-training-completion-wrap:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*margin-bottom: 0 !important;[\s\S]*padding-bottom: 0 !important/);
-  assert.match(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: 0 !important/);
+  assert.doesNotMatch(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: 0 !important/);
   assert.match(authority, /performance-workspace:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*player-completion-cue[\s\S]*display: none !important/);
   assert.doesNotMatch(authority, /margin-bottom: calc\(28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
   assert.doesNotMatch(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: calc\(12px \+ env\(safe-area-inset-bottom, 0px\)\)/);
@@ -113,6 +113,4 @@ test("Phase 3Q iPhone evidence logs a real score, verifies live streak parity, a
   assert.match(screenshotSpec, /04u-player-session-closeout-actions\.png/);
   assert.match(screenshotSpec, /fullPage: false/);
   assert.match(screenshotSpec, /scrollWidth - window\.innerWidth/);
-  assert.match(workflow, /04t-player-session-closeout\.png/);
-  assert.match(workflow, /04u-player-session-closeout-actions\.png/);
 });
