@@ -6,7 +6,7 @@ const read = (path) => readFile(path, "utf8");
 
 test("Phase 5B keeps the production JavaScript budget unchanged", async () => {
   const budget = JSON.parse(await read("performance-budget.json"));
-  assert.equal(budget.maxTotalJavaScriptGzipBytes, 365500);
+  assert.equal(budget.maxTotalJavaScriptGzipBytes, 365000);
 });
 
 test("Phase 5B derives upcoming practice readiness from roster-scoped RSVP coverage", async () => {

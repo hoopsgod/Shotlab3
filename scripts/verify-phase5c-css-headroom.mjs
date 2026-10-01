@@ -1,54 +1,49 @@
+#!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
-import { gzipSync } from 'node:zlib'
+import process from 'node:process'
+import zlib from 'node:zlib'
 
-const distDir = path.resolve('dist')
-const assetsDir = path.join(distDir, 'assets')
+const repoRoot = process.cwd()
+const assetsDir = path.join(repoRoot, 'dist', 'assets')
+const largestCssLimitBytes = 128000
+const totalCssGzipLimitBytes = 89000
 
-// Rebased after the desktop workspace CSS recovery preserved media rules that
-// the production optimizer had silently discarded. Keep the reserve aligned
-// with the explicit production CSS budget while retaining a measured margin.
-// Exact candidate observed on 2026-09-29: largest=136,415 bytes, total gzip=91,554 bytes.
-const MAX_LARGEST_CSS_BYTES = 138_000
-const MAX_TOTAL_CSS_GZIP_BYTES = 93_000
-
-function collectCssFiles(directory) {
-  const files = []
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const fullPath = path.join(directory, entry.name)
-    if (entry.isDirectory()) files.push(...collectCssFiles(fullPath))
-    else if (entry.isFile() && entry.name.endsWith('.css')) files.push(fullPath)
-  }
-  return files
+if (!fs.existsSync(assetsDir)) {
+  console.error('Phase 5C CSS headroom gate failed: dist/assets is missing. Run the production build first.')
+  process.exit(1)
 }
 
-const files = collectCssFiles(distDir)
-if (!files.length) throw new Error('Phase 5C could not find production CSS assets')
-
-const metrics = files.map((file) => {
-  const bytes = fs.readFileSync(file)
-  return {
-    file: path.relative(distDir, file).replaceAll('\\', '/'),
-    bytes: bytes.byteLength,
-    gzipBytes: gzipSync(bytes, { level: 9 }).byteLength,
-  }
-}).sort((a, b) => b.bytes - a.bytes)
-
-const largest = metrics[0]
-const totalGzipBytes = metrics.reduce((sum, metric) => sum + metric.gzipBytes, 0)
-const failures = []
-
-if (largest.bytes > MAX_LARGEST_CSS_BYTES) {
-  failures.push(`largest CSS ${largest.file} is ${largest.bytes} bytes; Phase 5C reserve target is ${MAX_LARGEST_CSS_BYTES}`)
-}
-if (totalGzipBytes > MAX_TOTAL_CSS_GZIP_BYTES) {
-  failures.push(`total CSS gzip is ${totalGzipBytes} bytes; Phase 5C reserve target is ${MAX_TOTAL_CSS_GZIP_BYTES}`)
+const cssFiles = fs.readdirSync(assetsDir).filter((file) => file.endsWith('.css'))
+if (cssFiles.length === 0) {
+  console.error('Phase 5C CSS headroom gate failed: no CSS assets were generated.')
+  process.exit(1)
 }
 
-console.log(`Phase 5C CSS reserve: largest ${largest.bytes}/${MAX_LARGEST_CSS_BYTES} bytes; total gzip ${totalGzipBytes}/${MAX_TOTAL_CSS_GZIP_BYTES} bytes`)
+const largestCssBytes = cssFiles.reduce((largest, file) => {
+  const sizeBytes = fs.statSync(path.join(assetsDir, file)).size
+  return Math.max(largest, sizeBytes)
+}, 0)
 
-if (failures.length) {
-  throw new Error(`Phase 5C durable headroom gate failed:\n- ${failures.join('\n- ')}`)
+const totalCssGzipBytes = cssFiles.reduce((total, file) => {
+  const buffer = fs.readFileSync(path.join(assetsDir, file))
+  return total + zlib.gzipSync(buffer).length
+}, 0)
+
+if (largestCssBytes > largestCssLimitBytes) {
+  console.error(
+    `Phase 5C CSS headroom gate failed: largest CSS asset is ${largestCssBytes} bytes (limit ${largestCssLimitBytes}).`,
+  )
+  process.exit(1)
 }
 
-console.log('Phase 5C durable CSS headroom: PASS')
+if (totalCssGzipBytes > totalCssGzipLimitBytes) {
+  console.error(
+    `Phase 5C CSS headroom gate failed: total CSS gzip is ${totalCssGzipBytes} bytes (limit ${totalCssGzipLimitBytes}).`,
+  )
+  process.exit(1)
+}
+
+console.log(
+  `Phase 5C CSS headroom gate passed (largest ${largestCssBytes}/${largestCssLimitBytes}, gzip ${totalCssGzipBytes}/${totalCssGzipLimitBytes}).`,
+)
