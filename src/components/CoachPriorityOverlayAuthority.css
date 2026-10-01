@@ -50,7 +50,7 @@ body.mission-control-priority-open [data-testid="mobile-navigation-overlay"] {
   touch-action: manipulation;
 }
 
-body.mission-control-priority-open .coach-home-dashboard {
+body.mission-control-active.mission-control-priority-open .coach-home-dashboard {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
