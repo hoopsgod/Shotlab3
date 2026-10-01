@@ -214,8 +214,8 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   expect(new URL(direct.url()).pathname).toBe("/coach/players");
 
   await direct.goto("/coach/not-a-real-route?demo=1");
-  await expect(direct.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => new URL(direct.url()).pathname).toBe("/");
+  await expect(direct.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   await direct.close();
   expect(pageErrors).toEqual([]);
 });
@@ -262,17 +262,17 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
 
   await reloadExplicitDemoRoute(page);
   await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
-  await expect(page.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
 
   const direct = await page.context().newPage();
   await installSafeRoutes(direct);
   await installDemoRestoreRoutes(direct, "player", demoRestoreFixture);
   await direct.setViewportSize({ width: 1280, height: 900 });
   await direct.goto("/events?demo=1");
-  await expect(direct.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
+  await expect(direct.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
   expect(new URL(direct.url()).pathname).toBe("/events");
   await direct.reload();
-  await expect(direct.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 20_000 });
+  await expect(direct.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
   expect(new URL(direct.url()).pathname).toBe("/events");
   await direct.close();
   expect(pageErrors).toEqual([]);
