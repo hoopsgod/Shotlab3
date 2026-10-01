@@ -1,4 +1,6 @@
-/* Phase 3B: normalize Coach Leaderboards onto the accepted light editorial / dark decision system. */
+/* Phase 3B: route-specific Coach Leaderboards presentation.
+   Shared title, decision, toolbar, and metric material stays owned by the
+   canonical secondary-page system instead of being repeated here. */
 
 .page.pageShell:has(> [data-testid="coach-page-dashboard-leaderboards"]) {
   --sl-ink: #171a18;
@@ -14,93 +16,8 @@
   color: #171a18 !important;
 }
 
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro {
-  background: transparent !important;
-  color: #171a18 !important;
-  box-shadow: none !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__eyebrow {
-  color: #71851f !important;
-  -webkit-text-fill-color: #71851f !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__title,
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__title.appHeaderTitle {
-  color: #171a18 !important;
-  -webkit-text-fill-color: #171a18 !important;
-  text-shadow: none !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__summary {
-  margin-top: 11px !important;
-  border: 0 !important;
-  background: transparent !important;
-  color: #5d665f !important;
-  -webkit-text-fill-color: #5d665f !important;
-  box-shadow: none !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__status {
-  color: #536057 !important;
-  -webkit-text-fill-color: #536057 !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageDecision {
-  border: 1px solid rgba(255, 255, 255, .08) !important;
-  background:
-    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, transparent), transparent 36%),
-    linear-gradient(145deg, var(--team-brand-surface-elevated, #171b18), var(--team-brand-surface-deep, #0c0f0d) 72%) !important;
-  color: #f5f7f4 !important;
-  box-shadow: 0 24px 58px rgba(25, 31, 26, .16) !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageDecision__eyebrow {
-  color: #c8ff1a !important;
-  -webkit-text-fill-color: #c8ff1a !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageDecision h2 {
-  color: #f5f7f4 !important;
-  -webkit-text-fill-color: #f5f7f4 !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageDecision p {
-  background: transparent !important;
-  color: #aeb7b0 !important;
-  -webkit-text-fill-color: #aeb7b0 !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageDecision button {
-  border-color: rgba(200, 255, 26, .28) !important;
-  background: rgba(200, 255, 26, .08) !important;
-  color: #eff7dc !important;
-  -webkit-text-fill-color: #eff7dc !important;
-}
-
 [data-testid="coach-page-dashboard-leaderboards-toolbar"] {
   color: #171a18 !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-metric-strip"] {
-  border-block: 1px solid rgba(23, 26, 24, .10) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric] {
-  border: 0 !important;
-  background: transparent !important;
-  color: #171a18 !important;
-  box-shadow: none !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric] + [data-premium-metric] {
-  border-left: 1px solid rgba(23, 26, 24, .10) !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric][aria-pressed="true"] {
-  background: #eef1e4 !important;
 }
 
 [data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric-label],
@@ -124,9 +41,39 @@
   -webkit-text-fill-color: #1e708e !important;
 }
 
+/* Leaderboards owns its route evidence material. Empty-state CSS does not. */
 [data-testid="coach-page-dashboard-leaderboards-evidence"] {
-  background: #f7f8f2 !important;
+  overflow: hidden;
+  border: 1px solid rgba(38, 48, 41, .12) !important;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .28)),
+    #f7f8f2 !important;
   color: #171a18 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .74);
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] > * {
+  background: transparent !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] :is(h2, h3, strong) {
+  color: #26302a !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] :is(p, small) {
+  color: #5c675f !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] [class*="insightEyebrow"] {
+  color: #61731f !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] article button {
+  border: 1px solid rgba(97, 115, 31, .32) !important;
+  background: #f2f4ee !important;
+  color: #33402f !important;
+  -webkit-text-fill-color: #33402f !important;
 }
 
 @media (max-width: 760px) {
