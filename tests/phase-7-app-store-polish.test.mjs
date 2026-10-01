@@ -10,7 +10,7 @@ const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeade
 const sharedDeferred = fs.readFileSync("src/components/DeferredSharedAuthenticatedUi.jsx", "utf8");
 const sharedChrome = fs.readFileSync("src/components/Phase7AuthenticatedChrome.css", "utf8");
 const commandHierarchy = fs.readFileSync("src/styles/CommandHierarchy2026.css", "utf8");
-const secondaryAcceptance = fs.readFileSync("public/shotlab-phase3-secondary-acceptance.css", "utf8");
+const leaderboardHierarchy = fs.readFileSync("src/components/Phase3CoachLeaderboardHierarchy.css", "utf8");
 const backEnhancer = fs.readFileSync("scripts/apply-phase4d-shared-back-hit-area.mjs", "utf8");
 const industrialFoundation = fs.readFileSync("src/lib/industrialDesignFoundation.js", "utf8");
 const releaseBoundary = fs.readFileSync("src/components/ReleaseReadinessBoundary.jsx", "utf8");
@@ -57,10 +57,10 @@ test("Phase 7 overrides the legacy dark Coach workspace canvas at the exact sour
   assert.doesNotMatch(sharedChrome, /body:has/);
 });
 
-test("Phase 7 includes Coach Leaderboards in the established light secondary-route canvas authority", () => {
-  assert.match(secondaryAcceptance, /coach-page-dashboard-leaderboards/);
-  assert.match(secondaryAcceptance, /#root \.coach-scroll-container/);
-  assert.match(secondaryAcceptance, /background:var\(--p3-canvas\)!important/);
+test("Phase 7 keeps Coach Leaderboards on its source-owned light route canvas", () => {
+  assert.match(leaderboardHierarchy, /coach-page-dashboard-leaderboards/);
+  assert.match(leaderboardHierarchy, /background:\s*#f7f8f2\s*!important/);
+  assert.match(leaderboardHierarchy, /color:\s*#171a18\s*!important/);
 });
 
 test("Phase 7 keeps authenticated chrome bounded to route framing rather than duplicating component paint", () => {
