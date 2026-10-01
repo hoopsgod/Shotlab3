@@ -16,19 +16,36 @@ export function applyInSeasonPlayerParity(rawSource) {
   const lineEnding = rawSource.includes("\r\n") ? "\r\n" : "\n";
   let source = rawSource.replace(/\r\n/g, "\n");
 
-  const pathBefore = 'const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards",profile:"/profile",players:"/players"};\nconst PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/profile":"profile","/players":"players"};';
-  const pathAfter = 'const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards","in-season":"/in-season",profile:"/profile",players:"/players"};\nconst PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/in-season":"in-season","/profile":"profile","/players":"players"};';
+  const pathBefore = 'const PLAYER_TAB_PATHS={home:"/",duels:"/program-log",log-drill:"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards",profile:"/profile",players:"/players"};\nconst PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/profile":"profile","/players":"players"};';
+  const pathAfter = 'const PLAYER_TAB_PATHS={home:"/",duels:"/program-log",log-drill:"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards","in-season":"/in-season",profile:"/profile",players:"/players"};\nconst PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/in-season":"in-season","/profile":"profile","/players":"players"};';
   const hasInSeasonPath = source.includes('"in-season":"/in-season"');
   const hasInSeasonReversePath = source.includes('"/in-season":"in-season"');
   if (hasInSeasonPath !== hasInSeasonReversePath) throw new Error("player In Season path mapping: incomplete mapping");
   if (!hasInSeasonPath) source = replaceOnce(source, pathBefore, pathAfter, "player In Season path mapping");
 
-  const routeSyncBefore = 'useEffect(()=>{if(!desktopPlayerWorkspace)return;const onPop=()=>setTab(PLAYER_PATH_TABS[window.location.pathname]||"home");window.addEventListener("popstate",onPop);return()=>window.removeEventListener("popstate",onPop)},[desktopPlayerWorkspace]);';
-  const routeSyncAfter = 'useEffect(()=>{if(!desktopPlayerWorkspace)return;const onPop=()=>setTab(PLAYER_PATH_TABS[window.location.pathname]||"home");onPop();window.addEventListener("popstate",onPop);return()=>window.removeEventListener("popstate",onPop)},[desktopPlayerWorkspace]);';
+  const routeSyncBefore = `useEffect(()=>{
+  const onPop=()=>{
+    setTab(tabFromPath(window.location.pathname));
+    setActive(null);
+    setShowShotStats(false);
+  };
+  window.addEventListener("popstate",onPop);
+  return ()=>window.removeEventListener("popstate",onPop);
+},[tabFromPath]);`;
+  const routeSyncAfter = `useEffect(()=>{
+  const onPop=()=>{
+    setTab(tabFromPath(window.location.pathname));
+    setActive(null);
+    setShowShotStats(false);
+  };
+  onPop();
+  window.addEventListener("popstate",onPop);
+  return ()=>window.removeEventListener("popstate",onPop);
+},[tabFromPath]);`;
   source = replaceOnce(source, routeSyncBefore, routeSyncAfter, "player deep-route hydration resync");
 
-  const navBefore = '  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},\n];\nconst getPlayerNavItem=';
-  const navAfter = '  {k:"in-season",l:"In Season",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-3 3 2 5-7"/><path d="M15 7h4v4"/></svg>},\n  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},\n];\nconst getPlayerNavItem=';
+  const navBefore = '  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 004 4v2"/><circle cx="12" cy="7" r="4"/></svg>},\n];\nconst getPlayerNavItem=';
+  const navAfter = '  {k:"in-season",l:"In Season",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-3 3 2 5-7"/><path d="M15 7h4v4"/></svg>},\n  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 004 4v2"/><circle cx="12" cy="7" r="4"/></svg>},\n];\nconst getPlayerNavItem=';
   source = replaceOnce(source, navBefore, navAfter, "player In Season navigation item");
 
   const secondaryBefore = '  {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},\n  getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"}),';
