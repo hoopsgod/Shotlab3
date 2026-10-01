@@ -10,6 +10,7 @@ const interactionsCss=read("../src/components/CoachMissionControlInteractions.cs
 const shellCss=read("../src/components/CoachMissionControlShell.css");
 const finalCss=read("../src/components/CoachMissionControlFinal.css");
 const titleCss=read("../src/components/CoachMissionControlTitleStage.css");
+const desktopWorkspaceCss=read("../src/styles/DesktopHudlWorkspace2026.css");
 const activationCss=read("../src/components/CoachActivationPath.css");
 const navigationCss=read("../src/components/MobileNavigation.module.css");
 const v2Css=read("../src/components/CoachMissionControlV2.css");
@@ -96,7 +97,8 @@ test("late shared styles cannot reclaim Coach Home visual authority",()=>{
 });
 
 test("desktop Coach Home follows the prototype command-stage anatomy",()=>{
-  assert.match(desktopTitle,/grid-template-columns:208px minmax\(0,1fr\)/);
+  assert.doesNotMatch(desktopTitle,/grid-template-columns:208px minmax\(0,1fr\)/);
+  assert.match(desktopWorkspaceCss,/\.mcShellV3\.is-desktop-shell\s*\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/);
   assert.match(desktopTitle,/grid-template-columns:repeat\(12,minmax\(0,1fr\)\)/);
   assert.match(desktopTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\][^{]*\{[^}]*grid-column:1\/10/);
   assert.match(desktopTitle,/\.mcTeamHealth\{[^}]*grid-column:10\/-1/);
