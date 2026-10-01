@@ -6,7 +6,6 @@ import "./CoachMissionControlTitleStage.css";
 import "./DesktopHudlWorkspace2026.css";
 import "./CoachActivationPath.css";
 import "./CoachTeamMonogramFallback.css";
-import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import { buildCoachInboxModel } from "../lib/coachInbox.js";
