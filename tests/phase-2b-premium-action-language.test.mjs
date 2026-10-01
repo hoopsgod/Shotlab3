@@ -8,9 +8,8 @@ const actionLayer = readFileSync('src/components/Phase2PremiumActionLayer.css', 
 test('Phase 2B action layer is attached to the shared secondary-page system and stable runtime selectors', () => {
   assert.match(secondaryPageSystem, /import "\.\/Phase2PremiumActionLayer\.css"/);
   assert.match(actionLayer, /\.secondaryPageShell/);
-  assert.match(actionLayer, /:is\(\[data-testid="coach-players-insight-grid"\],\s*\[data-testid="coach-events-insight-grid"\]\) article button/);
-  assert.ok(actionLayer.includes('[data-testid="coach-players-insight-grid"]'));
-  assert.ok(actionLayer.includes('[data-testid="coach-events-insight-grid"]'));
+  assert.match(actionLayer, /\[data-testid="coach-players-insight-grid"\] article button/);
+  assert.match(actionLayer, /\[data-testid="coach-events-insight-grid"\] article button/);
   assert.doesNotMatch(actionLayer, /\.secondaryPageAction--secondary/);
   assert.doesNotMatch(actionLayer, /\[class\*="insightActions"\]/);
 });

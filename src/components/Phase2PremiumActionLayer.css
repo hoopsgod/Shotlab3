@@ -12,7 +12,8 @@
 
 /* CSS-module class names are intentionally hashed in the runtime bundle.
    Anchor the premium action layer to stable page IDs and semantic global classes instead. */
-:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button {
+[data-testid="coach-players-insight-grid"] article button,
+[data-testid="coach-events-insight-grid"] article button {
   min-height: 44px !important;
   max-width: 100%;
   padding: 0 12px 0 14px !important;
@@ -35,7 +36,8 @@
   transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease !important;
 }
 
-:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button::after {
+[data-testid="coach-players-insight-grid"] article button::after,
+[data-testid="coach-events-insight-grid"] article button::after {
   content: "";
   width: 14px;
   height: 14px;
@@ -47,37 +49,48 @@
   transition: transform 150ms ease, opacity 150ms ease;
 }
 
-:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:is(:hover, :focus-visible):not(:disabled) {
+[data-testid="coach-players-insight-grid"] article button:hover:not(:disabled),
+[data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled),
+[data-testid="coach-events-insight-grid"] article button:hover:not(:disabled),
+[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled) {
   transform: translateY(-1px) !important;
   border-color: color-mix(in srgb, var(--phase2-action-accent) 28%, var(--phase2-action-line)) !important;
   background: color-mix(in srgb, var(--phase2-action-accent) 5%, #f8f9f5) !important;
   box-shadow: 0 8px 18px rgba(28, 34, 29, .06) !important;
 }
 
-:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:is(:hover, :focus-visible):not(:disabled)::after {
+[data-testid="coach-players-insight-grid"] article button:hover:not(:disabled)::after,
+[data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled)::after,
+[data-testid="coach-events-insight-grid"] article button:hover:not(:disabled)::after,
+[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled)::after {
   transform: translateX(2px);
   opacity: 1;
 }
 
-:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:focus-visible {
+[data-testid="coach-players-insight-grid"] article button:focus-visible,
+[data-testid="coach-events-insight-grid"] article button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--phase2-action-accent) 28%, transparent) !important;
   outline-offset: 3px !important;
 }
 
-:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:disabled {
+[data-testid="coach-players-insight-grid"] article button:disabled,
+[data-testid="coach-events-insight-grid"] article button:disabled {
   cursor: not-allowed;
   opacity: .5;
 }
 
 @media (max-width: 480px) {
-  :is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button {
+  [data-testid="coach-players-insight-grid"] article button,
+  [data-testid="coach-events-insight-grid"] article button {
     padding-inline: 12px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button,
-  :is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button::after {
+  [data-testid="coach-players-insight-grid"] article button,
+  [data-testid="coach-players-insight-grid"] article button::after,
+  [data-testid="coach-events-insight-grid"] article button,
+  [data-testid="coach-events-insight-grid"] article button::after {
     transition: none !important;
   }
 }
