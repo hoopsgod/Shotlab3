@@ -64,7 +64,7 @@ test("0 25 85 100 and 125 retain deterministic and distinct target meaning",()=>
 });
 
 test("Phase 4 preserves the production bundle budgets and UI-library guard",()=>{
-  assert.equal(budget.maxTotalCssGzipBytes,93000);
-  assert.equal(budget.maxTotalJavaScriptGzipBytes,365500);
+  assert.equal(budget.maxTotalCssGzipBytes,89000);
+  assert.equal(budget.maxTotalJavaScriptGzipBytes,365000);
   for(const name of ["framer-motion","chart.js","@fortawesome/react-fontawesome","lucide-react"]) assert.equal(pkg.dependencies[name],undefined);
 });
