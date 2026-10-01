@@ -30,7 +30,7 @@ const mobileTitle=mediaBlock(titleCss,"(max-width:700px)");
 const desktopTitle=mediaBlock(titleCss,"(min-width:981px)");
 
 test("Coach Home keeps the production decision model and truthful signals",()=>{
-  ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Next session"].forEach((label)=>assert.match(source,new RegExp(label)));
+  ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Upcoming Event"].forEach((label)=>assert.match(source,new RegExp(label)));
   ["coach-primary-objective","coach-primary-metrics","coach-program-pulse","coach-athlete-attention","coach-upcoming-event"].forEach((id)=>assert.match(source,new RegExp(`data-testid="${id}"`)));
   assert.match(source,/primaryCommand/);
   assert.match(source,/attentionCount > 0/);
