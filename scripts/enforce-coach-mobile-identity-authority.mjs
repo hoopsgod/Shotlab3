@@ -120,7 +120,7 @@ async function main() {
     ['mobile Coach crest authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)/],
     ['mobile metric control authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/],
     ['mobile metric value authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcRealityStrip strong\{[^}]*font:800 20px\/.95 var\(--mc-native\)/],
-    ['mobile primary CTA authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/],
+    ['mobile primary CTA authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/],
   ]
   const missing = requiredAuthority.filter(([, pattern]) => !pattern.test(coachProductionCss)).map(([label]) => label)
   if (missing.length) {
