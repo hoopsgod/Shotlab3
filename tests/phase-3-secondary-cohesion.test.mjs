@@ -23,15 +23,19 @@ test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance or
   assert.match(html, /href="\/shotlab-phase3-secondary-acceptance\.css"/);
 });
 
-test('Phase 3 is scoped to high-value secondary destinations', () => {
+test('Phase 3 cohesion is player-only now that Coach secondary routes are source-owned', () => {
   for (const selector of [
     'premium-leaderboards-hub',
     'player-career-history',
+  ]) {
+    assert.match(css, new RegExp(selector));
+  }
+  for (const retiredCoachSelector of [
     'coach-players-interactive-dashboard',
     'coach-events-interactive-dashboard',
     'coach-drills-management',
   ]) {
-    assert.match(css, new RegExp(selector));
+    assert.doesNotMatch(css, new RegExp(retiredCoachSelector));
   }
   assert.match(css, /color-scheme:light!important/);
   assert.match(css, /performance-workspace::before/);
