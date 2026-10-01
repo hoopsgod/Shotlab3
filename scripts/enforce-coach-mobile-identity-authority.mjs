@@ -76,6 +76,15 @@ export function enforceCoachMobileIdentityAuthority(css) {
   return { css: output, changed, selectors }
 }
 
+function selectorOwnsDeclaration(css, expectedSelector, expectedDeclaration) {
+  for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectorArms = arms(match[1]).map((arm) => arm.replace(/\s+/g, ''))
+    if (!selectorArms.includes(expectedSelector.replace(/\s+/g, ''))) continue
+    if (match[2].replace(/\s+/g, '').includes(expectedDeclaration.replace(/\s+/g, ''))) return true
+  }
+  return false
+}
+
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
   let violatingFiles = 0
@@ -118,15 +127,15 @@ async function main() {
     throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  // Desktop shell geometry is now owned by the globally loaded shared workspace
-  // stylesheet. Keep mobile component authority in CoachWorkspaces, but require
-  // both desktop grids in App CSS so removing the former duplicate Coach copy
-  // cannot silently remove the live desktop shell.
+  // Desktop shell geometry is globally owned. CSSO may combine Coach and Player
+  // selectors when they share the same declaration, so verify selector/declaration
+  // ownership instead of requiring an unfactored one-selector rule.
   const appCss = (await Promise.all(entries.filter((entry) => entry.isFile() && /^App-.*\.css$/.test(entry.name)).map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')))).join('\n')
-  if (!/\.mcShellV3\.is-desktop-shell\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/.test(appCss)) {
+  const desktopGrid = 'grid-template-columns:248px minmax(0,1fr)'
+  if (!selectorOwnsDeclaration(appCss, '.mcShellV3.is-desktop-shell', desktopGrid)) {
     throw new Error('Production CSS lost the desktop Coach workspace grid during optimization.')
   }
-  if (!/\.performance-shell\.is-desktop\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/.test(appCss)) {
+  if (!selectorOwnsDeclaration(appCss, '.performance-shell.is-desktop', desktopGrid)) {
     throw new Error('Production CSS lost the desktop Player workspace grid during optimization.')
   }
 
