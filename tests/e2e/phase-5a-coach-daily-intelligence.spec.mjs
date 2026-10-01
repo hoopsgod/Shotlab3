@@ -68,9 +68,9 @@ test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding de
   await expect(hero.getByText("Demo Titans", { exact: true })).toBeVisible();
   await expect(hero.locator(".mcHeroTitle")).toHaveText(/\S+/);
   await expect(hero.locator(".mcPrimary")).toBeVisible();
-  await expect(metrics).toContainText("Active");
-  await expect(metrics).toContainText("Follow-up");
-  await expect(metrics).toContainText(/Set|Next/);
+  await expect(metrics).toContainText("Logged today");
+  await expect(metrics).toContainText("Activity follow-ups");
+  await expect(metrics).toContainText("Assignment actions");
 
   const buttonHeights = await metrics.getByRole("button").evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
   expect(buttonHeights).toHaveLength(3);
@@ -131,6 +131,9 @@ test("Phase 5A keeps the post-roster-change Coach decision path truthful and act
     await expect(drawer).not.toContainText("Unavailable");
   } else {
     await expect(hero).not.toContainText(/RSVP.*Unavailable/i);
-    await expect(page.getByTestId("coach-primary-metrics")).toContainText(/Active|Follow-up|Set|Next/);
+    const metrics = page.getByTestId("coach-primary-metrics");
+    await expect(metrics).toContainText("Logged today");
+    await expect(metrics).toContainText("Activity follow-ups");
+    await expect(metrics).toContainText("Assignment actions");
   }
 });
