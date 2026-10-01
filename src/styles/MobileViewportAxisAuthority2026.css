@@ -95,10 +95,10 @@
   html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="label"],
   html body #root .performance-shell--player.is-mobile [data-team-workspace="leaderboards"] [data-metric-role="detail"] { color: #e8eee6 !important; -webkit-text-fill-color: #e8eee6 !important; }
 
-  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-visual-role="performance-evidence"] {
+  html body #root .performance-shell--coach.is-mobile :is([data-route-kind="leaderboards"], [data-route-kind="schedule"]) [data-visual-role="performance-evidence"] {
     display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; grid-auto-flow: row !important; grid-auto-columns: minmax(0, 1fr) !important; overflow-x: hidden !important; overscroll-behavior-inline: auto !important;
   }
-  html body #root .performance-shell--coach.is-mobile [data-route-kind="leaderboards"] [data-route-stage-metric] { min-width: 0 !important; }
+  html body #root .performance-shell--coach.is-mobile :is([data-route-kind="leaderboards"], [data-route-kind="schedule"]) [data-route-stage-metric] { min-width: 0 !important; }
 
   /* Registered Coach activation uses a desktop three-column grid in source.
    * On mobile the primary action owns a full-width second row so the paid Home
