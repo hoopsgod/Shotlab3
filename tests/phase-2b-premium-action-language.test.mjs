@@ -10,13 +10,13 @@ test('Phase 2B action layer is attached to the shared secondary-page system and 
   assert.match(actionLayer, /\.secondaryPageShell/);
   assert.match(actionLayer, /\[data-testid="coach-players-insight-grid"\] article button/);
   assert.match(actionLayer, /\[data-testid="coach-events-insight-grid"\] article button/);
-  assert.match(actionLayer, /\.secondaryPageAction--secondary/);
+  assert.doesNotMatch(actionLayer, /\.secondaryPageAction--secondary/);
   assert.doesNotMatch(actionLayer, /\[class\*="insightActions"\]/);
 });
 
 test('Phase 2B supporting actions carry a directional icon treatment without changing button semantics', () => {
   assert.match(actionLayer, /article button::after/);
-  assert.match(actionLayer, /secondaryPageAction--secondary::after/);
+  assert.doesNotMatch(actionLayer, /secondaryPageAction--secondary::after/);
   assert.match(actionLayer, /mask: url\("data:image\/svg\+xml/);
   assert.match(actionLayer, /M5 12h14m-6-6 6 6-6 6/);
   assert.doesNotMatch(actionLayer, /pointer-events:\s*none/);
