@@ -16,6 +16,11 @@
   color: #171a18 !important;
 }
 
+[data-testid="coach-page-dashboard-leaderboards"] .teamIdentityTitleStage__summary {
+  color: #5c675f !important;
+  -webkit-text-fill-color: #5c675f !important;
+}
+
 [data-testid="coach-page-dashboard-leaderboards-toolbar"] {
   color: #171a18 !important;
 }
