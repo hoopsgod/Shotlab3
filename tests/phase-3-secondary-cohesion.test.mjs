@@ -24,18 +24,16 @@ test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance or
 });
 
 test('Phase 3 cohesion is player-only now that Coach secondary routes are source-owned', () => {
-  for (const selector of [
-    'premium-leaderboards-hub',
+  assert.match(css, /premium-leaderboards-hub/);
+  for (const retiredSelector of [
     'player-career-history',
-  ]) {
-    assert.match(css, new RegExp(selector));
-  }
-  for (const retiredCoachSelector of [
+    'player-dashboard-identity-header',
+    'mobile-navigation-dock',
     'coach-players-interactive-dashboard',
     'coach-events-interactive-dashboard',
     'coach-drills-management',
   ]) {
-    assert.doesNotMatch(css, new RegExp(retiredCoachSelector));
+    assert.doesNotMatch(css, new RegExp(retiredSelector));
   }
   assert.match(css, /color-scheme:light!important/);
   assert.match(css, /performance-workspace::before/);
