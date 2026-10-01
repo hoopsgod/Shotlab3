@@ -58,8 +58,9 @@ test('Phase 2D enhancer is a one-way semantic migration and tolerates downstream
   assert.equal(read(TARGET), original);
 });
 
-test('Phase 2D uses a quiet premium state lane with semantic icon, copy hierarchy, and contextual material safeguards', () => {
+test('Phase 2D owns semantic empty states while Leaderboards owns route presentation', () => {
   const css = read('src/components/Phase2PremiumEmptyStateLanguage.css');
+  const leaderboardCss = read('src/components/Phase3CoachLeaderboardHierarchy.css');
 
   assert.match(css, /\[data-phase2-empty-state\]/);
   assert.match(css, /grid-template-columns:\s*38px minmax\(0, 1fr\)/);
@@ -80,12 +81,22 @@ test('Phase 2D uses a quiet premium state lane with semantic icon, copy hierarch
   assert.match(css, /coach-leaderboard-operational-panel/);
   assert.match(css, /:has\(\[data-phase2-empty-kind="filter"\]\)/);
   assert.match(css, /section:has\(\[data-phase2-empty-state\]\)/);
-  assert.match(css, /coach-page-dashboard-leaderboards-evidence/);
-  assert.match(css, /\[data-testid="coach-page-dashboard-leaderboards-evidence"\] article button/);
-  assert.match(css, /-webkit-text-fill-color:\s*#33402f !important/);
-  assert.match(css, /#f7f8f2 !important/);
-  assert.match(css, /#26302a !important/);
-  assert.match(css, /#33402f !important/);
+
+  // One mask pipeline owns browser compatibility; each semantic state supplies
+  // only its icon token instead of duplicating full SVGs for both mask properties.
+  assert.match(css, /--phase2-empty-icon:/);
+  assert.match(css, /-webkit-mask:\s*var\(--phase2-empty-icon\)/);
+  assert.match(css, /mask:\s*var\(--phase2-empty-icon\)/);
+  assert.equal((css.match(/--phase2-empty-icon:/g) || []).length, 6);
+
+  // Route-level Leaderboards material is not an empty-state responsibility.
+  assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(leaderboardCss, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(leaderboardCss, /\[data-testid="coach-page-dashboard-leaderboards-evidence"\] article button/);
+  assert.match(leaderboardCss, /-webkit-text-fill-color:\s*#33402f !important/);
+  assert.match(leaderboardCss, /#f7f8f2 !important/);
+  assert.match(leaderboardCss, /#26302a !important/);
+  assert.match(leaderboardCss, /#33402f !important/);
   assert.doesNotMatch(css, /border:\s*1px dashed/);
   assert.doesNotMatch(css, /isDemoAccount|isDemoMode|demoMode|setDemoMode/);
 });
