@@ -239,7 +239,7 @@ test("player activation, first result, and coach response loop work across separ
   await expect(activity).toContainText("Ari Cross");
   await expect(activity).toContainText("Home shots · 33 makes");
   await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("1/1");
-  await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("Activity follow-ups");
+  await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("Follow-up");
   await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("0");
   await expect(coachPage.getByTestId("coach-onboarding-state")).toHaveCount(0);
 
