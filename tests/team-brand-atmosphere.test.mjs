@@ -99,7 +99,8 @@ test("shared authenticated surfaces consume the brand atmosphere instead of fixe
   assert.match(surfaceContractCss, /--sl-surface-dark-material:\s*var\(--team-brand-surface-deep/);
   assert.match(surfaceContractCss, /--sl-surface-dark-material-elevated:\s*var\(--team-brand-surface-elevated/);
   assert.match(surfaceContractCss, /primary-decision[\s\S]*linear-gradient\(145deg, var\(--sl-surface-dark-material-elevated\), var\(--sl-surface-dark-material\) 72%\)/);
-  assert.match(leaderboardCss, /secondaryPageDecision[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.match(secondaryCss, /secondaryPageDecision[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
+  assert.doesNotMatch(leaderboardCss, /secondaryPageDecision/);
   assert.doesNotMatch(leaderboardCss, /linear-gradient\(145deg, #171b18, #0c0f0d/);
   assert.match(commandHierarchyCss, /player-primary-logging-region[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
   assert.match(dashboardPrimitivesCss, /commandBar[\s\S]*var\(--team-brand-surface-elevated[\s\S]*var\(--team-brand-surface-deep/);
