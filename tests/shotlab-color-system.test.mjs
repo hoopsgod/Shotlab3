@@ -11,6 +11,7 @@ const titleCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleSta
 const coach = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 const coachShellCss = fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css", import.meta.url), "utf8");
+const teamStoreCss = fs.readFileSync(new URL("../src/components/TeamStoreIndustrial.css", import.meta.url), "utf8");
 
 const channel = (hex) => {
   const value = Number.parseInt(hex, 16) / 255;
@@ -83,9 +84,10 @@ test("secondary coach pages and Team Store share the restrained light-and-dark p
   assert.match(titleCss, /\.teamIdentityTitleStage--dark/);
   assert.match(titleCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(secondaryCss, /\.secondaryPageDecision[\s\S]*linear-gradient\(145deg/);
-  assert.match(css, /\.ts-panel[\s\S]*background:var\(--v3-canvas\)/);
-  assert.match(css, /\.ts-header h2[\s\S]*font-family:inherit/);
-  assert.match(css, /\.ts-field input,[\s\S]*font-size:16px/);
+  assert.doesNotMatch(css, /\.ts-(?:panel|header|field|button|overlay)/);
+  assert.match(teamStoreCss, /\.ts-panel\s*\{[\s\S]*background:[^;]*var\(--ts-canvas\)/);
+  assert.match(teamStoreCss, /\.ts-header h2[\s\S]*color:\s*var\(--ts-ink\)/);
+  assert.match(teamStoreCss, /\.ts-field input,[\s\S]*\.ts-field select[\s\S]*min-height:\s*48px/);
 });
 
 test("loading shell, accessibility, and V3 entry points remain intact", () => {
