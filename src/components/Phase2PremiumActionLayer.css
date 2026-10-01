@@ -7,12 +7,12 @@
   --phase2-action-line: rgba(38, 46, 40, .12);
   --phase2-action-surface: #f4f6f0;
   --phase2-action-accent: var(--sl-accent, #71851f);
+  --phase2-action-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14m-6-6 6 6-6 6'/%3E%3C/svg%3E");
 }
 
 /* CSS-module class names are intentionally hashed in the runtime bundle.
    Anchor the premium action layer to stable page IDs and semantic global classes instead. */
-[data-testid="coach-players-insight-grid"] article button,
-[data-testid="coach-events-insight-grid"] article button {
+:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button {
   min-height: 44px !important;
   max-width: 100%;
   padding: 0 12px 0 14px !important;
@@ -35,62 +35,49 @@
   transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease !important;
 }
 
-[data-testid="coach-players-insight-grid"] article button::after,
-[data-testid="coach-events-insight-grid"] article button::after {
+:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button::after {
   content: "";
   width: 14px;
   height: 14px;
   flex: 0 0 14px;
   background: currentColor;
   opacity: .72;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14m-6-6 6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14m-6-6 6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: var(--phase2-action-arrow) center / contain no-repeat;
+  mask: var(--phase2-action-arrow) center / contain no-repeat;
   transition: transform 150ms ease, opacity 150ms ease;
 }
 
-[data-testid="coach-players-insight-grid"] article button:hover:not(:disabled),
-[data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled),
-[data-testid="coach-events-insight-grid"] article button:hover:not(:disabled),
-[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled) {
+:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:is(:hover, :focus-visible):not(:disabled) {
   transform: translateY(-1px) !important;
   border-color: color-mix(in srgb, var(--phase2-action-accent) 28%, var(--phase2-action-line)) !important;
   background: color-mix(in srgb, var(--phase2-action-accent) 5%, #f8f9f5) !important;
   box-shadow: 0 8px 18px rgba(28, 34, 29, .06) !important;
 }
 
-[data-testid="coach-players-insight-grid"] article button:hover:not(:disabled)::after,
-[data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled)::after,
-[data-testid="coach-events-insight-grid"] article button:hover:not(:disabled)::after,
-[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled)::after {
+:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:is(:hover, :focus-visible):not(:disabled)::after {
   transform: translateX(2px);
   opacity: 1;
 }
 
-[data-testid="coach-players-insight-grid"] article button:focus-visible,
-[data-testid="coach-events-insight-grid"] article button:focus-visible {
+:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--phase2-action-accent) 28%, transparent) !important;
   outline-offset: 3px !important;
 }
 
-[data-testid="coach-players-insight-grid"] article button:disabled,
-[data-testid="coach-events-insight-grid"] article button:disabled {
+:is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button:disabled {
   cursor: not-allowed;
   opacity: .5;
 }
 
 @media (max-width: 480px) {
-  [data-testid="coach-players-insight-grid"] article button,
-  [data-testid="coach-events-insight-grid"] article button {
-    min-height: 44px !important;
+  :is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button {
     padding-inline: 12px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-testid="coach-players-insight-grid"] article button,
-  [data-testid="coach-players-insight-grid"] article button::after,
-  [data-testid="coach-events-insight-grid"] article button,
-  [data-testid="coach-events-insight-grid"] article button::after {
+  :is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button,
+  :is([data-testid="coach-players-insight-grid"], [data-testid="coach-events-insight-grid"]) article button::after {
     transition: none !important;
   }
 }
