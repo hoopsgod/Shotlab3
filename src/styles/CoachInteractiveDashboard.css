@@ -1,5 +1,3 @@
-@import "../components/CoachEventsPremium.css";
-
 /* Coach secondary workspaces follow the approved cream editorial system.
    Route components keep all existing data and actions; this file removes the
    stacked-dashboard presentation without introducing a parallel component tree. */
