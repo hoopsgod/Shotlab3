@@ -9,11 +9,12 @@ const backEnhancer = readFileSync('scripts/apply-phase4d-shared-back-hit-area.mj
 const workspaceSource = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 
-test('Phase 3C route framing loads after the existing Phase 3 secondary authority', () => {
-  const acceptance = index.indexOf('shotlab-phase3-secondary-acceptance');
+test('Phase 3C route framing loads after Player cohesion with the retired Coach acceptance shim unmounted', () => {
+  const cohesion = index.indexOf('shotlab-phase3-secondary-cohesion');
   const framing = index.indexOf('shotlab-phase3-native-route-framing');
-  assert.ok(acceptance >= 0, 'Phase 3 acceptance stylesheet must remain loaded');
-  assert.ok(framing > acceptance, 'Phase 3C framing must load after Phase 3 acceptance');
+  assert.ok(cohesion >= 0, 'Phase 3 Player cohesion stylesheet must remain loaded');
+  assert.ok(framing > cohesion, 'Phase 3C framing must load after Player cohesion');
+  assert.doesNotMatch(index, /shotlab-phase3-secondary-acceptance\.css/);
 });
 
 test('Player secondary destinations keep one gutter authority and explicit account access', () => {
