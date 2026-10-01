@@ -5,6 +5,11 @@ import fs from "node:fs";
 const appSource = fs.readFileSync("src/App.jsx", "utf8");
 const componentSource = fs.readFileSync("src/components/CoachDashboardPhase2.jsx", "utf8");
 const selectorSource = fs.readFileSync("src/lib/coachOperationalIntelligence.js", "utf8");
+const emptyStateCss = fs.readFileSync("src/components/Phase2PremiumEmptyStateLanguage.css", "utf8");
+const leaderboardCss = fs.readFileSync("src/components/Phase3CoachLeaderboardHierarchy.css", "utf8");
+const activationCss = fs.readFileSync("src/components/CoachActivationPath.css", "utf8");
+const titleCss = fs.readFileSync("src/components/CoachMissionControlTitleStage.css", "utf8");
+const mobileAxisCss = fs.readFileSync("src/styles/MobileViewportAxisAuthority2026.css", "utf8");
 
 test("phase two imports the reusable operational layer into the coach shell", () => {
   assert.match(appSource, /CoachPlayerIntelligenceDrawer/);
@@ -65,4 +70,27 @@ test("activity intelligence is a reachable coach workspace", () => {
   assert.match(appSource, /testId="coach-page-dashboard-activity"/);
   assert.match(appSource, /tab==="activity"/);
   assert.match(appSource, /setTab\("activity"\)/);
+});
+
+test("Coach CSS responsibilities are consolidated without reopening the desktop shell", () => {
+  assert.match(emptyStateCss, /--phase2-empty-icon:/);
+  assert.match(emptyStateCss, /-webkit-mask:\s*var\(--phase2-empty-icon\)/);
+  assert.match(emptyStateCss, /mask:\s*var\(--phase2-empty-icon\)/);
+  assert.doesNotMatch(emptyStateCss, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(leaderboardCss, /coach-page-dashboard-leaderboards-evidence/);
+
+  const activationMobile = activationCss.match(/@media\(max-width:700px\)\{([\s\S]*?)\n\}/)?.[1] || "";
+  assert.doesNotMatch(activationMobile, /\.mcActivationPlan\s*\{[\s\S]*grid-template-columns/);
+  assert.doesNotMatch(activationMobile, /\.mcActivationPlan>button\s*\{[\s\S]*width:100%/);
+  assert.match(mobileAxisCss, /\.mcActivationPlan\s*\{[\s\S]*grid-template-columns:\s*auto minmax\(0, 1fr\)/);
+  assert.match(mobileAxisCss, /\.mcActivationPlan > button\s*\{[\s\S]*width:\s*100% !important/);
+});
+
+test("390px Coach hero uses the existing hierarchy inside its certified vertical budget", () => {
+  const mobile = titleCss.match(/@media\(max-width:700px\)\{([\s\S]*?)\n\}/)?.[1] || "";
+  assert.match(mobile, /\.mcHeroContent\{[^}]*padding:14px 18px 18px/);
+  assert.match(mobile, /\.mcRealityStrip\{[^}]*margin:9px 0 0/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/);
+  assert.match(mobile, /--coach-hero-crest:clamp\(104px,29vw,120px\)/);
+  assert.match(mobile, /font-size:clamp\(36px,9\.4vw,40px\)/);
 });
