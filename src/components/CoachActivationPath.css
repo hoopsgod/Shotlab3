@@ -150,7 +150,6 @@ body.mission-control-active #root .mcShellV3 .mcActivationPlan{
 
 @media(max-width:700px){
   .mcActivationPlan{
-    grid-template-columns:auto minmax(0,1fr);
     gap:12px;
     min-height:0;
     padding:16px;
@@ -162,18 +161,9 @@ body.mission-control-active #root .mcShellV3 .mcActivationPlan{
   .mcActivationPlan .mcTodayPlanCopy small{margin-bottom:5px}
   .mcActivationPlan .mcTodayPlanCopy em{margin-top:6px;font-size:12px;line-height:1.4}
   .mcActivationProgress{margin-top:12px}
-  .mcActivationPlan>button{
-    grid-column:1 / -1;
-    width:100%;
-    min-height:48px;
-  }
-  /* The mobile activation CTA remains part of the component-owned activation
-     path; late Mission Control compatibility must not collapse it into a link. */
+  .mcActivationPlan>button{min-height:48px}
+  /* Appearance stays component-owned; final mobile axis authority owns row/width geometry. */
   body.mission-control-active #root .mcShellV3 .mcActivationPlan>button{
-    grid-column:1 / -1;
-    grid-row:auto;
-    justify-self:stretch;
-    width:100%;
     min-height:48px;
     padding:0 18px;
     border:1px solid color-mix(in srgb,var(--mc) 82%,white 18%);
