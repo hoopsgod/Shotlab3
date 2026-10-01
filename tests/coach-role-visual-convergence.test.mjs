@@ -22,7 +22,7 @@ test("all Coach operational destinations resolve through the shared editorial an
     "coach-page-dashboard-strength",
     "coach-page-dashboard-leaderboards",
   ]) assert.match(routes, new RegExp(marker));
-  assert.match(app, /\{k:"settings",l:"Team & Account"/);
+  assert.match(app, /\["settings",\s*"Team & Account",\s*"settings"\]/);
   assert.match(app, /className="coachAdministrationWorkspace"/);
   assert.match(branding, /testId="coach-branding-workspace"/);
   assert.match(secondary, /\.coachPlayerDetailWorkspace/);
