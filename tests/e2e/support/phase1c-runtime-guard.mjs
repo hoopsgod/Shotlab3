@@ -11,17 +11,29 @@ const EXACT_HEAD_PATH = path.join(OUTPUT_ROOT, 'exact-head-sha.txt');
 const FIXED_NOW = Date.parse('2026-09-01T12:00:00-04:00');
 const EXACT_VISUAL_BASELINE_HASHES = new Map([
   // Exact GitHub Actions Linux/Chromium evidence only; never regenerate these from a local browser.
-  ['coach-mission-control-demo-empty-390', '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220'],
-  ['coach-mission-control-registered-empty-390', '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f'],
+  // The October desktop-workspace closure preserves the reviewed mobile composition while updating
+  // truthful metric language and route-owned responsive spacing. Keep both prior and current CI
+  // evidence where the underlying mobile surface remains intentionally supported.
+  ['coach-mission-control-demo-empty-390', [
+    '513f6e8206cf44b7389f9459c28fad685045491ab166a6773178455ccf4db220',
+    '01515edb5ab2b7acfeaaf97bf8ad2b8d98425c490ce57648afe8127151b7a7da',
+  ]],
+  ['coach-mission-control-registered-empty-390', [
+    '8033e1db98e1d712408ea8f6ec1dbafe8a8f70d3113eeee9d7946db07273004f',
+    '66c9dff1e2ebf5635b88d74b6408472bb57d613b7bd6a6f204ac288677f0e85d',
+  ]],
   // Phase 7D.2 restores the reviewed flat roster composition. Phase 7E keeps that composition
   // and adds the reviewed restrained team-brand row tint. The app-wide heading pass adds the
   // reviewed compact editorial title treatment while preserving the roster composition below it.
+  // The closure pass also stacks the roster heading at mobile widths so the description and sort
+  // control cannot collide while retaining the same flat roster hierarchy.
   ['coach-players-registered-populated-390', [
     'd613a65be33b24e9be224161e2bc30a0cc119c9a1fb846de9728a0736111beee',
     '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
     'a3407c36f7b76bbb2b98b664acd89f759a4eaabfae27326576465fff851945a2',
     '37b37fb495cfca1747ae79810b6103964971fa4bf2e222cc6c601133dead9b2c',
     '549a327449c8a375e7dd45f738a62b651263fa83bb859732c40f0476153dc07f',
+    '9ac0468e64bb2e326be02cd13e99c4f94dbca518c1073ae596493a2218baa38c',
   ]],
   // The app-wide heading pass intentionally replaces the generic Events intro copy with the
   // reviewed live RSVP status. Lock that exact CI-rendered state by digest so Phase 1C does not
@@ -29,17 +41,35 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   ['coach-events-registered-populated-390', [
     '03e08a265baa8384f207499e9a830191afbbc8110caf64cfe8b238cb2ea591fe',
     'b1f9bf67a81a471ac9f7f74ba03f8b7f2a67e45951c168377713e2bbbe0bf211',
+    'dffd5176a3e0e1124dc8d79b5be3fa41df22169ec291f71ce6ebc52b91fc375a',
   ]],
+  // Player Home retains the reviewed mobile command-center hierarchy. The current exact CI states
+  // include the accepted spacing reconciliation produced by the desktop-workspace closure without
+  // widening geometry or changing the mobile navigation contract.
+  ['player-home-registered-populated-390', '2ca496b5aea8d286ce0e74d68a2b682e3cd7877107eed35dbd5c18dc6a4c01ac'],
   // Phase 7E now keeps photo ownership in More > Personalize, so Progress returns to the
   // previously reviewed compact state with no photo panel or unrelated visual drift.
   ['player-progress-registered-populated-390', [
     'ab2357b3e1393fb78d270b8eb840ff8dfec0627ae65576d7cd3be8faee4059d7',
     '33201cf2a3bb26b98774eccf2edde46e53963a59d574aa9a29b27696a61008a5',
     '8f7916dd1cf2877d3c2d62c551742364edd0521aa5ca68532409602b6a94852d',
+    '261bc4d07467ed2933bf8d2fc041c902533e228727f2912c34293f4be96937e1',
   ]],
-  ['coach-home-branding-stress-390', 'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255'],
-  ['coach-home-edge-320', '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df'],
-  ['coach-home-edge-430', '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258'],
+  ['coach-home-branding-stress-390', [
+    'ccc599f3c1ad07c91556b25e3eb5ab1adfe93088fad4a34dab733a1868e0d255',
+    '3a7d41e9c78c8e02fe7424a17fd07bcea299ca5d9d43989ed1f19d9d74c66882',
+  ]],
+  ['player-home-branding-stress-390', '3d60210afe86cf9b4c649b1c0ad401034341a36746e7be1c78831d4203276c27'],
+  ['coach-home-edge-320', [
+    '10913a78079da5e0cf3929cc5b32f2724773dd40f5258c2d97bf851682b912df',
+    'f3b8bde65ed2d41017c24ce4ae0de7f31ebe7fa5ba6e05ace6700aceb29dab4b',
+  ]],
+  ['coach-home-edge-430', [
+    '70926c6b80bd960b96a28f79fb7b5ef7ff5e0e8de62c05ed193b861de9a9f258',
+    '120ab97770530657c1d70803fcbd90161310c4aca1b3e412319be081b732494d',
+  ]],
+  ['player-home-edge-320', 'dd5c4750049f8c0d4268992fe43cc058349e00d7cff1855e35d2bf75bb0cf05f'],
+  ['player-home-edge-430', 'e3a58f8c5fc0efa4b6c048f219ff4af06393fb91df5be5defeb4101afe626ebd'],
 ]);
 
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -204,6 +234,7 @@ export async function capturePhase1CSnapshot(page, guard, name, { geometry = nul
     });
   }
 
+  guard.assertClean();
   const runtime = guard.snapshot();
   const evidence = {
     exactHead: exactHeadSha(),
