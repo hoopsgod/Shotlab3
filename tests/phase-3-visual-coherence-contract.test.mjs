@@ -97,7 +97,8 @@ test("active consolidated visual authorities contain no substring-selector mater
   assert.match(strengthHierarchyCss, /\[data-premium-metric-value\]/);
   assert.match(finalClosureCss, /\[data-visual-role="next-actions-title"\]/);
   assert.match(finalClosureCss, /\[data-visual-role="disclosure-title"\]/);
-  assert.match(industrial, /\[data-surface="light"\]/);
+  assert.match(surfaceCss, /\[data-surface="light"\]/);
+  assert.doesNotMatch(industrial, /\[data-surface=|\.performance-shell|\.premium-screen/);
 });
 
 test("light and dark semantic foreground tokens clear WCAG normal-text contrast", () => {
