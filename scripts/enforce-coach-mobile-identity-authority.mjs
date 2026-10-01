@@ -118,11 +118,14 @@ async function main() {
     throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  const desktopGrid = /\.mcShellV3\.is-desktop-shell\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/
-  if (!desktopGrid.test(coachProductionCss)) {
+  // Desktop shell geometry is now owned by the globally loaded shared workspace
+  // stylesheet. Keep mobile component authority in CoachWorkspaces, but require
+  // both desktop grids in App CSS so removing the former duplicate Coach copy
+  // cannot silently remove the live desktop shell.
+  const appCss = (await Promise.all(entries.filter((entry) => entry.isFile() && /^App-.*\.css$/.test(entry.name)).map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')))).join('\n')
+  if (!/\.mcShellV3\.is-desktop-shell\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/.test(appCss)) {
     throw new Error('Production CSS lost the desktop Coach workspace grid during optimization.')
   }
-  const appCss = (await Promise.all(entries.filter((entry) => entry.isFile() && /^App-.*\.css$/.test(entry.name)).map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')))).join('\n')
   if (!/\.performance-shell\.is-desktop\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/.test(appCss)) {
     throw new Error('Production CSS lost the desktop Player workspace grid during optimization.')
   }
