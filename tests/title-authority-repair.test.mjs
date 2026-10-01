@@ -67,10 +67,10 @@ test('Coach Home keeps one source-owned hero while runtime shell bridge owns onl
   assert.match(coachMobileAuthority, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
   assert.match(coachMobileAuthority, /\.mcHeroTitle\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed"/);
   assert.match(coachMobileAuthority, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
-  assert.match(coachMobileAuthority, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
+  assert.match(coachMobileAuthority, /\.mcRealityStrip\{[^}]*(?:margin-top:9px|margin:9px 0 0)/);
   assert.match(coachMobileAuthority, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(coachMobileAuthority, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
-  assert.match(coachMobileAuthority, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
+  assert.match(coachMobileAuthority, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/);
   assert.match(coachMobileAuthority, /\.mcFocusGrid\{[^}]*margin:23px 0 0/);
   assert.match(coachMobileAuthority, /\.mcActivationChapter\{[^}]*margin:0/);
   assert.match(coachMobileAuthority, /\.mcLowerGrid\{[^}]*margin:0/);
