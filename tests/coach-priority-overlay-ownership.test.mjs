@@ -8,7 +8,7 @@ const compatibilityCss = fs.readFileSync('src/components/CoachPriorityOverlay.cs
 const authorityCssPath = 'src/components/CoachPriorityOverlayAuthority.css'
 
 test('Coach priority overlay has one optimizer-safe runtime CSS authority before app mount', () => {
-  assert.match(coachSource, /import ["']\.\/CoachPriorityOverlay\.css["'];?/)
+  assert.doesNotMatch(coachSource, /import ["']\.\/CoachPriorityOverlay\.css["'];?/)
   assert.ok(fs.existsSync(authorityCssPath), 'canonical priority overlay authority stylesheet must exist')
   const authorityCss = fs.readFileSync(authorityCssPath, 'utf8')
   assert.match(mainSource, /await import\(["']\.\/components\/CoachPriorityOverlayAuthority\.css["']\)/)
