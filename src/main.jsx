@@ -171,9 +171,9 @@ window.addEventListener('shotlab:app-ready', () => {
     // are the final cascade authority in both development and optimized production builds.
     await import('./components/Phase7AuthenticatedChrome.css')
     // The production CSS optimizer can otherwise discard the priority modal's
-    // body/data-testid selectors from the Coach chunk. Load a dedicated late copy so
-    // the editor remains viewport-bound in the optimized build, not just in dev.
-    await import('./components/CoachPriorityOverlay.css?priority-overlay-authority')
+    // body/data-testid selectors from the Coach chunk. Load the canonical authority
+    // once, late enough to preserve the editor in the optimized build and before mount.
+    await import('./components/CoachPriorityOverlayAuthority.css')
     // Structural mobile geometry must load after every authenticated visual layer so
     // Demo and paid workspaces resolve to the same physical viewport origin on iOS.
     await import('./styles/MobileViewportAxisAuthority2026.css')
