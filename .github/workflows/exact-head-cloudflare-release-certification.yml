@@ -1,0 +1,275 @@
+name: Exact Head Cloudflare Release Certification
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: exact-head-cloudflare-release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deployed-browser-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner and browsers
+        run: |
+          npm install --no-save @playwright/test@1.55.1
+          npx playwright install --with-deps chromium webkit
+
+      - name: Record exact head
+        id: head
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/exact-head-deployed
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "${HEAD_SHA}" > artifacts/exact-head-deployed/exact-head-sha.txt
+          echo "sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+
+      - name: Resolve successful immutable Cloudflare preview for exact head
+        id: cloudflare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const token = process.env.GH_TOKEN;
+          const sha = process.env.HEAD_SHA;
+          const repo = process.env.GITHUB_REPOSITORY;
+          const output = process.env.GITHUB_OUTPUT;
+          if (!token || !sha || !repo || !output) throw new Error("Missing GitHub Actions environment required to resolve Cloudflare preview");
+
+          const endpoint = `https://api.github.com/repos/${repo}/commits/${sha}/check-runs?per_page=100`;
+          let last = "Cloudflare Pages check not created yet";
+
+          for (let attempt = 1; attempt <= 90; attempt += 1) {
+            const response = await fetch(endpoint, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+              },
+            });
+            if (!response.ok) throw new Error(`GitHub check-runs lookup failed: ${response.status} ${await response.text()}`);
+            const payload = await response.json();
+            const run = (payload.check_runs || []).find((candidate) =>
+              candidate.name === "Cloudflare Pages" && candidate.head_sha === sha
+            );
+
+            if (run) {
+              last = `Cloudflare Pages status=${run.status} conclusion=${run.conclusion || "pending"} id=${run.id}`;
+              console.log(`[${attempt}/90] ${last}`);
+              if (run.status === "completed") {
+                if (run.conclusion !== "success") {
+                  throw new Error(`Exact-head Cloudflare deployment did not succeed: ${last}`);
+                }
+                const summary = String(run.output?.summary || "");
+                const match = summary.match(/https:\/\/[0-9a-f]{8}\.shotlab3\.pages\.dev\b/i);
+                if (!match) throw new Error(`Successful Cloudflare check did not expose an immutable preview URL. Summary: ${summary}`);
+                const url = match[0];
+                fs.appendFileSync(output, `url=${url}\ncheck_id=${run.id}\nexternal_id=${run.external_id || ""}\ndeployment_sha=${run.head_sha}\n`);
+                fs.writeFileSync("artifacts/exact-head-deployed/cloudflare-deployment.json", `${JSON.stringify({
+                  url,
+                  checkId: run.id,
+                  externalId: run.external_id || "",
+                  deploymentSha: run.head_sha,
+                  conclusion: run.conclusion,
+                }, null, 2)}\n`);
+                console.log(`Resolved exact-head immutable preview: ${url}`);
+                process.exit(0);
+              }
+            } else {
+              console.log(`[${attempt}/90] ${last}`);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
+          }
+          throw new Error(`Timed out waiting for exact-head Cloudflare deployment. Last state: ${last}`);
+          NODE
+
+      - name: Assert deployment SHA integrity and reachability
+        env:
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+          DEPLOYMENT_SHA: ${{ steps.cloudflare.outputs.deployment_sha }}
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${HEAD_SHA}" = "${DEPLOYMENT_SHA}"
+          curl --fail --silent --show-error --location --retry 6 --retry-delay 5 --max-time 30 "${DEPLOYMENT_URL}/" > /dev/null
+
+      - name: Re-certify fixed production performance ceilings on exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            tests/css-module-dead-selector-pruner.test.mjs \
+            tests/prune-overridden-coach-declarations.test.mjs \
+            tests/prune-unreferenced-keyframes.test.mjs \
+            tests/dedupe-coach-font-stacks.test.mjs
+          npm run build
+          node scripts/verify-phase5b-live-coach-selectors.mjs
+          node scripts/analyze-coach-css-recovery.mjs
+          npm run verify:performance-budget
+          node scripts/verify-phase5c-css-headroom.mjs
+          cp artifacts/performance/build-metrics.json artifacts/exact-head-deployed/build-metrics.json
+
+      - name: Run deployed Phase 1A mobile geometry matrix
+        env:
+          PHASE1A_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        run: npx playwright test --config=playwright.phase1a.config.mjs
+
+      - name: Run deployed release browser contracts
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        run: |
+          npx playwright test \
+            tests/e2e/desktop-workspace-routing.spec.mjs \
+            tests/e2e/premium-workspace.spec.mjs \
+            tests/e2e/production-acceptance.spec.mjs \
+            tests/e2e/phase-3b-coach-leaderboards-hierarchy.spec.mjs \
+            --config=playwright.acceptance.config.mjs \
+            --reporter=line
+
+      - name: Verify deployed Coach desktop Leaderboards explicitly
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import { chromium } from "@playwright/test";
+
+          const baseURL = process.env.ACCEPTANCE_BASE_URL;
+          const browser = await chromium.launch();
+          const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+          const pageErrors = [];
+          page.on("pageerror", (error) => pageErrors.push(error.message));
+
+          await page.route("**/v1/season-archives", (route) =>
+            route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) })
+          );
+          await page.route("**/v1/leaderboards/home-shots**", (route) =>
+            route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) })
+          );
+          await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) =>
+            route.fulfill({ status: 200, contentType: "application/json", body: "[]" })
+          );
+
+          await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded" });
+          await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+          await page.reload({ waitUntil: "domcontentloaded" });
+          const demo = page.getByRole("button", { name: "Coach demo", exact: true });
+          await demo.waitFor({ state: "visible", timeout: 20_000 });
+          await demo.click();
+
+          const sidebar = page.getByRole("complementary", { name: "Coach navigation" });
+          await sidebar.waitFor({ state: "visible", timeout: 20_000 });
+          if (await page.getByTestId("mobile-navigation-dock").count()) {
+            throw new Error("Mobile navigation dock must not render at 1280px");
+          }
+
+          const navButtons = sidebar.getByRole("button");
+          const labels = (await navButtons.allTextContents()).map((value) => value.trim());
+          const leaderboardIndex = labels.findIndex((value) => /(leaderboard|ranking)/i.test(value));
+          if (leaderboardIndex < 0) {
+            throw new Error(`Coach desktop navigation has no Leaderboards/Rankings destination. Labels: ${JSON.stringify(labels)}`);
+          }
+
+          const navigationEntriesBefore = await page.evaluate(() => performance.getEntriesByType("navigation").length);
+          await navButtons.nth(leaderboardIndex).click();
+          await page.getByTestId("premium-leaderboards-hub").waitFor({ state: "visible", timeout: 20_000 });
+          const navigationEntriesAfter = await page.evaluate(() => performance.getEntriesByType("navigation").length);
+          if (navigationEntriesAfter !== navigationEntriesBefore) {
+            throw new Error(`Coach desktop Leaderboards caused a full-page navigation: before=${navigationEntriesBefore} after=${navigationEntriesAfter}`);
+          }
+
+          const geometry = await page.evaluate(() => ({
+            viewport: innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            bodyWidth: document.body.scrollWidth,
+            path: location.pathname,
+          }));
+          if (geometry.documentWidth > geometry.viewport + 1 || geometry.bodyWidth > geometry.viewport + 1) {
+            throw new Error(`Coach desktop Leaderboards horizontally overflows: ${JSON.stringify(geometry)}`);
+          }
+          if (pageErrors.length) throw new Error(`Coach desktop Leaderboards page errors: ${JSON.stringify(pageErrors)}`);
+
+          fs.mkdirSync("artifacts/exact-head-deployed", { recursive: true });
+          await page.screenshot({
+            path: "artifacts/exact-head-deployed/coach-desktop-leaderboards-1280.png",
+            fullPage: true,
+            animations: "disabled",
+          });
+          fs.writeFileSync(
+            "artifacts/exact-head-deployed/coach-desktop-leaderboards-1280.json",
+            `${JSON.stringify({ labels, geometry, pageErrors }, null, 2)}\n`
+          );
+          await browser.close();
+          NODE
+
+      - name: Write exact-head release summary
+        if: always()
+        env:
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+          DEPLOYMENT_SHA: ${{ steps.cloudflare.outputs.deployment_sha }}
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.url }}
+          DEPLOYMENT_CHECK_ID: ${{ steps.cloudflare.outputs.check_id }}
+        shell: bash
+        run: |
+          {
+            echo "## Exact-head Cloudflare release certification"
+            echo
+            echo "- PR head: \`${HEAD_SHA}\`"
+            echo "- Deployment SHA: \`${DEPLOYMENT_SHA}\`"
+            echo "- Immutable preview: ${DEPLOYMENT_URL}"
+            echo "- Cloudflare check ID: \`${DEPLOYMENT_CHECK_ID}\`"
+            echo "- Production budgets: re-certified without threshold changes"
+            echo "- Deployed mobile geometry: Chromium + WebKit"
+            echo "- Deployed Coach/Player workspace, routing, acceptance, Leaderboards: exercised by Playwright"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload exact-head deployed certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exact-head-cloudflare-release-${{ steps.head.outputs.sha }}
+          path: |
+            artifacts/exact-head-deployed/
+            artifacts/phase1a/
+            artifacts/phase-3b-coach-leaderboards-hierarchy/
+            artifacts/performance/
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 21

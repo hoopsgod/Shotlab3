@@ -1,5 +1,4 @@
-Cloudflare Pages production redeploy trigger
+Cloudflare Pages PR exact-head redeploy trigger
 
-PR: #1239
-Merge commit: faeced4b83a983b8ff57c093661cfa4ccd6247b0
-Purpose: Trigger a clean production deployment after the successful Mission Control merge.
+PR: #1580
+Purpose: Force an immutable preview for final exact-head deployed browser certification.
