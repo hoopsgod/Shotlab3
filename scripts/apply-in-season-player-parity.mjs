@@ -23,6 +23,10 @@ export function applyInSeasonPlayerParity(rawSource) {
   if (hasInSeasonPath !== hasInSeasonReversePath) throw new Error("player In Season path mapping: incomplete mapping");
   if (!hasInSeasonPath) source = replaceOnce(source, pathBefore, pathAfter, "player In Season path mapping");
 
+  const routeSyncBefore = 'useEffect(()=>{if(!desktopPlayerWorkspace)return;const onPop=()=>setTab(PLAYER_PATH_TABS[window.location.pathname]||"home");window.addEventListener("popstate",onPop);return()=>window.removeEventListener("popstate",onPop)},[desktopPlayerWorkspace]);';
+  const routeSyncAfter = 'useEffect(()=>{if(!desktopPlayerWorkspace)return;const onPop=()=>setTab(PLAYER_PATH_TABS[window.location.pathname]||"home");onPop();window.addEventListener("popstate",onPop);return()=>window.removeEventListener("popstate",onPop)},[desktopPlayerWorkspace]);';
+  source = replaceOnce(source, routeSyncBefore, routeSyncAfter, "player deep-route hydration resync");
+
   const navBefore = '  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},\n];\nconst getPlayerNavItem=';
   const navAfter = '  {k:"in-season",l:"In Season",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-3 3 2 5-7"/><path d="M15 7h4v4"/></svg>},\n  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},\n];\nconst getPlayerNavItem=';
   source = replaceOnce(source, navBefore, navAfter, "player In Season navigation item");
