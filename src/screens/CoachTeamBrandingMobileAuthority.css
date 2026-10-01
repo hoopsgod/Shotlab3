@@ -1,0 +1,25 @@
+/* Standalone Coach Branding is rendered outside the authenticated performance shell.
+ * Keep its compact editorial title-stage geometry authoritative after production
+ * CSS optimization/reordering, matching the canonical mobile title contract. */
+@media (max-width: 760px) {
+  .branding-industrial [data-team-identity-stage="true"][data-title-stage-family="editorial"].teamIdentityTitleStage--standard {
+    --identity-crest: clamp(60px, 16vw, 68px) !important;
+  }
+
+  .branding-industrial [data-team-identity-stage="true"][data-title-stage-family="editorial"].teamIdentityTitleStage--standard [data-identity-role="brand-panel"] {
+    width: var(--identity-crest) !important;
+    height: var(--identity-crest) !important;
+    min-width: var(--identity-crest) !important;
+    min-height: var(--identity-crest) !important;
+    max-width: var(--identity-crest) !important;
+    max-height: var(--identity-crest) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .branding-industrial [data-team-identity-stage="true"][data-title-stage-family="editorial"].teamIdentityTitleStage--standard {
+    --identity-crest: 60px !important;
+  }
+}

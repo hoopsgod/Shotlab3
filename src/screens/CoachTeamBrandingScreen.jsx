@@ -7,6 +7,7 @@ import { announceFeedback } from "../components/AppFeedbackLayer";
 import { persistCoachBranding } from "../lib/teamBrandingPersistence.js";
 import "../styles/PremiumWorkspace.css";
 import "./CoachTeamBrandingScreen.css";
+import "./CoachTeamBrandingMobileAuthority.css";
 
 export default function CoachTeamBrandingScreen({ branding, onSave, onBack, teamName }) {
   const [saving, setSaving] = useState(false);

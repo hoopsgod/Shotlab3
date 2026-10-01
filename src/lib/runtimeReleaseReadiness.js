@@ -3,6 +3,7 @@ const SHOT_LOGS_KEY = "sl:shotlogs";
 const SUPABASE_SESSION_KEY = "sl:supabase-session";
 const SUPABASE_ACCESS_TOKEN_KEY = "sl:supabase-access-token";
 const DEMO_MODE_KEY = "sl:demoMode";
+const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const AUTO_SYNC_STATES = new Set(["local_pending", "background_saved"]);
 
@@ -10,18 +11,32 @@ const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
 
 const boolValue = (value) => ["1", "true", "yes", "on"].includes(String(value || "").trim().toLowerCase());
 
-export function isDemoRuntimeEnabled({ env, location } = {}) {
+function readStoredJson(storage, key) {
+  try {
+    const raw = storage?.getItem?.(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === "string" ? { email: parsed } : parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function isDemoRuntimeEnabled({ env, location, sessionStorage } = {}) {
   const resolvedEnv = env || (typeof import.meta !== "undefined" ? import.meta.env : {});
   const resolvedLocation = location || (typeof window !== "undefined" ? window.location : null);
+  const resolvedSessionStorage = sessionStorage || (typeof window !== "undefined" ? window.sessionStorage : null);
   const hostname = String(resolvedLocation?.hostname || "").toLowerCase();
   const search = String(resolvedLocation?.search || "");
   const localHost = ["localhost", "127.0.0.1", "::1"].includes(hostname);
   const explicitDemo = new URLSearchParams(search).get("demo") === "1";
+  const sameTabDemo = isDemoRuntimeAccount(readStoredJson(resolvedSessionStorage, PENDING_DEMO_SESSION_KEY)?.email);
 
-  // Production must always start at authentication unless the URL explicitly
-  // requests a demo. Environment flags and hosting providers may expose demo
-  // controls, but they must never bootstrap a demo account automatically.
-  return Boolean(explicitDemo || resolvedEnv?.DEV || localHost);
+  // Production starts at authentication unless the URL explicitly requests a
+  // demo or this same browser tab already launched one through the demo UI.
+  // The sessionStorage handoff never survives a new tab/browser session, so a
+  // stale localStorage demo account still cannot bootstrap itself automatically.
+  return Boolean(explicitDemo || sameTabDemo || resolvedEnv?.DEV || localHost);
 }
 
 export function isDemoRuntimeAccount(userOrEmail) {
@@ -204,4 +219,5 @@ export const RUNTIME_STORAGE_KEYS = {
   appSession: APP_SESSION_KEY,
   shotLogs: SHOT_LOGS_KEY,
   demoMode: DEMO_MODE_KEY,
+  pendingDemoSession: PENDING_DEMO_SESSION_KEY,
 };

@@ -173,7 +173,7 @@ test("mobile Player primary navigation remains usable without horizontal pan", a
   await enterPlayerDemo(page);
   const dock=page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible();
-  await dock.getByRole("button", { name: "At Home", exact: true }).click();
+  await dock.getByRole("button", { name: "Train", exact: true }).click();
   await expect.poll(() => new URL(page.url()).pathname).toBe("/quick-menu");
   await expectNoHorizontalPagePan(page);
 });

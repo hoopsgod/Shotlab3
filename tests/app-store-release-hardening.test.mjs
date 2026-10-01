@@ -50,6 +50,44 @@ test("demo runtime requires explicit opt-in and never activates from hosting or 
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "?demo=1" } }), true);
 });
 
+test("same-tab demo handoff survives a production reload without enabling stale demo state in a fresh tab", async () => {
+  const sameTab = createStorage({
+    [RUNTIME_STORAGE_KEYS.pendingDemoSession]: JSON.stringify({ email: "demo@shotlab.app", createdAt: Date.now() }),
+  });
+  assert.equal(isDemoRuntimeEnabled({
+    env: { DEV: false },
+    location: { hostname: "shotlab3.pages.dev", search: "" },
+    sessionStorage: sameTab.localStorage,
+  }), true);
+
+  const state = createStorage({
+    [RUNTIME_STORAGE_KEYS.appSession]: JSON.stringify({ email: "demo@shotlab.app" }),
+  });
+  const cleared = await clearStaleDemoSession({
+    env: { DEV: false },
+    location: { hostname: "shotlab3.pages.dev", search: "" },
+    storage: state.storage,
+    localStorage: state.localStorage,
+    sessionStorage: sameTab.localStorage,
+  });
+  assert.equal(cleared, false);
+  assert.deepEqual(JSON.parse(state.values.get(RUNTIME_STORAGE_KEYS.appSession)), { email: "demo@shotlab.app" });
+
+  const freshTab = createStorage();
+  assert.equal(isDemoRuntimeEnabled({
+    env: { DEV: false },
+    location: { hostname: "shotlab3.pages.dev", search: "" },
+    sessionStorage: freshTab.localStorage,
+  }), false);
+
+  freshTab.localStorage.setItem(RUNTIME_STORAGE_KEYS.pendingDemoSession, JSON.stringify({ email: "registered@shotlab.app" }));
+  assert.equal(isDemoRuntimeEnabled({
+    env: { DEV: false },
+    location: { hostname: "shotlab3.pages.dev", search: "" },
+    sessionStorage: freshTab.localStorage,
+  }), false);
+});
+
 test("release persistence recognizes only the two isolated demo identities", () => {
   assert.equal(isDemoRuntimeAccount("demo@shotlab.app"), true);
   assert.equal(isDemoRuntimeAccount({ email: "COACH.DEMO@SHOTLAB.APP" }), true);
