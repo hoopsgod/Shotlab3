@@ -3,7 +3,7 @@ name: Phase 2 Desktop Workspace Contract
 on:
   pull_request:
     branches:
-      - agent/desktop-hudl-workspace-clean
+      - march-3-reset-85393dd
   workflow_dispatch:
 
 permissions:
