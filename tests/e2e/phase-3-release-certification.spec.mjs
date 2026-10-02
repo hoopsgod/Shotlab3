@@ -89,11 +89,9 @@ async function expectRenderedTextContrast(locator, minimum = 4.5) {
 async function enterDemo(page, role) {
   await installSafeRoutes(page);
   await page.goto("/");
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.reload();
   const demoButton = page.getByRole("button", { name: new RegExp(`${role} demo`, "i") });
-  if (!(await demoButton.isVisible().catch(() => false))) {
-    await page.evaluate(() => sessionStorage.clear());
-    await page.reload();
-  }
   await suppressMotion(page);
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
   await demoButton.click();
@@ -258,6 +256,8 @@ test.describe("Phase 3 release certification — responsive spot checks", () => 
     await page.setViewportSize({ width: 1440, height: 1000 });
     await installSafeRoutes(page);
     await page.goto("/");
+    await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+    await page.reload();
     await suppressMotion(page);
     await capture(page, "27-auth-desktop");
 
@@ -265,7 +265,7 @@ test.describe("Phase 3 release certification — responsive spot checks", () => 
     await expect(page.getByText(/Coach/i).first()).toBeVisible({ timeout: 20_000 });
     await capture(page, "28-coach-home-desktop");
 
-    await page.evaluate(() => sessionStorage.clear());
+    await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
     await page.goto("/");
     const playerDemoButton = page.getByRole("button", { name: /Player demo/i });
     await expect(playerDemoButton).toBeVisible({ timeout: 20_000 });
