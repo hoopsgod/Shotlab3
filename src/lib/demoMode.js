@@ -108,7 +108,7 @@ export function isDemoMode() {
   return explicitDemo || activeSameTabDemo;
 }
 
-export function setDemoMode(enabled) {
+export function setDemoMode(enabled, options = {}) {
   if (typeof window === "undefined") return;
 
   // Clear historical demo persistence first. Entry into demo mode is then pinned
@@ -118,11 +118,14 @@ export function setDemoMode(enabled) {
   window.sessionStorage.removeItem(PENDING_DEMO_SESSION_KEY);
 
   if (enabled) {
-    // Demo buttons update React state before the durable app session write resolves.
-    // Pin the hard-coded identity to this browser tab immediately: the pending marker
-    // protects the first persistence handoff, while the active marker survives later
-    // same-tab reloads without leaking into a fresh tab or browser session.
-    const pendingEmail = inferPendingDemoEmail();
+    // Demo sign-in already knows the account identity. Prefer that explicit value
+    // because the async auth sign-out boundary can move focus away from the button
+    // before this function runs. Focus inference remains as a backwards-compatible fallback.
+    const requestedEmail = typeof options === "string" ? options : options?.email;
+    const normalizedRequestedEmail = String(requestedEmail || "").trim().toLowerCase();
+    const pendingEmail = isDemoAccount(normalizedRequestedEmail)
+      ? normalizedRequestedEmail
+      : inferPendingDemoEmail();
     if (isDemoAccount(pendingEmail)) {
       window.sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify({ email: pendingEmail }));
       window.sessionStorage.setItem(PENDING_DEMO_SESSION_KEY, JSON.stringify({

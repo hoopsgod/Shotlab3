@@ -195,11 +195,11 @@ test("registered Player restores the Events deep route after reload", async ({ p
     playerName: "Acceptance Player",
     teamId: TEAM_ID,
     path: "/events",
-    readyTestId: "player-daily-command-center",
+    readyTestId: "player-commitment-center-events",
   });
   expect(new URL(page.url()).pathname).toBe("/events");
   await page.reload();
-  await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
   expect(new URL(page.url()).pathname).toBe("/events");
   expect(pageErrors).toEqual([]);
 });

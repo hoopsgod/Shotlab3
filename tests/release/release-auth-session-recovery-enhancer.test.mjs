@@ -19,6 +19,8 @@ const initialSupabaseSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabaseS
 const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const explicitDemo=new URLSearchParams(window.location.search).get("demo")==="1";const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||explicitDemo&&isDemoAccount(sess?.email))?sess?.email:""));
 if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");
 if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")
+const demoSignIn=async(acct)=>{await supabase.auth.signOut();setDemoMode(true);await DB.set("sl:session",{email:acct.email});};
+const cleanupDemoPlayerSessionData=()=>{};
 const directLogin=()=>navigateToPlayerHome();
 setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 `
@@ -28,15 +30,14 @@ test('enhancer upgrades an already slow-recovery-patched App for demo reload and
   await mkdir(path.join(root, 'src'))
   const appPath = path.join(root, 'src', 'App.jsx')
   await writeFile(appPath, currentHydratedSource)
-
   const result = spawnSync(process.execPath, [scriptPath], { cwd: root, encoding: 'utf8' })
   assert.equal(result.status, 0, result.stderr || result.stdout)
-
   const transformed = await readFile(appPath, 'utf8')
   assert.match(transformed, /const demoPersistenceSession=isDemoPersistenceSession\(\)/)
   assert.match(transformed, /preserveCurrentRoute=false/)
   assert.match(transformed, /hasOwnProperty\.call\(PLAYER_PATH_TABS,currentPath\)/)
   assert.match(transformed, /navigateToPlayerHome\(\{preserveCurrentRoute:true\}\)/)
+  assert.match(transformed, /setDemoMode\(true,\{email:acct\.email\}\)/)
   assert.match(transformed, /const directLogin=\(\)=>navigateToPlayerHome\(\);/)
 
   const once = transformed
