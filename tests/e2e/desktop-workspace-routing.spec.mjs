@@ -165,7 +165,7 @@ test("desktop Player workspace preserves route, refresh, back, forward, and same
 
   await page.reload();
   await expect.poll(() => new URL(page.url()).pathname).toBe("/events");
-  await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
   expect(pageErrors).toEqual([]);
 });
 
