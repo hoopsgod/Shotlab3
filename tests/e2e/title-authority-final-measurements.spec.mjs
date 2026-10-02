@@ -27,7 +27,7 @@ async function enterCoachDemo(page) {
 async function applyDifficultBranding(page) {
   const teamName = "Northwestern Metropolitan Preparatory Basketball";
   const userName = "Coach Alexandra Montgomery-Washington";
-  const branding = { primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" };
+  const branding = { name: teamName, primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" };
 
   await expect.poll(async () => page.evaluate(async () => {
     const parseRaw = (raw) => {
