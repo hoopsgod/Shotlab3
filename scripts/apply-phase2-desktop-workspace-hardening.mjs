@@ -13,6 +13,7 @@ const COACH_HOME_NAV_BEFORE = '<nav>{navigation.map((item) => <button key={item.
 const COACH_HOME_NAV_AFTER = '<nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} aria-current={item.active?"page":undefined} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>';
 const COACH_TEXT_SCALE_BINDING = 'const coachTextScale=COACH_TEXT_SIZES.includes(coachTextSize)?coachTextSize:"standard";\n';
 const COACH_TEXT_SCALE_ATTRIBUTE = ' data-text-scale={coachTextScale}';
+const EXPLICIT_FULL_VARIANT = '\n  variant="full"';
 const EMPTY_DELETE_STYLE = ' className="btn-v cta-danger" style={{}}';
 const DELETE_STYLELESS = ' className="btn-v cta-danger"';
 const COACH_HOME_RUNTIME_ONLY_MARKERS = Object.freeze([
@@ -38,6 +39,7 @@ export function applyPhase2DesktopWorkspaceHardening(source) {
   next = replaceOrVerify(next, PLAYER_BEFORE, PLAYER_AFTER, "Player desktop navigation");
   next = stripRuntimeOnly(next, COACH_TEXT_SCALE_BINDING);
   next = stripRuntimeOnly(next, COACH_TEXT_SCALE_ATTRIBUTE);
+  next = stripRuntimeOnly(next, EXPLICIT_FULL_VARIANT);
   if (next.includes(EMPTY_DELETE_STYLE)) next = next.replace(EMPTY_DELETE_STYLE, DELETE_STYLELESS);
   return next;
 }
