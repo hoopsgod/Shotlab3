@@ -50,7 +50,19 @@ async function applyPerformance(page, makes) {
     const pad = (value) => String(value).padStart(2, "0");
     const today = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     const existing = JSON.parse(localStorage.getItem("sl:shotlogs") || "[]").filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
-    if (Number(makes) > 0) existing.push({ id: `dashboard-showstopper-phase-2-${makes}`, email: demoEmail, playerId: demoEmail, teamId: demoTeamId, name: "Demo Player", made: Number(makes), date: today, ts: Date.now() });
+    if (Number(makes) > 0) existing.push({
+      id: `dashboard-showstopper-phase-2-${makes}`,
+      email: demoEmail,
+      playerId: demoEmail,
+      teamId: demoTeamId,
+      name: "Demo Player",
+      made: Number(makes),
+      date: today,
+      ts: Date.now(),
+      demo: true,
+      syncState: "local_pending",
+      syncSource: "local",
+    });
     const serializedLogs = JSON.stringify(existing);
     localStorage.setItem("sl:shotlogs", serializedLogs);
     try { await window.storage?.set?.("sl:shotlogs", serializedLogs, true); } catch {}
