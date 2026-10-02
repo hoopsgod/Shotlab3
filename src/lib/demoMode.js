@@ -93,20 +93,26 @@ export function isDemoMode() {
   if (typeof window === "undefined") return false;
 
   const explicitDemo = new URLSearchParams(window.location.search).get("demo") === "1";
+  let activeSameTabDemo = false;
+  try {
+    activeSameTabDemo = isDemoAccount(
+      parseStoredSession(window.sessionStorage?.getItem?.(DEMO_SESSION_KEY))?.email,
+    );
+  } catch {}
 
-  // Demo mode is explicit and query-only. Stored demo state must never bypass login.
+  // Legacy localStorage state must never bootstrap a demo. Only an explicit
+  // demo URL or the active marker from this same browser tab may do so.
   window.localStorage.removeItem(LEGACY_DEMO_KEY);
-  window.sessionStorage.removeItem(DEMO_SESSION_KEY);
 
-  if (!explicitDemo) clearPersistedDemoAuthSession();
-  return explicitDemo;
+  if (!explicitDemo && !activeSameTabDemo) clearPersistedDemoAuthSession();
+  return explicitDemo || activeSameTabDemo;
 }
 
 export function setDemoMode(enabled) {
   if (typeof window === "undefined") return;
 
-  // Clear all historical demo persistence. Entry into demo mode must happen through
-  // an explicit demo URL or route, never through browser storage.
+  // Clear historical demo persistence first. Entry into demo mode is then pinned
+  // to this browser tab only and therefore cannot leak into a fresh tab/session.
   window.localStorage.removeItem(LEGACY_DEMO_KEY);
   window.sessionStorage.removeItem(DEMO_SESSION_KEY);
   window.sessionStorage.removeItem(PENDING_DEMO_SESSION_KEY);
