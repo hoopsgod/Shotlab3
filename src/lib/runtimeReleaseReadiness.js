@@ -81,8 +81,8 @@ export function installStartupPlayerDeepRouteGuard(options = {}) {
 
   const originalReplaceState = history.replaceState;
   let armed = true;
-  let timeoutId = null;
   let guardedReplaceState = null;
+  const onAppReady = () => restore();
 
   const restore = () => {
     if (!armed) return;
@@ -90,10 +90,7 @@ export function installStartupPlayerDeepRouteGuard(options = {}) {
     try {
       if (history.replaceState === guardedReplaceState) history.replaceState = originalReplaceState;
     } catch {}
-    if (timeoutId != null && typeof browserWindow?.clearTimeout === "function") {
-      browserWindow.clearTimeout(timeoutId);
-      timeoutId = null;
-    }
+    try { browserWindow?.removeEventListener?.("shotlab:app-ready", onAppReady); } catch {}
   };
 
   guardedReplaceState = function guardedPlayerRouteReplaceState(state, title, url) {
@@ -105,6 +102,14 @@ export function installStartupPlayerDeepRouteGuard(options = {}) {
         const targetPath = String(target.pathname || "").replace(/\/+$/, "") || "/";
         if (currentPath === initialPath && targetPath === "/") {
           restore();
+          const resyncRoute = () => {
+            try {
+              const event = typeof PopStateEvent === "function" ? new PopStateEvent("popstate") : new Event("popstate");
+              browserWindow?.dispatchEvent?.(event);
+            } catch {}
+          };
+          if (typeof browserWindow?.setTimeout === "function") browserWindow.setTimeout(resyncRoute, 0);
+          else if (typeof queueMicrotask === "function") queueMicrotask(resyncRoute);
           return undefined;
         }
       } catch {}
@@ -114,14 +119,12 @@ export function installStartupPlayerDeepRouteGuard(options = {}) {
 
   try {
     history.replaceState = guardedReplaceState;
+    browserWindow?.addEventListener?.("shotlab:app-ready", onAppReady, { once: true });
   } catch {
     armed = false;
     return () => {};
   }
 
-  if (typeof browserWindow?.setTimeout === "function") {
-    timeoutId = browserWindow.setTimeout(restore, 15_000);
-  }
   return restore;
 }
 
