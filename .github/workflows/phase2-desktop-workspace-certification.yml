@@ -1,0 +1,232 @@
+name: Phase 2 Desktop Workspace Certification
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: phase2-desktop-workspace-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-build-and-budgets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run all source and regression contracts
+        run: npm test
+      - name: Re-certify fixed production performance ceilings
+        run: |
+          set -euo pipefail
+          npm run build
+          node scripts/verify-phase5b-live-coach-selectors.mjs
+          node scripts/analyze-coach-css-recovery.mjs
+          npm run verify:performance-budget
+          node scripts/verify-phase5c-css-headroom.mjs
+          cp artifacts/performance/build-metrics.json /tmp/phase2-head-metrics.json
+      - name: Verify Phase 2 build equivalence against exact base
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          test -n "${HEAD_SHA}"
+          test -n "${BASE_SHA}"
+          git reset --hard "${HEAD_SHA}"
+          git clean -fd
+          git checkout --force "${BASE_SHA}"
+          npm ci
+          npm run build
+          npm run verify:performance-budget
+          cp artifacts/performance/build-metrics.json /tmp/phase2-base-metrics.json
+          git reset --hard "${BASE_SHA}"
+          git checkout --force "${HEAD_SHA}"
+          node scripts/verify-phase5a-build-equivalence.mjs /tmp/phase2-base-metrics.json /tmp/phase2-head-metrics.json
+          mkdir -p artifacts/phase2-build-equivalence
+          cp /tmp/phase2-base-metrics.json artifacts/phase2-build-equivalence/base-build-metrics.json
+          cp /tmp/phase2-head-metrics.json artifacts/phase2-build-equivalence/head-build-metrics.json
+      - name: Upload Phase 2 build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-build-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/performance/
+            artifacts/phase2-build-equivalence/
+          if-no-files-found: warn
+          retention-days: 21
+
+  exact-head-deployed-browser:
+    needs: source-build-and-budgets
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+      VITE_SUPABASE_URL: "https://parity.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install pinned Playwright runner and browsers
+        run: |
+          npm install --no-save @playwright/test@1.55.1
+          npx playwright install --with-deps chromium webkit
+      - name: Record exact head
+        id: head
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/phase2-exact-head
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "${HEAD_SHA}" > artifacts/phase2-exact-head/head-sha.txt
+      - name: Resolve successful immutable Cloudflare preview for exact head
+        id: cloudflare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const token = process.env.GH_TOKEN;
+          const sha = process.env.HEAD_SHA;
+          const repo = process.env.GITHUB_REPOSITORY;
+          const output = process.env.GITHUB_OUTPUT;
+          let last = "Cloudflare Pages check not created yet";
+          for (let attempt = 1; attempt <= 90; attempt += 1) {
+            const response = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}/check-runs?per_page=100`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" } });
+            if (!response.ok) throw new Error(`check-runs lookup failed: ${response.status} ${await response.text()}`);
+            const payload = await response.json();
+            const run = (payload.check_runs || []).find(candidate => candidate.name === "Cloudflare Pages" && candidate.head_sha === sha);
+            if (run) {
+              last = `status=${run.status} conclusion=${run.conclusion || "pending"} id=${run.id}`;
+              console.log(`[${attempt}/90] ${last}`);
+              if (run.status === "completed") {
+                if (run.conclusion !== "success") throw new Error(`Exact-head Cloudflare deployment failed: ${last}`);
+                const match = String(run.output?.summary || "").match(/https:\/\/[0-9a-f]{8}\.shotlab3\.pages\.dev\b/i);
+                if (!match) throw new Error(`Successful Cloudflare check did not expose immutable preview. Summary: ${run.output?.summary || ""}`);
+                const url = match[0];
+                fs.appendFileSync(output, `url=${url}\ndeployment_sha=${run.head_sha}\ncheck_id=${run.id}\n`);
+                fs.writeFileSync("artifacts/phase2-exact-head/cloudflare.json", `${JSON.stringify({ url, deploymentSha: run.head_sha, checkId: run.id, externalId: run.external_id || "" }, null, 2)}\n`);
+                process.exit(0);
+              }
+            }
+            await new Promise(resolve => setTimeout(resolve, 10_000));
+          }
+          throw new Error(`Timed out waiting for exact-head Cloudflare deployment. Last state: ${last}`);
+          NODE
+      - name: Assert deployment SHA integrity and reachability
+        env:
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+          DEPLOYMENT_SHA: ${{ steps.cloudflare.outputs.deployment_sha }}
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.url }}
+        run: |
+          set -euo pipefail
+          test "${HEAD_SHA}" = "${DEPLOYMENT_SHA}"
+          curl --fail --silent --show-error --location --retry 6 --retry-delay 5 --max-time 30 "${DEPLOYMENT_URL}/" > /dev/null
+      - name: Run deployed Phase 1A mobile geometry matrix
+        env:
+          PHASE1A_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        run: npx playwright test --config=playwright.phase1a.config.mjs --reporter=line
+      - name: Run deployed Phase 2 and production acceptance contracts
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        run: |
+          npx playwright test \
+            tests/e2e/desktop-workspace-phase2.spec.mjs \
+            tests/e2e/desktop-workspace-routing.spec.mjs \
+            tests/e2e/premium-workspace.spec.mjs \
+            tests/e2e/production-acceptance.spec.mjs \
+            --config=playwright.acceptance.config.mjs \
+            --reporter=line
+      - name: Capture required Coach and Player viewport evidence
+        env:
+          ACCEPTANCE_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import { chromium } from "@playwright/test";
+          const baseURL = process.env.ACCEPTANCE_BASE_URL;
+          const out = "artifacts/phase2-exact-head/viewports";
+          fs.mkdirSync(out, { recursive: true });
+          const browser = await chromium.launch();
+          for (const role of ["Coach", "Player"]) {
+            for (const width of [320,375,390,430,768,1024,1280,1440]) {
+              const page = await browser.newPage({ viewport: { width, height: 900 } });
+              await page.route("**/v1/season-archives", route => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
+              await page.route("**/v1/leaderboards/home-shots**", route => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+              await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, route => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+              await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded" });
+              await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+              await page.reload({ waitUntil: "domcontentloaded" });
+              const demo = page.getByRole("button", { name: `${role} demo`, exact: true });
+              await demo.waitFor({ state: "visible", timeout: 20_000 });
+              await demo.click();
+              if (role === "Coach" && width >= 1024) await page.getByRole("complementary", { name: "Coach navigation" }).waitFor({ state: "visible", timeout: 20_000 });
+              if (role === "Player" && width >= 1024) await page.getByRole("complementary", { name: "Player navigation" }).waitFor({ state: "visible", timeout: 20_000 });
+              const geometry = await page.evaluate(() => ({ viewport: innerWidth, doc: document.documentElement.scrollWidth, body: document.body.scrollWidth, path: location.pathname }));
+              if (geometry.doc > geometry.viewport + 1 || geometry.body > geometry.viewport + 1) throw new Error(`${role} ${width}px horizontal overflow: ${JSON.stringify(geometry)}`);
+              await page.screenshot({ path: `${out}/${role.toLowerCase()}-${width}.png`, fullPage: true, animations: "disabled" });
+              await page.close();
+            }
+          }
+          await browser.close();
+          NODE
+      - name: Write certification summary
+        if: always()
+        env:
+          HEAD_SHA: ${{ steps.head.outputs.sha }}
+          DEPLOYMENT_SHA: ${{ steps.cloudflare.outputs.deployment_sha }}
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.url }}
+        run: |
+          {
+            echo "## Phase 2 exact-head certification"
+            echo "- PR head: \`${HEAD_SHA}\`"
+            echo "- Deployment SHA: \`${DEPLOYMENT_SHA}\`"
+            echo "- Immutable preview: ${DEPLOYMENT_URL}"
+            echo "- Fixed budgets: unchanged"
+            echo "- Deployed routing/history/mobile matrix: Playwright certified"
+          } >> "${GITHUB_STEP_SUMMARY}"
+      - name: Upload Phase 2 exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-desktop-workspace-${{ steps.head.outputs.sha }}
+          path: |
+            artifacts/phase2-exact-head/
+            artifacts/phase1a/
+            artifacts/performance/
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 21

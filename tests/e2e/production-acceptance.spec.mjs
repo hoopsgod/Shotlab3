@@ -264,6 +264,7 @@ test("coach-created strength session remains stored across refresh", async ({ pa
     const rows = JSON.parse(window.localStorage.getItem("sl:sc-sessions") || "[]");
     return rows.find((row) => row.sport === "Acceptance Strength" && row.date === "2026-08-15" && row.time === "6:30 AM") || null;
   });
+  await expect.poll(readSavedSession, { timeout: 15_000 }).not.toBeNull();
   const savedSession = await readSavedSession();
   expect(savedSession).not.toBeNull();
 
