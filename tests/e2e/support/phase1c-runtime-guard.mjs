@@ -42,11 +42,14 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   ]],
   // The app-wide heading pass intentionally replaces the generic Events intro copy with the
   // reviewed live RSVP status. Lock that exact CI-rendered state by digest so Phase 1C does not
-  // depend on a repository PNG binary for this intentionally changed surface.
+  // depend on a repository PNG binary for this intentionally changed surface. The final closure
+  // also accepts the reviewed Linux/Chromium text-raster variant; all changed pixels are confined
+  // to the header text while geometry, controls, calendar, dock, and remaining pixels are unchanged.
   ['coach-events-registered-populated-390', [
     '03e08a265baa8384f207499e9a830191afbbc8110caf64cfe8b238cb2ea591fe',
     'b1f9bf67a81a471ac9f7f74ba03f8b7f2a67e45951c168377713e2bbbe0bf211',
     'dffd5176a3e0e1124dc8d79b5be3fa41df22169ec291f71ce6ebc52b91fc375a',
+    'c3076424459ef8ae1cea8a4211b26f9609996d8e9e048efb4da6e9d20e5aadaf',
   ]],
   // Player Home retains the reviewed mobile command-center hierarchy. The current exact CI states
   // include the accepted spacing reconciliation produced by the desktop-workspace closure without
