@@ -42,6 +42,21 @@ export function buildLocalHomeShotLog({ id, user, made, date, ts = Date.now() } 
   };
 }
 
+export function isSameHomeShotLogEntry(a = {}, b = {}) {
+  const aId = asText(a?.id);
+  const bId = asText(b?.id);
+  if (aId && bId) return aId === bId;
+
+  const aTs = Number(a?.ts);
+  const bTs = Number(b?.ts);
+  if (!Number.isFinite(aTs) || !Number.isFinite(bTs) || aTs <= 0 || bTs <= 0 || aTs !== bTs) return false;
+
+  return normalizeEmail(a?.email) === normalizeEmail(b?.email)
+    && asText(a?.teamId || a?.team_id) === asText(b?.teamId || b?.team_id)
+    && asText(a?.date) === asText(b?.date)
+    && Number(a?.made || 0) === Number(b?.made || 0);
+}
+
 export function normalizeSavedHomeShotLog(saved = {}, fallback = {}) {
   return {
     id: asText(saved.id) || fallback.id,

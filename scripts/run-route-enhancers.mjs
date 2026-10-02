@@ -44,6 +44,7 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase4e7-player-profile-source-filters.mjs',
   'scripts/apply-phase4e8-player-profile-drill-filters.mjs',
   'scripts/apply-release-auth-session-recovery.mjs',
+  'scripts/apply-home-shot-entry-identity.mjs',
   'scripts/apply-legacy-signed-collection-reads.mjs',
   'scripts/apply-phase3d-rsvp-state-ownership.mjs',
   'scripts/apply-phase3-events-replacement-ownership.mjs',
