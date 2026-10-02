@@ -116,6 +116,9 @@ export default function TeamIdentityTitleStage({
   const fallbackInitials = useMemo(() => initialsFor(teamName), [teamName]);
   const brandingAction = Array.isArray(actions) ? actions.find((action) => action?.key === "branding") : null;
   const isCoachStage = /coach/i.test(`${role} ${eyebrow} ${dataVisualRole} ${className} ${testId || ""}`);
+  const coachEditorialCrestStyle = isCoachStage && titleFamily === "editorial"
+    ? { "--identity-crest": "clamp(64px, 17vw, 74px)" }
+    : undefined;
   const showLogoSetupAction = isCoachStage && (!cleanedLogo || logoFailed);
   const hasUsableLogo = Boolean(cleanedLogo && !logoFailed);
   const openBrandingSettings = () => {
@@ -187,6 +190,7 @@ export default function TeamIdentityTitleStage({
         titleSize !== "auto" ? `teamIdentityTitleStage--title-${titleSize}` : "",
         className,
       ].filter(Boolean).join(" ")}
+      style={coachEditorialCrestStyle}
       data-testid={testId}
       data-team-identity-stage="true"
       data-variant={titleFamily === "identity" ? "hero" : "standard"}

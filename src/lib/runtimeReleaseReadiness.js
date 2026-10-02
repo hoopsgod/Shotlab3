@@ -3,6 +3,7 @@ const SHOT_LOGS_KEY = "sl:shotlogs";
 const SUPABASE_SESSION_KEY = "sl:supabase-session";
 const SUPABASE_ACCESS_TOKEN_KEY = "sl:supabase-access-token";
 const DEMO_MODE_KEY = "sl:demoMode";
+const DEMO_SESSION_KEY = "sl:demoSession";
 const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const AUTO_SYNC_STATES = new Set(["local_pending", "background_saved"]);
@@ -30,13 +31,14 @@ export function isDemoRuntimeEnabled({ env, location, sessionStorage } = {}) {
   const search = String(resolvedLocation?.search || "");
   const localHost = ["localhost", "127.0.0.1", "::1"].includes(hostname);
   const explicitDemo = new URLSearchParams(search).get("demo") === "1";
-  const sameTabDemo = isDemoRuntimeAccount(readStoredJson(resolvedSessionStorage, PENDING_DEMO_SESSION_KEY)?.email);
+  const activeSameTabDemo = isDemoRuntimeAccount(readStoredJson(resolvedSessionStorage, DEMO_SESSION_KEY)?.email);
+  const pendingSameTabDemo = isDemoRuntimeAccount(readStoredJson(resolvedSessionStorage, PENDING_DEMO_SESSION_KEY)?.email);
 
   // Production starts at authentication unless the URL explicitly requests a
   // demo or this same browser tab already launched one through the demo UI.
-  // The sessionStorage handoff never survives a new tab/browser session, so a
+  // The sessionStorage marker never survives a new tab/browser session, so a
   // stale localStorage demo account still cannot bootstrap itself automatically.
-  return Boolean(explicitDemo || sameTabDemo || resolvedEnv?.DEV || localHost);
+  return Boolean(explicitDemo || activeSameTabDemo || pendingSameTabDemo || resolvedEnv?.DEV || localHost);
 }
 
 export function isDemoRuntimeAccount(userOrEmail) {
@@ -90,6 +92,17 @@ export async function writeRuntimeJson(key, value, options = {}) {
   } catch {}
 
   return saved;
+}
+
+export async function restoreSameTabDemoSession(options = {}) {
+  const sessionStorage = options.sessionStorage ?? (typeof window !== "undefined" ? window.sessionStorage : null);
+  const activeDemoSession = readStoredJson(sessionStorage, DEMO_SESSION_KEY);
+  const email = normalizeEmail(activeDemoSession?.email);
+  if (!isDemoRuntimeAccount(email)) return false;
+
+  const currentSession = await readRuntimeJson(APP_SESSION_KEY, options);
+  if (normalizeEmail(currentSession?.email) === email) return false;
+  return writeRuntimeJson(APP_SESSION_KEY, { email }, options);
 }
 
 export async function clearPersistedAuthSession(options = {}) {
@@ -219,5 +232,6 @@ export const RUNTIME_STORAGE_KEYS = {
   appSession: APP_SESSION_KEY,
   shotLogs: SHOT_LOGS_KEY,
   demoMode: DEMO_MODE_KEY,
+  demoSession: DEMO_SESSION_KEY,
   pendingDemoSession: PENDING_DEMO_SESSION_KEY,
 };

@@ -30,6 +30,10 @@ export function isDemoPersistenceSession(options = {}) {
   const explicitDemo = new URLSearchParams(String(location?.search || "")).get("demo") === "1";
   if (explicitDemo) return true;
 
+  let activeSession = null;
+  try { activeSession = parseStoredSession(sessionStorage?.getItem?.(DEMO_SESSION_KEY)); } catch {}
+  if (isDemoAccount(activeSession?.email)) return true;
+
   const durableSession = [localStorage, sessionStorage]
     .map((storage) => {
       try { return parseStoredSession(storage?.getItem?.(APP_SESSION_KEY)); } catch { return null; }
