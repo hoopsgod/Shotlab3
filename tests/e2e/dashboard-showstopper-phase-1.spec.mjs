@@ -97,6 +97,9 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
         made: Number(makes),
         date: today,
         ts: Date.now(),
+        demo: true,
+        syncState: "local_pending",
+        syncSource: "local",
       });
     } else {
       const prior = new Date(date);
@@ -110,6 +113,9 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
         made: 20,
         date: dateKey(prior),
         ts: prior.getTime(),
+        demo: true,
+        syncState: "local_pending",
+        syncSource: "local",
       });
     }
     const serializedLogs = JSON.stringify(nextLogs);
