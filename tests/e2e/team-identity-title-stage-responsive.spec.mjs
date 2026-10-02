@@ -98,6 +98,11 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
     localStorage.setItem("sl:teams", serializedTeams);
     try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
 
+    const existingDemoMeta = parseRaw(localStorage.getItem("sl:demo-data-meta"), {});
+    const serializedDemoMeta = JSON.stringify({ ...existingDemoMeta, source: "title-authority-certification", teamId: activeTeamId });
+    localStorage.setItem("sl:demo-data-meta", serializedDemoMeta);
+    try { await window.storage?.set?.("sl:demo-data-meta", serializedDemoMeta, true); } catch {}
+
     const nextSession = session ? {
       ...session,
       ...(nextUserName ? { name: nextUserName } : {}),
