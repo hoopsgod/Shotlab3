@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
+import { applyPhase2DesktopWorkspaceHardening } from "../scripts/apply-phase2-desktop-workspace-hardening.mjs";
 
 const app = await readFile("src/App.jsx", "utf8");
 const css = await readFile("src/styles/DesktopHudlWorkspace2026.css", "utf8");
+const shippingApp = applyPhase2DesktopWorkspaceHardening(app);
 
 test("desktop workspace shell has one 1024px authority boundary", () => {
   assert.match(app, /window\.innerWidth>=1024/);
@@ -12,9 +14,9 @@ test("desktop workspace shell has one 1024px authority boundary", () => {
   assert.doesNotMatch(css, /@media\s*\(max-width:\s*980px\)/);
 });
 
-test("persistent Coach and Player desktop navigation exposes the active route semantically", () => {
-  const activeRouteSemantics = app.match(/aria-current=\{[^}]*\?\s*"page"\s*:\s*undefined\}/g) || [];
-  assert.ok(activeRouteSemantics.length >= 2, `expected Coach and Player aria-current semantics; found ${activeRouteSemantics.length}`);
+test("shipping Coach and Player desktop navigation exposes the active route semantically", () => {
+  const activeRouteSemantics = shippingApp.match(/aria-current=\{[^}]*\?\s*"page"\s*:\s*undefined\}/g) || [];
+  assert.ok(activeRouteSemantics.length >= 2, `expected Coach and Player aria-current semantics after the shipping Phase 2 enhancer; found ${activeRouteSemantics.length}`);
 });
 
 test("Phase 2 keeps native History API ownership rather than introducing a competing router", () => {
