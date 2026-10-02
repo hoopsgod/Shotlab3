@@ -14,6 +14,7 @@ const REQUIRED_VIEWPORTS = [
 async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route("**/v1/teams/restore-context", (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "fixture_team_restore_disabled" }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
@@ -63,12 +64,17 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
     const localTeams = parseRaw(localStorage.getItem("sl:teams"), []);
     const bridgedTeams = await readBridge("sl:teams", []);
     const teams = localTeams.length ? localTeams : bridgedTeams;
+    const localPlayers = parseRaw(localStorage.getItem("sl:players"), []);
+    const bridgedPlayers = await readBridge("sl:players", []);
+    const players = localPlayers.length ? localPlayers : bridgedPlayers;
     const localSession = parseRaw(localStorage.getItem("sl:session"), null);
     const tabSession = parseRaw(sessionStorage.getItem("sl:session"), null);
     const bridgedSession = await readBridge("sl:session", null);
     const session = tabSession || localSession || bridgedSession;
+    const sessionEmail = String(session?.email || "").trim().toLowerCase();
+    const signedInPlayer = players.find((player) => String(player?.email || "").trim().toLowerCase() === sessionEmail);
     const demoTeam = teams.find((team) => /demo/i.test(String(team?.id || team?.name || "")));
-    const activeTeamId = String(session?.teamId || session?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
+    const activeTeamId = String(session?.teamId || session?.team_id || signedInPlayer?.teamId || signedInPlayer?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
     let matchedTeam = false;
     const nextTeams = teams.map((team) => {
       if (String(team?.id || "") !== activeTeamId) return team;
@@ -81,7 +87,8 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         branding: {
           ...(team.branding || {}),
           ...nextBranding,
-          teamName: nextBranding.teamName ?? "",
+          name: nextTeamName || nextBranding.name || team.branding?.name || team.name || "Demo Titans",
+          teamName: nextTeamName || nextBranding.teamName || team.branding?.teamName || "",
         },
       };
     });
@@ -91,12 +98,21 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         name: nextTeamName || "Demo Titans",
         ownerCoachId: session?.email || null,
         joinCode: "DEMO26",
-        branding: { ...nextBranding, teamName: nextBranding.teamName ?? "" },
+        branding: {
+          ...nextBranding,
+          name: nextTeamName || nextBranding.name || "Demo Titans",
+          teamName: nextTeamName || nextBranding.teamName || "",
+        },
       });
     }
     const serializedTeams = JSON.stringify(nextTeams);
     localStorage.setItem("sl:teams", serializedTeams);
     try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
+
+    const existingDemoMeta = parseRaw(localStorage.getItem("sl:demo-data-meta"), {});
+    const serializedDemoMeta = JSON.stringify({ ...existingDemoMeta, source: "title-authority-certification", teamId: activeTeamId });
+    localStorage.setItem("sl:demo-data-meta", serializedDemoMeta);
+    try { await window.storage?.set?.("sl:demo-data-meta", serializedDemoMeta, true); } catch {}
 
     const nextSession = session ? {
       ...session,

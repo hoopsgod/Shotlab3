@@ -11,6 +11,7 @@ const titleCss = fs.readFileSync(new URL("../src/components/TeamIdentityTitleSta
 const coach = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const coachTitleCss = fs.readFileSync(new URL("../src/components/CoachMissionControlTitleStage.css", import.meta.url), "utf8");
 const coachShellCss = fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css", import.meta.url), "utf8");
+const teamStoreCss = fs.readFileSync(new URL("../src/components/TeamStoreIndustrial.css", import.meta.url), "utf8");
 
 const channel = (hex) => {
   const value = Number.parseInt(hex, 16) / 255;
@@ -55,8 +56,8 @@ test("Mission Control uses one dark component-owned program identity hierarchy p
   assert.match(mobile, /\.mcEyebrow\{[^}]*grid-row:auto[^}]*font:720 11px\/1\.2 -apple-system/);
   assert.match(mobile, /\.mcHeroTitle\{[^}]*max-width:15ch[^}]*margin:12px 0 0[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)/);
   assert.match(mobile, /\.mcHeroContent>p\{[^}]*max-width:36ch[^}]*margin:7px 0 0[^}]*font:520 14px\/1\.42 -apple-system/);
-  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
-  assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:13px|margin:13px 0 0)/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/);
+  assert.match(mobile, /\.mcRealityStrip\{[^}]*(?:margin-top:9px|margin:9px 0 0)/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(mobile, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
   assert.match(mobile, /\.mcFocusGrid\{[^}]*margin:23px 0 0[^}]*padding:0 16px/);
@@ -83,9 +84,10 @@ test("secondary coach pages and Team Store share the restrained light-and-dark p
   assert.match(titleCss, /\.teamIdentityTitleStage--dark/);
   assert.match(titleCss, /--identity-title:\s*clamp\(42px, 10\.2vw, 44px\)/);
   assert.match(secondaryCss, /\.secondaryPageDecision[\s\S]*linear-gradient\(145deg/);
-  assert.match(css, /\.ts-panel[\s\S]*background:var\(--v3-canvas\)/);
-  assert.match(css, /\.ts-header h2[\s\S]*font-family:inherit/);
-  assert.match(css, /\.ts-field input,[\s\S]*font-size:16px/);
+  assert.doesNotMatch(css, /\.ts-(?:panel|header|field|button|overlay)/);
+  assert.match(teamStoreCss, /\.ts-panel\s*\{[\s\S]*background:[^;]*var\(--ts-canvas\)/);
+  assert.match(teamStoreCss, /\.ts-header h2[\s\S]*color:\s*var\(--ts-ink\)/);
+  assert.match(teamStoreCss, /\.ts-field input,[\s\S]*\.ts-field select[\s\S]*min-height:\s*48px/);
 });
 
 test("loading shell, accessibility, and V3 entry points remain intact", () => {

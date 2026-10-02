@@ -3,6 +3,7 @@
    carry different meaning while staying inside one quiet editorial system. */
 
 [data-phase2-empty-state] {
+  --phase2-empty-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='7.5'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M12 4.5V2.5M19.5 12h2M12 19.5v2M4.5 12h-2'/%3E%3C/svg%3E");
   position: relative;
   min-height: 92px;
   display: grid !important;
@@ -34,8 +35,8 @@
   border: 1px solid color-mix(in srgb, var(--sl-accent, #71851f) 22%, transparent);
   border-radius: 12px;
   background-color: var(--sl-accent, #71851f);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='7.5'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M12 4.5V2.5M19.5 12h2M12 19.5v2M4.5 12h-2'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='7.5'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M12 4.5V2.5M19.5 12h2M12 19.5v2M4.5 12h-2'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
+  -webkit-mask: var(--phase2-empty-icon) center / 21px 21px no-repeat;
+  mask: var(--phase2-empty-icon) center / 21px 21px no-repeat;
   opacity: .88;
 }
 
@@ -73,28 +74,23 @@
 }
 
 [data-phase2-empty-kind="filter"]::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='5.75'/%3E%3Cpath d='m15 15 4 4'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='5.75'/%3E%3Cpath d='m15 15 4 4'/%3E%3C/svg%3E");
+  --phase2-empty-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='5.75'/%3E%3Cpath d='m15 15 4 4'/%3E%3C/svg%3E");
 }
 
 [data-phase2-empty-kind="activity"]::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E");
+  --phase2-empty-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E");
 }
 
 [data-phase2-empty-kind="attendance"]::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8.5' r='3'/%3E%3Cpath d='M3.5 18c.7-3 2.6-4.5 5.5-4.5s4.8 1.5 5.5 4.5M16 8h4M18 6v4'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8.5' r='3'/%3E%3Cpath d='M3.5 18c.7-3 2.6-4.5 5.5-4.5s4.8 1.5 5.5 4.5M16 8h4M18 6v4'/%3E%3C/svg%3E");
+  --phase2-empty-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8.5' r='3'/%3E%3Cpath d='M3.5 18c.7-3 2.6-4.5 5.5-4.5s4.8 1.5 5.5 4.5M16 8h4M18 6v4'/%3E%3C/svg%3E");
 }
 
 [data-phase2-empty-kind="complete"]::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='m8.5 12 2.3 2.3 4.8-5'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='m8.5 12 2.3 2.3 4.8-5'/%3E%3C/svg%3E");
+  --phase2-empty-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='m8.5 12 2.3 2.3 4.8-5'/%3E%3C/svg%3E");
 }
 
 [data-phase2-empty-kind="history"]::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5h14v11H5zM7 4.5h10v3H7zM9 11h6'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5h14v11H5zM7 4.5h10v3H7zM9 11h6'/%3E%3C/svg%3E");
+  --phase2-empty-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5h14v11H5zM7 4.5h10v3H7zM9 11h6'/%3E%3C/svg%3E");
 }
 
 [data-testid="coach-player-intelligence-drawer"] [data-phase2-empty-state],
@@ -144,55 +140,12 @@
   color: #c8ff1a;
 }
 
-/* Filtered leaderboard results should not inherit the Phase 3L competitive pulse.
-   The pulse is derived from the already-filtered row set, so a zero-match search
-   would otherwise imply that the team has no ranking history at all. */
+/* Filtered leaderboard results should not inherit the competitive pulse. */
 [data-testid="coach-leaderboard-operational-panel"]:has([data-phase2-empty-kind="filter"]) .coachLeaderboardPulse {
   display: none !important;
 }
 
-/* The leaderboard page carries editorial evidence through a legacy dark canvas.
-   Secondary-page evidence intentionally uses dark ink, so this rail must own a
-   quiet light material instead of inheriting that dark workspace underneath. */
-[data-testid="coach-page-dashboard-leaderboards-evidence"] {
-  overflow: hidden;
-  border: 1px solid rgba(38, 48, 41, .12) !important;
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .28)),
-    #f7f8f2 !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .74);
-}
-
-[data-testid="coach-page-dashboard-leaderboards-evidence"] > * {
-  background: transparent !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-evidence"] :is(h2, h3, strong) {
-  color: #26302a !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-evidence"] :is(p, small) {
-  color: #5c675f !important;
-}
-
-[data-testid="coach-page-dashboard-leaderboards-evidence"] [class*="insightEyebrow"] {
-  color: #61731f !important;
-}
-
-/* Keep an optimizer-safe selector for production. CSS-module class fragments can
-   be pruned after build, while the evidence test id and article/button structure
-   are stable runtime contracts. */
-[data-testid="coach-page-dashboard-leaderboards-evidence"] article button {
-  border: 1px solid rgba(97, 115, 31, .32) !important;
-  background: #f2f4ee !important;
-  color: #33402f !important;
-  -webkit-text-fill-color: #33402f !important;
-}
-
-/* Empty states inside portaled intelligence drawers must own the surrounding
-   section material as well as the lane itself. This prevents a light section
-   gutter from breaking the dark drawer surface. */
+/* Empty states inside portaled intelligence drawers own the surrounding section material. */
 [data-testid="coach-player-intelligence-drawer"] section:has([data-phase2-empty-state]),
 [data-testid="coach-event-intelligence-drawer"] section:has([data-phase2-empty-state]) {
   color: #f7fafb !important;

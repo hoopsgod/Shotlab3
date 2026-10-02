@@ -1,3 +1,5 @@
+import { readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import baseConfig from './vite.config.js'
 import { createCssModuleDeadSelectorPruner } from './scripts/css-module-dead-selector-pruner.mjs'
@@ -57,6 +59,22 @@ function ownCoachInteractiveStylesInWorkspace() {
   }
 }
 
+function enforceRootSpaAssetUrls() {
+  return {
+    name: 'shotlab-root-spa-asset-urls',
+    apply: 'build',
+    enforce: 'post',
+    async closeBundle() {
+      const indexPath = path.resolve(process.cwd(), 'dist/index.html')
+      let html = await readFile(indexPath, 'utf8')
+      html = html
+        .replaceAll('href="./shotlab-authority-', 'href="/shotlab-authority-')
+        .replaceAll("href='./shotlab-authority-", "href='/shotlab-authority-")
+      await writeFile(indexPath, html)
+    },
+  }
+}
+
 export default defineConfig(async (environment) => {
   const resolvedBase = typeof baseConfig === 'function' ? await baseConfig(environment) : baseConfig
   const baseBuild = resolvedBase.build || {}
@@ -66,11 +84,16 @@ export default defineConfig(async (environment) => {
 
   return {
     ...resolvedBase,
+    // Cloudflare and Capacitor both serve the production bundle from the app
+    // origin root. Root-relative hashed assets keep hard-refresh SPA routes such
+    // as /coach/events and /events from resolving bundles beneath those routes.
+    base: '/',
     plugins: [
       createLegacyRuntimeCssExtractionPlugin(),
       ownCoachInteractiveStylesInWorkspace(),
       createCssModuleDeadSelectorPruner(),
       ...(resolvedBase.plugins || []),
+      enforceRootSpaAssetUrls(),
     ],
     build: {
       ...baseBuild,

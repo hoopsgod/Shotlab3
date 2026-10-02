@@ -312,6 +312,7 @@
     background: rgba(2, 13, 19, .18);
   }
 
+  .stage[data-route-kind="schedule"] .metricRail,
   .stage[data-route-kind="leaderboards"] .metricRail {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-flow: row;

@@ -1,6 +1,5 @@
 import { expect } from '@playwright/test';
 
-const REGISTERED_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const DEFAULT_AUTH_USER_ID = '99999999-9999-4999-8999-999999999999';
 const DEFAULT_PLAYER_AUTH_USER_ID = '88888888-8888-4888-8888-888888888888';
 
@@ -92,6 +91,23 @@ async function installSignedStrengthConditioningRoute(page, storage, teamId) {
   });
 }
 
+async function installRegisteredSupabaseRoutes(page, registeredUser) {
+  // The immutable Cloudflare preview uses the deployment's configured Supabase
+  // origin, while local CI uses parity.supabase.co. Match the API path rather
+  // than a test-only hostname so the same registered-session fixture exercises
+  // both environments without touching real auth.
+  await page.route('**/auth/v1/user', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify(registeredUser),
+  }));
+  await page.route('**/rest/v1/**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: '[]',
+  }));
+}
+
 /**
  * Boots a deterministic registered Coach without borrowing ShotLab's canonical
  * Demo identity. Bespoke dashboard/acceptance fixtures must use this boundary
@@ -150,16 +166,7 @@ export async function enterSeededRegisteredCoach(page, {
       leaderboard: Array.isArray(homeShotsLeaderboardRows) ? homeShotsLeaderboardRows : [],
     }),
   }));
-  await page.route(`${REGISTERED_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify(registeredUser),
-  }));
-  await page.route(`${REGISTERED_SUPABASE_ORIGIN}/rest/v1/**`, (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: '[]',
-  }));
+  await installRegisteredSupabaseRoutes(page, registeredUser);
   await page.route('**/v1/legacy-auth/restore', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -242,16 +249,7 @@ export async function enterSeededRegisteredPlayer(page, {
       leaderboard: Array.isArray(homeShotsLeaderboardRows) ? homeShotsLeaderboardRows : [],
     }),
   }));
-  await page.route(`${REGISTERED_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify(registeredUser),
-  }));
-  await page.route(`${REGISTERED_SUPABASE_ORIGIN}/rest/v1/**`, (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: '[]',
-  }));
+  await installRegisteredSupabaseRoutes(page, registeredUser);
   await page.route('**/v1/legacy-auth/restore', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',

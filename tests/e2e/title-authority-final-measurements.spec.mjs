@@ -9,6 +9,7 @@ async function installSafeRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
   await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
+  await page.route("**/v1/teams/restore-context", (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "fixture_team_restore_disabled" }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
@@ -27,7 +28,7 @@ async function enterCoachDemo(page) {
 async function applyDifficultBranding(page) {
   const teamName = "Northwestern Metropolitan Preparatory Basketball";
   const userName = "Coach Alexandra Montgomery-Washington";
-  const branding = { primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" };
+  const branding = { name: teamName, primaryColor: "#FFF59D", secondaryColor: "#080808", accentColor: "#FFF59D", logoUrl: "", logoMarkUrl: "" };
 
   await expect.poll(async () => page.evaluate(async () => {
     const parseRaw = (raw) => {
@@ -58,12 +59,17 @@ async function applyDifficultBranding(page) {
     const localTeams = parseRaw(localStorage.getItem("sl:teams"), []);
     const bridgedTeams = await readBridge("sl:teams", []);
     const teams = localTeams.length ? localTeams : bridgedTeams;
+    const localPlayers = parseRaw(localStorage.getItem("sl:players"), []);
+    const bridgedPlayers = await readBridge("sl:players", []);
+    const players = localPlayers.length ? localPlayers : bridgedPlayers;
     const localSession = parseRaw(localStorage.getItem("sl:session"), null);
     const tabSession = parseRaw(sessionStorage.getItem("sl:session"), null);
     const bridgedSession = await readBridge("sl:session", null);
     const session = tabSession || localSession || bridgedSession;
+    const sessionEmail = String(session?.email || "").trim().toLowerCase();
+    const signedInPlayer = players.find((player) => String(player?.email || "").trim().toLowerCase() === sessionEmail);
     const demoTeam = teams.find((team) => /demo/i.test(String(team?.id || team?.name || "")));
-    const activeTeamId = String(session?.teamId || session?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
+    const activeTeamId = String(session?.teamId || session?.team_id || signedInPlayer?.teamId || signedInPlayer?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
     let matchedTeam = false;
     const nextTeams = teams.map((team) => {
       if (String(team?.id || "") !== activeTeamId) return team;
@@ -88,6 +94,11 @@ async function applyDifficultBranding(page) {
     const serializedTeams = JSON.stringify(nextTeams);
     localStorage.setItem("sl:teams", serializedTeams);
     try { await window.storage?.set?.("sl:teams", serializedTeams, true); } catch {}
+
+    const existingDemoMeta = parseRaw(localStorage.getItem("sl:demo-data-meta"), {});
+    const serializedDemoMeta = JSON.stringify({ ...existingDemoMeta, source: "title-authority-final-measurement", teamId: activeTeamId });
+    localStorage.setItem("sl:demo-data-meta", serializedDemoMeta);
+    try { await window.storage?.set?.("sl:demo-data-meta", serializedDemoMeta, true); } catch {}
 
     const nextSession = session ? { ...session, name: nextUserName, teamId: activeTeamId, team_id: activeTeamId } : session;
     if (nextSession) {

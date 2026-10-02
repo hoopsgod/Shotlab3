@@ -19,6 +19,12 @@ test("Coach Events places a real month calendar before the next-event decision s
   assert.match(integrationCss, /coach-events-interactive-dashboard[^}]*> \.coachEventsCalendar\s*\{\s*order:\s*2\s*!important/s);
 });
 
+test("Coach Events ships one premium CSS generation", () => {
+  assert.doesNotMatch(integrationCss, /@import\s+["']\.\.\/components\/CoachEventsPremium\.css["']/);
+  assert.match(calendar, /import "\.\/CoachEventsPremiumV2\.css";/);
+  assert.match(css, /Premium Coach Events v2/);
+});
+
 test("month calendar owns stable six-week geometry and real event-day signals", () => {
   assert.match(calendar, /Array\.from\(\{ length: 42 \}/);
   assert.match(calendar, /data-testid="coach-events-month-calendar"/);

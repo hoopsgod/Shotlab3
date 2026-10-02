@@ -26,7 +26,7 @@ test("Coach mobile hierarchy makes the daily decision dominant and program ident
   assert.ok(coachHome.includes("--team-brand-surface-elevated"));
   assert.match(coachMobile, /\.mcProgramIdentity\s*\{[^}]*font:\s*780 11px\/1\.2 -apple-system/);
   assert.match(coachMobile, /\.mcHeroTitle\s*\{[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)[^}]*font-weight:800[^}]*line-height:\.94/);
-  assert.match(coachMobile, /\.mcPrimary\s*\{[^}]*min-height:\s*50px[^}]*margin-top:\s*11px/);
+  assert.match(coachMobile, /\.mcPrimary\s*\{[^}]*min-height:\s*50px[^}]*margin-top:\s*6px/);
   assert.match(coachCss, /\.mcRealityStrip\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
 });
 
@@ -36,6 +36,6 @@ test("Coach parity repair remains presentation-only and preserves operational co
   assert.match(coach, /className="mcPrimary" onClick=\{primaryCommand\.onClick\}/);
   assert.match(coach, /onClick=\{onActiveTodayClick\}/);
   assert.match(coach, /onClick=\{onPlayersClick\}/);
-  assert.match(coach, /onClick=\{onNextEventClick\}/);
+  assert.match(coach, /const sessionPanel = <NextSessionPanel[^;]*onOpen=\{onNextEventClick\}/);
   assert.doesNotMatch(coachCss, /!important/);
 });

@@ -44,19 +44,36 @@ async function enterPlayerDemo(page) {
   await settleHome(page);
 }
 
+async function readTodayMakes(page) {
+  const text = await page.getByTestId("player-today-performance").textContent();
+  const match = String(text || "").match(/\d[\d,]*/);
+  return Number(String(match?.[0] || "0").replace(/,/g, ""));
+}
+
 async function applyPerformance(page, makes) {
-  await page.evaluate(({ makes, demoEmail, demoTeamId }) => {
-    const date = new Date();
-    const pad = (value) => String(value).padStart(2, "0");
-    const today = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-    const existing = JSON.parse(localStorage.getItem("sl:shotlogs") || "[]").filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
-    if (Number(makes) > 0) existing.push({ id: `dashboard-showstopper-phase-2-${makes}`, email: demoEmail, playerId: demoEmail, teamId: demoTeamId, name: "Demo Player", made: Number(makes), date: today, ts: Date.now() });
-    localStorage.setItem("sl:shotlogs", JSON.stringify(existing));
-    const meta = JSON.parse(localStorage.getItem("sl:demo-data-meta") || "{}");
-    localStorage.setItem("sl:demo-data-meta", JSON.stringify({ ...meta, source: "dashboard-showstopper-phase-2", teamId: demoTeamId }));
-  }, { makes, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
-  await page.goto("/?demo=1");
+  const targetMakes = Number(makes);
+  if (!Number.isFinite(targetMakes) || targetMakes < 0) throw new Error(`Invalid target makes: ${makes}`);
+
+  const currentMakes = await readTodayMakes(page);
+  const delta = targetMakes - currentMakes;
+  if (delta < 0) throw new Error(`Dashboard certification cannot reduce makes from ${currentMakes} to ${targetMakes}`);
+  if (delta === 0) return;
+
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toBeVisible({ timeout: 20_000 });
+  await dock.getByRole("button", { name: "Train", exact: true }).click();
+
+  const input = page.getByRole("spinbutton").first();
+  await expect(input).toBeVisible({ timeout: 20_000 });
+  await input.fill(String(delta));
+  await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
+
+  const cue = page.getByTestId("player-completion-cue");
+  await expect(cue).toBeVisible({ timeout: 20_000 });
+  await expect(cue).toContainText(`${delta} makes added to today’s total`);
+  await cue.getByRole("button", { name: /CONTINUE/ }).click();
   await settleHome(page);
+  await expect(page.getByTestId("player-today-performance")).toContainText(String(targetMakes));
 }
 
 async function capture(page, name, { fullPage = true } = {}) {
@@ -135,9 +152,11 @@ test("100 and 125 are visually and semantically distinct", async ({ page }) => {
 
 test("Target Court remains composed at 375, 390, 430 and desktop widths", async ({ page }) => {
   for (const [width, height, name] of [[375,844,"player-home-375"],[390,844,"player-home-390"],[430,932,"player-home-430"],[1280,900,"player-home-desktop-1280"]]) {
-    await page.setViewportSize({ width, height });
+    await page.setViewportSize({ width: 390, height: 844 });
     await enterPlayerDemo(page);
     await applyPerformance(page, 125);
+    await page.setViewportSize({ width, height });
+    await settleHome(page);
     await expect(page.locator('[data-performance-visual="shotlab-target-court"]')).toBeVisible();
     await expect(page.getByTestId("player-daily-primary-action")).toBeVisible();
     await assertNoOverflow(page);
@@ -161,7 +180,6 @@ test("long athlete identity and the Hero to cream chapter retain mobile clearanc
   await capture(page, "player-home-375-long-identity");
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/?demo=1");
   await settleHome(page);
   await page.evaluate(async () => {
     const nested = document.querySelector(".player-scroll-container");

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { enterSeededRegisteredCoach } from "./registered-coach-fixture.mjs";
+import { enterSeededRegisteredCoach, enterSeededRegisteredPlayer } from "./registered-coach-fixture.mjs";
 
 const TEAM_ID = "team-e2e-production-acceptance";
 const COACH_EMAIL = "coach.demo@shotlab.app";
@@ -162,8 +162,46 @@ test("coach branding save persists and renders a cleaned prominent logo", async 
   expect(await visibleIdentityLogo.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
 
   await page.reload();
-  await expect(page.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   expect(await readTeamBranding(page)).toEqual(savedBranding);
+});
+
+test("registered Coach restores the Events deep route after reload", async ({ page }) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await enterSeededRegisteredCoach(page, {
+    storage: registeredRemovalSeedData,
+    coachEmail: REGISTERED_COACH_EMAIL,
+    coachName: "Acceptance Coach",
+    teamId: TEAM_ID,
+    path: "/coach/events",
+    readyTestId: "coach-events-interactive-dashboard",
+  });
+  expect(new URL(page.url()).pathname).toBe("/coach/events");
+  await page.reload();
+  await expect(page.getByTestId("coach-events-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
+  expect(new URL(page.url()).pathname).toBe("/coach/events");
+  expect(pageErrors).toEqual([]);
+});
+
+test("registered Player restores the Events deep route after reload", async ({ page }) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await enterSeededRegisteredPlayer(page, {
+    storage: seedData,
+    playerEmail: PLAYER_EMAIL,
+    playerName: "Acceptance Player",
+    teamId: TEAM_ID,
+    path: "/events",
+    readyTestId: "player-commitment-center-events",
+  });
+  expect(new URL(page.url()).pathname).toBe("/events");
+  await page.reload();
+  await expect(page.getByTestId("player-commitment-center-events")).toBeVisible({ timeout: 20_000 });
+  expect(new URL(page.url()).pathname).toBe("/events");
+  expect(pageErrors).toEqual([]);
 });
 
 test("coach removal creates a hidden tombstone and excludes the player from roster and leaderboards", async ({ page }) => {
@@ -230,7 +268,7 @@ test("coach-created strength session remains stored across refresh", async ({ pa
   expect(savedSession).not.toBeNull();
 
   await page.reload();
-  await expect(page.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   expect(await readSavedSession()).toEqual(savedSession);
 });
 
@@ -251,6 +289,8 @@ test("Demo Player shot mutation is sandboxed and reset on logout", async ({ page
   await page.getByTestId("mobile-navigation-more").click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toBeVisible();
   await page.getByTestId("mobile-navigation-sign-out").click();
+  await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
+  await page.reload();
   await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
 
   await enterDemoPlayer(page);

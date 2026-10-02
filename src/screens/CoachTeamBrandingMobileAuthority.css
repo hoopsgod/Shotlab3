@@ -1,0 +1,11 @@
+@media (max-width: 760px) {
+  .branding-industrial .teamIdentityTitleStage--standard {
+    --identity-crest: clamp(60px, 16vw, 68px) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .branding-industrial .teamIdentityTitleStage--standard {
+    --identity-crest: 60px !important;
+  }
+}

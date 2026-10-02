@@ -3,15 +3,17 @@ import "./CoachMissionControlInteractions.css";
 import "./CoachMissionControlShell.css";
 import "./CoachMissionControlFinal.css";
 import "./CoachMissionControlTitleStage.css";
+import "./DesktopHudlWorkspace2026.css";
 import "./CoachActivationPath.css";
 import "./CoachTeamMonogramFallback.css";
-import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import { buildCoachInboxModel } from "../lib/coachInbox.js";
 import { getRemoteActiveNamesToday, loadCoachCrossDeviceActivity, mergeCoachActivityItems } from "../lib/coachCrossDeviceActivity.js";
 import { isDemoPersistenceSession } from "../lib/demoMode.js";
 import CoachCoreLoopPanel from "./CoachCoreLoopPanel.jsx";
+import { loadCoachAssignmentAccountability } from "../lib/coachAssignmentAccountability.js";
+import { PLAYER_ASSIGNMENT_CHANGE_EVENT } from "../lib/playerAssignmentService.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
@@ -93,12 +95,12 @@ function ProgramPulsePanel({ model }) {
     <div className="mcPulseCaption"><span>{summary}</span><small>{available ? "Roster makes credited to the shared goal" : "Set a weekly makes goal to activate Pulse"}</small></div>
   </article>;
 }
-function LiveActivityPanel({ items }) {
-  return <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity"><div className="mcSectionHead"><span><small>Team evidence</small><h2 id="mc-activity-heading">Recent Activity</h2></span></div>{items.length ? <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div> : <div className="mcEvidenceEmpty"><strong>No recent activity</strong><small>Team training evidence will appear here.</small></div>}</article>;
+function LiveActivityPanel({ items, onOpen }) {
+  return <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity"><div className="mcSectionHead"><span><small>Recorded team evidence</small><h2 id="mc-activity-heading">Recent Activity</h2></span></div>{items.length ? <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div> : <div className="mcEvidenceEmpty"><strong>No training activity recorded today</strong><small>Open Players to inspect individual histories.</small></div>}<button type="button" className="mcSecondaryAction" onClick={onOpen}>Inspect players <Icon name="arrow" size={17} /></button></article>;
 }
-function NextSessionPanel({ date, onOpen }) {
+function NextSessionPanel({ date, onOpen, readiness }) {
   const hasEvent = Boolean(date);
-  return <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading" data-testid="coach-upcoming-event" data-event-state={hasEvent ? "scheduled" : "empty"}><div className="mcSectionHead"><span><small>Coming up</small><h2 id="mc-session-heading">Upcoming Event</h2></span></div><div className="mcSessionSummary"><span className={`mcSessionIcon ${hasEvent ? "is-ready" : ""}`}><Icon name="calendar" /></span><div><strong>{hasEvent ? "Team event ready" : "No upcoming event"}</strong><small>{hasEvent ? String(date) : "Create the next team touchpoint when you’re ready."}</small></div></div><button type="button" className="mcSecondaryAction" onClick={onOpen}>{hasEvent ? "Open event" : "Open schedule"}<Icon name="arrow" size={17} /></button></article>;
+  return <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading" data-testid="coach-upcoming-event" data-event-state={hasEvent ? "scheduled" : "empty"}><div className="mcSectionHead"><span><small>Next team touchpoint</small><h2 id="mc-session-heading">Next session</h2></span></div><div className="mcSessionSummary"><span className={`mcSessionIcon ${hasEvent ? "is-ready" : ""}`}><Icon name="calendar" /></span><div><strong>{hasEvent ? readiness?.title || "Team event" : "No upcoming event"}</strong><small>{hasEvent ? String(date) : "Schedule a session to give the team a next touchpoint."}</small>{hasEvent && readiness?.rosterCount > 0 ? <small>{readiness.responded}/{readiness.rosterCount} roster RSVPs received for this event</small> : null}</div></div><button type="button" className="mcSecondaryAction" onClick={onOpen}>{hasEvent ? "Open event" : "Open schedule"}<Icon name="arrow" size={17} /></button></article>;
 }
 function TodayPlan({ activation, onAction }) {
   const next = activation?.next;
@@ -126,6 +128,7 @@ export default function CoachCommandCenter({
   const [prioritiesOpen, setPrioritiesOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
   const [remoteActivityItems, setRemoteActivityItems] = useState([]);
+  const [assignmentSnapshot, setAssignmentSnapshot] = useState(null);
   const [desktopRailEnabled, setDesktopRailEnabled] = useState(hasDesktopViewport);
   const inboxRef = useRef(null);
   const restoreInboxFocusRef = useRef(true);
@@ -150,6 +153,14 @@ export default function CoachCommandCenter({
     void refresh(); const timer = window.setInterval(refresh, 15_000); window.addEventListener("focus", onFocus); document.addEventListener("visibilitychange", onVisibility);
     return () => { cancelled = true; window.clearInterval(timer); window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onVisibility); };
   }, [joinCode]);
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = () => { void loadCoachAssignmentAccountability().then((result) => { if (!cancelled) setAssignmentSnapshot(result?.model || null); }); };
+    refresh();
+    window.addEventListener(PLAYER_ASSIGNMENT_CHANGE_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => { cancelled = true; window.removeEventListener(PLAYER_ASSIGNMENT_CHANGE_EVENT, refresh); window.removeEventListener("storage", refresh); };
+  }, []);
 
   const openBrandingSettings = () => { document.querySelector('[data-testid="coach-dashboard-identity-header"] button')?.click(); };
   const openTeamTools = () => { setActionsOpen(false); setToolsOpen(true); window.setTimeout(() => document.querySelector('[data-testid="coach-secondary-tools"]')?.scrollIntoView({ behavior: "smooth", block: "center" }), 40); };
@@ -183,6 +194,12 @@ export default function CoachCommandCenter({
   const attentionSource = coreLoop?.attentionItems?.length ? coreLoop.attentionItems : attentionItems.length ? attentionItems : fallbackAttention;
   const resolvedAttention = attentionSource.filter((item) => !remoteActiveNames.has(normalizedName(item?.name || item?.title))).map((item) => item?.onClick ? item : { ...item, actionLabel: "Open profile", onClick: () => onOpenCoreLoopPlayer?.(item) });
   const attentionCount = resolvedAttention.length;
+  const assignmentCount = assignmentSnapshot?.actionCount ?? null;
+  const openAssignments = () => {
+    const panel = document.querySelector('[data-testid="coach-assignment-accountability"]');
+    if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    else onPlayersClick?.();
+  };
   const resolvedActivity = mergedActivityItems.length ? mergedActivityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
   const hasLiveActivity = resolvedActivity.length > 0;
   const activationPath = useMemo(() => deriveCoachActivationPath({ teamCode: joinCode, teamName, logoUrl: fullLogoSource, fallbackLogo: FALLBACK_LOGO, rosterSize, hasScheduledSession, activeTodayCount: activeCount, hasLiveActivity }), [activeCount, fullLogoSource, hasLiveActivity, hasScheduledSession, joinCode, rosterSize, teamName]);
@@ -197,6 +214,8 @@ export default function CoachCommandCenter({
     ? { eyebrow: "Today at a glance", title: `${attentionCount} decision${attentionCount === 1 ? "" : "s"} before practice`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
     : unresolvedRsvps > 0
       ? { eyebrow: "Today at a glance", title: "1 decision before practice", detail: unresolvedRsvps + " RSVP" + (unresolvedRsvps === 1 ? "" : "s") + " still open for " + (eventReadiness?.title || "the next session") + ".", label: "Review RSVPs", onClick: () => onEventReadinessClick?.(eventReadiness?.key), state: "attention" }
+      : assignmentCount > 0
+        ? { eyebrow: "Assignment decisions", title: `${assignmentCount} player${assignmentCount === 1 ? "" : "s"} need a training next step`, detail: "Open the roster assignment queue, review a player, and set the next block.", label: "Review assignments", onClick: openAssignments, state: "attention" }
       : activationCommand || (hasScheduledSession
         ? { eyebrow: "Practice ready", title: "Today is under control", detail: `Your next team session is ${nextEventDateFormatted}.`, label: "Open session", onClick: onNextEventClick, state: "ready" }
         : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });
@@ -205,15 +224,15 @@ export default function CoachCommandCenter({
 
   const attentionPanel = <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading" data-testid="coach-athlete-attention"><div className="mcSectionHead"><span><small>Who needs you now</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div><CoachCoreLoopPanel model={coreLoop} onOpenPlayer={onOpenCoreLoopPlayer || onPlayersClick} onOpenPlayers={onPlayersClick} onAddPlayer={onAddPlayer} onRetry={onCoreLoopRetry} renderItem={(item, onOpen, index) => <AttentionRow key={item.id} item={{ ...item, ariaLabel: `Open ${item.name} player context`, onClick: () => onOpen?.(item) }} onFallback={onPlayersClick} priority={index} />} /></article>;
   const pulsePanel = <ProgramPulsePanel model={programPulse} />;
-  const livePanel = <LiveActivityPanel items={resolvedActivity} />;
-  const sessionPanel = <NextSessionPanel date={hasScheduledSession ? nextEventDateFormatted : ""} onOpen={onNextEventClick} />;
+  const livePanel = <LiveActivityPanel items={resolvedActivity} onOpen={onActiveTodayClick || onPlayersClick} />;
+  const sessionPanel = <NextSessionPanel date={hasScheduledSession ? nextEventDateFormatted : ""} onOpen={onNextEventClick} readiness={eventReadiness} />;
 
   if (variant === "compact") return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
 
   return <>
     <div className={`mcShell mcShellV3 ${desktopRailEnabled ? "is-desktop-shell" : "is-mobile-shell"} ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" data-visual-system="phase-4-premium" data-desktop-rail={desktopRailEnabled ? "visible" : "removed"} style={{ "--mc": accent, "--mc-secondary": secondary }}>
       {desktopRailEnabled ? <aside className="mcRail" aria-label="Coach navigation">
-        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</button>
+        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><span className="mcRailBrandMark">{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</span><span className="mcRailBrandCopy"><small>TEAM WORKSPACE</small><strong>{teamName}</strong></span></button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside> : null}
@@ -233,7 +252,7 @@ export default function CoachCommandCenter({
               <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcHeroLogoSetup" />}</button>
             </div>
             <h2 className="mcHeroTitle">{primaryCommand.title}</h2><p>{primaryCommand.detail}</p>
-            <div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button><button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button></div>
+            <div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Logged today</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Activity follow-ups</small></button><button type="button" onClick={openAssignments}><strong>{assignmentCount == null ? "—" : assignmentCount}</strong><small>Assignment actions</small></button></div>
             <button type="button" className="mcPrimary" onClick={primaryCommand.onClick}>{primaryCommand.label}<Icon name="arrow" /></button>
           </div>
         </section>

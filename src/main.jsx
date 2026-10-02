@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import ReleaseReadinessBoundary from './components/ReleaseReadinessBoundary.jsx'
 import RuntimeErrorBoundary from './components/RuntimeErrorBoundary.jsx'
 import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
-import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
+import { clearStaleDemoSession, isDemoRuntimeAccount, isDemoRuntimeEnabled, restoreSameTabDemoSession } from './lib/runtimeReleaseReadiness.js'
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
 import './styles/ExpertVisualPolish.css'
@@ -43,6 +43,17 @@ function installBrowserStorageFallback() {
   }
 }
 
+function installSameTabDemoLifecycleBridge() {
+  if (typeof window === 'undefined') return
+  window.addEventListener('shotlab:demo-session-started', event => {
+    const email = String(event?.detail?.email || '').trim().toLowerCase()
+    if (!isDemoRuntimeAccount(email)) return
+    try {
+      window.sessionStorage?.setItem('sl:demoSession', JSON.stringify({ email }))
+    } catch {}
+  })
+}
+
 function renderBootPanel() {
   if (!bootDebugEnabled || bootPanelEl || !document.body) return
   bootPanelEl = document.createElement('aside')
@@ -70,6 +81,7 @@ function markBoot(stage, detail = '') {
 
 if (typeof window !== 'undefined') {
   installBrowserStorageFallback()
+  installSameTabDemoLifecycleBridge()
   window.__shotlabBootMark = markBoot
   if (DEV) {
     window.__shotlabBackendStatus = async () => {
@@ -139,6 +151,11 @@ window.addEventListener('shotlab:app-ready', () => {
   try {
     markBoot('startup_mode', EXPLICIT_DEMO_RUNTIME ? 'explicit_demo' : 'authentication')
 
+    if (EXPLICIT_DEMO_RUNTIME) {
+      const restored = await restoreSameTabDemoSession()
+      if (restored) markBoot('demo_session_restore', 'same_tab_identity_restored_before_app_import')
+    }
+
     // Normal launches must complete demo-session cleanup before App can hydrate.
     // This eliminates the startup race that previously restored Coach Demo.
     if (!EXPLICIT_DEMO_RUNTIME) {
@@ -171,9 +188,9 @@ window.addEventListener('shotlab:app-ready', () => {
     // are the final cascade authority in both development and optimized production builds.
     await import('./components/Phase7AuthenticatedChrome.css')
     // The production CSS optimizer can otherwise discard the priority modal's
-    // body/data-testid selectors from the Coach chunk. Load a dedicated late copy so
-    // the editor remains viewport-bound in the optimized build, not just in dev.
-    await import('./components/CoachPriorityOverlay.css?priority-overlay-authority')
+    // body/data-testid selectors from the Coach chunk. Load the canonical authority
+    // once, late enough to preserve the editor in the optimized build and before mount.
+    await import('./components/CoachPriorityOverlayAuthority.css')
     // Structural mobile geometry must load after every authenticated visual layer so
     // Demo and paid workspaces resolve to the same physical viewport origin on iOS.
     await import('./styles/MobileViewportAxisAuthority2026.css')

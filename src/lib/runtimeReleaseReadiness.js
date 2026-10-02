@@ -3,30 +3,129 @@ const SHOT_LOGS_KEY = "sl:shotlogs";
 const SUPABASE_SESSION_KEY = "sl:supabase-session";
 const SUPABASE_ACCESS_TOKEN_KEY = "sl:supabase-access-token";
 const DEMO_MODE_KEY = "sl:demoMode";
+const DEMO_SESSION_KEY = "sl:demoSession";
+const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
+const PLAYER_DEEP_ROUTE_PATHS = new Set([
+  "/duels",
+  "/program-log",
+  "/quick-menu",
+  "/lifting",
+  "/events",
+  "/leaderboards",
+  "/in-season",
+  "/profile",
+  "/players",
+]);
 const AUTO_SYNC_STATES = new Set(["local_pending", "background_saved"]);
 
 const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
 
 const boolValue = (value) => ["1", "true", "yes", "on"].includes(String(value || "").trim().toLowerCase());
 
-export function isDemoRuntimeEnabled({ env, location } = {}) {
+function readStoredJson(storage, key) {
+  try {
+    const raw = storage?.getItem?.(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === "string" ? { email: parsed } : parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function isDemoRuntimeEnabled({ env, location, sessionStorage } = {}) {
   const resolvedEnv = env || (typeof import.meta !== "undefined" ? import.meta.env : {});
   const resolvedLocation = location || (typeof window !== "undefined" ? window.location : null);
+  const resolvedSessionStorage = sessionStorage || (typeof window !== "undefined" ? window.sessionStorage : null);
   const hostname = String(resolvedLocation?.hostname || "").toLowerCase();
   const search = String(resolvedLocation?.search || "");
   const localHost = ["localhost", "127.0.0.1", "::1"].includes(hostname);
   const explicitDemo = new URLSearchParams(search).get("demo") === "1";
+  const activeSameTabDemo = isDemoRuntimeAccount(readStoredJson(resolvedSessionStorage, DEMO_SESSION_KEY)?.email);
+  const pendingSameTabDemo = isDemoRuntimeAccount(readStoredJson(resolvedSessionStorage, PENDING_DEMO_SESSION_KEY)?.email);
 
-  // Production must always start at authentication unless the URL explicitly
-  // requests a demo. Environment flags and hosting providers may expose demo
-  // controls, but they must never bootstrap a demo account automatically.
-  return Boolean(explicitDemo || resolvedEnv?.DEV || localHost);
+  // Production starts at authentication unless the URL explicitly requests a
+  // demo or this same browser tab already launched one through the demo UI.
+  // The sessionStorage marker never survives a new tab/browser session, so a
+  // stale localStorage demo account still cannot bootstrap itself automatically.
+  return Boolean(explicitDemo || activeSameTabDemo || pendingSameTabDemo || resolvedEnv?.DEV || localHost);
 }
 
 export function isDemoRuntimeAccount(userOrEmail) {
   const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
   return DEMO_EMAILS.has(normalizeEmail(email));
+}
+
+export function installStartupPlayerDeepRouteGuard(options = {}) {
+  const browserWindow = options.window ?? (typeof window !== "undefined" ? window : null);
+  const location = options.location ?? browserWindow?.location;
+  const history = options.history ?? browserWindow?.history;
+  const localStorage = options.localStorage ?? browserWindow?.localStorage;
+  const sessionStorage = options.sessionStorage ?? browserWindow?.sessionStorage;
+  const initialPath = String(location?.pathname || "").replace(/\/+$/, "") || "/";
+  if (!PLAYER_DEEP_ROUTE_PATHS.has(initialPath) || typeof history?.replaceState !== "function") return () => {};
+
+  const persistedSession = readStoredJson(localStorage, APP_SESSION_KEY) || readStoredJson(sessionStorage, APP_SESSION_KEY);
+  const email = normalizeEmail(persistedSession?.email);
+  if (!email) return () => {};
+
+  const activeDemoSession = readStoredJson(sessionStorage, DEMO_SESSION_KEY);
+  if (isDemoRuntimeAccount(email) && !isDemoRuntimeAccount(activeDemoSession?.email)) return () => {};
+
+  const storedPlayers = readStoredJson(localStorage, "sl:players");
+  const actor = Array.isArray(storedPlayers)
+    ? storedPlayers.find((player) => normalizeEmail(player?.email) === email)
+    : null;
+  if (actor && String(actor?.role || "player").trim().toLowerCase() !== "player") return () => {};
+
+  const originalReplaceState = history.replaceState;
+  let armed = true;
+  let guardedReplaceState = null;
+  const onAppReady = () => restore();
+
+  const restore = () => {
+    if (!armed) return;
+    armed = false;
+    try {
+      if (history.replaceState === guardedReplaceState) history.replaceState = originalReplaceState;
+    } catch {}
+    try { browserWindow?.removeEventListener?.("shotlab:app-ready", onAppReady); } catch {}
+  };
+
+  guardedReplaceState = function guardedPlayerRouteReplaceState(state, title, url) {
+    if (armed && url != null) {
+      try {
+        const currentPath = String(location?.pathname || "").replace(/\/+$/, "") || "/";
+        const baseHref = String(location?.href || "https://shotlab.local/");
+        const target = new URL(String(url), baseHref);
+        const targetPath = String(target.pathname || "").replace(/\/+$/, "") || "/";
+        if (currentPath === initialPath && targetPath === "/") {
+          restore();
+          const resyncRoute = () => {
+            try {
+              const event = typeof PopStateEvent === "function" ? new PopStateEvent("popstate") : new Event("popstate");
+              browserWindow?.dispatchEvent?.(event);
+            } catch {}
+          };
+          if (typeof browserWindow?.setTimeout === "function") browserWindow.setTimeout(resyncRoute, 0);
+          else if (typeof queueMicrotask === "function") queueMicrotask(resyncRoute);
+          return undefined;
+        }
+      } catch {}
+    }
+    return originalReplaceState.call(history, state, title, url);
+  };
+
+  try {
+    history.replaceState = guardedReplaceState;
+    browserWindow?.addEventListener?.("shotlab:app-ready", onAppReady, { once: true });
+  } catch {
+    armed = false;
+    return () => {};
+  }
+
+  return restore;
 }
 
 export function isSupabaseAuthEnabled(env) {
@@ -75,6 +174,17 @@ export async function writeRuntimeJson(key, value, options = {}) {
   } catch {}
 
   return saved;
+}
+
+export async function restoreSameTabDemoSession(options = {}) {
+  const sessionStorage = options.sessionStorage ?? (typeof window !== "undefined" ? window.sessionStorage : null);
+  const activeDemoSession = readStoredJson(sessionStorage, DEMO_SESSION_KEY);
+  const email = normalizeEmail(activeDemoSession?.email);
+  if (!isDemoRuntimeAccount(email)) return false;
+
+  const currentSession = await readRuntimeJson(APP_SESSION_KEY, options);
+  if (normalizeEmail(currentSession?.email) === email) return false;
+  return writeRuntimeJson(APP_SESSION_KEY, { email }, options);
 }
 
 export async function clearPersistedAuthSession(options = {}) {
@@ -204,4 +314,8 @@ export const RUNTIME_STORAGE_KEYS = {
   appSession: APP_SESSION_KEY,
   shotLogs: SHOT_LOGS_KEY,
   demoMode: DEMO_MODE_KEY,
+  demoSession: DEMO_SESSION_KEY,
+  pendingDemoSession: PENDING_DEMO_SESSION_KEY,
 };
+
+if (typeof window !== "undefined") installStartupPlayerDeepRouteGuard();

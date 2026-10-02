@@ -62,7 +62,7 @@ test('Coach prototype hierarchy is brand-aware, decision-first and intentionally
   assert.match(mobile, /\.mcHeroTitle\{[^}]*font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif[^}]*font-size:clamp\(36px,9\.4vw,40px\)[^}]*font-weight:800[^}]*line-height:\.94/);
   assert.match(mobile, /\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(mobile, /\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
-  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
+  assert.match(mobile, /\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/);
   assert.doesNotMatch(mobile, /min-height:382px|clamp\(96px,26vw,108px\)|clamp\(39px,10\.5vw,45px\)/);
 });
 

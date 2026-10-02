@@ -11,6 +11,7 @@ const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
 const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
 const coachRouteStage = read("../src/components/CoachRoutePerformanceStage.jsx");
 const playerDaily = read("../src/components/PlayerDailyCommandCenter.jsx");
+const playerCareer = read("../src/components/PlayerCareerHistory.jsx");
 const visualHierarchy = read("../src/components/VisualHierarchy.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
@@ -90,14 +91,15 @@ test("active consolidated visual authorities contain no substring-selector mater
   assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
   assert.match(sessionIntegrityCss, /\[data-visual-role="insight-card"\]\[data-surface="dark"\]/);
   assert.match(phase2CriticalCss, /\[data-testid="mobile-navigation-sheet"\]\s+p/);
-  assert.match(secondaryCohesionCss, /\[data-identity-role="tagline"\]/);
-  assert.match(secondaryCohesionCss, /\[data-visual-role="career-record"\]/);
-  assert.match(secondaryCohesionCss, /\[data-copy-tone="muted"\]/);
+  assert.doesNotMatch(secondaryCohesionCss, /player-career-history|player-dashboard-identity-header|mobile-navigation-dock/);
+  assert.match(playerCareer, /data-visual-role="career-record"/);
+  assert.match(playerCareer, /data-copy-tone="muted"/);
   assert.match(strengthHierarchyCss, /\[data-premium-metric-label\]/);
   assert.match(strengthHierarchyCss, /\[data-premium-metric-value\]/);
   assert.match(finalClosureCss, /\[data-visual-role="next-actions-title"\]/);
   assert.match(finalClosureCss, /\[data-visual-role="disclosure-title"\]/);
-  assert.match(industrial, /\[data-surface="light"\]/);
+  assert.match(surfaceCss, /\[data-surface="light"\]/);
+  assert.doesNotMatch(industrial, /\[data-surface=|\.performance-shell|\.premium-screen/);
 });
 
 test("light and dark semantic foreground tokens clear WCAG normal-text contrast", () => {

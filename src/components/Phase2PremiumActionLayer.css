@@ -3,7 +3,6 @@
 
 .secondaryPageShell {
   --phase2-action-ink: #2f3932;
-  --phase2-action-muted: #667068;
   --phase2-action-line: rgba(38, 46, 40, .12);
   --phase2-action-surface: #f4f6f0;
   --phase2-action-accent: var(--sl-accent, #71851f);
@@ -12,8 +11,7 @@
 /* CSS-module class names are intentionally hashed in the runtime bundle.
    Anchor the premium action layer to stable page IDs and semantic global classes instead. */
 [data-testid="coach-players-insight-grid"] article button,
-[data-testid="coach-events-insight-grid"] article button,
-.secondaryPageAction--secondary {
+[data-testid="coach-events-insight-grid"] article button {
   min-height: 44px !important;
   max-width: 100%;
   padding: 0 12px 0 14px !important;
@@ -37,25 +35,18 @@
 }
 
 [data-testid="coach-players-insight-grid"] article button::after,
-[data-testid="coach-events-insight-grid"] article button::after,
-.secondaryPageAction--secondary::after {
-  content: "";
+[data-testid="coach-events-insight-grid"] article button::after {
+  content: "→";
   width: 14px;
-  height: 14px;
   flex: 0 0 14px;
-  background: currentColor;
   opacity: .72;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14m-6-6 6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14m-6-6 6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
   transition: transform 150ms ease, opacity 150ms ease;
 }
 
 [data-testid="coach-players-insight-grid"] article button:hover:not(:disabled),
 [data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled),
 [data-testid="coach-events-insight-grid"] article button:hover:not(:disabled),
-[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled),
-.secondaryPageAction--secondary:hover:not(:disabled),
-.secondaryPageAction--secondary:focus-visible:not(:disabled) {
+[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled) {
   transform: translateY(-1px) !important;
   border-color: color-mix(in srgb, var(--phase2-action-accent) 28%, var(--phase2-action-line)) !important;
   background: color-mix(in srgb, var(--phase2-action-accent) 5%, #f8f9f5) !important;
@@ -65,32 +56,26 @@
 [data-testid="coach-players-insight-grid"] article button:hover:not(:disabled)::after,
 [data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled)::after,
 [data-testid="coach-events-insight-grid"] article button:hover:not(:disabled)::after,
-[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled)::after,
-.secondaryPageAction--secondary:hover:not(:disabled)::after,
-.secondaryPageAction--secondary:focus-visible:not(:disabled)::after {
+[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled)::after {
   transform: translateX(2px);
   opacity: 1;
 }
 
 [data-testid="coach-players-insight-grid"] article button:focus-visible,
-[data-testid="coach-events-insight-grid"] article button:focus-visible,
-.secondaryPageAction--secondary:focus-visible {
+[data-testid="coach-events-insight-grid"] article button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--phase2-action-accent) 28%, transparent) !important;
   outline-offset: 3px !important;
 }
 
 [data-testid="coach-players-insight-grid"] article button:disabled,
-[data-testid="coach-events-insight-grid"] article button:disabled,
-.secondaryPageAction--secondary:disabled {
+[data-testid="coach-events-insight-grid"] article button:disabled {
   cursor: not-allowed;
   opacity: .5;
 }
 
 @media (max-width: 480px) {
   [data-testid="coach-players-insight-grid"] article button,
-  [data-testid="coach-events-insight-grid"] article button,
-  .secondaryPageAction--secondary {
-    min-height: 44px !important;
+  [data-testid="coach-events-insight-grid"] article button {
     padding-inline: 12px !important;
   }
 }
@@ -99,9 +84,7 @@
   [data-testid="coach-players-insight-grid"] article button,
   [data-testid="coach-players-insight-grid"] article button::after,
   [data-testid="coach-events-insight-grid"] article button,
-  [data-testid="coach-events-insight-grid"] article button::after,
-  .secondaryPageAction--secondary,
-  .secondaryPageAction--secondary::after {
+  [data-testid="coach-events-insight-grid"] article button::after {
     transition: none !important;
   }
 }

@@ -10,6 +10,7 @@ const interactionsCss=read("../src/components/CoachMissionControlInteractions.cs
 const shellCss=read("../src/components/CoachMissionControlShell.css");
 const finalCss=read("../src/components/CoachMissionControlFinal.css");
 const titleCss=read("../src/components/CoachMissionControlTitleStage.css");
+const desktopWorkspaceCss=read("../src/styles/DesktopHudlWorkspace2026.css");
 const activationCss=read("../src/components/CoachActivationPath.css");
 const navigationCss=read("../src/components/MobileNavigation.module.css");
 const v2Css=read("../src/components/CoachMissionControlV2.css");
@@ -30,7 +31,7 @@ const mobileTitle=mediaBlock(titleCss,"(max-width:700px)");
 const desktopTitle=mediaBlock(titleCss,"(min-width:981px)");
 
 test("Coach Home keeps the production decision model and truthful signals",()=>{
-  ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Upcoming Event"].forEach((label)=>assert.match(source,new RegExp(label)));
+  ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Next session"].forEach((label)=>assert.match(source,new RegExp(label)));
   ["coach-primary-objective","coach-primary-metrics","coach-program-pulse","coach-athlete-attention","coach-upcoming-event"].forEach((id)=>assert.match(source,new RegExp(`data-testid="${id}"`)));
   assert.match(source,/primaryCommand/);
   assert.match(source,/attentionCount > 0/);
@@ -96,7 +97,8 @@ test("late shared styles cannot reclaim Coach Home visual authority",()=>{
 });
 
 test("desktop Coach Home follows the prototype command-stage anatomy",()=>{
-  assert.match(desktopTitle,/grid-template-columns:208px minmax\(0,1fr\)/);
+  assert.doesNotMatch(desktopTitle,/grid-template-columns:208px minmax\(0,1fr\)/);
+  assert.match(desktopWorkspaceCss,/\.mcShellV3\.is-desktop-shell\s*\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/);
   assert.match(desktopTitle,/grid-template-columns:repeat\(12,minmax\(0,1fr\)\)/);
   assert.match(desktopTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\][^{]*\{[^}]*grid-column:1\/10/);
   assert.match(desktopTitle,/\.mcTeamHealth\{[^}]*grid-column:10\/-1/);
@@ -120,7 +122,7 @@ test("mobile Coach Home remains brand-first, Pulse-first and touch-safe",()=>{
   assert.match(mobileTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)[^}]*grid-template-columns:minmax\(0,1fr\) var\(--coach-hero-crest\)[^}]*gap:12px/);
   assert.match(mobileTitle,/\.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/);
   assert.match(mobileTitle,/\.mcRealityStrip strong\{[^}]*font:800 20px\/\.95 var\(--mc-native\)/);
-  assert.match(mobileTitle,/\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/);
+  assert.match(mobileTitle,/\.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/);
   assert.doesNotMatch(titleCss,/body\.mission-control-active \.mcShellV3\.is-mobile-shell/);
   assert.ok(source.indexOf("{pulsePanel}{attentionPanel}") > -1,"Program Pulse must precede Athlete Attention in source order");
   assert.match(navigationCss,/--mobile-tab-bar-height:\s*56px/);

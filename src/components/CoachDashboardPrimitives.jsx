@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./CoachDashboardPrimitives.module.css";
@@ -241,6 +242,32 @@ export function DashboardProgress({ value = 0, max = 100, label, detail }) {
 }
 
 export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, children, testId }) {
+  const closeButtonRef = useRef(null);
+  const previousFocusRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!open || typeof document === "undefined") return undefined;
+    previousFocusRef.current = document.activeElement;
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      onCloseRef.current?.();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("keydown", handleKeyDown);
+      const previous = previousFocusRef.current;
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+    };
+  }, [open]);
+
   if (!open) return null;
   const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
@@ -252,7 +279,7 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
             <h2>{title}</h2>
             {meta ? <p>{meta}</p> : null}
           </div>
-          <button type="button" className={styles.drawerClose} data-action-role="tertiary" aria-label="Close details" onClick={onClose}>×</button>
+          <button ref={closeButtonRef} type="button" className={styles.drawerClose} data-action-role="tertiary" aria-label="Close details" onClick={onClose}>×</button>
         </div>
         <div className={styles.drawerBody}>{children}</div>
       </aside>

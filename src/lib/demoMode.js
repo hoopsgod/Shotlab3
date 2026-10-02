@@ -30,6 +30,10 @@ export function isDemoPersistenceSession(options = {}) {
   const explicitDemo = new URLSearchParams(String(location?.search || "")).get("demo") === "1";
   if (explicitDemo) return true;
 
+  let activeSession = null;
+  try { activeSession = parseStoredSession(sessionStorage?.getItem?.(DEMO_SESSION_KEY)); } catch {}
+  if (isDemoAccount(activeSession?.email)) return true;
+
   const durableSession = [localStorage, sessionStorage]
     .map((storage) => {
       try { return parseStoredSession(storage?.getItem?.(APP_SESSION_KEY)); } catch { return null; }
@@ -89,30 +93,41 @@ export function isDemoMode() {
   if (typeof window === "undefined") return false;
 
   const explicitDemo = new URLSearchParams(window.location.search).get("demo") === "1";
+  let activeSameTabDemo = false;
+  try {
+    activeSameTabDemo = isDemoAccount(
+      parseStoredSession(window.sessionStorage?.getItem?.(DEMO_SESSION_KEY))?.email,
+    );
+  } catch {}
 
-  // Demo mode is explicit and query-only. Stored demo state must never bypass login.
+  // Legacy localStorage state must never bootstrap a demo. Only an explicit
+  // demo URL or the active marker from this same browser tab may do so.
   window.localStorage.removeItem(LEGACY_DEMO_KEY);
-  window.sessionStorage.removeItem(DEMO_SESSION_KEY);
 
-  if (!explicitDemo) clearPersistedDemoAuthSession();
-  return explicitDemo;
+  if (!explicitDemo && !activeSameTabDemo) clearPersistedDemoAuthSession();
+  return explicitDemo || activeSameTabDemo;
 }
 
-export function setDemoMode(enabled) {
+export function setDemoMode(enabled, options = {}) {
   if (typeof window === "undefined") return;
 
-  // Clear all historical demo persistence. Entry into demo mode must happen through
-  // an explicit demo URL or route, never through browser storage.
+  // Clear historical demo persistence first. Entry into demo mode is then pinned
+  // to this browser tab only and therefore cannot leak into a fresh tab/session.
   window.localStorage.removeItem(LEGACY_DEMO_KEY);
   window.sessionStorage.removeItem(DEMO_SESSION_KEY);
   window.sessionStorage.removeItem(PENDING_DEMO_SESSION_KEY);
 
   if (enabled) {
-    // Demo buttons update React state before the durable app session write resolves.
-    // Record only the hard-coded demo identity for that short handoff window so the
-    // first identity-scoped read cannot fall back to another team's stale data.
-    const pendingEmail = inferPendingDemoEmail();
+    // Demo sign-in already knows the account identity. Prefer that explicit value
+    // because the async auth sign-out boundary can move focus away from the button
+    // before this function runs. Focus inference remains as a backwards-compatible fallback.
+    const requestedEmail = typeof options === "string" ? options : options?.email;
+    const normalizedRequestedEmail = String(requestedEmail || "").trim().toLowerCase();
+    const pendingEmail = isDemoAccount(normalizedRequestedEmail)
+      ? normalizedRequestedEmail
+      : inferPendingDemoEmail();
     if (isDemoAccount(pendingEmail)) {
+      window.sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify({ email: pendingEmail }));
       window.sessionStorage.setItem(PENDING_DEMO_SESSION_KEY, JSON.stringify({
         email: pendingEmail,
         createdAt: Date.now(),

@@ -7,6 +7,7 @@ const AUTHORITATIVE_HEADER = /\[data-testid=(?:["'])?mission-control-team-header
 const COMPONENT_HEADER_AUTHORITY = /^\.mcShellV3\s+(?:\.mcHeader(?:\s|[.:])|\.mcBrandLockup(?:\s|[.:]|$)|\.mcBrandCopy(?:\s|[.:]|$)|\.mcHeaderActions(?:\s|[.:]|$)|\.mcTeamSelect(?:[.:]|$)|\.mcBell(?:[.:]|$)|\.mcMobileMenu(?:[.:]|$))/
 const COMPONENT_FALLBACK_AUTHORITY = /^\.mcShellV3\s+\.mc(?:Hero|Header)TeamMark\s+\.mcTeamFallback\b/
 const COMPONENT_RAIL_BRAND_AUTHORITY = /^\.mcShellV3\s+\.mcRailBrand(?:\s|[.:]|$)/
+const DESKTOP_ONLY_AUTHORITY = /^\.mcShellV3\.is-desktop-shell(?:\s|[.:>]|$)/
 
 const GEOMETRY = new Set([
   'width','height','min-width','min-height','max-width','max-height',
@@ -36,7 +37,8 @@ function everyArmIsCurrentComponentAuthority(selector) {
     || AUTHORITATIVE_HEADER.test(arm)
     || COMPONENT_HEADER_AUTHORITY.test(arm)
     || COMPONENT_FALLBACK_AUTHORITY.test(arm)
-    || COMPONENT_RAIL_BRAND_AUTHORITY.test(arm),
+    || COMPONENT_RAIL_BRAND_AUTHORITY.test(arm)
+    || DESKTOP_ONLY_AUTHORITY.test(arm),
   )
 }
 
@@ -74,6 +76,15 @@ export function enforceCoachMobileIdentityAuthority(css) {
   return { css: output, changed, selectors }
 }
 
+function selectorOwnsDeclaration(css, expectedSelector, expectedDeclaration) {
+  for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectorArms = arms(match[1]).map((arm) => arm.replace(/\s+/g, ''))
+    if (!selectorArms.includes(expectedSelector.replace(/\s+/g, ''))) continue
+    if (match[2].replace(/\s+/g, '').includes(expectedDeclaration.replace(/\s+/g, ''))) return true
+  }
+  return false
+}
+
 async function main() {
   const entries = await readdir(DIST_ASSETS, { withFileTypes: true })
   let violatingFiles = 0
@@ -109,14 +120,26 @@ async function main() {
     ['mobile Coach crest authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcHeroIdentity\{[^}]*--coach-hero-crest:clamp\(104px,29vw,120px\)/],
     ['mobile metric control authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcRealityStrip button\{[^}]*min-height:48px[^}]*padding:6px 12px/],
     ['mobile metric value authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcRealityStrip strong\{[^}]*font:800 20px\/.95 var\(--mc-native\)/],
-    ['mobile primary CTA authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:11px/],
+    ['mobile primary CTA authority', /\.mcShellV3\.is-mobile-shell \.mcHero\[data-team-identity-stage=coach-mission-control\] \.mcPrimary\{[^}]*min-height:50px[^}]*margin-top:6px/],
   ]
   const missing = requiredAuthority.filter(([, pattern]) => !pattern.test(coachProductionCss)).map(([label]) => label)
   if (missing.length) {
     throw new Error(`Coach mobile identity authority verification failed: optimized CoachWorkspaces CSS lost canonical authority (${missing.join(', ')}).`)
   }
 
-  console.log('Coach mobile identity authority verified: canonical mobile authority remains in the optimized CoachWorkspaces asset; roster geometry is source-owned and media-independent; computed-style certification owns final association.')
+  // Desktop shell geometry is globally owned. CSSO may combine Coach and Player
+  // selectors when they share the same declaration, so verify selector/declaration
+  // ownership instead of requiring an unfactored one-selector rule.
+  const appCss = (await Promise.all(entries.filter((entry) => entry.isFile() && /^App-.*\.css$/.test(entry.name)).map((entry) => readFile(path.join(DIST_ASSETS, entry.name), 'utf8')))).join('\n')
+  const desktopGrid = 'grid-template-columns:248px minmax(0,1fr)'
+  if (!selectorOwnsDeclaration(appCss, '.mcShellV3.is-desktop-shell', desktopGrid)) {
+    throw new Error('Production CSS lost the desktop Coach workspace grid during optimization.')
+  }
+  if (!selectorOwnsDeclaration(appCss, '.performance-shell.is-desktop', desktopGrid)) {
+    throw new Error('Production CSS lost the desktop Player workspace grid during optimization.')
+  }
+
+  console.log('Coach mobile identity and desktop workspace grids verified in optimized production CSS.')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((error) => { console.error(error); process.exit(1) })

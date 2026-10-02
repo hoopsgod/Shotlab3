@@ -18,14 +18,15 @@ const COACH_AUTHORITY_MARKERS = [
   "min-height:50px",
 ];
 
-function normalizeMediaRangesForCsso(css) {
-  // Lightning CSS emits Media Queries Level 4 range syntax, while CSSO 5
-  // treats those at-rules as empty. Normalize only while CSSO is running;
-  // the subsequent Lightning CSS compaction restores standards-based ranges.
-  return css
+function normalizeMediaRangesForCsso(css, { finalMobileAxis = false } = {}) {
+  // The final mobile axis is independently loaded last. CSSO 5 cannot parse
+  // Lightning's <= syntax, so normalize it before its one final compaction.
+  if (finalMobileAxis) return css
     .replace(/\(\s*width\s*>=\s*([^\)]+)\)\s+and\s+\(\s*width\s*<=\s*([^\)]+)\)/g, "(min-width:$1) and (max-width:$2)")
     .replace(/\(\s*width\s*<=\s*([^\)]+)\)/g, "(max-width:$1)")
     .replace(/\(\s*width\s*>=\s*([^\)]+)\)/g, "(min-width:$1)");
+  return css.replace(/\(\s*width\s*>=\s*(\d+(?:\.\d+)?)px\s*\)/g,
+    (query, width) => Number(width) >= 981 ? `(min-width:${width}px)` : query);
 }
 
 async function removeBundledAuthorityDuplicates() {
@@ -69,8 +70,8 @@ function isCoachWorkspace(file) {
   return COACH_WORKSPACE_ASSET.test(path.basename(file));
 }
 
-function restructureCss(css, filename, { coach = false, preserveMediaRanges = false } = {}) {
-  return minify(preserveMediaRanges ? normalizeMediaRangesForCsso(css) : css, {
+function restructureCss(css, filename, { coach = false, preserveMediaRanges = true, finalMobileAxis = false } = {}) {
+  return minify(preserveMediaRanges ? normalizeMediaRangesForCsso(css, { finalMobileAxis }) : css, {
     filename,
     restructure: true,
     comments: false,
@@ -217,7 +218,7 @@ async function finalizeProductionCss(files, mode) {
       // transform has finished; browser geometry/parity suites certify that
       // the resulting cascade is unchanged.
       const output = compactProductionCss(
-        restructureCss(source, `${relative}:final-mobile-axis`, { preserveMediaRanges: true }),
+        restructureCss(source, `${relative}:final-mobile-axis`, { preserveMediaRanges: true, finalMobileAxis: true }),
         path.basename(file),
       );
       sourceBytes += Buffer.byteLength(source);
