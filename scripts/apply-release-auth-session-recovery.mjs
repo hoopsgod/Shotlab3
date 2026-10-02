@@ -24,28 +24,78 @@ setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"playe
 setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:"yes",profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no",lateSessionRestore:"success"}}));
 if(found.role==="coach"&&!found.teamId)setView("create-team");
 else if(found.role==="player"&&!found.teamId)setView("join-team");
-else{if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player");}
+else{if((found.role||"player")==="player")navigateToPlayerHome({preserveCurrentRoute:true});setView(found.role||"player");}
 }).catch(error=>emitReleaseDiagnostic("late_auth_session_restore_failed",{message:String(error?.message||"unknown")}));
 }
 ${insertionAnchor}`
 
+const playerHomeSource = `const navigateToPlayerHome=useCallback(()=>{
+if(typeof window==="undefined")return;
+const homePath=PLAYER_TAB_PATHS.home||"/";
+if(window.location.pathname!==homePath)window.history.replaceState({},"",homePath);
+},[]);`
+
+const playerHomeReplacement = `const navigateToPlayerHome=useCallback(({preserveCurrentRoute=false}={})=>{
+if(typeof window==="undefined")return;
+const normalizePlayerPath=(value)=>String(value||"/").replace(/\\/+$/g,"")||"/";
+const homePath=normalizePlayerPath(PLAYER_TAB_PATHS.home||"/");
+const currentPath=normalizePlayerPath(window.location.pathname);
+if(preserveCurrentRoute&&Object.prototype.hasOwnProperty.call(PLAYER_PATH_TABS,currentPath))return;
+if(currentPath!==homePath)window.history.replaceState({},"",homePath);
+},[]);`
+
+const demoAuthSource = 'const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const explicitDemo=new URLSearchParams(window.location.search).get("demo")==="1";const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||explicitDemo&&isDemoAccount(sess?.email))?sess?.email:""));'
+const demoAuthReplacement = 'const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const demoPersistenceSession=isDemoPersistenceSession();const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||demoPersistenceSession&&isDemoAccount(sess?.email))?sess?.email:""));'
+
+const legacyHydrationSource = 'if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");'
+const legacyHydrationReplacement = 'if(rp.role==="player")navigateToPlayerHome({preserveCurrentRoute:true});setView(rp.role||"player");'
+const signedHydrationSource = 'if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")'
+const signedHydrationReplacement = 'if((found.role||"player")==="player")navigateToPlayerHome({preserveCurrentRoute:true});setView(found.role||"player")'
+
+function replaceRequired(source, before, after, alreadyAppliedMarker, label, { all = false } = {}) {
+  if (source.includes(before)) return { source: all ? source.replaceAll(before, after) : source.replace(before, after), changed: true }
+  if (source.includes(alreadyAppliedMarker)) return { source, changed: false }
+  throw new Error(`Could not find the ${label} contract in src/App.jsx.`)
+}
+
 async function main() {
   let source = await readFile(appPath, 'utf8')
-  if (source.includes(marker)) {
-    console.log('Slow Supabase session recovery already applied.')
-    return
-  }
-  if (!source.includes(timeoutSource)) {
-    throw new Error('Could not find the bounded Supabase session bootstrap contract in src/App.jsx.')
-  }
-  if (!source.includes(insertionAnchor)) {
-    throw new Error('Could not find the pending join-context anchor in src/App.jsx.')
+  let changed = false
+
+  if (!source.includes(marker)) {
+    if (!source.includes(timeoutSource)) {
+      throw new Error('Could not find the bounded Supabase session bootstrap contract in src/App.jsx.')
+    }
+    if (!source.includes(insertionAnchor)) {
+      throw new Error('Could not find the pending join-context anchor in src/App.jsx.')
+    }
+    source = source.replace(timeoutSource, timeoutReplacement)
+    source = source.replace(insertionAnchor, lateRecovery)
+    changed = true
   }
 
-  source = source.replace(timeoutSource, timeoutReplacement)
-  source = source.replace(insertionAnchor, lateRecovery)
-  await writeFile(appPath, source)
-  console.log('Applied bounded late Supabase session recovery with current-session revalidation.')
+  let result = replaceRequired(source, playerHomeSource, playerHomeReplacement, 'preserveCurrentRoute=false', 'Player home navigation')
+  source = result.source
+  changed ||= result.changed
+
+  result = replaceRequired(source, demoAuthSource, demoAuthReplacement, 'const demoPersistenceSession=isDemoPersistenceSession()', 'same-tab Demo restoration')
+  source = result.source
+  changed ||= result.changed
+
+  result = replaceRequired(source, legacyHydrationSource, legacyHydrationReplacement, 'navigateToPlayerHome({preserveCurrentRoute:true});setView(rp.role||"player");', 'legacy Player route restoration')
+  source = result.source
+  changed ||= result.changed
+
+  result = replaceRequired(source, signedHydrationSource, signedHydrationReplacement, 'navigateToPlayerHome({preserveCurrentRoute:true});setView(found.role||"player")', 'signed Player route restoration', { all: true })
+  source = result.source
+  changed ||= result.changed
+
+  if (changed) {
+    await writeFile(appPath, source)
+    console.log('Applied release auth recovery, same-tab Demo restoration, and Player deep-route preservation.')
+  } else {
+    console.log('Release auth recovery, same-tab Demo restoration, and Player deep-route preservation already applied.')
+  }
 }
 
 main().catch((error) => {
