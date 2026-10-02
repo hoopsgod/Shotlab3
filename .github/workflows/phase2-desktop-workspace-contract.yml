@@ -1,0 +1,26 @@
+name: Phase 2 Desktop Workspace Contract
+
+on:
+  pull_request:
+    branches:
+      - agent/desktop-hudl-workspace-clean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase2-workspace-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run Phase 2 source contract explicitly
+        run: node --test tests/desktop-single-page-workspace-shell-phase2.test.mjs
