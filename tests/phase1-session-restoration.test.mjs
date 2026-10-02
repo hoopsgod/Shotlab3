@@ -5,6 +5,7 @@ import fs from 'node:fs'
 import { isDemoPersistenceSession, setDemoMode } from '../src/lib/demoMode.js'
 import {
   clearStaleDemoSession,
+  installStartupPlayerDeepRouteGuard,
   isDemoRuntimeEnabled,
   restoreSameTabDemoSession,
 } from '../src/lib/runtimeReleaseReadiness.js'
@@ -38,6 +39,38 @@ test('same-tab demo marker survives the transient handoff and restores the app s
 
   assert.equal(await restoreSameTabDemoSession({ localStorage, sessionStorage, storage }), true)
   assert.deepEqual(JSON.parse(localStorage.getItem('sl:session')), { email: 'coach.demo@shotlab.app' })
+})
+
+test('demo entry pins both transient and active same-tab markers before persistence handoff', () => {
+  const previousWindow = globalThis.window
+  const previousDocument = globalThis.document
+  const localStorage = createStorage()
+  const sessionStorage = createStorage()
+  globalThis.window = {
+    location: { href: 'https://shotlab.test/', search: '' },
+    localStorage,
+    sessionStorage,
+    history: { replaceState() {} },
+  }
+  globalThis.document = {
+    activeElement: {
+      getAttribute(name) { return name === 'aria-label' ? 'Coach demo' : null },
+      textContent: 'Coach demo',
+    },
+  }
+
+  try {
+    setDemoMode(true)
+    assert.deepEqual(JSON.parse(sessionStorage.getItem('sl:demoSession')), { email: 'coach.demo@shotlab.app' })
+    const pending = JSON.parse(sessionStorage.getItem('sl:pendingDemoSession'))
+    assert.equal(pending.email, 'coach.demo@shotlab.app')
+    assert.equal(Number.isFinite(Number(pending.createdAt)), true)
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window
+    else globalThis.window = previousWindow
+    if (previousDocument === undefined) delete globalThis.document
+    else globalThis.document = previousDocument
+  }
 })
 
 test('active same-tab marker keeps demo persistence sandboxed after shared session storage is cleared', () => {
@@ -83,6 +116,59 @@ test('registered session is not cleared by production demo cleanup', async () =>
     storage,
   }), false)
   assert.deepEqual(JSON.parse(localStorage.getItem('sl:session')), { email: 'registered@shotlab.test' })
+})
+
+test('startup preserves a registered Player deep route across the hydration home rewrite', () => {
+  const localStorage = createStorage()
+  const sessionStorage = createStorage()
+  const location = { href: 'https://shotlab.test/events', pathname: '/events' }
+  localStorage.setItem('sl:session', JSON.stringify({ email: 'registered@shotlab.test' }))
+  localStorage.setItem('sl:players', JSON.stringify([{ email: 'registered@shotlab.test', role: 'player' }]))
+  const history = {
+    replaceState(_state, _title, url) {
+      const next = new URL(String(url), location.href)
+      location.pathname = next.pathname
+      location.href = next.href
+    },
+  }
+
+  installStartupPlayerDeepRouteGuard({
+    window: {},
+    location,
+    history,
+    localStorage,
+    sessionStorage,
+  })
+
+  history.replaceState({}, '', '/')
+  assert.equal(location.pathname, '/events')
+  history.replaceState({}, '', '/profile')
+  assert.equal(location.pathname, '/profile')
+})
+
+test('fresh-tab stale demo identity does not receive Player deep-route protection', () => {
+  const localStorage = createStorage()
+  const sessionStorage = createStorage()
+  const location = { href: 'https://shotlab.test/events', pathname: '/events' }
+  localStorage.setItem('sl:session', JSON.stringify({ email: 'demo@shotlab.app' }))
+  const history = {
+    replaceState(_state, _title, url) {
+      const next = new URL(String(url), location.href)
+      location.pathname = next.pathname
+      location.href = next.href
+    },
+  }
+
+  installStartupPlayerDeepRouteGuard({
+    window: {},
+    location,
+    history,
+    localStorage,
+    sessionStorage,
+  })
+
+  history.replaceState({}, '', '/')
+  assert.equal(location.pathname, '/')
 })
 
 test('demo logout clears the same-tab restoration marker and persisted demo session', () => {

@@ -6,6 +6,17 @@ const DEMO_MODE_KEY = "sl:demoMode";
 const DEMO_SESSION_KEY = "sl:demoSession";
 const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
+const PLAYER_DEEP_ROUTE_PATHS = new Set([
+  "/duels",
+  "/program-log",
+  "/quick-menu",
+  "/lifting",
+  "/events",
+  "/leaderboards",
+  "/in-season",
+  "/profile",
+  "/players",
+]);
 const AUTO_SYNC_STATES = new Set(["local_pending", "background_saved"]);
 
 const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
@@ -44,6 +55,74 @@ export function isDemoRuntimeEnabled({ env, location, sessionStorage } = {}) {
 export function isDemoRuntimeAccount(userOrEmail) {
   const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
   return DEMO_EMAILS.has(normalizeEmail(email));
+}
+
+export function installStartupPlayerDeepRouteGuard(options = {}) {
+  const browserWindow = options.window ?? (typeof window !== "undefined" ? window : null);
+  const location = options.location ?? browserWindow?.location;
+  const history = options.history ?? browserWindow?.history;
+  const localStorage = options.localStorage ?? browserWindow?.localStorage;
+  const sessionStorage = options.sessionStorage ?? browserWindow?.sessionStorage;
+  const initialPath = String(location?.pathname || "").replace(/\/+$/, "") || "/";
+  if (!PLAYER_DEEP_ROUTE_PATHS.has(initialPath) || typeof history?.replaceState !== "function") return () => {};
+
+  const persistedSession = readStoredJson(localStorage, APP_SESSION_KEY) || readStoredJson(sessionStorage, APP_SESSION_KEY);
+  const email = normalizeEmail(persistedSession?.email);
+  if (!email) return () => {};
+
+  const activeDemoSession = readStoredJson(sessionStorage, DEMO_SESSION_KEY);
+  if (isDemoRuntimeAccount(email) && !isDemoRuntimeAccount(activeDemoSession?.email)) return () => {};
+
+  const storedPlayers = readStoredJson(localStorage, "sl:players");
+  const actor = Array.isArray(storedPlayers)
+    ? storedPlayers.find((player) => normalizeEmail(player?.email) === email)
+    : null;
+  if (actor && String(actor?.role || "player").trim().toLowerCase() !== "player") return () => {};
+
+  const originalReplaceState = history.replaceState;
+  let armed = true;
+  let timeoutId = null;
+  let guardedReplaceState = null;
+
+  const restore = () => {
+    if (!armed) return;
+    armed = false;
+    try {
+      if (history.replaceState === guardedReplaceState) history.replaceState = originalReplaceState;
+    } catch {}
+    if (timeoutId != null && typeof browserWindow?.clearTimeout === "function") {
+      browserWindow.clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+  };
+
+  guardedReplaceState = function guardedPlayerRouteReplaceState(state, title, url) {
+    if (armed && url != null) {
+      try {
+        const currentPath = String(location?.pathname || "").replace(/\/+$/, "") || "/";
+        const baseHref = String(location?.href || "https://shotlab.local/");
+        const target = new URL(String(url), baseHref);
+        const targetPath = String(target.pathname || "").replace(/\/+$/, "") || "/";
+        if (currentPath === initialPath && targetPath === "/") {
+          restore();
+          return undefined;
+        }
+      } catch {}
+    }
+    return originalReplaceState.call(history, state, title, url);
+  };
+
+  try {
+    history.replaceState = guardedReplaceState;
+  } catch {
+    armed = false;
+    return () => {};
+  }
+
+  if (typeof browserWindow?.setTimeout === "function") {
+    timeoutId = browserWindow.setTimeout(restore, 15_000);
+  }
+  return restore;
 }
 
 export function isSupabaseAuthEnabled(env) {
@@ -235,3 +314,5 @@ export const RUNTIME_STORAGE_KEYS = {
   demoSession: DEMO_SESSION_KEY,
   pendingDemoSession: PENDING_DEMO_SESSION_KEY,
 };
+
+if (typeof window !== "undefined") installStartupPlayerDeepRouteGuard();

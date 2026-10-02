@@ -113,10 +113,12 @@ export function setDemoMode(enabled) {
 
   if (enabled) {
     // Demo buttons update React state before the durable app session write resolves.
-    // Record only the hard-coded demo identity for that short handoff window so the
-    // first identity-scoped read cannot fall back to another team's stale data.
+    // Pin the hard-coded identity to this browser tab immediately: the pending marker
+    // protects the first persistence handoff, while the active marker survives later
+    // same-tab reloads without leaking into a fresh tab or browser session.
     const pendingEmail = inferPendingDemoEmail();
     if (isDemoAccount(pendingEmail)) {
+      window.sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify({ email: pendingEmail }));
       window.sessionStorage.setItem(PENDING_DEMO_SESSION_KEY, JSON.stringify({
         email: pendingEmail,
         createdAt: Date.now(),
