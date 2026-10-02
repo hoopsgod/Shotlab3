@@ -11,6 +11,16 @@ const COACH_HOME_BREAKPOINT_BEFORE = 'const DESKTOP_RAIL_MIN_WIDTH = 981;';
 const COACH_HOME_BREAKPOINT_AFTER = 'const DESKTOP_RAIL_MIN_WIDTH = 1024;';
 const COACH_HOME_NAV_BEFORE = '<nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>';
 const COACH_HOME_NAV_AFTER = '<nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} aria-current={item.active?"page":undefined} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>';
+const COACH_TEXT_SCALE_BINDING = 'const coachTextScale=COACH_TEXT_SIZES.includes(coachTextSize)?coachTextSize:"standard";\n';
+const COACH_TEXT_SCALE_ATTRIBUTE = ' data-text-scale={coachTextScale}';
+const EMPTY_DELETE_STYLE = ' className="btn-v cta-danger" style={{}}';
+const DELETE_STYLELESS = ' className="btn-v cta-danger"';
+const COACH_HOME_RUNTIME_ONLY_MARKERS = Object.freeze([
+  ' data-testid="coach-command-center-compact"',
+  ' data-mobile-product-reset="phase-1"',
+  ' data-visual-system="phase-4-premium"',
+  ' data-desktop-rail={desktopRailEnabled ? "visible" : "removed"}',
+]);
 
 function replaceOrVerify(source, before, after, label) {
   if (source.includes(after)) return source;
@@ -18,10 +28,17 @@ function replaceOrVerify(source, before, after, label) {
   return source.replace(before, after);
 }
 
+function stripRuntimeOnly(source, token) {
+  return source.includes(token) ? source.replace(token, "") : source;
+}
+
 export function applyPhase2DesktopWorkspaceHardening(source) {
   let next = String(source || "");
   next = replaceOrVerify(next, COACH_BEFORE, COACH_AFTER, "Coach desktop navigation");
   next = replaceOrVerify(next, PLAYER_BEFORE, PLAYER_AFTER, "Player desktop navigation");
+  next = stripRuntimeOnly(next, COACH_TEXT_SCALE_BINDING);
+  next = stripRuntimeOnly(next, COACH_TEXT_SCALE_ATTRIBUTE);
+  if (next.includes(EMPTY_DELETE_STYLE)) next = next.replace(EMPTY_DELETE_STYLE, DELETE_STYLELESS);
   return next;
 }
 
@@ -29,6 +46,7 @@ export function applyPhase2CoachHomeHardening(source) {
   let next = String(source || "");
   next = replaceOrVerify(next, COACH_HOME_BREAKPOINT_BEFORE, COACH_HOME_BREAKPOINT_AFTER, "Coach Home desktop breakpoint");
   next = replaceOrVerify(next, COACH_HOME_NAV_BEFORE, COACH_HOME_NAV_AFTER, "Coach Home desktop navigation semantics");
+  for (const marker of COACH_HOME_RUNTIME_ONLY_MARKERS) next = stripRuntimeOnly(next, marker);
   return next;
 }
 
