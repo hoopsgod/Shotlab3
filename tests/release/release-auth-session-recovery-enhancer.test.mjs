@@ -17,8 +17,8 @@ if(window.location.pathname!==homePath)window.history.replaceState({},"",homePat
 const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;
 const initialSupabaseSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabaseSessionRequest,new Promise(r=>setTimeout(()=>r(null),3e3))]):null;
 const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const explicitDemo=new URLSearchParams(window.location.search).get("demo")==="1";const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||explicitDemo&&isDemoAccount(sess?.email))?sess?.email:""));
-if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");
-if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")
+if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail});if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}
+else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}}
 const demoSignIn=async(kind="player")=>{
 await supabase.auth.signOut();
 legacyAuthSecretRef.current={email:"",password:""};
@@ -40,6 +40,8 @@ test('enhancer upgrades an already slow-recovery-patched App for demo reload and
   assert.equal(result.status, 0, result.stderr || result.stdout)
   const transformed = await readFile(appPath, 'utf8')
   assert.match(transformed, /const demoPersistenceSession=isDemoPersistenceSession\(\)/)
+  assert.match(transformed, /if\(authEmail&&!SUPABASE_AUTH_ENABLED&&!demoPersistenceSession\)\{const restore=await legacyAuthFetch\("\/v1\/legacy-auth\/restore"/)
+  assert.doesNotMatch(transformed, /if\(authEmail&&!SUPABASE_AUTH_ENABLED\)\{const restore=await legacyAuthFetch\("\/v1\/legacy-auth\/restore"/)
   assert.match(transformed, /preserveCurrentRoute=false/)
   assert.match(transformed, /hasOwnProperty\.call\(PLAYER_PATH_TABS,currentPath\)/)
   assert.match(transformed, /navigateToPlayerHome\(\{preserveCurrentRoute:true\}\)/)

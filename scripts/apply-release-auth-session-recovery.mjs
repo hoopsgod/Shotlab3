@@ -47,6 +47,8 @@ if(currentPath!==homePath)window.history.replaceState({},"",homePath);
 const demoAuthSource = 'const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const explicitDemo=new URLSearchParams(window.location.search).get("demo")==="1";const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||explicitDemo&&isDemoAccount(sess?.email))?sess?.email:""));'
 const demoAuthReplacement = 'const supabaseEmail=normalizeEmail(initialSupabaseSession?.data?.session?.user?.email);const demoPersistenceSession=isDemoPersistenceSession();const authEmail=normalizeEmail(supabaseEmail||((!SUPABASE_AUTH_ENABLED||demoPersistenceSession&&isDemoAccount(sess?.email))?sess?.email:""));'
 
+const legacyDemoRestoreSource = 'if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail});'
+const legacyDemoRestoreReplacement = 'if(authEmail&&!SUPABASE_AUTH_ENABLED&&!demoPersistenceSession){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail});'
 const legacyHydrationSource = 'if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");'
 const legacyHydrationReplacement = 'if(rp.role==="player")navigateToPlayerHome({preserveCurrentRoute:true});setView(rp.role||"player");'
 const signedHydrationSource = 'if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")'
@@ -101,6 +103,10 @@ async function main() {
   source = result.source
   changed ||= result.changed
 
+  result = replaceRequired(source, legacyDemoRestoreSource, legacyDemoRestoreReplacement, 'if(authEmail&&!SUPABASE_AUTH_ENABLED&&!demoPersistenceSession){', 'Demo legacy-auth bypass')
+  source = result.source
+  changed ||= result.changed
+
   result = applyExplicitDemoIdentity(source)
   source = result.source
   changed ||= result.changed
@@ -115,9 +121,9 @@ async function main() {
 
   if (changed) {
     await writeFile(appPath, source)
-    console.log('Applied release auth recovery, same-tab Demo restoration, and Player deep-route preservation.')
+    console.log('Applied release auth recovery, same-tab Demo restoration, Demo legacy-auth bypass, and Player deep-route preservation.')
   } else {
-    console.log('Release auth recovery, same-tab Demo restoration, and Player deep-route preservation already applied.')
+    console.log('Release auth recovery, same-tab Demo restoration, Demo legacy-auth bypass, and Player deep-route preservation already applied.')
   }
 }
 
