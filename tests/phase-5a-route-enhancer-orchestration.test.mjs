@@ -30,6 +30,7 @@ const finalPresentationChain = [
   'scripts/apply-mobile-auth-signature-stage.mjs',
   'scripts/apply-in-season-player-parity.mjs',
   'scripts/apply-phase7e-player-profile-photo.mjs',
+  'scripts/apply-phase2-desktop-workspace-hardening.mjs',
   'scripts/minify-visual-authority-css.mjs',
 ]
 const registeredParityEnhancers = [
@@ -69,11 +70,15 @@ test('route enhancer manifests preserve the certified dev/build ordering contrac
   const devPhase5Index = DEV_ROUTE_ENHANCERS.indexOf('scripts/apply-phase5a-coach-daily-intelligence.mjs')
   const buildAlignmentIndex = BUILD_ROUTE_ENHANCERS.indexOf('scripts/align-phase4f-browser-contracts.mjs')
   const buildPhase5Index = BUILD_ROUTE_ENHANCERS.indexOf('scripts/apply-phase5a-coach-daily-intelligence.mjs')
+  const devPhase2Index = DEV_ROUTE_ENHANCERS.indexOf('scripts/apply-phase2-desktop-workspace-hardening.mjs')
+  const buildPhase2Index = BUILD_ROUTE_ENHANCERS.indexOf('scripts/apply-phase2-desktop-workspace-hardening.mjs')
 
   assert.equal(devMinifyIndex, DEV_ROUTE_ENHANCERS.length - 1, 'dev minification must happen after all source/style reconcilers')
   assert.equal(buildMinifyIndex, BUILD_ROUTE_ENHANCERS.length - 1, 'build minification must happen after all source/style reconcilers')
   assert.ok(devPhase5Index >= 0, 'dev manifest must retain Phase 5A data/auth reconciliation')
   assert.equal(buildPhase5Index, buildAlignmentIndex + 1, 'build browser alignment must immediately precede final data/auth reconciliation')
+  assert.equal(devPhase2Index, devMinifyIndex - 1, 'Phase 2 desktop workspace hardening must be the final semantic route enhancer before minification in dev')
+  assert.equal(buildPhase2Index, buildMinifyIndex - 1, 'Phase 2 desktop workspace hardening must be the final semantic route enhancer before minification in build')
 
   for (const manifest of [DEV_ROUTE_ENHANCERS, BUILD_ROUTE_ENHANCERS]) {
     const registeredParityIndexes = registeredParityEnhancers.map((script) => manifest.indexOf(script))
