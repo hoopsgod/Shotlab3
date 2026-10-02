@@ -78,73 +78,20 @@ async function enterPlayerDemo(page) {
   await settleHome(page);
 }
 
-async function applyDemoPerformanceState(page, { makes, coachCurrent = false, weeklyTarget } = {}) {
-  await page.evaluate(async ({ makes, coachCurrent, weeklyTarget, demoEmail, demoTeamId }) => {
-    const date = new Date();
-    const pad = (value) => String(value).padStart(2, "0");
-    const dateKey = (value) => `${value.getFullYear()}-${pad(value.getMonth() + 1, "0")}-${pad(value.getDate(), "0")}`;
-    const today = dateKey(date);
-    const existingLogs = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    const otherPlayers = existingLogs.filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
-    const nextLogs = [...otherPlayers];
-    if (Number(makes) > 0) {
-      nextLogs.push({
-        id: `dashboard-showstopper-state-${makes}`,
-        email: demoEmail,
-        playerId: demoEmail,
-        teamId: demoTeamId,
-        name: "Demo Player",
-        made: Number(makes),
-        date: today,
-        ts: Date.now(),
-        demo: true,
-        syncState: "local_pending",
-        syncSource: "local",
-      });
-    } else {
-      const prior = new Date(date);
-      prior.setDate(prior.getDate() - 8);
-      nextLogs.push({
-        id: "dashboard-showstopper-prior-result",
-        email: demoEmail,
-        playerId: demoEmail,
-        teamId: demoTeamId,
-        name: "Demo Player",
-        made: 20,
-        date: dateKey(prior),
-        ts: prior.getTime(),
-        demo: true,
-        syncState: "local_pending",
-        syncSource: "local",
-      });
-    }
-    const serializedLogs = JSON.stringify(nextLogs);
-    window.localStorage.setItem("sl:shotlogs", serializedLogs);
-    try { await window.storage?.set?.("sl:shotlogs", serializedLogs, true); } catch {}
+async function logDemoMakes(page, makes) {
+  const amount = Number(makes);
+  if (!Number.isFinite(amount) || amount <= 0) return;
 
-    const meta = JSON.parse(window.localStorage.getItem("sl:demo-data-meta") || "{}");
-    const serializedMeta = JSON.stringify({ ...meta, source: "dashboard-showstopper-certification", teamId: demoTeamId });
-    window.localStorage.setItem("sl:demo-data-meta", serializedMeta);
-    try { await window.storage?.set?.("sl:demo-data-meta", serializedMeta, true); } catch {}
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
+  const input = page.getByRole("spinbutton").first();
+  await expect(input).toBeVisible({ timeout: 20_000 });
+  await input.fill(String(amount));
+  await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
 
-    const priorities = JSON.parse(window.localStorage.getItem("sl:coach-priorities") || "{}");
-    const current = priorities[demoTeamId] || {};
-    priorities[demoTeamId] = {
-      ...current,
-      ...(weeklyTarget === undefined ? {} : { weeklyMakesTarget: weeklyTarget }),
-      ...(coachCurrent ? {
-        todayFocusText: "Create paint pressure, then own the next game-speed block.",
-        priorityDrillText: "2:30 Shooting",
-        challengeText: "Complete 2:30 Shooting with game-speed footwork.",
-        updatedAt: new Date().toISOString(),
-      } : {}),
-    };
-    const serializedPriorities = JSON.stringify(priorities);
-    window.localStorage.setItem("sl:coach-priorities", serializedPriorities);
-    try { await window.storage?.set?.("sl:coach-priorities", serializedPriorities, true); } catch {}
-  }, { makes, coachCurrent, weeklyTarget, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
-
-  await page.goto("/?demo=1");
+  const cue = page.getByTestId("player-completion-cue");
+  await expect(cue).toBeVisible({ timeout: 20_000 });
+  await expect(cue).toContainText(`${amount} makes added to today’s total`);
+  await cue.getByRole("button", { name: /CONTINUE/ }).click();
   await settleHome(page);
 }
 
@@ -205,8 +152,10 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
     { makes: 125, interpretation: "+25 ABOVE TARGET", heading: "Daily work banked.", name: "player-home-state-above-125-390" },
   ];
 
+  let currentMakes = 0;
   for (const state of states) {
-    await applyDemoPerformanceState(page, { makes: state.makes });
+    await logDemoMakes(page, state.makes - currentMakes);
+    currentMakes = state.makes;
     await expect(page.getByTestId("player-today-performance")).toContainText(String(state.makes));
     await expect(page.getByTestId("player-target-interpretation")).toHaveText(state.interpretation);
     await expect(page.getByTestId("player-dashboard-identity-header").getByRole("heading", { level: 1 })).toBeVisible();
@@ -216,8 +165,9 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
     await capture(page, state.name);
   }
 
-  await applyDemoPerformanceState(page, { makes: 25, coachCurrent: true });
-  await expect(page.getByTestId("player-coach-priority-signal")).toContainText("Create paint pressure, then own the next game-speed block.");
+  const coachSignal = page.getByTestId("player-coach-priority-signal");
+  await expect(coachSignal).toBeVisible();
+  await expect(coachSignal).toContainText("2:30 Shooting");
   await capture(page, "player-home-state-coach-assignment-390");
 });
 
