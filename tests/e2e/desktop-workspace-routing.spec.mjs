@@ -105,21 +105,23 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await expect(page.getByTestId("coach-season-archive")).toBeVisible({ timeout: 20_000 });
   expect(new URL(page.url()).pathname).toBe("/coach/settings");
 
+  await page.goto("/coach/not-a-real-route");
+  await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
+  await expect.poll(() => new URL(page.url()).pathname).toBe("/");
+
   const direct = await page.context().newPage();
   await installSafeRoutes(direct);
   await direct.setViewportSize({ width: 1280, height: 900 });
   await direct.goto(playerPath);
-  const directDrawer = direct.getByTestId("coach-player-intelligence-drawer");
-  await expect(directDrawer).toBeVisible({ timeout: 20_000 });
-  expect(await direct.evaluate(() => window.history.state?.slp || null)).not.toBe(1);
-  await directDrawer.getByRole("button", { name: "Close details", exact: true }).last().click();
-  await expect(directDrawer).toHaveCount(0);
-  expect(new URL(direct.url()).pathname).toBe("/coach/players");
-
-  await direct.goto("/coach/not-a-real-route");
-  await expect(direct.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
-  await expect.poll(() => new URL(direct.url()).pathname).toBe("/");
+  await expect(direct.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(direct.getByTestId("coach-player-intelligence-drawer")).toHaveCount(0);
   await direct.close();
+
+  // A fresh tab clears the shared local demo identity. The originating tab still
+  // owns its explicit sessionStorage marker and must be able to reconstruct the
+  // demo app session on its next normal reload.
+  await page.reload();
+  await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   expect(pageErrors).toEqual([]);
 });
 
