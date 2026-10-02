@@ -145,7 +145,7 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
   await enterPlayerDemo(page);
 
   const states = [
-    { makes: 0, interpretation: "100 TO TARGET", heading: "Set your baseline.", name: "player-home-state-zero-390" },
+    { makes: 0, interpretation: "100 TO TARGET", heading: "Today starts here.", name: "player-home-state-zero-390" },
     { makes: 25, interpretation: "75 TO TARGET", heading: "Stay on today’s standard.", name: "player-home-state-partial-25-390" },
     { makes: 85, interpretation: "15 TO TARGET", heading: "Stay on today’s standard.", name: "player-home-state-near-85-390" },
     { makes: 100, interpretation: "TARGET COMPLETE", heading: "Daily work banked.", name: "player-home-state-complete-100-390" },
