@@ -2,7 +2,7 @@
    Coach TitleStage and PremiumWorkspace; this file owns persistent shell layout
    plus clearance for fixed app navigation outside component document flow. */
 @media (min-width:1024px) {
-  .mcShellV3.is-desktop-shell { display:grid; grid-template-columns:248px minmax(0,1fr); width:100%; min-height:100dvh; }
+  .mcShellV3.is-desktop-shell { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; }
   .mcShellV3.is-desktop-shell > .mcRail { display:flex; flex-direction:column; position:sticky; top:0; align-self:start; height:100dvh; min-height:0; }
   .mcShellV3.is-desktop-shell > .missionControl { min-width:0; max-width:none; width:100%; }
   .mcShellV3.is-desktop-shell .mcHeader[data-testid="mission-control-team-header"] { position:sticky; top:0; z-index:10; }
