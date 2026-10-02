@@ -59,12 +59,17 @@ async function applyDifficultBranding(page) {
     const localTeams = parseRaw(localStorage.getItem("sl:teams"), []);
     const bridgedTeams = await readBridge("sl:teams", []);
     const teams = localTeams.length ? localTeams : bridgedTeams;
+    const localPlayers = parseRaw(localStorage.getItem("sl:players"), []);
+    const bridgedPlayers = await readBridge("sl:players", []);
+    const players = localPlayers.length ? localPlayers : bridgedPlayers;
     const localSession = parseRaw(localStorage.getItem("sl:session"), null);
     const tabSession = parseRaw(sessionStorage.getItem("sl:session"), null);
     const bridgedSession = await readBridge("sl:session", null);
     const session = tabSession || localSession || bridgedSession;
+    const sessionEmail = String(session?.email || "").trim().toLowerCase();
+    const signedInPlayer = players.find((player) => String(player?.email || "").trim().toLowerCase() === sessionEmail);
     const demoTeam = teams.find((team) => /demo/i.test(String(team?.id || team?.name || "")));
-    const activeTeamId = String(session?.teamId || session?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
+    const activeTeamId = String(session?.teamId || session?.team_id || signedInPlayer?.teamId || signedInPlayer?.team_id || demoTeam?.id || teams[0]?.id || "team-demo-titans");
     let matchedTeam = false;
     const nextTeams = teams.map((team) => {
       if (String(team?.id || "") !== activeTeamId) return team;
