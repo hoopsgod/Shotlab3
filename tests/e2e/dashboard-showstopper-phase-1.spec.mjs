@@ -79,7 +79,7 @@ async function enterPlayerDemo(page) {
 }
 
 async function applyDemoPerformanceState(page, { makes, coachCurrent = false, weeklyTarget } = {}) {
-  await page.evaluate(({ makes, coachCurrent, weeklyTarget, demoEmail, demoTeamId }) => {
+  await page.evaluate(async ({ makes, coachCurrent, weeklyTarget, demoEmail, demoTeamId }) => {
     const date = new Date();
     const pad = (value) => String(value).padStart(2, "0");
     const dateKey = (value) => `${value.getFullYear()}-${pad(value.getMonth() + 1, "0")}-${pad(value.getDate(), "0")}`;
@@ -112,10 +112,14 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
         ts: prior.getTime(),
       });
     }
-    window.localStorage.setItem("sl:shotlogs", JSON.stringify(nextLogs));
+    const serializedLogs = JSON.stringify(nextLogs);
+    window.localStorage.setItem("sl:shotlogs", serializedLogs);
+    try { await window.storage?.set?.("sl:shotlogs", serializedLogs, true); } catch {}
 
     const meta = JSON.parse(window.localStorage.getItem("sl:demo-data-meta") || "{}");
-    window.localStorage.setItem("sl:demo-data-meta", JSON.stringify({ ...meta, source: "dashboard-showstopper-certification", teamId: demoTeamId }));
+    const serializedMeta = JSON.stringify({ ...meta, source: "dashboard-showstopper-certification", teamId: demoTeamId });
+    window.localStorage.setItem("sl:demo-data-meta", serializedMeta);
+    try { await window.storage?.set?.("sl:demo-data-meta", serializedMeta, true); } catch {}
 
     const priorities = JSON.parse(window.localStorage.getItem("sl:coach-priorities") || "{}");
     const current = priorities[demoTeamId] || {};
@@ -129,7 +133,9 @@ async function applyDemoPerformanceState(page, { makes, coachCurrent = false, we
         updatedAt: new Date().toISOString(),
       } : {}),
     };
-    window.localStorage.setItem("sl:coach-priorities", JSON.stringify(priorities));
+    const serializedPriorities = JSON.stringify(priorities);
+    window.localStorage.setItem("sl:coach-priorities", serializedPriorities);
+    try { await window.storage?.set?.("sl:coach-priorities", serializedPriorities, true); } catch {}
   }, { makes, coachCurrent, weeklyTarget, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
 
   await page.goto("/?demo=1");
@@ -186,7 +192,7 @@ test("390px visual evidence covers zero, partial, near, complete, above-target, 
   await enterPlayerDemo(page);
 
   const states = [
-    { makes: 0, interpretation: "100 TO TARGET", heading: "Today starts here.", name: "player-home-state-zero-390" },
+    { makes: 0, interpretation: "100 TO TARGET", heading: "Set your baseline.", name: "player-home-state-zero-390" },
     { makes: 25, interpretation: "75 TO TARGET", heading: "Stay on today’s standard.", name: "player-home-state-partial-25-390" },
     { makes: 85, interpretation: "15 TO TARGET", heading: "Stay on today’s standard.", name: "player-home-state-near-85-390" },
     { makes: 100, interpretation: "TARGET COMPLETE", heading: "Daily work banked.", name: "player-home-state-complete-100-390" },
