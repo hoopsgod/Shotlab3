@@ -45,15 +45,20 @@ async function enterPlayerDemo(page) {
 }
 
 async function applyPerformance(page, makes) {
-  await page.evaluate(({ makes, demoEmail, demoTeamId }) => {
+  await page.evaluate(async ({ makes, demoEmail, demoTeamId }) => {
     const date = new Date();
     const pad = (value) => String(value).padStart(2, "0");
     const today = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     const existing = JSON.parse(localStorage.getItem("sl:shotlogs") || "[]").filter((row) => String(row?.email || row?.player_email || "").toLowerCase() !== demoEmail);
     if (Number(makes) > 0) existing.push({ id: `dashboard-showstopper-phase-2-${makes}`, email: demoEmail, playerId: demoEmail, teamId: demoTeamId, name: "Demo Player", made: Number(makes), date: today, ts: Date.now() });
-    localStorage.setItem("sl:shotlogs", JSON.stringify(existing));
+    const serializedLogs = JSON.stringify(existing);
+    localStorage.setItem("sl:shotlogs", serializedLogs);
+    try { await window.storage?.set?.("sl:shotlogs", serializedLogs, true); } catch {}
+
     const meta = JSON.parse(localStorage.getItem("sl:demo-data-meta") || "{}");
-    localStorage.setItem("sl:demo-data-meta", JSON.stringify({ ...meta, source: "dashboard-showstopper-phase-2", teamId: demoTeamId }));
+    const serializedMeta = JSON.stringify({ ...meta, source: "dashboard-showstopper-phase-2", teamId: demoTeamId });
+    localStorage.setItem("sl:demo-data-meta", serializedMeta);
+    try { await window.storage?.set?.("sl:demo-data-meta", serializedMeta, true); } catch {}
   }, { makes, demoEmail: DEMO_EMAIL, demoTeamId: DEMO_TEAM_ID });
   await page.goto("/?demo=1");
   await settleHome(page);
