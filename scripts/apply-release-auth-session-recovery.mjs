@@ -59,14 +59,21 @@ function replaceRequired(source, before, after, alreadyAppliedMarker, label, { a
 }
 
 function applyExplicitDemoIdentity(source) {
-  const appliedMarker = 'setDemoMode(true,{email:acct.email})'
+  const appliedMarker = 'setDemoMode(true,{email:kind==="coach"?DEMO_COACH.email:DEMO_PLAYER.email})'
+  const obsoleteMarker = 'setDemoMode(true,{email:acct.email})'
   if (source.includes(appliedMarker)) return { source, changed: false }
   const start = source.indexOf('const demoSignIn=')
   const end = source.indexOf('const cleanupDemoPlayerSessionData=', start)
   if (start < 0 || end <= start) throw new Error('Could not find the Demo sign-in contract in src/App.jsx.')
   const demoSignInSource = source.slice(start, end)
-  if (!demoSignInSource.includes('setDemoMode(true)')) throw new Error('Could not find the Demo mode activation inside Demo sign-in.')
-  const nextDemoSignInSource = demoSignInSource.replace('setDemoMode(true)', appliedMarker)
+  let nextDemoSignInSource = demoSignInSource
+  if (demoSignInSource.includes(obsoleteMarker)) {
+    nextDemoSignInSource = demoSignInSource.replace(obsoleteMarker, appliedMarker)
+  } else if (demoSignInSource.includes('setDemoMode(true)')) {
+    nextDemoSignInSource = demoSignInSource.replace('setDemoMode(true)', appliedMarker)
+  } else {
+    throw new Error('Could not find the Demo mode activation inside Demo sign-in.')
+  }
   return { source: `${source.slice(0, start)}${nextDemoSignInSource}${source.slice(end)}`, changed: true }
 }
 
