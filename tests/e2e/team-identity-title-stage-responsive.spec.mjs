@@ -81,7 +81,8 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         branding: {
           ...(team.branding || {}),
           ...nextBranding,
-          teamName: nextBranding.teamName ?? "",
+          name: nextTeamName || nextBranding.name || team.branding?.name || team.name || "Demo Titans",
+          teamName: nextTeamName || nextBranding.teamName || team.branding?.teamName || "",
         },
       };
     });
@@ -91,7 +92,11 @@ async function mutateActiveDemoIdentity(page, { teamName, branding = {}, userNam
         name: nextTeamName || "Demo Titans",
         ownerCoachId: session?.email || null,
         joinCode: "DEMO26",
-        branding: { ...nextBranding, teamName: nextBranding.teamName ?? "" },
+        branding: {
+          ...nextBranding,
+          name: nextTeamName || nextBranding.name || "Demo Titans",
+          teamName: nextTeamName || nextBranding.teamName || "",
+        },
       });
     }
     const serializedTeams = JSON.stringify(nextTeams);
