@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
-import { setDemoMode } from '../src/lib/demoMode.js'
+import { isDemoPersistenceSession, setDemoMode } from '../src/lib/demoMode.js'
 import {
   clearStaleDemoSession,
   isDemoRuntimeEnabled,
@@ -34,9 +34,17 @@ test('same-tab demo marker survives the transient handoff and restores the app s
     location: { hostname: 'shotlab.test', search: '' },
     sessionStorage,
   }), true)
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' } }), true)
 
   assert.equal(await restoreSameTabDemoSession({ localStorage, sessionStorage, storage }), true)
   assert.deepEqual(JSON.parse(localStorage.getItem('sl:session')), { email: 'coach.demo@shotlab.app' })
+})
+
+test('active same-tab marker keeps demo persistence sandboxed after shared session storage is cleared', () => {
+  const localStorage = createStorage()
+  const sessionStorage = createStorage()
+  sessionStorage.setItem('sl:demoSession', JSON.stringify({ email: 'demo@shotlab.app' }))
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' }, now: Date.now() }), true)
 })
 
 test('fresh tab cannot inherit a shared local demo identity', async () => {
