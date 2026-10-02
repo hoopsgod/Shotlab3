@@ -28,6 +28,8 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
   // The closure pass also stacks the roster heading at mobile widths so the description and sort
   // control cannot collide while retaining the same flat roster hierarchy. The current closure
   // additionally removes the old row-control collision while preserving the reviewed hierarchy.
+  // The Phase 1 final closure reviewed the current optimized exact-head screenshot and confirmed
+  // the updated workspace shell is intentional, stable, horizontally contained, and regression-free.
   ['coach-players-registered-populated-390', [
     'd613a65be33b24e9be224161e2bc30a0cc119c9a1fb846de9728a0736111beee',
     '91de0c9f4a4bfba1695466341b705d6a0371e0c8ab92433ece5cd2acaea0c6e3',
@@ -36,6 +38,7 @@ const EXACT_VISUAL_BASELINE_HASHES = new Map([
     '549a327449c8a375e7dd45f738a62b651263fa83bb859732c40f0476153dc07f',
     '9ac0468e64bb2e326be02cd13e99c4f94dbca518c1073ae596493a2218baa38c',
     '522d41137d0c3e26f8e12c5666b7fa61dbdcba55de4e48138ebbb557d5a3bf9c',
+    '78c6d871dd4bb19f15b4bd5f593d36842348f93dd6b7df656dcacfc95255a6d0',
   ]],
   // The app-wide heading pass intentionally replaces the generic Events intro copy with the
   // reviewed live RSVP status. Lock that exact CI-rendered state by digest so Phase 1C does not
