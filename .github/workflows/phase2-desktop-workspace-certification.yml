@@ -3,7 +3,7 @@ name: Phase 2 Desktop Workspace Certification
 on:
   pull_request:
     branches:
-      - agent/desktop-hudl-workspace-clean
+      - march-3-reset-85393dd
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   source-build-and-budgets:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       VITE_ENABLE_PRODUCTION_DEMOS: "true"
       VITE_SUPABASE_URL: "https://parity.supabase.co"
@@ -27,6 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -42,6 +43,38 @@ jobs:
           node scripts/analyze-coach-css-recovery.mjs
           npm run verify:performance-budget
           node scripts/verify-phase5c-css-headroom.mjs
+          cp artifacts/performance/build-metrics.json /tmp/phase2-head-metrics.json
+      - name: Verify Phase 2 build equivalence against exact base
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          test -n "${HEAD_SHA}"
+          test -n "${BASE_SHA}"
+          git reset --hard "${HEAD_SHA}"
+          git clean -fd
+          git checkout --force "${BASE_SHA}"
+          npm ci
+          npm run build
+          npm run verify:performance-budget
+          cp artifacts/performance/build-metrics.json /tmp/phase2-base-metrics.json
+          git reset --hard "${BASE_SHA}"
+          git checkout --force "${HEAD_SHA}"
+          node scripts/verify-phase5a-build-equivalence.mjs /tmp/phase2-base-metrics.json /tmp/phase2-head-metrics.json
+          mkdir -p artifacts/phase2-build-equivalence
+          cp /tmp/phase2-base-metrics.json artifacts/phase2-build-equivalence/base-build-metrics.json
+          cp /tmp/phase2-head-metrics.json artifacts/phase2-build-equivalence/head-build-metrics.json
+      - name: Upload Phase 2 build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-build-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/performance/
+            artifacts/phase2-build-equivalence/
+          if-no-files-found: warn
+          retention-days: 21
 
   exact-head-deployed-browser:
     needs: source-build-and-budgets
