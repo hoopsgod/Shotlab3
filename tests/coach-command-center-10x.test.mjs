@@ -96,19 +96,20 @@ test("late shared styles cannot reclaim Coach Home visual authority",()=>{
   assert.match(cascadeRules,/performance-workspace--coach/);
 });
 
-test("desktop Coach Home follows the prototype command-stage anatomy",()=>{
+test("desktop Coach Home follows the Phase 3 operational command-stage anatomy",()=>{
   assert.doesNotMatch(desktopTitle,/grid-template-columns:208px minmax\(0,1fr\)/);
   assert.match(desktopWorkspaceCss,/\.mcShellV3\.is-desktop-shell\s*\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/);
   assert.match(desktopTitle,/grid-template-columns:repeat\(12,minmax\(0,1fr\)\)/);
-  assert.match(desktopTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\][^{]*\{[^}]*grid-column:1\/10/);
-  assert.match(desktopTitle,/\.mcTeamHealth\{[^}]*grid-column:10\/-1/);
-  assert.match(desktopTitle,/\.mcActivity\{grid-column:1\/6/);
-  assert.match(desktopTitle,/\.mcAttention\{grid-column:6\/10/);
-  assert.match(desktopTitle,/\.mcNextSession\{grid-column:10\/-1/);
+  assert.match(desktopTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\][^{]*\{[^}]*grid-column:1\/8[^}]*grid-row:2[^}]*min-height:300px/);
+  assert.match(desktopTitle,/\.mcAttention\{[^}]*grid-column:8\/-1[^}]*grid-row:2[^}]*min-height:300px/);
+  assert.match(desktopTitle,/\.mcTeamHealth\{[^}]*grid-column:1\/4[^}]*grid-row:3[^}]*min-height:210px/);
+  assert.match(desktopTitle,/\.mcActivity,\.mcShellV3 \.mcNextSession\{[^}]*grid-row:3[^}]*min-height:210px/);
+  assert.match(desktopTitle,/\.mcActivity\{grid-column:4\/9/);
+  assert.match(desktopTitle,/\.mcNextSession\{grid-column:9\/-1/);
   assert.match(titleCss,/\.mcRailBrand::before\{content:"SHOTLAB"/);
   assert.match(desktopTitle,/\.mcProgramIdentity\{[^}]*font:760 12px\/1\.2 var\(--mc-native\)/);
   assert.doesNotMatch(desktopTitle,/\.mcProgramIdentity\{[^}]*font:[^}]*Barlow Condensed/);
-  assert.match(desktopTitle,/ \.mcHeroTitle\{[^}]*font:800 clamp\(36px,3\.4vw,48px\)\/\.92 "Barlow Condensed"/);
+  assert.match(desktopTitle,/ \.mcHeroTitle\{[^}]*font:800 clamp\(32px,2\.8vw,42px\)\/\.94 "Barlow Condensed"/);
 });
 
 test("mobile Coach Home remains brand-first, Pulse-first and touch-safe",()=>{
