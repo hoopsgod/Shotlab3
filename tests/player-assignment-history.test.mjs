@@ -185,3 +185,14 @@ test("database, server, and UI contracts keep history immutable, visible, and pr
   assert.doesNotMatch(enhancer, /private_note|coach_note/i);
   assert.doesNotMatch(readyEnhancer, /private_note|coach_note/i);
 });
+
+test("coach follow-up routes completed delivery through history-safe adjustment", () => {
+  const followUp = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
+
+  assert.match(followUp, /playerAssignmentHistoryService\.js/);
+  assert.match(followUp, /delivery\?\.state\s*===\s*["']completed["']/);
+  assert.match(followUp, /saveNextPlayerAssignment\s*\(/);
+  assert.match(followUp, /savePlayerAssignment\s*\(/);
+  assert.match(followUp, /Adjust and deliver next assignment/);
+  assert.match(followUp, /completed work remains in history/i);
+});
