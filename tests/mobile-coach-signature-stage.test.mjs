@@ -44,12 +44,13 @@ test('Coach prototype hierarchy is brand-aware, decision-first and intentionally
   const tablet = mediaBlock(titleCss, '(min-width:701px) and (max-width:980px)');
   const mobile = mediaBlock(titleCss, '(max-width:700px)');
 
-  assert.match(desktop, /grid-column:1\/10/);
-  assert.match(desktop, /min-height:330px/);
+  assert.match(desktop, /grid-column:1\/8/);
+  assert.match(desktop, /min-height:300px/);
+  assert.match(desktop, /\.mcAttention\{[^}]*grid-column:8\/-1[^}]*grid-row:2[^}]*min-height:300px/);
   assert.match(desktop, /\.mcProgramIdentity\{[^}]*font:760 12px\/1\.2 var\(--mc-native\)/);
   assert.doesNotMatch(desktop, /\.mcProgramIdentity\{[^}]*font:[^}]*Barlow Condensed/);
-  assert.match(desktop, / \.mcHeroTitle\{[^}]*font:800 clamp\(36px,3\.4vw,48px\)\/\.92 "Barlow Condensed"/);
-  assert.match(desktop, /clamp\(128px,12vw,168px\)/);
+  assert.match(desktop, / \.mcHeroTitle\{[^}]*font:800 clamp\(32px,2\.8vw,42px\)\/\.94 "Barlow Condensed"/);
+  assert.match(desktop, /clamp\(104px,10vw,132px\)/);
 
   assert.match(tablet, /min-height:354px/);
   assert.match(tablet, /clamp\(36px,5\.5vw,49px\)\/\.88 "Barlow Condensed"/);

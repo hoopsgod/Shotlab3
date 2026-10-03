@@ -234,11 +234,11 @@
 .coachSignalAction:focus-visible { outline:3px solid #9ebd7d; outline-offset:2px; }
 @media (min-width:981px) {
   .root { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr); gap:12px 18px; align-items:start; }
-  .hero { grid-column:1; grid-row:1 / span 2; min-height:430px; padding:25px 28px; border-radius:15px; }
+  .hero { grid-column:1; grid-row:1 / span 2; min-height:360px; padding:20px 24px; border-radius:15px; }
   .title { font-size:clamp(30px,2.6vw,38px); line-height:1.04; }
   .description { font-size:15px; line-height:1.5; }
   .heroKicker,.momentumLabel { font-size:12px; }
-  .coachSignal { grid-column:2; grid-row:1; margin:0 !important; padding:20px !important; border:1px solid #d6ded7; border-radius:15px; background:#fff; }
+  .coachSignal { grid-column:2; grid-row:1; margin:0 !important; padding:18px !important; border:1px solid #d6ded7; border-radius:15px; background:#fff; }
   .coachSignalTitle { color:#142b25; }
   .coachSignalValue { font-size:14px !important; line-height:1.45 !important; }
   .coachSignalAction { display:inline-flex; grid-column:2; grid-row:2; width:100%; margin:0; }
