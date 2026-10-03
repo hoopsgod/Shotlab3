@@ -21,9 +21,8 @@ test("Coach Home desktop stage uses operational rather than marketing scale", ()
   assert.match(coachCss, /\.mcHeroTeamMark\{width:clamp\(104px,10vw,132px\);height:clamp\(104px,10vw,132px\)/);
 });
 
-test("Player Home desktop keeps today and coach context dense enough for one operational viewport", () => {
-  assert.match(playerCss, /@media \(min-width:981px\)[\s\S]*?\.root \{ display:grid; grid-template-columns:minmax\(0,1\.35fr\) minmax\(300px,\.75fr\); gap:12px 16px/);
-  assert.match(playerCss, /\.hero \{ grid-column:1; grid-row:1 \/ span 2; min-height:360px; padding:23px 26px; border-radius:13px; \}/);
+test("Player Home desktop reduces showcase height while preserving Coach context", () => {
+  assert.match(playerCss, /@media \(min-width:981px\)[\s\S]*?\.hero \{ grid-column:1; grid-row:1 \/ span 2; min-height:360px; padding:20px 24px; border-radius:15px; \}/);
   assert.match(playerCss, /\.coachSignal \{ grid-column:2; grid-row:1; margin:0 !important; padding:18px !important;/);
 });
 
