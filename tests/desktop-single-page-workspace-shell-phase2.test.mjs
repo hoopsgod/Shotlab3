@@ -5,6 +5,7 @@ import { applyPhase2CoachHomeHardening, applyPhase2DesktopWorkspaceHardening } f
 
 const app = await readFile("src/App.jsx", "utf8");
 const coachHome = await readFile("src/components/CoachCommandCenter.jsx", "utf8");
+const chrome = await readFile("src/components/DesktopWorkspaceChrome.jsx", "utf8");
 const css = await readFile("src/styles/DesktopHudlWorkspace2026.css", "utf8");
 const shippingApp = applyPhase2DesktopWorkspaceHardening(app);
 const shippingCoachHome = applyPhase2CoachHomeHardening(coachHome);
@@ -18,8 +19,9 @@ test("desktop workspace shell has one 1024px authority boundary", () => {
 });
 
 test("shipping Coach and Player desktop navigation exposes the active route semantically", () => {
-  const activeRouteSemantics = shippingApp.match(/aria-current=\{[^}]*\?\s*"page"\s*:\s*undefined\}/g) || [];
-  assert.ok(activeRouteSemantics.length >= 2, `expected Coach and Player aria-current semantics after the shipping Phase 2 enhancer; found ${activeRouteSemantics.length}`);
+  assert.match(shippingApp, /<DesktopWorkspaceNavigation role="Coach"/);
+  assert.match(shippingApp, /<DesktopWorkspaceNavigation role="Player"/);
+  assert.match(chrome, /aria-current=\{activeKey === item.k \? "page" : undefined\}/);
   assert.match(shippingCoachHome, /aria-current=\{item\.active\?"page":undefined\}/);
 });
 

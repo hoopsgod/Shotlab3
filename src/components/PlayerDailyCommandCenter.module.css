@@ -232,7 +232,7 @@
 .coachSignalAction { display:none; align-items:center; justify-content:space-between; gap:10px; min-height:42px; margin-top:2px; padding:0 14px; border:1px solid #ccd6d2; border-radius:10px; background:#fff; color:#20342f; font:750 13px/1.2 var(--font-body,system-ui,sans-serif); cursor:pointer; }
 .coachSignalAction:hover,.coachSignalAction:focus-visible { border-color:#799786; background:#f3f9f1; }
 .coachSignalAction:focus-visible { outline:3px solid #9ebd7d; outline-offset:2px; }
-@media (min-width:981px) {
+@media (min-width:1024px) {
   .root { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr); gap:12px 18px; align-items:start; }
   .hero { grid-column:1; grid-row:1 / span 2; min-height:360px; padding:20px 24px; border-radius:15px; }
   .title { font-size:clamp(30px,2.6vw,38px); line-height:1.04; }
@@ -246,7 +246,7 @@
   .root > :global(.playerProgressDisclosure) summary { padding:15px 20px; }
   .section,.activation,.momentumSignal { grid-column:1/-1; margin-top:0; }
 }
-@media (min-width:981px) and (max-width:1150px) {
+@media (min-width:1024px) and (max-width:1150px) {
   .root { grid-template-columns:minmax(0,1fr) minmax(280px,.8fr); gap:10px; }
   .hero { padding:20px; }
 }

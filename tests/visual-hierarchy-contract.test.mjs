@@ -71,7 +71,7 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   // composition belongs to CoachMissionControlTitleStage.css. Shared navigation is
   // independently certified and must not be re-owned by Coach title-stage CSS.
   assert.match(coachShellCss,/\.mcShellV3/);
-  mediaBlock(coachShellCss,"(max-width:980px)");
+  mediaBlock(coachShellCss,"(max-width:1023px)");
   mediaBlock(coachShellCss,"(max-width:700px)");
   assert.match(coachShellCss,/mission-control-active/);
   assert.match(coachShellCss,/safe-area-inset-bottom/);

@@ -24,7 +24,7 @@ const isDefaultTitansLogo = (value = "") => [
   "/branding/titans-default-mark.svg",
   "/branding/titans-default-mark-free.svg",
 ].some((candidate) => String(value).includes(candidate));
-const DESKTOP_RAIL_MIN_WIDTH = 981;
+const DESKTOP_RAIL_MIN_WIDTH = 1024;
 const hasDesktopViewport = () => {
   if (typeof window === "undefined") return false;
   const widths = [window.innerWidth, window.visualViewport?.width, window.screen?.width].filter((value) => Number.isFinite(Number(value)) && Number(value) > 0).map(Number);
@@ -109,7 +109,7 @@ function TodayPlan({ activation, onAction }) {
 }
 
 export default function CoachCommandCenter({
-  variant = "full", totalPlayers, activeTodayCount, nextEventDateFormatted, highlightPlayersAttention, onPlayersClick, onActiveTodayClick, onAnalyticsClick, onNextEventClick, onAddPlayer, onAddDrill, onScheduleEvent, onLogScore, joinCode, onCopyJoinCode, onRegenerateJoinCode, codeErr, attentionItems = [], activityItems = [], eventReadiness = null, onEventReadinessClick, programPulse = null, coreLoop = null, onOpenCoreLoopPlayer, onCoreLoopRetry,
+  desktopFrame = false, variant = "full", totalPlayers, activeTodayCount, nextEventDateFormatted, highlightPlayersAttention, onPlayersClick, onActiveTodayClick, onAnalyticsClick, onNextEventClick, onAddPlayer, onAddDrill, onScheduleEvent, onLogScore, joinCode, onCopyJoinCode, onRegenerateJoinCode, codeErr, attentionItems = [], activityItems = [], eventReadiness = null, onEventReadinessClick, programPulse = null, coreLoop = null, onOpenCoreLoopPlayer, onCoreLoopRetry,
 }) {
   const { branding } = useTeamBranding();
   const isDemoSession = isDemoPersistenceSession();
@@ -230,21 +230,22 @@ export default function CoachCommandCenter({
   if (variant === "compact") return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
 
   return <>
-    <div className={`mcShell mcShellV3 ${desktopRailEnabled ? "is-desktop-shell" : "is-mobile-shell"} ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" data-visual-system="phase-4-premium" data-desktop-rail={desktopRailEnabled ? "visible" : "removed"} style={{ "--mc": accent, "--mc-secondary": secondary }}>
-      {desktopRailEnabled ? <aside className="mcRail" aria-label="Coach navigation">
+    <div className={`mcShell mcShellV3 ${desktopRailEnabled ? "is-desktop-shell" : "is-mobile-shell"} ${desktopFrame ? "uses-workspace-frame" : ""} ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" data-mobile-product-reset="phase-1" data-visual-system="phase-4-premium" data-desktop-rail={desktopRailEnabled ? "visible" : "removed"} style={{ "--mc": accent, "--mc-secondary": secondary }}>
+      {desktopRailEnabled && !desktopFrame ? <aside className="mcRail" aria-label="Coach navigation">
         <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><span className="mcRailBrandMark">{fullTeamLogoUrl ? <img className="mcRailLogo" src={fullTeamLogoUrl} alt={`${teamName} logo`} /> : <LogoSetupPrompt teamName={teamName} className="mcRailLogoSetup" />}</span><span className="mcRailBrandCopy"><small>TEAM WORKSPACE</small><strong>{teamName}</strong></span></button>
-        <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
+        <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} aria-current={item.active?"page":undefined} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside> : null}
 
       <main className="missionControl">
-        <header className="mcHeader" data-testid="mission-control-team-header">
+        {!desktopFrame&&<header className="mcHeader" data-testid="mission-control-team-header">
           <button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button>
           <div className="mcBrandLockup"><button type="button" className="mcHeaderTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}>{heroTeamLogoUrl ? <img src={heroTeamLogoUrl} alt="" /> : <LogoSetupPrompt teamName={teamName} className="mcHeaderLogoSetup" />}</button><span className="mcBrandCopy"><small>Coach mode</small><strong>{teamName}</strong></span></div>
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
-        </header>
+        </header>}
 
         <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective" data-home-role="primary" data-team-identity-stage="coach-mission-control">
+          {desktopFrame&&<button type="button" className="mcWorkspaceInbox" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} items`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" size={17}/> Inbox{inboxModel.actionableCount>0?` · ${inboxModel.actionableCount}`:""}</button>}
           <CourtArtwork logoUrl={heroTeamLogoUrl} /><div className="mcHeroScrim" />
           <div className="mcHeroContent">
             <div className="mcHeroIdentity">

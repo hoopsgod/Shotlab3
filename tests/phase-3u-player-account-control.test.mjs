@@ -10,7 +10,7 @@ const routeEnhancerSource = fs.readFileSync(new URL("../scripts/run-route-enhanc
 const productionAcceptanceSource = fs.readFileSync(new URL("./e2e/production-acceptance.spec.mjs", import.meta.url), "utf8");
 
 test("mobile player account actions are consolidated into More", () => {
-  assert.match(appSource, /\{isDesktop&&<div className="player-quick-actions"/);
+  assert.match(appSource, /\{isDesktop&&[^\n]*<div className="player-quick-actions"/);
   assert.match(appSource, /<MobileNavigation primaryItems=\{playerMobilePrimaryItems\}[^>]+onLogout=\{logout\}[^>]+ariaLabel="Player navigation"/);
   assert.match(navSource, /onLogout, ariaLabel = "Mobile navigation"/);
   assert.match(navSource, /role === "player" && onLogout/);

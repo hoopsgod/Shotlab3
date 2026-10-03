@@ -130,7 +130,7 @@ button { letter-spacing: -.005em; }
 .performance-workspace,
 .performance-shell .player-scroll-container,
 .performance-shell .coach-scroll-container { background: transparent !important; }
-.performance-shell .content-wrap { max-width: 1320px !important; }
+.performance-shell:not(.has-workspace-frame) .content-wrap { max-width: 1320px !important; }
 .performance-shell .player-scroll-container,
 .performance-shell .coach-scroll-container { max-width: 1120px !important; }
 

@@ -34,6 +34,7 @@ import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
 import { DominantObjectiveCard, MetricStrip, ProgressiveDisclosure, QuietSection } from "./components/VisualHierarchy.jsx";
 import MobileNavigation from "./components/MobileNavigation.jsx";
 import ShotLabIcon from "./components/ShotLabIcon.jsx";
+import { DesktopWorkspaceNavigation, DesktopWorkspaceHeader } from "./components/DesktopWorkspaceChrome.jsx";
 import SemanticStatus from "./components/SemanticStatus.jsx";
 import { DashboardSection } from "./components/CoachDashboardPrimitives.jsx";
 import { CoachEventsInteractiveDashboard, CoachPageDashboardHeader, CoachPlayersInteractiveDashboard } from "./components/CoachInteractiveDashboards.jsx";
@@ -1756,7 +1757,7 @@ if(!user)return <StaticLegalPage pageKey="delete-account"/>;
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/><main data-testid="signed-in-delete-account-route" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:"40px 20px",fontFamily:FB}}><div style={{maxWidth:560,margin:"0 auto"}}><a href={user?.role==="coach"?"/coach/profile":"/player/profile"} style={{display:"inline-flex",alignItems:"center",gap:8,color:VOLT,textDecoration:"none",fontFamily:FD,fontSize:16,letterSpacing:2,marginBottom:22,minHeight:44,touchAction:"manipulation"}}><SLLogo size={24}/> SHOTLAB</a><section style={{background:`linear-gradient(145deg,${CARD_BG},#111111)`,border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"22px 20px",boxShadow:"0 18px 46px rgba(0,0,0,0.38)"}}><div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:800,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:8}}>Signed-in account deletion</div><h1 style={{fontFamily:FD,color:LIGHT,fontSize:34,letterSpacing:2,lineHeight:1,marginBottom:8}}>Account & Data</h1><p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.55,marginBottom:12}}>You are signed in. Delete your account in-app below instead of using the static support fallback.</p><AccountTrustActions deleteAccount={deleteAccount} preserveTeamData={user?.role==="coach"||user?.isCoach}/></section></div></main>{dataDebugPanel}</TeamBrandingProvider>;
 }
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth runtime={AUTH_WORKSPACE_RUNTIME} onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
+{view==="auth"&&<div className="screen-fade-in"><Auth runtime={AUTH_WORKSPACE_RUNTIME} onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>}
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog} seasonArchives={seasonArchives.filter(a=>String(a?.teamId||a?.team_id||"")===String(user?.teamId||""))}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} archiveSeason={archiveSeason} seasonArchives={seasonArchives.filter(a=>String(a.teamId||"")===String(user?.teamId||""))} playerProfiles={playerProfiles.filter(pp=>String(pp.teamId||pp.team_id||"")===String(user?.teamId||""))} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} players={scopedPlayers} addCoachProgramScore={addCoachProgramScore} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} updateProgramDrill={updateProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachHomeLeaderboardRows={coachHomeLeaderboardRows} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} accountCapabilities={accountCapabilities} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
@@ -2001,9 +2002,9 @@ const handlePlayerInsightAction=useCallback((action={})=>{
 const handleAtHomeMetric=useCallback((metric)=>{if(metric?.filter){setHomeDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||atHomeWorkspaceModel.primaryAction);},[atHomeWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
 const handleProgramMetric=useCallback((metric)=>{if(metric?.filter){setProgramDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||programWorkspaceModel.primaryAction);},[programWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
 
-return <div className={`app-shell performance-shell performance-shell--player ${isDesktop?"is-desktop":"is-mobile"}`} data-workspace-tab={tab}>
-{isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title"><SLLogo size={36}/><span><strong>SHOTLAB</strong><small>PLAYER DASHBOARD</small></span></div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}><ShotLabIcon name={item.icon} size={22}/><span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:saved&&shareData?"calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px))":"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
+return <div className={`app-shell performance-shell performance-shell--player ${isDesktop?"is-desktop has-workspace-frame":"is-mobile"}`} data-workspace-tab={tab}>
+{isDesktop&&<DesktopWorkspaceNavigation role="Player" items={playerNavItems} activeKey={tab} onNavigate={switchTab} userName={u.name}/>}
+<main className="shell-main">{isDesktop&&<DesktopWorkspaceHeader role="Player" title={tab==="home"?"Home":tab==="log-drill"?"Training":playerNavItems.find(item=>item.k===tab)?.l||"Workspace"} accountLabel="Profile" onAccount={()=>switchTab("profile")} onLogout={logout}/>}<div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:saved&&shareData?"calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px))":"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
 <BrandBackdrop/>
 {completionCue&&<div className="fade-up" data-testid="player-completion-cue" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
   <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
@@ -2040,7 +2041,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 </div>}
 
 {/* Header — Premium dashboard heading */}
-<PlayerDashboardHeader
+{(!isDesktop||!["home","log-drill"].includes(tab))&&<PlayerDashboardHeader
   headingLevel={tab !== "home" && !showShotStats}
   userName={u.name}
   subtitle=""
@@ -2050,9 +2051,9 @@ return <div className={`app-shell performance-shell performance-shell--player ${
     if(todayS.length>0)return <span>{todayS.length}/{drills.length} drills · {shotsToday>0?shotsToday+" shots · ":""}{streak}D streak</span>;
     return `${drills.length} drills available today`;
   })()}
-/>
+/>}
 
-{isDesktop&&<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
+{isDesktop&&!["home","log-drill"].includes(tab)&&<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
   <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:44,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
   <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:44,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
 </div>}
@@ -2239,8 +2240,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
             {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:44,borderRadius:10,border:"1px solid var(--stroke-1)",background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
           </div>
         </ProgressiveDisclosure>
-        
-        
+
+
       </div>
     })()}
 
@@ -2248,7 +2249,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
   {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up player-training-workspace player-training-workspace--home" data-player-journey="at-home">
-    
+
     <PlayerWorkspaceCommandBar model={atHomeWorkspaceModel} activeMetric={homeDrillFilter==="open"?"open":homeDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleAtHomeMetric} testId="player-at-home-workspace"/>
     <PlayerWorkspaceFilterRail value={homeDrillFilter} onChange={setHomeDrillFilter} ariaLabel="At Home drill filters" testId="player-at-home-filter-rail" options={[{value:"all",label:"All drills",count:drills.length},{value:"open",label:"Open",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
 
@@ -3611,9 +3612,9 @@ useEffect(()=>{
   window.scrollTo({top:0,left:0,behavior:"auto"});
 },[tab,selP]);
 
-return <div className={`app-shell performance-shell performance-shell--coach ${isDesktop?"is-desktop":"is-mobile"}`} data-workspace-tab={tab} data-text-scale={coachTextScale}>
-{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={u.isCoach&&["feed","drills","events","sc","players","activity"].includes(tab)?(tab==="activity"?"feed":tab):"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
+return <div className={`app-shell performance-shell performance-shell--coach ${isDesktop?"is-desktop has-workspace-frame":"is-mobile"}`} data-workspace-tab={tab} data-text-scale={coachTextScale}>
+{isDesktop&&<DesktopWorkspaceNavigation role="Coach" items={navItems.map(item=>item.k==="feed"?{...item,l:"Mission Control"}:item)} activeKey={tab} onNavigate={handleNavChange} userName={u.name}/>}
+<main className="shell-main">{isDesktop&&<DesktopWorkspaceHeader role="Coach" title={tab==="feed"?"Mission Control":navItems.find(item=>item.k===tab)?.l||"Workspace"} accountLabel="Team branding" onAccount={openTeamBranding} onLogout={logout}/>}<div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={u.isCoach&&["feed","drills","events","sc","players","activity"].includes(tab)?(tab==="activity"?"feed":tab):"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -3634,7 +3635,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   mutedColor={MUTED}
   onLogout={logout}
 />
-<div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
+<div style={{position:"relative",zIndex:1,padding:isDesktop?"0":"max(20px,env(safe-area-inset-top)) 20px 0"}}>
 {isOverviewTab&&<>
 <CoachDashboardHeader
   heroRef={heroRef}
@@ -3642,7 +3643,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   onOpenTeamBranding={openTeamBranding}
 />
 <CoachCommandCenter
-  variant="full"
+  desktopFrame={isDesktop}
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
@@ -4202,7 +4203,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   {tab==="in-season"&&<div className="page pageShell fade-up" data-accent="in-season" style={shellVars("in-season")}><CoachPageDashboardHeader eyebrow="Season performance" title="In Season" summary="Manage in-season drill records, free throw standards, school leaderboards, and verified game-stat imports." status={`${customInSeasonDrillCount}/30 custom in-season drills`} metrics={[{key:"drills",label:"In Season Drills",value:programDrills.filter(d=>d?.isDefaultDemo||isInSeasonProgramDrill(d)).length,detail:"Team standards"},{key:"custom",label:"Custom Slots",value:`${customInSeasonDrillCount}/30`,detail:"Coach-created standards",tone:"info"},{key:"records",label:"Program Scores",value:safeProgramScores.length,detail:"Verified drill results",tone:"positive"},{key:"archives",label:"Archived Seasons",value:seasonArchives.length,detail:"Historical record books"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>setCoachPageMetric(key)} testId="coach-page-dashboard-in-season"/><InSeasonPerformanceHub role="coach" user={u} team={team} programDrills={programDrills} programScores={safeProgramScores} players={leaderboardPlayers} seasonArchives={seasonArchives} addProgramDrill={addInSeasonProgramDrill} updateProgramDrill={updateInSeasonProgramDrill} removeProgramDrill={removeProgramDrill} onOpenCoachScoreEntry={()=>setShowProgramScoreEntry(true)} />
   </div>}
 
-  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><CoachPlayersInteractiveDashboard metrics={coachPlayerDashboardMetrics} rows={coachPlayerDashboardRows} filter={playerDashboardFilter} query={playerDashboardQuery} onFilterChange={setPlayerDashboardFilter} onQueryChange={setPlayerDashboardQuery} onAddPlayer={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth",block:"start"})} onOpenArchives={()=>setTab("settings")}/>
+  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><CoachPlayersInteractiveDashboard desktopHeading={isDesktop} metrics={coachPlayerDashboardMetrics} rows={coachPlayerDashboardRows} filter={playerDashboardFilter} query={playerDashboardQuery} onFilterChange={setPlayerDashboardFilter} onQueryChange={setPlayerDashboardQuery} onAddPlayer={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth",block:"start"})} onOpenArchives={()=>setTab("settings")}/>
     <div id="coach-roster-operations" className="coachDashboardOperationalContent">{filteredCoachPlayerDashboardRows.length===0&&<div className="coachDashboardNoResults">No players match the current dashboard filters.</div>}<CoachRoster players={filteredCoachRosterPlayers} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged} onRemovePlayer={removeRosterPlayer} onSelectPlayer={openPlayerIntelligence}/></div>
     <DashboardSection eyebrow="Account activation" title="Add a player" summary="Create the roster relationship and send a secure account setup invitation." action={{label:"Back to roster",onClick:()=>document.getElementById("coach-roster-operations")?.scrollIntoView({behavior:"smooth",block:"start"})}} testId="coach-player-invite-dashboard-section"><div id="coach-add-player-form" className="coachPlayerInviteMount"><CoachPlayerInviteForm coach={u} teamId={u?.teamId||""} onProvisioned={()=>{void hydratePersistedData();}}/></div></DashboardSection>
   </div>}

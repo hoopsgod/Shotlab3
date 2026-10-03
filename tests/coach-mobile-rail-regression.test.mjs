@@ -6,12 +6,12 @@ import { mediaBlock } from "./helpers/css-contract.mjs";
 const shellCss = fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css", import.meta.url), "utf8");
 
 test("Coach Home permanent navigation rail stays desktop-only", () => {
-  const desktop = mediaBlock(shellCss, "(min-width:981px)");
-  const mobileAndTablet = mediaBlock(shellCss, "(max-width:980px)");
+  const desktop = mediaBlock(fs.readFileSync(new URL("../src/styles/DesktopHudlWorkspace2026.css", import.meta.url), "utf8"), "(min-width:1024px)");
+  const mobileAndTablet = mediaBlock(shellCss, "(max-width:1023px)");
 
   assert.match(
     desktop,
-    /\.app-shell\.is-desktop \.mcShellV3>\.mcRail\{display:flex!important/,
+    /\.workspaceRail \{[^}]*position:sticky;[^}]*height:100dvh;[^}]*display:flex;/,
     "desktop Coach Home should retain the permanent rail",
   );
   assert.match(

@@ -243,6 +243,7 @@ export function DashboardProgress({ value = 0, max = 100, label, detail }) {
 
 export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, children, testId }) {
   const closeButtonRef = useRef(null);
+  const drawerRef = useRef(null);
   const previousFocusRef = useRef(null);
   const onCloseRef = useRef(onClose);
 
@@ -255,6 +256,17 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
     previousFocusRef.current = document.activeElement;
     const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
     const handleKeyDown = (event) => {
+      if (event.key === "Tab") {
+        const controls = Array.from(drawerRef.current?.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]') || [])
+          .filter(node => !node.disabled && node.getClientRects().length);
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault(); last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault(); first?.focus();
+        }
+      }
       if (event.key !== "Escape") return;
       event.preventDefault();
       onCloseRef.current?.();
@@ -272,7 +284,7 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
   const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
       <button type="button" className={styles.drawerBackdrop} aria-label="Close details" onClick={onClose} />
-      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer">
+      <aside ref={drawerRef} className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer">
         <div className={styles.drawerHeader}>
           <div>
             {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}

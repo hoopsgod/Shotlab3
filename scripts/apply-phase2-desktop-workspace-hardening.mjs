@@ -35,8 +35,12 @@ function stripRuntimeOnly(source, token) {
 
 export function applyPhase2DesktopWorkspaceHardening(source) {
   let next = String(source || "");
-  next = replaceOrVerify(next, COACH_BEFORE, COACH_AFTER, "Coach desktop navigation");
-  next = replaceOrVerify(next, PLAYER_BEFORE, PLAYER_AFTER, "Player desktop navigation");
+  // Shared chrome owns active-route semantics; legacy standalone shells still
+  // receive the existing compatibility patch.
+  if (!next.includes("<DesktopWorkspaceNavigation")) {
+    next = replaceOrVerify(next, COACH_BEFORE, COACH_AFTER, "Coach desktop navigation");
+    next = replaceOrVerify(next, PLAYER_BEFORE, PLAYER_AFTER, "Player desktop navigation");
+  }
   next = stripRuntimeOnly(next, COACH_TEXT_SCALE_BINDING);
   next = stripRuntimeOnly(next, COACH_TEXT_SCALE_ATTRIBUTE);
   next = stripRuntimeOnly(next, EXPLICIT_FULL_VARIANT);

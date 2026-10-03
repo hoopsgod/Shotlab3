@@ -169,6 +169,10 @@ jobs:
             tests/e2e/production-acceptance.spec.mjs \
             --config=playwright.acceptance.config.mjs \
             --reporter=line
+      - name: Certify Phase 1 shared frame and contextual detail on exact deployment
+        env:
+          DESKTOP_SHELL_BASE_URL: ${{ steps.cloudflare.outputs.url }}
+        run: npx playwright test tests/e2e/phase1-desktop-visual-shell.spec.mjs --config=playwright.desktop-shell.config.mjs --reporter=line
       - name: Capture required Coach and Player viewport evidence
         env:
           ACCEPTANCE_BASE_URL: ${{ steps.cloudflare.outputs.url }}

@@ -28,7 +28,7 @@ const viewportWorkflow=read("../.github/workflows/viewport-debug-preflight.yml")
 const stripComments=(value)=>value.replace(/\/\*[\s\S]*?\*\//g,"");
 
 const mobileTitle=mediaBlock(titleCss,"(max-width:700px)");
-const desktopTitle=mediaBlock(titleCss,"(min-width:981px)");
+const desktopTitle=mediaBlock(titleCss,"(min-width:1024px)");
 
 test("Coach Home keeps the production decision model and truthful signals",()=>{
   ["Mission Control","Today at a glance","Needs attention","Program Pulse","Recent Activity","Next session"].forEach((label)=>assert.match(source,new RegExp(label)));
@@ -100,10 +100,10 @@ test("desktop Coach Home follows the Phase 3 operational command-stage anatomy",
   assert.doesNotMatch(desktopTitle,/grid-template-columns:208px minmax\(0,1fr\)/);
   assert.match(desktopWorkspaceCss,/\.mcShellV3\.is-desktop-shell\s*\{[^}]*grid-template-columns:248px minmax\(0,1fr\)/);
   assert.match(desktopTitle,/grid-template-columns:repeat\(12,minmax\(0,1fr\)\)/);
-  assert.match(desktopTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\][^{]*\{[^}]*grid-column:1\/8[^}]*grid-row:2[^}]*min-height:300px/);
-  assert.match(desktopTitle,/\.mcAttention\{[^}]*grid-column:8\/-1[^}]*grid-row:2[^}]*min-height:300px/);
-  assert.match(desktopTitle,/\.mcTeamHealth\{[^}]*grid-column:1\/4[^}]*grid-row:3[^}]*min-height:210px/);
-  assert.match(desktopTitle,/\.mcActivity,\.mcShellV3 \.mcNextSession\{[^}]*grid-row:3[^}]*min-height:210px/);
+  assert.match(desktopTitle,/\.mcHero\[data-team-identity-stage="coach-mission-control"\][^{]*\{[^}]*grid-column:1\/8[^}]*grid-row:2[^}]*min-height:230px/);
+  assert.match(desktopTitle,/\.mcAttention\{[^}]*grid-column:8\/-1[^}]*grid-row:2[^}]*min-height:230px/);
+  assert.match(desktopTitle,/\.mcTeamHealth\{[^}]*grid-column:1\/4[^}]*grid-row:3[^}]*min-height:160px/);
+  assert.match(desktopTitle,/\.mcActivity,\.mcShellV3 \.mcNextSession\{[^}]*grid-row:3[^}]*min-height:160px/);
   assert.match(desktopTitle,/\.mcActivity\{grid-column:4\/9/);
   assert.match(desktopTitle,/\.mcNextSession\{grid-column:9\/-1/);
   assert.match(titleCss,/\.mcRailBrand::before\{content:"SHOTLAB"/);
