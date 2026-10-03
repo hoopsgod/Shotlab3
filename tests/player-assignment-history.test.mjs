@@ -7,7 +7,7 @@ import {
   loadCoachAssignmentHistory,
   saveNextPlayerAssignment,
 } from "../src/lib/playerAssignmentHistoryService.js";
-import { assignmentReadState, getPlayerAssignmentLocal, savePlayerAssignmentLocal } from "../src/lib/playerAssignmentService.js";
+import { assignmentReadState, getPlayerAssignmentLocal, savePlayerAssignment, savePlayerAssignmentLocal } from "../src/lib/playerAssignmentService.js";
 
 function memoryStorage(seed = {}) {
   const values = new Map(Object.entries(seed).map(([key, value]) => [key, typeof value === "string" ? value : JSON.stringify(value)]));
@@ -186,13 +186,55 @@ test("database, server, and UI contracts keep history immutable, visible, and pr
   assert.doesNotMatch(readyEnhancer, /private_note|coach_note/i);
 });
 
-test("coach follow-up routes completed delivery through history-safe adjustment", () => {
-  const followUp = fs.readFileSync(new URL("../src/components/CoachDashboardPhase2.jsx", import.meta.url), "utf8");
+test("assignment delivery automatically preserves completed work before creating the adjusted next assignment", async () => {
+  const storage = coachStorage();
+  savePlayerAssignmentLocal(completed, storage);
+  let requestUrl = "";
+  let payload = null;
 
-  assert.match(followUp, /playerAssignmentHistoryService\.js/);
-  assert.match(followUp, /delivery\?\.state\s*===\s*["']completed["']/);
-  assert.match(followUp, /saveNextPlayerAssignment\s*\(/);
-  assert.match(followUp, /savePlayerAssignment\s*\(/);
-  assert.match(followUp, /Adjust and deliver next assignment/);
-  assert.match(followUp, /completed work remains in history/i);
+  const result = await savePlayerAssignment({
+    teamId: TEAM_ID,
+    playerIdentity: PLAYER,
+    playerName: "Player One",
+    assignmentText: "Adjust: repeat the five-spot ladder with a 45-make target.",
+    resultDetail: "Review: 42 makes on the prior assignment.",
+    dueDate: "2026-08-06",
+    storage,
+    fetchImpl: async (url, options) => {
+      requestUrl = url;
+      payload = JSON.parse(options.body);
+      if (url !== "/v1/player-assignment-history") {
+        return { ok: false, json: async () => ({ error: "wrong_route" }) };
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          ok: true,
+          storage_mode: "team_remote",
+          archived_previous: true,
+          archived_assignment: { ...completed, archived_at: "2026-08-02T21:00:00.000Z" },
+          assignment: {
+            team_id: TEAM_ID,
+            player_identity: PLAYER,
+            player_name: "Player One",
+            assignment_text: "Adjust: repeat the five-spot ladder with a 45-make target.",
+            result_detail: "Review: 42 makes on the prior assignment.",
+            due_date: "2026-08-06",
+            state: "assigned",
+            assigned_by: "coach@example.com",
+            created_at: "2026-08-02T21:00:00.000Z",
+            updated_at: "2026-08-02T21:00:00.000Z",
+          },
+        }),
+      };
+    },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(requestUrl, "/v1/player-assignment-history");
+  assert.equal(payload.assignment.result_detail, "Review: 42 makes on the prior assignment.");
+  assert.equal(listPlayerAssignmentHistoryLocal({ teamId: TEAM_ID, storage }).length, 1);
+  const current = getPlayerAssignmentLocal({ teamId: TEAM_ID, playerIdentity: PLAYER, storage });
+  assert.equal(current.state, "assigned");
+  assert.match(current.assignmentText, /45-make target/);
 });
