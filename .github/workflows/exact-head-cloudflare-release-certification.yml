@@ -201,15 +201,15 @@ jobs:
 
           const navButtons = sidebar.getByRole("button");
           const labels = (await navButtons.allTextContents()).map((value) => value.trim());
-          const analyticsButton = sidebar.getByRole("button", { name: "Analytics", exact: true });
-          await analyticsButton.waitFor({ state: "visible", timeout: 20_000 });
+          const leaderboardsNavigation = sidebar.getByRole("button", { name: "Analytics", exact: true });
+          await leaderboardsNavigation.waitFor({ state: "visible", timeout: 20_000 });
 
           const navigationEntriesBefore = await page.evaluate(() => performance.getEntriesByType("navigation").length);
-          await analyticsButton.click();
-          await page.getByTestId("premium-leaderboards-hub").waitFor({ state: "visible", timeout: 20_000 });
+          await leaderboardsNavigation.click();
+          await page.getByTestId("coach-page-dashboard-leaderboards").waitFor({ state: "visible", timeout: 20_000 });
           const navigationEntriesAfter = await page.evaluate(() => performance.getEntriesByType("navigation").length);
           if (navigationEntriesAfter !== navigationEntriesBefore) {
-            throw new Error(`Coach desktop Analytics → Leaderboards caused a full-page navigation: before=${navigationEntriesBefore} after=${navigationEntriesAfter}`);
+            throw new Error(`Coach desktop Leaderboards navigation caused a full-page navigation: before=${navigationEntriesBefore} after=${navigationEntriesAfter}`);
           }
 
           const geometry = await page.evaluate(() => ({
