@@ -1,0 +1,148 @@
+/* ShotLab Desktop Workspace Phase 1
+   Narrow desktop-only composition layer for the shared shell, Coach Home,
+   and Coach Players. Mobile behavior is intentionally untouched. */
+@media (min-width:1024px) {
+  /* Shared workspace shell */
+  .mcShellV3.is-desktop-shell,
+  .performance-shell.is-desktop {
+    grid-template-columns:232px minmax(0,1fr);
+  }
+
+  .mcShellV3.is-desktop-shell > .mcRail,
+  .performance-shell.is-desktop > .sidebar-nav {
+    box-shadow:none;
+  }
+
+  .performance-shell.is-desktop > .shell-main {
+    min-height:100dvh;
+    background:#f4f0e7;
+  }
+
+  .performance-shell.is-desktop .content-wrap,
+  .performance-shell.is-desktop .coach-scroll-container,
+  .performance-shell.is-desktop .player-scroll-container {
+    width:100% !important;
+    max-width:none !important;
+    margin-inline:0 !important;
+  }
+
+  .performance-shell.is-desktop .sidebar-nav .nav-item {
+    min-height:42px !important;
+    margin:2px 10px !important;
+    border-radius:8px !important;
+    transform:none !important;
+  }
+
+  .performance-shell.is-desktop .sidebar-nav .nav-item.is-active {
+    border-color:transparent !important;
+    background:rgba(255,255,255,.05) !important;
+    box-shadow:inset 3px 0 var(--pw-accent) !important;
+  }
+
+  /* Coach Home: stronger hierarchy and denser first viewport */
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] {
+    min-height:244px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent {
+    min-height:244px;
+    padding:22px 28px 18px 34px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTeamMark {
+    width:96px;
+    height:96px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroTitle {
+    max-width:20ch;
+    margin-top:8px;
+    font-size:34px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcHeroContent > p {
+    margin-top:5px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip {
+    margin-top:9px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcRealityStrip button {
+    min-height:42px;
+  }
+
+  .mcShellV3 .mcHero[data-team-identity-stage="coach-mission-control"] .mcPrimary {
+    min-height:38px;
+    margin-top:8px;
+  }
+
+  .mcShellV3 .mcAttention {
+    min-height:244px;
+  }
+
+  .mcShellV3 .mcTeamHealth,
+  .mcShellV3 .mcActivity,
+  .mcShellV3 .mcNextSession {
+    min-height:180px;
+  }
+
+  .mcShellV3 .mcTeamHealth {
+    padding:22px 22px 18px;
+  }
+
+  /* Coach Players: full-width roster workspace, not a centered card page */
+  .performance-shell--coach.is-desktop [data-testid="coach-players-interactive-dashboard"] {
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:20px 28px 56px;
+    gap:18px;
+  }
+
+  .performance-shell--coach.is-desktop [data-testid="coach-players-command-bar"] {
+    margin:0;
+  }
+
+  .performance-shell--coach.is-desktop [data-testid="coach-players-toolbar"] {
+    padding-block:8px 12px;
+    border-bottom:1px solid var(--sl-line,rgba(23,26,24,.1));
+  }
+
+  .performance-shell--coach.is-desktop .coachRoster__heading {
+    margin:0;
+    padding:0 2px 10px;
+    border-bottom:1px solid var(--sl-line,rgba(23,26,24,.1));
+  }
+
+  .performance-shell--coach.is-desktop .coachRosterCard {
+    margin:0 !important;
+    padding:13px 4px !important;
+    border:0 !important;
+    border-radius:0 !important;
+    background:transparent !important;
+    box-shadow:none !important;
+  }
+
+  .performance-shell--coach.is-desktop .coachRosterCard + .coachRosterCard {
+    border-top:1px solid var(--sl-line,rgba(23,26,24,.1)) !important;
+  }
+
+  .performance-shell--coach.is-desktop .coachRosterCard:hover,
+  .performance-shell--coach.is-desktop .coachRosterCard:focus-within {
+    background:rgba(255,255,255,.55) !important;
+    transform:none !important;
+  }
+
+  .performance-shell--coach.is-desktop .coachRosterCard__profile {
+    font-size:15px;
+  }
+
+  .performance-shell--coach.is-desktop .coachRosterCard__metrics {
+    font-size:11px;
+  }
+
+  .performance-shell--coach.is-desktop .coachPlayersSecondary {
+    margin-top:2px;
+  }
+}
