@@ -90,7 +90,7 @@ test("Coach desktop shell preserves one document, real IA history, active state,
   const workspaceSidebar = page.getByRole("complementary", { name: "Coach navigation" });
   await expect(workspaceSidebar).toHaveCount(1);
   await expect(workspaceSidebar.getByRole("button", { name: "Players", exact: true })).toHaveAttribute("aria-current", "page");
-  await expect(workspaceSidebar.getByRole("button", { name: "Feed", exact: true })).not.toHaveAttribute("aria-current", "page");
+  await expect(workspaceSidebar.getByRole("button", { name: "Mission Control", exact: true })).not.toHaveAttribute("aria-current", "page");
 
   const roster = page.locator("#coach-roster-operations");
   await expect(roster).toBeVisible({ timeout: 20_000 });
@@ -123,7 +123,7 @@ test("Coach desktop shell preserves one document, real IA history, active state,
   await page.goBack();
   await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible();
 
-  await coachNav(page, "Feed");
+  await coachNav(page, "Mission Control");
   expect(new URL(page.url()).pathname).toBe("/");
   await coachNav(page, "Players");
   await coachNav(page, "Events");

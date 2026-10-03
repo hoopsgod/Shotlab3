@@ -40,13 +40,13 @@ test('Coach Home source owns integrated program identity, premium crest and acti
 });
 
 test('Coach prototype hierarchy is brand-aware, decision-first and intentionally responsive', () => {
-  const desktop = mediaBlock(titleCss, '(min-width:981px)');
-  const tablet = mediaBlock(titleCss, '(min-width:701px) and (max-width:980px)');
+  const desktop = mediaBlock(titleCss, '(min-width:1024px)');
+  const tablet = mediaBlock(titleCss, '(min-width:701px) and (max-width:1023px)');
   const mobile = mediaBlock(titleCss, '(max-width:700px)');
 
   assert.match(desktop, /grid-column:1\/8/);
-  assert.match(desktop, /min-height:300px/);
-  assert.match(desktop, /\.mcAttention\{[^}]*grid-column:8\/-1[^}]*grid-row:2[^}]*min-height:300px/);
+  assert.match(desktop, /min-height:230px/);
+  assert.match(desktop, /\.mcAttention\{[^}]*grid-column:8\/-1[^}]*grid-row:2[^}]*min-height:230px/);
   assert.match(desktop, /\.mcProgramIdentity\{[^}]*font:760 12px\/1\.2 var\(--mc-native\)/);
   assert.doesNotMatch(desktop, /\.mcProgramIdentity\{[^}]*font:[^}]*Barlow Condensed/);
   assert.match(desktop, / \.mcHeroTitle\{[^}]*font:800 clamp\(32px,2\.8vw,42px\)\/\.94 "Barlow Condensed"/);

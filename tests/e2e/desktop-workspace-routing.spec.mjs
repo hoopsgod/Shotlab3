@@ -109,17 +109,17 @@ test("desktop Coach workspace owns marked player history and restores valid rout
   await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => new URL(page.url()).pathname).toBe("/");
 
-  const direct = await page.context().newPage();
+  const directContext = await page.context().browser().newContext();
+  const direct = await directContext.newPage();
   await installSafeRoutes(direct);
   await direct.setViewportSize({ width: 1280, height: 900 });
   await direct.goto(playerPath);
   await expect(direct.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
   await expect(direct.getByTestId("coach-player-intelligence-drawer")).toHaveCount(0);
-  await direct.close();
+  await directContext.close();
 
-  // A fresh tab clears the shared local demo identity. The originating tab still
-  // owns its explicit sessionStorage marker and must be able to reconstruct the
-  // demo app session on its next normal reload.
+  // Signed-out deep links use an isolated session. The originating demo session
+  // must still reconstruct its route and selected player on a normal reload.
   await page.reload();
   await expect(page.getByRole("complementary", { name: "Coach navigation" })).toBeVisible({ timeout: 20_000 });
   expect(pageErrors).toEqual([]);

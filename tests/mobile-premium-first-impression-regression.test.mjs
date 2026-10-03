@@ -126,7 +126,7 @@ test("Player Home remains immersive while Coach Home uses one verified brand-fir
   assert.match(coachCommand, /CoachMissionControlShell\.css/);
   assert.doesNotMatch(coachCommand, /MOBILE_PRODUCT_RESET_CSS|<style>/);
 
-  const tablet = mediaBlock(coachTitleCss, "(min-width:701px) and (max-width:980px)");
+  const tablet = mediaBlock(coachTitleCss, "(min-width:701px) and (max-width:1023px)");
   const mobile = mediaBlock(coachTitleCss, "(max-width:700px)");
   assert.match(tablet, /min-height:354px/);
   assert.match(tablet, /clamp\(36px,5\.5vw,49px\)\/\.88 "Barlow Condensed"/);

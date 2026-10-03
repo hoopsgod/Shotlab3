@@ -54,11 +54,13 @@ test("shared Coach title stages replace missing logos with an actionable premium
   assert.match(titleStageSource, /coach-dashboard-identity-header/);
 });
 
-test("Mission Control exposes the same premium monogram affordance in every Coach logo placement", () => {
+test("Mission Control preserves logo setup and shares desktop team identity", async () => {
   assert.match(commandCenterSource, /data-team-logo-fallback=\{mark\}/);
   assert.match(commandCenterSource, /<strong>\{mark\}<\/strong><small>Add logo<\/small>/);
   assert.doesNotMatch(commandCenterSource, /Click here to add your custom team logo/);
-  assert.match(commandCenterSource, /mcRailLogoSetup/);
+  const chrome = await readFile(new URL("../src/components/DesktopWorkspaceChrome.jsx", import.meta.url), "utf8");
+  assert.match(chrome, /className="workspaceContext"/);
+  assert.match(chrome, /<img src=\{logo\}/);
   assert.match(commandCenterSource, /mcHeaderLogoSetup/);
   assert.match(commandCenterSource, /mcHeroLogoSetup/);
   assert.match(commandCenterSource, /mcDrawerLogoSetup/);

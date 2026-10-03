@@ -35,6 +35,8 @@ const accessibleDesktopQuickActions = `{isDesktop&&<div className="player-quick-
 if (app.includes(legacyDesktopQuickActions)) {
   app = app.replace(legacyDesktopQuickActions, accessibleDesktopQuickActions);
 }
+const scopedDesktopQuickActions = accessibleDesktopQuickActions.replace("{isDesktop&&", '{isDesktop&&!["home","log-drill"].includes(tab)&&');
+if (!app.includes(scopedDesktopQuickActions)) {
 app = replaceOrVerify(
   app,
   `<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
@@ -44,6 +46,7 @@ app = replaceOrVerify(
   accessibleDesktopQuickActions,
   "mobile player quick actions"
 );
+}
 app = replaceOrVerify(
   app,
   `padding:isDesktop?"14px 20px 36px":"16px 20px var(--player-scroll-bottom-padding)"`,

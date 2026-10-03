@@ -35,8 +35,12 @@ function stripRuntimeOnly(source, token) {
 
 export function applyPhase2DesktopWorkspaceHardening(source) {
   let next = String(source || "");
-  next = replaceOrVerify(next, COACH_BEFORE, COACH_AFTER, "Coach desktop navigation");
-  next = replaceOrVerify(next, PLAYER_BEFORE, PLAYER_AFTER, "Player desktop navigation");
+  // Shared chrome owns active-route semantics; legacy standalone shells still
+  // receive the existing compatibility patch.
+  if (!next.includes("<DesktopWorkspaceNavigation")) {
+    next = replaceOrVerify(next, COACH_BEFORE, COACH_AFTER, "Coach desktop navigation");
+    next = replaceOrVerify(next, PLAYER_BEFORE, PLAYER_AFTER, "Player desktop navigation");
+  }
   next = stripRuntimeOnly(next, COACH_TEXT_SCALE_BINDING);
   next = stripRuntimeOnly(next, COACH_TEXT_SCALE_ATTRIBUTE);
   next = stripRuntimeOnly(next, EXPLICIT_FULL_VARIANT);
@@ -46,8 +50,9 @@ export function applyPhase2DesktopWorkspaceHardening(source) {
 
 export function applyPhase2CoachHomeHardening(source) {
   let next = String(source || "");
-  next = replaceOrVerify(next, COACH_HOME_BREAKPOINT_BEFORE, COACH_HOME_BREAKPOINT_AFTER, "Coach Home desktop breakpoint");
-  next = replaceOrVerify(next, COACH_HOME_NAV_BEFORE, COACH_HOME_NAV_AFTER, "Coach Home desktop navigation semantics");
+  if (next.includes("DESKTOP_RAIL_MIN_WIDTH")) next = replaceOrVerify(next, COACH_HOME_BREAKPOINT_BEFORE, COACH_HOME_BREAKPOINT_AFTER, "Coach Home desktop breakpoint");
+  else if (!next.includes("desktopFrame = false")) throw new Error("Coach Home must inherit the shared desktop frame authority.");
+  if (next.includes('className="mcRail"')) next = replaceOrVerify(next, COACH_HOME_NAV_BEFORE, COACH_HOME_NAV_AFTER, "Coach Home desktop navigation semantics");
   for (const marker of COACH_HOME_RUNTIME_ONLY_MARKERS) next = stripRuntimeOnly(next, marker);
   return next;
 }

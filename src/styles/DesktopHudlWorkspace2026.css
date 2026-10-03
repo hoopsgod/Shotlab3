@@ -1,21 +1,44 @@
-/* Shared workspace shell geometry authority. Page-level visuals remain owned by
-   Coach TitleStage and PremiumWorkspace; this file owns persistent shell layout
-   plus clearance for fixed app navigation outside component document flow. */
+/* Shared desktop geometry authority. Role controllers retain routing/history;
+   page authorities retain their content. Mobile has no workspace chrome. */
 @media (min-width:1024px) {
   .mcShellV3.is-desktop-shell { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; }
   .mcShellV3.is-desktop-shell > .mcRail { display:flex; flex-direction:column; position:sticky; top:0; align-self:start; height:100dvh; min-height:0; }
+  .mcShellV3.is-desktop-shell.uses-workspace-frame { grid-template-columns:minmax(0,1fr); min-height:0; width:100%; max-width:none; margin:0; }
   .mcShellV3.is-desktop-shell > .missionControl { min-width:0; max-width:none; width:100%; }
-  .mcShellV3.is-desktop-shell .mcHeader[data-testid="mission-control-team-header"] { position:sticky; top:0; z-index:10; }
   .performance-shell.is-desktop { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; }
-  .performance-shell.is-desktop > .sidebar-nav { position:sticky; top:0; align-self:start; height:100dvh; box-sizing:border-box; }
-  .performance-shell.is-desktop > .shell-main { min-width:0; }
-  .performance-shell.is-desktop > .shell-main > .content-wrap { max-width:none; }
-  .performance-shell.is-desktop .player-scroll-container { max-width:1320px !important; }
-  .performance-shell--player.is-desktop > .insights-panel { grid-column:2; min-width:0; }
-}
-@media (min-width:1280px) {
-  .performance-shell--player.is-desktop { grid-template-columns:248px minmax(0,1fr) minmax(240px,280px); }
-  .performance-shell--player.is-desktop > .insights-panel { grid-column:3; grid-row:1; position:sticky; top:0; align-self:start; max-height:100dvh; overflow-y:auto; }
+  .performance-shell.is-desktop.has-workspace-frame { grid-template-columns:248px minmax(0,1fr); gap:0; padding:0; margin:0; max-width:none; width:100%; align-items:start; }
+  .has-workspace-frame > .shell-main { min-width:0; }
+  .has-workspace-frame > .shell-main > .content-wrap { max-width:none; border:0; border-radius:0; box-shadow:none; padding:0; margin:0; }
+  .has-workspace-frame > .insights-panel { grid-column:2; min-width:0; height:auto; position:static; margin:0 24px 24px; }
+  .has-workspace-frame[data-workspace-tab="feed"] > .insights-panel,
+  .has-workspace-frame[data-workspace-tab="players"] > .insights-panel,
+  .has-workspace-frame[data-workspace-tab="home"] > .insights-panel,
+  .has-workspace-frame[data-workspace-tab="log-drill"] > .insights-panel { display:none; }
+  .workspaceRail { position:sticky; top:0; height:100dvh; display:flex; flex-direction:column; gap:22px; padding:26px 18px 20px; box-sizing:border-box; overflow-y:auto; background:#071c28; color:#f4f7f8; border-right:1px solid #17313e; }
+  .workspaceWordmark { font:800 30px/1 "Barlow Condensed","Arial Narrow",sans-serif; letter-spacing:-.025em; padding:0 12px 23px; border-bottom:1px solid #24404d; }
+  .workspaceWordmark span { display:block; margin-top:9px; color:#adbdc5; font:650 11px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; letter-spacing:.07em; text-transform:uppercase; }
+  .workspaceRail nav { display:grid; gap:4px; }
+  .workspaceRail nav button { display:flex; align-items:center; gap:12px; width:100%; min-height:42px; padding:10px 12px; border:0; border-radius:6px; background:transparent; color:#b8c6ce; font:600 13px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; text-align:left; cursor:pointer; }
+  .workspaceRail nav button svg { width:19px; height:19px; flex:none; }
+  .workspaceRail nav button:hover { background:#102e3e; color:#fff; }
+  .workspaceRail nav button[aria-current="page"] { color:#f5f8f9; background:#193442; box-shadow:inset 3px 0 var(--team-brand-primary,#c8ff1a); }
+  .workspaceRail nav button[aria-current="page"] svg { color:var(--team-brand-primary,#c8ff1a); }
+  .workspaceHeader { position:sticky; top:0; z-index:30; min-height:64px; padding:10px 24px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; gap:18px; background:#f7f5ee; color:#101820; border-bottom:1px solid #d9dfd8; }
+  .workspaceContext { display:flex; align-items:center; gap:12px; min-width:0; }
+  .workspaceContext > img { width:36px; height:36px; object-fit:contain; flex:none; }
+  .workspaceContext > div { min-width:0; }
+  .workspaceContext span { display:block; max-width:45vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#59665f; font:650 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  .workspaceHeader h1 { margin:3px 0 0; color:#101820; font:750 18px/1.15 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; letter-spacing:-.025em; }
+  .workspaceHeader > button { min-height:40px; padding:8px 12px; background:transparent; color:#34433b; border:1px solid #d3dcd3; border-radius:6px; font:650 11px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; cursor:pointer; }
+  .workspaceHeader > button:last-child { border-color:transparent; }
+  .workspaceRail button:focus-visible,.workspaceHeader button:focus-visible { outline:3px solid #9bc323; outline-offset:3px; }
+  .has-workspace-frame .player-scroll-container { max-width:1320px; }
+  .has-workspace-frame[data-workspace-tab="players"] .secondaryPageShell { width:100%; box-sizing:border-box; padding:18px 0 24px; gap:14px; }
+  .workspaceRosterHeading { display:flex; align-items:center; justify-content:space-between; gap:18px; border-bottom:1px solid #d9dfd8; padding-bottom:14px; }
+  .workspaceRosterHeading h2 { margin:0; font-size:24px; line-height:1.2; }
+  .workspaceRosterHeading small { display:block; margin:5px 0 0; color:#59665f; font-size:12px; }
+  .workspaceRosterHeading button { min-height:40px; padding:9px 16px; border:0; border-radius:6px; background:#30491f; color:#fff; font-weight:700; cursor:pointer; }
+  .workspaceRosterHeading button:focus-visible { outline:3px solid #9bc323; outline-offset:3px; }
 }
 @media (max-width:1023px) {
   body [data-testid="player-session-closeout"] { margin-bottom:calc(36px + env(safe-area-inset-bottom, 0px)); }

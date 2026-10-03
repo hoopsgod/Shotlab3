@@ -18,8 +18,8 @@ const builtCss = fs.readdirSync(assetsDir)
 
 const requiredSelectors = [
   '.mcCourtArtwork',
-  '.mcRailBrand',
-  '.mcRailBrand img',
+  '.workspaceRail',
+  '.workspaceContext',
   '.mcDrawerLogo',
   '.mcDrawerLogo img',
 ]
@@ -33,8 +33,9 @@ const coachSource = fs.readFileSync(coachSourcePath, 'utf8')
 if (!/function CourtArtwork\(/.test(coachSource) || !/className="mcCourtArtwork"/.test(coachSource)) {
   throw new Error('Phase 5B could not verify the live Coach court artwork component contract')
 }
-if (!/className="mcRailLogo"/.test(coachSource)) {
-  throw new Error('Phase 5B could not verify the live Coach rail logo DOM contract')
+const workspaceChrome = fs.readFileSync(path.resolve("src/components/DesktopWorkspaceChrome.jsx"), "utf8")
+if (!/className="workspaceContext"/.test(workspaceChrome) || !/<img src=\{logo\}/.test(workspaceChrome)) {
+  throw new Error('Phase 5B could not verify the live shared workspace team logo DOM contract')
 }
 
 for (const sourceOwnedIdentityContract of [

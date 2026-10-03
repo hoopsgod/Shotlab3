@@ -55,11 +55,14 @@ replaceOptional(
   'Coach In Season desktop return control',
 );
 
+if (!source.includes("desktopHeading={isDesktop}")) {
 replaceOptional(
   '{tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><CoachPlayersInteractiveDashboard',
   '{tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}>{isDesktop&&<DashboardReturnButton onClick={()=>setTab("feed")} />}<CoachPlayersInteractiveDashboard',
   'Coach Players desktop return control',
 );
+}
+
 
 replaceOptional(
   '{tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><CoachPageDashboardHeader',

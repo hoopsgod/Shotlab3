@@ -40,7 +40,7 @@ const resolvePlayerAction = (action, { onFilterChange, onAddPlayer }) => {
 const safeCount = (value) => Math.max(0, Number(value) || 0);
 const eventTypeLabel = (value) => ({ run: "Practice", game: "Game", clinic: "Camp", recovery: "Meeting", challenge: "Challenge" }[value] || "Team event");
 
-export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
+export function CoachPlayersInteractiveDashboard({ desktopHeading = false, metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
   const metricItems = [
     { key: "all", label: "Roster", displayLabel: "Roster", value: briefing.total, detail: "Active team players", evidence: rows.slice(0, 8).map((row) => row.engagementScore || 0), evidenceLabel: "Roster engagement distribution" },
@@ -51,7 +51,8 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
 
   return (
     <SecondaryPageShell testId="coach-players-interactive-dashboard" className="secondaryPageShell--embeddedHeader">
-      <SecondaryPageIntro eyebrow="Roster" title="Players" summary="Open a player to review recent training and progress." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }]} testId="coach-players-command-bar" compact />
+      {desktopHeading ? <header className="workspaceRosterHeading"><div><h2>Roster</h2><small>{briefing.active}/{briefing.total || 0} active this week · Open a player to review training and progress.</small></div><button type="button" onClick={onAddPlayer}>Add Player</button></header> :
+      <SecondaryPageIntro eyebrow="Roster" title="Players" summary="Open a player to review recent training and progress." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }]} testId="coach-players-command-bar" compact />}
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <DashboardFilterRail surface="light" stacked searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
       </SecondaryPageToolbar>
