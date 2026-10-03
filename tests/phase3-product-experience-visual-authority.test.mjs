@@ -8,10 +8,11 @@ const trainSource = readFileSync("src/components/PlayerTrainingSessionHeader.jsx
 
 test("Coach Home keeps the decision and player-attention surfaces in the first desktop band", () => {
   assert.match(coachCss, /\.mcHero\[data-team-identity-stage="coach-mission-control"\]\{grid-column:1\/8;grid-row:2;min-height:300px\}/);
-  assert.match(coachCss, /\.mcAttention\{grid-column:8\/-1;grid-row:2;min-height:300px/);
+  assert.match(coachCss, /\.mcAttention\{[^}]*grid-column:8\/-1;grid-row:2;min-height:300px/);
   assert.match(coachCss, /\.mcTeamHealth\{[^}]*grid-column:1\/4;grid-row:3;min-height:210px/);
-  assert.match(coachCss, /\.mcActivity\{grid-column:4\/9;grid-row:3/);
-  assert.match(coachCss, /\.mcNextSession\{grid-column:9\/-1;grid-row:3/);
+  assert.match(coachCss, /\.mcActivity,\.mcShellV3 \.mcNextSession\{[^}]*grid-row:3;min-height:210px/);
+  assert.match(coachCss, /\.mcActivity\{grid-column:4\/9/);
+  assert.match(coachCss, /\.mcNextSession\{grid-column:9\/-1/);
 });
 
 test("Coach Home desktop stage uses operational rather than marketing scale", () => {
