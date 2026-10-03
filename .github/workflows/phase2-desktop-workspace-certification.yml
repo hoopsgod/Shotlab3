@@ -193,8 +193,19 @@ jobs:
               const demo = page.getByRole("button", { name: `${role} demo`, exact: true });
               await demo.waitFor({ state: "visible", timeout: 20_000 });
               await demo.click();
-              if (role === "Coach" && width >= 1024) await page.getByRole("complementary", { name: "Coach navigation" }).waitFor({ state: "visible", timeout: 20_000 });
-              if (role === "Player" && width >= 1024) await page.getByRole("complementary", { name: "Player navigation" }).waitFor({ state: "visible", timeout: 20_000 });
+              if (width >= 1024) {
+                const navigationLabel = `${role} navigation`;
+                await page.waitForFunction(label => {
+                  const visible = [...document.querySelectorAll(`aside[aria-label="${label}"]`)].filter(element => {
+                    const style = getComputedStyle(element);
+                    const bounds = element.getBoundingClientRect();
+                    return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || 1) > 0 && bounds.width > 0 && bounds.height > 0;
+                  });
+                  return visible.length === 1;
+                }, navigationLabel, { timeout: 20_000 });
+                const visibleNavigationCount = await page.locator(`aside[aria-label="${navigationLabel}"]:visible`).count();
+                if (visibleNavigationCount !== 1) throw new Error(`${role} ${width}px expected exactly one visible navigation authority; found ${visibleNavigationCount}`);
+              }
               const geometry = await page.evaluate(() => ({ viewport: innerWidth, doc: document.documentElement.scrollWidth, body: document.body.scrollWidth, path: location.pathname }));
               if (geometry.doc > geometry.viewport + 1 || geometry.body > geometry.viewport + 1) throw new Error(`${role} ${width}px horizontal overflow: ${JSON.stringify(geometry)}`);
               await page.screenshot({ path: `${out}/${role.toLowerCase()}-${width}.png`, fullPage: true, animations: "disabled" });

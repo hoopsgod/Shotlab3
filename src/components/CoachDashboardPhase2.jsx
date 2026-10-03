@@ -122,9 +122,9 @@ function CoachPlayerFollowUp({ model }) {
       </div>
       {response ? <div className="coachResponseEvidence" data-testid="coach-result-response-context" style={{ marginTop: 10, padding: 10 }}><small>Latest player result</small><strong>{response.resultDetail || "Training result recorded"}</strong></div> : null}
       {delivery ? <div className="coachDeliveryStatus" data-testid="coach-player-assignment-status" data-assignment-state={delivery.state} style={{ marginTop: 10, padding: 10 }}><span>Player delivery</span><strong>{followUpDeliveryLabel(delivery.state)}</strong></div> : null}
-      <p className="coachFollowUpWarning" style={{ margin: "10px 0 0", color: "#aab3b8", font: "600 11px/1.45 system-ui,sans-serif" }}>The player receives only the assignment text and result context. Private coach notes remain coach-only.</p>
+      <p className="coachFollowUpWarning" style={{ margin: "10px 0 0", color: "#aab3b8", font: "600 11px/1.45 system-ui,sans-serif" }}>When a completed assignment is adjusted, completed work remains in history. The player receives only the assignment text and result context. Private coach notes remain coach-only.</p>
       <label className="coachFollowUpField is-assignment"><span>Next assignment to deliver</span><textarea value={assignment} maxLength={2000} onChange={(event) => setAssignment(event.target.value)} disabled={saving} data-testid="coach-next-assignment-input" /></label>
-      <button type="button" className="coachAssignmentSave" onClick={() => save("planned", true)} disabled={saving} aria-busy={saving}>Deliver next assignment</button>
+      <button type="button" className="coachAssignmentSave" onClick={() => save("planned", true)} disabled={saving} aria-busy={saving}>{delivery?.state === "completed" ? "Adjust and deliver next assignment" : "Deliver next assignment"}</button>
       <label className="coachFollowUpField"><span>Private coach note</span><textarea value={note} maxLength={2000} onChange={(event) => setNote(event.target.value)} disabled={saving} /></label>
       <div className="coachFollowUpActions">
         <button type="button" onClick={() => save(state === "planned" ? "completed" : "planned")} disabled={saving} aria-busy={saving}>{state === "planned" ? "Mark follow-up complete" : state === "completed" ? "Reopen follow-up" : "Mark for follow-up"}</button>

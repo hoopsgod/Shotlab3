@@ -172,6 +172,11 @@ export async function savePlayerAssignment({
 } = {}) {
   const session = readAssignmentSession(storage);
   const activeTeamId = clean(teamId || session.teamId, 180);
+  const current = getPlayerAssignmentLocal({ teamId: activeTeamId, playerIdentity, storage });
+  if (session.role === "coach" && current?.state === "completed") {
+    const { saveNextPlayerAssignment } = await import("./playerAssignmentHistoryService.js");
+    return saveNextPlayerAssignment({ teamId: activeTeamId, playerIdentity, playerName, assignmentText, resultDetail, dueDate, storage, fetchImpl });
+  }
   const now = new Date().toISOString();
   const draft = normalizePlayerAssignment({
     teamId: activeTeamId,
