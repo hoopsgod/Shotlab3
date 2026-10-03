@@ -8,7 +8,7 @@ import {
 } from "./CoachDashboardPrimitives.jsx";
 import { useEffect, useRef, useState } from "react";
 import { buildNextAssignmentSuggestion, getCoachResponseContext, parseCoachResponseNote, serializeCoachResponseNote } from "../lib/coachPlayerResponseLoop.js";
-const loadCoachFollowUpServices = () => Promise.all([import("../lib/coachFollowUpService.js"), import("../lib/playerAssignmentService.js"), import("../lib/playerAssignmentHistoryService.js")]);
+const loadCoachFollowUpServices = () => Promise.all([import("../lib/coachFollowUpService.js"), import("../lib/playerAssignmentService.js")]);
 import styles from "./CoachDashboardPhase2.module.css";
 import "./Phase2PremiumEmptyStateLanguage.css";
 
@@ -91,15 +91,10 @@ function CoachPlayerFollowUp({ model }) {
     setError(false);
     setStatus("Saving…");
     try {
-      const [followUpService, assignmentService, assignmentHistoryService] = await loadCoachFollowUpServices();
-      const assignmentDelivery = !requireAssignment
-        ? Promise.resolve(null)
-        : delivery?.state === "completed"
-          ? assignmentHistoryService.saveNextPlayerAssignment({ ...context, assignmentText: assignment })
-          : assignmentService.savePlayerAssignment({ ...context, assignmentText: assignment, resultDetail: response?.resultDetail || "" });
+      const [followUpService, assignmentService] = await loadCoachFollowUpServices();
       const [result, deliveryResult] = await Promise.all([
         followUpService.saveCoachCoreLoopAction({ ...context, state: nextState, note: serializeCoachResponseNote({ assignment, privateNote: note }) }),
-        assignmentDelivery,
+        requireAssignment ? assignmentService.savePlayerAssignment({ ...context, assignmentText: assignment, resultDetail: response?.resultDetail || "" }) : Promise.resolve(null),
       ]);
       setRecord(result.record || record);
       if (deliveryResult?.ok && deliveryResult.assignment) setDelivery(deliveryResult.assignment);
