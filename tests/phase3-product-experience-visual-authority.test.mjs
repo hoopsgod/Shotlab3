@@ -32,5 +32,5 @@ test("Train retains the certified current-work, session-path, and target hierarc
   assert.match(trainSource, />CURRENT WORK</);
   assert.match(trainSource, />SESSION PATH</);
   assert.match(trainSource, />DRILL TARGET</);
-  assert.match(trainSource, /data-testid="player-training-live-target"/);
+  assert.match(trainSource, /testId="player-training-live-target"/);
 });
