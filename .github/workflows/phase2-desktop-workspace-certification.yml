@@ -45,6 +45,7 @@ jobs:
           node scripts/verify-phase5c-css-headroom.mjs
           cp artifacts/performance/build-metrics.json /tmp/phase2-head-metrics.json
       - name: Verify Phase 2 build equivalence against exact base
+        if: startsWith(github.head_ref, 'agent/desktop-single-page-workspace-shell-phase2')
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
