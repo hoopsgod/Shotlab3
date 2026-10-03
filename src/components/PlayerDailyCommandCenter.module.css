@@ -233,24 +233,17 @@
 .coachSignalAction:hover,.coachSignalAction:focus-visible { border-color:#799786; background:#f3f9f1; }
 .coachSignalAction:focus-visible { outline:3px solid #9ebd7d; outline-offset:2px; }
 @media (min-width:981px) {
-  .root { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.75fr); gap:12px 16px; align-items:start; }
-  .hero { grid-column:1; grid-row:1 / span 2; min-height:360px; padding:23px 26px; border-radius:13px; }
-  .performanceStage { margin-top:10px; }
-  .todayValue { font-size:clamp(52px,5vw,64px); }
-  .statusBlock { margin-top:14px; padding-top:14px; }
-  .title { font-size:clamp(29px,2.35vw,35px); line-height:1.02; }
-  .description { margin-top:7px; font-size:14px; line-height:1.42; }
-  .momentumRow { margin-top:13px; }
-  .momentumItem { padding-block:10px; }
-  .heroKicker,.momentumLabel { font-size:11px; }
-  .primaryButton { min-height:48px; margin-top:12px; }
-  .coachSignal { grid-column:2; grid-row:1; margin:0 !important; padding:18px !important; border:1px solid #d6ded7; border-radius:13px; background:#fff; }
-  .coachSignalTitle { color:#142b25; font-size:clamp(20px,1.8vw,25px); }
-  .coachSignalGrid { margin-top:12px; }
-  .coachSignalValue { font-size:14px !important; line-height:1.42 !important; }
-  .coachSignalAction { display:inline-flex; grid-column:2; grid-row:2; width:100%; min-height:44px; margin:0; }
-  .root > :global(.playerProgressDisclosure) { grid-column:1/-1; grid-row:3; margin:0; border:1px solid #d8ded8; border-radius:12px; background:#fff; }
-  .root > :global(.playerProgressDisclosure) summary { padding:14px 18px; }
+  .root { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr); gap:12px 18px; align-items:start; }
+  .hero { grid-column:1; grid-row:1 / span 2; min-height:360px; padding:20px 24px; border-radius:15px; }
+  .title { font-size:clamp(30px,2.6vw,38px); line-height:1.04; }
+  .description { font-size:15px; line-height:1.5; }
+  .heroKicker,.momentumLabel { font-size:12px; }
+  .coachSignal { grid-column:2; grid-row:1; margin:0 !important; padding:18px !important; border:1px solid #d6ded7; border-radius:15px; background:#fff; }
+  .coachSignalTitle { color:#142b25; }
+  .coachSignalValue { font-size:14px !important; line-height:1.45 !important; }
+  .coachSignalAction { display:inline-flex; grid-column:2; grid-row:2; width:100%; margin:0; }
+  .root > :global(.playerProgressDisclosure) { grid-column:1/-1; grid-row:3; margin:0; border:1px solid #d8ded8; border-radius:14px; background:#fff; }
+  .root > :global(.playerProgressDisclosure) summary { padding:15px 20px; }
   .section,.activation,.momentumSignal { grid-column:1/-1; margin-top:0; }
 }
 @media (min-width:981px) and (max-width:1150px) {
