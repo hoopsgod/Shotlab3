@@ -2,21 +2,83 @@
    Coach TitleStage and PremiumWorkspace; this file owns persistent shell layout
    plus clearance for fixed app navigation outside component document flow. */
 @media (min-width:1024px) {
-  .mcShellV3.is-desktop-shell { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; }
-  .mcShellV3.is-desktop-shell > .mcRail { display:flex; flex-direction:column; position:sticky; top:0; align-self:start; height:100dvh; min-height:0; }
-  .mcShellV3.is-desktop-shell > .missionControl { min-width:0; max-width:none; width:100%; }
-  .mcShellV3.is-desktop-shell .mcHeader[data-testid="mission-control-team-header"] { position:sticky; top:0; z-index:10; }
-  .performance-shell.is-desktop { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100dvh; }
-  .performance-shell.is-desktop > .sidebar-nav { position:sticky; top:0; align-self:start; height:100dvh; box-sizing:border-box; }
-  .performance-shell.is-desktop > .shell-main { min-width:0; }
-  .performance-shell.is-desktop > .shell-main > .content-wrap { max-width:none; }
-  .performance-shell.is-desktop .player-scroll-container { max-width:1320px !important; }
-  .performance-shell--player.is-desktop > .insights-panel { grid-column:2; min-width:0; }
+  .mcShellV3.is-desktop-shell,
+  .performance-shell.is-desktop {
+    display:grid;
+    grid-template-columns:232px minmax(0,1fr);
+    min-height:100dvh;
+  }
+
+  .mcShellV3.is-desktop-shell > .mcRail,
+  .performance-shell.is-desktop > .sidebar-nav {
+    position:sticky;
+    top:0;
+    align-self:start;
+    height:100dvh;
+    min-height:0;
+    box-sizing:border-box;
+  }
+
+  .mcShellV3.is-desktop-shell > .mcRail {
+    display:flex;
+    flex-direction:column;
+  }
+
+  .mcShellV3.is-desktop-shell > .missionControl,
+  .performance-shell.is-desktop > .shell-main {
+    min-width:0;
+    width:100%;
+  }
+
+  .performance-shell.is-desktop > .shell-main {
+    min-height:100dvh;
+    background:#f4f0e7;
+  }
+
+  .mcShellV3.is-desktop-shell .mcHeader[data-testid="mission-control-team-header"] {
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+
+  .performance-shell.is-desktop > .shell-main > .content-wrap,
+  .performance-shell.is-desktop .content-wrap {
+    width:100%;
+    max-width:none;
+    margin:0;
+  }
+
+  .performance-shell.is-desktop .player-scroll-container,
+  .performance-shell.is-desktop .coach-scroll-container {
+    width:100% !important;
+    max-width:none !important;
+    margin-inline:0 !important;
+  }
+
+  .performance-shell--player.is-desktop > .insights-panel {
+    grid-column:2;
+    min-width:0;
+  }
 }
+
 @media (min-width:1280px) {
-  .performance-shell--player.is-desktop { grid-template-columns:248px minmax(0,1fr) minmax(240px,280px); }
-  .performance-shell--player.is-desktop > .insights-panel { grid-column:3; grid-row:1; position:sticky; top:0; align-self:start; max-height:100dvh; overflow-y:auto; }
+  .performance-shell--player.is-desktop {
+    grid-template-columns:232px minmax(0,1fr) minmax(240px,280px);
+  }
+
+  .performance-shell--player.is-desktop > .insights-panel {
+    grid-column:3;
+    grid-row:1;
+    position:sticky;
+    top:0;
+    align-self:start;
+    max-height:100dvh;
+    overflow-y:auto;
+  }
 }
+
 @media (max-width:1023px) {
-  body [data-testid="player-session-closeout"] { margin-bottom:calc(36px + env(safe-area-inset-bottom, 0px)); }
+  body [data-testid="player-session-closeout"] {
+    margin-bottom:calc(36px + env(safe-area-inset-bottom, 0px));
+  }
 }
