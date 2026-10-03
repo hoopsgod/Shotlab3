@@ -106,7 +106,7 @@ test("desktop Coach Home follows the Phase 3 operational command-stage anatomy",
   assert.match(desktopTitle,/\.mcActivity,\.mcShellV3 \.mcNextSession\{[^}]*grid-row:3[^}]*min-height:160px/);
   assert.match(desktopTitle,/\.mcActivity\{grid-column:4\/9/);
   assert.match(desktopTitle,/\.mcNextSession\{grid-column:9\/-1/);
-  assert.match(titleCss,/\.mcRailBrand::before\{content:"SHOTLAB"/);
+  assert.doesNotMatch(source, /<aside className="mcRail"/);
   assert.match(desktopTitle,/\.mcProgramIdentity\{[^}]*font:760 12px\/1\.2 var\(--mc-native\)/);
   assert.doesNotMatch(desktopTitle,/\.mcProgramIdentity\{[^}]*font:[^}]*Barlow Condensed/);
   assert.match(desktopTitle,/ \.mcHeroTitle\{[^}]*font:800 clamp\(32px,2\.8vw,42px\)\/\.94 "Barlow Condensed"/);

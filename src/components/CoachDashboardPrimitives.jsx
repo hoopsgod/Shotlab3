@@ -259,12 +259,9 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
       if (event.key === "Tab") {
         const controls = Array.from(drawerRef.current?.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]') || [])
           .filter(node => !node.disabled && node.getClientRects().length);
-        const first = controls[0];
-        const last = controls[controls.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault(); last?.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault(); first?.focus();
+        const first = controls[0], last = controls[controls.length - 1];
+        if (document.activeElement === (event.shiftKey ? first : last)) {
+          event.preventDefault(); (event.shiftKey ? last : first)?.focus();
         }
       }
       if (event.key !== "Escape") return;

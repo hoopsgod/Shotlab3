@@ -23,7 +23,9 @@ test("shared workspace system uses semantic team-aware tokens and scoped selecto
   assert.match(workspaceCss, /--pw-accent: var\(--team-brand-primary, var\(--accent\)\)/);
   assert.match(workspaceCss, /data-workspace-tab="events"/);
   assert.match(workspaceCss, /data-workspace-tab="sc"/);
-  assert.match(workspaceCss, /\.performance-shell \.sidebar-nav/);
+  const desktopChromeCss = fs.readFileSync(new URL("../src/styles/DesktopHudlWorkspace2026.css", import.meta.url), "utf8");
+  assert.match(desktopChromeCss, /\.workspaceRail/);
+  assert.match(desktopChromeCss, /var\(--team-brand-primary,/);
   assert.match(workspaceCss, /\.performance-shell input/);
   assert.match(workspaceCss, /\.premium-screen/);
   assert.doesNotMatch(workspaceCss, /(^|\n)\s*(body|html|\*)\s*\{/);

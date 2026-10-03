@@ -12,7 +12,9 @@ const shippingCoachHome = applyPhase2CoachHomeHardening(coachHome);
 
 test("desktop workspace shell has one 1024px authority boundary", () => {
   assert.match(app, /window\.innerWidth>=1024/);
-  assert.match(shippingCoachHome, /const DESKTOP_RAIL_MIN_WIDTH = 1024;/);
+  assert.match(app, /desktopFrame=\{isDesktop\}/);
+  assert.match(shippingCoachHome, /desktopFrame \? "is-desktop-shell" : "is-mobile-shell"/);
+  assert.doesNotMatch(shippingCoachHome, /hasDesktopViewport|setDesktopRailEnabled/);
   assert.match(css, /@media\s*\(min-width:\s*1024px\)/);
   assert.doesNotMatch(css, /@media\s*\(min-width:\s*981px\)/);
   assert.doesNotMatch(css, /@media\s*\(max-width:\s*980px\)/);
@@ -22,7 +24,7 @@ test("shipping Coach and Player desktop navigation exposes the active route sema
   assert.match(shippingApp, /<DesktopWorkspaceNavigation role="Coach"/);
   assert.match(shippingApp, /<DesktopWorkspaceNavigation role="Player"/);
   assert.match(chrome, /aria-current=\{activeKey === item.k \? "page" : undefined\}/);
-  assert.match(shippingCoachHome, /aria-current=\{item\.active\?"page":undefined\}/);
+  assert.doesNotMatch(shippingCoachHome, /<aside className="mcRail"/);
 });
 
 test("Phase 2 keeps native History API ownership rather than introducing a competing router", () => {

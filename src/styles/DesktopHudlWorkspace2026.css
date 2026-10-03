@@ -23,21 +23,14 @@
   .workspaceRail nav button:hover { background:#102e3e; color:#fff; }
   .workspaceRail nav button[aria-current="page"] { color:#f5f8f9; background:#193442; box-shadow:inset 3px 0 var(--team-brand-primary,#c8ff1a); }
   .workspaceRail nav button[aria-current="page"] svg { color:var(--team-brand-primary,#c8ff1a); }
-  .workspaceUser { display:flex; align-items:center; gap:10px; padding:18px 8px 0; margin-top:auto; border-top:1px solid #24404d; min-width:0; }
-  .workspaceUser > span { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; background:#183645; color:#c8ff1a; font-weight:750; }
-  .workspaceUser div { min-width:0; }
-  .workspaceUser strong { display:block; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .workspaceUser small { display:block; margin-top:4px; color:#a6b8c2; font-size:10px; }
   .workspaceHeader { position:sticky; top:0; z-index:30; min-height:64px; padding:10px 24px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; gap:18px; background:#f7f5ee; color:#101820; border-bottom:1px solid #d9dfd8; }
   .workspaceContext { display:flex; align-items:center; gap:12px; min-width:0; }
-  .workspaceContext > img,.workspaceTeamInitial { width:36px; height:36px; object-fit:contain; flex:none; }
-  .workspaceTeamInitial { display:grid; place-items:center; background:#e5e9df; border-radius:6px; font-weight:800; }
+  .workspaceContext > img { width:36px; height:36px; object-fit:contain; flex:none; }
   .workspaceContext > div { min-width:0; }
   .workspaceContext span { display:block; max-width:45vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#59665f; font:650 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
   .workspaceHeader h1 { margin:3px 0 0; color:#101820; font:750 18px/1.15 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; letter-spacing:-.025em; }
-  .workspaceHeaderActions { display:flex; align-items:center; gap:6px; flex:none; }
-  .workspaceHeaderActions button { min-height:40px; padding:8px 12px; background:transparent; color:#34433b; border:1px solid #d3dcd3; border-radius:6px; font:650 11px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; cursor:pointer; }
-  .workspaceHeaderActions button:last-child { border-color:transparent; }
+  .workspaceHeader > button { min-height:40px; padding:8px 12px; background:transparent; color:#34433b; border:1px solid #d3dcd3; border-radius:6px; font:650 11px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; cursor:pointer; }
+  .workspaceHeader > button:last-child { border-color:transparent; }
   .workspaceRail button:focus-visible,.workspaceHeader button:focus-visible { outline:3px solid #9bc323; outline-offset:3px; }
   .has-workspace-frame .player-scroll-container { max-width:1320px; }
   .has-workspace-frame[data-workspace-tab="players"] .secondaryPageShell { width:100%; box-sizing:border-box; padding:18px 0 24px; gap:14px; }

@@ -2003,8 +2003,8 @@ const handleAtHomeMetric=useCallback((metric)=>{if(metric?.filter){setHomeDrillF
 const handleProgramMetric=useCallback((metric)=>{if(metric?.filter){setProgramDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||programWorkspaceModel.primaryAction);},[programWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
 
 return <div className={`app-shell performance-shell performance-shell--player ${isDesktop?"is-desktop has-workspace-frame":"is-mobile"}`} data-workspace-tab={tab}>
-{isDesktop&&<DesktopWorkspaceNavigation role="Player" items={playerNavItems} activeKey={tab} onNavigate={switchTab} userName={u.name}/>}
-<main className="shell-main">{isDesktop&&<DesktopWorkspaceHeader role="Player" title={tab==="home"?"Home":tab==="log-drill"?"Training":playerNavItems.find(item=>item.k===tab)?.l||"Workspace"} accountLabel="Profile" onAccount={()=>switchTab("profile")} onLogout={logout}/>}<div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:saved&&shareData?"calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px))":"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
+{isDesktop&&<DesktopWorkspaceNavigation role="Player" items={playerNavItems} activeKey={tab} onNavigate={switchTab}/>}
+<main className="shell-main">{isDesktop&&<DesktopWorkspaceHeader title={tab==="home"?"Home":tab==="log-drill"?"Training":playerNavItems.find(item=>item.k===tab)?.l||"Workspace"} onLogout={logout}/>}<div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:saved&&shareData?"calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px))":"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
 <BrandBackdrop/>
 {completionCue&&<div className="fade-up" data-testid="player-completion-cue" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
   <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
@@ -2043,7 +2043,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 {/* Header — Premium dashboard heading */}
 {(!isDesktop||!["home","log-drill"].includes(tab))&&<PlayerDashboardHeader
   headingLevel={tab !== "home" && !showShotStats}
-  userName={u.name}
+
   subtitle=""
   mission={(()=>{
     const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
@@ -2435,7 +2435,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
   {tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">
-  <PlayerProgressStory userName={u.name} userEmail={u.email} teamId={u.teamId} shotLogs={shotLogs} scores={scores} programScores={programScores} drills={drills} programDrills={programDrills} streak={streak} coachPriorities={coachPriorities} today={today} onStartTraining={()=>switchTab("log-drill")} onOpenFullProfile={()=>{const details=document.querySelector('[data-testid="player-progress-full-profile"]');if(details instanceof HTMLDetailsElement)details.open=true;window.setTimeout(()=>document.querySelector('[data-testid="player-profile-readout"]')?.scrollIntoView({behavior:"smooth",block:"start"}),0)}}/>
+  <PlayerProgressStory userEmail={u.email} teamId={u.teamId} shotLogs={shotLogs} scores={scores} programScores={programScores} drills={drills} programDrills={programDrills} streak={streak} coachPriorities={coachPriorities} today={today} onStartTraining={()=>switchTab("log-drill")} onOpenFullProfile={()=>{const details=document.querySelector('[data-testid="player-progress-full-profile"]');if(details instanceof HTMLDetailsElement)details.open=true;window.setTimeout(()=>document.querySelector('[data-testid="player-profile-readout"]')?.scrollIntoView({behavior:"smooth",block:"start"}),0)}}/>
   <ProgressiveDisclosure title="Full progress profile" summary="Report card, performance intelligence, drill development, history, and privacy" testId="player-progress-full-profile">
     <ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/>
   </ProgressiveDisclosure>
@@ -3505,7 +3505,7 @@ const handleLogScoreAction=()=>{
   setShowProgramScoreEntry(true);
 };
 const shellVars=(k)=>({"--pageAccent":PAGE_ACCENTS[k].accent,"--pageAccentGlow":PAGE_ACCENTS[k].glow,"--pageAccentBg":PAGE_ACCENTS[k].bg,"--page-accent":PAGE_ACCENTS[k].accent,"--page-accent-soft":PAGE_ACCENTS[k].bg,"--page-accent-border":PAGE_ACCENTS[k].glow});
-const navItems=[["feed","Feed","home"],["drills","Drills","training"],["events","Events","calendar"],["sc","S&C","strength"],["players","Players","team"],["activity","Activity","activity"],["leaderboards","Leaderboards","chart"],["in-season","In Season","momentum"],["settings","Team & Account","settings"],["team-store","Team Store","store"],["branding","Brand","verified"]].map(([k,l,icon])=>({k,l,icon,mobileIcon:icon}));
+const navItems=[["feed",isDesktop?"Mission Control":"Feed","home"],["drills","Drills","training"],["events","Events","calendar"],["sc","S&C","strength"],["players","Players","team"],["activity","Activity","activity"],["leaderboards","Leaderboards","chart"],["in-season","In Season","momentum"],["settings","Team & Account","settings"],["team-store","Team Store","store"],["branding","Brand","verified"]].map(([k,l,icon])=>({k,l,icon,mobileIcon:icon}));
 const getCoachNavItem=(key,overrides={})=>{const item=navItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
 const coachMobilePrimaryItems=[
   getCoachNavItem("feed",{mobileLabel:"Home"}),
@@ -3613,8 +3613,8 @@ useEffect(()=>{
 },[tab,selP]);
 
 return <div className={`app-shell performance-shell performance-shell--coach ${isDesktop?"is-desktop has-workspace-frame":"is-mobile"}`} data-workspace-tab={tab} data-text-scale={coachTextScale}>
-{isDesktop&&<DesktopWorkspaceNavigation role="Coach" items={navItems.map(item=>item.k==="feed"?{...item,l:"Mission Control"}:item)} activeKey={tab} onNavigate={handleNavChange} userName={u.name}/>}
-<main className="shell-main">{isDesktop&&<DesktopWorkspaceHeader role="Coach" title={tab==="feed"?"Mission Control":navItems.find(item=>item.k===tab)?.l||"Workspace"} accountLabel="Team branding" onAccount={openTeamBranding} onLogout={logout}/>}<div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={u.isCoach&&["feed","drills","events","sc","players","activity"].includes(tab)?(tab==="activity"?"feed":tab):"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
+{isDesktop&&<DesktopWorkspaceNavigation role="Coach" items={navItems} activeKey={tab} onNavigate={handleNavChange}/>}
+<main className="shell-main">{isDesktop&&<DesktopWorkspaceHeader title={navItems.find(item=>item.k===tab)?.l||"Workspace"} onLogout={logout}/>}<div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={u.isCoach&&["feed","drills","events","sc","players","activity"].includes(tab)?(tab==="activity"?"feed":tab):"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -3639,7 +3639,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
 {isOverviewTab&&<>
 <CoachDashboardHeader
   heroRef={heroRef}
-  userName={u.name}
+
   onOpenTeamBranding={openTeamBranding}
 />
 <CoachCommandCenter

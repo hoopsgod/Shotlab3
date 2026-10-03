@@ -50,8 +50,9 @@ export function applyPhase2DesktopWorkspaceHardening(source) {
 
 export function applyPhase2CoachHomeHardening(source) {
   let next = String(source || "");
-  next = replaceOrVerify(next, COACH_HOME_BREAKPOINT_BEFORE, COACH_HOME_BREAKPOINT_AFTER, "Coach Home desktop breakpoint");
-  next = replaceOrVerify(next, COACH_HOME_NAV_BEFORE, COACH_HOME_NAV_AFTER, "Coach Home desktop navigation semantics");
+  if (next.includes("DESKTOP_RAIL_MIN_WIDTH")) next = replaceOrVerify(next, COACH_HOME_BREAKPOINT_BEFORE, COACH_HOME_BREAKPOINT_AFTER, "Coach Home desktop breakpoint");
+  else if (!next.includes("desktopFrame = false")) throw new Error("Coach Home must inherit the shared desktop frame authority.");
+  if (next.includes('className="mcRail"')) next = replaceOrVerify(next, COACH_HOME_NAV_BEFORE, COACH_HOME_NAV_AFTER, "Coach Home desktop navigation semantics");
   for (const marker of COACH_HOME_RUNTIME_ONLY_MARKERS) next = stripRuntimeOnly(next, marker);
   return next;
 }
