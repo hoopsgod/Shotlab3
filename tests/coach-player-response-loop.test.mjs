@@ -69,6 +69,10 @@ test("response-loop source contracts keep the workflow one-tap and honest", () =
   assert.match(followUp, /coach-result-response-context/);
   assert.match(followUp, /Next assignment to deliver/);
   assert.match(followUp, /Deliver next assignment/);
+  assert.match(followUp, /Adjust and deliver next assignment/);
+  assert.match(followUp, /completed work remains in history/i);
+  assert.match(followUp, /savePlayerAssignment\(\{ \.\.\.context, assignmentText: assignment, resultDetail: response\?\.resultDetail \|\| "" \}\)/);
+  assert.doesNotMatch(followUp, /assignmentHistoryService\.saveNextPlayerAssignment/);
   assert.match(followUp, /player receives only the assignment text and result context/i);
   assert.match(followUp, /Private coach notes remain coach-only/i);
   assert.match(activation, /installCoachResponseLoopEnhancer\(\)/);
