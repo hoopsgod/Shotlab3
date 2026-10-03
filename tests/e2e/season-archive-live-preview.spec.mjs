@@ -66,7 +66,9 @@ test("corrected Cloudflare preview completes isolated demo-local season archive 
   demoInteractionStarted = true;
   await playersButton.click();
 
-  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Team & Account", exact: true }).click();
+  const coachNavigation = page.getByRole("complementary", { name: "Coach navigation" });
+  await expect(coachNavigation).toBeVisible({ timeout: 20_000 });
+  await coachNavigation.getByRole("button", { name: "Team & Account", exact: true }).click();
   const panel = page.getByTestId("coach-season-archive");
   await expect(panel).toBeVisible({ timeout: 20_000 });
 
